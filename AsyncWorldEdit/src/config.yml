@@ -1,0 +1,6 @@
+awe:
+  version: 1
+  rendering:
+    interval: 15
+    blocks: 1000
+  checkVersion: true

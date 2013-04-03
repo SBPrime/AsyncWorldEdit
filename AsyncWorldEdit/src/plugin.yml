@@ -1,0 +1,14 @@
+name: AsyncWorldedit
+main: org.PrimeSoft.AsyncWorldedit.PluginMain
+version: 0.1
+website: http://dev.bukkit.org/server-mods/?/
+description: This plugin attaches into WorldEdit and makes it asynchronous.
+authors: [SBPrime]
+depend: [WorldEdit]
+softdepend: []
+commands:
+  mcpainter:
+    description: 'Displays the help for Async world edit.'
+    usage: /<command>
+    aliases: /async
+permissions:
