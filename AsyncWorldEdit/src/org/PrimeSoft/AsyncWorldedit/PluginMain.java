@@ -28,7 +28,11 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.PrimeSoft.AsyncWorldedit.Commands.Commands;
+import org.PrimeSoft.AsyncWorldedit.Commands.JobsCommand;
+import org.PrimeSoft.AsyncWorldedit.Commands.PurgeCommand;
 import org.PrimeSoft.AsyncWorldedit.MCStats.MetricsLite;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -42,17 +46,17 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author SBPrime
  */
 public class PluginMain extends JavaPlugin {
-    private static final Logger s_log = Logger.getLogger("Minecraft.MCPainter");    
+
+    private static final Logger s_log = Logger.getLogger("Minecraft.MCPainter");
     private static ConsoleCommandSender s_console;
     private static String s_prefix = null;
     private static String s_logFormat = "%s %s";
     private Boolean m_isInitialized = false;
     private WorldEditPlugin m_worldEdit = null;
     private MetricsLite m_metrics;
-    
+    private EventListener m_listener = new EventListener(this);
     private BlockPlacer m_blockPlacer;
 
-    
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
@@ -60,7 +64,7 @@ public class PluginMain extends JavaPlugin {
     public static String getPrefix() {
         return s_prefix;
     }
-    
+
     public static void Log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
             return;
@@ -76,64 +80,136 @@ public class PluginMain extends JavaPlugin {
             player.sendRawMessage(msg);
         }
     }
-    
+
     @Override
     public void onEnable() {
         PluginDescriptionFile desc = getDescription();
         s_prefix = String.format("[%s]", desc.getName());
-        m_isInitialized = false;        
-        
+        m_isInitialized = false;
+
         try {
             m_metrics = new MetricsLite(this);
             m_metrics.start();
         } catch (IOException e) {
             Log("Error initializing MCStats: " + e.getMessage());
         }
-        
+
         s_console = getServer().getConsoleSender();
         m_worldEdit = getWorldEdit(this);
         if (m_worldEdit == null) {
             Log("World edit not found.");
         }
-        
+
         if (!ConfigProvider.load(this)) {
             Log("Error loading config");
             return;
         }
-        
+
         m_blockPlacer = new BlockPlacer(this);
-        
-        //if (ConfigProvider.getCheckUpdate()) {
-        //    Log(VersionChecker.CheckVersion(desc.getVersion()));
-        //}        
-        if (!ConfigProvider.isConfigUpdated())
-        {
+
+        if (ConfigProvider.getCheckUpdate()) {
+            Log(VersionChecker.CheckVersion(desc.getVersion()));
+        }
+        if (!ConfigProvider.isConfigUpdated()) {
             Log("Please update your config file!");
         }
-        
+
         m_worldEdit.getWorldEdit().setEditSessionFactory(new AsyncEditSessionFactory(m_blockPlacer));
-        
+
+        getServer().getPluginManager().registerEvents(m_listener, this);
         m_isInitialized = true;
         Log("Enabled");
     }
-    
-    
+
     @Override
     public void onDisable() {
         m_blockPlacer.Stop();
         m_worldEdit.getWorldEdit().setEditSessionFactory(new EditSessionFactory());
         Log("Disabled");
     }
-    
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         Player player = (sender instanceof Player) ? (Player) sender : null;
-        
-        return super.onCommand(sender, command, label, args);
+
+        if (!command.getName().equalsIgnoreCase(Commands.COMMAND_MAIN)) {
+            return false;
+        }
+
+        String name = (args != null && args.length > 0) ? args[0] : "";
+
+        if (name.equalsIgnoreCase(Commands.COMMAND_RELOAD)) {
+            doReloadConfig(player);
+            return true;
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_HELP)) {
+            String arg = args.length > 1 ? args[1] : null;
+            return Help.ShowHelp(player, arg);
+        }
+
+        if (player == null) {
+            return Help.ShowHelp(player, null);
+        }
+
+        if (name.equalsIgnoreCase(Commands.COMMAND_PURGE)) {
+            DoPurge(player, args);
+            return true;
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_JOBS)) {
+            DoJobs(player, args);
+            return true;
+        }
+
+        return Help.ShowHelp(player, null);
     }
-    
-    
+
+    private void doReloadConfig(Player player) {
+        if (player != null) {
+            if (!PermissionManager.isAllowed(player, PermissionManager.Perms.ReloadConfig)) {
+                Say(player, ChatColor.RED + "You have no permissions to do that.");
+                return;
+            }
+        }
+
+        Log(player != null ? player.getName() : "console " + " reloading config...");
+
+        reloadConfig();
+        m_isInitialized = false;
+
+        if (!ConfigProvider.load(this)) {
+            Say(player, "Error loading config");
+            return;
+        }
+
+        m_blockPlacer.queueStop();
+        m_blockPlacer = new BlockPlacer(this);
+
+        m_isInitialized = m_worldEdit != null;
+        Say(player, "Config reloaded");
+    }
+
+    private void DoPurge(Player player, String[] args) {
+        if (!m_isInitialized) {
+            Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            return;
+        }
+
+        PurgeCommand.Execte(this, player, args);
+    }
+
+    private void DoJobs(Player player, String[] args) {
+        if (!m_isInitialized) {
+            Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            return;
+        }
+
+        JobsCommand.Execte(this, player, args);
+    }
+
+    /**
+     * Get instance of the world edit plugin
+     *
+     * @param plugin
+     * @return
+     */
     public static WorldEditPlugin getWorldEdit(JavaPlugin plugin) {
         Plugin wPlugin = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
 

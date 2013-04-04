@@ -31,13 +31,10 @@ import com.sk89q.worldedit.blocks.BaseBlock;
  *
  * @author SBPrime
  */
-public class BlockLogerEntry {    
+public class BlockPlacerEntry {    
     private Vector m_location;
     private BaseBlock m_newBlock;
-    private String m_player;
     private AsyncEditSession m_editSession;
-    private LocalWorld m_world;
-    private boolean m_isRaw;
 
     public Vector getLocation() {
         return m_location;
@@ -47,45 +44,14 @@ public class BlockLogerEntry {
         return m_newBlock;
     }
     
-    public boolean isRaw()
-    {
-        return m_isRaw;
-    }
-    
     public AsyncEditSession getEditSession() {
         return m_editSession;
     }
-    
-    public LocalWorld getWorld()
-    {
-        return m_world;
-    }
-    
-    public String getPlayer() {
-        return m_player;
-    }
 
-    /*public BlockLogerEntry(String player, AsyncEditSession editSession) {
-        initialize(player, editSession);
-        
-        m_finalize = true;
-    }*/
-
-    public BlockLogerEntry(String player, AsyncEditSession editSession,
-            Vector location, BaseBlock newBlock, boolean raw) {
-        initialize(player, editSession);
+    public BlockPlacerEntry(AsyncEditSession editSession,
+            Vector location, BaseBlock newBlock) {
         m_location = location;
         m_newBlock = newBlock;
-        m_isRaw = raw;                 
-    }
-    
-    private void initialize(String player, AsyncEditSession editSession)
-    {
-        m_player = player;
-        m_isRaw = false;
-        m_location = null;
-        m_newBlock = null;
         m_editSession = editSession;
-        m_world = editSession.getWorld();
     }
 }

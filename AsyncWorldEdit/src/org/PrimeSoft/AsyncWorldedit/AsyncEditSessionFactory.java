@@ -43,7 +43,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
     
     @Override
     public EditSession getEditSession(LocalWorld world, int maxBlocks) {
-        return new AsyncEditSession(null, m_blockPlacer, world, maxBlocks);
+        return new AsyncEditSession(ConfigProvider.DEFAULT_USER, m_blockPlacer, world, maxBlocks);
     }
 
     @Override

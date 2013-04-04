@@ -32,8 +32,18 @@ import org.bukkit.configuration.ConfigurationSection;
  * @author SBPrime
  */
 public class ConfigProvider {
+    /**
+     * Default user name when no user is available
+     */
+    public static final String DEFAULT_USER = "#worldedit";
+    
+    
+    /**
+     * The config file version
+     */
     private static final int CONFIG_VERSION = 1;
     
+        
     private static boolean m_checkUpdate = false;
     private static boolean m_isConfigUpdate = false;
     private static long m_interval;
@@ -103,7 +113,7 @@ public class ConfigProvider {
         parseRenderSection(mainSection);
 
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
-        m_isConfigUpdate = mainSection.getInt("version", 1) == CONFIG_VERSION;
+        m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         return true;
     }
     

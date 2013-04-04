@@ -23,14 +23,9 @@
  */
 package org.PrimeSoft.AsyncWorldedit;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.foundation.World;
 import java.util.*;
-import org.PrimeSoft.AsyncWorldedit.BlockLogger.IBlockLogger;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -50,7 +45,7 @@ public class BlockPlacer implements Runnable {
     /**
      * Logged events queue (per player)
      */
-    private HashMap<String, Queue<BlockLogerEntry>> m_blocks;
+    private HashMap<String, Queue<BlockPlacerEntry>> m_blocks;
     /**
      * Should block places shut down
      */
@@ -63,7 +58,7 @@ public class BlockPlacer implements Runnable {
      * @param blockLogger instance block logger
      */
     public BlockPlacer(PluginMain plugin) {
-        m_blocks = new HashMap<String, Queue<BlockLogerEntry>>();
+        m_blocks = new HashMap<String, Queue<BlockPlacerEntry>>();
         m_scheduler = plugin.getServer().getScheduler();
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 ConfigProvider.getInterval(), ConfigProvider.getInterval());
@@ -74,7 +69,8 @@ public class BlockPlacer implements Runnable {
      */
     @Override
     public void run() {
-        List<BlockLogerEntry> entries = new ArrayList<BlockLogerEntry>(ConfigProvider.getBlockCount());
+        List<BlockPlacerEntry> entries = 
+                new ArrayList<BlockPlacerEntry>(ConfigProvider.getBlockCount());
         synchronized (this) {
             String[] keys = m_blocks.keySet().toArray(new String[0]);
             int keyPos = 0;
@@ -83,7 +79,7 @@ public class BlockPlacer implements Runnable {
             for (int i = 0; i < blockCnt && added; i++) {
                 added = false;
 
-                Queue<BlockLogerEntry> queue = m_blocks.get(keys[keyPos]);
+                Queue<BlockPlacerEntry> queue = m_blocks.get(keys[keyPos]);
                 if (queue != null) {
                     if (!queue.isEmpty()) {
                         entries.add(queue.poll());
@@ -101,7 +97,7 @@ public class BlockPlacer implements Runnable {
             }
         }
 
-        for (BlockLogerEntry entry : entries) {
+        for (BlockPlacerEntry entry : entries) {
             process(entry);
         }
     }
@@ -124,12 +120,13 @@ public class BlockPlacer implements Runnable {
      * Add task to perform in async mode
      *
      */
-    public void addTasks(BlockLogerEntry entry) {
+    public void addTasks(BlockPlacerEntry entry) {
         synchronized (this) {
-            String player = entry.getPlayer();            
-            Queue<BlockLogerEntry> queue;
+            AsyncEditSession editSesson = entry.getEditSession();            
+            String player = editSesson.getPlayer();
+            Queue<BlockPlacerEntry> queue;
             if (!m_blocks.containsKey(player)) {
-                queue = new ArrayDeque<BlockLogerEntry>();
+                queue = new ArrayDeque<BlockPlacerEntry>();
                 m_blocks.put(player, queue);
             } else {
                 queue = m_blocks.get(player);
@@ -139,6 +136,34 @@ public class BlockPlacer implements Runnable {
         }
     }
 
+    
+    /**
+     * Remove all entries for player
+     *
+     * @param player
+     */
+    public void purge(String player) {
+        synchronized (this) {
+            if (m_blocks.containsKey(player)) {
+                m_blocks.remove(player);
+            }
+        }
+    }
+    
+    
+    /**
+     * Remove all entries 
+     */
+    public void purgeAll() {
+        synchronized (this) {
+            for (String user : getAllPlayers())
+            {
+                purge(user);
+            }
+        }
+    }
+    
+    
     /**
      * Get all players in log
      *
@@ -150,6 +175,7 @@ public class BlockPlacer implements Runnable {
         }
     }
 
+    
     /**
      * Gets the number of events for a player
      *
@@ -171,20 +197,17 @@ public class BlockPlacer implements Runnable {
      *
      * @param entry event to process
      */
-    private void process(BlockLogerEntry entry) {
+    private void process(BlockPlacerEntry entry) {
         if (entry == null) {
             return;
         }
 
         Vector location = entry.getLocation();
-        BaseBlock block = entry.getNewBlock();
-        String player = entry.getPlayer();
+        BaseBlock block = entry.getNewBlock();        
         AsyncEditSession eSession = entry.getEditSession();
+        //String player = eSession.getPlayer();
+        //LocalWorld world = eSession.getWorld();
         
-        if ((location != null && block != null)/* || entry.isFinalize()*/) {
-            if (location != null && block != null) {
-                eSession.doRawSetBlock(location, block);
-            }
-        }        
-    }
+        eSession.doRawSetBlock(location, block);
+    }    
 }

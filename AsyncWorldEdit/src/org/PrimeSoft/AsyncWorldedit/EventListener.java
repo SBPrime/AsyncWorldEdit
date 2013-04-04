@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2012 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,48 +23,44 @@
  */
 package org.PrimeSoft.AsyncWorldedit;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalWorld;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.bags.BlockBag;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.PluginDescriptionFile;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncEditSession extends EditSession {
-    private String m_player;
-    private BlockPlacer m_blockPlacer;
+public class EventListener implements Listener {
+
+    private PluginMain m_parent;
+
+    public EventListener(PluginMain parent) {
+        m_parent = parent;
+    }
     
-    public String getPlayer()
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event)
     {
-        return m_player;
-    }
-
-    public AsyncEditSession(String player, BlockPlacer blockPlacer,
-            LocalWorld world, int maxBlocks) {
-        super(world, maxBlocks);
-
-        m_player = player;
-        m_blockPlacer = blockPlacer;
-    }
-
-    public AsyncEditSession(String player, BlockPlacer blockPlacer,
-            LocalWorld world, int maxBlocks, BlockBag blockBag) {
-        super(world, maxBlocks, blockBag);
-
-        m_player = player;
-        m_blockPlacer = blockPlacer;
-    }
-
-    @Override
-    public boolean rawSetBlock(Vector pt, BaseBlock block) {
-        m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
-        return true;
-    }
-
-    public void doRawSetBlock(Vector pt, BaseBlock block) {
-        super.rawSetBlock(pt, block);
+        Player player = event.getPlayer();
+        if (!PermissionManager.isAllowed(player, PermissionManager.Perms.AnnounceVersion))
+        {
+            return;
+        }
+        
+        if (ConfigProvider.getCheckUpdate()) {            
+            PluginDescriptionFile desc = m_parent.getDescription();
+            PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix() +
+                    VersionChecker.CheckVersion(desc.getVersion()));
+        }
+        
+        if (ConfigProvider.isConfigUpdated())
+        {
+            PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix() +
+                    "Please update your config file!");
+        }
     }
 }
