@@ -23,15 +23,16 @@
  */
 package org.PrimeSoft.AsyncWorldedit;
 
-import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.PrimeSoft.AsyncWorldedit.BlockLogger.*;
 import org.PrimeSoft.AsyncWorldedit.Commands.Commands;
 import org.PrimeSoft.AsyncWorldedit.Commands.JobsCommand;
 import org.PrimeSoft.AsyncWorldedit.Commands.PurgeCommand;
 import org.PrimeSoft.AsyncWorldedit.MCStats.MetricsLite;
+import org.PrimeSoft.AsyncWorldedit.Worldedit.WorldeditIntegrator;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -52,10 +53,11 @@ public class PluginMain extends JavaPlugin {
     private static String s_prefix = null;
     private static String s_logFormat = "%s %s";
     private Boolean m_isInitialized = false;
-    private WorldEditPlugin m_worldEdit = null;
     private MetricsLite m_metrics;
     private EventListener m_listener = new EventListener(this);
     private BlockPlacer m_blockPlacer;
+    private WorldeditIntegrator m_weIntegrator;
+    private IBlockLogger m_logger;
 
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
@@ -94,11 +96,13 @@ public class PluginMain extends JavaPlugin {
             Log("Error initializing MCStats: " + e.getMessage());
         }
 
-        s_console = getServer().getConsoleSender();
-        m_worldEdit = getWorldEdit(this);
-        if (m_worldEdit == null) {
+        s_console = getServer().getConsoleSender();        
+        WorldEditPlugin worldEdit = getWorldEdit(this);
+        if (worldEdit == null) {
             Log("World edit not found.");
+            return;
         }
+        m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit());
 
         if (!ConfigProvider.load(this)) {
             Log("Error loading config");
@@ -112,10 +116,11 @@ public class PluginMain extends JavaPlugin {
         }
         if (!ConfigProvider.isConfigUpdated()) {
             Log("Please update your config file!");
-        }
+        }        
 
-        m_worldEdit.getWorldEdit().setEditSessionFactory(new AsyncEditSessionFactory(m_blockPlacer));
-
+        m_logger = getLogger(ConfigProvider.getLogger());
+        m_blockPlacer.setLogger(m_logger);
+        
         getServer().getPluginManager().registerEvents(m_listener, this);
         m_isInitialized = true;
         Log("Enabled");
@@ -123,8 +128,8 @@ public class PluginMain extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        m_blockPlacer.Stop();
-        m_worldEdit.getWorldEdit().setEditSessionFactory(new EditSessionFactory());
+        m_blockPlacer.stop();
+        m_weIntegrator.queueStop();
         Log("Disabled");
     }
 
@@ -151,10 +156,10 @@ public class PluginMain extends JavaPlugin {
         }
 
         if (name.equalsIgnoreCase(Commands.COMMAND_PURGE)) {
-            DoPurge(player, args);
+            doPurge(player, args);
             return true;
         } else if (name.equalsIgnoreCase(Commands.COMMAND_JOBS)) {
-            DoJobs(player, args);
+            doJobs(player, args);
             return true;
         }
 
@@ -182,11 +187,14 @@ public class PluginMain extends JavaPlugin {
         m_blockPlacer.queueStop();
         m_blockPlacer = new BlockPlacer(this);
 
-        m_isInitialized = m_worldEdit != null;
+        m_logger = getLogger(ConfigProvider.getLogger());
+        m_blockPlacer.setLogger(m_logger);
+        
+        m_isInitialized = true;
         Say(player, "Config reloaded");
     }
 
-    private void DoPurge(Player player, String[] args) {
+    private void doPurge(Player player, String[] args) {
         if (!m_isInitialized) {
             Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
             return;
@@ -195,7 +203,7 @@ public class PluginMain extends JavaPlugin {
         PurgeCommand.Execte(this, player, args);
     }
 
-    private void DoJobs(Player player, String[] args) {
+    private void doJobs(Player player, String[] args) {
         if (!m_isInitialized) {
             Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
             return;
@@ -218,5 +226,29 @@ public class PluginMain extends JavaPlugin {
         }
 
         return (WorldEditPlugin) wPlugin;
+    }
+
+    
+    /**
+     * Create the block logger
+     * @param logger
+     * @return 
+     */
+    private IBlockLogger getLogger(String logger) {
+        if (logger.equalsIgnoreCase(Loggers.LOG_BLOCK))
+        {
+            return new LogBlockLogger(this);
+        }
+        if (logger.equalsIgnoreCase(Loggers.CORE_PROTECT))
+        {
+            return new CoreProtectLogger(this);
+        }
+        if (logger.equalsIgnoreCase(Loggers.NONE))
+        {
+            return new NoneLogger();
+        }
+        
+        Log("Unknown logger: "+ logger + ". Logger disabled.");
+        return new NoneLogger();
     }
 }

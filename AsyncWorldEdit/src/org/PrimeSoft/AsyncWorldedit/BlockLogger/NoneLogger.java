@@ -21,50 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.PrimeSoft.AsyncWorldedit;
+package org.PrimeSoft.AsyncWorldedit.BlockLogger;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.bags.BlockBag;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import org.bukkit.World;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncEditSession extends EditSession {
-    private String m_player;
-    private BlockPlacer m_blockPlacer;
-    
-    public String getPlayer()
-    {
-        return m_player;
-    }
-
-    public AsyncEditSession(String player, BlockPlacer blockPlacer,
-            LocalWorld world, int maxBlocks) {
-        super(world, maxBlocks);
-
-        m_player = player;
-        m_blockPlacer = blockPlacer;
-    }
-
-    public AsyncEditSession(String player, BlockPlacer blockPlacer,
-            LocalWorld world, int maxBlocks, BlockBag blockBag) {
-        super(world, maxBlocks, blockBag);
-
-        m_player = player;
-        m_blockPlacer = blockPlacer;
-    }
+public class NoneLogger implements IBlockLogger {
 
     @Override
-    public boolean rawSetBlock(Vector pt, BaseBlock block) {
-        m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
-        return true;
+    public void LogBlock(Vector location, BaseBlock oldBlock, BaseBlock newBlock, 
+        String player, World world) {        
     }
-
-    public void doRawSetBlock(Vector pt, BaseBlock block) {
-        super.rawSetBlock(pt, block);
-    }
+    
 }

@@ -21,38 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.PrimeSoft.AsyncWorldedit;
-
-import org.PrimeSoft.AsyncWorldedit.Worldedit.AsyncEditSession;
-import com.sk89q.worldedit.LocalWorld;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
+package org.PrimeSoft.AsyncWorldedit.BlockLogger;
 
 /**
  *
  * @author SBPrime
  */
-public class BlockPlacerEntry {    
-    private Vector m_location;
-    private BaseBlock m_newBlock;
-    private AsyncEditSession m_editSession;
-
-    public Vector getLocation() {
-        return m_location;
-    }
-
-    public BaseBlock getNewBlock() {
-        return m_newBlock;
-    }
-    
-    public AsyncEditSession getEditSession() {
-        return m_editSession;
-    }
-
-    public BlockPlacerEntry(AsyncEditSession editSession,
-            Vector location, BaseBlock newBlock) {
-        m_location = location;
-        m_newBlock = newBlock;
-        m_editSession = editSession;
-    }
+public class Loggers {
+    public final static String NONE = "none";
+    public final static String CORE_PROTECT = "coreprotect";
+    public final static String LOG_BLOCK = "logblock";
 }

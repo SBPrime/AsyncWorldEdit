@@ -4,3 +4,6 @@ awe:
     interval: 15
     blocks: 1000
   checkVersion: true
+  logger: none
+#  logger: logBlock
+#  logger: coreProtect

@@ -48,8 +48,14 @@ public class ConfigProvider {
     private static boolean m_isConfigUpdate = false;
     private static long m_interval;
     private static int m_blocksCnt;
-    private static String m_configVersion;    
+    private static String m_configVersion;
+    private static String m_logger;
 
+    public static String getLogger()
+    {
+        return m_logger;
+    }
+    
     public static String getConfigVersion() {
         return m_configVersion;
     }
@@ -114,6 +120,7 @@ public class ConfigProvider {
 
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
+        m_logger = mainSection.getString("logger", "none").toLowerCase();
         return true;
     }
     

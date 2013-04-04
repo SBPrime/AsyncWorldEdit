@@ -23,9 +23,14 @@
  */
 package org.PrimeSoft.AsyncWorldedit;
 
+import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.*;
+import org.PrimeSoft.AsyncWorldedit.BlockLogger.IBlockLogger;
+import org.PrimeSoft.AsyncWorldedit.BlockLogger.NoneLogger;
+import org.PrimeSoft.AsyncWorldedit.Worldedit.AsyncEditSession;
+import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -50,6 +55,10 @@ public class BlockPlacer implements Runnable {
      * Should block places shut down
      */
     private boolean m_shutdown;
+    /**
+     * The block logger
+     */
+    private IBlockLogger m_logger;
 
     /**
      * Initialize new instance of the block placer
@@ -62,8 +71,24 @@ public class BlockPlacer implements Runnable {
         m_scheduler = plugin.getServer().getScheduler();
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 ConfigProvider.getInterval(), ConfigProvider.getInterval());
+        
+        setLogger(null);
     }
 
+    
+    /**
+     * Set the logger
+     * @param logger 
+     */
+    public void setLogger(IBlockLogger logger) {
+        if (logger == null)
+        {
+            logger = new NoneLogger();
+        }
+        m_logger = logger;
+    }
+    
+    
     /**
      * Block placer main loop
      */
@@ -93,7 +118,7 @@ public class BlockPlacer implements Runnable {
             }
 
             if (!added && m_shutdown) {
-                Stop();
+                stop();
             }
         }
 
@@ -110,9 +135,9 @@ public class BlockPlacer implements Runnable {
     }
 
     /**
-     * Stop block logger
+     * stop block logger
      */
-    public void Stop() {
+    public void stop() {
         m_task.cancel();
     }
 
@@ -205,9 +230,12 @@ public class BlockPlacer implements Runnable {
         Vector location = entry.getLocation();
         BaseBlock block = entry.getNewBlock();        
         AsyncEditSession eSession = entry.getEditSession();
-        //String player = eSession.getPlayer();
-        //LocalWorld world = eSession.getWorld();
+        String player = eSession.getPlayer();
+        World world = eSession.getCBWorld();
         
+        BaseBlock oldBlock = eSession.getBlock(location);
         eSession.doRawSetBlock(location, block);
+        
+        m_logger.LogBlock(location, oldBlock, block, player, world);
     }    
 }
