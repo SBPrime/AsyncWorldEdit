@@ -31,4 +31,5 @@ public class Loggers {
     public final static String NONE = "none";
     public final static String CORE_PROTECT = "coreprotect";
     public final static String LOG_BLOCK = "logblock";
+    public final static String PRISM = "prism";
 }

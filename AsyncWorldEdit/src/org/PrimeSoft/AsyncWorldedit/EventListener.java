@@ -57,7 +57,7 @@ public class EventListener implements Listener {
                     VersionChecker.CheckVersion(desc.getVersion()));
         }
         
-        if (ConfigProvider.isConfigUpdated())
+        if (!ConfigProvider.isConfigUpdated())
         {
             PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix() +
                     "Please update your config file!");

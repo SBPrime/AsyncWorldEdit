@@ -7,3 +7,4 @@ awe:
   logger: none
 #  logger: logBlock
 #  logger: coreProtect
+#  logger: prism

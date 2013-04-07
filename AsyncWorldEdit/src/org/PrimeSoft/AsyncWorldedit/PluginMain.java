@@ -243,6 +243,10 @@ public class PluginMain extends JavaPlugin {
         {
             return new CoreProtectLogger(this);
         }
+        if (logger.equalsIgnoreCase(Loggers.PRISM))
+        {
+            return new PrismLogger(this);
+        }
         if (logger.equalsIgnoreCase(Loggers.NONE))
         {
             return new NoneLogger();
