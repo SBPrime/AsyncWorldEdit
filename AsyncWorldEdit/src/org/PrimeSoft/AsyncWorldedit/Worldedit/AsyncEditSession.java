@@ -28,6 +28,7 @@ import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bags.BlockBag;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import java.util.Map;
 import org.PrimeSoft.AsyncWorldedit.BlockPlacer;
 import org.PrimeSoft.AsyncWorldedit.BlockPlacerEntry;
 import org.PrimeSoft.AsyncWorldedit.PluginMain;
@@ -38,12 +39,12 @@ import org.bukkit.World;
  * @author SBPrime
  */
 public class AsyncEditSession extends EditSession {
+
     private String m_player;
     private BlockPlacer m_blockPlacer;
     private World m_world;
-    
-    public String getPlayer()
-    {
+
+    public String getPlayer() {
         return m_player;
     }
 
@@ -68,6 +69,20 @@ public class AsyncEditSession extends EditSession {
     @Override
     public boolean rawSetBlock(Vector pt, BaseBlock block) {
         return m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
+    }
+
+    @Override
+    public void undo(EditSession sess) {
+        UndoSession undoSession = new UndoSession();
+        super.undo(undoSession);
+
+        Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
+        for (int i = blocks.length - 1; i >= 0; i--) {
+            Map.Entry<Vector, BaseBlock> entry = blocks[i];
+            sess.smartSetBlock(entry.getKey(), entry.getValue());
+        }
+        
+        sess.flushQueue();
     }
 
     public void doRawSetBlock(Vector pt, BaseBlock block) {

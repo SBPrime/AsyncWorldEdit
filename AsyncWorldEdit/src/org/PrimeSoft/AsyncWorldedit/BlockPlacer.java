@@ -188,7 +188,7 @@ public class BlockPlacer implements Runnable {
             
             queue.add(entry);
             if (queue.size() >= m_queueHardLimit && 
-                    !PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass))
+                !PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass))
             {
                 m_lockedQueues.add(player);
                 PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is full. Wait for items to finish drawing.");
