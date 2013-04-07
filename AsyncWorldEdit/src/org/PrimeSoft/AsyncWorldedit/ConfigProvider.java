@@ -48,8 +48,10 @@ public class ConfigProvider {
     private static boolean m_isConfigUpdate = false;
     private static long m_interval;
     private static int m_blocksCnt;
+    private static int m_queueHardLimit;
+    private static int m_queueSoftLimit;
     private static String m_configVersion;
-    private static String m_logger;
+    private static String m_logger;    
 
     public static String getLogger()
     {
@@ -98,6 +100,25 @@ public class ConfigProvider {
 
     
     /**
+     * Queue hard limit
+     * @return 
+     */
+    public static int getQueueHardLimit()
+    {
+        return m_queueHardLimit;
+    }
+    
+    /**
+     * Queue soft limit
+     * @return 
+     */
+    public static int getQueueSoftLimit()
+    {
+        return m_queueSoftLimit;
+    }
+
+    
+    /**
      * Load configuration
      *
      * @param plugin parent plugin
@@ -133,9 +154,13 @@ public class ConfigProvider {
         if (renderSection == null) {
             m_blocksCnt = 1000;
             m_interval = 15;
+            m_queueHardLimit = 500000;
+            m_queueSoftLimit = 250000;
         } else {
             m_blocksCnt = renderSection.getInt("blocks", 1000);
             m_interval = renderSection.getInt("interval", 15);
+            m_queueSoftLimit = renderSection.getInt("queue-limit-soft", 250000);
+            m_queueHardLimit = renderSection.getInt("queue-limit-hard", 500000);
         }
     }
 }

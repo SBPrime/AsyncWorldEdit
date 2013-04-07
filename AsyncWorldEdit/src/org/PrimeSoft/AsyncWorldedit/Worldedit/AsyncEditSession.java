@@ -67,8 +67,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public boolean rawSetBlock(Vector pt, BaseBlock block) {
-        m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
-        return true;
+        return m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
     }
 
     public void doRawSetBlock(Vector pt, BaseBlock block) {

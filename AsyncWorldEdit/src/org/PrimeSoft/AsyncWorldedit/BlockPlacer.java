@@ -23,7 +23,6 @@
  */
 package org.PrimeSoft.AsyncWorldedit;
 
-import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.*;
@@ -51,6 +50,14 @@ public class BlockPlacer implements Runnable {
      * Logged events queue (per player)
      */
     private HashMap<String, Queue<BlockPlacerEntry>> m_blocks;
+    
+    
+    /**
+     * All locked queues
+     */
+    private HashSet<String> m_lockedQueues;
+    
+    
     /**
      * Should block places shut down
      */
@@ -59,6 +66,9 @@ public class BlockPlacer implements Runnable {
      * The block logger
      */
     private IBlockLogger m_logger;
+    
+    private int m_queueHardLimit;
+    private int m_queueSoftLimit;
 
     /**
      * Initialize new instance of the block placer
@@ -68,9 +78,13 @@ public class BlockPlacer implements Runnable {
      */
     public BlockPlacer(PluginMain plugin) {
         m_blocks = new HashMap<String, Queue<BlockPlacerEntry>>();
+        m_lockedQueues = new HashSet<String>();
         m_scheduler = plugin.getServer().getScheduler();
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 ConfigProvider.getInterval(), ConfigProvider.getInterval());
+        
+        m_queueHardLimit = ConfigProvider.getQueueHardLimit();
+        m_queueSoftLimit = ConfigProvider.getQueueSoftLimit();
         
         setLogger(null);
     }
@@ -104,15 +118,25 @@ public class BlockPlacer implements Runnable {
             for (int i = 0; i < blockCnt && added; i++) {
                 added = false;
 
-                Queue<BlockPlacerEntry> queue = m_blocks.get(keys[keyPos]);
+                String player = keys[keyPos];
+                Queue<BlockPlacerEntry> queue = m_blocks.get(player);
                 if (queue != null) {
                     if (!queue.isEmpty()) {
                         entries.add(queue.poll());
                         added = true;
                     }
-                    if (queue.isEmpty()) {
-                        m_blocks.remove(keys[keyPos]);
+                    int size = queue.size();
+                    if (size < m_queueSoftLimit && m_lockedQueues.contains(player))
+                    {
+                        PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
+                        m_lockedQueues.remove(player);
                     }
+                    if (size == 0) {
+                        m_blocks.remove(keys[keyPos]);
+                    }                                        
+                } else  if (m_lockedQueues.contains(player)) {
+                    PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
+                    m_lockedQueues.remove(player);
                 }
                 keyPos = (keyPos + 1) % keys.length;
             }
@@ -145,7 +169,7 @@ public class BlockPlacer implements Runnable {
      * Add task to perform in async mode
      *
      */
-    public void addTasks(BlockPlacerEntry entry) {
+    public boolean addTasks(BlockPlacerEntry entry) {
         synchronized (this) {
             AsyncEditSession editSesson = entry.getEditSession();            
             String player = editSesson.getPlayer();
@@ -156,8 +180,22 @@ public class BlockPlacer implements Runnable {
             } else {
                 queue = m_blocks.get(player);
             }
+            
+            if (m_lockedQueues.contains(player))
+            {
+                return false;
+            }            
+            
             queue.add(entry);
+            if (queue.size() >= m_queueHardLimit && 
+                    !PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass))
+            {
+                m_lockedQueues.add(player);
+                PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is full. Wait for items to finish drawing.");
+                return false;
+            }
 
+            return true;
         }
     }
 
@@ -171,6 +209,10 @@ public class BlockPlacer implements Runnable {
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 m_blocks.remove(player);
+            }
+            if (m_lockedQueues.contains(player))
+            {
+                m_lockedQueues.remove(player);
             }
         }
     }

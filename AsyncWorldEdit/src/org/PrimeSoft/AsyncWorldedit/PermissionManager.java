@@ -36,6 +36,7 @@ public class PermissionManager {
     public enum Perms {
         ReloadConfig, 
         AnnounceVersion,
+        QueueBypass,
         Purge_Self, Purge_Other, Purge_All,
         Jobs_Self, Jobs_Other, Jobs_All, Filter
     }
@@ -90,6 +91,8 @@ public class PermissionManager {
                 return s_prefix + "admin.jobs";
             case Jobs_All:
                 return s_prefix + "admin.jobs.all";
+            case QueueBypass:
+                return s_prefix + "admin.queue-bypass";
         }
 
         return null;

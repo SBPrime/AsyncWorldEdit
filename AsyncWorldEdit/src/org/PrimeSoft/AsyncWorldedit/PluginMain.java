@@ -52,6 +52,7 @@ public class PluginMain extends JavaPlugin {
     private static ConsoleCommandSender s_console;
     private static String s_prefix = null;
     private static String s_logFormat = "%s %s";
+    private static PluginMain s_instance;
     private Boolean m_isInitialized = false;
     private MetricsLite m_metrics;
     private EventListener m_listener = new EventListener(this);
@@ -67,6 +68,15 @@ public class PluginMain extends JavaPlugin {
         return s_prefix;
     }
 
+    public static Player getPlayer(String player) {
+        if (s_instance == null)
+        {
+            return null;
+        }
+        
+        return s_instance.getServer().getPlayer(player);
+    }
+    
     public static void Log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
             return;
@@ -85,6 +95,7 @@ public class PluginMain extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        s_instance = this;
         PluginDescriptionFile desc = getDescription();
         s_prefix = String.format("[%s]", desc.getName());
         m_isInitialized = false;
