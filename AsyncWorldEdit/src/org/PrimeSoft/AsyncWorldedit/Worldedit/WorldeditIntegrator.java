@@ -73,7 +73,20 @@ public class WorldeditIntegrator implements Runnable {
     public WorldeditIntegrator(PluginMain plugin, WorldEdit worldEdit) {
         m_worldedit = worldEdit;
         m_parent = plugin;
-        m_scheduler = plugin.getServer().getScheduler();
+        m_scheduler = plugin.getServer().getScheduler();        
+        
+        if (m_parent == null)
+        {
+            m_shutdown = true;
+            return;
+        }
+        if (m_worldedit == null || m_scheduler == null)
+        {
+            m_shutdown = true;
+            PluginMain.Log("Error initializeing Worldedit integrator");
+            return;
+        }
+        
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 CHECK_INTERVAL, CHECK_INTERVAL);
     }
@@ -107,6 +120,10 @@ public class WorldeditIntegrator implements Runnable {
      * Stop the integrator
      */
     public void stop() {
-        m_task.cancel();
+        if (m_task != null)
+        {
+            m_task.cancel();
+            m_task = null;
+        }
     }
 }
