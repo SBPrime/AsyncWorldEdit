@@ -41,26 +41,37 @@ public class EventListener implements Listener {
     public EventListener(PluginMain parent) {
         m_parent = parent;
     }
-    
+
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event)
-    {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (!PermissionManager.isAllowed(player, PermissionManager.Perms.AnnounceVersion))
-        {
+
+        boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
+        boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
+        boolean def = ConfigProvider.getDefaultMode();
+
+        if (hasOn) {
+            PluginMain.setMode(player.getName(), true);
+        } else if (hasOff) {
+            PluginMain.setMode(player.getName(), false);
+        } else {
+            PluginMain.setMode(player.getName(), def);
+        }
+
+
+        if (!PermissionManager.isAllowed(player, PermissionManager.Perms.AnnounceVersion)) {
             return;
         }
-        
-        if (ConfigProvider.getCheckUpdate()) {            
+
+        if (ConfigProvider.getCheckUpdate()) {
             PluginDescriptionFile desc = m_parent.getDescription();
-            PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix() +
-                    VersionChecker.CheckVersion(desc.getVersion()));
+            PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()
+                    + VersionChecker.CheckVersion(desc.getVersion()));
         }
-        
-        if (!ConfigProvider.isConfigUpdated())
-        {
-            PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix() +
-                    "Please update your config file!");
+
+        if (!ConfigProvider.isConfigUpdated()) {
+            PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()
+                    + "Please update your config file!");
         }
     }
 }

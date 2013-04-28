@@ -33,4 +33,5 @@ public final class Commands {
     public final static String COMMAND_HELP = "Help";
     public final static String COMMAND_PURGE = "Purge";
     public final static String COMMAND_JOBS = "Jobs";
+    public final static String COMMAND_TOGGLE = "Toggle";
 }

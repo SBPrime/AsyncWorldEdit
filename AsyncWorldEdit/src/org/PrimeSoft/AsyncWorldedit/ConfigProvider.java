@@ -43,7 +43,7 @@ public class ConfigProvider {
      */
     private static final int CONFIG_VERSION = 1;
     
-        
+    private static boolean m_defaultMode = true;
     private static boolean m_checkUpdate = false;
     private static boolean m_isConfigUpdate = false;
     private static long m_interval;
@@ -116,6 +116,17 @@ public class ConfigProvider {
     {
         return m_queueSoftLimit;
     }
+    
+    
+    
+    /**
+     * The default mode
+     * @return 
+     */
+    public static boolean getDefaultMode()
+    {
+        return m_defaultMode;
+    }
 
     
     /**
@@ -142,6 +153,8 @@ public class ConfigProvider {
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_logger = mainSection.getString("logger", "none").toLowerCase();
+        m_defaultMode = mainSection.getBoolean("defaultOn", true);
+        
         return true;
     }
     

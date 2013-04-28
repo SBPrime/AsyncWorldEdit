@@ -25,12 +25,14 @@ package org.PrimeSoft.AsyncWorldedit;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.PrimeSoft.AsyncWorldedit.BlockLogger.*;
 import org.PrimeSoft.AsyncWorldedit.Commands.Commands;
 import org.PrimeSoft.AsyncWorldedit.Commands.JobsCommand;
 import org.PrimeSoft.AsyncWorldedit.Commands.PurgeCommand;
+import org.PrimeSoft.AsyncWorldedit.Commands.ToggleCommand;
 import org.PrimeSoft.AsyncWorldedit.MCStats.MetricsLite;
 import org.PrimeSoft.AsyncWorldedit.Worldedit.WorldeditIntegrator;
 import org.bukkit.ChatColor;
@@ -53,6 +55,45 @@ public class PluginMain extends JavaPlugin {
     private static String s_prefix = null;
     private static String s_logFormat = "%s %s";
     private static PluginMain s_instance;
+
+    private static final HashSet<String> s_asyncPlayers = new HashSet<String>();
+    
+    public static boolean hasAsyncMode(String player) {
+        if (player == null)
+        {
+            return true;
+        }
+        
+        synchronized (s_asyncPlayers)
+        {
+            return s_asyncPlayers.contains(player.toLowerCase());
+        }
+    }
+    
+    
+    public static void setMode(String player, boolean mode)
+    {
+        if (player == null)
+        {
+            return;
+        }
+        
+        synchronized (s_asyncPlayers)
+        {
+            player = player.toLowerCase();
+            boolean contains = s_asyncPlayers.contains(player);
+            
+            if (contains && !mode)
+            {
+                s_asyncPlayers.remove(player);
+            } else if (!contains && mode)
+            {
+                s_asyncPlayers.add(player);
+            }
+        }
+    }
+    
+    
     private Boolean m_isInitialized = false;
     private MetricsLite m_metrics;
     private EventListener m_listener = new EventListener(this);
@@ -172,6 +213,9 @@ public class PluginMain extends JavaPlugin {
         } else if (name.equalsIgnoreCase(Commands.COMMAND_JOBS)) {
             doJobs(player, args);
             return true;
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_TOGGLE)){
+            doToggle(player, args);
+            return true;
         }
 
         return Help.ShowHelp(player, null);
@@ -205,6 +249,16 @@ public class PluginMain extends JavaPlugin {
         Say(player, "Config reloaded");
     }
 
+    private void doToggle(Player player, String[] args) {
+        if (!m_isInitialized) {
+            Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            return;
+        }
+
+        ToggleCommand.Execte(this, player, args);
+    }
+    
+    
     private void doPurge(Player player, String[] args) {
         if (!m_isInitialized) {
             Say(player, ChatColor.RED + "Module not initialized, contact administrator.");

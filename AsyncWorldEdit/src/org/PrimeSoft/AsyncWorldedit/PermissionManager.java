@@ -38,7 +38,8 @@ public class PermissionManager {
         AnnounceVersion,
         QueueBypass,
         Purge_Self, Purge_Other, Purge_All,
-        Jobs_Self, Jobs_Other, Jobs_All, Filter
+        Jobs_Self, Jobs_Other, Jobs_All, Filter,
+        Mode_Change, Mode_On, Mode_Off
     }
     
     
@@ -93,6 +94,12 @@ public class PermissionManager {
                 return s_prefix + "admin.jobs.all";
             case QueueBypass:
                 return s_prefix + "admin.queue-bypass";
+            case Mode_Change:
+                return s_prefix + "user.mode.change";
+            case Mode_On:
+                return s_prefix + "user.mode.on";
+            case Mode_Off:
+                return s_prefix + "user.mode.off";
         }
 
         return null;

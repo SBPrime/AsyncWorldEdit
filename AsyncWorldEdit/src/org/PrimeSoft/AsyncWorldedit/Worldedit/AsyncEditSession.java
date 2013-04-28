@@ -68,7 +68,11 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public boolean rawSetBlock(Vector pt, BaseBlock block) {
-        return m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
+        if (PluginMain.hasAsyncMode(m_player)) {
+            return m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
+        } else {
+            return super.rawSetBlock(pt, block);
+        }
     }
 
     @Override
@@ -81,7 +85,7 @@ public class AsyncEditSession extends EditSession {
             Map.Entry<Vector, BaseBlock> entry = blocks[i];
             sess.smartSetBlock(entry.getKey(), entry.getValue());
         }
-        
+
         sess.flushQueue();
     }
 

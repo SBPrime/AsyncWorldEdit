@@ -38,9 +38,18 @@ public final class Help {
         ChatColor.BLUE + "Help" + ChatColor.WHITE + " - diaplay help screen",
         ChatColor.BLUE + "Jobs" + ChatColor.WHITE + " - display queued block operations",
         ChatColor.BLUE + "Purge" + ChatColor.WHITE + " - remove all queued block operations",
+        ChatColor.BLUE + "Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off",
         ChatColor.BLUE + "Reload" + ChatColor.WHITE + " - reload configuration",
         ChatColor.YELLOW + "To display help on command use: " + ChatColor.BLUE + "/Help <command>"
     };
+    private final static String[] HelpToggle = new String[]{
+        ChatColor.YELLOW + "Toggle " + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off",
+        ChatColor.BLUE + " Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit",
+        ChatColor.BLUE + " Toggle on" + ChatColor.WHITE + " - toggle AsyncWorldEdit on",
+        ChatColor.BLUE + " Toggle off" + ChatColor.WHITE + " - toggle AsyncWorldEdit off",
+        ChatColor.BLUE + " Toggle <u:playerName> " + ChatColor.WHITE + " - toggle AsyncWorldEdit",
+        ChatColor.BLUE + " Toggle <u:playerName> on" + ChatColor.WHITE + " - toggle AsyncWorldEdit on",
+        ChatColor.BLUE + " Toggle <u:playerName> off" + ChatColor.WHITE + " - toggle AsyncWorldEdit off",};
     private final static String[] HelpPurge = new String[]{
         ChatColor.YELLOW + "Purge " + ChatColor.WHITE + " - remove all queued block operations",
         ChatColor.BLUE + " Purge" + ChatColor.WHITE + " - purges your operations",
@@ -60,6 +69,8 @@ public final class Help {
                 help = HelpPurge;
             } else if (command.equalsIgnoreCase(Commands.COMMAND_JOBS)) {
                 help = HelpJobs;
+            } else if (command.equalsIgnoreCase(Commands.COMMAND_TOGGLE)) {
+                help = HelpToggle;
             }
         }
 
