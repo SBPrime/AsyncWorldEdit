@@ -10,3 +10,4 @@ awe:
 #  logger: logBlock
 #  logger: coreProtect
 #  logger: prism
+#  logger: hawkEye

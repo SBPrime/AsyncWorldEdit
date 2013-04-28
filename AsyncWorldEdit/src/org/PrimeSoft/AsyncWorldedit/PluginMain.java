@@ -258,6 +258,10 @@ public class PluginMain extends JavaPlugin {
         {
             return new PrismLogger(this);
         }
+        if (logger.equalsIgnoreCase(Loggers.HAWK_EYE))
+        {
+            return new HawkEyeLogger(this);
+        }
         if (logger.equalsIgnoreCase(Loggers.NONE))
         {
             return new NoneLogger();

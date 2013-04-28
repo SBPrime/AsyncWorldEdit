@@ -32,4 +32,5 @@ public class Loggers {
     public final static String CORE_PROTECT = "coreprotect";
     public final static String LOG_BLOCK = "logblock";
     public final static String PRISM = "prism";
+    public final static String HAWK_EYE = "hawkeye";
 }
