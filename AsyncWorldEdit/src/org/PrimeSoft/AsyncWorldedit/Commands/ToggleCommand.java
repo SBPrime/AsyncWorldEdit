@@ -42,20 +42,25 @@ public class ToggleCommand {
             return;
         }
 
-        if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
-            PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
-            return;
-        }
-
         String playerName = null;
         boolean mode;
 
         if (args.length == 1) {
+            if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
+                PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                return;
+            }
+
             playerName = player.getName();
             mode = !PluginMain.hasAsyncMode(playerName);
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
+                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change_Other)) {
+                    PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                    return;
+                }
+
                 playerName = arg.substring(2);
 
                 if (args.length == 3) {
@@ -71,13 +76,19 @@ public class ToggleCommand {
                 } else {
                     mode = !PluginMain.hasAsyncMode(playerName);
                 }
-            } else if (arg.equalsIgnoreCase("on")) {
-                mode = true;
-            } else if (arg.equalsIgnoreCase("off")) {
-                mode = false;
             } else {
-                Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
-                return;
+                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
+                    PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                    return;
+                }
+                if (arg.equalsIgnoreCase("on")) {
+                    mode = true;
+                } else if (arg.equalsIgnoreCase("off")) {
+                    mode = false;
+                } else {
+                    Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
+                    return;
+                }
             }
         }
 
