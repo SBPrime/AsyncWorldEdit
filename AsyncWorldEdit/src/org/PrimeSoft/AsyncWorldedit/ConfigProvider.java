@@ -23,6 +23,7 @@
  */
 package org.PrimeSoft.AsyncWorldedit;
 
+import org.PrimeSoft.AsyncWorldedit.Worldedit.WorldeditOperations;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -157,6 +158,20 @@ public class ConfigProvider {
         
         return true;
     }
+    
+    
+    /**
+     * This function checks if async mode is allowed for 
+     * specific worldedit operation
+     * @param operation
+     * @return 
+     */
+    public static boolean isAsyncAllowed(WorldeditOperations operation)
+    {
+        //TODO: Implement me!
+        return true;
+    }
+            
     
     /**
      * Parse render section
