@@ -21,20 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.PrimeSoft.AsyncWorldedit;
+package org.primesoft.asyncworldedit;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.PrimeSoft.AsyncWorldedit.BlockLogger.*;
-import org.PrimeSoft.AsyncWorldedit.Commands.Commands;
-import org.PrimeSoft.AsyncWorldedit.Commands.JobsCommand;
-import org.PrimeSoft.AsyncWorldedit.Commands.PurgeCommand;
-import org.PrimeSoft.AsyncWorldedit.Commands.ToggleCommand;
-import org.PrimeSoft.AsyncWorldedit.MCStats.MetricsLite;
-import org.PrimeSoft.AsyncWorldedit.Worldedit.WorldeditIntegrator;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -43,6 +36,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.primesoft.asyncworldedit.blocklogger.*;
+import org.primesoft.asyncworldedit.commands.Commands;
+import org.primesoft.asyncworldedit.commands.JobsCommand;
+import org.primesoft.asyncworldedit.commands.PurgeCommand;
+import org.primesoft.asyncworldedit.commands.ToggleCommand;
+import org.primesoft.asyncworldedit.mcstats.MetricsLite;
+import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
 /**
  *
@@ -58,6 +58,12 @@ public class PluginMain extends JavaPlugin {
 
     private static final HashSet<String> s_asyncPlayers = new HashSet<String>();
     
+    
+    /**
+     * Check if player has AWE enabled
+     * @param player
+     * @return 
+     */
     public static boolean hasAsyncMode(String player) {
         if (player == null)
         {
@@ -71,6 +77,30 @@ public class PluginMain extends JavaPlugin {
     }
     
     
+    /**
+     * Set player AEW default mode (on or off)
+     * @param player 
+     */
+    public static void setMode(Player player)
+    {
+        boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
+        boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
+        boolean def = ConfigProvider.getDefaultMode();
+
+        if (hasOn) {
+            PluginMain.setMode(player.getName(), true);
+        } else if (hasOff) {
+            PluginMain.setMode(player.getName(), false);
+        } else {
+            PluginMain.setMode(player.getName(), def);
+        }
+    }
+    
+    /**
+     * Aet the AWE player mode
+     * @param player
+     * @param mode 
+     */
     public static void setMode(String player, boolean mode)
     {
         if (player == null)
@@ -175,6 +205,9 @@ public class PluginMain extends JavaPlugin {
         
         getServer().getPluginManager().registerEvents(m_listener, this);
         m_isInitialized = true;
+        
+        setPlayerModes();
+        
         Log("Enabled");
     }
 
@@ -323,5 +356,17 @@ public class PluginMain extends JavaPlugin {
         
         Log("Unknown logger: "+ logger + ". Logger disabled.");
         return new NoneLogger();
+    }
+    
+    /**
+     * Set all players AWE mode on/off
+     */
+    private void setPlayerModes()
+    {
+        Player[] players = getServer().getOnlinePlayers();
+        for (Player player : players)
+        {
+            setMode(player);
+        }
     }
 }

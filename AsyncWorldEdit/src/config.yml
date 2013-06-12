@@ -6,8 +6,36 @@ awe:
     queue-limit-hard: 500000
     queue-limit-soft: 250000
   checkVersion: true
-  logger: none
   defaultOn: true
+  enabledOperations:
+    - undo
+    - redo
+    - fillXZ
+    - removeAbove
+    - removeBelow
+    - removeNear
+    - setBlocks
+    - replaceBlocks
+    - makeCuboidFaces
+    - makeCuboidWalls
+    - overlayCuboidBlocks
+    - naturalizeCuboidBlocks
+    - stackCuboidRegion
+    - moveCuboidRegion
+    - drainArea
+    - fixLiquid
+    - makeCylinder
+    - makeSphere
+    - makePyramid
+    - thaw
+    - simulateSnow
+    - green
+    - makePumpkinPatches
+    - makeForest
+    - makeShape
+    - deformRegion
+    - hollowOutRegion
+  logger: none  
 #  logger: logBlock
 #  logger: coreProtect
 #  logger: prism

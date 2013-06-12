@@ -58,6 +58,12 @@ public class PluginMain extends JavaPlugin {
 
     private static final HashSet<String> s_asyncPlayers = new HashSet<String>();
     
+    
+    /**
+     * Check if player has AWE enabled
+     * @param player
+     * @return 
+     */
     public static boolean hasAsyncMode(String player) {
         if (player == null)
         {
@@ -71,6 +77,30 @@ public class PluginMain extends JavaPlugin {
     }
     
     
+    /**
+     * Set player AEW default mode (on or off)
+     * @param player 
+     */
+    public static void setMode(Player player)
+    {
+        boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
+        boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
+        boolean def = ConfigProvider.getDefaultMode();
+
+        if (hasOn) {
+            PluginMain.setMode(player.getName(), true);
+        } else if (hasOff) {
+            PluginMain.setMode(player.getName(), false);
+        } else {
+            PluginMain.setMode(player.getName(), def);
+        }
+    }
+    
+    /**
+     * Aet the AWE player mode
+     * @param player
+     * @param mode 
+     */
     public static void setMode(String player, boolean mode)
     {
         if (player == null)
@@ -175,6 +205,9 @@ public class PluginMain extends JavaPlugin {
         
         getServer().getPluginManager().registerEvents(m_listener, this);
         m_isInitialized = true;
+        
+        setPlayerModes();
+        
         Log("Enabled");
     }
 
@@ -323,5 +356,17 @@ public class PluginMain extends JavaPlugin {
         
         Log("Unknown logger: "+ logger + ". Logger disabled.");
         return new NoneLogger();
+    }
+    
+    /**
+     * Set all players AWE mode on/off
+     */
+    private void setPlayerModes()
+    {
+        Player[] players = getServer().getOnlinePlayers();
+        for (Player player : players)
+        {
+            setMode(player);
+        }
     }
 }

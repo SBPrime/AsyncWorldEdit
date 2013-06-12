@@ -45,19 +45,8 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
-        boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
-        boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
-        boolean def = ConfigProvider.getDefaultMode();
-
-        if (hasOn) {
-            PluginMain.setMode(player.getName(), true);
-        } else if (hasOff) {
-            PluginMain.setMode(player.getName(), false);
-        } else {
-            PluginMain.setMode(player.getName(), def);
-        }
-
+        
+        PluginMain.setMode(player);
 
         if (!PermissionManager.isAllowed(player, PermissionManager.Perms.AnnounceVersion)) {
             return;

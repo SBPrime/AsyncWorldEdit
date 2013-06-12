@@ -35,6 +35,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.text.PlainDocument;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.BlockPlacer;
 import org.primesoft.asyncworldedit.BlockPlacerEntry;
@@ -96,6 +97,17 @@ public class AsyncEditSession extends EditSession
     }
 
     @Override
+    public void flushQueue()
+    {
+        boolean queued = isQueueEnabled();
+        super.flushQueue();
+        if (queued)
+        {
+            resetAsync();
+        }
+    }
+
+    @Override
     public void undo(EditSession sess)
     {
         checkAsync(WorldeditOperations.undo);
@@ -110,7 +122,10 @@ public class AsyncEditSession extends EditSession
         }
 
         sess.flushQueue();
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
     }
 
     @Override
@@ -118,7 +133,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.redo);
         super.redo(sess);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
     }
 
     @Override
@@ -128,7 +146,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.fillXZ);
         int result = super.fillXZ(origin, block, radius, depth, recursive);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -139,7 +160,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.fillXZ);
         int result = super.fillXZ(origin, pattern, radius, depth, recursive);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -149,7 +173,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.removeAbove);
         int result = super.removeAbove(pos, size, height);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -159,7 +186,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.removeBelow);
         int result = super.removeBelow(pos, size, height);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -169,7 +199,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.removeNear);
         int result = super.removeNear(pos, blockType, size);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -179,7 +212,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.setBlocks);
         int result = super.setBlocks(region, block);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -189,7 +225,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.setBlocks);
         int result = super.setBlocks(region, pattern);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -200,7 +239,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.replaceBlocks);
         int result = super.replaceBlocks(region, fromBlockTypes, toBlock);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -211,7 +253,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.replaceBlocks);
         int result = super.replaceBlocks(region, fromBlockTypes, pattern);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -221,7 +266,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeCuboidFaces);
         int result = super.makeCuboidFaces(region, block);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -231,7 +279,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeCuboidFaces);
         int result = super.makeCuboidFaces(region, pattern);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -241,7 +292,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeCuboidWalls);
         int result = super.makeCuboidWalls(region, block);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -251,7 +305,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeCuboidWalls);
         int result = super.makeCuboidWalls(region, pattern);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -261,7 +318,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.overlayCuboidBlocks);
         int result = super.overlayCuboidBlocks(region, block);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -271,7 +331,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.overlayCuboidBlocks);
         int result = super.overlayCuboidBlocks(region, pattern);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -281,7 +344,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.naturalizeCuboidBlocks);
         int result = super.naturalizeCuboidBlocks(region);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -292,7 +358,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.stackCuboidRegion);
         int result = super.stackCuboidRegion(region, dir, count, copyAir);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -303,7 +372,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.moveCuboidRegion);
         int result = super.moveCuboidRegion(region, dir, distance, copyAir, replace);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -313,7 +385,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.drainArea);
         int result = super.drainArea(pos, radius);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -323,7 +398,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.fixLiquid);
         int result = super.fixLiquid(pos, radius, moving, stationary);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -334,7 +412,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeCylinder);
         int result = super.makeCylinder(pos, block, radius, height, filled);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -345,7 +426,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeCylinder);
         int result = super.makeCylinder(pos, block, radiusX, radiusZ, height, filled);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -356,7 +440,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeSphere);
         int result = super.makeSphere(pos, block, radius, filled);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -367,7 +454,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeSphere);
         int result = super.makeSphere(pos, block, radiusX, radiusY, radiusZ, filled);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -377,7 +467,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makePyramid);
         int result = super.makePyramid(pos, block, size, filled);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -387,7 +480,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.thaw);
         int result = super.thaw(pos, radius);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -397,7 +493,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.simulateSnow);
         int result = super.simulateSnow(pos, radius);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -407,7 +506,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.green);
         int result = super.green(pos, radius);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -417,7 +519,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makePumpkinPatches);
         int result = super.makePumpkinPatches(basePos, size);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -428,7 +533,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeForest);
         int result = super.makeForest(basePos, size, density, treeGenerator);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -440,7 +548,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.makeShape);
         int result = super.makeShape(region, zero, unit, pattern, expressionString, hollow);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -451,7 +562,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.deformRegion);
         int result = super.deformRegion(region, zero, unit, expressionString);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 
@@ -461,7 +575,10 @@ public class AsyncEditSession extends EditSession
     {
         checkAsync(WorldeditOperations.hollowOutRegion);
         int result = super.hollowOutRegion(region, thickness, pattern);
-        resetAsync();
+        if (!isQueueEnabled())
+        {
+            resetAsync();
+        }
         return result;
     }
 

@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import java.util.HashSet;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
@@ -32,34 +33,45 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
  *
  * @author SBPrime
  */
-public class ConfigProvider {
+public class ConfigProvider
+{
     /**
      * Default user name when no user is available
      */
     public static final String DEFAULT_USER = "#worldedit";
-    
-    
+
     /**
      * The config file version
      */
     private static final int CONFIG_VERSION = 1;
-    
+
     private static boolean m_defaultMode = true;
+
     private static boolean m_checkUpdate = false;
+
     private static boolean m_isConfigUpdate = false;
+
     private static long m_interval;
+
     private static int m_blocksCnt;
+
     private static int m_queueHardLimit;
+
     private static int m_queueSoftLimit;
+
     private static String m_configVersion;
-    private static String m_logger;    
+
+    private static String m_logger;
+
+    private static HashSet<WorldeditOperations> m_allowedOperations;
 
     public static String getLogger()
     {
         return m_logger;
     }
-    
-    public static String getConfigVersion() {
+
+    public static String getConfigVersion()
+    {
         return m_configVersion;
     }
 
@@ -68,17 +80,18 @@ public class ConfigProvider {
      *
      * @return true if enabled
      */
-    public static boolean getCheckUpdate() {
+    public static boolean getCheckUpdate()
+    {
         return m_checkUpdate;
     }
 
-    
     /**
      * Block drawing interval
      *
      * @return the interval
      */
-    public static long getInterval() {
+    public static long getInterval()
+    {
         return m_interval;
     }
 
@@ -87,57 +100,61 @@ public class ConfigProvider {
      *
      * @return number of blocks
      */
-    public static int getBlockCount() {
+    public static int getBlockCount()
+    {
         return m_blocksCnt;
     }
-    
+
     /**
      * Is the configuration up to date
-     * @return 
+     *
+     * @return
      */
-    public static boolean isConfigUpdated() {
+    public static boolean isConfigUpdated()
+    {
         return m_isConfigUpdate;
     }
 
-    
     /**
      * Queue hard limit
-     * @return 
+     *
+     * @return
      */
     public static int getQueueHardLimit()
     {
         return m_queueHardLimit;
     }
-    
+
     /**
      * Queue soft limit
-     * @return 
+     *
+     * @return
      */
     public static int getQueueSoftLimit()
     {
         return m_queueSoftLimit;
     }
-    
-    
-    
+
     /**
      * The default mode
-     * @return 
+     *
+     * @return
      */
     public static boolean getDefaultMode()
     {
         return m_defaultMode;
     }
 
-    
     /**
      * Load configuration
      *
      * @param plugin parent plugin
      * @return true if config loaded
      */
-    public static boolean load(PluginMain plugin) {
-        if (plugin == null) {
+    public static boolean load(PluginMain plugin)
+    {
+        if (plugin == null)
+        {
             return false;
         }
 
@@ -145,7 +162,8 @@ public class ConfigProvider {
 
         Configuration config = plugin.getConfig();
         ConfigurationSection mainSection = config.getConfigurationSection("awe");
-        if (mainSection == null) {
+        if (mainSection == null)
+        {
             return false;
         }
         m_configVersion = mainSection.getString("version", "?");
@@ -155,40 +173,80 @@ public class ConfigProvider {
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_logger = mainSection.getString("logger", "none").toLowerCase();
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
-        
+        m_allowedOperations = parseOperationsSection(mainSection);
+
         return true;
     }
-    
-    
+
     /**
-     * This function checks if async mode is allowed for 
-     * specific worldedit operation
+     * This function checks if async mode is allowed for specific worldedit
+     * operation
+     *
      * @param operation
-     * @return 
+     * @return
      */
     public static boolean isAsyncAllowed(WorldeditOperations operation)
-    {
-        //TODO: Implement me!
-        return true;
+    {        
+        return m_allowedOperations.contains(operation);
     }
-            
-    
+
     /**
      * Parse render section
-     * @param mainSection 
+     *
+     * @param mainSection
      */
-    private static void parseRenderSection(ConfigurationSection mainSection) {
+    private static void parseRenderSection(ConfigurationSection mainSection)
+    {
         ConfigurationSection renderSection = mainSection.getConfigurationSection("rendering");
-        if (renderSection == null) {
+        if (renderSection == null)
+        {
             m_blocksCnt = 1000;
             m_interval = 15;
             m_queueHardLimit = 500000;
             m_queueSoftLimit = 250000;
-        } else {
+        } else
+        {
             m_blocksCnt = renderSection.getInt("blocks", 1000);
             m_interval = renderSection.getInt("interval", 15);
             m_queueSoftLimit = renderSection.getInt("queue-limit-soft", 250000);
             m_queueHardLimit = renderSection.getInt("queue-limit-hard", 500000);
         }
+    }
+
+    /**
+     * Parse enabled operations section
+     *
+     * @param mainSection
+     * @return
+     */
+    private static HashSet<WorldeditOperations> parseOperationsSection(
+            ConfigurationSection mainSection)
+    {
+        HashSet<WorldeditOperations> result = new HashSet<WorldeditOperations>();
+
+        for (String string : mainSection.getStringList("enabledOperations")) {
+            try {
+                result.add(WorldeditOperations.valueOf(string));
+            } catch (Exception e) {
+                PluginMain.Log("* unknown operation name " + string);
+            }
+        }
+        if (result.isEmpty())
+        {
+            //Add all entires
+            PluginMain.Log("Warning: No operations defined in config file. Enabling all.");
+            for (WorldeditOperations op : WorldeditOperations.values())
+            {
+                result.add(op);
+            }
+        }
+        PluginMain.Log("World edit operations:");
+        for (WorldeditOperations op : WorldeditOperations.values())
+        {
+            PluginMain.Log("* " + op +"..." + (result.contains(op) ? "async" : "regular"));
+        }
+        
+
+        return result;
     }
 }
