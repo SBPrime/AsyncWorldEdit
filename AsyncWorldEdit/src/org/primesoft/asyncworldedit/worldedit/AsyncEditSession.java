@@ -486,7 +486,10 @@ public class AsyncEditSession extends EditSession
     {
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
-        m_world = plugin.getServer().getWorld(world.getName());
+        if (world != null)
+        {
+            m_world = plugin.getServer().getWorld(world.getName());
+        }
         m_asyncForced = false;
         m_asyncDisabled = false;
     }

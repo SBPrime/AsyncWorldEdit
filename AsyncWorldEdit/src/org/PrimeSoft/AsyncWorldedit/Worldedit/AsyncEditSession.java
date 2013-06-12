@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.PrimeSoft.AsyncWorldedit.Worldedit;
+package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalWorld;
@@ -35,11 +35,11 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
 import java.util.Map;
 import java.util.Set;
-import org.PrimeSoft.AsyncWorldedit.BlockPlacer;
-import org.PrimeSoft.AsyncWorldedit.BlockPlacerEntry;
-import org.PrimeSoft.AsyncWorldedit.ConfigProvider;
-import org.PrimeSoft.AsyncWorldedit.PluginMain;
 import org.bukkit.World;
+import org.primesoft.asyncworldedit.BlockPlacer;
+import org.primesoft.asyncworldedit.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.PluginMain;
 
 /**
  *
@@ -465,9 +465,9 @@ public class AsyncEditSession extends EditSession
         return result;
     }
 
-    public void doRawSetBlock(Vector pt, BaseBlock block)
+    public boolean doRawSetBlock(Vector pt, BaseBlock block)
     {
-        super.rawSetBlock(pt, block);
+        return super.rawSetBlock(pt, block);
     }
 
     public World getCBWorld()
@@ -486,7 +486,10 @@ public class AsyncEditSession extends EditSession
     {
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
-        m_world = plugin.getServer().getWorld(world.getName());
+        if (world != null)
+        {
+            m_world = plugin.getServer().getWorld(world.getName());
+        }
         m_asyncForced = false;
         m_asyncDisabled = false;
     }

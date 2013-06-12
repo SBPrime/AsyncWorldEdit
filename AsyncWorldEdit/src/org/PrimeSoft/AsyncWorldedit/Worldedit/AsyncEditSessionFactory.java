@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.PrimeSoft.AsyncWorldedit.Worldedit;
+package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.bags.BlockBag;
-import org.PrimeSoft.AsyncWorldedit.BlockPlacer;
-import org.PrimeSoft.AsyncWorldedit.ConfigProvider;
-import org.PrimeSoft.AsyncWorldedit.PluginMain;
+
+import org.primesoft.asyncworldedit.BlockPlacer;
+import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.PluginMain;
 
 /**
  *

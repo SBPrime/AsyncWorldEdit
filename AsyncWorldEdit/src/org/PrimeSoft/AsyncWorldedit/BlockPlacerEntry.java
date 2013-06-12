@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.PrimeSoft.AsyncWorldedit;
+package org.primesoft.asyncworldedit;
 
-import org.PrimeSoft.AsyncWorldedit.Worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;

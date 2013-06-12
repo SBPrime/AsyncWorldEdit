@@ -278,7 +278,7 @@ public class BlockPlacer implements Runnable {
         BaseBlock oldBlock = eSession.getBlock(location);
         boolean success = eSession.doRawSetBlock(location, block);
         
-        if(success) {
+        if(success && world != null) {
         	m_logger.LogBlock(location, oldBlock, block, player, world);
         }
     }    

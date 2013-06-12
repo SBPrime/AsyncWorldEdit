@@ -21,17 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.PrimeSoft.AsyncWorldedit;
+package org.primesoft.asyncworldedit;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.*;
-import org.PrimeSoft.AsyncWorldedit.BlockLogger.IBlockLogger;
-import org.PrimeSoft.AsyncWorldedit.BlockLogger.NoneLogger;
-import org.PrimeSoft.AsyncWorldedit.Worldedit.AsyncEditSession;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
+import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
+import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
@@ -276,8 +276,10 @@ public class BlockPlacer implements Runnable {
         World world = eSession.getCBWorld();
         
         BaseBlock oldBlock = eSession.getBlock(location);
-        eSession.doRawSetBlock(location, block);
+        boolean success = eSession.doRawSetBlock(location, block);
         
-        m_logger.LogBlock(location, oldBlock, block, player, world);
+        if(success && world != null) {
+        	m_logger.LogBlock(location, oldBlock, block, player, world);
+        }
     }    
 }
