@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.PrimeSoft.AsyncWorldedit;
+package org.primesoft.asyncworldedit;
 
 import org.bukkit.entity.Player;
 
@@ -34,9 +34,9 @@ public class PermissionManager {
     * List of all permissions
     */
     public enum Perms {
-        ReloadConfig, 
+        ReloadConfig,
         AnnounceVersion,
-        QueueBypass,
+        QueueBypass, QueueVip,
         Purge_Self, Purge_Other, Purge_All,
         Jobs_Self, Jobs_Other, Jobs_All, Filter,
         Mode_Change, Mode_On, Mode_Off,
@@ -95,6 +95,8 @@ public class PermissionManager {
                 return s_prefix + "admin.jobs.all";
             case QueueBypass:
                 return s_prefix + "admin.queue-bypass";
+            case QueueVip:
+                return s_prefix + "user.vip-queue";
             case Mode_Change:
                 return s_prefix + "user.mode.change";
             case Mode_Change_Other:

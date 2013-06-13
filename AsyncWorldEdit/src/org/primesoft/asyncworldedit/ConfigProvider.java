@@ -54,6 +54,8 @@ public class ConfigProvider
     private static long m_interval;
 
     private static int m_blocksCnt;
+    
+    private static int m_vipBlocksCnt;
 
     private static int m_queueHardLimit;
 
@@ -105,6 +107,17 @@ public class ConfigProvider
         return m_blocksCnt;
     }
 
+    /**
+     * Get the number of blocks placed for VIP players
+     *
+     * @return number of blocks
+     */
+    public static int getVipBlockCount()
+    {
+        return m_vipBlocksCnt;
+    }
+
+    
     /**
      * Is the configuration up to date
      *
@@ -201,12 +214,14 @@ public class ConfigProvider
         if (renderSection == null)
         {
             m_blocksCnt = 1000;
+            m_vipBlocksCnt = 1000;
             m_interval = 15;
             m_queueHardLimit = 500000;
             m_queueSoftLimit = 250000;
         } else
         {
             m_blocksCnt = renderSection.getInt("blocks", 1000);
+            m_vipBlocksCnt = renderSection.getInt("blocks-vip", 1000);
             m_interval = renderSection.getInt("interval", 15);
             m_queueSoftLimit = renderSection.getInt("queue-limit-soft", 250000);
             m_queueHardLimit = renderSection.getInt("queue-limit-hard", 500000);

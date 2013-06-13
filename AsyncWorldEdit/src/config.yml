@@ -3,6 +3,7 @@ awe:
   rendering:
     interval: 15
     blocks: 1000
+    blocks-vip: 1000
     queue-limit-hard: 500000
     queue-limit-soft: 250000
   checkVersion: true

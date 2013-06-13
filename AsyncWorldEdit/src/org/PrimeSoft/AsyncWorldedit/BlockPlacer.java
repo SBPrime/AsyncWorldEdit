@@ -25,8 +25,10 @@ package org.primesoft.asyncworldedit;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import de.diddiz.LogBlock.config.Config;
 import java.util.*;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
@@ -42,15 +44,16 @@ public class BlockPlacer implements Runnable {
      * Bukkit scheduler
      */
     private BukkitScheduler m_scheduler;
+    
     /**
      * Current scheduler task
      */
     private BukkitTask m_task;
+    
     /**
      * Logged events queue (per player)
      */
     private HashMap<String, Queue<BlockPlacerEntry>> m_blocks;
-    
     
     /**
      * All locked queues
@@ -108,39 +111,15 @@ public class BlockPlacer implements Runnable {
      */
     @Override
     public void run() {
-        List<BlockPlacerEntry> entries = 
-                new ArrayList<BlockPlacerEntry>(ConfigProvider.getBlockCount());
+        List<BlockPlacerEntry> entries = new ArrayList<BlockPlacerEntry>(ConfigProvider.getBlockCount() + ConfigProvider.getVipBlockCount());
+        boolean added = false;
         synchronized (this) {
-            String[] keys = m_blocks.keySet().toArray(new String[0]);
-            int keyPos = 0;
-            boolean added = keys.length > 0;
-            final int blockCnt = ConfigProvider.getBlockCount();
-            for (int i = 0; i < blockCnt && added; i++) {
-                added = false;
-
-                String player = keys[keyPos];
-                Queue<BlockPlacerEntry> queue = m_blocks.get(player);
-                if (queue != null) {
-                    if (!queue.isEmpty()) {
-                        entries.add(queue.poll());
-                        added = true;
-                    }
-                    int size = queue.size();
-                    if (size < m_queueSoftLimit && m_lockedQueues.contains(player))
-                    {
-                        PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
-                        m_lockedQueues.remove(player);
-                    }
-                    if (size == 0) {
-                        m_blocks.remove(keys[keyPos]);
-                    }                                        
-                } else  if (m_lockedQueues.contains(player)) {
-                    PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
-                    m_lockedQueues.remove(player);
-                }
-                keyPos = (keyPos + 1) % keys.length;
-            }
-
+            final String[] keys = m_blocks.keySet().toArray(new String[0]);
+            final String[] vipKeys = getVips(keys);
+                        
+            added |= fetchBlocks(ConfigProvider.getBlockCount(), keys, entries);
+            added |= fetchBlocks(ConfigProvider.getVipBlockCount(), vipKeys, entries);
+            
             if (!added && m_shutdown) {
                 stop();
             }
@@ -150,6 +129,53 @@ public class BlockPlacer implements Runnable {
             process(entry);
         }
     }
+    
+    
+    /**
+     * Fetch the blocks that are going to by placed in this run
+     * @param blockCnt number of blocks to fetch
+     * @param playerNames list of all players
+     * @param entries destination blocks entrie
+     * @return blocks fatched
+     */
+    private boolean fetchBlocks(final int blockCnt, final String[] playerNames,
+                                List<BlockPlacerEntry> entries)
+    {
+        if (blockCnt <= 0 || playerNames == null || playerNames.length == 0)
+        {
+            return false;
+        }
+        
+        int keyPos = 0;
+        boolean added = playerNames.length > 0;
+        for (int i = 0; i < blockCnt && added; i++) {
+            added = false;
+
+            String player = playerNames[keyPos];
+            Queue<BlockPlacerEntry> queue = m_blocks.get(player);
+            if (queue != null) {
+                if (!queue.isEmpty()) {
+                    entries.add(queue.poll());
+                    added = true;
+                }
+                int size = queue.size();
+                if (size < m_queueSoftLimit && m_lockedQueues.contains(player))
+                {
+                    PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
+                    m_lockedQueues.remove(player);
+                }
+                if (size == 0) {
+                    m_blocks.remove(playerNames[keyPos]);
+                }                                        
+            } else  if (m_lockedQueues.contains(player)) {
+                PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
+                m_lockedQueues.remove(player);
+            }
+            keyPos = (keyPos + 1) % playerNames.length;
+        }
+        return added;
+    }
+    
 
     /**
      * Queue stop command
@@ -282,4 +308,36 @@ public class BlockPlacer implements Runnable {
         	m_logger.LogBlock(location, oldBlock, block, player, world);
         }
     }    
+
+    
+    /**
+     * Filter player names for vip players (AWE.user.vip-queue)
+     * @param playerNames
+     * @return 
+     */
+    private String[] getVips(String[] playerNames)
+    {
+        if (playerNames == null || playerNames.length == 0)
+        {
+            return new String[0];
+        }
+        
+        List<String> result = new ArrayList<String>(playerNames.length);
+        
+        for (String login : playerNames)
+        {
+            Player player = PluginMain.getPlayer(login);
+            if (player == null)
+            {
+                continue;
+            }
+            
+            if (PermissionManager.isAllowed(player, PermissionManager.Perms.QueueVip))
+            {
+                result.add(login);
+            }
+        }
+        
+        return result.toArray(new String[0]);
+    }
 }
