@@ -306,11 +306,12 @@ public class BlockPlacer implements Runnable {
         AsyncEditSession eSession = entry.getEditSession();
         String player = eSession.getPlayer();
         World world = eSession.getCBWorld();
+        boolean logging = ConfigProvider.isLogging(world.getName());
         
         BaseBlock oldBlock = eSession.getBlock(location);
         boolean success = eSession.doRawSetBlock(location, block);
         
-        if(success && world != null) {
+        if(logging && success && world != null) {
         	m_logger.LogBlock(location, oldBlock, block, player, world);
         }
     }    

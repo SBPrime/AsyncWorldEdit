@@ -24,6 +24,9 @@
 package org.primesoft.asyncworldedit;
 
 import java.util.HashSet;
+
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
@@ -66,6 +69,8 @@ public class ConfigProvider
     private static String m_logger;
 
     private static HashSet<WorldeditOperations> m_allowedOperations;
+    
+    private static HashSet<String> m_enabledWorlds;
 
     public static String getLogger()
     {
@@ -127,6 +132,15 @@ public class ConfigProvider
     {
         return m_isConfigUpdate;
     }
+    
+    /**
+     * Is the world being logged
+     * 
+     * @return
+     */
+    public static boolean isLogging(String world) {
+    	return m_enabledWorlds.contains(world.toLowerCase());
+    }
 
     /**
      * Queue hard limit
@@ -175,6 +189,7 @@ public class ConfigProvider
 
         Configuration config = plugin.getConfig();
         ConfigurationSection mainSection = config.getConfigurationSection("awe");
+        ConfigurationSection loggerSection = config.getConfigurationSection("logger");
         if (mainSection == null)
         {
             return false;
@@ -184,7 +199,8 @@ public class ConfigProvider
 
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
-        m_logger = mainSection.getString("logger", "none").toLowerCase();
+        m_logger = loggerSection.getString("loggerType", "none").toLowerCase();
+        m_enabledWorlds = parseLoggerSection(loggerSection);
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
         m_allowedOperations = parseOperationsSection(mainSection);
 
@@ -248,7 +264,7 @@ public class ConfigProvider
         }
         if (result.isEmpty())
         {
-            //Add all entires
+            //Add all entries
             PluginMain.Log("Warning: No operations defined in config file. Enabling all.");
             for (WorldeditOperations op : WorldeditOperations.values())
             {
@@ -261,6 +277,30 @@ public class ConfigProvider
             PluginMain.Log("* " + op +"..." + (result.contains(op) ? "async" : "regular"));
         }
         
+
+        return result;
+    }
+    
+    /**
+     * Parse enabled worlds section
+     *
+     * @param mainSection
+     * @return
+     */
+    private static HashSet<String> parseLoggerSection(
+            ConfigurationSection mainSection)
+    {
+        HashSet<String> result = new HashSet<String>();
+
+        for (String string : mainSection.getStringList("enabledWorlds")) {
+        	result.add(string.toLowerCase());
+        }
+        
+        PluginMain.Log("Logging worlds:");
+	    for (World world : Bukkit.getWorlds())
+	    {
+	    	PluginMain.Log("* " + world.getName() + "..." + (result.contains(world.getName().toLowerCase()) ? "logging" : "not logging"));
+        }
 
         return result;
     }
