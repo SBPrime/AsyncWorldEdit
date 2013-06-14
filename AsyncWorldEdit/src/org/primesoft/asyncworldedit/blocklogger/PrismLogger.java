@@ -23,18 +23,18 @@
  */
 package org.primesoft.asyncworldedit.blocklogger;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import me.botsko.prism.Prism;
 import me.botsko.prism.actionlibs.ActionFactory;
 import me.botsko.prism.actions.Handler;
-import net.coreprotect.CoreProtect;
-import net.coreprotect.CoreProtectAPI;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.PluginMain;
+
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 
 /**
  *

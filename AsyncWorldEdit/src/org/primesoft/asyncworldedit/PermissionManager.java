@@ -75,7 +75,8 @@ public class PermissionManager {
      * @param perms Permission
      * @return Permission node
      */
-    private static String getPermString(Perms perms) {
+    @SuppressWarnings("incomplete-switch")
+	private static String getPermString(Perms perms) {
         switch (perms) {
             case AnnounceVersion:
                 return s_prefix + "admin.version";

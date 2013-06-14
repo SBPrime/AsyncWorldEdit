@@ -25,7 +25,6 @@ package org.primesoft.asyncworldedit.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.BlockPlacer;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PluginMain;

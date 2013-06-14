@@ -23,10 +23,13 @@
  */
 package org.primesoft.asyncworldedit;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import de.diddiz.LogBlock.config.Config;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Queue;
+
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -34,6 +37,9 @@ import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
 import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 
 /**
  *

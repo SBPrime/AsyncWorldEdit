@@ -38,7 +38,8 @@ import java.util.Map.Entry;
 public class UndoSession extends EditSession {
     private List<Entry<Vector, BaseBlock>> m_undoQueue;
 
-    public Entry<Vector, BaseBlock>[] getEntries()
+    @SuppressWarnings("unchecked")
+	public Entry<Vector, BaseBlock>[] getEntries()
     {
         return m_undoQueue.toArray(new Entry[0]);
     }

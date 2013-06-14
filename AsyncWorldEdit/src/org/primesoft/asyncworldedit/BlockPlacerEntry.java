@@ -25,7 +25,6 @@ package org.primesoft.asyncworldedit;
 
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
-import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 

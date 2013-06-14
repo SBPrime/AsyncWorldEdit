@@ -206,7 +206,8 @@ public class Metrics {
      *     
      * @return True if statistics measuring is running, otherwise false.
      */
-    public boolean start() {
+    @SuppressWarnings("deprecation")
+	public boolean start() {
         synchronized (optOutLock) {
             // Did we opt out?
             if (isOptOut()) {

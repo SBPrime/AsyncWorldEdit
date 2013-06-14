@@ -23,6 +23,15 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import java.util.Map;
+import java.util.Set;
+
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.BlockPlacer;
+import org.primesoft.asyncworldedit.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.PluginMain;
+
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -33,14 +42,6 @@ import com.sk89q.worldedit.expression.ExpressionException;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
-import java.util.Map;
-import java.util.Set;
-import javax.swing.text.PlainDocument;
-import org.bukkit.World;
-import org.primesoft.asyncworldedit.BlockPlacer;
-import org.primesoft.asyncworldedit.BlockPlacerEntry;
-import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
 
 /**
  *

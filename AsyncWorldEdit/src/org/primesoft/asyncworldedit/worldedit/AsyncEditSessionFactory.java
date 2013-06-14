@@ -23,15 +23,14 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.PluginMain;
+
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.bags.BlockBag;
-
-import org.primesoft.asyncworldedit.BlockPlacer;
-import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
 
 /**
  *
