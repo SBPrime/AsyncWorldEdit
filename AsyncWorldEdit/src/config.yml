@@ -37,12 +37,12 @@ awe:
     - deformRegion
     - hollowOutRegion
   logger:
-    logger: none
-#   logger: logBlock
-#   logger: coreProtect
-#   logger: prism
-#   logger: hawkEye
-    enabledWorlds:
+    type: none
+#   type: logBlock
+#   type: coreProtect
+#   type: prism
+#   type: hawkEye
+    worlds:
       - world
       - world_nether
       - world_the_end

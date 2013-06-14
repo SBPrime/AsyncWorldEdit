@@ -199,7 +199,7 @@ public class ConfigProvider
 
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
-        m_logger = loggerSection.getString("loggerType", "none").toLowerCase();
+        m_logger = loggerSection.getString("type", "none").toLowerCase();
         m_enabledWorlds = parseLoggerSection(loggerSection);
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
         m_allowedOperations = parseOperationsSection(mainSection);
@@ -292,14 +292,14 @@ public class ConfigProvider
     {
         HashSet<String> result = new HashSet<String>();
 
-        for (String string : mainSection.getStringList("enabledWorlds")) {
+        for (String string : mainSection.getStringList("worlds")) {
         	result.add(string.toLowerCase());
         }
         
-        PluginMain.Log("Logging worlds:");
+        PluginMain.Log("WorldEdit logging:");
 	    for (World world : Bukkit.getWorlds())
 	    {
-	    	PluginMain.Log("* " + world.getName() + "..." + (result.contains(world.getName().toLowerCase()) ? "logging" : "not logging"));
+	    	PluginMain.Log("* " + world.getName() + "..." + (result.contains(world.getName().toLowerCase()) ? "enabled" : "disabled"));
         }
 
         return result;
