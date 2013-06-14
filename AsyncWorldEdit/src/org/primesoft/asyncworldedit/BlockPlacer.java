@@ -23,7 +23,6 @@
  */
 package org.primesoft.asyncworldedit;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,33 +39,30 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import java.util.*;
 
 /**
  *
  * @author SBPrime
  */
 public class BlockPlacer implements Runnable {
+
     /**
      * Bukkit scheduler
      */
     private BukkitScheduler m_scheduler;
-    
     /**
      * Current scheduler task
      */
     private BukkitTask m_task;
-    
     /**
      * Logged events queue (per player)
      */
     private HashMap<String, Queue<BlockPlacerEntry>> m_blocks;
-    
     /**
      * All locked queues
      */
     private HashSet<String> m_lockedQueues;
-    
-    
     /**
      * Should block places shut down
      */
@@ -75,9 +71,9 @@ public class BlockPlacer implements Runnable {
      * The block logger
      */
     private IBlockLogger m_logger;
-    
     private int m_queueHardLimit;
     private int m_queueSoftLimit;
+    private int m_queueMaxSize;
 
     /**
      * Initialize new instance of the block placer
@@ -91,27 +87,26 @@ public class BlockPlacer implements Runnable {
         m_scheduler = plugin.getServer().getScheduler();
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 ConfigProvider.getInterval(), ConfigProvider.getInterval());
-        
+
         m_queueHardLimit = ConfigProvider.getQueueHardLimit();
         m_queueSoftLimit = ConfigProvider.getQueueSoftLimit();
-        
+        m_queueMaxSize = ConfigProvider.getQueueMaxSize();
+
         setLogger(null);
     }
 
-    
     /**
      * Set the logger
-     * @param logger 
+     *
+     * @param logger
      */
     public void setLogger(IBlockLogger logger) {
-        if (logger == null)
-        {
+        if (logger == null) {
             logger = new NoneLogger();
         }
         m_logger = logger;
     }
-    
-    
+
     /**
      * Block placer main loop
      */
@@ -122,10 +117,10 @@ public class BlockPlacer implements Runnable {
         synchronized (this) {
             final String[] keys = m_blocks.keySet().toArray(new String[0]);
             final String[] vipKeys = getVips(keys);
-                        
+
             added |= fetchBlocks(ConfigProvider.getBlockCount(), keys, entries);
             added |= fetchBlocks(ConfigProvider.getVipBlockCount(), vipKeys, entries);
-            
+
             if (!added && m_shutdown) {
                 stop();
             }
@@ -135,23 +130,21 @@ public class BlockPlacer implements Runnable {
             process(entry);
         }
     }
-    
-    
+
     /**
      * Fetch the blocks that are going to by placed in this run
+     *
      * @param blockCnt number of blocks to fetch
      * @param playerNames list of all players
      * @param entries destination blocks entrie
      * @return blocks fatched
      */
     private boolean fetchBlocks(final int blockCnt, final String[] playerNames,
-                                List<BlockPlacerEntry> entries)
-    {
-        if (blockCnt <= 0 || playerNames == null || playerNames.length == 0)
-        {
+            List<BlockPlacerEntry> entries) {
+        if (blockCnt <= 0 || playerNames == null || playerNames.length == 0) {
             return false;
         }
-        
+
         int keyPos = 0;
         boolean added = playerNames.length > 0;
         for (int i = 0; i < blockCnt && added; i++) {
@@ -165,15 +158,14 @@ public class BlockPlacer implements Runnable {
                     added = true;
                 }
                 int size = queue.size();
-                if (size < m_queueSoftLimit && m_lockedQueues.contains(player))
-                {
+                if (size < m_queueSoftLimit && m_lockedQueues.contains(player)) {
                     PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
                     m_lockedQueues.remove(player);
                 }
                 if (size == 0) {
                     m_blocks.remove(playerNames[keyPos]);
-                }                                        
-            } else  if (m_lockedQueues.contains(player)) {
+                }
+            } else if (m_lockedQueues.contains(player)) {
                 PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
                 m_lockedQueues.remove(player);
             }
@@ -181,7 +173,6 @@ public class BlockPlacer implements Runnable {
         }
         return added;
     }
-    
 
     /**
      * Queue stop command
@@ -203,7 +194,7 @@ public class BlockPlacer implements Runnable {
      */
     public boolean addTasks(BlockPlacerEntry entry) {
         synchronized (this) {
-            AsyncEditSession editSesson = entry.getEditSession();            
+            AsyncEditSession editSesson = entry.getEditSession();
             String player = editSesson.getPlayer();
             Queue<BlockPlacerEntry> queue;
             if (!m_blocks.containsKey(player)) {
@@ -212,26 +203,32 @@ public class BlockPlacer implements Runnable {
             } else {
                 queue = m_blocks.get(player);
             }
-            
-            if (m_lockedQueues.contains(player))
-            {
-                return false;
-            }            
-            
-            queue.add(entry);
-            if (queue.size() >= m_queueHardLimit && 
-                !PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass))
-            {
-                m_lockedQueues.add(player);
-                PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is full. Wait for items to finish drawing.");
+
+            if (m_lockedQueues.contains(player)) {
                 return false;
             }
 
+            boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass);
+            int size = 0;
+            for (Map.Entry<String, Queue<BlockPlacerEntry>> queueEntry : m_blocks.entrySet()) {
+                size += queueEntry.getValue().size();
+            }
+            
+            if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
+                PluginMain.Say(PluginMain.getPlayer(player), "Out of space on AWE block queue.");
+                return false;
+            } else {
+                queue.add(entry);
+                if (queue.size() >= m_queueHardLimit && bypass) {
+                    m_lockedQueues.add(player);
+                    PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is full. Wait for items to finish drawing.");
+                    return false;
+                }
+            }
             return true;
         }
     }
 
-    
     /**
      * Remove all entries for player
      *
@@ -242,27 +239,23 @@ public class BlockPlacer implements Runnable {
             if (m_blocks.containsKey(player)) {
                 m_blocks.remove(player);
             }
-            if (m_lockedQueues.contains(player))
-            {
+            if (m_lockedQueues.contains(player)) {
                 m_lockedQueues.remove(player);
             }
         }
     }
-    
-    
+
     /**
-     * Remove all entries 
+     * Remove all entries
      */
     public void purgeAll() {
         synchronized (this) {
-            for (String user : getAllPlayers())
-            {
+            for (String user : getAllPlayers()) {
                 purge(user);
             }
         }
     }
-    
-    
+
     /**
      * Get all players in log
      *
@@ -274,7 +267,6 @@ public class BlockPlacer implements Runnable {
         }
     }
 
-    
     /**
      * Gets the number of events for a player
      *
@@ -302,49 +294,44 @@ public class BlockPlacer implements Runnable {
         }
 
         Vector location = entry.getLocation();
-        BaseBlock block = entry.getNewBlock();        
+        BaseBlock block = entry.getNewBlock();
         AsyncEditSession eSession = entry.getEditSession();
         String player = eSession.getPlayer();
         World world = eSession.getCBWorld();
         BaseBlock oldBlock = eSession.getBlock(location);
         boolean success = eSession.doRawSetBlock(location, block);
-        
-        if(success && world != null) {
-            if(ConfigProvider.isLogging(world.getName())) {
-            	m_logger.LogBlock(location, oldBlock, block, player, world);
+
+        if (success && world != null) {
+            if (ConfigProvider.isLogging(world.getName())) {
+                m_logger.LogBlock(location, oldBlock, block, player, world);
             }
         }
-    }    
+    }
 
-    
     /**
      * Filter player names for vip players (AWE.user.vip-queue)
+     *
      * @param playerNames
-     * @return 
+     * @return
      */
-    private String[] getVips(String[] playerNames)
-    {
-        if (playerNames == null || playerNames.length == 0)
-        {
+    private String[] getVips(String[] playerNames) {
+        if (playerNames == null || playerNames.length == 0) {
             return new String[0];
         }
-        
+
         List<String> result = new ArrayList<String>(playerNames.length);
-        
-        for (String login : playerNames)
-        {
+
+        for (String login : playerNames) {
             Player player = PluginMain.getPlayer(login);
-            if (player == null)
-            {
+            if (player == null) {
                 continue;
             }
-            
-            if (PermissionManager.isAllowed(player, PermissionManager.Perms.QueueVip))
-            {
+
+            if (PermissionManager.isAllowed(player, PermissionManager.Perms.QueueVip)) {
                 result.add(login);
             }
         }
-        
+
         return result.toArray(new String[0]);
     }
 }
