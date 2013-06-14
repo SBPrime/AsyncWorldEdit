@@ -200,7 +200,7 @@ public class ConfigProvider
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_logger = loggerSection.getString("type", "none").toLowerCase();
-        m_enabledWorlds = parseLoggerSection(loggerSection);
+        m_enabledWorlds = parseLoggerSection(mainSection);
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
         m_allowedOperations = parseOperationsSection(mainSection);
 
@@ -287,12 +287,13 @@ public class ConfigProvider
      * @param mainSection
      * @return
      */
-    private static HashSet<String> parseLoggerSection(
-            ConfigurationSection mainSection)
+    private static HashSet<String> parseLoggerSection(ConfigurationSection mainSection)
     {
+        ConfigurationSection loggerSection = mainSection.getConfigurationSection("logger");
+
         HashSet<String> result = new HashSet<String>();
 
-        for (String string : mainSection.getStringList("worlds")) {
+        for (String string : loggerSection.getStringList("worlds")) {
         	result.add(string.toLowerCase());
         }
         
