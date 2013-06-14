@@ -36,12 +36,13 @@ awe:
     - makeShape
     - deformRegion
     - hollowOutRegion
-  enabledWorlds:
-    - world
-    - world_nether
-    - world_the_end
-  logger: none  
-#  logger: logBlock
-#  logger: coreProtect
-#  logger: prism
-#  logger: hawkEye
+  logger:
+    logger: none
+#   logger: logBlock
+#   logger: coreProtect
+#   logger: prism
+#   logger: hawkEye
+    enabledWorlds:
+      - world
+      - world_nether
+      - world_the_end
