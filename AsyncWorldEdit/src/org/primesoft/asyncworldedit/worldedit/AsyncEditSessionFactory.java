@@ -31,6 +31,8 @@ import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.bags.BlockBag;
+import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
+import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
 
 /**
  *
@@ -39,29 +41,57 @@ import com.sk89q.worldedit.bags.BlockBag;
 public class AsyncEditSessionFactory extends EditSessionFactory {
 
     private PluginMain m_parent;
-
-    public AsyncEditSessionFactory(PluginMain parent) {
+    
+    /**
+     * The block logger
+     */
+    private IBlockLogger m_logger;
+           
+    
+    public AsyncEditSessionFactory(PluginMain parent, IBlockLogger logger) {
         m_parent = parent;
+        setLogger(logger);
     }
 
+    /**
+     * Set the logger
+     *
+     * @param logger
+     */
+    public void setLogger(IBlockLogger logger) {
+        if (logger == null) {
+            logger = new NoneLogger();
+        }
+        m_logger = logger;
+    }
+    
+    /**
+     * Get the logger
+     *
+     * @return logger
+     */
+    public IBlockLogger getLogger() {
+        return m_logger;
+    }
+    
     @Override
     public EditSession getEditSession(LocalWorld world, int maxBlocks) {
-        return new AsyncEditSession(m_parent, ConfigProvider.DEFAULT_USER, world, maxBlocks);
+        return new AsyncEditSession(this, m_parent, ConfigProvider.DEFAULT_USER, world, maxBlocks);
     }
 
     @Override
     public EditSession getEditSession(LocalWorld world, int maxBlocks, LocalPlayer player) {
-        return new AsyncEditSession(m_parent, player.getName(), world, maxBlocks);
+        return new AsyncEditSession(this, m_parent, player.getName(), world, maxBlocks);
     }
 
     @Override
     public EditSession getEditSession(LocalWorld world, int maxBlocks, BlockBag blockBag) {
-        return new AsyncEditSession(m_parent, ConfigProvider.DEFAULT_USER , world, maxBlocks, blockBag);
+        return new AsyncEditSession(this, m_parent, ConfigProvider.DEFAULT_USER , world, maxBlocks, blockBag);
     }
 
     @Override
     public EditSession getEditSession(LocalWorld world, int maxBlocks, BlockBag blockBag,
             LocalPlayer player) {
-        return new AsyncEditSession(m_parent, player.getName(), world, maxBlocks, blockBag);
+        return new AsyncEditSession(this, m_parent, player.getName(), world, maxBlocks, blockBag);
     }
 }

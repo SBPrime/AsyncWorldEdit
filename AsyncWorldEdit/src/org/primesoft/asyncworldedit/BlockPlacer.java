@@ -67,12 +67,23 @@ public class BlockPlacer implements Runnable {
      * Should block places shut down
      */
     private boolean m_shutdown;
+    
     /**
-     * The block logger
-     */
-    private IBlockLogger m_logger;
+     * Player block queue hard limit (max bloks count)
+     */       
     private int m_queueHardLimit;
+    
+    
+    /**
+     * Player block queue soft limit (minimum number of blocks 
+     * before queue is unlocked)
+     */
     private int m_queueSoftLimit;
+    
+    
+    /**
+     * Global queue max size
+     */
     private int m_queueMaxSize;
 
     /**
@@ -91,20 +102,6 @@ public class BlockPlacer implements Runnable {
         m_queueHardLimit = ConfigProvider.getQueueHardLimit();
         m_queueSoftLimit = ConfigProvider.getQueueSoftLimit();
         m_queueMaxSize = ConfigProvider.getQueueMaxSize();
-
-        setLogger(null);
-    }
-
-    /**
-     * Set the logger
-     *
-     * @param logger
-     */
-    public void setLogger(IBlockLogger logger) {
-        if (logger == null) {
-            logger = new NoneLogger();
-        }
-        m_logger = logger;
     }
 
     /**
@@ -295,17 +292,8 @@ public class BlockPlacer implements Runnable {
 
         Vector location = entry.getLocation();
         BaseBlock block = entry.getNewBlock();
-        AsyncEditSession eSession = entry.getEditSession();
-        String player = eSession.getPlayer();
-        World world = eSession.getCBWorld();
-        BaseBlock oldBlock = eSession.getBlock(location);
-        boolean success = eSession.doRawSetBlock(location, block);
-
-        if (success && world != null) {
-            if (ConfigProvider.isLogging(world.getName())) {
-                m_logger.LogBlock(location, oldBlock, block, player, world);
-            }
-        }
+        AsyncEditSession eSession = entry.getEditSession();        
+        eSession.doRawSetBlock(location, block);        
     }
 
     /**

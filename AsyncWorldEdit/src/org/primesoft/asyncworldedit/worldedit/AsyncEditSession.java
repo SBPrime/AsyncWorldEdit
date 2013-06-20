@@ -42,6 +42,7 @@ import com.sk89q.worldedit.expression.ExpressionException;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
+import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
 
 /**
  *
@@ -54,12 +55,19 @@ public class AsyncEditSession extends EditSession
     private BlockPlacer m_blockPlacer;
 
     private World m_world;
+        
+    /**
+     * The parent factory class
+     */
+    private AsyncEditSessionFactory m_factory;
+    
 
     /**
      * Force all functions to by performed in async mode this is used to
      * override the config by API calls
      */
     private boolean m_asyncForced;
+    
 
     /**
      * Indicates that the async mode has been disabled (inner state)
@@ -71,18 +79,18 @@ public class AsyncEditSession extends EditSession
         return m_player;
     }
 
-    public AsyncEditSession(PluginMain plugin, String player,
-                            LocalWorld world, int maxBlocks)
+    public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin, 
+                            String player, LocalWorld world, int maxBlocks)
     {
         super(world, maxBlocks);
-        initialize(player, plugin, world);
+        initialize(player, plugin, world, factory);
     }
 
-    public AsyncEditSession(PluginMain plugin, String player,
-                            LocalWorld world, int maxBlocks, BlockBag blockBag)
+    public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin, 
+                            String player, LocalWorld world, int maxBlocks, BlockBag blockBag)
     {
         super(world, maxBlocks, blockBag);
-        initialize(player, plugin, world);
+        initialize(player, plugin, world, factory);
     }
 
     @Override
@@ -93,7 +101,7 @@ public class AsyncEditSession extends EditSession
             return m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
         } else
         {
-            return super.rawSetBlock(pt, block);
+            return doRawSetBlock(pt, block);            
         }
     }
 
@@ -583,9 +591,22 @@ public class AsyncEditSession extends EditSession
         return result;
     }
 
-    public boolean doRawSetBlock(Vector pt, BaseBlock block)
+    public boolean doRawSetBlock(Vector location, BaseBlock block)
     {
-        return super.rawSetBlock(pt, block);
+        IBlockLogger logger = m_factory != null ? m_factory.getLogger() : null;
+        String player = getPlayer();
+        World world = getCBWorld();
+        BaseBlock oldBlock = getBlock(location);
+        
+        boolean success = super.rawSetBlock(location, block);
+        //boolean success = eSession.doRawSetBlock(location, block);
+
+        if (logger != null && success && world != null) {
+            if (ConfigProvider.isLogging(world.getName())) {
+                logger.LogBlock(location, oldBlock, block, player, world);
+            }
+        }        
+        return success;
     }
 
     public World getCBWorld()
@@ -600,8 +621,10 @@ public class AsyncEditSession extends EditSession
      * @param plugin parent plugin
      * @param world edit session world
      */
-    private void initialize(String player, PluginMain plugin, LocalWorld world)
+    private void initialize(String player, PluginMain plugin, 
+                            LocalWorld world, AsyncEditSessionFactory factory)
     {
+        m_factory = factory;
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
         if (world != null)

@@ -29,6 +29,8 @@ import org.primesoft.asyncworldedit.PluginMain;
 
 import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.WorldEdit;
+import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
+import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
 
 /**
  *
@@ -60,15 +62,22 @@ public class WorldeditIntegrator implements Runnable {
      * The parent plugin
      */
     private PluginMain m_parent;
-
+    
+    
+    /**
+     * Current world edit session factory
+     */
+    private AsyncEditSessionFactory m_factory;
+    
     
     /**
      * Create new instance of world edit integration checker and start it
      *
      * @param plugin
      * @param wePlugin
+     * @param logger
      */
-    public WorldeditIntegrator(PluginMain plugin, WorldEdit worldEdit) {
+    public WorldeditIntegrator(PluginMain plugin, WorldEdit worldEdit, IBlockLogger logger) {
         m_worldedit = worldEdit;
         m_parent = plugin;
         m_scheduler = plugin.getServer().getScheduler();        
@@ -85,10 +94,25 @@ public class WorldeditIntegrator implements Runnable {
             return;
         }
         
+        m_factory = new AsyncEditSessionFactory(m_parent, logger);
+        
         m_task = m_scheduler.runTaskTimer(plugin, this,
-                CHECK_INTERVAL, CHECK_INTERVAL);
+                CHECK_INTERVAL, CHECK_INTERVAL);         
     }
 
+    /**
+     * Set the logger
+     *
+     * @param logger
+     */
+    public void setLogger(IBlockLogger logger) {
+        if (logger == null) {
+            logger = new NoneLogger();
+        }
+        m_factory.setLogger(logger);        
+    }
+    
+    
     @Override
     public void run() {
         synchronized (this) {
@@ -101,8 +125,7 @@ public class WorldeditIntegrator implements Runnable {
             if (!(factory instanceof AsyncEditSessionFactory))
             {
                 PluginMain.Log("World edit session not set to AsyncWorldedit. Fixing.");
-                
-                m_worldedit.setEditSessionFactory(new AsyncEditSessionFactory(m_parent));
+                m_worldedit.setEditSessionFactory(m_factory);
             }
         }
     }

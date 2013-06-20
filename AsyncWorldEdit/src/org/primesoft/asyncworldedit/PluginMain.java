@@ -184,7 +184,6 @@ public class PluginMain extends JavaPlugin {
             Log("World edit not found.");
             return;
         }
-        m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit());
 
         if (!ConfigProvider.load(this)) {
             Log("Error loading config");
@@ -201,7 +200,7 @@ public class PluginMain extends JavaPlugin {
         }        
 
         m_logger = getLogger(ConfigProvider.getLogger());
-        m_blockPlacer.setLogger(m_logger);
+        m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit(), m_logger);
         
         getServer().getPluginManager().registerEvents(m_listener, this);
         m_isInitialized = true;
@@ -276,7 +275,7 @@ public class PluginMain extends JavaPlugin {
         m_blockPlacer = new BlockPlacer(this);
 
         m_logger = getLogger(ConfigProvider.getLogger());
-        m_blockPlacer.setLogger(m_logger);
+        m_weIntegrator.setLogger(m_logger);
         
         m_isInitialized = true;
         Say(player, "Config reloaded");
