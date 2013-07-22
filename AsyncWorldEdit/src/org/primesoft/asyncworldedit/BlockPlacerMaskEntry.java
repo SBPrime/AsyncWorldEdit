@@ -23,22 +23,24 @@
  */
 package org.primesoft.asyncworldedit;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.masks.Mask;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
- * @author SBPrime
+ * @author Prime
  */
-public abstract class BlockPlacerEntry {    
-    private AsyncEditSession m_editSession;
-
-    public AsyncEditSession getEditSession() {
-        return m_editSession;
+public class BlockPlacerMaskEntry extends BlockPlacerEntry
+{
+    private Mask m_mask;
+    
+    public Mask getMask() {
+        return m_mask;
     }
 
-    public BlockPlacerEntry(AsyncEditSession editSession) {
-        m_editSession = editSession;
+    public BlockPlacerMaskEntry(AsyncEditSession editSession,
+            Mask mask) {
+        super(editSession);
+        m_mask = mask;
     }
 }

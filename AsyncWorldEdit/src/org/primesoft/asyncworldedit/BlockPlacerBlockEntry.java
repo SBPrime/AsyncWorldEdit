@@ -29,16 +29,27 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
- * @author SBPrime
+ * @author Prime
  */
-public abstract class BlockPlacerEntry {    
-    private AsyncEditSession m_editSession;
-
-    public AsyncEditSession getEditSession() {
-        return m_editSession;
+public class BlockPlacerBlockEntry extends BlockPlacerEntry
+{
+    private Vector m_location;
+    private BaseBlock m_newBlock;
+ 
+    
+    public Vector getLocation() {
+        return m_location;
     }
 
-    public BlockPlacerEntry(AsyncEditSession editSession) {
-        m_editSession = editSession;
+    public BaseBlock getNewBlock() {
+        return m_newBlock;
+    }
+    
+
+    public BlockPlacerBlockEntry(AsyncEditSession editSession,
+            Vector location, BaseBlock newBlock) {
+        super(editSession);
+        m_location = location;
+        m_newBlock = newBlock;
     }
 }

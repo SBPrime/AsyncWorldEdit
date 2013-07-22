@@ -23,15 +23,6 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import java.util.Map;
-import java.util.Set;
-
-import org.bukkit.World;
-import org.primesoft.asyncworldedit.BlockPlacer;
-import org.primesoft.asyncworldedit.BlockPlacerEntry;
-import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
-
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -39,9 +30,18 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bags.BlockBag;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.expression.ExpressionException;
+import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
+import java.util.Map;
+import java.util.Set;
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.BlockPlacer;
+import org.primesoft.asyncworldedit.BlockPlacerBlockEntry;
+import org.primesoft.asyncworldedit.BlockPlacerMaskEntry;
+import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
 
 /**
@@ -98,12 +98,27 @@ public class AsyncEditSession extends EditSession
     {
         if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled))
         {
-            return m_blockPlacer.addTasks(new BlockPlacerEntry(this, pt, block));
+            return m_blockPlacer.addTasks(new BlockPlacerBlockEntry(this, pt, block));
         } else
         {
             return doRawSetBlock(pt, block);            
         }
     }
+    
+    
+    @Override
+    public void setMask(Mask mask)
+    {
+        if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled))
+        {
+            m_blockPlacer.addTasks(new BlockPlacerMaskEntry(this, mask));
+        } else
+        {
+            doSetMask(mask);
+        }
+
+    }
+    
 
     @Override
     public void flushQueue()
@@ -608,6 +623,14 @@ public class AsyncEditSession extends EditSession
         }        
         return success;
     }
+    
+    
+    public void doSetMask(Mask mask)
+    {
+        super.setMask(mask);
+        
+    }
+    
 
     public World getCBWorld()
     {

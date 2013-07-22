@@ -23,12 +23,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import com.sk89q.worldedit.EditSessionFactory;
+import com.sk89q.worldedit.WorldEdit;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.PluginMain;
-
-import com.sk89q.worldedit.EditSessionFactory;
-import com.sk89q.worldedit.WorldEdit;
 import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
 import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
 

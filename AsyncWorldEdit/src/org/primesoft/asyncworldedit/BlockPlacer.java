@@ -290,10 +290,19 @@ public class BlockPlacer implements Runnable {
             return;
         }
 
-        Vector location = entry.getLocation();
-        BaseBlock block = entry.getNewBlock();
-        AsyncEditSession eSession = entry.getEditSession();        
-        eSession.doRawSetBlock(location, block);        
+        AsyncEditSession eSession = entry.getEditSession();
+        if (entry instanceof BlockPlacerBlockEntry)
+        {
+            BlockPlacerBlockEntry blockEntry = (BlockPlacerBlockEntry)entry;
+            Vector location = blockEntry.getLocation();
+            BaseBlock block = blockEntry.getNewBlock();        
+            eSession.doRawSetBlock(location, block);
+        }
+        if (entry instanceof BlockPlacerMaskEntry)
+        {
+            BlockPlacerMaskEntry maskEntry = (BlockPlacerMaskEntry)entry;
+            eSession.doSetMask(maskEntry.getMask());
+        }
     }
 
     /**
