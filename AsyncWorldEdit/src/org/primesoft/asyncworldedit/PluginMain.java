@@ -130,7 +130,16 @@ public class PluginMain extends JavaPlugin {
     private BlockPlacer m_blockPlacer;
     private WorldeditIntegrator m_weIntegrator;
     private IBlockLogger m_logger;
+    private PlotMeFix m_plotMeFix;
 
+    public PlotMeFix getPlotMeFix(){
+        if (m_plotMeFix == null)
+        {
+            m_plotMeFix = new PlotMeFix(this);
+        }
+        return m_plotMeFix;
+    }
+    
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }

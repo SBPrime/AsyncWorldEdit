@@ -39,7 +39,6 @@ import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
  * @author SBPrime
  */
 public class AsyncEditSessionFactory extends EditSessionFactory {
-
     private PluginMain m_parent;
     
     /**
@@ -81,7 +80,10 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
 
     @Override
     public EditSession getEditSession(LocalWorld world, int maxBlocks, LocalPlayer player) {
-        return new AsyncEditSession(this, m_parent, player.getName(), world, maxBlocks);
+        AsyncEditSession result = new AsyncEditSession(this, m_parent, player.getName(), world, maxBlocks);
+                
+        m_parent.getPlotMeFix().setMask(m_parent.getServer().getPlayer(player.getName()));
+        return result;
     }
 
     @Override
@@ -92,6 +94,8 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
     @Override
     public EditSession getEditSession(LocalWorld world, int maxBlocks, BlockBag blockBag,
             LocalPlayer player) {
-        return new AsyncEditSession(this, m_parent, player.getName(), world, maxBlocks, blockBag);
+        AsyncEditSession result = new AsyncEditSession(this, m_parent, player.getName(), world, maxBlocks, blockBag);
+        m_parent.getPlotMeFix().setMask(m_parent.getServer().getPlayer(player.getName()));
+        return result;
     }
 }
