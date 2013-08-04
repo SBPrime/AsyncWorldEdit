@@ -23,8 +23,6 @@
  */
 package org.primesoft.asyncworldedit;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**

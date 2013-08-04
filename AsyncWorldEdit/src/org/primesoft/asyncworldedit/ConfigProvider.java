@@ -48,6 +48,7 @@ public class ConfigProvider {
     private static boolean m_defaultMode = true;
     private static boolean m_checkUpdate = false;
     private static boolean m_isConfigUpdate = false;
+    private static boolean m_isWorldGuardEnabled = false;
     private static long m_interval;
     private static int m_blocksCnt;
     private static int m_vipBlocksCnt;
@@ -118,6 +119,14 @@ public class ConfigProvider {
     }
 
     /**
+     * Is the world guard integration enabled
+     * @return 
+     */
+    public static boolean isWorldGuardEnabled() {
+        return m_isWorldGuardEnabled;
+    }
+
+    /**
      * Is the world being logged
      *
      * @return
@@ -155,7 +164,8 @@ public class ConfigProvider {
 
     /**
      * Get maximum size of the queue
-     * @return 
+     *
+     * @return
      */
     public static int getQueueMaxSize() {
         return m_queueMaxSize;
@@ -179,15 +189,16 @@ public class ConfigProvider {
         if (mainSection == null) {
             return false;
         }
-        
+
         m_configVersion = mainSection.getString("version", "?");
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
-        
+        m_isWorldGuardEnabled = mainSection.getBoolean("worldGuard", false);
+
         parseRenderSection(mainSection);
         parseLoggerSection(mainSection);
-        
+
         m_allowedOperations = parseOperationsSection(mainSection);
 
         return true;
@@ -225,9 +236,8 @@ public class ConfigProvider {
             m_queueSoftLimit = renderSection.getInt("queue-limit-soft", 250000);
             m_queueHardLimit = renderSection.getInt("queue-limit-hard", 500000);
             m_queueMaxSize = renderSection.getInt("queue-max-size", 10000000);
-            
-            if (m_queueMaxSize <= 0)
-            {
+
+            if (m_queueMaxSize <= 0) {
                 PluginMain.Log("Warinig: Block queue is disabled!");
             }
         }

@@ -8,6 +8,7 @@ awe:
     queue-limit-hard: 500000
     queue-limit-soft: 250000
   checkVersion: true
+  worldGuard: false
   defaultOn: true
   enabledOperations:
     - undo

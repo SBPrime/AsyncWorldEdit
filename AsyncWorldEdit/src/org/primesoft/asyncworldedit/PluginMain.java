@@ -55,34 +55,30 @@ public class PluginMain extends JavaPlugin {
     private static String s_prefix = null;
     private static String s_logFormat = "%s %s";
     private static PluginMain s_instance;
-
     private static final HashSet<String> s_asyncPlayers = new HashSet<String>();
-    
-    
+
     /**
      * Check if player has AWE enabled
+     *
      * @param player
-     * @return 
+     * @return
      */
     public static boolean hasAsyncMode(String player) {
-        if (player == null)
-        {
+        if (player == null) {
             return true;
         }
-        
-        synchronized (s_asyncPlayers)
-        {
+
+        synchronized (s_asyncPlayers) {
             return s_asyncPlayers.contains(player.toLowerCase());
         }
     }
-    
-    
+
     /**
      * Set player AEW default mode (on or off)
-     * @param player 
+     *
+     * @param player
      */
-    public static void setMode(Player player)
-    {
+    public static void setMode(Player player) {
         boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
         boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
         boolean def = ConfigProvider.getDefaultMode();
@@ -95,35 +91,29 @@ public class PluginMain extends JavaPlugin {
             PluginMain.setMode(player.getName(), def);
         }
     }
-    
+
     /**
      * Aet the AWE player mode
+     *
      * @param player
-     * @param mode 
+     * @param mode
      */
-    public static void setMode(String player, boolean mode)
-    {
-        if (player == null)
-        {
+    public static void setMode(String player, boolean mode) {
+        if (player == null) {
             return;
         }
-        
-        synchronized (s_asyncPlayers)
-        {
+
+        synchronized (s_asyncPlayers) {
             player = player.toLowerCase();
             boolean contains = s_asyncPlayers.contains(player);
-            
-            if (contains && !mode)
-            {
+
+            if (contains && !mode) {
                 s_asyncPlayers.remove(player);
-            } else if (!contains && mode)
-            {
+            } else if (!contains && mode) {
                 s_asyncPlayers.add(player);
             }
         }
     }
-    
-    
     private Boolean m_isInitialized = false;
     private MetricsLite m_metrics;
     private EventListener m_listener = new EventListener(this);
@@ -131,15 +121,19 @@ public class PluginMain extends JavaPlugin {
     private WorldeditIntegrator m_weIntegrator;
     private IBlockLogger m_logger;
     private PlotMeFix m_plotMeFix;
+    private WorldGuardIntegrator m_worldGuard;
 
-    public PlotMeFix getPlotMeFix(){
-        if (m_plotMeFix == null)
-        {
+    public PlotMeFix getPlotMeFix() {
+        if (m_plotMeFix == null) {
             m_plotMeFix = new PlotMeFix(this);
         }
         return m_plotMeFix;
     }
-    
+
+    public WorldGuardIntegrator getWorldGuardIntegrator() {
+        return m_worldGuard;
+    }
+
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
@@ -149,14 +143,13 @@ public class PluginMain extends JavaPlugin {
     }
 
     public static Player getPlayer(String player) {
-        if (s_instance == null)
-        {
+        if (s_instance == null) {
             return null;
         }
-        
+
         return s_instance.getServer().getPlayer(player);
     }
-    
+
     public static void Log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
             return;
@@ -187,7 +180,7 @@ public class PluginMain extends JavaPlugin {
             Log("Error initializing MCStats: " + e.getMessage());
         }
 
-        s_console = getServer().getConsoleSender();        
+        s_console = getServer().getConsoleSender();
         WorldEditPlugin worldEdit = getWorldEdit(this);
         if (worldEdit == null) {
             Log("World edit not found.");
@@ -199,6 +192,7 @@ public class PluginMain extends JavaPlugin {
             return;
         }
 
+        m_worldGuard = new WorldGuardIntegrator(this);
         m_blockPlacer = new BlockPlacer(this);
 
         if (ConfigProvider.getCheckUpdate()) {
@@ -206,16 +200,16 @@ public class PluginMain extends JavaPlugin {
         }
         if (!ConfigProvider.isConfigUpdated()) {
             Log("Please update your config file!");
-        }        
+        }
 
         m_logger = getLogger(ConfigProvider.getLogger());
         m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit(), m_logger);
-        
+
         getServer().getPluginManager().registerEvents(m_listener, this);
         m_isInitialized = true;
-        
+
         setPlayerModes();
-        
+
         Log("Enabled");
     }
 
@@ -254,7 +248,7 @@ public class PluginMain extends JavaPlugin {
         } else if (name.equalsIgnoreCase(Commands.COMMAND_JOBS)) {
             doJobs(player, args);
             return true;
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_TOGGLE)){
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_TOGGLE)) {
             doToggle(player, args);
             return true;
         }
@@ -285,7 +279,7 @@ public class PluginMain extends JavaPlugin {
 
         m_logger = getLogger(ConfigProvider.getLogger());
         m_weIntegrator.setLogger(m_logger);
-        
+
         m_isInitialized = true;
         Say(player, "Config reloaded");
     }
@@ -298,8 +292,7 @@ public class PluginMain extends JavaPlugin {
 
         ToggleCommand.Execte(this, player, args);
     }
-    
-    
+
     private void doPurge(Player player, String[] args) {
         if (!m_isInitialized) {
             Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
@@ -334,46 +327,39 @@ public class PluginMain extends JavaPlugin {
         return (WorldEditPlugin) wPlugin;
     }
 
-    
     /**
      * Create the block logger
+     *
      * @param logger
-     * @return 
+     * @return
      */
     private IBlockLogger getLogger(String logger) {
-        if (logger.equalsIgnoreCase(Loggers.LOG_BLOCK))
-        {
+        if (logger.equalsIgnoreCase(Loggers.LOG_BLOCK)) {
             return new LogBlockLogger(this);
         }
-        if (logger.equalsIgnoreCase(Loggers.CORE_PROTECT))
-        {
+        if (logger.equalsIgnoreCase(Loggers.CORE_PROTECT)) {
             return new CoreProtectLogger(this);
         }
-        if (logger.equalsIgnoreCase(Loggers.PRISM))
-        {
+        if (logger.equalsIgnoreCase(Loggers.PRISM)) {
             return new PrismLogger(this);
         }
-        if (logger.equalsIgnoreCase(Loggers.HAWK_EYE))
-        {
+        if (logger.equalsIgnoreCase(Loggers.HAWK_EYE)) {
             return new HawkEyeLogger(this);
         }
-        if (logger.equalsIgnoreCase(Loggers.NONE))
-        {
+        if (logger.equalsIgnoreCase(Loggers.NONE)) {
             return new NoneLogger();
         }
-        
-        Log("Unknown logger: "+ logger + ". Logger disabled.");
+
+        Log("Unknown logger: " + logger + ". Logger disabled.");
         return new NoneLogger();
     }
-    
+
     /**
      * Set all players AWE mode on/off
      */
-    private void setPlayerModes()
-    {
+    private void setPlayerModes() {
         Player[] players = getServer().getOnlinePlayers();
-        for (Player player : players)
-        {
+        for (Player player : players) {
             setMode(player);
         }
     }

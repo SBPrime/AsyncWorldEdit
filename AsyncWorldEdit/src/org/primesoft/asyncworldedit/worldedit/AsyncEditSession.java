@@ -37,11 +37,7 @@ import com.sk89q.worldedit.util.TreeGenerator;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.World;
-import org.primesoft.asyncworldedit.BlockPlacer;
-import org.primesoft.asyncworldedit.BlockPlacerBlockEntry;
-import org.primesoft.asyncworldedit.BlockPlacerMaskEntry;
-import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.*;
 import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
 
 /**
@@ -55,6 +51,13 @@ public class AsyncEditSession extends EditSession
     private BlockPlacer m_blockPlacer;
 
     private World m_world;
+    
+    
+    /**
+     * The world guard integrator
+     */
+    private WorldGuardIntegrator m_worldGuard;
+    
         
     /**
      * The parent factory class
@@ -96,6 +99,11 @@ public class AsyncEditSession extends EditSession
     @Override
     public boolean rawSetBlock(Vector pt, BaseBlock block)
     {
+        if (!m_worldGuard.canPlace(m_player, pt, m_world))
+        {
+            return false;
+        }
+        
         if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled))
         {
             return m_blockPlacer.addTasks(new BlockPlacerBlockEntry(this, pt, block));
@@ -656,6 +664,7 @@ public class AsyncEditSession extends EditSession
         }
         m_asyncForced = false;
         m_asyncDisabled = false;
+        m_worldGuard = plugin.getWorldGuardIntegrator();
     }
 
     /**

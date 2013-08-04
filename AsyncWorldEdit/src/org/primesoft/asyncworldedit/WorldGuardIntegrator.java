@@ -23,64 +23,73 @@
  */
 package org.primesoft.asyncworldedit;
 
-import com.worldcretornica.plotme.PlotManager;
-import com.worldcretornica.plotme.PlotMe;
-import com.worldcretornica.plotme.PlotWorldEdit;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * This class is used to fix PlotMe Mask seting errors
  *
  * @author SBPrime
  */
-public class PlotMeFix
-{
+public class WorldGuardIntegrator {
     /**
-     * Is PlotMe fix enabled
+     * The world guard
+     */
+    private WorldGuardPlugin m_worldGuard;
+    
+    
+    /**
+     * Craftbukkit server
+     */
+    private Server m_server;    
+    
+    
+    /**
+     * Is world guard integration enabed
      */
     private boolean m_isEnabled;
-
-    /**
-     * New instance of PlotMe plugin
-     *
-     * @param plugin
-     */
-    public PlotMeFix(JavaPlugin plugin)
+    
+    
+    public WorldGuardIntegrator(PluginMain plugin)
     {
         m_isEnabled = false;
         try
         {
-            Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("PlotMe");
+            Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
 
-            if ((cPlugin != null) && (cPlugin instanceof PlotMe))
+            if ((cPlugin != null) && (cPlugin instanceof WorldGuardPlugin))
             {
                 m_isEnabled = true;
+                m_worldGuard = (WorldGuardPlugin)cPlugin;
+                m_server = plugin.getServer();
             }
         }
         catch (NoClassDefFoundError ex)
         {
         }
     }
-
     
-    public void setMask(Player p)
+    
+    /**
+     * Check if a player is allowed to place a block
+     * @param player
+     * @param location
+     * @param world
+     * @return 
+     */
+    public boolean canPlace(String player, Vector pos, World world)
     {
-        if (!m_isEnabled || p == null)
+        if (!m_isEnabled || ConfigProvider.isWorldGuardEnabled())
         {
-            return;
-        }
-
-        if (PlotManager.isPlotWorld(p))
-        {
-            if (!PlotMe.isIgnoringWELimit(p))
-            {
-                PlotWorldEdit.setMask(p);
-            } else
-            {
-                PlotWorldEdit.removeMask(p);
-            }
-        }
+            return false;
+        }        
+        
+        Player p = m_server.getPlayer(player);
+        Location location = new Location(world, pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+        return m_worldGuard.canBuild(p, location);
     }
 }

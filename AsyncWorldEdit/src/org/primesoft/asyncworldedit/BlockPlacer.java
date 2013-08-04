@@ -63,20 +63,15 @@ public class BlockPlacer implements Runnable {
      * Should block places shut down
      */
     private boolean m_shutdown;
-    
     /**
      * Player block queue hard limit (max bloks count)
-     */       
+     */
     private int m_queueHardLimit;
-    
-    
     /**
-     * Player block queue soft limit (minimum number of blocks 
-     * before queue is unlocked)
+     * Player block queue soft limit (minimum number of blocks before queue is
+     * unlocked)
      */
     private int m_queueSoftLimit;
-    
-    
     /**
      * Global queue max size
      */
@@ -206,7 +201,7 @@ public class BlockPlacer implements Runnable {
             for (Map.Entry<String, Queue<BlockPlacerEntry>> queueEntry : m_blocks.entrySet()) {
                 size += queueEntry.getValue().size();
             }
-            
+
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
                 PluginMain.Say(PluginMain.getPlayer(player), "Out of space on AWE block queue.");
                 return false;
@@ -287,16 +282,14 @@ public class BlockPlacer implements Runnable {
         }
 
         AsyncEditSession eSession = entry.getEditSession();
-        if (entry instanceof BlockPlacerBlockEntry)
-        {
-            BlockPlacerBlockEntry blockEntry = (BlockPlacerBlockEntry)entry;
+        if (entry instanceof BlockPlacerBlockEntry) {
+            BlockPlacerBlockEntry blockEntry = (BlockPlacerBlockEntry) entry;
             Vector location = blockEntry.getLocation();
-            BaseBlock block = blockEntry.getNewBlock();        
+            BaseBlock block = blockEntry.getNewBlock();
             eSession.doRawSetBlock(location, block);
         }
-        if (entry instanceof BlockPlacerMaskEntry)
-        {
-            BlockPlacerMaskEntry maskEntry = (BlockPlacerMaskEntry)entry;
+        if (entry instanceof BlockPlacerMaskEntry) {
+            BlockPlacerMaskEntry maskEntry = (BlockPlacerMaskEntry) entry;
             eSession.doSetMask(maskEntry.getMask());
         }
     }
