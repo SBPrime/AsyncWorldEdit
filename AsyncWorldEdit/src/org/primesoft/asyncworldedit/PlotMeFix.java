@@ -62,6 +62,11 @@ public class PlotMeFix
         catch (NoClassDefFoundError ex)
         {
         }
+        
+        if (m_isEnabled)
+        {
+            PluginMain.Log("PlotMe fix enabled.");
+        }
     }
 
     

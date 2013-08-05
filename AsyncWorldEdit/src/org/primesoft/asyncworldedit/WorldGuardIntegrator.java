@@ -71,6 +71,14 @@ public class WorldGuardIntegrator {
         catch (NoClassDefFoundError ex)
         {
         }
+        
+        if (m_isEnabled)
+        {
+            PluginMain.Log("World guard found, " + 
+                    (ConfigProvider.isWorldGuardEnabled() ? "integration enabled" : "integration disabled in config"));
+        } else {
+            PluginMain.Log("World guard found, integration disabled.");
+        }
     }
     
     
@@ -83,7 +91,7 @@ public class WorldGuardIntegrator {
      */
     public boolean canPlace(String player, Vector pos, World world)
     {
-        if (!m_isEnabled || ConfigProvider.isWorldGuardEnabled())
+        if (!m_isEnabled || !ConfigProvider.isWorldGuardEnabled())
         {
             return false;
         }        

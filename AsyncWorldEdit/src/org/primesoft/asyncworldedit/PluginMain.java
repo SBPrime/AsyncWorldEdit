@@ -123,10 +123,7 @@ public class PluginMain extends JavaPlugin {
     private PlotMeFix m_plotMeFix;
     private WorldGuardIntegrator m_worldGuard;
 
-    public PlotMeFix getPlotMeFix() {
-        if (m_plotMeFix == null) {
-            m_plotMeFix = new PlotMeFix(this);
-        }
+    public PlotMeFix getPlotMeFix() {       
         return m_plotMeFix;
     }
 
@@ -192,7 +189,8 @@ public class PluginMain extends JavaPlugin {
             return;
         }
 
-        m_worldGuard = new WorldGuardIntegrator(this);
+        m_worldGuard = new WorldGuardIntegrator(this);        
+        m_plotMeFix = new PlotMeFix(this);
         m_blockPlacer = new BlockPlacer(this);
 
         if (ConfigProvider.getCheckUpdate()) {
