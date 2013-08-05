@@ -36,28 +36,49 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
  * @author SBPrime
  */
 public class ConfigProvider {
+    /**
+     * Number of ticks in one second
+     */
+    public static final int TICKS_PER_SECOND = 20;
 
     /**
      * Default user name when no user is available
      */
     public static final String DEFAULT_USER = "#worldedit";
+
     /**
      * The config file version
      */
     private static final int CONFIG_VERSION = 1;
+
     private static boolean m_defaultMode = true;
+
     private static boolean m_checkUpdate = false;
+
     private static boolean m_isConfigUpdate = false;
+
     private static boolean m_isWorldGuardEnabled = false;
+
     private static long m_interval;
+
     private static int m_blocksCnt;
+
     private static int m_vipBlocksCnt;
+
     private static int m_queueHardLimit;
+
     private static int m_queueSoftLimit;
+
     private static int m_queueMaxSize;
+
+    private static int m_queueTalkInterval;
+
     private static String m_configVersion;
+
     private static String m_logger;
+
     private static HashSet<WorldeditOperations> m_allowedOperations;
+
     private static HashSet<String> m_enabledWorlds;
 
     public static String getLogger() {
@@ -109,6 +130,10 @@ public class ConfigProvider {
         return m_vipBlocksCnt;
     }
 
+    public static int getQueueTalkInterval() {
+        return m_queueTalkInterval;
+    }
+
     /**
      * Is the configuration up to date
      *
@@ -120,7 +145,8 @@ public class ConfigProvider {
 
     /**
      * Is the world guard integration enabled
-     * @return 
+     *
+     * @return
      */
     public static boolean isWorldGuardEnabled() {
         return m_isWorldGuardEnabled;
@@ -226,6 +252,7 @@ public class ConfigProvider {
             m_blocksCnt = 1000;
             m_vipBlocksCnt = 1000;
             m_interval = 15;
+            m_queueTalkInterval = 10;
             m_queueHardLimit = 500000;
             m_queueSoftLimit = 250000;
             m_queueMaxSize = 10000000;
@@ -233,6 +260,7 @@ public class ConfigProvider {
             m_blocksCnt = renderSection.getInt("blocks", 1000);
             m_vipBlocksCnt = renderSection.getInt("blocks-vip", 1000);
             m_interval = renderSection.getInt("interval", 15);
+            m_queueTalkInterval = renderSection.getInt("talk-interval", 10);
             m_queueSoftLimit = renderSection.getInt("queue-limit-soft", 250000);
             m_queueHardLimit = renderSection.getInt("queue-limit-hard", 500000);
             m_queueMaxSize = renderSection.getInt("queue-max-size", 10000000);
@@ -256,7 +284,8 @@ public class ConfigProvider {
         for (String string : mainSection.getStringList("enabledOperations")) {
             try {
                 result.add(WorldeditOperations.valueOf(string));
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 PluginMain.Log("* unknown operation name " + string);
             }
         }

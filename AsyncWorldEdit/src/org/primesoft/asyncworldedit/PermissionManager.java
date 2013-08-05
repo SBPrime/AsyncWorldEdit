@@ -40,7 +40,8 @@ public class PermissionManager {
         Purge_Self, Purge_Other, Purge_All,
         Jobs_Self, Jobs_Other, Jobs_All, Filter,
         Mode_Change, Mode_On, Mode_Off,
-        Mode_Change_Other
+        Mode_Change_Other,
+        TalkativeQueue
     }
     
     
@@ -106,6 +107,8 @@ public class PermissionManager {
                 return s_prefix + "user.mode.on";
             case Mode_Off:
                 return s_prefix + "user.mode.off";
+            case TalkativeQueue:
+                return s_prefix + "user.talkative";
         }
 
         return null;

@@ -42,40 +42,98 @@ import java.util.*;
  * @author SBPrime
  */
 public class BlockPlacer implements Runnable {
+    /**
+     * Operation queue player entry
+     */
+    private class PlayerEntry {
+        /**
+         * Number of samples used in AVG count
+         */
+        private final int AVG_SAMPLES = 5;
+
+        /**
+         * The queue
+         */
+        private Queue<BlockPlacerEntry> m_queue;
+
+        /**
+         * Current block placing speed (blocks per second)
+         */
+        private double m_speed;
+
+        public PlayerEntry() {
+            m_queue = new ArrayDeque();
+            m_speed = 0;
+        }
+
+        public Queue<BlockPlacerEntry> getQueue() {
+            return m_queue;
+        }
+
+        public double getSpeed() {
+            return m_speed;
+        }
+
+        public void updateSpeed(int blocks) {
+            m_speed = (m_speed * (AVG_SAMPLES - 1) + blocks) / AVG_SAMPLES;
+        }
+    }
 
     /**
      * Bukkit scheduler
      */
     private BukkitScheduler m_scheduler;
+
     /**
      * Current scheduler task
      */
     private BukkitTask m_task;
+
     /**
      * Logged events queue (per player)
      */
-    private HashMap<String, Queue<BlockPlacerEntry>> m_blocks;
+    private HashMap<String, PlayerEntry> m_blocks;
+
     /**
      * All locked queues
      */
     private HashSet<String> m_lockedQueues;
+
     /**
      * Should block places shut down
      */
     private boolean m_shutdown;
+
     /**
      * Player block queue hard limit (max bloks count)
      */
     private int m_queueHardLimit;
+
     /**
      * Player block queue soft limit (minimum number of blocks before queue is
      * unlocked)
      */
     private int m_queueSoftLimit;
+
     /**
      * Global queue max size
      */
     private int m_queueMaxSize;
+
+    /**
+     * Block placing interval (in ticks)
+     */
+    private long m_interval;
+
+    /**
+     * Talk interval
+     */
+    private int m_talkInterval;
+
+    /**
+     * Run number
+     */
+    private int m_runNumber;
 
     /**
      * Initialize new instance of the block placer
@@ -84,12 +142,15 @@ public class BlockPlacer implements Runnable {
      * @param blockLogger instance block logger
      */
     public BlockPlacer(PluginMain plugin) {
-        m_blocks = new HashMap<String, Queue<BlockPlacerEntry>>();
+        m_runNumber = 0;
+        m_blocks = new HashMap<String, PlayerEntry>();
         m_lockedQueues = new HashSet<String>();
         m_scheduler = plugin.getServer().getScheduler();
+        m_interval = ConfigProvider.getInterval();
         m_task = m_scheduler.runTaskTimer(plugin, this,
-                ConfigProvider.getInterval(), ConfigProvider.getInterval());
+                m_interval, m_interval);
 
+        m_talkInterval = ConfigProvider.getQueueTalkInterval();
         m_queueHardLimit = ConfigProvider.getQueueHardLimit();
         m_queueSoftLimit = ConfigProvider.getQueueSoftLimit();
         m_queueMaxSize = ConfigProvider.getQueueMaxSize();
@@ -104,13 +165,46 @@ public class BlockPlacer implements Runnable {
         boolean added = false;
         synchronized (this) {
             final String[] keys = m_blocks.keySet().toArray(new String[0]);
-            final String[] vipKeys = getVips(keys);
 
-            added |= fetchBlocks(ConfigProvider.getBlockCount(), keys, entries);
-            added |= fetchBlocks(ConfigProvider.getVipBlockCount(), vipKeys, entries);
+            final HashSet<String> vips = getVips(keys);
+            final String[] vipKeys = vips.toArray(new String[0]);
+
+            final int blockCount = ConfigProvider.getBlockCount();
+            final int blockCountVip = ConfigProvider.getVipBlockCount();
+
+            added |= fetchBlocks(blockCount, keys, entries);
+            added |= fetchBlocks(blockCountVip, vipKeys, entries);
 
             if (!added && m_shutdown) {
                 stop();
+            }
+
+            final int nonVip = (keys.length != 0) ? blockCount / keys.length : 0;
+            final int vip = (vipKeys.length != 0) ? blockCountVip / vipKeys.length : 0;
+
+            m_runNumber++;
+            boolean talk = false;
+            if (m_runNumber > m_talkInterval) {
+                m_runNumber = 0;
+                talk = true;
+            }
+
+            for (Map.Entry<String, PlayerEntry> queueEntry : m_blocks.entrySet()) {
+                String player = queueEntry.getKey();
+                boolean isVip = vips.contains(player);
+
+                PlayerEntry entry = queueEntry.getValue();
+                entry.updateSpeed(nonVip + (isVip ? vip : 0));
+
+                if (talk) {
+                    Player p = PluginMain.getPlayer(player);
+                    boolean bypass = PermissionManager.isAllowed(p, PermissionManager.Perms.QueueBypass);
+                    boolean talkative = PermissionManager.isAllowed(p, PermissionManager.Perms.TalkativeQueue);
+
+                    if (talkative) {
+                        PluginMain.Say(p, "[AWE] You have " + getPlayerMessage(entry, bypass));
+                    }
+                }
             }
         }
 
@@ -128,7 +222,7 @@ public class BlockPlacer implements Runnable {
      * @return blocks fatched
      */
     private boolean fetchBlocks(final int blockCnt, final String[] playerNames,
-            List<BlockPlacerEntry> entries) {
+                                List<BlockPlacerEntry> entries) {
         if (blockCnt <= 0 || playerNames == null || playerNames.length == 0) {
             return false;
         }
@@ -139,8 +233,9 @@ public class BlockPlacer implements Runnable {
             added = false;
 
             String player = playerNames[keyPos];
-            Queue<BlockPlacerEntry> queue = m_blocks.get(player);
-            if (queue != null) {
+            PlayerEntry playerEntry = m_blocks.get(player);
+            if (playerEntry != null) {
+                Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 if (!queue.isEmpty()) {
                     entries.add(queue.poll());
                     added = true;
@@ -184,13 +279,15 @@ public class BlockPlacer implements Runnable {
         synchronized (this) {
             AsyncEditSession editSesson = entry.getEditSession();
             String player = editSesson.getPlayer();
-            Queue<BlockPlacerEntry> queue;
+            PlayerEntry playerEntry;
+
             if (!m_blocks.containsKey(player)) {
-                queue = new ArrayDeque<BlockPlacerEntry>();
-                m_blocks.put(player, queue);
+                playerEntry = new PlayerEntry();
+                m_blocks.put(player, playerEntry);
             } else {
-                queue = m_blocks.get(player);
+                playerEntry = m_blocks.get(player);
             }
+            Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
 
             if (m_lockedQueues.contains(player)) {
                 return false;
@@ -198,8 +295,8 @@ public class BlockPlacer implements Runnable {
 
             boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass);
             int size = 0;
-            for (Map.Entry<String, Queue<BlockPlacerEntry>> queueEntry : m_blocks.entrySet()) {
-                size += queueEntry.getValue().size();
+            for (Map.Entry<String, PlayerEntry> queueEntry : m_blocks.entrySet()) {
+                size += queueEntry.getValue().getQueue().size();
             }
 
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
@@ -264,11 +361,57 @@ public class BlockPlacer implements Runnable {
     public int getPlayerEvents(String player) {
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
-                return m_blocks.get(player).size();
+                return m_blocks.get(player).getQueue().size();
             }
-
             return 0;
         }
+    }
+
+    /**
+     * Gets the player message string
+     *
+     * @param player player login
+     * @return
+     */
+    public String getPlayerMessage(String player) {
+        PlayerEntry entry = null;
+        synchronized (this) {
+            if (m_blocks.containsKey(player)) {
+                entry = m_blocks.get(player);
+            }
+        }
+
+        boolean bypass = PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass);
+        return getPlayerMessage(entry, bypass);
+    }
+
+    /**
+     * Gets the player message string
+     *
+     * @param player player login
+     * @return
+     */
+    private String getPlayerMessage(PlayerEntry player, boolean bypass) {
+        final String format = "%d out of %d blocks (%.2f%%) queued. Placing speed: %.2fbps, %.2fs left.";
+        final String formatShort = "%d blocks queued. Placing speed: %.2fbps, %.2fs left.";
+
+        int blocks = 0;
+        double speed = 0;
+        double time = 0;
+
+        if (player != null) {
+            blocks = player.getQueue().size();
+            speed = player.getSpeed() / m_interval * ConfigProvider.TICKS_PER_SECOND;
+        }
+        if (speed > 0) {
+            time = blocks / speed;
+        }
+
+        if (bypass) {
+            return String.format(formatShort, blocks, speed, time);
+        }
+
+        return String.format(format, blocks, m_queueHardLimit, 100.0 * blocks / m_queueHardLimit, speed, time);
     }
 
     /**
@@ -300,12 +443,12 @@ public class BlockPlacer implements Runnable {
      * @param playerNames
      * @return
      */
-    private String[] getVips(String[] playerNames) {
+    private HashSet<String> getVips(String[] playerNames) {
         if (playerNames == null || playerNames.length == 0) {
-            return new String[0];
+            return new HashSet<String>();
         }
 
-        List<String> result = new ArrayList<String>(playerNames.length);
+        HashSet<String> result = new HashSet<String>(playerNames.length);
 
         for (String login : playerNames) {
             Player player = PluginMain.getPlayer(login);
@@ -313,11 +456,12 @@ public class BlockPlacer implements Runnable {
                 continue;
             }
 
-            if (PermissionManager.isAllowed(player, PermissionManager.Perms.QueueVip)) {
+            if (PermissionManager.isAllowed(player, PermissionManager.Perms.QueueVip)
+                    && !result.contains(login)) {
                 result.add(login);
             }
         }
 
-        return result.toArray(new String[0]);
+        return result;
     }
 }
