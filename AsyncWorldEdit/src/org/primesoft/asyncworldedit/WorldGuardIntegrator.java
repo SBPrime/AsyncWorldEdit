@@ -93,7 +93,7 @@ public class WorldGuardIntegrator {
     {
         if (!m_isEnabled || !ConfigProvider.isWorldGuardEnabled())
         {
-            return false;
+            return true;
         }        
         
         Player p = m_server.getPlayer(player);

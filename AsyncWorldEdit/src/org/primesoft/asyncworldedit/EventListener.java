@@ -44,7 +44,7 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
+        final Player player = event.getPlayer();
         
         PluginMain.setMode(player);
 
@@ -52,11 +52,16 @@ public class EventListener implements Listener {
             return;
         }
 
-        if (ConfigProvider.getCheckUpdate()) {
-            PluginDescriptionFile desc = m_parent.getDescription();
-            PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()
-                    + VersionChecker.CheckVersion(desc.getVersion()));
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (ConfigProvider.getCheckUpdate()) {
+                    PluginDescriptionFile desc = m_parent.getDescription();
+                    PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()
+                        + VersionChecker.CheckVersion(desc.getVersion()));                    
+                }
+            }
+        }).start();
 
         if (!ConfigProvider.isConfigUpdated()) {
             PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()

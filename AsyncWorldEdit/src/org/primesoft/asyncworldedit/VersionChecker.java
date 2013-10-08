@@ -57,7 +57,7 @@ public class VersionChecker {
             br.close();
 
             return sb.toString();
-        } catch (IOException e) {
+        } catch (Exception e) {
             PluginMain.Log("Error downloading file: " + e.getMessage());
             return null;
         }
