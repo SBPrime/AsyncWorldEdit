@@ -35,6 +35,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blocklogger.*;
 import org.primesoft.asyncworldedit.commands.Commands;
@@ -50,7 +51,7 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
  */
 public class PluginMain extends JavaPlugin {
 
-    private static final Logger s_log = Logger.getLogger("Minecraft.MCPainter");
+    private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
     private static ConsoleCommandSender s_console;
     private static String s_prefix = null;
     private static String s_logFormat = "%s %s";
@@ -117,12 +118,18 @@ public class PluginMain extends JavaPlugin {
     private Boolean m_isInitialized = false;
     private MetricsLite m_metrics;
     private EventListener m_listener = new EventListener(this);
+    private PhysicsWatch m_physicsWatcher = new PhysicsWatch();
     private BlockPlacer m_blockPlacer;
     private WorldeditIntegrator m_weIntegrator;
     private IBlockLogger m_logger;
     private PlotMeFix m_plotMeFix;
     private WorldGuardIntegrator m_worldGuard;
 
+    public PhysicsWatch getPhysicsWatcher()
+    {
+        return m_physicsWatcher;
+    }
+    
     public PlotMeFix getPlotMeFix() {       
         return m_plotMeFix;
     }
@@ -203,7 +210,16 @@ public class PluginMain extends JavaPlugin {
         m_logger = getLogger(ConfigProvider.getLogger());
         m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit(), m_logger);
 
-        getServer().getPluginManager().registerEvents(m_listener, this);
+        if (ConfigProvider.isPhysicsFreezEnabled()) {
+            m_physicsWatcher.Enable();
+        } else {
+            m_physicsWatcher.Disable();
+        }
+        
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(m_listener, this);
+        pm.registerEvents(m_physicsWatcher, this);
+        
         m_isInitialized = true;
 
         setPlayerModes();
@@ -277,6 +293,13 @@ public class PluginMain extends JavaPlugin {
 
         m_logger = getLogger(ConfigProvider.getLogger());
         m_weIntegrator.setLogger(m_logger);
+        if (ConfigProvider.isPhysicsFreezEnabled())
+        {
+            m_physicsWatcher.Enable();
+        }
+        else {
+            m_physicsWatcher.Disable();
+        }
 
         m_isInitialized = true;
         Say(player, "Config reloaded");

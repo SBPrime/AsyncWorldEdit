@@ -36,26 +36,27 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.*;
+import org.bukkit.World;
 
 /**
  *
  * @author SBPrime
  */
 public class BlockPlacer implements Runnable {
+
     /**
      * Operation queue player entry
      */
     private class PlayerEntry {
+
         /**
          * Number of samples used in AVG count
          */
         private final int AVG_SAMPLES = 5;
-
         /**
          * The queue
          */
         private Queue<BlockPlacerEntry> m_queue;
-
         /**
          * Current block placing speed (blocks per second)
          */
@@ -78,58 +79,51 @@ public class BlockPlacer implements Runnable {
             m_speed = (m_speed * (AVG_SAMPLES - 1) + blocks) / AVG_SAMPLES;
         }
     }
-
+    /**
+     * The physics watcher
+     */
+    private final PhysicsWatch m_physicsWatcher;
     /**
      * Bukkit scheduler
      */
     private BukkitScheduler m_scheduler;
-
     /**
      * Current scheduler task
      */
     private BukkitTask m_task;
-
     /**
      * Logged events queue (per player)
      */
     private HashMap<String, PlayerEntry> m_blocks;
-
     /**
      * All locked queues
      */
     private HashSet<String> m_lockedQueues;
-
     /**
      * Should block places shut down
      */
     private boolean m_shutdown;
-
     /**
      * Player block queue hard limit (max bloks count)
      */
     private int m_queueHardLimit;
-
     /**
      * Player block queue soft limit (minimum number of blocks before queue is
      * unlocked)
      */
     private int m_queueSoftLimit;
-
     /**
      * Global queue max size
      */
     private int m_queueMaxSize;
-
     /**
      * Block placing interval (in ticks)
      */
     private long m_interval;
-
     /**
      * Talk interval
      */
     private int m_talkInterval;
-
     /**
      * Run number
      */
@@ -154,6 +148,7 @@ public class BlockPlacer implements Runnable {
         m_queueHardLimit = ConfigProvider.getQueueHardLimit();
         m_queueSoftLimit = ConfigProvider.getQueueSoftLimit();
         m_queueMaxSize = ConfigProvider.getQueueMaxSize();
+        m_physicsWatcher = plugin.getPhysicsWatcher();
     }
 
     /**
@@ -222,7 +217,7 @@ public class BlockPlacer implements Runnable {
      * @return blocks fatched
      */
     private boolean fetchBlocks(final int blockCnt, final String[] playerNames,
-                                List<BlockPlacerEntry> entries) {
+            List<BlockPlacerEntry> entries) {
         if (blockCnt <= 0 || playerNames == null || playerNames.length == 0) {
             return false;
         }
@@ -304,12 +299,19 @@ public class BlockPlacer implements Runnable {
                 return false;
             } else {
                 queue.add(entry);
+                if (entry instanceof BlockPlacerBlockEntry) {
+                    World world = entry.getEditSession().getCBWorld();
+                    if (world != null) {
+                        m_physicsWatcher.addLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
+                    }
+                }
                 if (queue.size() >= m_queueHardLimit && bypass) {
                     m_lockedQueues.add(player);
                     PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is full. Wait for items to finish drawing.");
                     return false;
                 }
             }
+
             return true;
         }
     }
@@ -322,6 +324,15 @@ public class BlockPlacer implements Runnable {
     public void purge(String player) {
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
+                Queue<BlockPlacerEntry> queue = m_blocks.get(player).getQueue();
+                for (BlockPlacerEntry entry : queue) {
+                    if (entry instanceof BlockPlacerBlockEntry) {
+                        World world = entry.getEditSession().getCBWorld();
+                        if (world != null) {
+                            m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
+                        }
+                    }
+                }
                 m_blocks.remove(player);
             }
             if (m_lockedQueues.contains(player)) {
@@ -430,6 +441,11 @@ public class BlockPlacer implements Runnable {
             Vector location = blockEntry.getLocation();
             BaseBlock block = blockEntry.getNewBlock();
             eSession.doRawSetBlock(location, block);
+
+            World world = eSession.getCBWorld();
+            if (world != null) {
+                m_physicsWatcher.removeLocation(world.getName(), location);
+            }
         }
         if (entry instanceof BlockPlacerMaskEntry) {
             BlockPlacerMaskEntry maskEntry = (BlockPlacerMaskEntry) entry;

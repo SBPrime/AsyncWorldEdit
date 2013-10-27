@@ -45,7 +45,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
-        
+
         PluginMain.setMode(player);
 
         if (!PermissionManager.isAllowed(player, PermissionManager.Perms.AnnounceVersion)) {
@@ -53,12 +53,13 @@ public class EventListener implements Listener {
         }
 
         new Thread(new Runnable() {
+
             @Override
             public void run() {
                 if (ConfigProvider.getCheckUpdate()) {
                     PluginDescriptionFile desc = m_parent.getDescription();
                     PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()
-                        + VersionChecker.CheckVersion(desc.getVersion()));                    
+                            + VersionChecker.CheckVersion(desc.getVersion()));
                 }
             }
         }).start();
@@ -67,5 +68,5 @@ public class EventListener implements Listener {
             PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()
                     + "Please update your config file!");
         }
-    }
+    }    
 }

@@ -11,6 +11,7 @@ awe:
   checkVersion: true
   worldGuard: false
   defaultOn: true
+  physicsFreez: true
   enabledOperations:
     - undo
     - redo

@@ -36,50 +36,35 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
  * @author SBPrime
  */
 public class ConfigProvider {
+
     /**
      * Number of ticks in one second
      */
     public static final int TICKS_PER_SECOND = 20;
-
     /**
      * Default user name when no user is available
      */
     public static final String DEFAULT_USER = "#worldedit";
-
     /**
      * The config file version
      */
     private static final int CONFIG_VERSION = 1;
-
     private static boolean m_defaultMode = true;
-
     private static boolean m_checkUpdate = false;
-
     private static boolean m_isConfigUpdate = false;
-
     private static boolean m_isWorldGuardEnabled = false;
-
     private static long m_interval;
-
     private static int m_blocksCnt;
-
     private static int m_vipBlocksCnt;
-
     private static int m_queueHardLimit;
-
     private static int m_queueSoftLimit;
-
     private static int m_queueMaxSize;
-
     private static int m_queueTalkInterval;
-
     private static String m_configVersion;
-
     private static String m_logger;
-
     private static HashSet<WorldeditOperations> m_allowedOperations;
-
     private static HashSet<String> m_enabledWorlds;
+    private static boolean m_physicsFreez;
 
     public static String getLogger() {
         return m_logger;
@@ -197,6 +182,10 @@ public class ConfigProvider {
         return m_queueMaxSize;
     }
 
+    public static boolean isPhysicsFreezEnabled() {
+        return m_physicsFreez;
+    }
+
     /**
      * Load configuration
      *
@@ -220,6 +209,7 @@ public class ConfigProvider {
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
+        m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
         m_isWorldGuardEnabled = mainSection.getBoolean("worldGuard", false);
 
         parseRenderSection(mainSection);
@@ -284,8 +274,7 @@ public class ConfigProvider {
         for (String string : mainSection.getStringList("enabledOperations")) {
             try {
                 result.add(WorldeditOperations.valueOf(string));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 PluginMain.Log("* unknown operation name " + string);
             }
         }

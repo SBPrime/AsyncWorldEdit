@@ -24,7 +24,6 @@
 package org.primesoft.asyncworldedit;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
@@ -44,7 +43,7 @@ public class VersionChecker {
      * @param url Version file http page
      * @return Version page content
      */
-    private static String downlaodPage(String url) {
+    private static String downloadPage(String url) {
         try {
             InputStreamReader is = new InputStreamReader(new URL(url).openStream());
             BufferedReader br = new BufferedReader(is);
@@ -69,7 +68,7 @@ public class VersionChecker {
      * @return Version comperation answer
      */
     public static String CheckVersion(String version) {
-        String content = downlaodPage(s_versionUrl);
+        String content = downloadPage(s_versionUrl);
 
         if (content == null || content.isEmpty()) {
             return "Unable to check latest plugin version.";
