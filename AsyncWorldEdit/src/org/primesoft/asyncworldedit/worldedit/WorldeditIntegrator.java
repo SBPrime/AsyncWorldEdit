@@ -27,9 +27,8 @@ import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.WorldEdit;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
+import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.PluginMain;
-import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
-import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
 
 /**
  *
@@ -76,7 +75,7 @@ public class WorldeditIntegrator implements Runnable {
      * @param wePlugin
      * @param logger
      */
-    public WorldeditIntegrator(PluginMain plugin, WorldEdit worldEdit, IBlockLogger logger) {
+    public WorldeditIntegrator(PluginMain plugin, WorldEdit worldEdit, BlocksHubIntegration bh) {
         m_worldedit = worldEdit;
         m_parent = plugin;
         m_scheduler = plugin.getServer().getScheduler();        
@@ -93,22 +92,10 @@ public class WorldeditIntegrator implements Runnable {
             return;
         }
         
-        m_factory = new AsyncEditSessionFactory(m_parent, logger);
+        m_factory = new AsyncEditSessionFactory(m_parent);
         
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 CHECK_INTERVAL, CHECK_INTERVAL);         
-    }
-
-    /**
-     * Set the logger
-     *
-     * @param logger
-     */
-    public void setLogger(IBlockLogger logger) {
-        if (logger == null) {
-            logger = new NoneLogger();
-        }
-        m_factory.setLogger(logger);        
     }
     
     

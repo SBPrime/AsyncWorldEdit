@@ -8,8 +8,7 @@ awe:
     queue-max-size: 10000000
     queue-limit-hard: 500000
     queue-limit-soft: 250000
-  checkVersion: true
-  worldGuard: false
+  checkVersion: true  
   defaultOn: true
   physicsFreez: true
   enabledOperations:
@@ -40,13 +39,3 @@ awe:
     - makeShape
     - deformRegion
     - hollowOutRegion
-  logger:
-    type: none
-#   type: logBlock
-#   type: coreProtect
-#   type: prism
-#   type: hawkEye
-    worlds:
-      - world
-      - world_nether
-      - world_the_end

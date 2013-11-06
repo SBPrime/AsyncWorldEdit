@@ -31,8 +31,7 @@ import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.bags.BlockBag;
-import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
-import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
+import org.primesoft.asyncworldedit.BlocksHubIntegration;
 
 /**
  *
@@ -41,36 +40,8 @@ import org.primesoft.asyncworldedit.blocklogger.NoneLogger;
 public class AsyncEditSessionFactory extends EditSessionFactory {
     private PluginMain m_parent;
     
-    /**
-     * The block logger
-     */
-    private IBlockLogger m_logger;
-           
-    
-    public AsyncEditSessionFactory(PluginMain parent, IBlockLogger logger) {
+    public AsyncEditSessionFactory(PluginMain parent) {
         m_parent = parent;
-        setLogger(logger);
-    }
-
-    /**
-     * Set the logger
-     *
-     * @param logger
-     */
-    public void setLogger(IBlockLogger logger) {
-        if (logger == null) {
-            logger = new NoneLogger();
-        }
-        m_logger = logger;
-    }
-    
-    /**
-     * Get the logger
-     *
-     * @return logger
-     */
-    public IBlockLogger getLogger() {
-        return m_logger;
     }
     
     @Override

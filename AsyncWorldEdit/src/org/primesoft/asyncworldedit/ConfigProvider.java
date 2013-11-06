@@ -24,8 +24,6 @@
 package org.primesoft.asyncworldedit;
 
 import java.util.HashSet;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
@@ -52,7 +50,6 @@ public class ConfigProvider {
     private static boolean m_defaultMode = true;
     private static boolean m_checkUpdate = false;
     private static boolean m_isConfigUpdate = false;
-    private static boolean m_isWorldGuardEnabled = false;
     private static long m_interval;
     private static int m_blocksCnt;
     private static int m_vipBlocksCnt;
@@ -61,14 +58,8 @@ public class ConfigProvider {
     private static int m_queueMaxSize;
     private static int m_queueTalkInterval;
     private static String m_configVersion;
-    private static String m_logger;
     private static HashSet<WorldeditOperations> m_allowedOperations;
-    private static HashSet<String> m_enabledWorlds;
     private static boolean m_physicsFreez;
-
-    public static String getLogger() {
-        return m_logger;
-    }
 
     /**
      * Get the config version
@@ -128,23 +119,6 @@ public class ConfigProvider {
         return m_isConfigUpdate;
     }
 
-    /**
-     * Is the world guard integration enabled
-     *
-     * @return
-     */
-    public static boolean isWorldGuardEnabled() {
-        return m_isWorldGuardEnabled;
-    }
-
-    /**
-     * Is the world being logged
-     *
-     * @return
-     */
-    public static boolean isLogging(String world) {
-        return m_enabledWorlds.contains(world.toLowerCase());
-    }
 
     /**
      * Queue hard limit
@@ -210,10 +184,8 @@ public class ConfigProvider {
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
-        m_isWorldGuardEnabled = mainSection.getBoolean("worldGuard", false);
 
         parseRenderSection(mainSection);
-        parseLoggerSection(mainSection);
 
         m_allowedOperations = parseOperationsSection(mainSection);
 
@@ -292,35 +264,5 @@ public class ConfigProvider {
 
 
         return result;
-    }
-
-    /**
-     * Parse blocks logger section
-     *
-     * @param mainSection config section
-     */
-    private static void parseLoggerSection(ConfigurationSection mainSection) {
-        ConfigurationSection loggerSection = mainSection.getConfigurationSection("logger");
-
-        if (loggerSection == null) {
-            m_logger = "none";
-            m_enabledWorlds = new HashSet<String>();
-        } else {
-            m_logger = loggerSection.getString("type", "none").toLowerCase();
-            m_enabledWorlds = new HashSet<String>();
-
-            for (String world : loggerSection.getStringList("worlds")) {
-                world = world.toLowerCase();
-                if (!m_enabledWorlds.contains(world)) {
-                    m_enabledWorlds.add(world);
-                }
-            }
-
-            PluginMain.Log("WorldEdit logging:");
-        }
-
-        for (World world : Bukkit.getWorlds()) {
-            PluginMain.Log("* " + world.getName() + "..." + (m_enabledWorlds.contains(world.getName().toLowerCase()) ? "enabled" : "disabled"));
-        }
     }
 }

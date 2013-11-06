@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.*;
-import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
 
 /**
  *
@@ -56,9 +55,10 @@ public class AsyncEditSession extends EditSession {
     private World m_world;
 
     /**
-     * The world guard integrator
+     * The blocks hub integrator
      */
-    private WorldGuardIntegrator m_worldGuard;
+    private BlocksHubIntegration m_bh;
+    
 
     /**
      * The parent factory class
@@ -95,7 +95,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public boolean rawSetBlock(Vector pt, BaseBlock block) {
-        if (!m_worldGuard.canPlace(m_player, pt, m_world)) {
+        if (!m_bh.canPlace(m_player, m_world, pt)) {
             return false;
         }
 
@@ -558,8 +558,7 @@ public class AsyncEditSession extends EditSession {
         return result;
     }
 
-    public boolean doRawSetBlock(Vector location, BaseBlock block) {
-        IBlockLogger logger = m_factory != null ? m_factory.getLogger() : null;
+    public boolean doRawSetBlock(Vector location, BaseBlock block) {        
         String player = getPlayer();
         World world = getCBWorld();
         BaseBlock oldBlock = getBlock(location);
@@ -567,10 +566,8 @@ public class AsyncEditSession extends EditSession {
         boolean success = super.rawSetBlock(location, block);
         //boolean success = eSession.doRawSetBlock(location, block);
 
-        if (logger != null && success && world != null) {
-            if (ConfigProvider.isLogging(world.getName())) {
-                logger.LogBlock(location, oldBlock, block, player, world);
-            }
+        if (success && world != null) {
+            m_bh.logBlock(player, world, location, oldBlock, oldBlock);
         }
         return success;
     }
@@ -593,6 +590,7 @@ public class AsyncEditSession extends EditSession {
      */
     private void initialize(String player, PluginMain plugin,
                             LocalWorld world, AsyncEditSessionFactory factory) {
+        m_bh = plugin.getBlocksHub();
         m_factory = factory;
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
@@ -601,7 +599,6 @@ public class AsyncEditSession extends EditSession {
         }
         m_asyncForced = false;
         m_asyncDisabled = false;
-        m_worldGuard = plugin.getWorldGuardIntegrator();
     }
 
     /**

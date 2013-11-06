@@ -37,7 +37,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.blocklogger.*;
 import org.primesoft.asyncworldedit.commands.Commands;
 import org.primesoft.asyncworldedit.commands.JobsCommand;
 import org.primesoft.asyncworldedit.commands.PurgeCommand;
@@ -57,6 +56,7 @@ public class PluginMain extends JavaPlugin {
     private static String s_logFormat = "%s %s";
     private static PluginMain s_instance;
     private static final HashSet<String> s_asyncPlayers = new HashSet<String>();
+    private BlocksHubIntegration m_blocksHub;
 
     /**
      * Check if player has AWE enabled
@@ -120,10 +120,8 @@ public class PluginMain extends JavaPlugin {
     private EventListener m_listener = new EventListener(this);
     private PhysicsWatch m_physicsWatcher = new PhysicsWatch();
     private BlockPlacer m_blockPlacer;
-    private WorldeditIntegrator m_weIntegrator;
-    private IBlockLogger m_logger;
+    private WorldeditIntegrator m_weIntegrator;    
     private PlotMeFix m_plotMeFix;
-    private WorldGuardIntegrator m_worldGuard;
 
     public PhysicsWatch getPhysicsWatcher()
     {
@@ -132,10 +130,6 @@ public class PluginMain extends JavaPlugin {
     
     public PlotMeFix getPlotMeFix() {       
         return m_plotMeFix;
-    }
-
-    public WorldGuardIntegrator getWorldGuardIntegrator() {
-        return m_worldGuard;
     }
 
     public BlockPlacer getBlockPlacer() {
@@ -153,6 +147,7 @@ public class PluginMain extends JavaPlugin {
 
         return s_instance.getServer().getPlayer(player);
     }
+       
 
     public static void Log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
@@ -170,6 +165,10 @@ public class PluginMain extends JavaPlugin {
         }
     }
 
+    public BlocksHubIntegration getBlocksHub(){
+        return m_blocksHub;
+    }
+    
     @Override
     public void onEnable() {
         s_instance = this;
@@ -196,7 +195,7 @@ public class PluginMain extends JavaPlugin {
             return;
         }
 
-        m_worldGuard = new WorldGuardIntegrator(this);        
+        m_blocksHub = new BlocksHubIntegration(this);
         m_plotMeFix = new PlotMeFix(this);
         m_blockPlacer = new BlockPlacer(this);
 
@@ -206,9 +205,8 @@ public class PluginMain extends JavaPlugin {
         if (!ConfigProvider.isConfigUpdated()) {
             Log("Please update your config file!");
         }
-
-        m_logger = getLogger(ConfigProvider.getLogger());
-        m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit(), m_logger);
+        
+        m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit(), m_blocksHub);
 
         if (ConfigProvider.isPhysicsFreezEnabled()) {
             m_physicsWatcher.Enable();
@@ -291,8 +289,6 @@ public class PluginMain extends JavaPlugin {
         m_blockPlacer.queueStop();
         m_blockPlacer = new BlockPlacer(this);
 
-        m_logger = getLogger(ConfigProvider.getLogger());
-        m_weIntegrator.setLogger(m_logger);
         if (ConfigProvider.isPhysicsFreezEnabled())
         {
             m_physicsWatcher.Enable();
@@ -346,33 +342,6 @@ public class PluginMain extends JavaPlugin {
         }
 
         return (WorldEditPlugin) wPlugin;
-    }
-
-    /**
-     * Create the block logger
-     *
-     * @param logger
-     * @return
-     */
-    private IBlockLogger getLogger(String logger) {
-        if (logger.equalsIgnoreCase(Loggers.LOG_BLOCK)) {
-            return new LogBlockLogger(this);
-        }
-        if (logger.equalsIgnoreCase(Loggers.CORE_PROTECT)) {
-            return new CoreProtectLogger(this);
-        }
-        if (logger.equalsIgnoreCase(Loggers.PRISM)) {
-            return new PrismLogger(this);
-        }
-        if (logger.equalsIgnoreCase(Loggers.HAWK_EYE)) {
-            return new HawkEyeLogger(this);
-        }
-        if (logger.equalsIgnoreCase(Loggers.NONE)) {
-            return new NoneLogger();
-        }
-
-        Log("Unknown logger: " + logger + ". Logger disabled.");
-        return new NoneLogger();
     }
 
     /**
