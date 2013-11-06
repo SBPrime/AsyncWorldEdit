@@ -27,7 +27,6 @@ import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.WorldEdit;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
-import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.PluginMain;
 
 /**
@@ -75,7 +74,7 @@ public class WorldeditIntegrator implements Runnable {
      * @param wePlugin
      * @param logger
      */
-    public WorldeditIntegrator(PluginMain plugin, WorldEdit worldEdit, BlocksHubIntegration bh) {
+    public WorldeditIntegrator(PluginMain plugin, WorldEdit worldEdit) {
         m_worldedit = worldEdit;
         m_parent = plugin;
         m_scheduler = plugin.getServer().getScheduler();        

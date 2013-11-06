@@ -567,7 +567,7 @@ public class AsyncEditSession extends EditSession {
         //boolean success = eSession.doRawSetBlock(location, block);
 
         if (success && world != null) {
-            m_bh.logBlock(player, world, location, oldBlock, oldBlock);
+            m_bh.logBlock(player, world, location, oldBlock, block);
         }
         return success;
     }
