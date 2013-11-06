@@ -34,6 +34,10 @@ import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.World;
@@ -44,129 +48,135 @@ import org.primesoft.asyncworldedit.blocklogger.IBlockLogger;
  *
  * @author SBPrime
  */
-public class AsyncEditSession extends EditSession
-{
+public class AsyncEditSession extends EditSession {
     private String m_player;
 
     private BlockPlacer m_blockPlacer;
 
     private World m_world;
-    
-    
+
     /**
      * The world guard integrator
      */
     private WorldGuardIntegrator m_worldGuard;
-    
-        
+
     /**
      * The parent factory class
      */
     private AsyncEditSessionFactory m_factory;
-    
 
     /**
      * Force all functions to by performed in async mode this is used to
      * override the config by API calls
      */
     private boolean m_asyncForced;
-    
 
     /**
      * Indicates that the async mode has been disabled (inner state)
      */
     private boolean m_asyncDisabled;
 
-    public String getPlayer()
-    {
+    public String getPlayer() {
         return m_player;
     }
 
-    public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin, 
-                            String player, LocalWorld world, int maxBlocks)
-    {
+    public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
+                            String player, LocalWorld world, int maxBlocks) {
         super(world, maxBlocks);
         initialize(player, plugin, world, factory);
     }
 
-    public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin, 
-                            String player, LocalWorld world, int maxBlocks, BlockBag blockBag)
-    {
+    public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
+                            String player, LocalWorld world, int maxBlocks,
+                            BlockBag blockBag) {
         super(world, maxBlocks, blockBag);
         initialize(player, plugin, world, factory);
     }
 
     @Override
-    public boolean rawSetBlock(Vector pt, BaseBlock block)
-    {
-        if (!m_worldGuard.canPlace(m_player, pt, m_world))
-        {
+    public boolean rawSetBlock(Vector pt, BaseBlock block) {
+        if (!m_worldGuard.canPlace(m_player, pt, m_world)) {
             return false;
         }
-        
-        if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled))
-        {
+
+        if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled)) {
             return m_blockPlacer.addTasks(new BlockPlacerBlockEntry(this, pt, block));
-        } else
-        {
-            return doRawSetBlock(pt, block);            
+        } else {
+            return doRawSetBlock(pt, block);
         }
     }
-    
-    
+
     @Override
-    public void setMask(Mask mask)
-    {
-        if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled))
-        {
+    public void setMask(Mask mask) {
+        if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled)) {
             m_blockPlacer.addTasks(new BlockPlacerMaskEntry(this, mask));
-        } else
-        {
+        } else {
             doSetMask(mask);
         }
 
     }
-    
 
     @Override
-    public void flushQueue()
-    {
+    public void flushQueue() {
         boolean queued = isQueueEnabled();
         super.flushQueue();
-        if (queued)
-        {
+        if (queued) {
             resetAsync();
         }
     }
 
     @Override
-    public void undo(EditSession sess)
-    {
+    public void undo(EditSession sess) {
         checkAsync(WorldeditOperations.undo);
         UndoSession undoSession = new UndoSession();
         super.undo(undoSession);
 
-        Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
-        for (int i = blocks.length - 1; i >= 0; i--)
-        {
+        final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
+        final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> placedBlocks = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
+
+        for (int i = blocks.length - 1; i >= 0; i--) {
             Map.Entry<Vector, BaseBlock> entry = blocks[i];
-            sess.smartSetBlock(entry.getKey(), entry.getValue());
+            Vector pos = entry.getKey();
+            BaseBlock block = entry.getValue();
+
+            int x = pos.getBlockX();
+            int y = pos.getBlockY();
+            int z = pos.getBlockZ();
+            boolean ignore = false;
+
+            HashMap<Integer, HashSet<Integer>> mapX = placedBlocks.get(x);
+            if (mapX == null) {
+                mapX = new HashMap<Integer, HashSet<Integer>>();
+                placedBlocks.put(x, mapX);
+            }
+            
+            HashSet<Integer> mapY = mapX.get(y);
+            if (mapY == null) {
+                mapY = new HashSet<Integer>();
+                mapX.put(y, mapY);
+            }
+            if (mapY.contains(z)) {
+                ignore = true;
+            } else {
+                mapY.add(z);
+            }
+
+            if (!ignore) {
+                sess.smartSetBlock(pos, block);
+            }
         }
 
         sess.flushQueue();
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
     }
 
     @Override
-    public void redo(EditSession sess)
-    {
+    public void redo(EditSession sess) {
         checkAsync(WorldeditOperations.redo);
         super.redo(sess);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
     }
@@ -174,12 +184,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int fillXZ(Vector origin, BaseBlock block, double radius, int depth,
                       boolean recursive)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.fillXZ);
         int result = super.fillXZ(origin, block, radius, depth, recursive);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -188,12 +196,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int fillXZ(Vector origin, Pattern pattern, double radius, int depth,
                       boolean recursive)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.fillXZ);
         int result = super.fillXZ(origin, pattern, radius, depth, recursive);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -201,12 +207,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int removeAbove(Vector pos, int size, int height)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.removeAbove);
         int result = super.removeAbove(pos, size, height);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -214,12 +218,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int removeBelow(Vector pos, int size, int height)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.removeBelow);
         int result = super.removeBelow(pos, size, height);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -227,12 +229,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int removeNear(Vector pos, int blockType, int size)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.removeNear);
         int result = super.removeNear(pos, blockType, size);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -240,12 +240,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int setBlocks(Region region, BaseBlock block)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.setBlocks);
         int result = super.setBlocks(region, block);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -253,12 +251,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int setBlocks(Region region, Pattern pattern)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.setBlocks);
         int result = super.setBlocks(region, pattern);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -267,12 +263,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int replaceBlocks(Region region,
                              Set<BaseBlock> fromBlockTypes, BaseBlock toBlock)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.replaceBlocks);
         int result = super.replaceBlocks(region, fromBlockTypes, toBlock);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -281,12 +275,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int replaceBlocks(Region region,
                              Set<BaseBlock> fromBlockTypes, Pattern pattern)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.replaceBlocks);
         int result = super.replaceBlocks(region, fromBlockTypes, pattern);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -294,12 +286,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int makeCuboidFaces(Region region, BaseBlock block)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeCuboidFaces);
         int result = super.makeCuboidFaces(region, block);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -307,12 +297,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int makeCuboidFaces(Region region, Pattern pattern)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeCuboidFaces);
         int result = super.makeCuboidFaces(region, pattern);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -320,12 +308,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int makeCuboidWalls(Region region, BaseBlock block)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeCuboidWalls);
         int result = super.makeCuboidWalls(region, block);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -333,12 +319,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int makeCuboidWalls(Region region, Pattern pattern)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeCuboidWalls);
         int result = super.makeCuboidWalls(region, pattern);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -346,12 +330,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int overlayCuboidBlocks(Region region, BaseBlock block)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.overlayCuboidBlocks);
         int result = super.overlayCuboidBlocks(region, block);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -359,12 +341,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int overlayCuboidBlocks(Region region, Pattern pattern)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.overlayCuboidBlocks);
         int result = super.overlayCuboidBlocks(region, pattern);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -372,12 +352,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int naturalizeCuboidBlocks(Region region)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.naturalizeCuboidBlocks);
         int result = super.naturalizeCuboidBlocks(region);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -386,12 +364,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int stackCuboidRegion(Region region, Vector dir, int count,
                                  boolean copyAir)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.stackCuboidRegion);
         int result = super.stackCuboidRegion(region, dir, count, copyAir);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -400,12 +376,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int moveCuboidRegion(Region region, Vector dir, int distance,
                                 boolean copyAir, BaseBlock replace)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.moveCuboidRegion);
         int result = super.moveCuboidRegion(region, dir, distance, copyAir, replace);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -413,12 +387,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int drainArea(Vector pos, double radius)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.drainArea);
         int result = super.drainArea(pos, radius);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -426,12 +398,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int fixLiquid(Vector pos, double radius, int moving, int stationary)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.fixLiquid);
         int result = super.fixLiquid(pos, radius, moving, stationary);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -440,12 +410,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int makeCylinder(Vector pos, Pattern block, double radius, int height,
                             boolean filled)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeCylinder);
         int result = super.makeCylinder(pos, block, radius, height, filled);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -454,12 +422,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int makeCylinder(Vector pos, Pattern block, double radiusX,
                             double radiusZ, int height, boolean filled)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeCylinder);
         int result = super.makeCylinder(pos, block, radiusX, radiusZ, height, filled);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -468,12 +434,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int makeSphere(Vector pos, Pattern block, double radius,
                           boolean filled)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeSphere);
         int result = super.makeSphere(pos, block, radius, filled);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -482,12 +446,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int makeSphere(Vector pos, Pattern block, double radiusX,
                           double radiusY, double radiusZ, boolean filled)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeSphere);
         int result = super.makeSphere(pos, block, radiusX, radiusY, radiusZ, filled);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -495,12 +457,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int makePyramid(Vector pos, Pattern block, int size, boolean filled)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makePyramid);
         int result = super.makePyramid(pos, block, size, filled);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -508,12 +468,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int thaw(Vector pos, double radius)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.thaw);
         int result = super.thaw(pos, radius);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -521,12 +479,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int simulateSnow(Vector pos, double radius)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.simulateSnow);
         int result = super.simulateSnow(pos, radius);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -534,12 +490,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int green(Vector pos, double radius)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.green);
         int result = super.green(pos, radius);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -547,12 +501,10 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int makePumpkinPatches(Vector basePos, int size)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makePumpkinPatches);
         int result = super.makePumpkinPatches(basePos, size);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -561,12 +513,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int makeForest(Vector basePos, int size, double density,
                           TreeGenerator treeGenerator)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeForest);
         int result = super.makeForest(basePos, size, density, treeGenerator);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -576,12 +526,10 @@ public class AsyncEditSession extends EditSession
     public int makeShape(Region region, Vector zero, Vector unit,
                          Pattern pattern, String expressionString,
                          boolean hollow)
-            throws ExpressionException, MaxChangedBlocksException
-    {
+            throws ExpressionException, MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeShape);
         int result = super.makeShape(region, zero, unit, pattern, expressionString, hollow);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -590,12 +538,10 @@ public class AsyncEditSession extends EditSession
     @Override
     public int deformRegion(Region region, Vector zero, Vector unit,
                             String expressionString)
-            throws ExpressionException, MaxChangedBlocksException
-    {
+            throws ExpressionException, MaxChangedBlocksException {
         checkAsync(WorldeditOperations.deformRegion);
         int result = super.deformRegion(region, zero, unit, expressionString);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
@@ -603,24 +549,21 @@ public class AsyncEditSession extends EditSession
 
     @Override
     public int hollowOutRegion(Region region, int thickness, Pattern pattern)
-            throws MaxChangedBlocksException
-    {
+            throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.hollowOutRegion);
         int result = super.hollowOutRegion(region, thickness, pattern);
-        if (!isQueueEnabled())
-        {
+        if (!isQueueEnabled()) {
             resetAsync();
         }
         return result;
     }
 
-    public boolean doRawSetBlock(Vector location, BaseBlock block)
-    {
+    public boolean doRawSetBlock(Vector location, BaseBlock block) {
         IBlockLogger logger = m_factory != null ? m_factory.getLogger() : null;
         String player = getPlayer();
         World world = getCBWorld();
         BaseBlock oldBlock = getBlock(location);
-        
+
         boolean success = super.rawSetBlock(location, block);
         //boolean success = eSession.doRawSetBlock(location, block);
 
@@ -628,20 +571,16 @@ public class AsyncEditSession extends EditSession
             if (ConfigProvider.isLogging(world.getName())) {
                 logger.LogBlock(location, oldBlock, block, player, world);
             }
-        }        
+        }
         return success;
     }
-    
-    
-    public void doSetMask(Mask mask)
-    {
-        super.setMask(mask);
-        
-    }
-    
 
-    public World getCBWorld()
-    {
+    public void doSetMask(Mask mask) {
+        super.setMask(mask);
+
+    }
+
+    public World getCBWorld() {
         return m_world;
     }
 
@@ -652,14 +591,12 @@ public class AsyncEditSession extends EditSession
      * @param plugin parent plugin
      * @param world edit session world
      */
-    private void initialize(String player, PluginMain plugin, 
-                            LocalWorld world, AsyncEditSessionFactory factory)
-    {
+    private void initialize(String player, PluginMain plugin,
+                            LocalWorld world, AsyncEditSessionFactory factory) {
         m_factory = factory;
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
-        if (world != null)
-        {
+        if (world != null) {
             m_world = plugin.getServer().getWorld(world.getName());
         }
         m_asyncForced = false;
@@ -673,8 +610,7 @@ public class AsyncEditSession extends EditSession
      *
      * @param value true to enable async mode force
      */
-    public void setAsyncForced(boolean value)
-    {
+    public void setAsyncForced(boolean value) {
         m_asyncForced = value;
     }
 
@@ -683,8 +619,7 @@ public class AsyncEditSession extends EditSession
      *
      * @return
      */
-    public boolean isAsyncForced()
-    {
+    public boolean isAsyncForced() {
         return m_asyncForced;
     }
 
@@ -693,16 +628,14 @@ public class AsyncEditSession extends EditSession
      *
      * @param operation
      */
-    private void checkAsync(WorldeditOperations operation)
-    {
+    private void checkAsync(WorldeditOperations operation) {
         m_asyncDisabled = !ConfigProvider.isAsyncAllowed(operation);
     }
 
     /**
      * Reset async disabled inner state (enable async mode)
      */
-    private void resetAsync()
-    {
+    private void resetAsync() {
         m_asyncDisabled = false;
     }
 }
