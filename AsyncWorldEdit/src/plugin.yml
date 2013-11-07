@@ -1,11 +1,11 @@
 name: AsyncWorldedit
 main: org.primesoft.asyncworldedit.PluginMain
-version: 1.0RC2
+version: 1.0RC3
 website: http://dev.bukkit.org/server-mods/async_worldedit/
 description: This plugin attaches into WorldEdit and makes it asynchronous.
 authors: [SBPrime]
 depend: [WorldEdit]
-softdepend: [BlocksHub]
+softdepend: [BlocksHub, PlotMe]
 commands:
   awe:
     description: 'Displays the help for Async world edit.'
