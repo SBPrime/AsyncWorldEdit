@@ -86,11 +86,29 @@ public class BlocksHubIntegration {
     }
 
     public boolean canPlace(String name, World world, Vector location) {
+        if (location == null)
+        {
+            return false;
+        }
         Location l = new Location(world, location.getX(), location.getY(), location.getZ());
         return canPlace(name, world, l);
     }
 
     public void logBlock(String name, World world, Vector location, BaseBlock oldBlock, BaseBlock newBlock) {
+        if (location == null)
+        {
+            return;
+        }
+        
+        if (oldBlock == null)
+        {
+            oldBlock = new BaseBlock(0);
+        }
+        if (newBlock == null)
+        {
+            newBlock = new BaseBlock(0);
+        }
+        
         Location l = new Location(world, location.getX(), location.getY(), location.getZ());
         logBlock(name, world, l, oldBlock.getType(), (byte) oldBlock.getData(),
                 newBlock.getType(), (byte) newBlock.getData());
