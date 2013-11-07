@@ -4,8 +4,8 @@ version: 1.0RC2
 website: http://dev.bukkit.org/server-mods/async_worldedit/
 description: This plugin attaches into WorldEdit and makes it asynchronous.
 authors: [SBPrime]
-depend: [WorldEdit, BlocksHub]
-softdepend:
+depend: [WorldEdit]
+softdepend: [BlocksHub]
 commands:
   awe:
     description: 'Displays the help for Async world edit.'
