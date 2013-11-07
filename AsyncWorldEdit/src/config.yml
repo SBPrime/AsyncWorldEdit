@@ -11,6 +11,9 @@ awe:
   checkVersion: true  
   defaultOn: true
   physicsFreez: true
+  blocksHub:
+    logBlocks: true
+    checkAccess: false
   enabledOperations:
     - undo
     - redo

@@ -70,15 +70,15 @@ public class BlocksHubIntegration {
     public void logBlock(String player, World world, Location location,
             int oldBlockType, byte oldBlockData,
             int newBlockType, byte newBlockData) {
-        if (!m_isInitialized) {
+        if (!m_isInitialized || !ConfigProvider.getLogBlocks()) {
             return;
         }
 
-        m_blocksApi.logBlock(player, world, location, newBlockType, newBlockData, newBlockType, newBlockData);
+        m_blocksApi.logBlock(player, world, location, oldBlockType, oldBlockData, newBlockType, newBlockData);
     }
 
     public boolean canPlace(String player, World world, Location location) {
-        if (!m_isInitialized) {
+        if (!m_isInitialized || !ConfigProvider.getCheckAccess()) {
             return true;
         }
 
@@ -90,12 +90,16 @@ public class BlocksHubIntegration {
         {
             return false;
         }
+        if (!ConfigProvider.getCheckAccess())
+        {
+            return true;
+        }
         Location l = new Location(world, location.getX(), location.getY(), location.getZ());
         return canPlace(name, world, l);
     }
 
     public void logBlock(String name, World world, Vector location, BaseBlock oldBlock, BaseBlock newBlock) {
-        if (location == null)
+        if (location == null || !ConfigProvider.getLogBlocks())
         {
             return;
         }

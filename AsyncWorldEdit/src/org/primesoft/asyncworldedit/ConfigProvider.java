@@ -34,32 +34,50 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
  * @author SBPrime
  */
 public class ConfigProvider {
-
     /**
      * Number of ticks in one second
      */
     public static final int TICKS_PER_SECOND = 20;
+
     /**
      * Default user name when no user is available
      */
     public static final String DEFAULT_USER = "#worldedit";
+
     /**
      * The config file version
      */
     private static final int CONFIG_VERSION = 1;
+
     private static boolean m_defaultMode = true;
+
     private static boolean m_checkUpdate = false;
+
     private static boolean m_isConfigUpdate = false;
+
     private static long m_interval;
+
     private static int m_blocksCnt;
+
     private static int m_vipBlocksCnt;
+
     private static int m_queueHardLimit;
+
     private static int m_queueSoftLimit;
+
     private static int m_queueMaxSize;
+
     private static int m_queueTalkInterval;
+
     private static String m_configVersion;
+
     private static HashSet<WorldeditOperations> m_allowedOperations;
+
     private static boolean m_physicsFreez;
+
+    private static boolean m_checkAccess;
+
+    private static boolean m_logBlocks;
 
     /**
      * Get the config version
@@ -98,6 +116,24 @@ public class ConfigProvider {
     }
 
     /**
+     * Is block login enabled
+     *
+     * @return
+     */
+    public static boolean getLogBlocks() {
+        return m_logBlocks;
+    }
+
+    /**
+     * Is block perms checking enabled
+     *
+     * @return
+     */
+    public static boolean getCheckAccess() {
+        return m_checkAccess;
+    }
+
+    /**
      * Get the number of blocks placed for VIP players
      *
      * @return number of blocks
@@ -118,7 +154,6 @@ public class ConfigProvider {
     public static boolean isConfigUpdated() {
         return m_isConfigUpdate;
     }
-
 
     /**
      * Queue hard limit
@@ -186,6 +221,7 @@ public class ConfigProvider {
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
 
         parseRenderSection(mainSection);
+        parseBlocksHubSection(mainSection.getConfigurationSection("blocksHub"));
 
         m_allowedOperations = parseOperationsSection(mainSection);
 
@@ -246,7 +282,8 @@ public class ConfigProvider {
         for (String string : mainSection.getStringList("enabledOperations")) {
             try {
                 result.add(WorldeditOperations.valueOf(string));
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 PluginMain.Log("* unknown operation name " + string);
             }
         }
@@ -264,5 +301,20 @@ public class ConfigProvider {
 
 
         return result;
+    }
+
+    /**
+     * Initialize blocks hub configuration
+     * @param bhSection 
+     */
+    private static void parseBlocksHubSection(ConfigurationSection bhSection) {
+        if (bhSection == null)
+        {
+            m_logBlocks = true;
+            m_checkAccess = false;
+        } else {
+            m_logBlocks = bhSection.getBoolean("logBlocks", true);
+            m_checkAccess = bhSection.getBoolean("checkAccess", false);
+        }
     }
 }
