@@ -91,7 +91,16 @@ public class VersionChecker {
                 String versionName = (String) jObject.get(API_NAME_VALUE);
                 String[] parts = versionName.split("[ \t-]");
 
-                eVersion = parts[parts.length - 1];
+                StringBuilder sb = new StringBuilder();
+                for (int j = 1;j<parts.length;j++)
+                {
+                    if (j > 1)
+                    {
+                        sb.append("-");
+                    }
+                    sb.append(parts[j]);
+                }
+                eVersion = sb.toString();
                 if (eVersion != null && eVersion.length() > 0 && version.equalsIgnoreCase(eVersion)) {
                     if (i != latestId) {
                         return "You have an old version of the plugin. Your version: " + version
