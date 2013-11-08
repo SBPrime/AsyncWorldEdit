@@ -26,20 +26,27 @@ package org.primesoft.asyncworldedit;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 /**
  * Version checker class
+ *
  * @author SBPrime
  */
 public class VersionChecker {
+    // Keys for extracting file information from JSON response
+
+    private static final String API_NAME_VALUE = "name";
     /**
      * Version url
      */
-    private final static String s_versionUrl = "http://dev.bukkit.org/server-mods/async_worldedit/pages/version/";
+    private final static String s_versionUrl = "https://api.curseforge.com/servermods/files?projectIds=55226";
 
-    
     /**
      * Download version page from the www
+     *
      * @param url Version file http page
      * @return Version page content
      */
@@ -64,6 +71,7 @@ public class VersionChecker {
 
     /**
      * Check if the version is up to date
+     *
      * @param version Current plugin version
      * @return Version comperation answer
      */
@@ -74,17 +82,27 @@ public class VersionChecker {
             return "Unable to check latest plugin version.";
         }
 
-        String eVersion = content.replaceAll("(.*>VERSION:[\t ]*)([^<]+)(<.*)", "$2");
+        String eVersion = null;
+        JSONArray array = (JSONArray) JSONValue.parse(content);
+        if (array.size() > 0) {
+            final int latestId = array.size() - 1;
+            for (int i = 0; i < array.size(); i++) {
+                JSONObject jObject = (JSONObject) array.get(i);
+                String versionName = (String) jObject.get(API_NAME_VALUE);
+                String[] parts = versionName.split("[ \t-]");
 
-        int cmp = version.compareToIgnoreCase(eVersion);
-        if (cmp < 0) {
-            return "You have an old version of the plugin. Your version: " + version
-                    + ", available version: " + eVersion;
-        } else if (cmp > 0) {
-            return "You have a newer version of the plugin then available! Your version: " + version
-                    + ", available version: " + eVersion;
-        } else {
-            return "You have the latest version of the plugin.";
+                eVersion = parts[parts.length - 1];
+                if (eVersion != null && eVersion.length() > 0 && version.equalsIgnoreCase(eVersion)) {
+                    if (i != latestId) {
+                        return "You have an old version of the plugin. Your version: " + version
+                                + ", available version: " + eVersion;
+                    } else {
+                        return "You have the latest version of the plugin.";
+                    }
+                }
+            }
         }
+
+        return "Your version of the plugin was not found on the plugin page. Your version: " + version;
     }
 }
