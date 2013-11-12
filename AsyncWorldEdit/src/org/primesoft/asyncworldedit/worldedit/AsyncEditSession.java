@@ -34,13 +34,12 @@ import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.*;
 
 /**
@@ -48,48 +47,53 @@ import org.primesoft.asyncworldedit.*;
  * @author SBPrime
  */
 public class AsyncEditSession extends EditSession {
+
     private String m_player;
-
     private BlockPlacer m_blockPlacer;
-
     private World m_world;
-
+    private final List<BukkitTask> m_tasks;
     /**
      * The blocks hub integrator
      */
     private BlocksHubIntegration m_bh;
-    
-
     /**
      * The parent factory class
      */
     private AsyncEditSessionFactory m_factory;
-
     /**
      * Force all functions to by performed in async mode this is used to
      * override the config by API calls
      */
     private boolean m_asyncForced;
-
     /**
      * Indicates that the async mode has been disabled (inner state)
      */
     private boolean m_asyncDisabled;
+    /**
+     * Plugin instance
+     */
+    private PluginMain m_plugin;
+    /**
+     * Bukkit schedule
+     */
+    private BukkitScheduler m_schedule;
 
     public String getPlayer() {
         return m_player;
     }
 
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
-                            String player, LocalWorld world, int maxBlocks) {
+            String player, LocalWorld world, int maxBlocks) {
         super(world, maxBlocks);
+        m_tasks = new ArrayList<BukkitTask>();
         initialize(player, plugin, world, factory);
     }
 
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
-                            String player, LocalWorld world, int maxBlocks,
-                            BlockBag blockBag) {
+            String player, LocalWorld world, int maxBlocks,
+            BlockBag blockBag) {
         super(world, maxBlocks, blockBag);
+        m_tasks = new ArrayList<BukkitTask>();
         initialize(player, plugin, world, factory);
     }
 
@@ -127,6 +131,16 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public void undo(EditSession sess) {
+        BukkitTask[] tasks;
+        synchronized (m_tasks) {
+            tasks = m_tasks.toArray(new BukkitTask[0]);
+            for (BukkitTask task : tasks) {
+                task.cancel();
+            }
+
+            m_tasks.clear();
+        }
+
         checkAsync(WorldeditOperations.undo);
         UndoSession undoSession = new UndoSession();
         super.undo(undoSession);
@@ -149,7 +163,7 @@ public class AsyncEditSession extends EditSession {
                 mapX = new HashMap<Integer, HashSet<Integer>>();
                 placedBlocks.put(x, mapX);
             }
-            
+
             HashSet<Integer> mapY = mapX.get(y);
             if (mapY == null) {
                 mapY = new HashSet<Integer>();
@@ -183,7 +197,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int fillXZ(Vector origin, BaseBlock block, double radius, int depth,
-                      boolean recursive)
+            boolean recursive)
             throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.fillXZ);
         int result = super.fillXZ(origin, block, radius, depth, recursive);
@@ -195,7 +209,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int fillXZ(Vector origin, Pattern pattern, double radius, int depth,
-                      boolean recursive)
+            boolean recursive)
             throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.fillXZ);
         int result = super.fillXZ(origin, pattern, radius, depth, recursive);
@@ -238,50 +252,141 @@ public class AsyncEditSession extends EditSession {
         return result;
     }
 
-    @Override
-    public int setBlocks(Region region, BaseBlock block)
-            throws MaxChangedBlocksException {
-        checkAsync(WorldeditOperations.setBlocks);
-        int result = super.setBlocks(region, block);
-        if (!isQueueEnabled()) {
-            resetAsync();
-        }
-        return result;
+    private int supperSetBlocks(Region region, BaseBlock block) throws MaxChangedBlocksException {
+        return super.setBlocks(region, block);
+    }
+
+    private int superSetBlocks(Region region, Pattern pattern) throws MaxChangedBlocksException {
+        return super.setBlocks(region, pattern);
     }
 
     @Override
-    public int setBlocks(Region region, Pattern pattern)
+    public int setBlocks(final Region region, final BaseBlock block)
             throws MaxChangedBlocksException {
-        checkAsync(WorldeditOperations.setBlocks);
-        int result = super.setBlocks(region, pattern);
-        if (!isQueueEnabled()) {
-            resetAsync();
+        boolean isAsync = checkAsync(WorldeditOperations.setBlocks);
+
+        if (!isAsync) {
+            return supperSetBlocks(region, block);
         }
-        return result;
+
+        final Player p = PluginMain.getPlayer(m_player);
+        PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+
+        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
+        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
+                new AsyncTask(this, p, "setBlocks", m_tasks, tasks) {
+
+                    @Override
+                    public int task() throws MaxChangedBlocksException {
+                        return supperSetBlocks(region, block);
+                    }
+                }));
+
+        synchronized (m_tasks) {
+            for (BukkitTask task : tasks) {
+                m_tasks.add(task);
+            }
+        }
+        return 0;
     }
 
     @Override
-    public int replaceBlocks(Region region,
-                             Set<BaseBlock> fromBlockTypes, BaseBlock toBlock)
+    public int setBlocks(final Region region, final Pattern pattern)
             throws MaxChangedBlocksException {
-        checkAsync(WorldeditOperations.replaceBlocks);
-        int result = super.replaceBlocks(region, fromBlockTypes, toBlock);
-        if (!isQueueEnabled()) {
-            resetAsync();
+        boolean isAsync = checkAsync(WorldeditOperations.setBlocks);
+
+        if (!isAsync) {
+            return superSetBlocks(region, pattern);
         }
-        return result;
+
+        final Player p = PluginMain.getPlayer(m_player);
+        PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+
+        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
+        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
+                new AsyncTask(this, p, "setBlocks", m_tasks, tasks) {
+
+                    @Override
+                    public int task() throws MaxChangedBlocksException {
+                        return superSetBlocks(region, pattern);
+                    }
+                }));
+
+        synchronized (m_tasks) {
+            for (BukkitTask task : tasks) {
+                m_tasks.add(task);
+            }
+        }
+        return 0;
+    }
+
+    private int superReplaceBlocks(Region region, Set<BaseBlock> fromBlockTypes,
+            BaseBlock toBlock) throws MaxChangedBlocksException {
+        return super.replaceBlocks(region, fromBlockTypes, toBlock);
+    }
+
+    private int superReplaceBlocks(Region region, Set<BaseBlock> fromBlockTypes,
+            Pattern pattern) throws MaxChangedBlocksException {
+        return super.replaceBlocks(region, fromBlockTypes, pattern);
     }
 
     @Override
-    public int replaceBlocks(Region region,
-                             Set<BaseBlock> fromBlockTypes, Pattern pattern)
-            throws MaxChangedBlocksException {
-        checkAsync(WorldeditOperations.replaceBlocks);
-        int result = super.replaceBlocks(region, fromBlockTypes, pattern);
-        if (!isQueueEnabled()) {
-            resetAsync();
+    public int replaceBlocks(final Region region, final Set<BaseBlock> fromBlockTypes,
+            final BaseBlock toBlock) throws MaxChangedBlocksException {
+        boolean isAsync = checkAsync(WorldeditOperations.replaceBlocks);
+
+        if (!isAsync) {
+            return superReplaceBlocks(region, fromBlockTypes, toBlock);
         }
-        return result;
+
+        final Player p = PluginMain.getPlayer(m_player);
+        PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+
+        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
+        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
+                new AsyncTask(this, p, "replaceBlocks", m_tasks, tasks) {
+
+                    @Override
+                    public int task() throws MaxChangedBlocksException {
+                        return superReplaceBlocks(region, fromBlockTypes, toBlock);
+                    }
+                }));
+
+        synchronized (m_tasks) {
+            for (BukkitTask task : tasks) {
+                m_tasks.add(task);
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public int replaceBlocks(final Region region, final Set<BaseBlock> fromBlockTypes,
+            final Pattern pattern) throws MaxChangedBlocksException {
+        boolean isAsync = checkAsync(WorldeditOperations.replaceBlocks);
+        if (!isAsync) {
+            return superReplaceBlocks(region, fromBlockTypes, pattern);
+        }
+
+        final Player p = PluginMain.getPlayer(m_player);
+        PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+
+        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
+        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
+                new AsyncTask(this, p, "replaceBlocks", m_tasks, tasks) {
+
+                    @Override
+                    public int task() throws MaxChangedBlocksException {
+                        return superReplaceBlocks(region, fromBlockTypes, pattern);
+                    }
+                }));
+
+        synchronized (m_tasks) {
+            for (BukkitTask task : tasks) {
+                m_tasks.add(task);
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -363,7 +468,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int stackCuboidRegion(Region region, Vector dir, int count,
-                                 boolean copyAir)
+            boolean copyAir)
             throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.stackCuboidRegion);
         int result = super.stackCuboidRegion(region, dir, count, copyAir);
@@ -373,16 +478,39 @@ public class AsyncEditSession extends EditSession {
         return result;
     }
 
-    @Override
-    public int moveCuboidRegion(Region region, Vector dir, int distance,
-                                boolean copyAir, BaseBlock replace)
+    private int superMoveCuboidRegion(Region region, Vector dir, int distance,
+            boolean copyAir, BaseBlock replace)
             throws MaxChangedBlocksException {
-        checkAsync(WorldeditOperations.moveCuboidRegion);
-        int result = super.moveCuboidRegion(region, dir, distance, copyAir, replace);
-        if (!isQueueEnabled()) {
-            resetAsync();
+        return super.moveCuboidRegion(region, dir, distance, copyAir, replace);
+    }
+
+    @Override
+    public int moveCuboidRegion(final Region region, final Vector dir, final int distance,
+            final boolean copyAir, final BaseBlock replace) throws MaxChangedBlocksException {
+        boolean isAsync = checkAsync(WorldeditOperations.moveCuboidRegion);
+        if (!isAsync) {
+            return superMoveCuboidRegion(region, dir, distance, copyAir, replace);
         }
-        return result;
+
+        final Player p = PluginMain.getPlayer(m_player);
+        PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+
+        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
+        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
+                new AsyncTask(this, p, "moveCuboidRegion", m_tasks, tasks) {
+
+                    @Override
+                    public int task() throws MaxChangedBlocksException {
+                        return superMoveCuboidRegion(region, dir, distance, copyAir, replace);
+                    }
+                }));
+
+        synchronized (m_tasks) {
+            for (BukkitTask task : tasks) {
+                m_tasks.add(task);
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -409,7 +537,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int makeCylinder(Vector pos, Pattern block, double radius, int height,
-                            boolean filled)
+            boolean filled)
             throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeCylinder);
         int result = super.makeCylinder(pos, block, radius, height, filled);
@@ -421,7 +549,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int makeCylinder(Vector pos, Pattern block, double radiusX,
-                            double radiusZ, int height, boolean filled)
+            double radiusZ, int height, boolean filled)
             throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeCylinder);
         int result = super.makeCylinder(pos, block, radiusX, radiusZ, height, filled);
@@ -433,7 +561,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int makeSphere(Vector pos, Pattern block, double radius,
-                          boolean filled)
+            boolean filled)
             throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeSphere);
         int result = super.makeSphere(pos, block, radius, filled);
@@ -445,7 +573,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int makeSphere(Vector pos, Pattern block, double radiusX,
-                          double radiusY, double radiusZ, boolean filled)
+            double radiusY, double radiusZ, boolean filled)
             throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeSphere);
         int result = super.makeSphere(pos, block, radiusX, radiusY, radiusZ, filled);
@@ -512,7 +640,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int makeForest(Vector basePos, int size, double density,
-                          TreeGenerator treeGenerator)
+            TreeGenerator treeGenerator)
             throws MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeForest);
         int result = super.makeForest(basePos, size, density, treeGenerator);
@@ -524,8 +652,8 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int makeShape(Region region, Vector zero, Vector unit,
-                         Pattern pattern, String expressionString,
-                         boolean hollow)
+            Pattern pattern, String expressionString,
+            boolean hollow)
             throws ExpressionException, MaxChangedBlocksException {
         checkAsync(WorldeditOperations.makeShape);
         int result = super.makeShape(region, zero, unit, pattern, expressionString, hollow);
@@ -537,7 +665,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int deformRegion(Region region, Vector zero, Vector unit,
-                            String expressionString)
+            String expressionString)
             throws ExpressionException, MaxChangedBlocksException {
         checkAsync(WorldeditOperations.deformRegion);
         int result = super.deformRegion(region, zero, unit, expressionString);
@@ -558,7 +686,16 @@ public class AsyncEditSession extends EditSession {
         return result;
     }
 
-    public boolean doRawSetBlock(Vector location, BaseBlock block) {        
+    @Override
+    public int size() {
+        final int result = super.size();
+        if (result <= 0 && m_tasks.size() > 0) {
+            return 1;
+        }
+        return result;
+    }
+
+    public boolean doRawSetBlock(Vector location, BaseBlock block) {
         String player = getPlayer();
         World world = getCBWorld();
         BaseBlock oldBlock = getBlock(location);
@@ -589,11 +726,13 @@ public class AsyncEditSession extends EditSession {
      * @param world edit session world
      */
     private void initialize(String player, PluginMain plugin,
-                            LocalWorld world, AsyncEditSessionFactory factory) {
+            LocalWorld world, AsyncEditSessionFactory factory) {
+        m_plugin = plugin;
         m_bh = plugin.getBlocksHub();
         m_factory = factory;
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
+        m_schedule = plugin.getServer().getScheduler();
         if (world != null) {
             m_world = plugin.getServer().getWorld(world.getName());
         }
@@ -625,14 +764,17 @@ public class AsyncEditSession extends EditSession {
      *
      * @param operation
      */
-    private void checkAsync(WorldeditOperations operation) {
-        m_asyncDisabled = !ConfigProvider.isAsyncAllowed(operation);
+    private boolean checkAsync(WorldeditOperations operation) {
+        boolean result = ConfigProvider.isAsyncAllowed(operation);
+
+        m_asyncDisabled = !result;
+        return result;
     }
 
     /**
      * Reset async disabled inner state (enable async mode)
      */
-    private void resetAsync() {
+    public void resetAsync() {
         m_asyncDisabled = false;
     }
 }

@@ -294,10 +294,10 @@ public class ConfigProvider {
                 result.add(op);
             }
         }
-        PluginMain.Log("World edit operations:");
-        for (WorldeditOperations op : WorldeditOperations.values()) {
-            PluginMain.Log("* " + op + "..." + (result.contains(op) ? "async" : "regular"));
-        }
+        //PluginMain.Log("World edit operations:");
+        //for (WorldeditOperations op : WorldeditOperations.values()) {
+        //    PluginMain.Log("* " + op + "..." + (result.contains(op) ? "async" : "regular"));
+        //}
 
 
         return result;
