@@ -23,6 +23,9 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerMaskEntry;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerBlockEntry;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -41,6 +44,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.*;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 
 /**
  *
@@ -48,10 +52,18 @@ import org.primesoft.asyncworldedit.*;
  */
 public class AsyncEditSession extends EditSession {
 
+    /**
+     * Player
+     */
     private String m_player;
+    /**
+     * Async block placer
+     */
     private BlockPlacer m_blockPlacer;
+    /**
+     * Current craftbukkit world
+     */
     private World m_world;
-    private final List<BukkitTask> m_tasks;
     /**
      * The blocks hub integrator
      */
@@ -77,6 +89,10 @@ public class AsyncEditSession extends EditSession {
      * Bukkit schedule
      */
     private BukkitScheduler m_schedule;
+    /**
+     * Number of async tasks
+     */
+    private int m_asyncTasks;
 
     public String getPlayer() {
         return m_player;
@@ -85,26 +101,27 @@ public class AsyncEditSession extends EditSession {
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
             String player, LocalWorld world, int maxBlocks) {
         super(world, maxBlocks);
-        m_tasks = new ArrayList<BukkitTask>();
         initialize(player, plugin, world, factory);
     }
 
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
-            String player, LocalWorld world, int maxBlocks,
-            BlockBag blockBag) {
+            String player, LocalWorld world, int maxBlocks, BlockBag blockBag) {
         super(world, maxBlocks, blockBag);
-        m_tasks = new ArrayList<BukkitTask>();
         initialize(player, plugin, world, factory);
     }
 
     @Override
     public boolean rawSetBlock(Vector pt, BaseBlock block) {
+        return this.rawSetBlock(pt, -1, block);
+    }
+
+    public boolean rawSetBlock(Vector pt, int jobId, BaseBlock block) {
         if (!m_bh.canPlace(m_player, m_world, pt)) {
             return false;
         }
 
         if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled)) {
-            return m_blockPlacer.addTasks(new BlockPlacerBlockEntry(this, pt, block));
+            return m_blockPlacer.addTasks(new BlockPlacerBlockEntry(this, jobId, pt, block));
         } else {
             return doRawSetBlock(pt, block);
         }
@@ -113,11 +130,10 @@ public class AsyncEditSession extends EditSession {
     @Override
     public void setMask(Mask mask) {
         if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled)) {
-            m_blockPlacer.addTasks(new BlockPlacerMaskEntry(this, mask));
+            m_blockPlacer.addTasks(new BlockPlacerMaskEntry(this, -1, mask));
         } else {
             doSetMask(mask);
         }
-
     }
 
     @Override
@@ -131,16 +147,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public void undo(EditSession sess) {
-        BukkitTask[] tasks;
-        synchronized (m_tasks) {
-            tasks = m_tasks.toArray(new BukkitTask[0]);
-            for (BukkitTask task : tasks) {
-                task.cancel();
-            }
-
-            m_tasks.clear();
-        }
-
+        //TODO: Make async stage 1
         checkAsync(WorldeditOperations.undo);
         UndoSession undoSession = new UndoSession();
         super.undo(undoSession);
@@ -188,6 +195,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public void redo(EditSession sess) {
+        //TODO: Make async stage 1
         checkAsync(WorldeditOperations.redo);
         super.redo(sess);
         if (!isQueueEnabled()) {
@@ -199,6 +207,7 @@ public class AsyncEditSession extends EditSession {
     public int fillXZ(Vector origin, BaseBlock block, double radius, int depth,
             boolean recursive)
             throws MaxChangedBlocksException {
+        //TODO: Make async stage 1
         checkAsync(WorldeditOperations.fillXZ);
         int result = super.fillXZ(origin, block, radius, depth, recursive);
         if (!isQueueEnabled()) {
@@ -211,6 +220,7 @@ public class AsyncEditSession extends EditSession {
     public int fillXZ(Vector origin, Pattern pattern, double radius, int depth,
             boolean recursive)
             throws MaxChangedBlocksException {
+        //TODO: Make async stage 1
         checkAsync(WorldeditOperations.fillXZ);
         int result = super.fillXZ(origin, pattern, radius, depth, recursive);
         if (!isQueueEnabled()) {
@@ -222,6 +232,7 @@ public class AsyncEditSession extends EditSession {
     @Override
     public int removeAbove(Vector pos, int size, int height)
             throws MaxChangedBlocksException {
+        //TODO: Make async stage 1
         checkAsync(WorldeditOperations.removeAbove);
         int result = super.removeAbove(pos, size, height);
         if (!isQueueEnabled()) {
@@ -233,6 +244,7 @@ public class AsyncEditSession extends EditSession {
     @Override
     public int removeBelow(Vector pos, int size, int height)
             throws MaxChangedBlocksException {
+        //TODO: Make async stage 1
         checkAsync(WorldeditOperations.removeBelow);
         int result = super.removeBelow(pos, size, height);
         if (!isQueueEnabled()) {
@@ -244,6 +256,7 @@ public class AsyncEditSession extends EditSession {
     @Override
     public int removeNear(Vector pos, int blockType, int size)
             throws MaxChangedBlocksException {
+        //TODO: Make async stage 1
         checkAsync(WorldeditOperations.removeNear);
         int result = super.removeNear(pos, blockType, size);
         if (!isQueueEnabled()) {
@@ -252,41 +265,31 @@ public class AsyncEditSession extends EditSession {
         return result;
     }
 
-    private int supperSetBlocks(Region region, BaseBlock block) throws MaxChangedBlocksException {
-        return super.setBlocks(region, block);
-    }
-
-    private int superSetBlocks(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return super.setBlocks(region, pattern);
-    }
-
     @Override
     public int setBlocks(final Region region, final BaseBlock block)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.setBlocks);
 
         if (!isAsync) {
-            return supperSetBlocks(region, block);
+            return super.setBlocks(region, block);
         }
 
         final Player p = PluginMain.getPlayer(m_player);
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "setBlocks");
+        m_blockPlacer.addTasks(job);
+
         PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, p, "setBlocks",
+                m_blockPlacer, job) {
 
-        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
-        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
-                new AsyncTask(this, p, "setBlocks", m_tasks, tasks) {
-
-                    @Override
-                    public int task() throws MaxChangedBlocksException {
-                        return supperSetBlocks(region, block);
-                    }
-                }));
-
-        synchronized (m_tasks) {
-            for (BukkitTask task : tasks) {
-                m_tasks.add(task);
+            @Override
+            public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
+                return session.setBlocks(region, block);
             }
-        }
+        });
+
         return 0;
     }
 
@@ -296,38 +299,25 @@ public class AsyncEditSession extends EditSession {
         boolean isAsync = checkAsync(WorldeditOperations.setBlocks);
 
         if (!isAsync) {
-            return superSetBlocks(region, pattern);
+            return super.setBlocks(region, pattern);
         }
 
         final Player p = PluginMain.getPlayer(m_player);
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "setBlocks");
+        m_blockPlacer.addTasks(job);
+
         PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, p, "setBlocks",
+                m_blockPlacer, job) {
 
-        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
-        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
-                new AsyncTask(this, p, "setBlocks", m_tasks, tasks) {
-
-                    @Override
-                    public int task() throws MaxChangedBlocksException {
-                        return superSetBlocks(region, pattern);
-                    }
-                }));
-
-        synchronized (m_tasks) {
-            for (BukkitTask task : tasks) {
-                m_tasks.add(task);
+            @Override
+            public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
+                return session.setBlocks(region, pattern);
             }
-        }
+        });
         return 0;
-    }
-
-    private int superReplaceBlocks(Region region, Set<BaseBlock> fromBlockTypes,
-            BaseBlock toBlock) throws MaxChangedBlocksException {
-        return super.replaceBlocks(region, fromBlockTypes, toBlock);
-    }
-
-    private int superReplaceBlocks(Region region, Set<BaseBlock> fromBlockTypes,
-            Pattern pattern) throws MaxChangedBlocksException {
-        return super.replaceBlocks(region, fromBlockTypes, pattern);
     }
 
     @Override
@@ -336,27 +326,24 @@ public class AsyncEditSession extends EditSession {
         boolean isAsync = checkAsync(WorldeditOperations.replaceBlocks);
 
         if (!isAsync) {
-            return superReplaceBlocks(region, fromBlockTypes, toBlock);
+            return super.replaceBlocks(region, fromBlockTypes, toBlock);
         }
 
         final Player p = PluginMain.getPlayer(m_player);
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "replaceBlocks");
+        m_blockPlacer.addTasks(job);
+
         PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, p, "replaceBlocks",
+                m_blockPlacer, job) {
 
-        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
-        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
-                new AsyncTask(this, p, "replaceBlocks", m_tasks, tasks) {
-
-                    @Override
-                    public int task() throws MaxChangedBlocksException {
-                        return superReplaceBlocks(region, fromBlockTypes, toBlock);
-                    }
-                }));
-
-        synchronized (m_tasks) {
-            for (BukkitTask task : tasks) {
-                m_tasks.add(task);
+            @Override
+            public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
+                return session.replaceBlocks(region, fromBlockTypes, toBlock);
             }
-        }
+        });
         return 0;
     }
 
@@ -365,27 +352,24 @@ public class AsyncEditSession extends EditSession {
             final Pattern pattern) throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.replaceBlocks);
         if (!isAsync) {
-            return superReplaceBlocks(region, fromBlockTypes, pattern);
+            return super.replaceBlocks(region, fromBlockTypes, pattern);
         }
 
         final Player p = PluginMain.getPlayer(m_player);
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "replaceBlocks");
+        m_blockPlacer.addTasks(job);
+
         PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, p, "replaceBlocks",
+                m_blockPlacer, job) {
 
-        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
-        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
-                new AsyncTask(this, p, "replaceBlocks", m_tasks, tasks) {
-
-                    @Override
-                    public int task() throws MaxChangedBlocksException {
-                        return superReplaceBlocks(region, fromBlockTypes, pattern);
-                    }
-                }));
-
-        synchronized (m_tasks) {
-            for (BukkitTask task : tasks) {
-                m_tasks.add(task);
+            @Override
+            public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
+                return session.replaceBlocks(region, fromBlockTypes, pattern);
             }
-        }
+        });
         return 0;
     }
 
@@ -489,27 +473,24 @@ public class AsyncEditSession extends EditSession {
             final boolean copyAir, final BaseBlock replace) throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.moveCuboidRegion);
         if (!isAsync) {
-            return superMoveCuboidRegion(region, dir, distance, copyAir, replace);
+            return super.moveCuboidRegion(region, dir, distance, copyAir, replace);
         }
 
         final Player p = PluginMain.getPlayer(m_player);
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "moveCuboidRegion");
+        m_blockPlacer.addTasks(job);
+
         PluginMain.Say(p, ChatColor.RED + "Warning full async mode! Number of changed blocks is incorrect!");
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, p, "moveCuboidRegion",
+                m_blockPlacer, job) {
 
-        final List<BukkitTask> tasks = new ArrayList<BukkitTask>();
-        tasks.add(m_schedule.runTaskAsynchronously(m_plugin,
-                new AsyncTask(this, p, "moveCuboidRegion", m_tasks, tasks) {
-
-                    @Override
-                    public int task() throws MaxChangedBlocksException {
-                        return superMoveCuboidRegion(region, dir, distance, copyAir, replace);
-                    }
-                }));
-
-        synchronized (m_tasks) {
-            for (BukkitTask task : tasks) {
-                m_tasks.add(task);
+            @Override
+            public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
+                return session.moveCuboidRegion(region, dir, distance, copyAir, replace);
             }
-        }
+        });
         return 0;
     }
 
@@ -686,10 +667,22 @@ public class AsyncEditSession extends EditSession {
         return result;
     }
 
+    public void addAsync() {
+        synchronized (this) {
+            m_asyncTasks++;
+        }
+    }
+
+    public void removeAsync() {
+        synchronized (this) {
+            m_asyncTasks--;
+        }
+    }
+
     @Override
     public int size() {
         final int result = super.size();
-        if (result <= 0 && m_tasks.size() > 0) {
+        if (result <= 0 && m_asyncTasks > 0) {
             return 1;
         }
         return result;
@@ -727,6 +720,7 @@ public class AsyncEditSession extends EditSession {
      */
     private void initialize(String player, PluginMain plugin,
             LocalWorld world, AsyncEditSessionFactory factory) {
+        m_asyncTasks = 0;
         m_plugin = plugin;
         m_bh = plugin.getBlocksHub();
         m_factory = factory;
@@ -776,5 +770,14 @@ public class AsyncEditSession extends EditSession {
      */
     public void resetAsync() {
         m_asyncDisabled = false;
+    }
+
+    /**
+     * Get next job id for current player
+     *
+     * @return Job id
+     */
+    private int getJobId() {
+        return m_blockPlacer.getJobId(m_player);
     }
 }

@@ -25,10 +25,12 @@ package org.primesoft.asyncworldedit.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.PlayerEntry;
 
 /**
  *
@@ -52,7 +54,12 @@ public class JobsCommand {
             //int cnt = bPlacer.getPlayerEvents(player.getName());
             //PluginMain.Say(player, ChatColor.YELLOW + "You have " + ChatColor.WHITE + cnt
             //        + ChatColor.YELLOW + " block operations queued.");
-            PluginMain.Say(player, "You have " + bPlacer.getPlayerMessage(player.getName()));
+            String name = player.getName();
+            PluginMain.Say(player, ChatColor.YELLOW + "You have " + bPlacer.getPlayerMessage(name));
+            PlayerEntry entry = bPlacer.getPlayerEvents(name);
+            if (entry != null) {
+                entry.printJobs(player);
+            }
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
@@ -66,7 +73,12 @@ public class JobsCommand {
                 //PluginMain.Say(player, ChatColor.YELLOW + "Player " + ChatColor.BLUE
                 //        + user + ChatColor.YELLOW + " has " + ChatColor.WHITE + cnt
                 //        + ChatColor.YELLOW + " block operations queued.");
-                PluginMain.Say(player, "Player " + user + " has " + bPlacer.getPlayerMessage(player.getName()));
+                PluginMain.Say(player, ChatColor.YELLOW + "Player " + ChatColor.WHITE
+                        + user + ChatColor.YELLOW + " has " + bPlacer.getPlayerMessage(user));
+                PlayerEntry entry = bPlacer.getPlayerEvents(user);
+                if (entry != null) {
+                    entry.printJobs(player);
+                }
             } else {
                 if (!arg.toLowerCase().equalsIgnoreCase("all")) {
                     Help.ShowHelp(player, Commands.COMMAND_JOBS);
@@ -83,10 +95,14 @@ public class JobsCommand {
                     PluginMain.Say(player, ChatColor.YELLOW + "No operations queued.");
                 } else {
                     for (String user : users) {
-                        int cnt = bPlacer.getPlayerEvents(user);
-                        PluginMain.Say(player, ChatColor.YELLOW + "Player " + ChatColor.BLUE
-                                + user + ChatColor.YELLOW + "has " + ChatColor.WHITE + cnt
+                        PlayerEntry entry = bPlacer.getPlayerEvents(user);
+                        int cnt = entry != null ? entry.getQueue().size() : 0;
+                        PluginMain.Say(player, ChatColor.YELLOW + "Player " + ChatColor.WHITE
+                                + user + ChatColor.YELLOW + " has " + ChatColor.WHITE + cnt
                                 + ChatColor.YELLOW + " block operations queued.");
+                        if (entry != null) {
+                            entry.printJobs(player);
+                        }
                     }
                 }
             }

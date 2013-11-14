@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.blockPlacer;
 
 import com.sk89q.worldedit.masks.Mask;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -39,8 +39,8 @@ public class BlockPlacerMaskEntry extends BlockPlacerEntry
     }
 
     public BlockPlacerMaskEntry(AsyncEditSession editSession,
-            Mask mask) {
-        super(editSession);
+            int jobId, Mask mask) {
+        super(editSession, jobId);
         m_mask = mask;
     }
 }

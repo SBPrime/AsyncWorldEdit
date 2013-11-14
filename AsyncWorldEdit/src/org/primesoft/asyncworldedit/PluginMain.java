@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
 import java.util.HashSet;

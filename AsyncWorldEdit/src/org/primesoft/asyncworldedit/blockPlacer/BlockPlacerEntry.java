@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.blockPlacer;
 
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
@@ -29,14 +29,20 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  *
  * @author SBPrime
  */
-public abstract class BlockPlacerEntry {    
-    private AsyncEditSession m_editSession;
+public abstract class BlockPlacerEntry {
+    private final int m_jobId;
+    private final AsyncEditSession m_editSession;
 
+    public int getJobId(){
+        return m_jobId;
+    }
+    
     public AsyncEditSession getEditSession() {
         return m_editSession;
     }
 
-    public BlockPlacerEntry(AsyncEditSession editSession) {
+    public BlockPlacerEntry(AsyncEditSession editSession, int jobId) {
         m_editSession = editSession;
+        m_jobId = jobId;
     }
 }

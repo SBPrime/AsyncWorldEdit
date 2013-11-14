@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.blockPlacer;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
@@ -47,8 +47,8 @@ public class BlockPlacerBlockEntry extends BlockPlacerEntry
     
 
     public BlockPlacerBlockEntry(AsyncEditSession editSession,
-            Vector location, BaseBlock newBlock) {
-        super(editSession);
+            int jobId, Vector location, BaseBlock newBlock) {
+        super(editSession, jobId);
         m_location = location;
         m_newBlock = newBlock;
     }

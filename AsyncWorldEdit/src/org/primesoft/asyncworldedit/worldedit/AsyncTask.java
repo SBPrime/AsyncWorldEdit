@@ -24,86 +24,76 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 
 /**
  *
  * @author SBPrime
  */
 public abstract class AsyncTask extends BukkitRunnable {
+
     /**
      * Command name
      */
     private final String m_command;
     /**
-     * Current task
-     */
-    private final List<BukkitTask> m_task;
-    
-    
-    /**
-     * Task queue
-     */
-    private final List<BukkitTask> m_taskQueue;
-    
-    
-    /**
      * Edit session
      */
-    private final AsyncEditSession m_editSession;
+    private final CancelabeEditSession m_editSession;
     /**
      * The player
      */
     private final Player m_player;
+    private final BlockPlacer m_blockPlacer;
+    private final BlockPlacerJobEntry m_job;
 
-    
-    public AsyncTask(final AsyncEditSession session, final Player player,
-            final String commandName, final List<BukkitTask> taskQueue, 
-            final List<BukkitTask> task)
-    {
+    public AsyncTask(final CancelabeEditSession session, final Player player,
+            final String commandName, BlockPlacer blocksPlacer, BlockPlacerJobEntry job) {
         m_editSession = session;
         m_player = player;
         m_command = commandName;
-        m_taskQueue = taskQueue;
-        m_task = task;
+        m_blockPlacer = blocksPlacer;
+        m_job = job;
+        
+        session.getParent().addAsync();
     }
-    
-    
+
     @Override
     public void run() {
         try {
             PluginMain.Say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                     + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
-            int cnt = task();
-
+            int cnt = task(m_editSession);
+            
             if (!m_editSession.isQueueEnabled()) {
                 m_editSession.resetAsync();
             } else {
                 m_editSession.flushQueue();
             }
 
+            m_blockPlacer.addTasks(m_job);
             PluginMain.Say(m_player, ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + cnt);
         } catch (MaxChangedBlocksException ex) {
             PluginMain.Say(m_player, ChatColor.RED + "Maximum block change limit.");
-        }
-
-        synchronized (m_taskQueue) {
-            for (BukkitTask task : m_task) {
-                m_taskQueue.remove(task);
+        } catch (IllegalArgumentException ex) {
+            if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
+                PluginMain.Say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
             }
         }
+        
+        m_editSession.getParent().removeAsync();
     }
 
-    
     /**
      * Task to run
+     *
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
-    public abstract int task() throws MaxChangedBlocksException;
+    public abstract int task(CancelabeEditSession editSession) throws MaxChangedBlocksException;
 }
