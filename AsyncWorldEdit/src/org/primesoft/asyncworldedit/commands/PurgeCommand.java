@@ -46,7 +46,8 @@ public class PurgeCommand {
                 return;
             }
 
-            sender.getBlockPlacer().purge(player.getName());
+            int size = sender.getBlockPlacer().purge(player.getName());
+            PluginMain.Say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
