@@ -66,8 +66,11 @@ public abstract class AsyncTask extends BukkitRunnable {
     @Override
     public void run() {
         try {
+            m_job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
             PluginMain.Say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                     + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
+            
+            m_blockPlacer.addTasks(m_job);
             int cnt = task(m_editSession);
             
             if (!m_editSession.isQueueEnabled()) {
@@ -76,6 +79,7 @@ public abstract class AsyncTask extends BukkitRunnable {
                 m_editSession.flushQueue();
             }
 
+            m_job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
             m_blockPlacer.addTasks(m_job);
             PluginMain.Say(m_player, ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + cnt);
         } catch (MaxChangedBlocksException ex) {

@@ -34,7 +34,6 @@ import org.primesoft.asyncworldedit.PluginMain;
  * @author SBPrime
  */
 public class PurgeCommand {
-
     public static void Execte(PluginMain sender, Player player, String[] args) {
         if (args.length < 1 || args.length > 2) {
             Help.ShowHelp(player, Commands.COMMAND_PURGE);
@@ -57,19 +56,21 @@ public class PurgeCommand {
                 }
 
                 String user = arg.substring(2);
-                sender.getBlockPlacer().purge(user);
-            } else {                
+                int size = sender.getBlockPlacer().purge(user);
+                PluginMain.Say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+            } else {
                 if (!arg.toLowerCase().equalsIgnoreCase("all")) {
                     Help.ShowHelp(player, Commands.COMMAND_PURGE);
                     return;
                 }
-                
+
                 if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_All)) {
                     PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
-                
-                sender.getBlockPlacer().purgeAll();
+
+                int size = sender.getBlockPlacer().purgeAll();
+                PluginMain.Say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
             }
         }
     }

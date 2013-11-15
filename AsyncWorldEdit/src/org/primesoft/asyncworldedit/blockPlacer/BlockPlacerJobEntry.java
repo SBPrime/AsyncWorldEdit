@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import javax.print.attribute.standard.JobSheets;
 import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
@@ -32,26 +33,36 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  * @author SBPrime
  */
 public class BlockPlacerJobEntry extends BlockPlacerEntry {
+    public enum JobStatus {
+        Initializing,
+        Preparing,
+        Waiting,
+        PlacingBlocks,
+        Done
+    }
 
     /**
      * Job name
      */
     private final String m_name;
+
     /**
-     * Is the job started
+     * Is the job status
      */
-    private boolean m_isStarted;
+    private JobStatus m_status;
+
     /**
      * Cancelable edit session
      */
     private CancelabeEditSession m_cEditSession;
 
-    public BlockPlacerJobEntry(AsyncEditSession editSession, CancelabeEditSession cEditSession,
-            int jobId, String name) {
+    public BlockPlacerJobEntry(AsyncEditSession editSession,
+                               CancelabeEditSession cEditSession,
+                               int jobId, String name) {
         super(editSession, jobId);
 
         m_name = name;
-        m_isStarted = false;
+        m_status = JobStatus.Initializing;
         m_cEditSession = cEditSession;
     }
 
@@ -60,22 +71,69 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
      *
      * @return
      */
-    public boolean isStarted() {
-        return m_isStarted;
+    public JobStatus getStatus() {
+        return m_status;
     }
 
     public String getName() {
         return m_name;
     }
 
-    public void start() {
-        m_isStarted = true;
+    public void setStatus(JobStatus newStatus) {
+        System.out.println(m_status + " " + newStatus);
+        int newS = getStatusId(newStatus);
+        int oldS = getStatusId(m_status);
+        if (newS < oldS) {
+            return;
+        }
+        m_status = newStatus;
+        System.out.println(m_status);
     }
 
     public void cancel() {
         if (m_cEditSession != null) {
             m_cEditSession.cancel();
         }
+    }
+
+    /**
+     * Get job status order code
+     *
+     * @param status
+     * @return
+     */
+    private int getStatusId(JobStatus status) {
+        switch (status) {
+            case Done:
+                return 4;
+            case Initializing:
+                return 0;
+            case PlacingBlocks:
+                return 3;
+            case Preparing:
+                return 1;
+            case Waiting:
+                return 2;
+            default:
+                return -1;
+        }
+    }
+
+    public String getStatusString() {
+        switch (m_status) {
+            case Done:
+                return ChatColor.GREEN + "done";
+            case Initializing:
+                return ChatColor.WHITE + "initializing";
+            case PlacingBlocks:
+                return ChatColor.GREEN + "placing blocks";
+            case Preparing:
+                return ChatColor.RED + "preparing blocks";
+            case Waiting:
+                return ChatColor.YELLOW + "waiting";
+        }
+
+        return "";
     }
 
     @Override

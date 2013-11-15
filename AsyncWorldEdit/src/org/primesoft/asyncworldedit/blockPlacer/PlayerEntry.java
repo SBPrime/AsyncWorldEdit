@@ -36,27 +36,31 @@ import org.primesoft.asyncworldedit.PluginMain;
  * @author SBPrime
  */
 public class PlayerEntry {
-
     /**
      * Maximum job number
      */
     private final int MAX_JOBS = 1024;
+
     /**
      * Number of samples used in AVG count
      */
     private final int AVG_SAMPLES = 5;
+
     /**
      * The queue
      */
     private Queue<BlockPlacerEntry> m_queue;
+
     /**
      * Current block placing speed (blocks per second)
      */
     private double m_speed;
+
     /**
      * Job id
      */
     private int m_jobId;
+
     /**
      * List of jobs
      */
@@ -134,8 +138,14 @@ public class PlayerEntry {
             PluginMain.Say(player, ChatColor.YELLOW + "Jobs: ");
             for (BlockPlacerJobEntry job : m_jobs.values()) {
                 PluginMain.Say(player, ChatColor.YELLOW + " * " + job.toString()
-                        + (job.isStarted() ? (ChatColor.YELLOW + " - " + ChatColor.RED + "running") : ""));
+                        + ChatColor.YELLOW + " - " + job.getStatusString());
             }
+        }
+    }
+
+    public boolean hasJobs() {
+        synchronized (m_jobs) {
+            return !m_jobs.isEmpty();
         }
     }
 }

@@ -46,52 +46,62 @@ import org.primesoft.asyncworldedit.PluginMain;
  * @author SBPrime
  */
 public class BlockPlacer implements Runnable {
-
     /**
      * The physics watcher
      */
     private final PhysicsWatch m_physicsWatcher;
+
     /**
      * Bukkit scheduler
      */
     private BukkitScheduler m_scheduler;
+
     /**
      * Current scheduler task
      */
     private BukkitTask m_task;
+
     /**
      * Logged events queue (per player)
      */
     private HashMap<String, PlayerEntry> m_blocks;
+
     /**
      * All locked queues
      */
     private HashSet<String> m_lockedQueues;
+
     /**
      * Should block places shut down
      */
     private boolean m_shutdown;
+
     /**
      * Player block queue hard limit (max bloks count)
      */
     private int m_queueHardLimit;
+
     /**
      * Player block queue soft limit (minimum number of blocks before queue is
      * unlocked)
      */
     private int m_queueSoftLimit;
+
     /**
      * Global queue max size
      */
     private int m_queueMaxSize;
+
     /**
      * Block placing interval (in ticks)
      */
     private long m_interval;
+
     /**
      * Talk interval
      */
     private int m_talkInterval;
+
     /**
      * Run number
      */
@@ -159,7 +169,7 @@ public class BlockPlacer implements Runnable {
                 PlayerEntry entry = queueEntry.getValue();
                 entry.updateSpeed(nonVip + (isVip ? vip : 0));
 
-                if (talk) {
+                if (talk && !entry.getQueue().isEmpty()) {
                     Player p = PluginMain.getPlayer(player);
                     boolean bypass = PermissionManager.isAllowed(p, PermissionManager.Perms.QueueBypass);
                     boolean talkative = PermissionManager.isAllowed(p, PermissionManager.Perms.TalkativeQueue);
@@ -186,7 +196,7 @@ public class BlockPlacer implements Runnable {
      * @return blocks fatched
      */
     private boolean fetchBlocks(final int blockCnt, final String[] playerNames,
-            List<BlockPlacerEntry> entries) {
+                                List<BlockPlacerEntry> entries) {
         if (blockCnt <= 0 || playerNames == null || playerNames.length == 0) {
             return false;
         }
@@ -209,7 +219,7 @@ public class BlockPlacer implements Runnable {
                     PluginMain.Say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
                     m_lockedQueues.remove(player);
                 }
-                if (size == 0) {
+                if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
                 }
             } else if (m_lockedQueues.contains(player)) {
@@ -255,6 +265,20 @@ public class BlockPlacer implements Runnable {
         return playerEntry.getNextJobId();
     }
 
+    public void addJob(String player, BlockPlacerJobEntry job) {
+        synchronized (this) {
+            PlayerEntry playerEntry;
+
+            if (!m_blocks.containsKey(player)) {
+                playerEntry = new PlayerEntry();
+                m_blocks.put(player, playerEntry);
+            } else {
+                playerEntry = m_blocks.get(player);
+            }
+            playerEntry.addJob((BlockPlacerJobEntry) job);
+        }
+    }
+
     /**
      * Add task to perform in async mode
      *
@@ -293,9 +317,9 @@ public class BlockPlacer implements Runnable {
                     if (world != null) {
                         m_physicsWatcher.addLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
                     }
-                } 
+                }
                 if (entry instanceof BlockPlacerJobEntry) {
-                    playerEntry.addJob((BlockPlacerJobEntry)entry);
+                    playerEntry.addJob((BlockPlacerJobEntry) entry);
                 }
                 if (queue.size() >= m_queueHardLimit && bypass) {
                     m_lockedQueues.add(player);
@@ -359,11 +383,12 @@ public class BlockPlacer implements Runnable {
      *
      * @param player
      */
-    public void purge(String player) {
+    public int purge(String player) {
+        int result = 0;
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 PlayerEntry playerEntry = m_blocks.get(player);
-                Queue<BlockPlacerEntry> queue = playerEntry.getQueue();                
+                Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 for (BlockPlacerEntry entry : queue) {
                     if (entry instanceof BlockPlacerBlockEntry) {
                         World world = entry.getEditSession().getCBWorld();
@@ -371,26 +396,32 @@ public class BlockPlacer implements Runnable {
                             m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
                         }
                     } else if (entry instanceof BlockPlacerJobEntry) {
-                        playerEntry.removeJob((BlockPlacerJobEntry)entry);
+                        playerEntry.removeJob((BlockPlacerJobEntry) entry);
                     }
                 }
+                result = queue.size();
                 m_blocks.remove(player);
             }
             if (m_lockedQueues.contains(player)) {
                 m_lockedQueues.remove(player);
             }
         }
+
+        return result;
     }
 
     /**
      * Remove all entries
      */
-    public void purgeAll() {
+    public int purgeAll() {
+        int result = 0;
         synchronized (this) {
             for (String user : getAllPlayers()) {
-                purge(user);
+                result += purge(user);
             }
         }
+
+        return result;
     }
 
     /**
@@ -484,7 +515,8 @@ public class BlockPlacer implements Runnable {
             return;
         }
 
-        AsyncEditSession eSession = entry.getEditSession();
+        final AsyncEditSession eSession = entry.getEditSession();
+        final String player = eSession.getPlayer();
         if (entry instanceof BlockPlacerBlockEntry) {
             BlockPlacerBlockEntry blockEntry = (BlockPlacerBlockEntry) entry;
             Vector location = blockEntry.getLocation();
@@ -502,26 +534,26 @@ public class BlockPlacer implements Runnable {
         }
         if (entry instanceof BlockPlacerJobEntry) {
             BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;
-            boolean started = jobEntry.isStarted();
-            PluginMain.Say(PluginMain.getPlayer(eSession.getPlayer()),
-                    ChatColor.YELLOW + "Job " + jobEntry.toString()
-                    + ChatColor.YELLOW + " - " + (started ? "finished" : "started"));
+            String statusText = "Unknown (error?)";
 
-            if (!started) {
-                jobEntry.start();
-            } else {
-                PlayerEntry playerEntry;
-                synchronized (this)
-                {
-                    String player = jobEntry.getEditSession().getPlayer();
-                    playerEntry = m_blocks.get(player);
-                }
-                
-                if (playerEntry != null)
-                {
-                    playerEntry.removeJob(jobEntry);
-                }
+            switch (jobEntry.getStatus()) {
+                case Done:
+                    removeJob(player, jobEntry);
+                    return;
+                case PlacingBlocks:
+                    jobEntry.setStatus(BlockPlacerJobEntry.JobStatus.Done);
+                    removeJob(player, jobEntry);
+                    break;
+                case Initializing:
+                case Preparing:
+                case Waiting:
+                    jobEntry.setStatus(BlockPlacerJobEntry.JobStatus.PlacingBlocks);
+                    break;
             }
+
+            PluginMain.Say(PluginMain.getPlayer(player),
+                    ChatColor.YELLOW + "Job " + jobEntry.toString()
+                    + ChatColor.YELLOW + " - " + jobEntry.getStatusString());
         }
     }
 
@@ -551,5 +583,22 @@ public class BlockPlacer implements Runnable {
         }
 
         return result;
+    }
+
+    /**
+     * Remove the player job
+     *
+     * @param player
+     * @param jobEntry
+     */
+    private void removeJob(final String player, BlockPlacerJobEntry jobEntry) {
+        PlayerEntry playerEntry;
+        synchronized (this) {
+            playerEntry = m_blocks.get(player);
+        }
+
+        if (playerEntry != null) {
+            playerEntry.removeJob(jobEntry);
+        }
     }
 }

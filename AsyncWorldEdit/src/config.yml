@@ -1,19 +1,34 @@
 awe:
+  #Do not change
   version: 1
   rendering:
+    #amount of time (in ticks) the server will place a chunk of blocks
     interval: 15
+    #how often that a user will get an update on the current que (number of intervals)
     talk-interval: 10
+    #blocks to place (per-interval)
     blocks: 1000
+    #blocks to place (per-interval) for users with the permission AWE.user.vip-queue
     blocks-vip: 1000    
+    #maximum size of the blocks queue
     queue-max-size: 10000000
+    #maximum size of the player block queue
     queue-limit-hard: 500000
+    #number of blocks on the player queue when to stop placing blocks
     queue-limit-soft: 250000
+  #check for updates
   checkVersion: true  
+  #Default AWE status for loging in players if the player does not have 
+  #AWE.user.mode.on or AWE.user.mode.off permission
   defaultOn: true
-  physicsFreez: true
+  #Disable or enable blocks physics freeze when placing blocks
+  physicsFreez: true  
   blocksHub:
+    #Enable block chang loggin
     logBlocks: true
+    #Enable blocks access control
     checkAccess: false
+  #AWE will make the following WorldEdit actions async
   enabledOperations:
     - undo
     - redo
