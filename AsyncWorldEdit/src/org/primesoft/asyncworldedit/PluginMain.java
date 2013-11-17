@@ -158,6 +158,10 @@ public class PluginMain extends JavaPlugin {
         s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
     }
 
+    public static void Say(String player, String msg) {
+        Say(getPlayer(player), msg);
+    }
+    
     public static void Say(Player player, String msg) {
         if (player == null) {
             s_console.sendRawMessage(msg);

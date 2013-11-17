@@ -30,7 +30,6 @@ import com.sk89q.worldedit.expression.ExpressionException;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.util.TreeGenerator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +47,7 @@ public class CancelabeEditSession extends EditSession {
     private Mask m_mask;
 
     public CancelabeEditSession(AsyncEditSession parent, int jobId) {
-        super(null, -1);
+        super(parent.getWorld(), parent.getBlockChangeLimit());
 
         m_jobId = jobId;
         m_parent = parent;
@@ -76,18 +75,8 @@ public class CancelabeEditSession extends EditSession {
     }
 
     @Override
-    public int deformRegion(Region region, Vector zero, Vector unit, String expressionString) throws ExpressionException, MaxChangedBlocksException {
-        return m_parent.deformRegion(region, zero, unit, expressionString);
-    }
-
-    @Override
     public void disableQueue() {
         m_parent.disableQueue();
-    }
-
-    @Override
-    public int drainArea(Vector pos, double radius) throws MaxChangedBlocksException {
-        return m_parent.drainArea(pos, radius);
     }
 
     @Override
@@ -95,20 +84,6 @@ public class CancelabeEditSession extends EditSession {
         m_parent.enableQueue();
     }
 
-    @Override
-    public int fillXZ(Vector origin, BaseBlock block, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
-        return m_parent.fillXZ(origin, block, radius, depth, recursive);
-    }
-
-    @Override
-    public int fillXZ(Vector origin, Pattern pattern, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
-        return m_parent.fillXZ(origin, pattern, radius, depth, recursive);
-    }
-
-    @Override
-    public int fixLiquid(Vector pos, double radius, int moving, int stationary) throws MaxChangedBlocksException {
-        return m_parent.fixLiquid(pos, radius, moving, stationary);
-    }
 
     @Override
     public void flushQueue() {
@@ -176,99 +151,14 @@ public class CancelabeEditSession extends EditSession {
     }
 
     @Override
-    public int green(Vector pos, double radius) throws MaxChangedBlocksException {
-        return m_parent.green(pos, radius);
-    }
-
-    @Override
     public boolean hasFastMode() {
         return m_parent.hasFastMode();
     }
 
     @Override
-    public int hollowOutRegion(Region region, int thickness, Pattern pattern) throws MaxChangedBlocksException {
-        return m_parent.hollowOutRegion(region, thickness, pattern);
-    }
-
-    @Override
     public boolean isQueueEnabled() {
         return m_parent.isQueueEnabled();
-    }
-
-    @Override
-    public int makeCuboidFaces(Region region, BaseBlock block) throws MaxChangedBlocksException {
-        return m_parent.makeCuboidFaces(region, block);
-    }
-
-    @Override
-    public int makeCuboidFaces(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return m_parent.makeCuboidFaces(region, pattern);
-    }
-
-    @Override
-    public int makeCuboidWalls(Region region, BaseBlock block) throws MaxChangedBlocksException {
-        return m_parent.makeCuboidWalls(region, block);
-    }
-
-    @Override
-    public int makeCuboidWalls(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return m_parent.makeCuboidWalls(region, pattern);
-    }
-
-    @Override
-    public int makeCylinder(Vector pos, Pattern block, double radius, int height, boolean filled) throws MaxChangedBlocksException {
-        return m_parent.makeCylinder(pos, block, radius, height, filled);
-    }
-
-    @Override
-    public int makeCylinder(Vector pos, Pattern block, double radiusX, double radiusZ, int height, boolean filled) throws MaxChangedBlocksException {
-        return m_parent.makeCylinder(pos, block, radiusX, radiusZ, height, filled);
-    }
-
-    @Override
-    public int makeForest(Vector basePos, int size, double density, TreeGenerator treeGenerator) throws MaxChangedBlocksException {
-        return m_parent.makeForest(basePos, size, density, treeGenerator);
-    }
-
-    @Override
-    public int makePumpkinPatches(Vector basePos, int size) throws MaxChangedBlocksException {
-        return m_parent.makePumpkinPatches(basePos, size);
-    }
-
-    @Override
-    public int makePyramid(Vector pos, Pattern block, int size, boolean filled) throws MaxChangedBlocksException {
-        return m_parent.makePyramid(pos, block, size, filled);
-    }
-
-    @Override
-    public int makeShape(Region region, Vector zero, Vector unit, Pattern pattern, String expressionString, boolean hollow) throws ExpressionException, MaxChangedBlocksException {
-        return m_parent.makeShape(region, zero, unit, pattern, expressionString, hollow);
-    }
-
-    @Override
-    public int makeSphere(Vector pos, Pattern block, double radius, boolean filled) throws MaxChangedBlocksException {
-        return m_parent.makeSphere(pos, block, radius, filled);
-    }
-
-    @Override
-    public int makeSphere(Vector pos, Pattern block, double radiusX, double radiusY, double radiusZ, boolean filled) throws MaxChangedBlocksException {
-        return m_parent.makeSphere(pos, block, radiusX, radiusY, radiusZ, filled);
-    }
-
-    @Override
-    public int naturalizeCuboidBlocks(Region region) throws MaxChangedBlocksException {
-        return m_parent.naturalizeCuboidBlocks(region);
-    }
-
-    @Override
-    public int overlayCuboidBlocks(Region region, BaseBlock block) throws MaxChangedBlocksException {
-        return m_parent.overlayCuboidBlocks(region, block);
-    }
-
-    @Override
-    public int overlayCuboidBlocks(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return m_parent.overlayCuboidBlocks(region, pattern);
-    }
+    }    
 
     @Override
     public Map<Integer, Integer> popMissingBlocks() {
@@ -295,28 +185,8 @@ public class CancelabeEditSession extends EditSession {
     }
 
     @Override
-    public void redo(EditSession sess) {
-        m_parent.redo(sess);
-    }
-
-    @Override
     public void rememberChange(Vector pt, BaseBlock existing, BaseBlock block) {
         m_parent.rememberChange(pt, existing, block);
-    }
-
-    @Override
-    public int removeAbove(Vector pos, int size, int height) throws MaxChangedBlocksException {
-        return m_parent.removeAbove(pos, size, height);
-    }
-
-    @Override
-    public int removeBelow(Vector pos, int size, int height) throws MaxChangedBlocksException {
-        return m_parent.removeBelow(pos, size, height);
-    }
-
-    @Override
-    public int removeNear(Vector pos, int blockType, int size) throws MaxChangedBlocksException {
-        return m_parent.removeNear(pos, blockType, size);
     }
 
     @Override
@@ -371,23 +241,8 @@ public class CancelabeEditSession extends EditSession {
     }
 
     @Override
-    public int simulateSnow(Vector pos, double radius) throws MaxChangedBlocksException {
-        return m_parent.simulateSnow(pos, radius);
-    }
-
-    @Override
     public int size() {
         return m_parent.size();
-    }
-
-    @Override
-    public int stackCuboidRegion(Region region, Vector dir, int count, boolean copyAir) throws MaxChangedBlocksException {
-        return m_parent.stackCuboidRegion(region, dir, count, copyAir);
-    }
-
-    @Override
-    public int thaw(Vector pos, double radius) throws MaxChangedBlocksException {
-        return m_parent.thaw(pos, radius);
     }
 
     @Override

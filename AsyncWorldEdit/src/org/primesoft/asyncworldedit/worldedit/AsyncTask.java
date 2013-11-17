@@ -48,11 +48,11 @@ public abstract class AsyncTask extends BukkitRunnable {
     /**
      * The player
      */
-    private final Player m_player;
+    private final String m_player;
     private final BlockPlacer m_blockPlacer;
     private final BlockPlacerJobEntry m_job;
 
-    public AsyncTask(final CancelabeEditSession session, final Player player,
+    public AsyncTask(final CancelabeEditSession session, final String player,
             final String commandName, BlockPlacer blocksPlacer, BlockPlacerJobEntry job) {
         m_editSession = session;
         m_player = player;
@@ -60,7 +60,7 @@ public abstract class AsyncTask extends BukkitRunnable {
         m_blockPlacer = blocksPlacer;
         m_job = job;
         
-        session.getParent().addAsync();
+        session.getParent().addAsync(job);
     }
 
     @Override
@@ -90,7 +90,7 @@ public abstract class AsyncTask extends BukkitRunnable {
             }
         }
         
-        m_editSession.getParent().removeAsync();
+        m_editSession.getParent().removeAsync(m_job);
     }
 
     /**
