@@ -23,7 +23,6 @@
  */
 package org.primesoft.asyncworldedit;
 
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
 import java.util.HashSet;
@@ -38,6 +37,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.commands.Commands;
 import org.primesoft.asyncworldedit.commands.JobsCommand;
 import org.primesoft.asyncworldedit.commands.PurgeCommand;
@@ -121,15 +121,14 @@ public class PluginMain extends JavaPlugin {
     private EventListener m_listener = new EventListener(this);
     private PhysicsWatch m_physicsWatcher = new PhysicsWatch();
     private BlockPlacer m_blockPlacer;
-    private WorldeditIntegrator m_weIntegrator;    
+    private WorldeditIntegrator m_weIntegrator;
     private PlotMeFix m_plotMeFix;
 
-    public PhysicsWatch getPhysicsWatcher()
-    {
+    public PhysicsWatch getPhysicsWatcher() {
         return m_physicsWatcher;
     }
-    
-    public PlotMeFix getPlotMeFix() {       
+
+    public PlotMeFix getPlotMeFix() {
         return m_plotMeFix;
     }
 
@@ -148,7 +147,6 @@ public class PluginMain extends JavaPlugin {
 
         return s_instance.getServer().getPlayer(player);
     }
-       
 
     public static void Log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
@@ -161,7 +159,7 @@ public class PluginMain extends JavaPlugin {
     public static void Say(String player, String msg) {
         Say(getPlayer(player), msg);
     }
-    
+
     public static void Say(Player player, String msg) {
         if (player == null) {
             s_console.sendRawMessage(msg);
@@ -170,12 +168,12 @@ public class PluginMain extends JavaPlugin {
         }
     }
 
-    public BlocksHubIntegration getBlocksHub(){
+    public BlocksHubIntegration getBlocksHub() {
         return m_blocksHub;
     }
-    
+
     @Override
-    public void onEnable() {
+    public void onEnable() {        
         s_instance = this;
         PluginDescriptionFile desc = getDescription();
         s_prefix = String.format("[%s]", desc.getName());
@@ -193,7 +191,7 @@ public class PluginMain extends JavaPlugin {
         if (worldEdit == null) {
             Log("World edit not found.");
             return;
-        }
+        }        
 
         if (!ConfigProvider.load(this)) {
             Log("Error loading config");
@@ -210,7 +208,7 @@ public class PluginMain extends JavaPlugin {
         if (!ConfigProvider.isConfigUpdated()) {
             Log("Please update your config file!");
         }
-        
+
         m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit());
 
         if (ConfigProvider.isPhysicsFreezEnabled()) {
@@ -218,11 +216,11 @@ public class PluginMain extends JavaPlugin {
         } else {
             m_physicsWatcher.Disable();
         }
-        
+
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(m_listener, this);
         pm.registerEvents(m_physicsWatcher, this);
-        
+
         m_isInitialized = true;
 
         setPlayerModes();
@@ -294,11 +292,9 @@ public class PluginMain extends JavaPlugin {
         m_blockPlacer.queueStop();
         m_blockPlacer = new BlockPlacer(this);
 
-        if (ConfigProvider.isPhysicsFreezEnabled())
-        {
+        if (ConfigProvider.isPhysicsFreezEnabled()) {
             m_physicsWatcher.Enable();
-        }
-        else {
+        } else {
             m_physicsWatcher.Disable();
         }
 
@@ -340,12 +336,12 @@ public class PluginMain extends JavaPlugin {
      * @return
      */
     public static WorldEditPlugin getWorldEdit(JavaPlugin plugin) {
-        Plugin wPlugin = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
+        final Plugin wPlugin = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
 
         if ((wPlugin == null) || (!(wPlugin instanceof WorldEditPlugin))) {
             return null;
         }
-
+        
         return (WorldEditPlugin) wPlugin;
     }
 

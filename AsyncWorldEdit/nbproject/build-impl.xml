@@ -851,7 +851,7 @@ is divided into following sections:
     </target>
     <target name="-init-macrodef-copylibs">
         <macrodef name="copylibs" uri="http://www.netbeans.org/ns/j2se-project/3">
-            <attribute default="${manifest.file}" name="manifest"/>
+            <attribute default="${manifest.file}" name="MANIFEST"/>
             <element name="customize" optional="true"/>
             <sequential>
                 <property location="${build.classes.dir}" name="build.classes.dir.resolved"/>
