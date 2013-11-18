@@ -23,23 +23,19 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import java.util.List;
-import java.util.Queue;
-
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
-
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
@@ -389,6 +385,8 @@ public class BlockPlacer implements Runnable {
             if (m_blocks.containsKey(player)) {
                 PlayerEntry playerEntry = m_blocks.get(player);
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
+                Collection<BlockPlacerJobEntry> jobs = playerEntry.getJobs();
+                
                 for (BlockPlacerEntry entry : queue) {
                     if (entry instanceof BlockPlacerBlockEntry) {
                         World world = entry.getEditSession().getCBWorld();
@@ -398,6 +396,11 @@ public class BlockPlacer implements Runnable {
                     } else if (entry instanceof BlockPlacerJobEntry) {
                         playerEntry.removeJob((BlockPlacerJobEntry) entry);
                     }
+                }
+                
+                for (BlockPlacerJobEntry job : jobs)
+                {
+                    playerEntry.removeJob(job.getJobId());
                 }
                 result = queue.size();
                 m_blocks.remove(player);

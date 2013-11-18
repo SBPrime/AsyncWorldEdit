@@ -25,7 +25,6 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;

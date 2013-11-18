@@ -179,8 +179,32 @@ public class AsyncEditSession extends EditSession {
     }
 
     @Override
-    public void undo(EditSession sess) {
-        //TODO: Make async stage 1
+    public void undo(final EditSession sess) {
+        boolean isAsync = checkAsync(WorldeditOperations.undo);
+        if (!isAsync) {
+            doUndo(sess);
+            return;
+        }
+
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "undo");
+        m_blockPlacer.addJob(m_player, job);
+
+
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "undo",
+                m_blockPlacer, job) {
+
+            @Override
+            public int task(CancelabeEditSession session)
+                    throws MaxChangedBlocksException {
+                session.undo(sess);
+                return 0;
+            }
+        });
+    }
+    
+    public void doUndo(EditSession sess) {
         synchronized (m_asyncTasks) {
             for (BlockPlacerJobEntry job : m_asyncTasks) {
                 job.cancel();
@@ -225,20 +249,37 @@ public class AsyncEditSession extends EditSession {
             }
         }
 
-        sess.flushQueue();
-        if (!isQueueEnabled()) {
-            resetAsync();
-        }
+        sess.flushQueue();        
     }
 
     @Override
-    public void redo(EditSession sess) {
-        //TODO: Make async stage 1
-        checkAsync(WorldeditOperations.redo);
-        super.redo(sess);
-        if (!isQueueEnabled()) {
-            resetAsync();
+    public void redo(final EditSession sess) {
+        boolean isAsync = checkAsync(WorldeditOperations.redo);
+        if (!isAsync) {
+            doRedo(sess);
+            return;
         }
+
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "redo");
+        m_blockPlacer.addJob(m_player, job);
+
+
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "redo",
+                m_blockPlacer, job) {
+
+            @Override
+            public int task(CancelabeEditSession session)
+                    throws MaxChangedBlocksException {
+                session.redo(sess);
+                return 0;
+            }
+        });
+    }
+    
+    public void doRedo(EditSession sess) {
+        super.redo(sess);
     }
 
     @Override

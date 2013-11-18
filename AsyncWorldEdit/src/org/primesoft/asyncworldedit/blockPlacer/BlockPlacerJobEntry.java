@@ -80,14 +80,12 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     }
 
     public void setStatus(JobStatus newStatus) {
-        System.out.println(m_status + " " + newStatus);
         int newS = getStatusId(newStatus);
         int oldS = getStatusId(m_status);
         if (newS < oldS) {
             return;
         }
         m_status = newStatus;
-        System.out.println(m_status);
     }
 
     public void cancel() {

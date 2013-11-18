@@ -247,8 +247,15 @@ public class CancelabeEditSession extends EditSession {
 
     @Override
     public void undo(EditSession sess) {
-        m_parent.undo(sess);
+        m_parent.doUndo(sess);
     }
+
+    @Override
+    public void redo(EditSession sess) {
+        m_parent.doRedo(sess);
+    }
+    
+    
 
     @Override
     public boolean smartSetBlock(Vector pt, BaseBlock block) {
