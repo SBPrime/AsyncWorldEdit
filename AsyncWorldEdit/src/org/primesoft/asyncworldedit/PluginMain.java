@@ -148,6 +148,10 @@ public class PluginMain extends JavaPlugin {
         return s_instance.getServer().getPlayer(player);
     }
 
+    public static PluginMain getInstance() {
+        return s_instance;
+    }
+
     public static void log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
             return;
@@ -173,7 +177,7 @@ public class PluginMain extends JavaPlugin {
     }
 
     @Override
-    public void onEnable() {        
+    public void onEnable() {
         s_instance = this;
         PluginDescriptionFile desc = getDescription();
         s_prefix = String.format("[%s]", desc.getName());
@@ -191,7 +195,7 @@ public class PluginMain extends JavaPlugin {
         if (worldEdit == null) {
             log("World edit not found.");
             return;
-        }        
+        }
 
         if (!ConfigProvider.load(this)) {
             log("Error loading config");
@@ -341,7 +345,7 @@ public class PluginMain extends JavaPlugin {
         if ((wPlugin == null) || (!(wPlugin instanceof WorldEditPlugin))) {
             return null;
         }
-        
+
         return (WorldEditPlugin) wPlugin;
     }
 

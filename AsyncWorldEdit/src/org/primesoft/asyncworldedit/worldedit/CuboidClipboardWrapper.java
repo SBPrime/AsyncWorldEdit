@@ -24,6 +24,10 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.LocalEntity;
+import com.sk89q.worldedit.Vector;
+import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 
 /**
  * This class is a wrapper to better handle entity paste
@@ -31,7 +35,14 @@ import com.sk89q.worldedit.CuboidClipboard;
  * @author SBPrime
  */
 public class CuboidClipboardWrapper extends ProxyCuboidClipboard {    
+    /**
+     * The blocks placer
+     */
+    private final BlockPlacer m_blocksPlacer;
+    
     public CuboidClipboardWrapper(CuboidClipboard parrent) {
         super(parrent);
+        
+        m_blocksPlacer = PluginMain.getInstance().getBlockPlacer();
     }
 }

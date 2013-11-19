@@ -30,16 +30,31 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  * @author SBPrime
  */
 public abstract class BlockPlacerEntry {
-    private final int m_jobId;
-    private final AsyncEditSession m_editSession;
+    private final int m_jobId;    
+    protected final AsyncEditSession m_editSession;
 
+    /**
+     * The job ID
+     * @return 
+     */
     public int getJobId(){
         return m_jobId;
     }
     
+    
+    /**
+     * Job edit session
+     * @return 
+     */
     public AsyncEditSession getEditSession() {
         return m_editSession;
     }
+    
+    
+    /**
+     * Process the entry
+     */
+    public abstract void Process(BlockPlacer bp);
 
     public BlockPlacerEntry(AsyncEditSession editSession, int jobId) {
         m_editSession = editSession;

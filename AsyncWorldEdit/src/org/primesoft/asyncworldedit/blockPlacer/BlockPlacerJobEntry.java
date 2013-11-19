@@ -25,6 +25,7 @@ package org.primesoft.asyncworldedit.blockPlacer;
 
 import javax.print.attribute.standard.JobSheets;
 import org.bukkit.ChatColor;
+import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
@@ -33,32 +34,34 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  * @author SBPrime
  */
 public class BlockPlacerJobEntry extends BlockPlacerEntry {
+
+    /**
+     * Job status
+     */
     public enum JobStatus {
+
         Initializing,
         Preparing,
         Waiting,
         PlacingBlocks,
         Done
     }
-
     /**
      * Job name
      */
     private final String m_name;
-
     /**
      * Is the job status
      */
     private JobStatus m_status;
-
     /**
      * Cancelable edit session
      */
-    private CancelabeEditSession m_cEditSession;
+    private final CancelabeEditSession m_cEditSession;
 
     public BlockPlacerJobEntry(AsyncEditSession editSession,
-                               CancelabeEditSession cEditSession,
-                               int jobId, String name) {
+            CancelabeEditSession cEditSession,
+            int jobId, String name) {
         super(editSession, jobId);
 
         m_name = name;
@@ -137,5 +140,29 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     @Override
     public String toString() {
         return ChatColor.WHITE + "[" + getJobId() + "] " + getName();
+    }
+
+    @Override
+    public void Process(BlockPlacer bp) {
+        final String player = m_editSession.getPlayer();
+
+        switch (m_status) {
+            case Done:
+                bp.removeJob(player, this);
+                return;
+            case PlacingBlocks:
+                setStatus(BlockPlacerJobEntry.JobStatus.Done);
+                bp.removeJob(player, this);
+                break;
+            case Initializing:
+            case Preparing:
+            case Waiting:
+                setStatus(BlockPlacerJobEntry.JobStatus.PlacingBlocks);
+                break;
+        }
+
+        PluginMain.say(PluginMain.getPlayer(player),
+                ChatColor.YELLOW + "Job " + toString()
+                + ChatColor.YELLOW + " - " + getStatusString());
     }
 }

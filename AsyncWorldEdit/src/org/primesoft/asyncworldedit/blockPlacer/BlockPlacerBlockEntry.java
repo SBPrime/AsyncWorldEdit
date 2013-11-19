@@ -25,18 +25,17 @@ package org.primesoft.asyncworldedit.blockPlacer;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import org.bukkit.World;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
  * @author Prime
  */
-public class BlockPlacerBlockEntry extends BlockPlacerEntry
-{
-    private Vector m_location;
-    private BaseBlock m_newBlock;
- 
-    
+public class BlockPlacerBlockEntry extends BlockPlacerEntry {
+    private final Vector m_location;
+    private final BaseBlock m_newBlock;
+
     public Vector getLocation() {
         return m_location;
     }
@@ -44,12 +43,21 @@ public class BlockPlacerBlockEntry extends BlockPlacerEntry
     public BaseBlock getNewBlock() {
         return m_newBlock;
     }
-    
 
     public BlockPlacerBlockEntry(AsyncEditSession editSession,
             int jobId, Vector location, BaseBlock newBlock) {
         super(editSession, jobId);
         m_location = location;
         m_newBlock = newBlock;
+    }
+
+    @Override
+    public void Process(BlockPlacer bp) {        
+        final World world = m_editSession.getCBWorld();
+        
+        m_editSession.doRawSetBlock(m_location, m_newBlock);
+        if (world != null) {
+            bp.getPhysicsWatcher().removeLocation(world.getName(), m_location);
+        }
     }
 }

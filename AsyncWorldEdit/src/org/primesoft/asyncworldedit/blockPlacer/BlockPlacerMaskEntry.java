@@ -30,10 +30,9 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  *
  * @author Prime
  */
-public class BlockPlacerMaskEntry extends BlockPlacerEntry
-{
-    private Mask m_mask;
-    
+public class BlockPlacerMaskEntry extends BlockPlacerEntry {
+    private final Mask m_mask;
+
     public Mask getMask() {
         return m_mask;
     }
@@ -42,5 +41,10 @@ public class BlockPlacerMaskEntry extends BlockPlacerEntry
             int jobId, Mask mask) {
         super(editSession, jobId);
         m_mask = mask;
+    }
+
+    @Override
+    public void Process(BlockPlacer bp) {
+        m_editSession.doSetMask(m_mask);
     }
 }
