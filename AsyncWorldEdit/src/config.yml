@@ -57,3 +57,4 @@ awe:
     - makeShape
     - deformRegion
     - hollowOutRegion
+    - paste

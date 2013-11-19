@@ -23,7 +23,6 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import javax.print.attribute.standard.JobSheets;
 import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -58,12 +57,25 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
      * Cancelable edit session
      */
     private final CancelabeEditSession m_cEditSession;
+    /**
+     * The player name
+     */
+    private String m_player;
+
+    public BlockPlacerJobEntry(String player, int jobId, String name) {
+        super(null, jobId);
+        m_player = player;
+        m_name = name;
+        m_status = JobStatus.Initializing;
+        m_cEditSession = null;
+    }
 
     public BlockPlacerJobEntry(AsyncEditSession editSession,
             CancelabeEditSession cEditSession,
             int jobId, String name) {
         super(editSession, jobId);
 
+        m_player = editSession.getPlayer();
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = cEditSession;
@@ -144,7 +156,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
 
     @Override
     public void Process(BlockPlacer bp) {
-        final String player = m_editSession.getPlayer();
+        final String player = m_player;
 
         switch (m_status) {
             case Done:

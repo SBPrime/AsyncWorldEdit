@@ -38,7 +38,11 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntityEntry;
  * @author SBPrime
  */
 public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
-
+    /**
+     * The job id
+     */
+    private final int m_jobId;
+    
     /**
      * The blocks placer
      */
@@ -93,10 +97,15 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
 
         return null;
     }
-
+    
     public CuboidClipboardWrapper(String player, CuboidClipboard parrent) {
+        this(player, parrent, -1);
+    }
+
+    public CuboidClipboardWrapper(String player, CuboidClipboard parrent, int jobId) {
         super(parrent);
 
+        m_jobId = jobId;
         m_blocksPlacer = PluginMain.getInstance().getBlockPlacer();
         m_player = player;
     }
@@ -105,7 +114,7 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
     public LocalEntity[] pasteEntities(Vector pos) {
         synchronized (m_parrent) {
             final Object entities = getEntities(m_parrent);
-            final int jobId = m_blocksPlacer.getJobId(m_player);            
+            final int jobId = m_jobId < 0 ? m_blocksPlacer.getJobId(m_player) : m_jobId;
             final BlockPlacerEntityEntry entry =
                     new BlockPlacerEntityEntry(null, jobId, entities, pos, m_parrent);
 

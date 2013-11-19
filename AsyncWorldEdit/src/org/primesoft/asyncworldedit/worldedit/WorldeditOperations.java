@@ -56,4 +56,5 @@ public enum WorldeditOperations
     makeShape,
     deformRegion,
     hollowOutRegion,
+    paste
 }
