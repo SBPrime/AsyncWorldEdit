@@ -23,8 +23,6 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -35,7 +33,6 @@ import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.PluginMain;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
@@ -280,10 +277,8 @@ public class BlockPlacer implements Runnable {
      * Add task to perform in async mode
      *
      */
-    public boolean addTasks(BlockPlacerEntry entry) {
+    public boolean addTasks(String player, BlockPlacerEntry entry) {
         synchronized (this) {
-            AsyncEditSession editSesson = entry.getEditSession();
-            String player = editSesson.getPlayer();
             PlayerEntry playerEntry;
 
             if (!m_blocks.containsKey(player)) {

@@ -69,7 +69,7 @@ public abstract class AsyncTask extends BukkitRunnable {
             PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                     + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
             
-            m_blockPlacer.addTasks(m_job);
+            m_blockPlacer.addTasks(m_player, m_job);
             int cnt = task(m_editSession);
             
             if (!m_editSession.isQueueEnabled()) {
@@ -79,7 +79,7 @@ public abstract class AsyncTask extends BukkitRunnable {
             }
 
             m_job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
-            m_blockPlacer.addTasks(m_job);
+            m_blockPlacer.addTasks(m_player, m_job);
             PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + cnt);
         } catch (MaxChangedBlocksException ex) {
             PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");

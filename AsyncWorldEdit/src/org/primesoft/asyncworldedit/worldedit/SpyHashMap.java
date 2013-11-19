@@ -95,7 +95,7 @@ public class SpyHashMap extends HashMap<String, LocalSession> {
      * @return
      */
     private LocalSession createAndAdd(String key, LocalSession parent) {
-        LocalSessionWrapper result = new LocalSessionWrapper(m_weLocalConfiguration, parent);
+        LocalSessionWrapper result = new LocalSessionWrapper(key, m_weLocalConfiguration, parent);
         return super.put(key, result);
     }
 

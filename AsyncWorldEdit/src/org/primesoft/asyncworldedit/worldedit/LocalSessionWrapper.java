@@ -24,6 +24,7 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 
@@ -33,10 +34,15 @@ import com.sk89q.worldedit.LocalSession;
  * @author SBPrime
  */
 public class LocalSessionWrapper extends LocalSession {
+
     /**
      * The parrent local session
      */
     private final LocalSession m_parrent;
+    /**
+     * Player
+     */
+    private final String m_player;
 
     /**
      * The parrent local session
@@ -47,9 +53,10 @@ public class LocalSessionWrapper extends LocalSession {
         return m_parrent;
     }
 
-    public LocalSessionWrapper(LocalConfiguration configuration,
-                               LocalSession parrent) {
+    public LocalSessionWrapper(String player, LocalConfiguration configuration,
+            LocalSession parrent) {
         super(configuration);
+        m_player = player;
         m_parrent = parrent;
     }
 
@@ -57,9 +64,8 @@ public class LocalSessionWrapper extends LocalSession {
     public void setClipboard(CuboidClipboard clipboard) {
         if ((clipboard instanceof AsyncCuboidClipboard) || clipboard == null) {
             super.setClipboard(clipboard);
-        }
-        else {
-            super.setClipboard(new AsyncCuboidClipboard(clipboard));
+        } else {
+            super.setClipboard(new AsyncCuboidClipboard(m_player, clipboard));
         }
     }
 }

@@ -154,7 +154,7 @@ public class AsyncEditSession extends EditSession {
         }
 
         if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled)) {
-            return m_blockPlacer.addTasks(new BlockPlacerBlockEntry(this, jobId, pt, block));
+            return m_blockPlacer.addTasks(m_player, new BlockPlacerBlockEntry(this, jobId, pt, block));
         } else {
             return doRawSetBlock(pt, block);
         }
@@ -163,7 +163,7 @@ public class AsyncEditSession extends EditSession {
     @Override
     public void setMask(Mask mask) {
         if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled)) {
-            m_blockPlacer.addTasks(new BlockPlacerMaskEntry(this, -1, mask));
+            m_blockPlacer.addTasks(m_player, new BlockPlacerMaskEntry(this, -1, mask));
         } else {
             doSetMask(mask);
         }
@@ -203,7 +203,7 @@ public class AsyncEditSession extends EditSession {
             }
         });
     }
-    
+
     public void doUndo(EditSession sess) {
         synchronized (m_asyncTasks) {
             for (BlockPlacerJobEntry job : m_asyncTasks) {
@@ -249,7 +249,7 @@ public class AsyncEditSession extends EditSession {
             }
         }
 
-        sess.flushQueue();        
+        sess.flushQueue();
     }
 
     @Override
@@ -277,7 +277,7 @@ public class AsyncEditSession extends EditSession {
             }
         });
     }
-    
+
     public void doRedo(EditSession sess) {
         super.redo(sess);
     }

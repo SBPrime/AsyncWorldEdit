@@ -23,12 +23,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.Countable;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalEntity;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
@@ -36,139 +31,173 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * This class is only a wrapper proxy
- * Note: Do not use any operations from this class, always use th parrent!
+ * This class is only a wrapper proxy Note: Do not use any operations from this
+ * class, always use th parrent!
+ *
  * @author SBPrime
  */
-public class ProxyCuboidClipboard extends CuboidClipboard {    
+public class ProxyCuboidClipboard extends CuboidClipboard {
+
     /**
      * The parrent clipboard
      */
-    protected CuboidClipboard m_parrent;
-    
-    
+    protected final CuboidClipboard m_parrent;
+
     public ProxyCuboidClipboard(CuboidClipboard parrent) {
-        super(new Vector());
-        
+        super(parrent.getSize(), parrent.getOrigin(), parrent.getOffset());
+
         m_parrent = parrent;
     }
 
     @Override
     public void copy(EditSession editSession) {
-        m_parrent.copy(editSession);
+        synchronized (m_parrent) {
+            m_parrent.copy(editSession);
+        }
     }
 
     @Override
     public void flip(FlipDirection dir) {
-        m_parrent.flip(dir);
+        synchronized (m_parrent) {
+            m_parrent.flip(dir);
+        }
     }
 
     @Override
     public void flip(FlipDirection dir, boolean aroundPlayer) {
-        m_parrent.flip(dir, aroundPlayer);
+        synchronized (m_parrent) {
+            m_parrent.flip(dir, aroundPlayer);
+        }
     }
 
     @Override
     public List<Countable<Integer>> getBlockDistribution() {
-        return m_parrent.getBlockDistribution();
+        synchronized (m_parrent) {
+            return m_parrent.getBlockDistribution();
+        }
     }
 
     @Override
     public List<Countable<BaseBlock>> getBlockDistributionWithData() {
-        return m_parrent.getBlockDistributionWithData();
+        synchronized (m_parrent) {
+            return m_parrent.getBlockDistributionWithData();
+        }
     }
 
     @Override
     public int getHeight() {
-        return m_parrent.getHeight();
+        synchronized (m_parrent) {
+            return m_parrent.getHeight();
+        }
     }
 
     @Override
     public int getLength() {
-        return m_parrent.getLength();
+        synchronized (m_parrent) {
+            return m_parrent.getLength();
+        }
     }
 
     @Override
     public Vector getOffset() {
-        return m_parrent.getOffset();
+        synchronized (m_parrent) {
+            return m_parrent.getOffset();
+        }
     }
 
     @Override
     public Vector getOrigin() {
-        return m_parrent.getOrigin();
+        synchronized (m_parrent) {
+            return m_parrent.getOrigin();
+        }
     }
 
     @Override
     public BaseBlock getPoint(Vector pos)
             throws ArrayIndexOutOfBoundsException {
-        return m_parrent.getPoint(pos);
+        synchronized (m_parrent) {
+            return m_parrent.getPoint(pos);
+        }
     }
 
     @Override
     public Vector getSize() {
-        return m_parrent.getSize();
+        synchronized (m_parrent) {
+            return m_parrent.getSize();
+        }
     }
 
     @Override
     public int getWidth() {
-        return m_parrent.getWidth();
+        synchronized (m_parrent) {
+            return m_parrent.getWidth();
+        }
     }
 
     @Override
     public void paste(EditSession editSession, Vector newOrigin, boolean noAir)
             throws MaxChangedBlocksException {
-        System.out.println("! Hello from asyncCuboidClipboard paste");
-        m_parrent.paste(editSession, newOrigin, noAir);
-    }
-
-    @Override
-    public void paste(EditSession editSession, Vector newOrigin, boolean noAir,
-                      boolean entities)
-            throws MaxChangedBlocksException {
-        System.out.println("! Hello from asyncCuboidClipboard paste");
-        m_parrent.paste(editSession, newOrigin, noAir, entities);
+        synchronized (m_parrent) {
+            m_parrent.paste(editSession, newOrigin, noAir);
+        }
     }
 
     @Override
     public LocalEntity[] pasteEntities(Vector pos) {
-        return m_parrent.pasteEntities(pos);
+        synchronized (m_parrent) {
+            return m_parrent.pasteEntities(pos);
+        }
     }
 
     @Override
     public void place(EditSession editSession, Vector pos, boolean noAir)
             throws MaxChangedBlocksException {
-        System.out.println("! Hello from asyncCuboidClipboard place");
-        m_parrent.place(editSession, pos, noAir);
+        synchronized (m_parrent) {
+            m_parrent.place(editSession, pos, noAir);
+        }
     }
 
     @Override
     public void rotate2D(int angle) {
-        m_parrent.rotate2D(angle);
+        synchronized (m_parrent) {
+            m_parrent.rotate2D(angle);
+        }
     }
 
     @Override
     public void saveSchematic(File path)
             throws IOException, DataException {
-        m_parrent.saveSchematic(path);
+        synchronized (m_parrent) {
+            m_parrent.saveSchematic(path);
+        }
     }
 
     @Override
     public void setBlock(Vector pt, BaseBlock block) {
-        m_parrent.setBlock(pt, block);
+        synchronized (m_parrent) {
+            m_parrent.setBlock(pt, block);
+
+        }
     }
 
     @Override
     public void setOffset(Vector offset) {
-        m_parrent.setOffset(offset);
+        synchronized (m_parrent) {
+            m_parrent.setOffset(offset);
+        }
     }
 
     @Override
     public void setOrigin(Vector origin) {
-        m_parrent.setOrigin(origin);
+        synchronized (m_parrent) {
+            m_parrent.setOrigin(origin);
+        }
     }
 
     @Override
     public void storeEntity(LocalEntity entity) {
-        m_parrent.storeEntity(entity);
+        synchronized (m_parrent) {
+            m_parrent.storeEntity(entity);
+        }
     }
 }

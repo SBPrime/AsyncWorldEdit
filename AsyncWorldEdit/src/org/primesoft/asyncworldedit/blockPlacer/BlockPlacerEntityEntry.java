@@ -21,19 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.worldedit;
+package org.primesoft.asyncworldedit.blockPlacer;
 
 import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.Vector;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
 /**
- * This clipboar is used to async clipboard operations Note: Do not use any
- * operations from this class, always use th parrent!
  *
  * @author SBPrime
  */
-public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
+public class BlockPlacerEntityEntry extends BlockPlacerEntry {
 
-    public AsyncCuboidClipboard(String player, CuboidClipboard parrent) {
-        super(new CuboidClipboardWrapper(player, parrent));
+    /**
+     * Entity data
+     */
+    private final Object m_data;
+    /**
+     * Paste location
+     */
+    private final Vector m_location;
+    /**
+     * The clipboard
+     */
+    private final CuboidClipboard m_clipboard;
+
+    public BlockPlacerEntityEntry(AsyncEditSession editSession,
+            int jobId, Object data, Vector location, CuboidClipboard clipboard) {
+        super(editSession, jobId);
+
+        m_data = data;
+        m_location = location;
+        m_clipboard = clipboard;
+    }
+
+    @Override
+    public void Process(BlockPlacer bp) {
+        synchronized (m_clipboard) {
+            Object old = CuboidClipboardWrapper.getEntities(m_clipboard);
+            CuboidClipboardWrapper.setEntities(m_clipboard, m_data);
+            m_clipboard.pasteEntities(m_location);
+
+            CuboidClipboardWrapper.setEntities(m_clipboard, old);
+        }
     }
 }
