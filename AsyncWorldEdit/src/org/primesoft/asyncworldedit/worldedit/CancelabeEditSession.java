@@ -87,7 +87,7 @@ public class CancelabeEditSession extends EditSession {
 
     @Override
     public void flushQueue() {
-        m_parent.flushQueue();
+        m_parent.flushQueue(m_jobId);
     }
 
     @Override

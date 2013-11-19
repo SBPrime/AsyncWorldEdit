@@ -25,41 +25,41 @@ package org.primesoft.asyncworldedit;
 
 import org.bukkit.entity.Player;
 
-
 /**
  * @author SBPrime
  */
 public class PermissionManager {
+
     /**
-    * List of all permissions
-    */
+     * List of all permissions
+     */
     public enum Perms {
+
         ReloadConfig,
         AnnounceVersion,
         QueueBypass, QueueVip,
         Purge_Self, Purge_Other, Purge_All,
         Jobs_Self, Jobs_Other, Jobs_All, Filter,
+        Cancel_Self, Cancel_Other,
         Mode_Change, Mode_On, Mode_Off,
         Mode_Change_Other,
         TalkativeQueue
     }
-    
-    
     /**
      * Plugin permissions top node
      */
     private static String s_prefix = "AWE.";
-    
 
     /**
      * Check if player has a specific permission
+     *
      * @param player player
      * @param perms permission to check
      * @return True if permission pressent
      */
     public static boolean isAllowed(Player player, Perms perms) {
-        if (player == null) {
-            return false;
+        if (player == null || player.isOp()) {
+            return true;
         }
 
         String s = getPermString(perms);
@@ -70,14 +70,13 @@ public class PermissionManager {
         return player.hasPermission(s);
     }
 
-    
     /**
      * Convert permission to string
+     *
      * @param perms Permission
      * @return Permission node
-     */
-    @SuppressWarnings("incomplete-switch")
-	private static String getPermString(Perms perms) {
+     */    
+    private static String getPermString(Perms perms) {
         switch (perms) {
             case AnnounceVersion:
                 return s_prefix + "admin.version";
@@ -95,6 +94,10 @@ public class PermissionManager {
                 return s_prefix + "admin.jobs";
             case Jobs_All:
                 return s_prefix + "admin.jobs.all";
+            case Cancel_Self:
+                return s_prefix + "user.jobs.cancel";
+            case Cancel_Other:
+                return s_prefix + "admin.jobs.cancel";
             case QueueBypass:
                 return s_prefix + "admin.queue-bypass";
             case QueueVip:

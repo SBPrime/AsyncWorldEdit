@@ -38,10 +38,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.commands.Commands;
-import org.primesoft.asyncworldedit.commands.JobsCommand;
-import org.primesoft.asyncworldedit.commands.PurgeCommand;
-import org.primesoft.asyncworldedit.commands.ToggleCommand;
+import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
@@ -267,6 +264,9 @@ public class PluginMain extends JavaPlugin {
         } else if (name.equalsIgnoreCase(Commands.COMMAND_JOBS)) {
             doJobs(player, args);
             return true;
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_CANCEL)) {
+            doCancel(player, args);
+            return true;
         } else if (name.equalsIgnoreCase(Commands.COMMAND_TOGGLE)) {
             doToggle(player, args);
             return true;
@@ -331,6 +331,16 @@ public class PluginMain extends JavaPlugin {
         }
 
         JobsCommand.Execte(this, player, args);
+    }
+    
+    
+    private void doCancel(Player player, String[] args) {
+        if (!m_isInitialized) {
+            say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            return;
+        }
+
+        CancelCommand.Execte(this, player, args);
     }
 
     /**

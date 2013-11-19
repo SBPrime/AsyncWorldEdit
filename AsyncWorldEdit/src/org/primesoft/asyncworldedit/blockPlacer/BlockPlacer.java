@@ -330,13 +330,14 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @param jobId
      */
-    public void cancelJob(String player, int jobId) {
+    public int cancelJob(String player, int jobId) {
         int newSize = 0;
+        int result = 0;
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 PlayerEntry playerEntry = m_blocks.get(player);
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
-                playerEntry.removeJob(jobId);
+                playerEntry.removeJob(jobId);                
 
                 Queue<BlockPlacerEntry> filtered = new ArrayDeque<BlockPlacerEntry>();
                 for (BlockPlacerEntry entry : queue) {
@@ -353,6 +354,7 @@ public class BlockPlacer implements Runnable {
                 }
 
                 newSize = filtered.size();
+                result = queue.size() - filtered.size();
                 if (newSize > 0) {
                     playerEntry.updateQueue(filtered);
                 } else {
@@ -368,6 +370,8 @@ public class BlockPlacer implements Runnable {
                 }
             }
         }
+        
+        return result;
     }
 
     /**

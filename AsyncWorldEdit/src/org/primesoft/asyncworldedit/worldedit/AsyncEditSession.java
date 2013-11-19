@@ -99,6 +99,13 @@ public class AsyncEditSession extends EditSession {
      * Number of async tasks
      */
     private final HashSet<BlockPlacerJobEntry> m_asyncTasks;
+    
+    
+    /**
+     * Current job id
+     */
+    private int m_jobId;
+    
 
     public String getPlayer() {
         return m_player;
@@ -107,6 +114,7 @@ public class AsyncEditSession extends EditSession {
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
             String player, LocalWorld world, int maxBlocks) {
         super(world, maxBlocks);
+        m_jobId = -1;
         m_asyncTasks = new HashSet<BlockPlacerJobEntry>();
         m_plugin = plugin;
         m_bh = plugin.getBlocksHub();
@@ -127,6 +135,7 @@ public class AsyncEditSession extends EditSession {
             String player, LocalWorld world, int maxBlocks,
             BlockBag blockBag) {
         super(world, maxBlocks, blockBag);
+        m_jobId = -1;
         m_asyncTasks = new HashSet<BlockPlacerJobEntry>();
         m_plugin = plugin;
         m_bh = plugin.getBlocksHub();
@@ -145,7 +154,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public boolean rawSetBlock(Vector pt, BaseBlock block) {
-        return this.rawSetBlock(pt, -1, block);
+        return this.rawSetBlock(pt, m_jobId, block);
     }
 
     public boolean rawSetBlock(Vector pt, int jobId, BaseBlock block) {
@@ -166,6 +175,16 @@ public class AsyncEditSession extends EditSession {
             m_blockPlacer.addTasks(m_player, new BlockPlacerMaskEntry(this, -1, mask));
         } else {
             doSetMask(mask);
+        }
+    }
+    
+    public void flushQueue(int jobId) {
+        boolean queued = isQueueEnabled();
+        m_jobId = jobId;
+        super.flushQueue();
+        m_jobId = -1;
+        if (queued) {
+            resetAsync();
         }
     }
 

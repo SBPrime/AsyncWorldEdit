@@ -32,16 +32,17 @@ import org.primesoft.asyncworldedit.commands.Commands;
  * @author SBPrime
  */
 public final class Help {
+
     private final static String[] HelpGlobal = new String[]{
         ChatColor.YELLOW + "Async WorldEdit help:\n",
         ChatColor.BLUE + "Help" + ChatColor.WHITE + " - diaplay help screen",
         ChatColor.BLUE + "Jobs" + ChatColor.WHITE + " - display queued block operations",
+        ChatColor.BLUE + "Cancel" + ChatColor.WHITE + " - cancel queued job",
         ChatColor.BLUE + "Purge" + ChatColor.WHITE + " - remove all queued block operations",
         ChatColor.BLUE + "Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off",
         ChatColor.BLUE + "Reload" + ChatColor.WHITE + " - reload configuration",
         ChatColor.YELLOW + "To display help on command use: " + ChatColor.BLUE + "/Help <command>"
     };
-
     private final static String[] HelpToggle = new String[]{
         ChatColor.YELLOW + "Toggle " + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off",
         ChatColor.BLUE + " Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit",
@@ -50,19 +51,20 @@ public final class Help {
         ChatColor.BLUE + " Toggle <u:playerName> " + ChatColor.WHITE + " - toggle AsyncWorldEdit",
         ChatColor.BLUE + " Toggle <u:playerName> on" + ChatColor.WHITE + " - toggle AsyncWorldEdit on",
         ChatColor.BLUE + " Toggle <u:playerName> off" + ChatColor.WHITE + " - toggle AsyncWorldEdit off",};
-
     private final static String[] HelpPurge = new String[]{
         ChatColor.YELLOW + "Purge " + ChatColor.WHITE + " - remove all queued block operations",
         ChatColor.BLUE + " Purge" + ChatColor.WHITE + " - purges your operations",
         ChatColor.BLUE + " Purge <u:playerName>" + ChatColor.WHITE + " - purges other player operations",
         ChatColor.BLUE + " Purge all" + ChatColor.WHITE + " - purges all operations",};
-
     private final static String[] HelpJobs = new String[]{
         ChatColor.YELLOW + "Jobs " + ChatColor.WHITE + " - display queued block operations",
         ChatColor.BLUE + " Jobs" + ChatColor.WHITE + " - displays your operations",
         ChatColor.BLUE + " Jobs <u:playerName>" + ChatColor.WHITE + " - displays other player operations",
         ChatColor.BLUE + " Jobs all" + ChatColor.WHITE + " - displays all queued operations",};
-
+    private final static String[] HelpCancel = new String[]{
+        ChatColor.YELLOW + "Cancel " + ChatColor.WHITE + " - cancel queued job",        
+        ChatColor.BLUE + " Cancel #id" + ChatColor.WHITE + " - cancel your job",
+        ChatColor.BLUE + " Cancel <u:playerName> #id" + ChatColor.WHITE + " - cancel other player job",};
     private final static String[] HelpReload = new String[]{
         ChatColor.YELLOW + "Reload " + ChatColor.WHITE + " - Reload AWE configuration file",};
 
@@ -78,6 +80,8 @@ public final class Help {
                 help = HelpToggle;
             } else if (command.equalsIgnoreCase(Commands.COMMAND_RELOAD)) {
                 help = HelpReload;
+            } else if (command.equalsIgnoreCase(Commands.COMMAND_CANCEL)) {
+                help = HelpCancel;
             }
         }
 
