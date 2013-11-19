@@ -65,7 +65,7 @@ public class PlotMeFix
         
         if (m_isEnabled)
         {
-            PluginMain.Log("PlotMe fix enabled.");
+            PluginMain.log("PlotMe fix enabled.");
         }
     }
 

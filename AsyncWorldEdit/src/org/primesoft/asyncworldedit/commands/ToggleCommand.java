@@ -46,7 +46,7 @@ public class ToggleCommand {
 
         if (args.length == 1) {
             if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
-                PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
 
@@ -56,7 +56,7 @@ public class ToggleCommand {
             String arg = args[1];
             if (arg.startsWith("u:")) {
                 if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change_Other)) {
-                    PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                    PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
@@ -77,7 +77,7 @@ public class ToggleCommand {
                 }
             } else {
                 if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
-                    PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                    PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
                 if (arg.equalsIgnoreCase("on")) {
@@ -93,7 +93,7 @@ public class ToggleCommand {
 
         PluginMain.setMode(playerName, mode);
 
-        PluginMain.Say(player, "AsyncWorldEdit: "
+        PluginMain.say(player, "AsyncWorldEdit: "
                 + (PluginMain.hasAsyncMode(playerName) ? "on" : "off"));
     }
 }

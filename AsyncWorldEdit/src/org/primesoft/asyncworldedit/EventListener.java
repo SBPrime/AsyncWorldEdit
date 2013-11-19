@@ -58,14 +58,14 @@ public class EventListener implements Listener {
             public void run() {
                 if (ConfigProvider.getCheckUpdate()) {
                     PluginDescriptionFile desc = m_parent.getDescription();
-                    PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()
+                    PluginMain.say(player, ChatColor.BLUE + PluginMain.getPrefix()
                             + VersionChecker.CheckVersion(desc.getVersion()));
                 }
             }
         }).start();
 
         if (!ConfigProvider.isConfigUpdated()) {
-            PluginMain.Say(player, ChatColor.BLUE + PluginMain.getPrefix()
+            PluginMain.say(player, ChatColor.BLUE + PluginMain.getPrefix()
                     + "Please update your config file!");
         }
     }    

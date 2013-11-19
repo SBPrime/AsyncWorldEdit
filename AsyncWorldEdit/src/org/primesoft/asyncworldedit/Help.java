@@ -82,7 +82,7 @@ public final class Help {
         }
 
         for (String string : help) {
-            PluginMain.Say(player, string);
+            PluginMain.say(player, string);
         }
 
         return true;

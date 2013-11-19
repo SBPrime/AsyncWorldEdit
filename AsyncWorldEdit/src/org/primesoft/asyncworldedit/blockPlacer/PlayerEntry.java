@@ -188,9 +188,9 @@ public class PlayerEntry {
             if (m_jobs.isEmpty()) {
                 return;
             }
-            PluginMain.Say(player, ChatColor.YELLOW + "Jobs: ");
+            PluginMain.say(player, ChatColor.YELLOW + "Jobs: ");
             for (BlockPlacerJobEntry job : m_jobs.values()) {
-                PluginMain.Say(player, ChatColor.YELLOW + " * " + job.toString()
+                PluginMain.say(player, ChatColor.YELLOW + " * " + job.toString()
                         + ChatColor.YELLOW + " - " + job.getStatusString());
             }
         }

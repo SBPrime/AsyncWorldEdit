@@ -66,7 +66,7 @@ public abstract class AsyncTask extends BukkitRunnable {
     public void run() {
         try {
             m_job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
-            PluginMain.Say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
+            PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                     + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
             
             m_blockPlacer.addTasks(m_job);
@@ -80,12 +80,12 @@ public abstract class AsyncTask extends BukkitRunnable {
 
             m_job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
             m_blockPlacer.addTasks(m_job);
-            PluginMain.Say(m_player, ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + cnt);
+            PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + cnt);
         } catch (MaxChangedBlocksException ex) {
-            PluginMain.Say(m_player, ChatColor.RED + "Maximum block change limit.");
+            PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
-                PluginMain.Say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
+                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
             }
         }
         

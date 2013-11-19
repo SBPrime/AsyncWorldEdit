@@ -148,7 +148,7 @@ public class PluginMain extends JavaPlugin {
         return s_instance.getServer().getPlayer(player);
     }
 
-    public static void Log(String msg) {
+    public static void log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
             return;
         }
@@ -156,11 +156,11 @@ public class PluginMain extends JavaPlugin {
         s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
     }
 
-    public static void Say(String player, String msg) {
-        Say(getPlayer(player), msg);
+    public static void say(String player, String msg) {
+        say(getPlayer(player), msg);
     }
 
-    public static void Say(Player player, String msg) {
+    public static void say(Player player, String msg) {
         if (player == null) {
             s_console.sendRawMessage(msg);
         } else {
@@ -183,18 +183,18 @@ public class PluginMain extends JavaPlugin {
             m_metrics = new MetricsLite(this);
             m_metrics.start();
         } catch (IOException e) {
-            Log("Error initializing MCStats: " + e.getMessage());
+            log("Error initializing MCStats: " + e.getMessage());
         }
 
         s_console = getServer().getConsoleSender();
         WorldEditPlugin worldEdit = getWorldEdit(this);
         if (worldEdit == null) {
-            Log("World edit not found.");
+            log("World edit not found.");
             return;
         }        
 
         if (!ConfigProvider.load(this)) {
-            Log("Error loading config");
+            log("Error loading config");
             return;
         }
 
@@ -203,10 +203,10 @@ public class PluginMain extends JavaPlugin {
         m_blockPlacer = new BlockPlacer(this);
 
         if (ConfigProvider.getCheckUpdate()) {
-            Log(VersionChecker.CheckVersion(desc.getVersion()));
+            log(VersionChecker.CheckVersion(desc.getVersion()));
         }
         if (!ConfigProvider.isConfigUpdated()) {
-            Log("Please update your config file!");
+            log("Please update your config file!");
         }
 
         m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit());
@@ -225,14 +225,14 @@ public class PluginMain extends JavaPlugin {
 
         setPlayerModes();
 
-        Log("Enabled");
+        log("Enabled");
     }
 
     @Override
     public void onDisable() {
         m_blockPlacer.stop();
         m_weIntegrator.queueStop();
-        Log("Disabled");
+        log("Disabled");
     }
 
     @Override
@@ -274,18 +274,18 @@ public class PluginMain extends JavaPlugin {
     private void doReloadConfig(Player player) {
         if (player != null) {
             if (!PermissionManager.isAllowed(player, PermissionManager.Perms.ReloadConfig)) {
-                Say(player, ChatColor.RED + "You have no permissions to do that.");
+                say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
         }
 
-        Log(player != null ? player.getName() : "console " + " reloading config...");
+        log(player != null ? player.getName() : "console " + " reloading config...");
 
         reloadConfig();
         m_isInitialized = false;
 
         if (!ConfigProvider.load(this)) {
-            Say(player, "Error loading config");
+            say(player, "Error loading config");
             return;
         }
 
@@ -299,12 +299,12 @@ public class PluginMain extends JavaPlugin {
         }
 
         m_isInitialized = true;
-        Say(player, "Config reloaded");
+        say(player, "Config reloaded");
     }
 
     private void doToggle(Player player, String[] args) {
         if (!m_isInitialized) {
-            Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            say(player, ChatColor.RED + "Module not initialized, contact administrator.");
             return;
         }
 
@@ -313,7 +313,7 @@ public class PluginMain extends JavaPlugin {
 
     private void doPurge(Player player, String[] args) {
         if (!m_isInitialized) {
-            Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            say(player, ChatColor.RED + "Module not initialized, contact administrator.");
             return;
         }
 
@@ -322,7 +322,7 @@ public class PluginMain extends JavaPlugin {
 
     private void doJobs(Player player, String[] args) {
         if (!m_isInitialized) {
-            Say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            say(player, ChatColor.RED + "Module not initialized, contact administrator.");
             return;
         }
 

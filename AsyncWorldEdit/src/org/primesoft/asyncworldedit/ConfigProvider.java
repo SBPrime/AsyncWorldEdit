@@ -264,7 +264,7 @@ public class ConfigProvider {
             m_queueMaxSize = renderSection.getInt("queue-max-size", 10000000);
 
             if (m_queueMaxSize <= 0) {
-                PluginMain.Log("Warinig: Block queue is disabled!");
+                PluginMain.log("Warinig: Block queue is disabled!");
             }
         }
     }
@@ -284,12 +284,12 @@ public class ConfigProvider {
                 result.add(WorldeditOperations.valueOf(string));
             }
             catch (Exception e) {
-                PluginMain.Log("* unknown operation name " + string);
+                PluginMain.log("* unknown operation name " + string);
             }
         }
         if (result.isEmpty()) {
             //Add all entries
-            PluginMain.Log("Warning: No operations defined in config file. Enabling all.");
+            PluginMain.log("Warning: No operations defined in config file. Enabling all.");
             for (WorldeditOperations op : WorldeditOperations.values()) {
                 result.add(op);
             }

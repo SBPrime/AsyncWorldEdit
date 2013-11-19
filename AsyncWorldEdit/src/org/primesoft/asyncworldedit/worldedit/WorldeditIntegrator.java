@@ -24,15 +24,12 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSessionFactory;
+import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.PluginMain;
@@ -42,60 +39,36 @@ import org.primesoft.asyncworldedit.PluginMain;
  * @author SBPrime
  */
 public class WorldeditIntegrator implements Runnable {
-
-    public class SpyHashSet extends HashMap<String, LocalSession> {
-
-        @Override
-        public LocalSession put(String key, LocalSession value) {
-            System.out.println("!!!!!!!!!! Putting: " + key);
-            return super.put(key, value);
-        }
-
-        @Override
-        public void clear() {
-            System.out.println("!!!!!!!!!! Clear");
-            super.clear();
-        }
-
-        @Override
-        public LocalSession remove(Object key) {
-            System.out.println("!!!!!!!!!! Remove: " + key);
-            return super.remove(key);
-        }
-
-        @Override
-        public void putAll(Map<? extends String, ? extends LocalSession> m) {
-            Set<String> keys = (Set<String>) m.keySet();
-            for (String s : keys) {
-                System.out.println("!!!!!!!!!! Putting: " + s);
-            }
-            super.putAll(m);
-        }
-    }
     /**
      * How often check if world edit integration is successfull
      */
     private final static int CHECK_INTERVAL = 40;
+
     /**
      * Bukkit scheduler
      */
     private BukkitScheduler m_scheduler;
+
     /**
      * THe world edit plugin
      */
     private WorldEdit m_worldedit;
+
     /**
      * Should block places shut down
      */
     private boolean m_shutdown;
+
     /**
      * Current scheduler task
      */
     private BukkitTask m_task;
+
     /**
      * The parent plugin
      */
     private PluginMain m_parent;
+
     /**
      * Current world edit session factory
      */
@@ -119,7 +92,7 @@ public class WorldeditIntegrator implements Runnable {
         }
         if (m_worldedit == null || m_scheduler == null) {
             m_shutdown = true;
-            PluginMain.Log("Error initializeing Worldedit integrator");
+            PluginMain.log("Error initializeing Worldedit integrator");
             return;
         }
 
@@ -128,14 +101,51 @@ public class WorldeditIntegrator implements Runnable {
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 CHECK_INTERVAL, CHECK_INTERVAL);
 
-        setLocalSessionFactory(new SpyHashSet());
+        final LocalConfiguration weLocalConfiguration = getConfiguration();
+        if (weLocalConfiguration != null) {
+            setLocalSessionFactory(new SpyHashMap(weLocalConfiguration));
+        }
     }
 
-    
     /**
-     * Inject a LocalSession wrapper factory  using reflection
+     * Try to get the LocalConfiguration
+     *
+     * @return
      */
-    private void setLocalSessionFactory(final HashMap<String, LocalSession> sessionHash) {
+    private LocalConfiguration getConfiguration() {
+        try {
+            Field field = m_worldedit.getClass().getDeclaredField("config");
+            field.setAccessible(true);            
+            Object value = field.get(m_worldedit);
+            if (!(value instanceof LocalConfiguration))
+            {
+                PluginMain.log("Unable to get LocalConfiguration: unsupported WorldEdit version.");
+                return null;                
+            }
+            
+            return (LocalConfiguration)value;
+        }
+        catch (IllegalArgumentException ex) {
+            PluginMain.log("Unable to get LocalConfiguration: unsupported WorldEdit version.");
+        }
+        catch (IllegalAccessException ex) {
+            PluginMain.log("Unable to get LocalConfiguration: security exception.");
+        }
+        catch (NoSuchFieldException ex) {
+            PluginMain.log("Unable to get LocalConfiguration: unsupported WorldEdit version.");
+        }
+        catch (SecurityException ex) {
+            PluginMain.log("Unable to get LocalConfiguration: security exception.");
+        }
+
+        return null;
+    }
+
+    /**
+     * Inject a LocalSession wrapper factory using reflection
+     */
+    private void setLocalSessionFactory(
+            final HashMap<String, LocalSession> sessionHash) {
         try {
             Field field = m_worldedit.getClass().getDeclaredField("sessions");
             field.setAccessible(true);
@@ -143,15 +153,19 @@ public class WorldeditIntegrator implements Runnable {
             modifiersField.setAccessible(true);
             modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(m_worldedit, sessionHash);
-        } catch (IllegalArgumentException ex) {
-            PluginMain.Log("Unable to inject LocalSession factory: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            PluginMain.Log("Unable to inject LocalSession factory: security exception.");
-        } catch (NoSuchFieldException ex) {
-            PluginMain.Log("Unable to inject LocalSession factory: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            PluginMain.Log("Unable to inject LocalSession factory: security exception.");
-        } 
+        }
+        catch (IllegalArgumentException ex) {
+            PluginMain.log("Unable to inject LocalSession factory: unsupported WorldEdit version.");
+        }
+        catch (IllegalAccessException ex) {
+            PluginMain.log("Unable to inject LocalSession factory: security exception.");
+        }
+        catch (NoSuchFieldException ex) {
+            PluginMain.log("Unable to inject LocalSession factory: unsupported WorldEdit version.");
+        }
+        catch (SecurityException ex) {
+            PluginMain.log("Unable to inject LocalSession factory: security exception.");
+        }
     }
 
     @Override
@@ -164,7 +178,7 @@ public class WorldeditIntegrator implements Runnable {
 
             EditSessionFactory factory = m_worldedit.getEditSessionFactory();
             if (!(factory instanceof AsyncEditSessionFactory)) {
-                PluginMain.Log("World edit session not set to AsyncWorldedit. Fixing.");
+                PluginMain.log("World edit session not set to AsyncWorldedit. Fixing.");
                 m_worldedit.setEditSessionFactory(m_factory);
             }
         }

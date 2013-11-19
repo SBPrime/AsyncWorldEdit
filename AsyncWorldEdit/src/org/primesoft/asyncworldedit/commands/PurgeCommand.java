@@ -42,23 +42,23 @@ public class PurgeCommand {
 
         if (args.length == 1) {
             if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_Self)) {
-                PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
 
             int size = sender.getBlockPlacer().purge(player.getName());
-            PluginMain.Say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+            PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
                 if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_Other)) {
-                    PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                    PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
                 String user = arg.substring(2);
                 int size = sender.getBlockPlacer().purge(user);
-                PluginMain.Say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+                PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
             } else {
                 if (!arg.toLowerCase().equalsIgnoreCase("all")) {
                     Help.ShowHelp(player, Commands.COMMAND_PURGE);
@@ -66,12 +66,12 @@ public class PurgeCommand {
                 }
 
                 if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_All)) {
-                    PluginMain.Say(player, ChatColor.RED + "You have no permissions to do that.");
+                    PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
                 int size = sender.getBlockPlacer().purgeAll();
-                PluginMain.Say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+                PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
             }
         }
     }
