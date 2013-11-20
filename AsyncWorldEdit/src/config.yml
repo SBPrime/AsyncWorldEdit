@@ -6,10 +6,11 @@ awe:
     interval: 15
     #how often that a user will get an update on the current que (number of intervals)
     talk-interval: 10
-    #blocks to place (per-interval)
-    blocks: 1000
+    #blocks to place (per-interval), this determines the max speed of block placing
+    #if you experience lag lower this and the next number
+    blocks: 10000
     #blocks to place (per-interval) for users with the permission AWE.user.vip-queue
-    blocks-vip: 1000    
+    blocks-vip: 10000    
     #maximum size of the blocks queue
     queue-max-size: 10000000
     #maximum size of the player block queue

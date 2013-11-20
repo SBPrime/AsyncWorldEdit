@@ -89,6 +89,13 @@ public class BlockPlacer implements Runnable {
      * Run number
      */
     private int m_runNumber;
+    
+    
+    /**
+     * Last run time
+     */
+    private long m_lastRunTime;
+    
 
     /**
      * Get the physics watcher
@@ -106,6 +113,7 @@ public class BlockPlacer implements Runnable {
      * @param blockLogger instance block logger
      */
     public BlockPlacer(PluginMain plugin) {
+        m_lastRunTime = System.currentTimeMillis();
         m_runNumber = 0;
         m_blocks = new HashMap<String, PlayerEntry>();
         m_lockedQueues = new HashSet<String>();
@@ -126,6 +134,7 @@ public class BlockPlacer implements Runnable {
      */
     @Override
     public void run() {
+        long now = System.currentTimeMillis();
         List<BlockPlacerEntry> entries = new ArrayList<BlockPlacerEntry>(ConfigProvider.getBlockCount() + ConfigProvider.getVipBlockCount());
         boolean added = false;
         synchronized (this) {
@@ -159,7 +168,7 @@ public class BlockPlacer implements Runnable {
                 boolean isVip = vips.contains(player);
 
                 PlayerEntry entry = queueEntry.getValue();
-                entry.updateSpeed(nonVip + (isVip ? vip : 0));
+                entry.updateSpeed(nonVip + (isVip ? vip : 0), (now - m_lastRunTime));
 
                 if (talk && !entry.getQueue().isEmpty()) {
                     Player p = PluginMain.getPlayer(player);
@@ -179,6 +188,8 @@ public class BlockPlacer implements Runnable {
                 entry.Process(this);
             }
         }
+        
+        m_lastRunTime = now;
     }
 
     /**
@@ -494,7 +505,7 @@ public class BlockPlacer implements Runnable {
 
         if (player != null) {
             blocks = player.getQueue().size();
-            speed = player.getSpeed() / m_interval * ConfigProvider.TICKS_PER_SECOND;
+            speed = player.getSpeed();
         }
         if (speed > 0) {
             time = blocks / speed;

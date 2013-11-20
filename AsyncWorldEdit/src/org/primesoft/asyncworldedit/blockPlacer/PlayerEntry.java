@@ -92,7 +92,7 @@ public class PlayerEntry {
 
     
     /**
-     * Get block placing speed
+     * Get block placing speed (blocks per second)
      * @return 
      */
     public double getSpeed() {
@@ -103,8 +103,9 @@ public class PlayerEntry {
      * Update block placing speed
      * @param blocks 
      */
-    public void updateSpeed(int blocks) {
-        m_speed = (m_speed * (AVG_SAMPLES - 1) + blocks) / AVG_SAMPLES;
+    public void updateSpeed(double blocks, long timeDelta) {
+        double delta = timeDelta / 1000.0;        
+        m_speed = (m_speed * (AVG_SAMPLES - 1) + (blocks / delta)) / AVG_SAMPLES;
     }
 
     /**
