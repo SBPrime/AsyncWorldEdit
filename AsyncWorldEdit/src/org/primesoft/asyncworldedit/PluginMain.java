@@ -41,6 +41,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
+import sun.security.krb5.Config;
 
 /**
  *
@@ -72,6 +73,19 @@ public class PluginMain extends JavaPlugin {
         }
     }
 
+    public static void removePlayer(Player player)
+    {
+        if (player == null)
+        {
+            return;
+        }
+        
+        synchronized (s_asyncPlayers) {
+            String playerName = player.getName().toLowerCase();
+            s_asyncPlayers.remove(playerName);
+        }
+    }
+    
     /**
      * Set player AEW default mode (on or off)
      *
@@ -83,11 +97,11 @@ public class PluginMain extends JavaPlugin {
         boolean def = ConfigProvider.getDefaultMode();
 
         if (hasOn) {
-            PluginMain.setMode(player.getName(), true);
+            setMode(player.getName(), true);
         } else if (hasOff) {
-            PluginMain.setMode(player.getName(), false);
+            setMode(player.getName(), false);
         } else {
-            PluginMain.setMode(player.getName(), def);
+            setMode(player.getName(), def);
         }
     }
 

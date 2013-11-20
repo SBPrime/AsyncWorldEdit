@@ -41,7 +41,12 @@ public class EventListener implements Listener {
     public EventListener(PluginMain parent) {
         m_parent = parent;
     }
-
+    
+    @EventHandler
+    public void onPlayerQuit(PlayerJoinEvent event) {
+        PluginMain.removePlayer(event.getPlayer());
+    }
+    
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
