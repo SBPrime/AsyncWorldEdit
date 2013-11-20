@@ -56,10 +56,7 @@ public class PlayerManager {
                 return wrapper;
             }
 
-            wrapper = new PlayerWrapper(player, pName,
-                    getDefaultMode(player),
-                    getMaxSpeed(player));
-
+            wrapper = new PlayerWrapper(player, pName, getDefaultMode(player));
             m_players.put(pName, wrapper);
             return wrapper;
         }

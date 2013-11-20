@@ -34,13 +34,11 @@ public class PlayerWrapper {
     private final Player m_player;
     private final String m_name;
     private boolean m_mode;
-    private int m_speed;
 
-    public PlayerWrapper(Player player, String name, boolean mode, int speed) {
+    public PlayerWrapper(Player player, String name, boolean mode) {
         m_player = player;
         m_name = name;
         m_mode = mode;
-        m_speed = speed;
     }
 
     public Player getPlayer() {
@@ -55,15 +53,7 @@ public class PlayerWrapper {
         return m_mode;
     }
 
-    public int getSpeed() {
-        return m_speed;
-    }
-
     public void setMode(boolean mode) {
         m_mode = mode;
-    }
-
-    public void setSpeed(int speed) {
-        m_speed = speed;
     }
 }
