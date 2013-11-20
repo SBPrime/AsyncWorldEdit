@@ -40,12 +40,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerBlockEntry;
@@ -62,6 +61,10 @@ public class AsyncEditSession extends EditSession {
      * Player
      */
     private final String m_player;
+    /**
+     * Player wraper
+     */
+    private final PlayerWrapper m_wrapper;
     /**
      * Async block placer
      */
@@ -129,6 +132,7 @@ public class AsyncEditSession extends EditSession {
         }
         m_asyncForced = false;
         m_asyncDisabled = false;
+        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
     }
 
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
@@ -150,6 +154,7 @@ public class AsyncEditSession extends EditSession {
         }
         m_asyncForced = false;
         m_asyncDisabled = false;
+        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
     }
 
     @Override
@@ -162,7 +167,7 @@ public class AsyncEditSession extends EditSession {
             return false;
         }
 
-        if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled)) {
+        if (m_asyncForced || ((m_wrapper== null || m_wrapper.getMode()) && !m_asyncDisabled)) {
             return m_blockPlacer.addTasks(m_player, new BlockPlacerBlockEntry(this, jobId, pt, block));
         } else {
             return doRawSetBlock(pt, block);
@@ -171,7 +176,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public void setMask(Mask mask) {
-        if (m_asyncForced || (PluginMain.hasAsyncMode(m_player) && !m_asyncDisabled)) {
+        if (m_asyncForced || ((m_wrapper== null || m_wrapper.getMode()) && !m_asyncDisabled)) {
             m_blockPlacer.addTasks(m_player, new BlockPlacerMaskEntry(this, -1, mask));
         } else {
             doSetMask(mask);
@@ -1301,7 +1306,7 @@ public class AsyncEditSession extends EditSession {
      */
     private boolean checkAsync(WorldeditOperations operation) {
         boolean result = m_asyncForced || (ConfigProvider.isAsyncAllowed(operation)
-                && PluginMain.hasAsyncMode(m_player));
+                && (m_wrapper== null || m_wrapper.getMode()));
 
         m_asyncDisabled = !result;
         return result;

@@ -41,7 +41,6 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
-import sun.security.krb5.Config;
 
 /**
  *
@@ -54,79 +53,7 @@ public class PluginMain extends JavaPlugin {
     private static String s_prefix = null;
     private static String s_logFormat = "%s %s";
     private static PluginMain s_instance;
-    private static final HashSet<String> s_asyncPlayers = new HashSet<String>();
     private BlocksHubIntegration m_blocksHub;
-
-    /**
-     * Check if player has AWE enabled
-     *
-     * @param player
-     * @return
-     */
-    public static boolean hasAsyncMode(String player) {
-        if (player == null) {
-            return true;
-        }
-
-        synchronized (s_asyncPlayers) {
-            return s_asyncPlayers.contains(player.toLowerCase());
-        }
-    }
-
-    public static void removePlayer(Player player)
-    {
-        if (player == null)
-        {
-            return;
-        }
-        
-        synchronized (s_asyncPlayers) {
-            String playerName = player.getName().toLowerCase();
-            s_asyncPlayers.remove(playerName);
-        }
-    }
-    
-    /**
-     * Set player AEW default mode (on or off)
-     *
-     * @param player
-     */
-    public static void setMode(Player player) {
-        boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
-        boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
-        boolean def = ConfigProvider.getDefaultMode();
-
-        if (hasOn) {
-            setMode(player.getName(), true);
-        } else if (hasOff) {
-            setMode(player.getName(), false);
-        } else {
-            setMode(player.getName(), def);
-        }
-    }
-
-    /**
-     * Aet the AWE player mode
-     *
-     * @param player
-     * @param mode
-     */
-    public static void setMode(String player, boolean mode) {
-        if (player == null) {
-            return;
-        }
-
-        synchronized (s_asyncPlayers) {
-            player = player.toLowerCase();
-            boolean contains = s_asyncPlayers.contains(player);
-
-            if (contains && !mode) {
-                s_asyncPlayers.remove(player);
-            } else if (!contains && mode) {
-                s_asyncPlayers.add(player);
-            }
-        }
-    }
     private Boolean m_isInitialized = false;
     private MetricsLite m_metrics;
     private EventListener m_listener = new EventListener(this);
@@ -134,6 +61,11 @@ public class PluginMain extends JavaPlugin {
     private BlockPlacer m_blockPlacer;
     private WorldeditIntegrator m_weIntegrator;
     private PlotMeFix m_plotMeFix;
+    private PlayerManager m_playerManager = new PlayerManager(this);
+
+    public PlayerManager getPlayerManager() {
+        return m_playerManager;
+    }
 
     public PhysicsWatch getPhysicsWatcher() {
         return m_physicsWatcher;
@@ -151,14 +83,6 @@ public class PluginMain extends JavaPlugin {
         return s_prefix;
     }
 
-    public static Player getPlayer(String player) {
-        if (s_instance == null) {
-            return null;
-        }
-
-        return s_instance.getServer().getPlayer(player);
-    }
-
     public static PluginMain getInstance() {
         return s_instance;
     }
@@ -173,6 +97,20 @@ public class PluginMain extends JavaPlugin {
 
     public static void say(String player, String msg) {
         say(getPlayer(player), msg);
+    }
+    
+    
+    /**
+     * Get craft bukkit player
+     *
+     * @param player
+     * @return
+     */
+    public static Player getPlayer(String player) {
+        if (s_instance == null){
+            return null;
+        }
+        return s_instance.getServer().getPlayer(player);
     }
 
     public static void say(Player player, String msg) {
@@ -237,8 +175,7 @@ public class PluginMain extends JavaPlugin {
         pm.registerEvents(m_physicsWatcher, this);
 
         m_isInitialized = true;
-
-        setPlayerModes();
+        m_playerManager.initalize();
 
         log("Enabled");
     }
@@ -346,8 +283,7 @@ public class PluginMain extends JavaPlugin {
 
         JobsCommand.Execte(this, player, args);
     }
-    
-    
+
     private void doCancel(Player player, String[] args) {
         if (!m_isInitialized) {
             say(player, ChatColor.RED + "Module not initialized, contact administrator.");
@@ -371,15 +307,5 @@ public class PluginMain extends JavaPlugin {
         }
 
         return (WorldEditPlugin) wPlugin;
-    }
-
-    /**
-     * Set all players AWE mode on/off
-     */
-    private void setPlayerModes() {
-        Player[] players = getServer().getOnlinePlayers();
-        for (Player player : players) {
-            setMode(player);
-        }
     }
 }

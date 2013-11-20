@@ -44,14 +44,14 @@ public class EventListener implements Listener {
     
     @EventHandler
     public void onPlayerQuit(PlayerJoinEvent event) {
-        PluginMain.removePlayer(event.getPlayer());
+        m_parent.getPlayerManager().removePlayer(event.getPlayer());
     }
     
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
 
-        PluginMain.setMode(player);
+        m_parent.getPlayerManager().addPlayer(player);
 
         if (!PermissionManager.isAllowed(player, PermissionManager.Perms.AnnounceVersion)) {
             return;

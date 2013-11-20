@@ -25,9 +25,7 @@ package org.primesoft.asyncworldedit.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.PermissionManager;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.*;
 
 /**
  *
@@ -41,7 +39,8 @@ public class ToggleCommand {
             return;
         }
 
-        String playerName = null;
+        PlayerManager manager = sender.getPlayerManager();
+        PlayerWrapper wrapper = null;
         boolean mode;
 
         if (args.length == 1) {
@@ -50,8 +49,11 @@ public class ToggleCommand {
                 return;
             }
 
-            playerName = player.getName();
-            mode = !PluginMain.hasAsyncMode(playerName);
+            wrapper = manager.getPlayer(player.getName());
+            if (wrapper == null) {
+                return;
+            }
+            mode = !wrapper.getMode();
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
@@ -60,7 +62,12 @@ public class ToggleCommand {
                     return;
                 }
 
-                playerName = arg.substring(2);
+                String name = arg.substring(2);
+                wrapper = manager.getPlayer(name);
+                if (wrapper == null) {
+                    PluginMain.say(player, ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
+                    return;
+                }
 
                 if (args.length == 3) {
                     arg = args[2];
@@ -73,7 +80,7 @@ public class ToggleCommand {
                         return;
                     }
                 } else {
-                    mode = !PluginMain.hasAsyncMode(playerName);
+                    mode = !wrapper.getMode();
                 }
             } else {
                 if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
@@ -91,9 +98,7 @@ public class ToggleCommand {
             }
         }
 
-        PluginMain.setMode(playerName, mode);
-
-        PluginMain.say(player, "AsyncWorldEdit: "
-                + (PluginMain.hasAsyncMode(playerName) ? "on" : "off"));
+        wrapper.setMode(mode);
+        PluginMain.say(player, "AsyncWorldEdit: " + (wrapper.getMode() ? "on" : "off"));
     }
 }

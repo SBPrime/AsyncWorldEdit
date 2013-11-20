@@ -221,14 +221,14 @@ public class BlockPlacer implements Runnable {
                 }
                 int size = queue.size();
                 if (size < m_queueSoftLimit && m_lockedQueues.contains(player)) {
-                    PluginMain.say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
+                    PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
                     m_lockedQueues.remove(player);
                 }
                 if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
                 }
             } else if (m_lockedQueues.contains(player)) {
-                PluginMain.say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
+                PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
                 m_lockedQueues.remove(player);
             }
             keyPos = (keyPos + 1) % playerNames.length;
@@ -311,7 +311,7 @@ public class BlockPlacer implements Runnable {
             }
 
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
-                PluginMain.say(PluginMain.getPlayer(player), "Out of space on AWE block queue.");
+                PluginMain.say(player, "Out of space on AWE block queue.");
                 return false;
             } else {
                 queue.add(entry);
@@ -326,7 +326,7 @@ public class BlockPlacer implements Runnable {
                 }
                 if (queue.size() >= m_queueHardLimit && bypass) {
                     m_lockedQueues.add(player);
-                    PluginMain.say(PluginMain.getPlayer(player), "Your block queue is full. Wait for items to finish drawing.");
+                    PluginMain.say(player, "Your block queue is full. Wait for items to finish drawing.");
                     return false;
                 }
             }
@@ -376,7 +376,7 @@ public class BlockPlacer implements Runnable {
                 if (newSize == 0) {
                     m_lockedQueues.remove(player);
                 } else if (newSize < m_queueSoftLimit) {
-                    PluginMain.say(PluginMain.getPlayer(player), "Your block queue is unlocked. You can use WorldEdit.");
+                    PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
                     m_lockedQueues.remove(player);
                 }
             }

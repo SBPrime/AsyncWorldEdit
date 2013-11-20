@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.*;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
@@ -42,6 +43,14 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
      * The player
      */
     private final String m_player;
+    
+    
+    /**
+     * Player wraper
+     */
+    private final PlayerWrapper m_wrapper;
+    
+    
     /**
      * The blocks placer
      */
@@ -67,6 +76,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         m_clipboard = parrent;
         m_blockPlacer = m_plugin.getBlockPlacer();
         m_player = player;
+        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
     }
 
     @Override
@@ -176,7 +186,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
      * @param operation
      */
     private boolean checkAsync(WorldeditOperations operation) {
-        return ConfigProvider.isAsyncAllowed(operation) && PluginMain.hasAsyncMode(m_player);
+        return ConfigProvider.isAsyncAllowed(operation) && (m_wrapper== null || m_wrapper.getMode());
     }
 
     /**

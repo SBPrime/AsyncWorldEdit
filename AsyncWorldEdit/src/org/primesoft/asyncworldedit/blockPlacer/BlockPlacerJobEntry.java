@@ -173,8 +173,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
                 break;
         }
 
-        PluginMain.say(PluginMain.getPlayer(player),
-                ChatColor.YELLOW + "Job " + toString()
+        PluginMain.say(player, ChatColor.YELLOW + "Job " + toString()
                 + ChatColor.YELLOW + " - " + getStatusString());
     }
 }
