@@ -169,7 +169,7 @@ public class AsyncEditSession extends EditSession {
 
         if (m_asyncForced || ((m_wrapper== null || m_wrapper.getMode()) && !m_asyncDisabled)) {
             return m_blockPlacer.addTasks(m_player, new BlockPlacerBlockEntry(this, jobId, pt, block));
-        } else {
+        } else {            
             return doRawSetBlock(pt, block);
         }
     }
@@ -237,7 +237,10 @@ public class AsyncEditSession extends EditSession {
         checkAsync(WorldeditOperations.undo);
         UndoSession undoSession = new UndoSession();
         super.undo(undoSession);
-
+                
+        Mask oldMask = sess.getMask();
+        sess.setMask(getMask());
+        
         final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
         final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> placedBlocks = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
 
@@ -274,6 +277,7 @@ public class AsyncEditSession extends EditSession {
         }
 
         sess.flushQueue();
+        sess.setMask(oldMask);
     }
 
     @Override
@@ -303,7 +307,10 @@ public class AsyncEditSession extends EditSession {
     }
 
     public void doRedo(EditSession sess) {
+        Mask mask = sess.getMask();
+        sess.setMask(getMask());
         super.redo(sess);
+        sess.setMask(mask);
     }
 
     @Override
