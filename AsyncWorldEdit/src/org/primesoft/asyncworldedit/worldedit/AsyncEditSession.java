@@ -53,7 +53,10 @@ import org.primesoft.asyncworldedit.blockPlacer.*;
  * @author SBPrime
  */
 public class AsyncEditSession extends EditSession {
-
+    /**
+     * Maximum queued blocks
+     */
+    private final int MAX_QUEUED = 10000;    
     /**
      * Player
      */
@@ -105,6 +108,12 @@ public class AsyncEditSession extends EditSession {
      * Current job id
      */
     private int m_jobId;
+    
+    
+    /**
+     * Number of queued blocks
+     */
+    private int m_blocksQueued;
     
 
     public String getPlayer() {
@@ -221,6 +230,7 @@ public class AsyncEditSession extends EditSession {
     public void flushQueue() {
         boolean queued = isQueueEnabled();
         super.flushQueue();
+        m_blocksQueued = 0;
         if (queued) {
             resetAsync();
         }
@@ -304,6 +314,22 @@ public class AsyncEditSession extends EditSession {
         sess.setMask(oldMask);
     }
 
+    
+    @Override
+    public boolean smartSetBlock(Vector pt, BaseBlock block) {
+        if (isQueueEnabled())
+        {
+            m_blocksQueued++;
+            if (m_blocksQueued > MAX_QUEUED) {
+                m_blocksQueued = 0;
+                super.flushQueue();
+            }
+        }
+        return super.smartSetBlock(pt, block);
+    }
+
+    
+    
     @Override
     public void redo(final EditSession sess) {
         boolean isAsync = checkAsync(WorldeditOperations.redo);

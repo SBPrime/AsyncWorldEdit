@@ -1,6 +1,6 @@
 awe:
   #Do not change
-  version: 2
+  version: 1
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
     interval: 15

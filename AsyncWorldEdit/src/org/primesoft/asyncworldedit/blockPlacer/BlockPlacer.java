@@ -24,8 +24,6 @@
 package org.primesoft.asyncworldedit.blockPlacer;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -41,7 +39,10 @@ import org.primesoft.asyncworldedit.PluginMain;
  * @author SBPrime
  */
 public class BlockPlacer implements Runnable {
-
+    /**
+     * Maximum number of retries
+     */
+    private final int MAX_RETRIES = 200;
     /**
      * The physics watcher
      */
@@ -154,7 +155,7 @@ public class BlockPlacer implements Runnable {
      */
     public void processGet() {
         boolean run = true;
-        for (int i = 0; i < 100 && run; i++) {
+        for (int i = 0; i < MAX_RETRIES && run; i++) {
             final BlockPlacerGetBlockEntry[] tasks;
             synchronized (m_getBlocks) {
                 tasks = m_getBlocks.toArray(new BlockPlacerGetBlockEntry[0]);
@@ -183,6 +184,8 @@ public class BlockPlacer implements Runnable {
         long now = System.currentTimeMillis();
         List<BlockPlacerEntry> entries = new ArrayList<BlockPlacerEntry>(ConfigProvider.getBlockCount() + ConfigProvider.getVipBlockCount());
         boolean added = false;
+        boolean retry = true;
+        
         synchronized (this) {
             final String[] keys = m_blocks.keySet().toArray(new String[0]);
 
