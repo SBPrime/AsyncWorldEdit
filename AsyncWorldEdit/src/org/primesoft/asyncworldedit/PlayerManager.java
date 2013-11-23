@@ -67,10 +67,12 @@ public class PlayerManager {
             return;
         }
 
-        String playerName = player.getName().toLowerCase();
+        String playerName = player.getName();
         synchronized (m_players) {
-            m_players.remove(playerName);
+            m_players.remove(playerName.toLowerCase());
         }
+        
+        m_parrent.getBlockPlacer().purge(playerName);
     }
 
     /**

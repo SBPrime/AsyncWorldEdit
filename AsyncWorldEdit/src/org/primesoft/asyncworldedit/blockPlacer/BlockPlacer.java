@@ -89,13 +89,10 @@ public class BlockPlacer implements Runnable {
      * Run number
      */
     private int m_runNumber;
-    
-    
     /**
      * Last run time
      */
     private long m_lastRunTime;
-    
 
     /**
      * Get the physics watcher
@@ -153,8 +150,9 @@ public class BlockPlacer implements Runnable {
                 stop();
             }
 
-            final int nonVip = (keys.length != 0) ? blockCount / keys.length : 0;
-            final int vip = (vipKeys.length != 0) ? blockCountVip / vipKeys.length : 0;
+            final int nonVip = (keys.length != 0) ? (blockCount / keys.length + 1) : 0;
+            final int vip = (vipKeys.length != 0) ? (blockCountVip / vipKeys.length + 1) : 0;
+
 
             m_runNumber++;
             boolean talk = false;
@@ -188,7 +186,7 @@ public class BlockPlacer implements Runnable {
                 entry.Process(this);
             }
         }
-        
+
         m_lastRunTime = now;
     }
 
@@ -348,7 +346,7 @@ public class BlockPlacer implements Runnable {
             if (m_blocks.containsKey(player)) {
                 PlayerEntry playerEntry = m_blocks.get(player);
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
-                playerEntry.removeJob(jobId);                
+                playerEntry.removeJob(jobId);
 
                 Queue<BlockPlacerEntry> filtered = new ArrayDeque<BlockPlacerEntry>();
                 for (BlockPlacerEntry entry : queue) {
@@ -381,7 +379,7 @@ public class BlockPlacer implements Runnable {
                 }
             }
         }
-        
+
         return result;
     }
 
