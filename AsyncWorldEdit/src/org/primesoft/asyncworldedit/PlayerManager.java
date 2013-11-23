@@ -48,7 +48,7 @@ public class PlayerManager {
             return null;
         }
 
-        String pName = player.getName().toLowerCase();
+        String pName = player.getName();
         synchronized (m_players) {
             PlayerWrapper wrapper = m_players.get(pName);
 
@@ -69,7 +69,7 @@ public class PlayerManager {
 
         String playerName = player.getName();
         synchronized (m_players) {
-            m_players.remove(playerName.toLowerCase());
+            m_players.remove(playerName);
         }
         
         m_parrent.getBlockPlacer().purge(playerName);
@@ -86,7 +86,6 @@ public class PlayerManager {
             return null;
         }
 
-        player = player.toLowerCase();
         synchronized (m_players) {
             PlayerWrapper result = m_players.get(player);
             if (result == null) {

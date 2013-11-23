@@ -80,7 +80,7 @@ public class JobsCommand {
                     entry.printJobs(player);
                 }
             } else {
-                if (!arg.toLowerCase().equalsIgnoreCase("all")) {
+                if (!arg.equalsIgnoreCase("all")) {
                     Help.ShowHelp(player, Commands.COMMAND_JOBS);
                     return;
                 }

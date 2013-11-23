@@ -142,17 +142,14 @@ public class BlockPlacer implements Runnable {
 
             final int blockCount = ConfigProvider.getBlockCount();
             final int blockCountVip = ConfigProvider.getVipBlockCount();
+            final HashMap<String, Integer> blocksPlaced = new HashMap<String, Integer>();
 
-            added |= fetchBlocks(blockCount, keys, entries);
-            added |= fetchBlocks(blockCountVip, vipKeys, entries);
+            added |= fetchBlocks(blockCount, keys, entries, blocksPlaced);
+            added |= fetchBlocks(blockCountVip, vipKeys, entries, blocksPlaced);
 
             if (!added && m_shutdown) {
                 stop();
             }
-
-            final int nonVip = (keys.length != 0) ? (blockCount / keys.length + 1) : 0;
-            final int vip = (vipKeys.length != 0) ? (blockCountVip / vipKeys.length + 1) : 0;
-
 
             m_runNumber++;
             boolean talk = false;
@@ -160,13 +157,14 @@ public class BlockPlacer implements Runnable {
                 m_runNumber = 0;
                 talk = true;
             }
+            final long timeDelte = now - m_lastRunTime;
 
             for (Map.Entry<String, PlayerEntry> queueEntry : m_blocks.entrySet()) {
                 String player = queueEntry.getKey();
-                boolean isVip = vips.contains(player);
-
                 PlayerEntry entry = queueEntry.getValue();
-                entry.updateSpeed(nonVip + (isVip ? vip : 0), (now - m_lastRunTime));
+                Integer cnt = blocksPlaced.get(player);
+
+                entry.updateSpeed(cnt != null ? cnt : 0, timeDelte);
 
                 if (talk && !entry.getQueue().isEmpty()) {
                     Player p = PluginMain.getPlayer(player);
@@ -199,7 +197,7 @@ public class BlockPlacer implements Runnable {
      * @return blocks fatched
      */
     private boolean fetchBlocks(final int blockCnt, final String[] playerNames,
-            List<BlockPlacerEntry> entries) {
+            List<BlockPlacerEntry> entries, final HashMap<String, Integer> blocksPlaced) {
         if (blockCnt <= 0 || playerNames == null || playerNames.length == 0) {
             return false;
         }
@@ -209,15 +207,24 @@ public class BlockPlacer implements Runnable {
         for (int i = 0; i < blockCnt && added; i++) {
             added = false;
 
-            String player = playerNames[keyPos];
+            final String player = playerNames[keyPos];
             PlayerEntry playerEntry = m_blocks.get(player);
             if (playerEntry != null) {
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 if (!queue.isEmpty()) {
-                    entries.add(queue.poll());
-                    added = true;
+                    BlockPlacerEntry entry = queue.poll();
+                    if (entry != null) {
+                        entries.add(entry);
+                        added = true;
+
+                        if (blocksPlaced.containsKey(player)) {
+                            blocksPlaced.put(player, blocksPlaced.get(player) + 1);
+                        } else {
+                            blocksPlaced.put(player, 1);
+                        }
+                    }
                 }
-                int size = queue.size();
+                final int size = queue.size();
                 if (size < m_queueSoftLimit && m_lockedQueues.contains(player)) {
                     PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
                     m_lockedQueues.remove(player);
@@ -307,7 +314,8 @@ public class BlockPlacer implements Runnable {
             for (Map.Entry<String, PlayerEntry> queueEntry : m_blocks.entrySet()) {
                 size += queueEntry.getValue().getQueue().size();
             }
-
+            
+            bypass |= entry instanceof BlockPlacerJobEntry;            
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
                 PluginMain.say(player, "Out of space on AWE block queue.");
                 return false;

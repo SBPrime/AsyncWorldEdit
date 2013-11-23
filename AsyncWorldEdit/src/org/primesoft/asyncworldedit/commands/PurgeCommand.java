@@ -60,7 +60,7 @@ public class PurgeCommand {
                 int size = sender.getBlockPlacer().purge(user);
                 PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
             } else {
-                if (!arg.toLowerCase().equalsIgnoreCase("all")) {
+                if (!arg.equalsIgnoreCase("all")) {
                     Help.ShowHelp(player, Commands.COMMAND_PURGE);
                     return;
                 }
