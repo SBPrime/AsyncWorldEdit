@@ -1,4 +1,4 @@
-name: AsyncWorldedit
+name: AsyncWorldEdit
 main: org.primesoft.asyncworldedit.PluginMain
 version: 1.0-RC4
 website: http://dev.bukkit.org/server-mods/async_worldedit/

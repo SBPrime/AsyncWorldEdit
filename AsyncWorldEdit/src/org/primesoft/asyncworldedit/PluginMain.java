@@ -98,8 +98,7 @@ public class PluginMain extends JavaPlugin {
     public static void say(String player, String msg) {
         say(getPlayer(player), msg);
     }
-    
-    
+
     /**
      * Get craft bukkit player
      *
@@ -107,7 +106,7 @@ public class PluginMain extends JavaPlugin {
      * @return
      */
     public static Player getPlayer(String player) {
-        if (s_instance == null){
+        if (s_instance == null) {
             return null;
         }
         return s_instance.getServer().getPlayer(player);

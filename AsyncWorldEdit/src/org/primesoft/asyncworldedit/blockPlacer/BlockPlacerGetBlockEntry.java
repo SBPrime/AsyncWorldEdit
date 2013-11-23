@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2012 SBPrime.
+ * Copyright 2013 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,18 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.commands;
+package org.primesoft.asyncworldedit.blockPlacer;
+
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
- * @author SBPrime
+ * @author Prime
  */
-public final class Commands {
-    public final static String COMMAND_MAIN = "awe";
-    public final static String COMMAND_RELOAD = "Reload";
-    public final static String COMMAND_HELP = "Help";
-    public final static String COMMAND_PURGE = "Purge";
-    public final static String COMMAND_JOBS = "Jobs";
-    public final static String COMMAND_CANCEL = "Cancel";
-    public final static String COMMAND_TOGGLE = "Toggle";
+public class BlockPlacerGetBlockEntry extends BlockPlacerEntry {
+
+    private final Vector m_location;
+    private final Object m_mutex = new Object();
+    private BaseBlock m_result = null;
+
+    public Vector getLocation() {
+        return m_location;
+    }
+
+    public Object getMutex() {
+        return m_mutex;
+    }
+
+    public BaseBlock getResult() {
+        return m_result;
+    }
+
+    public BlockPlacerGetBlockEntry(AsyncEditSession editSession,
+            int jobId, Vector location) {
+        super(editSession, jobId);
+        m_location = location;
+    }
+
+    @Override
+    public void Process(BlockPlacer bp) {
+        final World world = m_editSession.getCBWorld();       
+        synchronized (m_mutex) {
+            m_result = m_editSession.doRawGetBlock(m_location);
+            m_mutex.notifyAll();
+        }
+    }
 }

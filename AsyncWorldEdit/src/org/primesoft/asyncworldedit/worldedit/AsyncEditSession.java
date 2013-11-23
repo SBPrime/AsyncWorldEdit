@@ -46,10 +46,7 @@ import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerBlockEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerMaskEntry;
+import org.primesoft.asyncworldedit.blockPlacer.*;
 
 /**
  *
@@ -161,6 +158,33 @@ public class AsyncEditSession extends EditSession {
     public boolean rawSetBlock(Vector pt, BaseBlock block) {
         return this.rawSetBlock(pt, m_jobId, block);
     }
+
+    @Override
+    public BaseBlock rawGetBlock(Vector pt) {
+        BlockPlacerGetBlockEntry getBlock = new BlockPlacerGetBlockEntry(this, m_jobId, pt);
+        if (m_blockPlacer.isMainTask()){
+            return doRawGetBlock(pt);
+        }
+        
+        final Object mutex= getBlock.getMutex();
+        
+        m_blockPlacer.addGetTask(getBlock);
+        synchronized(mutex){
+            while (getBlock.getResult() == null) {
+                try {
+                    mutex.wait();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
+        return getBlock.getResult();
+    }
+    
+    public BaseBlock doRawGetBlock(Vector pt) {
+        return super.rawGetBlock(pt);
+    }
+    
+    
 
     public boolean rawSetBlock(Vector pt, int jobId, BaseBlock block) {
         if (!m_bh.canPlace(m_player, m_world, pt)) {
