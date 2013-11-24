@@ -170,6 +170,17 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public BaseBlock rawGetBlock(Vector pt) {
+        try {
+            return doRawGetBlock(pt);
+        } catch (Exception ex)
+        {
+            /*
+             * Exception here indicates that async block get is not
+             * available. Therefore use the queue fallback.
+             */
+                    
+        }
+        
         BlockPlacerGetBlockEntry getBlock = new BlockPlacerGetBlockEntry(this, m_jobId, pt);
         if (m_blockPlacer.isMainTask()){
             return doRawGetBlock(pt);

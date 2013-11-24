@@ -62,6 +62,7 @@ public class PluginMain extends JavaPlugin {
     private WorldeditIntegrator m_weIntegrator;
     private PlotMeFix m_plotMeFix;
     private PlayerManager m_playerManager = new PlayerManager(this);
+    private BarAPIntegrator m_barApi;
 
     public PlayerManager getPlayerManager() {
         return m_playerManager;
@@ -77,6 +78,11 @@ public class PluginMain extends JavaPlugin {
 
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
+    }
+    
+    
+    public BarAPIntegrator getBarAPI() {    
+        return m_barApi;
     }
 
     public static String getPrefix() {
@@ -150,6 +156,7 @@ public class PluginMain extends JavaPlugin {
             return;
         }
 
+        m_barApi = new BarAPIntegrator(this);
         m_blocksHub = new BlocksHubIntegration(this);
         m_plotMeFix = new PlotMeFix(this);
         m_blockPlacer = new BlockPlacer(this);
@@ -161,8 +168,8 @@ public class PluginMain extends JavaPlugin {
             log("Please update your config file!");
         }
 
-        m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit());
-
+        m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit());        
+        
         if (ConfigProvider.isPhysicsFreezEnabled()) {
             m_physicsWatcher.Enable();
         } else {

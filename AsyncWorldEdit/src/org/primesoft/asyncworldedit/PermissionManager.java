@@ -43,7 +43,7 @@ public class PermissionManager {
         Cancel_Self, Cancel_Other,
         Mode_Change, Mode_On, Mode_Off,
         Mode_Change_Other,
-        TalkativeQueue
+        TalkativeQueue, ProgressBar
     }
     /**
      * Plugin permissions top node
@@ -112,6 +112,8 @@ public class PermissionManager {
                 return s_prefix + "user.mode.off";
             case TalkativeQueue:
                 return s_prefix + "user.talkative";
+            case ProgressBar:
+                return s_prefix + "user.progressBar";
         }
 
         return null;

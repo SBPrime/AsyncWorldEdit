@@ -29,6 +29,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
+import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PhysicsWatch;
@@ -39,6 +40,7 @@ import org.primesoft.asyncworldedit.PluginMain;
  * @author SBPrime
  */
 public class BlockPlacer implements Runnable {
+
     /**
      * Maximum number of retries
      */
@@ -108,6 +110,10 @@ public class BlockPlacer implements Runnable {
      * The main thread
      */
     private Thread m_mainThread;
+    /**
+     * The bar API
+     */
+    private final BarAPIntegrator m_barAPI;
 
     /**
      * Get the physics watcher
@@ -130,6 +136,7 @@ public class BlockPlacer implements Runnable {
         m_blocks = new HashMap<String, PlayerEntry>();
         m_lockedQueues = new HashSet<String>();
         m_scheduler = plugin.getServer().getScheduler();
+        m_barAPI = plugin.getBarAPI();
         m_interval = ConfigProvider.getInterval();
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 m_interval, m_interval);
@@ -169,7 +176,7 @@ public class BlockPlacer implements Runnable {
             try {
                 //Force thread release!
                 Thread.sleep(1);
-            } catch (InterruptedException ex) {                
+            } catch (InterruptedException ex) {
             }
         }
     }
@@ -185,7 +192,7 @@ public class BlockPlacer implements Runnable {
         List<BlockPlacerEntry> entries = new ArrayList<BlockPlacerEntry>(ConfigProvider.getBlockCount() + ConfigProvider.getVipBlockCount());
         boolean added = false;
         boolean retry = true;
-        
+
         synchronized (this) {
             final String[] keys = m_blocks.keySet().toArray(new String[0]);
 
@@ -218,14 +225,20 @@ public class BlockPlacer implements Runnable {
 
                 entry.updateSpeed(cnt != null ? cnt : 0, timeDelte);
 
-                if (talk && !entry.getQueue().isEmpty()) {
-                    Player p = PluginMain.getPlayer(player);
-                    boolean bypass = PermissionManager.isAllowed(p, PermissionManager.Perms.QueueBypass);
-                    boolean talkative = PermissionManager.isAllowed(p, PermissionManager.Perms.TalkativeQueue);
-
-                    if (talkative) {
+                final Player p = PluginMain.getPlayer(player);
+                boolean bypass = PermissionManager.isAllowed(p, PermissionManager.Perms.QueueBypass);
+                if (entry.getQueue().isEmpty()) {
+                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                        m_barAPI.disableMessage(p);
+                    }
+                } else {
+                    if (talk && PermissionManager.isAllowed(p, PermissionManager.Perms.TalkativeQueue)) {
                         PluginMain.say(p, ChatColor.YELLOW + "[AWE] You have "
                                 + getPlayerMessage(entry, bypass));
+                    }
+
+                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                        setBar(p, entry, bypass);
                     }
                 }
             }
@@ -646,5 +659,35 @@ public class BlockPlacer implements Runnable {
      */
     public boolean isMainTask() {
         return m_mainThread == Thread.currentThread();
+    }
+
+    private void setBar(Player player, PlayerEntry entry, boolean bypass) {
+        final String format = ChatColor.YELLOW + "Jobs: " + ChatColor.WHITE + "%d"
+                + ChatColor.YELLOW + ", Placing speed: " + ChatColor.WHITE + "%.2fbps"
+                + ChatColor.YELLOW + ", " + ChatColor.WHITE + "%.2fs"
+                + ChatColor.YELLOW + " left.";
+
+        int blocks = 0;
+        int jobs = 0;
+        double speed = 0;
+        double time = 0;
+        double percentage = 100;
+
+        if (entry != null) {
+            jobs = entry.getJobs().size();
+            blocks = entry.getQueue().size();
+            speed = entry.getSpeed();
+        }
+        if (speed > 0) {
+            time = blocks / speed;
+            double max = 60;
+            while (time > max * 1.05) {
+                max *= 2;
+            }
+            percentage = 100 - Math.min(100, 100 * time / max);
+        }
+
+        String message = String.format(format, jobs, speed, time);        
+        m_barAPI.setMessage(player, message, percentage);
     }
 }

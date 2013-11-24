@@ -8,7 +8,7 @@ awe:
     talk-interval: 10
     #blocks to place (per-interval), this determines the max speed of block placing
     #if you experience lag lower this and the next number
-    blocks: 1000
+    blocks: 10000
     #blocks to place (per-interval) for users with the permission AWE.user.vip-queue
     blocks-vip: 2000    
     #maximum size of the blocks queue
