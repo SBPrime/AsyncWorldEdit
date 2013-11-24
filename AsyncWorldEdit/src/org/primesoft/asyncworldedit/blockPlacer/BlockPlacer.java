@@ -298,6 +298,10 @@ public class BlockPlacer implements Runnable {
                 }
                 if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
+                    Player p = PluginMain.getPlayer(player);
+                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                        m_barAPI.disableMessage(p);
+                    }
                 }
             } else if (m_lockedQueues.contains(player)) {
                 PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
