@@ -447,6 +447,10 @@ public class BlockPlacer implements Runnable {
                     playerEntry.updateQueue(filtered);
                 } else {
                     m_blocks.remove(player);
+                    Player p = PluginMain.getPlayer(player);
+                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                        m_barAPI.disableMessage(p);
+                    }
                 }
             }
             if (m_lockedQueues.contains(player)) {
@@ -492,6 +496,10 @@ public class BlockPlacer implements Runnable {
                 }
                 result = queue.size();
                 m_blocks.remove(player);
+                Player p = PluginMain.getPlayer(player);
+                if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                    m_barAPI.disableMessage(p);
+                }
             }
             if (m_lockedQueues.contains(player)) {
                 m_lockedQueues.remove(player);
@@ -687,7 +695,7 @@ public class BlockPlacer implements Runnable {
             percentage = 100 - Math.min(100, 100 * time / max);
         }
 
-        String message = String.format(format, jobs, speed, time);        
+        String message = String.format(format, jobs, speed, time);
         m_barAPI.setMessage(player, message, percentage);
     }
 }
