@@ -207,4 +207,10 @@ public class PlayerEntry {
             return !m_jobs.isEmpty();
         }
     }
+
+    public BlockPlacerJobEntry getJob(int jobId) {
+        synchronized (m_jobs) {
+            return m_jobs.get(jobId);
+        }
+    }
 }

@@ -255,7 +255,6 @@ public class CancelabeEditSession extends EditSession {
     }
     
     
-
     @Override
     public boolean smartSetBlock(Vector pt, BaseBlock block) {
         if (m_isCanceled) {

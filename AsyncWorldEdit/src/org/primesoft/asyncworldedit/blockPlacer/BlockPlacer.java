@@ -268,10 +268,11 @@ public class BlockPlacer implements Runnable {
         }
 
         int keyPos = 0;
-        boolean added = playerNames.length > 0;
-        for (int i = 0; i < blockCnt && added; i++) {
-            added = false;
-
+        boolean added = false;
+        boolean result = false;
+        final int maxRetry = playerNames.length;
+        int retry = playerNames.length;
+        for (int i = 0; i < blockCnt && retry > 0; i += added ? 1 : 0) {
             final String player = playerNames[keyPos];
             PlayerEntry playerEntry = m_blocks.get(player);
             if (playerEntry != null) {
@@ -281,6 +282,7 @@ public class BlockPlacer implements Runnable {
                         BlockPlacerEntry entry = queue.poll();
                         if (entry != null) {
                             entries.add(entry);
+                            
                             added = true;
 
                             if (blocksPlaced.containsKey(player)) {
@@ -308,8 +310,14 @@ public class BlockPlacer implements Runnable {
                 m_lockedQueues.remove(player);
             }
             keyPos = (keyPos + 1) % playerNames.length;
+            if (added) {
+                retry = maxRetry;
+                result = true;
+            } else {
+                retry--;
+            }
         }
-        return added;
+        return result;
     }
 
     /**
@@ -347,6 +355,18 @@ public class BlockPlacer implements Runnable {
         return playerEntry.getNextJobId();
     }
 
+    
+    public BlockPlacerJobEntry getJob(String player, int jobId) {
+        synchronized (this) {
+            if (!m_blocks.containsKey(player)) {
+                return null;
+            } 
+            PlayerEntry playerEntry = m_blocks.get(player);            
+            return playerEntry.getJob(jobId);
+        }
+    }
+    
+    
     public void addJob(String player, BlockPlacerJobEntry job) {
         synchronized (this) {
             PlayerEntry playerEntry;
@@ -414,6 +434,17 @@ public class BlockPlacer implements Runnable {
             return true;
         }
     }
+    
+    
+    /**
+     * Cancel job
+     *
+     * @param player
+     * @param job
+     */
+    public void cancelJob(String player, BlockPlacerJobEntry job) {
+        cancelJob(player, job.getJobId());
+    }
 
     /**
      * Cancel job
@@ -480,8 +511,7 @@ public class BlockPlacer implements Runnable {
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 PlayerEntry playerEntry = m_blocks.get(player);
-                Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
-                Collection<BlockPlacerJobEntry> jobs = playerEntry.getJobs();
+                Queue<BlockPlacerEntry> queue = playerEntry.getQueue();                
                 synchronized (queue) {
                     for (BlockPlacerEntry entry : queue) {
                         if (entry instanceof BlockPlacerBlockEntry) {
@@ -495,6 +525,7 @@ public class BlockPlacer implements Runnable {
                     }
                 }
 
+                Collection<BlockPlacerJobEntry> jobs = playerEntry.getJobs();
                 for (BlockPlacerJobEntry job : jobs.toArray(new BlockPlacerJobEntry[0])) {
                     playerEntry.removeJob(job.getJobId());
                 }

@@ -86,6 +86,7 @@ public abstract class AsyncTask extends BukkitRunnable {
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
                 PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
+                m_job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
             }
         }
         
