@@ -41,6 +41,11 @@ public class PurgeCommand {
         }
 
         if (args.length == 1) {
+            if (player == null)
+            {
+                PluginMain.say(player, ChatColor.RED + "Command available ingame.");
+                return;
+            }
             if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_Self)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;

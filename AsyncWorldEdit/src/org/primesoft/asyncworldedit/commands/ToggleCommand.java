@@ -32,7 +32,6 @@ import org.primesoft.asyncworldedit.*;
  * @author SBPrime
  */
 public class ToggleCommand {
-
     public static void Execte(PluginMain sender, Player player, String[] args) {
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
@@ -44,6 +43,10 @@ public class ToggleCommand {
         boolean mode;
 
         if (args.length == 1) {
+            if (player == null) {
+                PluginMain.say(player, ChatColor.RED + "Command available ingame.");
+                return;
+            }
             if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
@@ -83,6 +86,10 @@ public class ToggleCommand {
                     mode = !wrapper.getMode();
                 }
             } else {
+                if (player == null) {
+                    PluginMain.say(player, ChatColor.RED + "Command available ingame.");
+                    return;
+                }
                 if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
@@ -95,6 +102,7 @@ public class ToggleCommand {
                     Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
                     return;
                 }
+                wrapper = manager.getPlayer(player.getName());
             }
         }
 

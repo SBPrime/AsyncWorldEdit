@@ -209,13 +209,7 @@ public class PluginMain extends JavaPlugin {
         } else if (name.equalsIgnoreCase(Commands.COMMAND_HELP)) {
             String arg = args.length > 1 ? args[1] : null;
             return Help.ShowHelp(player, arg);
-        }
-
-        if (player == null) {
-            return Help.ShowHelp(player, null);
-        }
-
-        if (name.equalsIgnoreCase(Commands.COMMAND_PURGE)) {
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_PURGE)) {
             doPurge(player, args);
             return true;
         } else if (name.equalsIgnoreCase(Commands.COMMAND_JOBS)) {

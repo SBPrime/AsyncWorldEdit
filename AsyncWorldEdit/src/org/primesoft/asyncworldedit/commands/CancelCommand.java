@@ -29,7 +29,6 @@ import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.PlayerEntry;
 
 /**
  *
@@ -47,6 +46,11 @@ public class CancelCommand {
         int id;
         String name;
         if (args.length == 2) {
+            if (player == null)
+            {
+                PluginMain.say(player, ChatColor.RED + "Command available ingame.");
+                return;
+            }
             if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Cancel_Self)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
