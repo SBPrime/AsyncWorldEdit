@@ -78,6 +78,8 @@ public class ConfigProvider {
     private static boolean m_checkAccess;
 
     private static boolean m_logBlocks;
+    
+    private static boolean m_plotMeFixEnabled;
 
     /**
      * Get the config version
@@ -196,6 +198,15 @@ public class ConfigProvider {
     }
 
     /**
+     * Is PlotMe Fix enabled?
+     * 
+     * @return 
+     */
+    public static boolean isPlotMeFixEnabled() {
+        return m_plotMeFixEnabled;
+    }
+    
+    /**
      * Load configuration
      *
      * @param plugin parent plugin
@@ -219,6 +230,7 @@ public class ConfigProvider {
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
+        m_plotMeFixEnabled = mainSection.getBoolean("plotMeFixEnabled", true);
 
         parseRenderSection(mainSection);
         parseBlocksHubSection(mainSection.getConfigurationSection("blocksHub"));
