@@ -24,6 +24,8 @@ awe:
   defaultOn: true
   #Disable or enable blocks physics freeze when placing blocks
   physicsFreez: true  
+  #Enable PlotMe Global Mask Fix
+  plotMeFixEnabled: true
   blocksHub:
     #Enable block chang loggin
     logBlocks: true

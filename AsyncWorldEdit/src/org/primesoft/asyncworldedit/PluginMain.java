@@ -159,10 +159,7 @@ public class PluginMain extends JavaPlugin {
         m_barApi = new BarAPIntegrator(this);
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
-        
-        if (ConfigProvider.isPlotMeFixEnabled()) {
-            m_plotMeFix = new PlotMeFix(this);
-        }
+        m_plotMeFix = new PlotMeFix(this);
 
         if (ConfigProvider.getCheckUpdate()) {
             log(VersionChecker.CheckVersion(desc.getVersion()));

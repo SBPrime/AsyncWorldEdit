@@ -50,22 +50,24 @@ public class PlotMeFix
     public PlotMeFix(JavaPlugin plugin)
     {
         m_isEnabled = false;
-        try
-        {
-            Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("PlotMe");
-
-            if ((cPlugin != null) && (cPlugin instanceof PlotMe))
+        if(ConfigProvider.isPlotMeFixEnabled()) {
+            try
             {
-                m_isEnabled = true;
+                Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("PlotMe");
+
+                if ((cPlugin != null) && (cPlugin instanceof PlotMe))
+                {
+                    m_isEnabled = true;
+                }
             }
-        }
-        catch (NoClassDefFoundError ex)
-        {
-        }
-        
-        if (m_isEnabled)
-        {
-            PluginMain.log("PlotMe fix enabled.");
+            catch (NoClassDefFoundError ex)
+            {
+            }
+
+            if (m_isEnabled)
+            {
+                PluginMain.log("PlotMe fix enabled.");
+            }
         }
     }
 
