@@ -3,4 +3,4 @@
 /AsyncWorldEdit/dist/
 /AsyncWorldEdit/lib/
 /AsyncWorldEdit/test/
-
+*.jar
