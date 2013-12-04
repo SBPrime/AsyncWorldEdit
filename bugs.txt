@@ -1,0 +1,21 @@
+2013-11-27 00:12:32 [SEVERE] org.apache.commons.lang.UnhandledException: Plugin AsyncWorldEdit v1.0-RC4 generated an exception while executing task 309795
+	at org.bukkit.craftbukkit.v1_6_R3.scheduler.CraftAsyncTask.run(CraftAsyncTask.java:56)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:744)
+Caused by: java.lang.ArrayIndexOutOfBoundsException: 150
+	at java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:368)
+	at java.util.concurrent.CopyOnWriteArrayList.get(CopyOnWriteArrayList.java:377)
+	at org.bukkit.craftbukkit.v1_6_R3.CraftServer.getOnlinePlayers(CraftServer.java:322)
+	at org.bukkit.craftbukkit.v1_6_R3.CraftServer.getPlayer(CraftServer.java:331)
+	at org.primesoft.asyncworldedit.PluginMain.getPlayer(PluginMain.java:118)
+	at org.primesoft.asyncworldedit.blockPlacer.BlockPlacer.addTasks(BlockPlacer.java:384)
+	at org.primesoft.asyncworldedit.worldedit.AsyncEditSession.rawSetBlock(AsyncEditSession.java:250)
+	at org.primesoft.asyncworldedit.worldedit.AsyncEditSession.rawSetBlock(AsyncEditSession.java:176)
+	at com.sk89q.worldedit.EditSession.flushQueue(EditSession.java:705)
+	at org.primesoft.asyncworldedit.worldedit.AsyncEditSession.flushQueue(AsyncEditSession.java:268)
+	at org.primesoft.asyncworldedit.worldedit.CancelabeEditSession.flushQueue(CancelabeEditSession.java:89)
+	at org.primesoft.asyncworldedit.worldedit.AsyncTask.run(AsyncTask.java:78)
+	at org.bukkit.craftbukkit.v1_6_R3.scheduler.CraftTask.run(CraftTask.java:58)
+	at org.bukkit.craftbukkit.v1_6_R3.scheduler.CraftAsyncTask.run(CraftAsyncTask.java:53)
+	... 3 more
