@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.blockPlacer;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Queue;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -182,16 +183,16 @@ public class PlayerEntry {
     
     /**
      * Print jobs message
-     * @param player 
+     * @param lines
      */
-    public void printJobs(Player player) {
+    public void printJobs(List<String> lines) {
         synchronized (m_jobs) {
             if (m_jobs.isEmpty()) {
                 return;
             }
-            PluginMain.say(player, ChatColor.YELLOW + "Jobs: ");
+            lines.add(ChatColor.YELLOW + "Jobs: ");
             for (BlockPlacerJobEntry job : m_jobs.values()) {
-                PluginMain.say(player, ChatColor.YELLOW + " * " + job.toString()
+                lines.add(ChatColor.YELLOW + " * " + job.toString()
                         + ChatColor.YELLOW + " - " + job.getStatusString());
             }
         }

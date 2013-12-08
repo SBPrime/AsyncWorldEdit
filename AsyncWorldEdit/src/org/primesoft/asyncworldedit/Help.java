@@ -58,9 +58,9 @@ public final class Help {
         ChatColor.BLUE + " Purge all" + ChatColor.WHITE + " - purges all operations",};
     private final static String[] HelpJobs = new String[]{
         ChatColor.YELLOW + "Jobs " + ChatColor.WHITE + " - display queued block operations",
-        ChatColor.BLUE + " Jobs" + ChatColor.WHITE + " - displays your operations",
-        ChatColor.BLUE + " Jobs <u:playerName>" + ChatColor.WHITE + " - displays other player operations",
-        ChatColor.BLUE + " Jobs all" + ChatColor.WHITE + " - displays all queued operations",};
+        ChatColor.BLUE + " Jobs [page]" + ChatColor.WHITE + " - displays your operations",
+        ChatColor.BLUE + " Jobs <u:playerName> [page]" + ChatColor.WHITE + " - displays other player operations",
+        ChatColor.BLUE + " Jobs all [page]" + ChatColor.WHITE + " - displays all queued operations",};
     private final static String[] HelpCancel = new String[]{
         ChatColor.YELLOW + "Cancel " + ChatColor.WHITE + " - cancel queued job",        
         ChatColor.BLUE + " Cancel #id" + ChatColor.WHITE + " - cancel your job",
