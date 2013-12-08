@@ -82,39 +82,61 @@ public class BlocksHubIntegration {
             return true;
         }
 
-        return m_blocksApi.canPlace(player, world, location);
+        try {
+            return m_blocksApi.canPlace(player, world, location);
+        } catch (Exception ex) {
+            PluginMain.log("Error checking block place perms: " + ex.toString());
+            PluginMain.log("Player: " + player);
+            PluginMain.log("World: " + world);
+            PluginMain.log("Location: " + location);
+            return true;
+        }
     }
 
     public boolean canPlace(String name, World world, Vector location) {
-        if (location == null)
-        {
+        if (location == null) {
             return false;
         }
-        if (!ConfigProvider.getCheckAccess())
-        {
+        if (!ConfigProvider.getCheckAccess()) {
             return true;
         }
         Location l = new Location(world, location.getX(), location.getY(), location.getZ());
-        return canPlace(name, world, l);
+        try {
+            return canPlace(name, world, l);
+
+        } catch (Exception ex) {
+            PluginMain.log("Error checking block place perms: " + ex.toString());
+            PluginMain.log("Player: " + name);
+            PluginMain.log("World: " + world);
+            PluginMain.log("Location: " + l);
+            return true;
+        }
     }
 
     public void logBlock(String name, World world, Vector location, BaseBlock oldBlock, BaseBlock newBlock) {
-        if (location == null || !ConfigProvider.getLogBlocks())
-        {
+        if (location == null || !ConfigProvider.getLogBlocks()) {
             return;
         }
-        
-        if (oldBlock == null)
-        {
+
+        if (oldBlock == null) {
             oldBlock = new BaseBlock(0);
         }
-        if (newBlock == null)
-        {
+        if (newBlock == null) {
             newBlock = new BaseBlock(0);
         }
-        
+
         Location l = new Location(world, location.getX(), location.getY(), location.getZ());
-        logBlock(name, world, l, oldBlock.getType(), (byte) oldBlock.getData(),
-                newBlock.getType(), (byte) newBlock.getData());
+        try {
+            logBlock(name, world, l, oldBlock.getType(), (byte) oldBlock.getData(),
+                    newBlock.getType(), (byte) newBlock.getData());
+        } catch (Exception ex)
+        {
+            PluginMain.log("Error logging block: " + ex.toString());
+            PluginMain.log("Player: " + name);
+            PluginMain.log("World: " + world);
+            PluginMain.log("Location: " + l);
+            PluginMain.log("Old: " + oldBlock);
+            PluginMain.log("New: " + newBlock);
+        }
     }
 }
