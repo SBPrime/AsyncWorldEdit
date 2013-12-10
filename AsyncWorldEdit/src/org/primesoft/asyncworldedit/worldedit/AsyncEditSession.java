@@ -251,12 +251,36 @@ public class AsyncEditSession extends EditSession {
     @Override
     public void setMask(Mask mask) {
         if (m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled)) {
-            m_blockPlacer.addTasks(m_player, new BlockPlacerMaskEntry(this, -1, mask));
+            m_blockPlacer.addTasks(m_player, new BlockPlacerMaskEntry(this, m_jobId, mask));
         } else {
             doSetMask(mask);
         }
     }
 
+    public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId) throws MaxChangedBlocksException {
+        m_jobId = jobId;
+        boolean r = super.setBlockIfAir(pt, block);        
+        m_jobId = -1;
+        return r;
+    }        
+    
+    public boolean setBlock(Vector pt, Pattern pat, int jobId) throws MaxChangedBlocksException {
+        m_jobId = jobId;
+        boolean r = super.setBlock(pt, pat); 
+        m_jobId = -1;
+        return r;
+    }
+
+    public boolean setBlock(Vector pt, BaseBlock block, int jobId) throws MaxChangedBlocksException {
+        m_jobId = jobId;
+        boolean r = super.setBlock(pt, block); 
+        m_jobId = -1;
+        return r;
+    }
+
+    
+    
+    
     public void flushQueue(int jobId) {
         boolean queued = isQueueEnabled();
         m_jobId = jobId;
@@ -281,22 +305,20 @@ public class AsyncEditSession extends EditSession {
     public void undo(final EditSession sess) {
         final int jobId = getJobId();
         int minId = jobId;
-        
+
         synchronized (m_asyncTasks) {
             for (BlockPlacerJobEntry job : m_asyncTasks) {
                 int id = job.getJobId();
                 if (id < minId) {
                     minId = id;
                 }
-                m_blockPlacer.cancelJob(m_player, id);
-                waitForJob(job);
+                m_blockPlacer.cancelJob(m_player, id);                
             }
-            if (minId > 0 && minId != jobId) {
-                minId--;
+            minId --;
+            if (minId >= 0 && minId != jobId) {                
                 BlockPlacerJobEntry job = m_blockPlacer.getJob(m_player, minId);
                 if (job != null) {
-                    m_blockPlacer.cancelJob(m_player, job);
-                    waitForJob(job);
+                    m_blockPlacer.cancelJob(m_player, job);                    
                 }
             }
         }
@@ -1405,21 +1427,5 @@ public class AsyncEditSession extends EditSession {
             }
         }
         return getBlock.getResult();
-    }
-
-    
-    /**
-     * Wait for job to finish
-     * @param job 
-     */
-    private void waitForJob(BlockPlacerJobEntry job) {        
-        BlockPlacerJobEntry.JobStatus status = job.getStatus();
-        while (status == BlockPlacerJobEntry.JobStatus.Preparing) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-            }
-            status = job.getStatus();
-        }
     }
 }

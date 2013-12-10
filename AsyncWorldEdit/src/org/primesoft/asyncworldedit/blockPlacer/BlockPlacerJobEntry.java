@@ -61,6 +61,12 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
      * The player name
      */
     private String m_player;
+    
+    
+    /**
+     * Is the async task done
+     */
+    private boolean m_taskDone;
 
     public BlockPlacerJobEntry(String player, int jobId, String name) {
         super(null, jobId);
@@ -81,6 +87,24 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_cEditSession = cEditSession;
     }
 
+    /**
+     * Is the async task done
+     * @return 
+     */
+    public boolean isTaskDone()
+    {
+        return m_taskDone;
+    }
+    
+    /**
+     * Async task has finished
+     */
+    public void taskDone()
+    {
+        m_taskDone = true;
+    }
+    
+    
     /**
      * Is the job started
      *

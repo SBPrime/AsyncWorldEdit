@@ -458,6 +458,23 @@ public class BlockPlacer implements Runnable {
     }
 
     /**
+     * Wait for job to finish
+     *
+     * @param job
+     */
+    private void waitForJob(BlockPlacerJobEntry job) {
+        BlockPlacerJobEntry.JobStatus status = job.getStatus();
+        while (status != BlockPlacerJobEntry.JobStatus.Initializing
+                && !job.isTaskDone()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+            }
+            status = job.getStatus();
+        }
+    }
+
+    /**
      * Cancel job
      *
      * @param player
@@ -466,39 +483,47 @@ public class BlockPlacer implements Runnable {
     public int cancelJob(String player, int jobId) {
         int newSize = 0;
         int result = 0;
+        PlayerEntry playerEntry;
+        Queue<BlockPlacerEntry> queue;
+        BlockPlacerJobEntry job;
         synchronized (this) {
-            if (m_blocks.containsKey(player)) {
-                PlayerEntry playerEntry = m_blocks.get(player);
-                Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
-                playerEntry.removeJob(jobId);
-                Queue<BlockPlacerEntry> filtered = new ArrayDeque<BlockPlacerEntry>();
-                synchronized (queue) {
-                    for (BlockPlacerEntry entry : queue) {
-                        if (entry.getJobId() == jobId) {
-                            if (entry instanceof BlockPlacerBlockEntry) {
-                                World world = entry.getEditSession().getCBWorld();
-                                if (world != null) {
-                                    m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
-                                }
-                            } else if (entry instanceof BlockPlacerJobEntry) {
-                                playerEntry.removeJob((BlockPlacerJobEntry) entry);
+            if (!m_blocks.containsKey(player)) {
+                return 0;
+            }
+            playerEntry = m_blocks.get(player);
+            queue = playerEntry.getQueue();
+            job = playerEntry.getJob(jobId);
+            playerEntry.removeJob(job);
+        }
+        waitForJob(job);
+        synchronized (this) {
+            Queue<BlockPlacerEntry> filtered = new ArrayDeque<BlockPlacerEntry>();
+            synchronized (queue) {
+                for (BlockPlacerEntry entry : queue) {
+                    if (entry.getJobId() == jobId) {
+                        if (entry instanceof BlockPlacerBlockEntry) {
+                            World world = entry.getEditSession().getCBWorld();
+                            if (world != null) {
+                                m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
                             }
-                        } else {
-                            filtered.add(entry);
+                        } else if (entry instanceof BlockPlacerJobEntry) {
+                            playerEntry.removeJob((BlockPlacerJobEntry) entry);
                         }
+                    } else {
+                        filtered.add(entry);
                     }
                 }
+            }
 
-                newSize = filtered.size();
-                result = queue.size() - filtered.size();
-                if (newSize > 0) {
-                    playerEntry.updateQueue(filtered);
-                } else {
-                    m_blocks.remove(player);
-                    Player p = PluginMain.getPlayer(player);
-                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
-                        m_barAPI.disableMessage(p);
-                    }
+            newSize = filtered.size();
+            result = queue.size() - filtered.size();
+            if (newSize > 0) {
+                playerEntry.updateQueue(filtered);
+            } else {
+                m_blocks.remove(player);
+                Player p = PluginMain.getPlayer(player);
+                if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                    m_barAPI.disableMessage(p);
                 }
             }
             if (m_lockedQueues.contains(player)) {
@@ -510,7 +535,6 @@ public class BlockPlacer implements Runnable {
                 }
             }
         }
-
         return result;
     }
 

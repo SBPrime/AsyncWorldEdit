@@ -198,7 +198,8 @@ public class CancelabeEditSession extends EditSession {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlock(pt, block);
+        
+        return m_parent.setBlock(pt, block, m_jobId);
     }
 
     @Override
@@ -206,7 +207,7 @@ public class CancelabeEditSession extends EditSession {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlock(pt, pat);
+        return m_parent.setBlock(pt, pat, m_jobId);
     }
 
     @Override
@@ -221,7 +222,7 @@ public class CancelabeEditSession extends EditSession {
 
     @Override
     public boolean setBlockIfAir(Vector pt, BaseBlock block) throws MaxChangedBlocksException {
-        return m_parent.setBlockIfAir(pt, block);
+        return m_parent.setBlockIfAir(pt, block, m_jobId);
     }
 
     @Override

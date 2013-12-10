@@ -80,7 +80,7 @@ public abstract class AsyncTask extends BukkitRunnable {
             } else {
                 m_editSession.flushQueue();
             }
-
+            
             m_job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
             m_blockPlacer.addTasks(m_player, m_job);
             PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + cnt);
@@ -93,6 +93,7 @@ public abstract class AsyncTask extends BukkitRunnable {
             }
         }
 
+        m_job.taskDone();
         m_editSession.getParent().removeAsync(m_job);
     }
 
