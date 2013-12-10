@@ -58,7 +58,7 @@ public abstract class AsyncTask extends BukkitRunnable {
         m_command = commandName;
         m_blockPlacer = blocksPlacer;
         m_job = job;
-        
+
         session.getParent().addAsync(job);
     }
 
@@ -68,10 +68,13 @@ public abstract class AsyncTask extends BukkitRunnable {
             m_job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
             PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                     + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
-            
+
             m_blockPlacer.addTasks(m_player, m_job);
-            int cnt = task(m_editSession);
-            
+            int cnt = 0;
+            if (!m_editSession.isCanceled()) {
+                 cnt = task(m_editSession);
+            }
+
             if (!m_editSession.isQueueEnabled()) {
                 m_editSession.resetAsync();
             } else {
@@ -89,7 +92,7 @@ public abstract class AsyncTask extends BukkitRunnable {
                 m_job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
             }
         }
-        
+
         m_editSession.getParent().removeAsync(m_job);
     }
 

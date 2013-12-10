@@ -291,7 +291,7 @@ public class AsyncEditSession extends EditSession {
                 m_blockPlacer.cancelJob(m_player, id);
                 waitForJob(job);
             }
-            if (minId > 0) {
+            if (minId > 0 && minId != jobId) {
                 minId--;
                 BlockPlacerJobEntry job = m_blockPlacer.getJob(m_player, minId);
                 if (job != null) {
@@ -1414,8 +1414,7 @@ public class AsyncEditSession extends EditSession {
      */
     private void waitForJob(BlockPlacerJobEntry job) {        
         BlockPlacerJobEntry.JobStatus status = job.getStatus();
-        while (status == BlockPlacerJobEntry.JobStatus.Preparing ||
-                status == BlockPlacerJobEntry.JobStatus.Initializing) {
+        while (status == BlockPlacerJobEntry.JobStatus.Preparing) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ex) {

@@ -54,6 +54,10 @@ public class CancelabeEditSession extends EditSession {
         m_mask = parent.getMask();
     }
 
+    public boolean isCanceled(){
+        return m_isCanceled;
+    }
+    
     public void cancel() {
         m_isCanceled = true;
     }

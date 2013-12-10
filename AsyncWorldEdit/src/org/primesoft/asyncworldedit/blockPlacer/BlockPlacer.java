@@ -282,7 +282,7 @@ public class BlockPlacer implements Runnable {
                         BlockPlacerEntry entry = queue.poll();
                         if (entry != null) {
                             entries.add(entry);
-                            
+
                             added = true;
 
                             if (blocksPlaced.containsKey(player)) {
@@ -290,6 +290,20 @@ public class BlockPlacer implements Runnable {
                             } else {
                                 blocksPlaced.put(player, 1);
                             }
+                        }
+                    } else {
+                        List<BlockPlacerJobEntry> toCancel = new ArrayList<BlockPlacerJobEntry>();
+                        for (BlockPlacerJobEntry job : playerEntry.getJobs()) {
+                            BlockPlacerJobEntry.JobStatus jStatus = job.getStatus();
+                            if (jStatus == BlockPlacerJobEntry.JobStatus.Done
+                                    || jStatus == BlockPlacerJobEntry.JobStatus.Waiting) {
+                                toCancel.add(job);
+                            }
+                        }
+
+                        for (BlockPlacerJobEntry job : toCancel) {
+                            job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
+                            playerEntry.removeJob(job);
                         }
                     }
                 }
@@ -355,18 +369,16 @@ public class BlockPlacer implements Runnable {
         return playerEntry.getNextJobId();
     }
 
-    
     public BlockPlacerJobEntry getJob(String player, int jobId) {
         synchronized (this) {
             if (!m_blocks.containsKey(player)) {
                 return null;
-            } 
-            PlayerEntry playerEntry = m_blocks.get(player);            
+            }
+            PlayerEntry playerEntry = m_blocks.get(player);
             return playerEntry.getJob(jobId);
         }
     }
-    
-    
+
     public void addJob(String player, BlockPlacerJobEntry job) {
         synchronized (this) {
             PlayerEntry playerEntry;
@@ -434,8 +446,7 @@ public class BlockPlacer implements Runnable {
             return true;
         }
     }
-    
-    
+
     /**
      * Cancel job
      *
@@ -469,6 +480,8 @@ public class BlockPlacer implements Runnable {
                                 if (world != null) {
                                     m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
                                 }
+                            } else if (entry instanceof BlockPlacerJobEntry) {
+                                playerEntry.removeJob((BlockPlacerJobEntry) entry);
                             }
                         } else {
                             filtered.add(entry);
@@ -511,7 +524,7 @@ public class BlockPlacer implements Runnable {
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 PlayerEntry playerEntry = m_blocks.get(player);
-                Queue<BlockPlacerEntry> queue = playerEntry.getQueue();                
+                Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 synchronized (queue) {
                     for (BlockPlacerEntry entry : queue) {
                         if (entry instanceof BlockPlacerBlockEntry) {
