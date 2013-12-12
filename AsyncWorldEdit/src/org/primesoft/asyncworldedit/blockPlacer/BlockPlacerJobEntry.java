@@ -75,6 +75,17 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_status = JobStatus.Initializing;
         m_cEditSession = null;
     }
+    
+    public BlockPlacerJobEntry(String player,
+            CancelabeEditSession cEditSession,
+            int jobId, String name) {
+        super(null, jobId);
+
+        m_player = player;
+        m_name = name;
+        m_status = JobStatus.Initializing;
+        m_cEditSession = cEditSession;
+    }
 
     public BlockPlacerJobEntry(AsyncEditSession editSession,
             CancelabeEditSession cEditSession,

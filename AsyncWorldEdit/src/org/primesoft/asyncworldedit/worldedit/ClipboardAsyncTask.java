@@ -94,6 +94,7 @@ public abstract class ClipboardAsyncTask extends BukkitRunnable {
             }
         }
 
+        m_job.taskDone();
         if (m_editSession != null) {
             m_editSession.removeAsync(m_job);
         }
