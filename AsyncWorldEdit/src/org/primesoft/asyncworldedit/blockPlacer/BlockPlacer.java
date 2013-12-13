@@ -113,8 +113,15 @@ public class BlockPlacer implements Runnable {
     /**
      * The bar API
      */
-    private final BarAPIntegrator m_barAPI;
-
+    private final BarAPIntegrator m_barAPI;    
+        
+    
+    /**
+     * List of all job added listeners
+     */
+    private final List<IJobAddedListener> m_jobAddedListeners;
+    
+    
     /**
      * Get the physics watcher
      *
@@ -131,6 +138,7 @@ public class BlockPlacer implements Runnable {
      * @param blockLogger instance block logger
      */
     public BlockPlacer(PluginMain plugin) {
+        m_jobAddedListeners = new ArrayList<IJobAddedListener>();
         m_lastRunTime = System.currentTimeMillis();
         m_runNumber = 0;
         m_blocks = new HashMap<String, PlayerEntry>();
@@ -157,6 +165,38 @@ public class BlockPlacer implements Runnable {
         m_physicsWatcher = plugin.getPhysicsWatcher();
     }
 
+    public void addJobAddedListener(IJobAddedListener listener)
+    {
+        if (listener == null) 
+        {
+            return;            
+        }
+        synchronized(m_jobAddedListeners)
+        {
+            if (!m_jobAddedListeners.contains(listener))
+            {
+                m_jobAddedListeners.add(listener);
+            }
+        }
+    }
+    
+    
+    public void removeJobAddedListener(IJobAddedListener listener)
+    {
+        if (listener == null) 
+        {
+            return;            
+        }
+        synchronized(m_jobAddedListeners)
+        {
+            if (m_jobAddedListeners.contains(listener))
+            {
+                m_jobAddedListeners.remove(listener);
+            }
+        }
+    }
+    
+    
     /**
      * Process the get requests
      */
@@ -389,7 +429,15 @@ public class BlockPlacer implements Runnable {
             } else {
                 playerEntry = m_blocks.get(player);
             }
-            playerEntry.addJob((BlockPlacerJobEntry) job);
+            playerEntry.addJob((BlockPlacerJobEntry) job);                       
+        }
+        
+        synchronized (m_jobAddedListeners)
+        {
+            for (IJobAddedListener listener : m_jobAddedListeners)
+            {
+                listener.jobAdded(job);
+            }            
         }
     }
 

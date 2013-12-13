@@ -23,6 +23,8 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -33,7 +35,6 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  * @author SBPrime
  */
 public class BlockPlacerJobEntry extends BlockPlacerEntry {
-
     /**
      * Job status
      */
@@ -67,6 +68,12 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
      * Is the async task done
      */
     private boolean m_taskDone;
+    
+    
+    /**
+     * All job state changed events
+     */
+    private final List<IJobStateChangedListener> m_jobStateChanged;
 
     public BlockPlacerJobEntry(String player, int jobId, String name) {
         super(null, jobId);
@@ -74,6 +81,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = null;
+        m_jobStateChanged = new ArrayList<IJobStateChangedListener>();
     }
     
     public BlockPlacerJobEntry(String player,
@@ -85,6 +93,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = cEditSession;
+        m_jobStateChanged = new ArrayList<IJobStateChangedListener>();
     }
 
     public BlockPlacerJobEntry(AsyncEditSession editSession,
@@ -96,6 +105,41 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = cEditSession;
+        m_jobStateChanged = new ArrayList<IJobStateChangedListener>();
+    }
+    
+    
+    public void addStateChangedListener(IJobStateChangedListener listener)
+    {
+        if (listener == null)
+        {
+            return;
+        }
+        
+        synchronized(m_jobStateChanged)
+        {
+            if (!m_jobStateChanged.contains(listener))
+            {
+                m_jobStateChanged.add(listener);
+            }
+        }        
+    }
+    
+    
+    public void removeStateChangedListener(IJobStateChangedListener listener)
+    {
+        if (listener == null)
+        {
+            return;
+        }
+        
+        synchronized(m_jobStateChanged)
+        {
+            if (m_jobStateChanged.contains(listener))
+            {
+                m_jobStateChanged.remove(listener);
+            }
+        }        
     }
 
     /**
@@ -113,6 +157,8 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     public void taskDone()
     {
         m_taskDone = true;
+        
+        callStateChangedEvents();
     }
     
     
@@ -132,10 +178,12 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     public void setStatus(JobStatus newStatus) {
         int newS = getStatusId(newStatus);
         int oldS = getStatusId(m_status);
+       
         if (newS < oldS) {
             return;
         }
         m_status = newStatus;
+        callStateChangedEvents();
     }
 
     public void cancel() {
@@ -210,5 +258,16 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
 
         PluginMain.say(player, ChatColor.YELLOW + "Job " + toString()
                 + ChatColor.YELLOW + " - " + getStatusString());
+    }
+    
+    
+    private void callStateChangedEvents() {
+        synchronized(m_jobStateChanged)
+        {
+            for (IJobStateChangedListener listener: m_jobStateChanged)                
+            {
+                listener.jobStateChanged(this);
+            }
+        }
     }
 }
