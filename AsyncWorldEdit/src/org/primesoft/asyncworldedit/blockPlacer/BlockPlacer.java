@@ -119,7 +119,7 @@ public class BlockPlacer implements Runnable {
     /**
      * List of all job added listeners
      */
-    private final List<IJobAddedListener> m_jobAddedListeners;
+    private final List<IBlockPlacerListener> m_jobAddedListeners;
     
     
     /**
@@ -138,7 +138,7 @@ public class BlockPlacer implements Runnable {
      * @param blockLogger instance block logger
      */
     public BlockPlacer(PluginMain plugin) {
-        m_jobAddedListeners = new ArrayList<IJobAddedListener>();
+        m_jobAddedListeners = new ArrayList<IBlockPlacerListener>();
         m_lastRunTime = System.currentTimeMillis();
         m_runNumber = 0;
         m_blocks = new HashMap<String, PlayerEntry>();
@@ -165,7 +165,7 @@ public class BlockPlacer implements Runnable {
         m_physicsWatcher = plugin.getPhysicsWatcher();
     }
 
-    public void addJobAddedListener(IJobAddedListener listener)
+    public void addListener(IBlockPlacerListener listener)
     {
         if (listener == null) 
         {
@@ -181,7 +181,7 @@ public class BlockPlacer implements Runnable {
     }
     
     
-    public void removeJobAddedListener(IJobAddedListener listener)
+    public void removeListener(IBlockPlacerListener listener)
     {
         if (listener == null) 
         {
@@ -344,6 +344,7 @@ public class BlockPlacer implements Runnable {
                         for (BlockPlacerJobEntry job : toCancel) {
                             job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
                             playerEntry.removeJob(job);
+                            onJobRemoved(job);
                         }
                     }
                 }
@@ -434,7 +435,7 @@ public class BlockPlacer implements Runnable {
         
         synchronized (m_jobAddedListeners)
         {
-            for (IJobAddedListener listener : m_jobAddedListeners)
+            for (IBlockPlacerListener listener : m_jobAddedListeners)
             {
                 listener.jobAdded(job);
             }            
@@ -542,6 +543,7 @@ public class BlockPlacer implements Runnable {
             queue = playerEntry.getQueue();
             job = playerEntry.getJob(jobId);
             playerEntry.removeJob(job);
+            onJobRemoved(job);
         }
         waitForJob(job);
         synchronized (this) {
@@ -555,7 +557,9 @@ public class BlockPlacer implements Runnable {
                                 m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
                             }
                         } else if (entry instanceof BlockPlacerJobEntry) {
-                            playerEntry.removeJob((BlockPlacerJobEntry) entry);
+                            BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry)entry;
+                            playerEntry.removeJob(jobEntry);
+                            onJobRemoved(jobEntry);
                         }
                     } else {
                         filtered.add(entry);
@@ -605,7 +609,9 @@ public class BlockPlacer implements Runnable {
                                 m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
                             }
                         } else if (entry instanceof BlockPlacerJobEntry) {
-                            playerEntry.removeJob((BlockPlacerJobEntry) entry);
+                            BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;
+                            playerEntry.removeJob(jobEntry);
+                            onJobRemoved(jobEntry);
                         }
                     }
                 }
@@ -613,6 +619,7 @@ public class BlockPlacer implements Runnable {
                 Collection<BlockPlacerJobEntry> jobs = playerEntry.getJobs();
                 for (BlockPlacerJobEntry job : jobs.toArray(new BlockPlacerJobEntry[0])) {
                     playerEntry.removeJob(job.getJobId());
+                    onJobRemoved(job);
                 }
                 result = queue.size();
                 m_blocks.remove(player);
@@ -766,6 +773,7 @@ public class BlockPlacer implements Runnable {
 
         if (playerEntry != null) {
             playerEntry.removeJob(jobEntry);
+            onJobRemoved(jobEntry);
         }
     }
 
@@ -817,5 +825,20 @@ public class BlockPlacer implements Runnable {
 
         String message = String.format(format, jobs, speed, time);
         m_barAPI.setMessage(player, message, percentage);
+    }
+
+    
+    /**
+     * Fire job removed event
+     * @param job 
+     */
+    private void onJobRemoved(BlockPlacerJobEntry job) {
+        synchronized (m_jobAddedListeners)
+        {
+            for (IBlockPlacerListener listener : m_jobAddedListeners)
+            {
+                listener.jobRemoved(job);
+            }            
+        }
     }
 }

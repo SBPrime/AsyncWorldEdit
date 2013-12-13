@@ -27,6 +27,7 @@ package org.primesoft.asyncworldedit.blockPlacer;
  *
  * @author SBPrime
  */
-public interface IJobAddedListener {
+public interface IBlockPlacerListener {
     void jobAdded(BlockPlacerJobEntry job);
+    void jobRemoved(BlockPlacerJobEntry job);
 }

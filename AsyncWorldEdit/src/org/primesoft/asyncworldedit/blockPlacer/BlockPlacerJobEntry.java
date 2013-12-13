@@ -73,7 +73,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     /**
      * All job state changed events
      */
-    private final List<IJobStateChangedListener> m_jobStateChanged;
+    private final List<IJobEntryListener> m_jobStateChanged;
 
     public BlockPlacerJobEntry(String player, int jobId, String name) {
         super(null, jobId);
@@ -81,7 +81,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = null;
-        m_jobStateChanged = new ArrayList<IJobStateChangedListener>();
+        m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
     
     public BlockPlacerJobEntry(String player,
@@ -93,7 +93,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = cEditSession;
-        m_jobStateChanged = new ArrayList<IJobStateChangedListener>();
+        m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
 
     public BlockPlacerJobEntry(AsyncEditSession editSession,
@@ -105,11 +105,11 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = cEditSession;
-        m_jobStateChanged = new ArrayList<IJobStateChangedListener>();
+        m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
     
     
-    public void addStateChangedListener(IJobStateChangedListener listener)
+    public void addStateChangedListener(IJobEntryListener listener)
     {
         if (listener == null)
         {
@@ -126,7 +126,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     }
     
     
-    public void removeStateChangedListener(IJobStateChangedListener listener)
+    public void removeStateChangedListener(IJobEntryListener listener)
     {
         if (listener == null)
         {
@@ -264,7 +264,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     private void callStateChangedEvents() {
         synchronized(m_jobStateChanged)
         {
-            for (IJobStateChangedListener listener: m_jobStateChanged)                
+            for (IJobEntryListener listener: m_jobStateChanged)                
             {
                 listener.jobStateChanged(this);
             }
