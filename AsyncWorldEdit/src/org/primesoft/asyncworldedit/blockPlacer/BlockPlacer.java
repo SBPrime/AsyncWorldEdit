@@ -113,15 +113,13 @@ public class BlockPlacer implements Runnable {
     /**
      * The bar API
      */
-    private final BarAPIntegrator m_barAPI;    
-        
-    
+    private final BarAPIntegrator m_barAPI;
+
     /**
      * List of all job added listeners
      */
     private final List<IBlockPlacerListener> m_jobAddedListeners;
-    
-    
+
     /**
      * Get the physics watcher
      *
@@ -165,38 +163,28 @@ public class BlockPlacer implements Runnable {
         m_physicsWatcher = plugin.getPhysicsWatcher();
     }
 
-    public void addListener(IBlockPlacerListener listener)
-    {
-        if (listener == null) 
-        {
-            return;            
+    public void addListener(IBlockPlacerListener listener) {
+        if (listener == null) {
+            return;
         }
-        synchronized(m_jobAddedListeners)
-        {
-            if (!m_jobAddedListeners.contains(listener))
-            {
+        synchronized (m_jobAddedListeners) {
+            if (!m_jobAddedListeners.contains(listener)) {
                 m_jobAddedListeners.add(listener);
             }
         }
     }
-    
-    
-    public void removeListener(IBlockPlacerListener listener)
-    {
-        if (listener == null) 
-        {
-            return;            
+
+    public void removeListener(IBlockPlacerListener listener) {
+        if (listener == null) {
+            return;
         }
-        synchronized(m_jobAddedListeners)
-        {
-            if (m_jobAddedListeners.contains(listener))
-            {
+        synchronized (m_jobAddedListeners) {
+            if (m_jobAddedListeners.contains(listener)) {
                 m_jobAddedListeners.remove(listener);
             }
         }
     }
-    
-    
+
     /**
      * Process the get requests
      */
@@ -232,6 +220,7 @@ public class BlockPlacer implements Runnable {
         List<BlockPlacerEntry> entries = new ArrayList<BlockPlacerEntry>(ConfigProvider.getBlockCount() + ConfigProvider.getVipBlockCount());
         boolean added = false;
         boolean retry = true;
+        final List<BlockPlacerJobEntry> jobsToCancel = new ArrayList<BlockPlacerJobEntry>();
 
         synchronized (this) {
             final String[] keys = m_blocks.keySet().toArray(new String[0]);
@@ -243,8 +232,8 @@ public class BlockPlacer implements Runnable {
             final int blockCountVip = ConfigProvider.getVipBlockCount();
             final HashMap<String, Integer> blocksPlaced = new HashMap<String, Integer>();
 
-            added |= fetchBlocks(blockCount, keys, entries, blocksPlaced);
-            added |= fetchBlocks(blockCountVip, vipKeys, entries, blocksPlaced);
+            added |= fetchBlocks(blockCount, keys, entries, blocksPlaced, jobsToCancel);
+            added |= fetchBlocks(blockCountVip, vipKeys, entries, blocksPlaced, jobsToCancel);
 
             if (!added && m_shutdown) {
                 stop();
@@ -290,6 +279,11 @@ public class BlockPlacer implements Runnable {
             }
         }
 
+        for (BlockPlacerJobEntry job : jobsToCancel) {
+            job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
+            onJobRemoved(job);
+        }
+
         m_lastRunTime = now;
     }
 
@@ -302,7 +296,8 @@ public class BlockPlacer implements Runnable {
      * @return blocks fatched
      */
     private boolean fetchBlocks(final int blockCnt, final String[] playerNames,
-            List<BlockPlacerEntry> entries, final HashMap<String, Integer> blocksPlaced) {
+            List<BlockPlacerEntry> entries, final HashMap<String, Integer> blocksPlaced,
+            final List<BlockPlacerJobEntry> jobsToCancel) {
         if (blockCnt <= 0 || playerNames == null || playerNames.length == 0) {
             return false;
         }
@@ -332,19 +327,16 @@ public class BlockPlacer implements Runnable {
                             }
                         }
                     } else {
-                        List<BlockPlacerJobEntry> toCancel = new ArrayList<BlockPlacerJobEntry>();
                         for (BlockPlacerJobEntry job : playerEntry.getJobs()) {
                             BlockPlacerJobEntry.JobStatus jStatus = job.getStatus();
                             if (jStatus == BlockPlacerJobEntry.JobStatus.Done
                                     || jStatus == BlockPlacerJobEntry.JobStatus.Waiting) {
-                                toCancel.add(job);
+                                jobsToCancel.add(job);
                             }
                         }
 
-                        for (BlockPlacerJobEntry job : toCancel) {
-                            job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
+                        for (BlockPlacerJobEntry job : jobsToCancel) {
                             playerEntry.removeJob(job);
-                            onJobRemoved(job);
                         }
                     }
                 }
@@ -430,15 +422,13 @@ public class BlockPlacer implements Runnable {
             } else {
                 playerEntry = m_blocks.get(player);
             }
-            playerEntry.addJob((BlockPlacerJobEntry) job);                       
+            playerEntry.addJob((BlockPlacerJobEntry) job);
         }
-        
-        synchronized (m_jobAddedListeners)
-        {
-            for (IBlockPlacerListener listener : m_jobAddedListeners)
-            {
+
+        synchronized (m_jobAddedListeners) {
+            for (IBlockPlacerListener listener : m_jobAddedListeners) {
                 listener.jobAdded(job);
-            }            
+            }
         }
     }
 
@@ -557,7 +547,7 @@ public class BlockPlacer implements Runnable {
                                 m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
                             }
                         } else if (entry instanceof BlockPlacerJobEntry) {
-                            BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry)entry;
+                            BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;
                             playerEntry.removeJob(jobEntry);
                             onJobRemoved(jobEntry);
                         }
@@ -827,18 +817,16 @@ public class BlockPlacer implements Runnable {
         m_barAPI.setMessage(player, message, percentage);
     }
 
-    
     /**
      * Fire job removed event
-     * @param job 
+     *
+     * @param job
      */
     private void onJobRemoved(BlockPlacerJobEntry job) {
-        synchronized (m_jobAddedListeners)
-        {
-            for (IBlockPlacerListener listener : m_jobAddedListeners)
-            {
+        synchronized (m_jobAddedListeners) {
+            for (IBlockPlacerListener listener : m_jobAddedListeners) {
                 listener.jobRemoved(job);
-            }            
+            }
         }
     }
 }
