@@ -502,14 +502,28 @@ public class BlockPlacer implements Runnable {
      * @param job
      */
     private void waitForJob(BlockPlacerJobEntry job) {
-        BlockPlacerJobEntry.JobStatus status = job.getStatus();
+        final int SLEEP = 10;
+        int maxWaitTime = 1000 / SLEEP;
+        BlockPlacerJobEntry.JobStatus status = job.getStatus();        
         while (status != BlockPlacerJobEntry.JobStatus.Initializing
-                && !job.isTaskDone()) {
+                && !job.isTaskDone() && maxWaitTime > 0) {
             try {
                 Thread.sleep(10);
+                maxWaitTime--;
             } catch (InterruptedException ex) {
             }
             status = job.getStatus();
+        }
+        
+        if (status != BlockPlacerJobEntry.JobStatus.Done && 
+                !job.isTaskDone()) {
+            PluginMain.log("-----------------------------------------------------------------------");
+            PluginMain.log("Warning: timeout waiting for job to finish. Manual job cancel.");
+            PluginMain.log("Job Id: " +job.getJobId()+ ", " +job.getName() + " Done:" + job.isTaskDone() + " Status: " + job.getStatus());
+            PluginMain.log("Send this message to the author of the plugin!");
+            PluginMain.log("-----------------------------------------------------------------------");
+            job.cancel();
+            job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
         }
     }
 
