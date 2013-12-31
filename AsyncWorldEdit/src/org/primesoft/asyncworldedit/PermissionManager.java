@@ -39,11 +39,12 @@ public class PermissionManager {
         AnnounceVersion,
         QueueBypass, QueueVip,
         Purge_Self, Purge_Other, Purge_All,
-        Jobs_Self, Jobs_Other, Jobs_All, Filter,
+        Jobs_Self, Jobs_Other, Jobs_All,
         Cancel_Self, Cancel_Other,
         Mode_Change, Mode_On, Mode_Off,
         Mode_Change_Other,
-        TalkativeQueue, ProgressBar
+        TalkativeQueue, ProgressBar,
+        IgnoreCleanup
     }
     /**
      * Plugin permissions top node
@@ -100,6 +101,8 @@ public class PermissionManager {
                 return s_prefix + "admin.jobs.cancel";
             case QueueBypass:
                 return s_prefix + "admin.queue-bypass";
+            case IgnoreCleanup:
+                return s_prefix + "admin.noCleanupOnQuit";
             case QueueVip:
                 return s_prefix + "user.vip-queue";
             case Mode_Change:

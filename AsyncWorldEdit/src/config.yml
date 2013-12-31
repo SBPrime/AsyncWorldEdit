@@ -26,6 +26,8 @@ awe:
   physicsFreez: true  
   #Enable PlotMe Global Mask Fix
   plotMeFixEnabled: true
+  #Enable or disable auto job cancelation on player quit
+  cleanOnLogout: true
   blocksHub:
     #Enable block chang loggin
     logBlocks: true

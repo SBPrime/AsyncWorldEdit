@@ -71,8 +71,11 @@ public class PlayerManager {
         synchronized (m_players) {
             m_players.remove(playerName);
         }
-        
-        m_parrent.getBlockPlacer().purge(playerName);
+
+        if (ConfigProvider.cleanOnLogoutEnabled() && 
+                !PermissionManager.isAllowed(player, PermissionManager.Perms.IgnoreCleanup)) {
+            m_parrent.getBlockPlacer().purge(playerName);
+        }
     }
 
     /**

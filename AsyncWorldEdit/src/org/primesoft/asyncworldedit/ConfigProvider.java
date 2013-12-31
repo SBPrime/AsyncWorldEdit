@@ -80,6 +80,8 @@ public class ConfigProvider {
     private static boolean m_logBlocks;
     
     private static boolean m_plotMeFixEnabled;
+    
+    private static boolean m_cleanOnLogout;
 
     /**
      * Get the config version
@@ -156,6 +158,15 @@ public class ConfigProvider {
     public static boolean isConfigUpdated() {
         return m_isConfigUpdate;
     }
+    
+    
+    /**
+     * Cancel player operations on logout
+     * @return 
+     */
+    public static boolean cleanOnLogoutEnabled() {
+        return m_cleanOnLogout;
+    }
 
     /**
      * Queue hard limit
@@ -231,6 +242,7 @@ public class ConfigProvider {
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
         m_plotMeFixEnabled = mainSection.getBoolean("plotMeFixEnabled", true);
+        m_cleanOnLogout = mainSection.getBoolean("cleanOnLogout", true);
 
         parseRenderSection(mainSection);
         parseBlocksHubSection(mainSection.getConfigurationSection("blocksHub"));
