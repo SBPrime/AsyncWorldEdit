@@ -127,7 +127,9 @@ public class PlayerManager {
         boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
         boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
 
-        if (hasOn) {
+        if (hasOn && hasOff){
+            return ConfigProvider.getDefaultMode();
+        } else if (hasOn) {
             return true;
         } else if (hasOff) {
             return false;
