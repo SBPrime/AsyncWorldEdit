@@ -29,6 +29,8 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +40,7 @@ import java.util.Set;
  * @author SBPrime
  */
 public class CancelabeEditSession extends EditSession {
+
     public class SessionCanceled extends Exception {
     }
     private final AsyncEditSession m_parent;
@@ -45,19 +48,19 @@ public class CancelabeEditSession extends EditSession {
     private int m_jobId;
     private Mask m_mask;
 
-    public CancelabeEditSession(AsyncEditSession parent, int jobId) {
+    public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
         super(parent.getWorld(), parent.getBlockChangeLimit());
 
         m_jobId = jobId;
         m_parent = parent;
         m_isCanceled = false;
-        m_mask = parent.getMask();
+        m_mask = mask;
     }
 
-    public boolean isCanceled(){
+    public boolean isCanceled() {
         return m_isCanceled;
     }
-    
+
     public void cancel() {
         m_isCanceled = true;
     }
@@ -86,7 +89,6 @@ public class CancelabeEditSession extends EditSession {
     public void enableQueue() {
         m_parent.enableQueue();
     }
-
 
     @Override
     public void flushQueue() {
@@ -161,7 +163,7 @@ public class CancelabeEditSession extends EditSession {
     @Override
     public boolean isQueueEnabled() {
         return m_parent.isQueueEnabled();
-    }    
+    }
 
     @Override
     public Map<Integer, Integer> popMissingBlocks() {
@@ -198,7 +200,7 @@ public class CancelabeEditSession extends EditSession {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.setBlock(pt, block, m_jobId);
     }
 
@@ -251,15 +253,68 @@ public class CancelabeEditSession extends EditSession {
 
     @Override
     public void undo(EditSession sess) {
-        m_parent.doUndo(sess);
+        doUndo(sess);
+    }
+
+    public void doUndo(EditSession sess) {
+        //checkAsync(WorldeditOperations.undo);
+        UndoSession undoSession = m_parent.doUndo();        
+
+        Mask oldMask = sess.getMask();
+        sess.setMask(getMask());
+
+        final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
+        final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> placedBlocks = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
+
+        for (int i = blocks.length - 1; i >= 0; i--) {
+            Map.Entry<Vector, BaseBlock> entry = blocks[i];
+            Vector pos = entry.getKey();
+            BaseBlock block = entry.getValue();
+
+            int x = pos.getBlockX();
+            int y = pos.getBlockY();
+            int z = pos.getBlockZ();
+            boolean ignore = false;
+
+            HashMap<Integer, HashSet<Integer>> mapX = placedBlocks.get(x);
+            if (mapX == null) {
+                mapX = new HashMap<Integer, HashSet<Integer>>();
+                placedBlocks.put(x, mapX);
+            }
+
+            HashSet<Integer> mapY = mapX.get(y);
+            if (mapY == null) {
+                mapY = new HashSet<Integer>();
+                mapX.put(y, mapY);
+            }
+            if (mapY.contains(z)) {
+                ignore = true;
+            } else {
+                mapY.add(z);
+            }
+
+            if (!ignore) {
+                sess.smartSetBlock(pos, block);
+            }
+        }
+
+        sess.flushQueue();
+        sess.setMask(oldMask);
     }
 
     @Override
     public void redo(EditSession sess) {
-        m_parent.doRedo(sess);
+        doRedo(sess);
     }
     
-    
+    public void doRedo(EditSession sess) {
+        Mask mask = sess.getMask();
+        sess.setMask(getMask());
+        m_parent.doRedo(sess);
+        //super.redo(sess);
+        sess.setMask(mask);
+    }
+
     @Override
     public boolean smartSetBlock(Vector pt, BaseBlock block) {
         if (m_isCanceled) {
@@ -271,8 +326,7 @@ public class CancelabeEditSession extends EditSession {
     public void resetAsync() {
         m_parent.resetAsync();
     }
-    
-    
+
     public AsyncEditSession getParent() {
         return m_parent;
     }
