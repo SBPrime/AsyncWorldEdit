@@ -28,7 +28,9 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
+import org.primesoft.asyncworldedit.PluginMain;
 
 /**
  * This class is only a wrapper proxy Note: Do not use any operations from this
@@ -54,6 +56,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
         synchronized (m_parrent) {
             m_parrent.copy(editSession);
         }
+        updateProps();
     }
 
     @Override
@@ -61,6 +64,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
         synchronized (m_parrent) {
             m_parrent.flip(dir);
         }
+        updateProps();
     }
 
     @Override
@@ -68,6 +72,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
         synchronized (m_parrent) {
             m_parrent.flip(dir, aroundPlayer);
         }
+        updateProps();
     }
 
     @Override
@@ -140,6 +145,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
         synchronized (m_parrent) {
             m_parrent.paste(editSession, newOrigin, noAir);
         }
+        updateProps();
     }
 
     @Override
@@ -155,6 +161,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
         synchronized (m_parrent) {
             m_parrent.place(editSession, pos, noAir);
         }
+        updateProps();
     }
 
     @Override
@@ -162,6 +169,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
         synchronized (m_parrent) {
             m_parrent.rotate2D(angle);
         }
+        updateProps();
     }
 
     @Override
@@ -176,7 +184,6 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
     public void setBlock(Vector pt, BaseBlock block) {
         synchronized (m_parrent) {
             m_parrent.setBlock(pt, block);
-
         }
     }
 
@@ -184,6 +191,8 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
     public void setOffset(Vector offset) {
         synchronized (m_parrent) {
             m_parrent.setOffset(offset);
+            
+            super.setOffset(offset);
         }
     }
 
@@ -191,6 +200,8 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
     public void setOrigin(Vector origin) {
         synchronized (m_parrent) {
             m_parrent.setOrigin(origin);
+            
+            super.setOrigin(origin);
         }
     }
 
@@ -198,6 +209,40 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
     public void storeEntity(LocalEntity entity) {
         synchronized (m_parrent) {
             m_parrent.storeEntity(entity);
+        }
+    }    
+
+    /**
+     * Inject a LocalSession wrapper factory using reflection
+     */
+    public void setSize(Vector size) {
+        try {
+            Field field = this.getClass().getDeclaredField("size");
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            
+            field.set(this, size);
+        } catch (IllegalArgumentException ex) {
+            PluginMain.log("Unable to set clipboard size: unsupported WorldEdit version.");
+        } catch (IllegalAccessException ex) {
+            PluginMain.log("Unable to set clipboard size: security exception.");
+        } catch (NoSuchFieldException ex) {
+            PluginMain.log("Unable to set clipboard size: unsupported WorldEdit version.");
+        } catch (SecurityException ex) {
+            PluginMain.log("Unable to set clipboard size: security exception.");
+        }
+    }
+    
+    
+    /** 
+     * Update all properties based on the parrent
+     */
+    protected void updateProps() {
+        synchronized (m_parrent) {
+            setOffset(m_parrent.getOffset());
+            setOrigin(m_parrent.getOrigin());
+            setSize(m_parrent.getSize());
         }
     }
 }

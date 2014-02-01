@@ -24,7 +24,6 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 
