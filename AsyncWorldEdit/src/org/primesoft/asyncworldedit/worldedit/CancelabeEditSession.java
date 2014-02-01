@@ -258,10 +258,10 @@ public class CancelabeEditSession extends EditSession {
 
     public void doUndo(EditSession sess) {
         //checkAsync(WorldeditOperations.undo);
-        UndoSession undoSession = m_parent.doUndo();        
+        UndoSession undoSession = m_parent.doUndo();
 
-        Mask oldMask = sess.getMask();
-        sess.setMask(getMask());
+//        Mask oldMask = sess.getMask();
+//        sess.setMask(getMask());
 
         final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
         final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> placedBlocks = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
@@ -299,7 +299,7 @@ public class CancelabeEditSession extends EditSession {
         }
 
         sess.flushQueue();
-        sess.setMask(oldMask);
+//        sess.setMask(oldMask);
     }
 
     @Override
