@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
@@ -74,9 +75,10 @@ public abstract class ClipboardAsyncTask extends BukkitRunnable {
     public void run() {
         try {
             m_job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
-            PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
-                    + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
-
+            if (ConfigProvider.isTalkative()) {
+                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
+                        + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
+            }
             m_blockPlacer.addTasks(m_player, m_job);
             task(m_clipboard);
 

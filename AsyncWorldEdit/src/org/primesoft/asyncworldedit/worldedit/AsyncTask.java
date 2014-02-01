@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
@@ -66,13 +67,14 @@ public abstract class AsyncTask extends BukkitRunnable {
     public void run() {
         try {
             m_job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
-            PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
-                    + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
-
+            if (ConfigProvider.isTalkative()) {
+                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
+                        + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
+            }
             m_blockPlacer.addTasks(m_player, m_job);
             int cnt = 0;
             if (!m_editSession.isCanceled()) {
-                 cnt = task(m_editSession);
+                cnt = task(m_editSession);
             }
 
             if (!m_editSession.isQueueEnabled()) {
@@ -80,10 +82,12 @@ public abstract class AsyncTask extends BukkitRunnable {
             } else {
                 m_editSession.flushQueue();
             }
-            
+
             m_job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
             m_blockPlacer.addTasks(m_player, m_job);
-            PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + cnt);
+            if (ConfigProvider.isTalkative()) {
+                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + cnt);
+            }
         } catch (MaxChangedBlocksException ex) {
             PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
         } catch (IllegalArgumentException ex) {

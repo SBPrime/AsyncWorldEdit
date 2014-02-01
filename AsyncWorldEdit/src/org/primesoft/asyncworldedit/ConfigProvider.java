@@ -82,6 +82,8 @@ public class ConfigProvider {
     private static boolean m_plotMeFixEnabled;
     
     private static boolean m_cleanOnLogout;
+    
+    private static boolean m_isTalkative;
 
     /**
      * Get the config version
@@ -157,6 +159,14 @@ public class ConfigProvider {
      */
     public static boolean isConfigUpdated() {
         return m_isConfigUpdate;
+    }
+    
+    /**
+     * Is AWE talkative
+     * @return 
+     */
+    public static boolean isTalkative() {
+        return m_isTalkative;
     }
     
     
@@ -239,6 +249,7 @@ public class ConfigProvider {
         m_configVersion = mainSection.getString("version", "?");
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
+        m_isTalkative = mainSection.getBoolean("talkative", true);
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
         m_plotMeFixEnabled = mainSection.getBoolean("plotMeFixEnabled", true);

@@ -33,6 +33,7 @@ import com.sk89q.worldedit.expression.ExpressionException;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldedit.util.TreeGenerator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -289,7 +290,7 @@ public class AsyncEditSession extends EditSession {
         m_jobId = -1;
         return r;
     }
-
+    
     public boolean setBlock(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         m_jobId = jobId;
@@ -369,9 +370,9 @@ public class AsyncEditSession extends EditSession {
         super.undo(result);
         return result;
     }
-        
-    public void doRedo(EditSession session) {        
-        super.redo(session);        
+
+    public void doRedo(EditSession session) {
+        super.redo(session);
     }
 
     @Override
@@ -672,6 +673,30 @@ public class AsyncEditSession extends EditSession {
     }
 
     @Override
+    public int makeFaces(final Region region, final Pattern pattern) throws MaxChangedBlocksException {
+        boolean isAsync = checkAsync(WorldeditOperations.makeCuboidFaces);
+        if (!isAsync) {
+            return super.makeFaces(region, pattern);
+        }
+
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "makeFaces");
+        m_blockPlacer.addJob(m_player, job);
+
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeFaces",
+                m_blockPlacer, job) {
+                    @Override
+                    public int task(CancelabeEditSession session)
+                    throws MaxChangedBlocksException {
+                        return session.makeFaces(region, pattern);
+                    }
+                });
+
+        return 0;
+    }
+
+    @Override
     public int makeCuboidFaces(final Region region, final Pattern pattern)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.makeCuboidFaces);
@@ -690,6 +715,30 @@ public class AsyncEditSession extends EditSession {
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
                         return session.makeCuboidFaces(region, pattern);
+                    }
+                });
+
+        return 0;
+    }
+
+    @Override
+    public int makeWalls(final Region region, final Pattern pattern) throws MaxChangedBlocksException {
+        boolean isAsync = checkAsync(WorldeditOperations.makeCuboidWalls);
+        if (!isAsync) {
+            return super.makeWalls(region, pattern);
+        }
+
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "makeWalls");
+        m_blockPlacer.addJob(m_player, job);
+
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeWalls",
+                m_blockPlacer, job) {
+                    @Override
+                    public int task(CancelabeEditSession session)
+                    throws MaxChangedBlocksException {
+                        return session.makeWalls(region, pattern);
                     }
                 });
 
@@ -845,6 +894,33 @@ public class AsyncEditSession extends EditSession {
                     }
                 });
 
+        return 0;
+    }
+
+    @Override
+    public int moveRegion(final Region region, final Vector dir, final int distance,
+            final boolean copyAir, final BaseBlock replace) throws MaxChangedBlocksException, RegionOperationException {
+        boolean isAsync = checkAsync(WorldeditOperations.moveCuboidRegion);
+        if (!isAsync) {
+            return super.moveRegion(region, dir, distance, copyAir, replace);
+        }
+
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "moveRegion");
+        m_blockPlacer.addJob(m_player, job);
+
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "moveRegion",
+                m_blockPlacer, job) {
+                    @Override
+                    public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
+                        try {
+                            return session.moveRegion(region, dir, distance, copyAir, replace);
+                        } catch (RegionOperationException ex) {
+                            return 0;
+                        }
+                    }
+                });
         return 0;
     }
 
@@ -1388,6 +1464,7 @@ public class AsyncEditSession extends EditSession {
     private int getJobId() {
         return m_blockPlacer.getJobId(m_player);
     }
+
 
     /**
      * Queue sunced block get operation

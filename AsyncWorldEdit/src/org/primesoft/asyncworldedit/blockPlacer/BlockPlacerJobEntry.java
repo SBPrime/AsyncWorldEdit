@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.blockPlacer;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
+import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
@@ -35,6 +36,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  * @author SBPrime
  */
 public class BlockPlacerJobEntry extends BlockPlacerEntry {
+
     /**
      * Job status
      */
@@ -62,14 +64,12 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
      * The player name
      */
     private String m_player;
-    
-    
+
     /**
      * Is the async task done
      */
     private boolean m_taskDone;
-    
-    
+
     /**
      * All job state changed events
      */
@@ -83,7 +83,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_cEditSession = null;
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
-    
+
     public BlockPlacerJobEntry(String player,
             CancelabeEditSession cEditSession,
             int jobId, String name) {
@@ -107,61 +107,49 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_cEditSession = cEditSession;
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
-    
-    
-    public void addStateChangedListener(IJobEntryListener listener)
-    {
-        if (listener == null)
-        {
+
+    public void addStateChangedListener(IJobEntryListener listener) {
+        if (listener == null) {
             return;
         }
-        
-        synchronized(m_jobStateChanged)
-        {
-            if (!m_jobStateChanged.contains(listener))
-            {
+
+        synchronized (m_jobStateChanged) {
+            if (!m_jobStateChanged.contains(listener)) {
                 m_jobStateChanged.add(listener);
             }
-        }        
+        }
     }
-    
-    
-    public void removeStateChangedListener(IJobEntryListener listener)
-    {
-        if (listener == null)
-        {
+
+    public void removeStateChangedListener(IJobEntryListener listener) {
+        if (listener == null) {
             return;
         }
-        
-        synchronized(m_jobStateChanged)
-        {
-            if (m_jobStateChanged.contains(listener))
-            {
+
+        synchronized (m_jobStateChanged) {
+            if (m_jobStateChanged.contains(listener)) {
                 m_jobStateChanged.remove(listener);
             }
-        }        
+        }
     }
 
     /**
      * Is the async task done
-     * @return 
+     *
+     * @return
      */
-    public boolean isTaskDone()
-    {
+    public boolean isTaskDone() {
         return m_taskDone;
     }
-    
+
     /**
      * Async task has finished
      */
-    public void taskDone()
-    {
+    public void taskDone() {
         m_taskDone = true;
-        
+
         callStateChangedEvents();
     }
-    
-    
+
     /**
      * Is the job started
      *
@@ -178,7 +166,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     public void setStatus(JobStatus newStatus) {
         int newS = getStatusId(newStatus);
         int oldS = getStatusId(m_status);
-       
+
         if (newS < oldS) {
             return;
         }
@@ -256,16 +244,15 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
                 break;
         }
 
-        PluginMain.say(player, ChatColor.YELLOW + "Job " + toString()
-                + ChatColor.YELLOW + " - " + getStatusString());
+        if (ConfigProvider.isTalkative()) {
+            PluginMain.say(player, ChatColor.YELLOW + "Job " + toString()
+                    + ChatColor.YELLOW + " - " + getStatusString());
+        }
     }
-    
-    
+
     private void callStateChangedEvents() {
-        synchronized(m_jobStateChanged)
-        {
-            for (IJobEntryListener listener: m_jobStateChanged)                
-            {
+        synchronized (m_jobStateChanged) {
+            for (IJobEntryListener listener : m_jobStateChanged) {
                 listener.jobStateChanged(this);
             }
         }

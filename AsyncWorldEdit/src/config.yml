@@ -7,10 +7,10 @@ awe:
     #how often that a user will get an update on the current que (number of intervals)
     talk-interval: 10
     #blocks to place (per-interval), this determines the max speed of block placing
-    #if you experience lag lower this and the next number
+    #if you experience lag lower this and the next number    
     blocks: 10000
     #blocks to place (per-interval) for users with the permission AWE.user.vip-queue
-    blocks-vip: 2000    
+    blocks-vip: 2000
     #maximum size of the blocks queue
     queue-max-size: 10000000
     #maximum size of the player block queue
@@ -18,12 +18,14 @@ awe:
     #number of blocks on the player queue when to stop placing blocks
     queue-limit-soft: 250000
   #check for updates
-  checkVersion: true  
+  checkVersion: true 
+  #is async world edit talkative 
+  talkative: true
   #Default AWE status for loging in players if the player does not have 
   #AWE.user.mode.on or AWE.user.mode.off permission
   defaultOn: true
   #Disable or enable blocks physics freeze when placing blocks
-  physicsFreez: true  
+  physicsFreez: true
   #Enable PlotMe Global Mask Fix
   plotMeFixEnabled: true
   #Enable or disable auto job cancelation on player quit
