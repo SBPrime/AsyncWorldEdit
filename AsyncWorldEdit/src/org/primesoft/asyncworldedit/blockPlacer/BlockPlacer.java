@@ -493,6 +493,10 @@ public class BlockPlacer implements Runnable {
      * @param job
      */
     public void cancelJob(String player, BlockPlacerJobEntry job) {
+        if (job instanceof BlockPlacerUndoJob) {
+            PluginMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
+            return;
+        }
         cancelJob(player, job.getJobId());
     }
 
@@ -502,9 +506,14 @@ public class BlockPlacer implements Runnable {
      * @param job
      */
     private void waitForJob(BlockPlacerJobEntry job) {
+        if (job instanceof BlockPlacerUndoJob) {
+            PluginMain.log("Warning: Undo jobs shuld not by canceled, ingoring!");
+            return;
+        }
+
         final int SLEEP = 10;
         int maxWaitTime = 1000 / SLEEP;
-        BlockPlacerJobEntry.JobStatus status = job.getStatus();        
+        BlockPlacerJobEntry.JobStatus status = job.getStatus();
         while (status != BlockPlacerJobEntry.JobStatus.Initializing
                 && !job.isTaskDone() && maxWaitTime > 0) {
             try {
@@ -514,12 +523,12 @@ public class BlockPlacer implements Runnable {
             }
             status = job.getStatus();
         }
-        
-        if (status != BlockPlacerJobEntry.JobStatus.Done && 
-                !job.isTaskDone()) {
+
+        if (status != BlockPlacerJobEntry.JobStatus.Done
+                && !job.isTaskDone()) {
             PluginMain.log("-----------------------------------------------------------------------");
             PluginMain.log("Warning: timeout waiting for job to finish. Manual job cancel.");
-            PluginMain.log("Job Id: " +job.getJobId()+ ", " +job.getName() + " Done:" + job.isTaskDone() + " Status: " + job.getStatus());
+            PluginMain.log("Job Id: " + job.getJobId() + ", " + job.getName() + " Done:" + job.isTaskDone() + " Status: " + job.getStatus());
             PluginMain.log("Send this message to the author of the plugin!");
             PluginMain.log("-----------------------------------------------------------------------");
             job.cancel();
@@ -544,8 +553,13 @@ public class BlockPlacer implements Runnable {
                 return 0;
             }
             playerEntry = m_blocks.get(player);
-            queue = playerEntry.getQueue();
             job = playerEntry.getJob(jobId);
+            if (job instanceof BlockPlacerUndoJob) {
+                PluginMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
+                return 0;
+            }
+
+            queue = playerEntry.getQueue();
             playerEntry.removeJob(job);
             onJobRemoved(job);
         }

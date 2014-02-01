@@ -330,12 +330,14 @@ public class AsyncEditSession extends EditSession {
                 if (id < minId) {
                     minId = id;
                 }
-                m_blockPlacer.cancelJob(m_player, id);
+                if (!(job instanceof BlockPlacerUndoJob)) {
+                    m_blockPlacer.cancelJob(m_player, id);
+                }                
             }
             minId--;
             if (minId >= 0 && minId != jobId) {
                 BlockPlacerJobEntry job = m_blockPlacer.getJob(m_player, minId);
-                if (job != null) {
+                if (job != null && !(job instanceof BlockPlacerUndoJob)) {
                     m_blockPlacer.cancelJob(m_player, job);
                 }
             }
@@ -351,7 +353,7 @@ public class AsyncEditSession extends EditSession {
             return;
         }
 
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(this, session, jobId, "undo");
+        final BlockPlacerJobEntry job = new BlockPlacerUndoJob(this, session, jobId, "undo");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "undo",
