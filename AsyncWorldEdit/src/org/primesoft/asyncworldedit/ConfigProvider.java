@@ -51,8 +51,6 @@ public class ConfigProvider {
 
     private static boolean m_defaultMode = true;
 
-    private static boolean m_checkUpdate = false;
-
     private static boolean m_isConfigUpdate = false;
 
     private static long m_interval;
@@ -92,15 +90,6 @@ public class ConfigProvider {
      */
     public static String getConfigVersion() {
         return m_configVersion;
-    }
-
-    /**
-     * Is update checking enabled
-     *
-     * @return true if enabled
-     */
-    public static boolean getCheckUpdate() {
-        return m_checkUpdate;
     }
 
     /**
@@ -247,7 +236,6 @@ public class ConfigProvider {
         }
 
         m_configVersion = mainSection.getString("version", "?");
-        m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_isTalkative = mainSection.getBoolean("talkative", true);
         m_defaultMode = mainSection.getBoolean("defaultOn", true);
