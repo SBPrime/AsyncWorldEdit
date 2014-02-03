@@ -80,7 +80,6 @@ public class PluginMain extends JavaPlugin {
         return m_blockPlacer;
     }
     
-    
     public BarAPIntegrator getBarAPI() {    
         return m_barApi;
     }
@@ -137,22 +136,24 @@ public class PluginMain extends JavaPlugin {
         s_prefix = String.format("[%s]", desc.getName());
         m_isInitialized = false;
 
-        try {
-            m_metrics = new MetricsLite(this);
-            m_metrics.start();
-        } catch (IOException e) {
-            log("Error initializing MCStats: " + e.getMessage());
+        if (!ConfigProvider.load(this)) {
+            log("Error loading config");
+            return;
+        }
+        
+        if (ConfigProvider.getAllowMetrics()) {
+	        try {
+	            m_metrics = new MetricsLite(this);
+	            m_metrics.start();
+	        } catch (IOException e) {
+	            log("Error initializing MCStats: " + e.getMessage());
+	        }
         }
 
         s_console = getServer().getConsoleSender();
         WorldEditPlugin worldEdit = getWorldEdit(this);
         if (worldEdit == null) {
             log("World edit not found.");
-            return;
-        }
-
-        if (!ConfigProvider.load(this)) {
-            log("Error loading config");
             return;
         }
 
