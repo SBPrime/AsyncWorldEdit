@@ -23,11 +23,10 @@
  */
 package org.primesoft.asyncworldedit;
 
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -38,9 +37,15 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.commands.*;
+import org.primesoft.asyncworldedit.commands.CancelCommand;
+import org.primesoft.asyncworldedit.commands.Commands;
+import org.primesoft.asyncworldedit.commands.JobsCommand;
+import org.primesoft.asyncworldedit.commands.PurgeCommand;
+import org.primesoft.asyncworldedit.commands.ToggleCommand;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
+
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
 /**
  *
@@ -160,10 +165,7 @@ public class PluginMain extends JavaPlugin {
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
         m_plotMeFix = new PlotMeFix(this);
-
-        if (ConfigProvider.getCheckUpdate()) {
-            log(VersionChecker.CheckVersion(desc.getVersion()));
-        }
+        
         if (!ConfigProvider.isConfigUpdated()) {
             log("Please update your config file!");
         }

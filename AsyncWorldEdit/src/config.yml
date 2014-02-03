@@ -17,8 +17,6 @@ awe:
     queue-limit-hard: 500000
     #number of blocks on the player queue when to stop placing blocks
     queue-limit-soft: 250000
-  #check for updates
-  checkVersion: true 
   #is async world edit talkative 
   talkative: true
   #Default AWE status for loging in players if the player does not have 
