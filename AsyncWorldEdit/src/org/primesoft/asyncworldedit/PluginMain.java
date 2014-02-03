@@ -25,7 +25,6 @@ package org.primesoft.asyncworldedit;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;

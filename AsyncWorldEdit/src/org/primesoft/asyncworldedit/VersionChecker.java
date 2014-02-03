@@ -42,7 +42,7 @@ public class VersionChecker {
     /**
      * Version url
      */
-    private final static String s_versionUrl = "https://api.curseforge.com/servermods/files?projectIds=55226";
+    private final static String s_versionUrl = "https://api.github.com/repos/SBPrime/AsyncWorldEdit/releases";
 
     /**
      * Download version page from the www
