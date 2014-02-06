@@ -217,7 +217,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
      */
     public void setSize(Vector size) {
         try {
-            Field field = this.getClass().getDeclaredField("size");
+            Field field = CuboidClipboard.class.getDeclaredField("size");
             field.setAccessible(true);
             Field modifiersField = Field.class.getDeclaredField("modifiers");
             modifiersField.setAccessible(true);
