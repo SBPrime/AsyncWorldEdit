@@ -82,6 +82,8 @@ public class WorldEditProxy extends WorldEdit {
         m_factory = factory;
         m_plugin = plugin;
         m_parent = we;
+        
+        m_parent.setEditSessionFactory(factory);
     }
 
     @Override
