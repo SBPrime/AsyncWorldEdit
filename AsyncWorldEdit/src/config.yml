@@ -67,3 +67,4 @@ awe:
     - deformRegion
     - hollowOutRegion
     - paste
+    - regenerate

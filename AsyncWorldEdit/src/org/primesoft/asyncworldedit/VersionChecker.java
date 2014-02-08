@@ -85,7 +85,7 @@ public class VersionChecker {
         String eVersion = null;
         JSONArray array = (JSONArray) JSONValue.parse(content);
         if (array.size() > 0) {
-            final int latestId = array.size() - 1;
+            final int latestId = 0;
             for (int i = 0; i < array.size(); i++) {
                 JSONObject jObject = (JSONObject) array.get(i);
                 String versionName = (String) jObject.get(API_NAME_VALUE);

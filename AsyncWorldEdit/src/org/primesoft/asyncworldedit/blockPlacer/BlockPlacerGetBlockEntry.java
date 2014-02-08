@@ -38,6 +38,11 @@ public class BlockPlacerGetBlockEntry extends BlockPlacerEntry {
     private final Object m_mutex = new Object();
     private BaseBlock m_result = null;
 
+    @Override
+    public boolean isDemanding() {
+        return false;
+    }
+    
     public Vector getLocation() {
         return m_location;
     }

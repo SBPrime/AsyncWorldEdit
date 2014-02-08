@@ -74,6 +74,11 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
      * All job state changed events
      */
     private final List<IJobEntryListener> m_jobStateChanged;
+    
+    @Override
+    public boolean isDemanding() {
+        return false;
+    }
 
     public BlockPlacerJobEntry(String player, int jobId, String name) {
         super(null, jobId);

@@ -168,7 +168,7 @@ public class PluginMain extends JavaPlugin {
             log("Please update your config file!");
         }
 
-        m_weIntegrator = new WorldeditIntegrator(this, worldEdit.getWorldEdit());        
+        m_weIntegrator = new WorldeditIntegrator(this, worldEdit);
         
         if (ConfigProvider.isPhysicsFreezEnabled()) {
             m_physicsWatcher.Enable();

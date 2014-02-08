@@ -44,6 +44,13 @@ public class BlockPlacerBlockEntry extends BlockPlacerEntry {
         return m_newBlock;
     }
 
+    @Override
+    public boolean isDemanding() {
+        return false;
+    }
+    
+    
+
     public BlockPlacerBlockEntry(AsyncEditSession editSession,
             int jobId, Vector location, BaseBlock newBlock) {
         super(editSession, jobId);

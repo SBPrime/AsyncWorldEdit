@@ -46,6 +46,11 @@ public class BlockPlacer implements Runnable {
      */
     private final int MAX_RETRIES = 200;
     /**
+     * MTA mutex
+     */
+    private final Object m_mutex = new Object();
+
+    /**
      * The physics watcher
      */
     private final PhysicsWatch m_physicsWatcher;
@@ -61,6 +66,12 @@ public class BlockPlacer implements Runnable {
      * Current scheduler get task
      */
     private BukkitTask m_getTask;
+
+    /**
+     * Number of get task run remaining
+     */
+    private int m_getTaskRunsRemaining;
+
     /**
      * Logged events queue (per player)
      */
@@ -119,6 +130,7 @@ public class BlockPlacer implements Runnable {
      * List of all job added listeners
      */
     private final List<IBlockPlacerListener> m_jobAddedListeners;
+    private final PluginMain m_plugin;
 
     /**
      * Get the physics watcher
@@ -146,21 +158,32 @@ public class BlockPlacer implements Runnable {
         m_interval = ConfigProvider.getInterval();
         m_task = m_scheduler.runTaskTimer(plugin, this,
                 m_interval, m_interval);
+        m_plugin = plugin;
 
-        m_getTask = m_scheduler.runTaskTimer(plugin, new Runnable() {
-
-            @Override
-            public void run() {
-                m_mainThread = Thread.currentThread();
-                processGet();
-            }
-        }, 1, 1);
+        startGetTask();
 
         m_talkInterval = ConfigProvider.getQueueTalkInterval();
         m_queueHardLimit = ConfigProvider.getQueueHardLimit();
         m_queueSoftLimit = ConfigProvider.getQueueSoftLimit();
         m_queueMaxSize = ConfigProvider.getQueueMaxSize();
         m_physicsWatcher = plugin.getPhysicsWatcher();
+    }
+
+    private void startGetTask() {
+        synchronized (m_mutex) {
+            m_getTaskRunsRemaining = MAX_RETRIES;
+            if (m_getTask != null) {
+                return;
+            }
+            m_getTask = m_scheduler.runTaskTimer(m_plugin, new Runnable() {
+
+                @Override
+                public void run() {
+                    m_mainThread = Thread.currentThread();
+                    processGet();
+                }
+            }, 1, 1);
+        }
     }
 
     public void addListener(IBlockPlacerListener listener) {
@@ -190,6 +213,7 @@ public class BlockPlacer implements Runnable {
      */
     public void processGet() {
         boolean run = true;
+        boolean processed = false;
         for (int i = 0; i < MAX_RETRIES && run; i++) {
             final BlockPlacerGetBlockEntry[] tasks;
             synchronized (m_getBlocks) {
@@ -200,11 +224,24 @@ public class BlockPlacer implements Runnable {
             for (BlockPlacerGetBlockEntry t : tasks) {
                 t.Process(this);
             }
-            run = tasks.length > 0;
-            try {
-                //Force thread release!
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
+            if (tasks.length > 0) {
+                processed = true;
+                run = true;
+                try {
+                    //Force thread release!
+                    Thread.sleep(1);
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
+
+        if (!processed) {
+            synchronized (m_mutex) {
+                m_getTaskRunsRemaining--;
+                if (m_getTaskRunsRemaining <= 0 && m_getTask != null) {
+                    m_getTask.cancel();
+                    m_getTask = null;
+                }
             }
         }
     }
@@ -305,9 +342,10 @@ public class BlockPlacer implements Runnable {
         int keyPos = 0;
         boolean added = false;
         boolean result = false;
+        boolean gotDemanding = false;
         final int maxRetry = playerNames.length;
         int retry = playerNames.length;
-        for (int i = 0; i < blockCnt && retry > 0; i += added ? 1 : 0) {
+        for (int i = 0; i < blockCnt && retry > 0 && !gotDemanding; i += added ? 1 : 0) {
             final String player = playerNames[keyPos];
             PlayerEntry playerEntry = m_blocks.get(player);
             if (playerEntry != null) {
@@ -325,6 +363,8 @@ public class BlockPlacer implements Runnable {
                             } else {
                                 blocksPlaced.put(player, 1);
                             }
+                            
+                            gotDemanding |= entry.isDemanding();
                         }
                     } else {
                         for (BlockPlacerJobEntry job : playerEntry.getJobs()) {
@@ -379,7 +419,11 @@ public class BlockPlacer implements Runnable {
      */
     public void stop() {
         m_task.cancel();
-        m_getTask.cancel();
+        synchronized (m_mutex) {
+            m_getTask.cancel();
+            m_getTask = null;
+        }
+
     }
 
     /**
@@ -804,6 +848,8 @@ public class BlockPlacer implements Runnable {
         synchronized (m_getBlocks) {
             m_getBlocks.add(block);
         }
+
+        startGetTask();
     }
 
     /**

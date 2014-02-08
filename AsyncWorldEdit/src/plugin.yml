@@ -1,6 +1,6 @@
 name: AsyncWorldEdit
 main: org.primesoft.asyncworldedit.PluginMain
-version: 1.0-dev
+version: 1.0
 website: http://dev.bukkit.org/server-mods/async_worldedit/
 dev-url: http://dev.bukkit.org/server-mods/async_worldedit/
 description: This plugin attaches into WorldEdit and makes it asynchronous.

@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,41 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.worldedit;
+package org.primesoft.asyncworldedit.blockPlacer;
+
+import com.sk89q.worldedit.Vector2D;
+import org.bukkit.World;
 
 /**
- * All operations that can by done in async mode
- * @author SBPrime
+ *
+ * @author Prime
  */
-public enum WorldeditOperations 
-{
-    undo,
-    redo,
-    fillXZ,
-    removeAbove,
-    removeBelow,
-    removeNear,
-    setBlocks,
-    replaceBlocks,
-    makeCuboidFaces,
-    makeCuboidWalls,
-    overlayCuboidBlocks,
-    naturalizeCuboidBlocks,
-    stackCuboidRegion,
-    moveCuboidRegion,
-    drainArea,
-    fixLiquid,
-    makeCylinder,
-    makeSphere,
-    makePyramid,
-    thaw,
-    simulateSnow,
-    green,
-    makePumpkinPatches,
-    makeForest,
-    makeShape,
-    deformRegion,
-    hollowOutRegion,
-    paste,
-    regenerate
+public class BlockPlacerRegenerateEntry extends BlockPlacerEntry {
+
+    private final World m_world;
+    private final Vector2D m_chunk;
+
+    public BlockPlacerRegenerateEntry(int jobId, World world, Vector2D chunk) {
+        super(null, jobId);
+
+        m_chunk = chunk;
+        m_world = world;
+    }
+    
+    @Override
+    public boolean isDemanding() {
+        return true;
+    }
+
+    @Override
+    public void Process(BlockPlacer bp) {
+        try {
+            m_world.regenerateChunk(m_chunk.getBlockX(), m_chunk.getBlockZ());
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
 }

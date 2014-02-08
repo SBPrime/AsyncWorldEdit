@@ -36,6 +36,11 @@ public class BlockPlacerMaskEntry extends BlockPlacerEntry {
     public Mask getMask() {
         return m_mask;
     }
+    
+    @Override
+    public boolean isDemanding() {
+        return false;
+    }
 
     public BlockPlacerMaskEntry(AsyncEditSession editSession,
             int jobId, Mask mask) {

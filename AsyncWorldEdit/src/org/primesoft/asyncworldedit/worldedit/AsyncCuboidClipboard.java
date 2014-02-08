@@ -175,6 +175,8 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
             }
         });
     }
+    
+    
 
     @Override
     public void paste(final EditSession editSession, final Vector newOrigin,

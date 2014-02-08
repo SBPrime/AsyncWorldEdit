@@ -55,6 +55,11 @@ public class BlockPlacerEntityEntry extends BlockPlacerEntry {
         m_location = location;
         m_clipboard = clipboard;
     }
+    
+    @Override
+    public boolean isDemanding() {
+        return true;
+    }
 
     @Override
     public void Process(BlockPlacer bp) {

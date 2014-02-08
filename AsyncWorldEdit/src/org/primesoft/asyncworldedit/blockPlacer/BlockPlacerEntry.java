@@ -34,6 +34,12 @@ public abstract class BlockPlacerEntry {
     protected final AsyncEditSession m_editSession;
 
     /**
+     * Is this task demanding
+     * @return 
+     */
+    public abstract boolean isDemanding();
+    
+    /**
      * The job ID
      * @return 
      */
