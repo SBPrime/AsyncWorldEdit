@@ -363,7 +363,7 @@ public class BlockPlacer implements Runnable {
                             } else {
                                 blocksPlaced.put(player, 1);
                             }
-                            
+
                             gotDemanding |= entry.isDemanding();
                         }
                     } else {
@@ -420,8 +420,10 @@ public class BlockPlacer implements Runnable {
     public void stop() {
         m_task.cancel();
         synchronized (m_mutex) {
-            m_getTask.cancel();
-            m_getTask = null;
+            if (m_getTask != null) {
+                m_getTask.cancel();
+                m_getTask = null;
+            }
         }
 
     }
