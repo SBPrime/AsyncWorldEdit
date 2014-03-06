@@ -64,6 +64,12 @@ public class PlayerEntry {
      */
     private final HashMap<Integer, BlockPlacerJobEntry> m_jobs;
 
+    
+    /**
+     * Is the player informed about queue limit reached
+     */
+    private boolean m_isInformed;
+
     /**
      * Create new player entry
      */
@@ -209,9 +215,33 @@ public class PlayerEntry {
         }
     }
 
+    
+    /**
+     * Get job ID
+     * @param jobId job ID
+     * @return 
+     */
     public BlockPlacerJobEntry getJob(int jobId) {
         synchronized (m_jobs) {
             return m_jobs.get(jobId);
         }
+    }
+       
+    
+    /**
+     * Is the player informed about queue overload
+     * @return 
+     */
+    public boolean isInformed() {
+        return m_isInformed;
+    }
+
+
+    /**
+     * Set isInformed state
+     * @param state 
+     */
+    public void setInformed(boolean state) {
+        m_isInformed = state;
     }
 }

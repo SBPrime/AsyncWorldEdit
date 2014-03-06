@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.blockPlacer;
 import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.command.defaults.PlaySoundCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
@@ -130,7 +131,12 @@ public class BlockPlacer implements Runnable {
      * List of all job added listeners
      */
     private final List<IBlockPlacerListener> m_jobAddedListeners;
+    
+    /**
+     * Parent plugin main
+     */
     private final PluginMain m_plugin;
+   
 
     /**
      * Get the physics watcher
@@ -506,9 +512,22 @@ public class BlockPlacer implements Runnable {
 
             bypass |= entry instanceof BlockPlacerJobEntry;
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
-                PluginMain.say(player, "Out of space on AWE block queue.");
+                if (player == null)
+                {
+                    return false;
+                }
+                
+                if (!playerEntry.isInformed()){
+                    playerEntry.setInformed(true);
+                    PluginMain.say(player, "Out of space on AWE block queue.");
+                }
+                
                 return false;
             } else {
+                if (playerEntry.isInformed()){
+                    playerEntry.setInformed(false);
+                }
+                
                 synchronized (queue) {
                     queue.add(entry);
                 }
@@ -522,7 +541,7 @@ public class BlockPlacer implements Runnable {
                     playerEntry.addJob((BlockPlacerJobEntry) entry);
                 }
                 if (queue.size() >= m_queueHardLimit && bypass) {
-                    m_lockedQueues.add(player);
+                    m_lockedQueues.add(player);                    
                     PluginMain.say(player, "Your block queue is full. Wait for items to finish drawing.");
                     return false;
                 }
