@@ -122,22 +122,22 @@ public class WorldEditProxy extends WorldEdit {
     }
 
     @Override
-    public BaseBlock getBlock(LocalPlayer player, String id) throws UnknownItemException, DisallowedItemException {
+    public BaseBlock getBlock(LocalPlayer player, String id) throws UnknownItemException, DisallowedItemException, WorldEditException {
         return m_parent.getBlock(player, id); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public BaseBlock getBlock(LocalPlayer player, String arg, boolean allAllowed) throws UnknownItemException, DisallowedItemException {
+    public BaseBlock getBlock(LocalPlayer player, String arg, boolean allAllowed) throws UnknownItemException, DisallowedItemException, WorldEditException {
         return m_parent.getBlock(player, arg, allAllowed); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public BaseBlock getBlock(LocalPlayer player, String arg, boolean allAllowed, boolean allowNoData) throws UnknownItemException, DisallowedItemException {
+    public BaseBlock getBlock(LocalPlayer player, String arg, boolean allAllowed, boolean allowNoData) throws UnknownItemException, DisallowedItemException, WorldEditException {
         return m_parent.getBlock(player, arg, allAllowed, allowNoData); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Set<Integer> getBlockIDs(LocalPlayer player, String list, boolean allBlocksAllowed) throws UnknownItemException, DisallowedItemException {
+    public Set<Integer> getBlockIDs(LocalPlayer player, String list, boolean allBlocksAllowed) throws UnknownItemException, DisallowedItemException, WorldEditException {
         return m_parent.getBlockIDs(player, list, allBlocksAllowed); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -147,22 +147,22 @@ public class WorldEditProxy extends WorldEdit {
     }
 
     @Override
-    public Pattern getBlockPattern(LocalPlayer player, String patternString) throws UnknownItemException, DisallowedItemException {
+    public Pattern getBlockPattern(LocalPlayer player, String patternString) throws UnknownItemException, DisallowedItemException, WorldEditException {
         return m_parent.getBlockPattern(player, patternString); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Set<BaseBlock> getBlocks(LocalPlayer player, String list) throws DisallowedItemException, UnknownItemException {
+    public Set<BaseBlock> getBlocks(LocalPlayer player, String list) throws DisallowedItemException, UnknownItemException, WorldEditException {
         return m_parent.getBlocks(player, list); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Set<BaseBlock> getBlocks(LocalPlayer player, String list, boolean allAllowed) throws DisallowedItemException, UnknownItemException {
+    public Set<BaseBlock> getBlocks(LocalPlayer player, String list, boolean allAllowed) throws DisallowedItemException, UnknownItemException, WorldEditException {
         return m_parent.getBlocks(player, list, allAllowed); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Set<BaseBlock> getBlocks(LocalPlayer player, String list, boolean allAllowed, boolean allowNoData) throws DisallowedItemException, UnknownItemException {
+    public Set<BaseBlock> getBlocks(LocalPlayer player, String list, boolean allAllowed, boolean allowNoData) throws DisallowedItemException, UnknownItemException, WorldEditException {
         return m_parent.getBlocks(player, list, allAllowed, allowNoData); //To change body of generated methods, choose Tools | Templates.
     }
 

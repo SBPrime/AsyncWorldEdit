@@ -57,5 +57,9 @@ public enum WorldeditOperations
     deformRegion,
     hollowOutRegion,
     paste,
-    regenerate
+    regenerate,
+    center,
+    drawLine,
+    drawSpline,
+    makeBiomeShape
 }

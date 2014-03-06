@@ -68,3 +68,7 @@ awe:
     - hollowOutRegion
     - paste
     - regenerate
+    - center
+    - drawLine
+    - drawSpline
+    - makeBiomeShape

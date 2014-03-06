@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
+import com.sk89q.worldedit.regions.Region;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -57,6 +58,14 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
             m_parrent.copy(editSession);
         }
         updateProps();
+    }
+
+    @Override
+    public void copy(EditSession editSession, Region region) {
+        synchronized (m_parrent) {
+            super.copy(editSession, region);
+        }
+        updateProps();        
     }
 
     @Override

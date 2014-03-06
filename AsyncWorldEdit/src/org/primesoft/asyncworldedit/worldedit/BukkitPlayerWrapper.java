@@ -28,10 +28,12 @@ import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.PlayerDirection;
 import com.sk89q.worldedit.ServerInterface;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.WorldEditPermissionException;
 import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.WorldVectorFace;
 import com.sk89q.worldedit.bags.BlockBag;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -296,6 +298,12 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
         this.server = server;
     }
 
+    @Override
+    public BaseBlock getBlockInHand()
+            throws WorldEditException {
+        return m_parent.getBlockInHand();
+    }
+   
     @Override
     public String toString() {
         return m_parent.toString(); 

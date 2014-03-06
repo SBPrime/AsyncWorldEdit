@@ -66,11 +66,6 @@ public class CancelabeEditSession extends EditSession {
     }
 
     @Override
-    public int center(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return m_parent.center(region, pattern);
-    }
-
-    @Override
     public int countBlock(Region region, Set<Integer> searchIDs) {
         return m_parent.countBlock(region, searchIDs);
     }
@@ -235,7 +230,7 @@ public class CancelabeEditSession extends EditSession {
     @Override
     public void setFastMode(boolean fastMode) {
         m_parent.setFastMode(fastMode);
-    }
+    }        
 
     @Override
     public void setMask(Mask mask) {

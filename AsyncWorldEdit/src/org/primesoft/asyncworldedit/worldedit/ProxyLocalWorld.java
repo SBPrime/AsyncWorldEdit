@@ -23,9 +23,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
