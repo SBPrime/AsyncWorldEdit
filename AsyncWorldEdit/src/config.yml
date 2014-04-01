@@ -21,6 +21,8 @@ awe:
   checkVersion: true
   #allow metrics to run
   allowMetrics: true
+  #Whether or not to set messages using BarAPI
+  use-barapi: true
   #is async world edit talkative 
   talkative: true
   #Default AWE status for loging in players if the player does not have 
