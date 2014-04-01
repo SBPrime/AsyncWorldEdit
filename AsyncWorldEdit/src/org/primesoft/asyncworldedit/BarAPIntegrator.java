@@ -66,6 +66,10 @@ public class BarAPIntegrator {
             return;
         }
 
+        if (!ConfigProvider.useBarAPI()) {
+            return;
+        }
+
         if (message == null) {
             message = "";
         }
@@ -82,7 +86,11 @@ public class BarAPIntegrator {
         if (!m_isInitialized || player == null) {
             return;
         }
-        
+
+        if (!ConfigProvider.useBarAPI()) {
+            return;
+        }
+
         BarAPI.removeBar(player);
     }
 }

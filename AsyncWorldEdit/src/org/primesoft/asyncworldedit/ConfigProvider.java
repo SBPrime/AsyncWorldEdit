@@ -87,6 +87,17 @@ public class ConfigProvider {
     
     private static boolean m_isTalkative;
 
+    private static boolean m_useBarAPI;
+
+    /**
+     * Whether or not setting values to the BarAPI bar will be shown
+     * 
+     * @return {@code true} if showing messages, false otherwise
+     */
+    public static boolean useBarAPI() {
+        return m_useBarAPI;
+    }
+
     /**
      * Get the config version
      *
@@ -266,6 +277,7 @@ public class ConfigProvider {
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
         m_plotMeFixEnabled = mainSection.getBoolean("plotMeFixEnabled", true);
         m_cleanOnLogout = mainSection.getBoolean("cleanOnLogout", true);
+        m_useBarAPI = mainSection.getBoolean("use-barapi");
 
         parseRenderSection(mainSection);
         parseBlocksHubSection(mainSection.getConfigurationSection("blocksHub"));
