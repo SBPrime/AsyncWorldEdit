@@ -24,6 +24,7 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
+import java.util.UUID;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
@@ -41,7 +42,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
     /**
      * The player
      */
-    private final String m_player;
+    private final UUID m_player;
 
     /**
      * Player wraper
@@ -68,7 +69,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
      */
     private final PluginMain m_plugin;
 
-    public AsyncCuboidClipboard(String player, CuboidClipboard parrent) {
+    public AsyncCuboidClipboard(UUID player, CuboidClipboard parrent) {
         super(new CuboidClipboardWrapper(player, parrent));
 
         m_plugin = PluginMain.getInstance();

@@ -24,6 +24,7 @@
 package org.primesoft.asyncworldedit;
 
 import java.util.HashSet;
+import java.util.UUID;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
@@ -42,7 +43,7 @@ public class ConfigProvider {
     /**
      * Default user name when no user is available
      */
-    public static final String DEFAULT_USER = "#worldedit";
+    public static final UUID DEFAULT_USER = UUID.randomUUID();
 
     /**
      * The config file version

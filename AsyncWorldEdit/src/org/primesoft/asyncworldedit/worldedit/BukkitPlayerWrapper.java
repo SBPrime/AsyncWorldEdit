@@ -24,6 +24,7 @@
 
 package org.primesoft.asyncworldedit.worldedit;
 
+import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.PlayerDirection;
 import com.sk89q.worldedit.ServerInterface;
@@ -39,6 +40,7 @@ import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.cui.CUIEvent;
 import java.io.File;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 
 /**
@@ -52,6 +54,18 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
         super(plugin, server, player.getPlayer());
         
         m_parent = player;
+    }
+    
+    public static UUID getUUID(LocalPlayer player){
+        if (player instanceof BukkitPlayer) {
+            return ((BukkitPlayer)player).getPlayer().getUniqueId();
+        }
+        
+        throw new UnsupportedOperationException("Invalid argument type");
+    }
+    
+    private UUID getUUID() {
+        return m_parent.getPlayer().getUniqueId();
     }
 
     @Override
@@ -200,10 +214,9 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
 
     @Override
     public LocalWorld getWorld() {
-        
         LocalWorld result = m_parent.getWorld(); 
         if (result instanceof BukkitWorld) {            
-            result = new ProxyLocalWorld(getName(), ((BukkitWorld)result).getWorld());
+            result = new ProxyLocalWorld(getUUID(), ((BukkitWorld)result).getWorld());
         }
         
         return result;

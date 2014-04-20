@@ -121,7 +121,7 @@ public class WorldeditIntegrator implements Runnable {
                 CHECK_INTERVAL, CHECK_INTERVAL);
 
         m_worldEdit = worldEditPlugin.getWorldEdit();
-        setLocalSessionFactory(m_worldEdit, new SpyHashMap(m_worldEdit.getConfiguration()));
+        setLocalSessionFactory(m_worldEdit, new SpyHashMap(m_worldEdit.getConfiguration(), m_parent.getPlayerManager()));
         m_worldeditProxy = createWorldEditProxy();
 
         m_worldeditProxy.initialize(m_plugin, m_worldEdit, m_factory);

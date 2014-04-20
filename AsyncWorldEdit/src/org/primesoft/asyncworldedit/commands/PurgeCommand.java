@@ -23,8 +23,10 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PluginMain;
@@ -51,7 +53,7 @@ public class PurgeCommand {
                 return;
             }
 
-            int size = sender.getBlockPlacer().purge(player.getName());
+            int size = sender.getBlockPlacer().purge(player.getUniqueId());
             PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
         } else {
             String arg = args[1];
@@ -61,8 +63,12 @@ public class PurgeCommand {
                     return;
                 }
 
-                String user = arg.substring(2);
-                int size = sender.getBlockPlacer().purge(user);
+                UUID uuid = sender.getPlayerManager().getPlayerUUID(arg.substring(2));
+                if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
+                    PluginMain.say(player, ChatColor.RED + "Player not found.");
+                    return;
+                }                
+                int size = sender.getBlockPlacer().purge(uuid);
                 PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
             } else {
                 if (!arg.equalsIgnoreCase("all")) {

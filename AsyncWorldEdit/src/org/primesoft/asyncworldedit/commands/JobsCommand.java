@@ -25,11 +25,14 @@ package org.primesoft.asyncworldedit.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.PermissionManager;
+import org.primesoft.asyncworldedit.PlayerManager;
+import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.PlayerEntry;
 
@@ -129,31 +132,36 @@ public class JobsCommand {
             PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
             return;
         }
-
-        if (!all) {
+        
+        final PlayerManager pm = sender.getPlayerManager();
+        if (!all) {            
+            UUID playerUuid = pm.getPlayerUUID(playerName);
+            
             switch (perm) {
                 case Jobs_Self:
-                    lines.add(ChatColor.YELLOW + "You have " + bPlacer.getPlayerMessage(playerName));
+                    lines.add(ChatColor.YELLOW + "You have " + bPlacer.getPlayerMessage(playerUuid));
                     break;
                 case Jobs_Other:
                     lines.add(ChatColor.YELLOW + "Player " + ChatColor.WHITE
-                            + playerName + ChatColor.YELLOW + " has " + bPlacer.getPlayerMessage(playerName));
+                            + playerName + ChatColor.YELLOW + " has " + bPlacer.getPlayerMessage(playerUuid));
                     break;
             }
-            PlayerEntry entry = bPlacer.getPlayerEvents(playerName);
+            PlayerEntry entry = bPlacer.getPlayerEvents(playerUuid);
             if (entry != null) {
                 entry.printJobs(lines);
             }
         } else {
-            String[] users = bPlacer.getAllPlayers();
+            UUID[] users = bPlacer.getAllPlayers();
             if (users.length == 0) {
                 lines.add(ChatColor.YELLOW + "No operations queued.");
             } else {
-                for (String user : users) {
+                for (UUID user : users) {
                     PlayerEntry entry = bPlacer.getPlayerEvents(user);
                     int cnt = entry != null ? entry.getQueue().size() : 0;
+                    PlayerWrapper pw = pm.getPlayer(user);
+                    String name = pw != null ? pw.getName() : user.toString();
                     lines.add(ChatColor.YELLOW + "Player " + ChatColor.WHITE
-                            + user + ChatColor.YELLOW + " has " + ChatColor.WHITE + cnt
+                            + name + ChatColor.YELLOW + " has " + ChatColor.WHITE + cnt
                             + ChatColor.YELLOW + " block operations queued.");
                     if (entry != null) {
                         entry.printJobs(lines);

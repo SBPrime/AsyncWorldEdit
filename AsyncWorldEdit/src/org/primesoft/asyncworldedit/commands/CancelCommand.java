@@ -23,8 +23,10 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PluginMain;
@@ -44,7 +46,7 @@ public class CancelCommand {
 
         BlockPlacer bPlacer = sender.getBlockPlacer();
         int id;
-        String name;
+        UUID uuid;
         if (args.length == 2) {
             if (player == null)
             {
@@ -62,7 +64,7 @@ public class CancelCommand {
                 return;
             }
 
-            name = player.getName();            
+            uuid = player.getUniqueId();
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
@@ -71,7 +73,11 @@ public class CancelCommand {
                     return;
                 }
 
-                name = arg.substring(2);
+                uuid = sender.getPlayerManager().getPlayerUUID(arg.substring(2));
+                if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
+                    PluginMain.say(player, ChatColor.RED + "Player not found.");
+                    return;
+                }
                 try {
                     id = Integer.parseInt(args[1]);
                 } catch (NumberFormatException ex) {
@@ -84,7 +90,7 @@ public class CancelCommand {
 
             }
         }
-        int size = sender.getBlockPlacer().cancelJob(name, id);
+        int size = sender.getBlockPlacer().cancelJob(uuid, id);
         PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");            
     }
 }

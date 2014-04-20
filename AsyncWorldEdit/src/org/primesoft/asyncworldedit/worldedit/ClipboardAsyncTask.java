@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.primesoft.asyncworldedit.ConfigProvider;
@@ -50,13 +51,22 @@ public abstract class ClipboardAsyncTask extends BukkitRunnable {
     /**
      * The player
      */
-    private final String m_player;
+    private final UUID m_player;
     private final BlockPlacer m_blockPlacer;
     private final BlockPlacerJobEntry m_job;
     private final AsyncEditSession m_editSession;
 
+    /**
+     *
+     * @param clipboard
+     * @param editSession
+     * @param player
+     * @param commandName
+     * @param blocksPlacer
+     * @param job
+     */
     public ClipboardAsyncTask(final CuboidClipboard clipboard, final EditSession editSession,
-            final String player, final String commandName, BlockPlacer blocksPlacer,
+            final UUID player, final String commandName, BlockPlacer blocksPlacer,
             BlockPlacerJobEntry job) {
         m_clipboard = clipboard;
         m_player = player;

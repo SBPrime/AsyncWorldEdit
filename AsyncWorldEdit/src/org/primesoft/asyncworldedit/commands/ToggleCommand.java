@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.*;
@@ -52,7 +53,7 @@ public class ToggleCommand {
                 return;
             }
 
-            wrapper = manager.getPlayer(player.getName());
+            wrapper = manager.getPlayer(player.getUniqueId());
             if (wrapper == null) {
                 return;
             }
@@ -66,7 +67,12 @@ public class ToggleCommand {
                 }
 
                 String name = arg.substring(2);
-                wrapper = manager.getPlayer(name);
+                UUID uuid = sender.getPlayerManager().getPlayerUUID(name);
+                if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
+                    PluginMain.say(player, ChatColor.RED + "Player not found.");
+                    return;
+                }
+                wrapper = manager.getPlayer(uuid);
                 if (wrapper == null) {
                     PluginMain.say(player, ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
                     return;
@@ -102,7 +108,7 @@ public class ToggleCommand {
                     Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
                     return;
                 }
-                wrapper = manager.getPlayer(player.getName());
+                wrapper = manager.getPlayer(player.getUniqueId());
             }
         }
 

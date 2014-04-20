@@ -24,6 +24,7 @@
 package org.primesoft.asyncworldedit;
 
 import java.util.HashMap;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 
 /**
@@ -33,13 +34,14 @@ import org.bukkit.entity.Player;
 public class PlayerManager {
 
     private final PluginMain m_parrent;
+
     /**
      * List of know players
      */
-    private final HashMap<String, PlayerWrapper> m_players;
+    private final HashMap<UUID, PlayerWrapper> m_playersUids;
 
     public PlayerManager(PluginMain parent) {
-        m_players = new HashMap<String, PlayerWrapper>();
+        m_playersUids = new HashMap<UUID, PlayerWrapper>();
         m_parrent = parent;
     }
 
@@ -48,16 +50,17 @@ public class PlayerManager {
             return null;
         }
 
+        UUID uuid = player.getUniqueId();
         String pName = player.getName();
-        synchronized (m_players) {
-            PlayerWrapper wrapper = m_players.get(pName);
+        synchronized (m_playersUids) {
+            PlayerWrapper wrapper = m_playersUids.get(uuid);
 
             if (wrapper != null) {
                 return wrapper;
             }
 
             wrapper = new PlayerWrapper(player, pName, getDefaultMode(player));
-            m_players.put(pName, wrapper);
+            m_playersUids.put(uuid, wrapper);
             return wrapper;
         }
     }
@@ -67,30 +70,30 @@ public class PlayerManager {
             return;
         }
 
-        String playerName = player.getName();
-        synchronized (m_players) {
-            m_players.remove(playerName);
+        UUID uuid = player.getUniqueId();
+        synchronized (m_playersUids) {
+            m_playersUids.remove(uuid);
         }
 
-        if (ConfigProvider.cleanOnLogoutEnabled() && 
-                !PermissionManager.isAllowed(player, PermissionManager.Perms.IgnoreCleanup)) {
-            m_parrent.getBlockPlacer().purge(playerName);
+        if (ConfigProvider.cleanOnLogoutEnabled()
+                && !PermissionManager.isAllowed(player, PermissionManager.Perms.IgnoreCleanup)) {
+            m_parrent.getBlockPlacer().purge(uuid);
         }
     }
 
     /**
-     * Get player wrapper
+     * Get the player wrapper based on UUID
      *
      * @param player
-     * @return t
+     * @return
      */
-    public PlayerWrapper getPlayer(String player) {
+    public PlayerWrapper getPlayer(UUID player) {
         if (player == null) {
             return null;
         }
 
-        synchronized (m_players) {
-            PlayerWrapper result = m_players.get(player);
+        synchronized (m_playersUids) {
+            PlayerWrapper result = m_playersUids.get(player);
             if (result == null) {
                 Player cbPlayer = m_parrent.getPlayer(player);
                 if (cbPlayer == null) {
@@ -127,7 +130,7 @@ public class PlayerManager {
         boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
         boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
 
-        if (hasOn && hasOff){
+        if (hasOn && hasOff) {
             return ConfigProvider.getDefaultMode();
         } else if (hasOn) {
             return true;
@@ -141,7 +144,7 @@ public class PlayerManager {
     /**
      * PLayer has async mode enabled
      */
-    public boolean hasAsyncMode(String player) {
+    public boolean hasAsyncMode(UUID player) {
         PlayerWrapper wrapper = getPlayer(player);
 
         if (wrapper == null) {
@@ -157,7 +160,7 @@ public class PlayerManager {
      * @param player
      * @param mode
      */
-    public void setMode(String player, boolean mode) {
+    public void setMode(UUID player, boolean mode) {
         PlayerWrapper wrapper = getPlayer(player);
 
         if (wrapper == null) {
@@ -171,6 +174,28 @@ public class PlayerManager {
         Player[] players = m_parrent.getServer().getOnlinePlayers();
         for (Player player : players) {
             addPlayer(player);
+        }
+    }
+
+    
+    /**
+     * Gets player UUID from player name
+     * @param playerName
+     * @return 
+     */
+    public UUID getPlayerUUID(String playerName) {
+        synchronized (m_playersUids) {
+            for (PlayerWrapper p : m_playersUids.values()) {
+                if (p.getName().equalsIgnoreCase(playerName)) {
+                    return p.getUUID();
+                }
+            }
+        }
+
+        try {
+            return UUID.fromString(playerName);
+        } catch (IllegalArgumentException ex) {
+            return ConfigProvider.DEFAULT_USER;
         }
     }
 }

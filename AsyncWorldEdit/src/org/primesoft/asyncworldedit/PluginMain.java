@@ -25,9 +25,11 @@ package org.primesoft.asyncworldedit;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -99,8 +101,8 @@ public class PluginMain extends JavaPlugin {
         s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
     }
 
-    public static void say(String player, String msg) {
-        say(getPlayer(player), msg);
+    public static void say(UUID uuid, String msg) {
+        say(getPlayer(uuid), msg);
     }
 
     /**
@@ -109,11 +111,21 @@ public class PluginMain extends JavaPlugin {
      * @param player
      * @return
      */
-    public static Player getPlayer(String player) {
+    public static Player getPlayer(UUID uuid) {
         if (s_instance == null) {
             return null;
         }
-        return s_instance.getServer().getPlayer(player);
+        
+        Server server = s_instance.getServer();
+        Player[] allPlayers = server.getOnlinePlayers();
+        for (Player p : allPlayers) {
+            if (p.isOnline() && 
+                p.getUniqueId().equals(uuid)) {
+                return p;
+            }
+        }
+        
+        return null;        
     }
 
     public static void say(Player player, String msg) {

@@ -27,6 +27,8 @@ import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerManager;
 import org.primesoft.asyncworldedit.PluginMain;
 
 /**
@@ -40,8 +42,15 @@ public class SpyHashMap extends HashMap<String, LocalSession> {
      * World edit configuration
      */
     private final LocalConfiguration m_weLocalConfiguration;
+    
+    /**
+     * The player manager
+     */
+    private final PlayerManager m_playerManager;
 
-    public SpyHashMap(LocalConfiguration configuration) {
+    public SpyHashMap(LocalConfiguration configuration,
+            PlayerManager playerManager) {
+        m_playerManager = playerManager;
         m_weLocalConfiguration = configuration;
     }
 
@@ -95,7 +104,8 @@ public class SpyHashMap extends HashMap<String, LocalSession> {
      * @return
      */
     private LocalSession createAndAdd(String key, LocalSession parent) {
-        LocalSessionWrapper result = new LocalSessionWrapper(key, m_weLocalConfiguration, parent);
+        UUID uuid = m_playerManager.getPlayerUUID(key);
+        LocalSessionWrapper result = new LocalSessionWrapper(uuid, m_weLocalConfiguration, parent);
         return super.put(key, result);
     }
 

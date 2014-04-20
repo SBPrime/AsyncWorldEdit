@@ -25,6 +25,7 @@ package org.primesoft.asyncworldedit.blockPlacer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
@@ -63,7 +64,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     /**
      * The player name
      */
-    private String m_player;
+    private final UUID m_player;
 
     /**
      * Is the async task done
@@ -80,7 +81,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         return false;
     }
 
-    public BlockPlacerJobEntry(String player, int jobId, String name) {
+    public BlockPlacerJobEntry(UUID player, int jobId, String name) {
         super(null, jobId);
         m_player = player;
         m_name = name;
@@ -89,7 +90,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
 
-    public BlockPlacerJobEntry(String player,
+    public BlockPlacerJobEntry(UUID player,
             CancelabeEditSession cEditSession,
             int jobId, String name) {
         super(null, jobId);
@@ -232,7 +233,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
 
     @Override
     public void Process(BlockPlacer bp) {
-        final String player = m_player;
+        final UUID player = m_player;
 
         switch (m_status) {
             case Done:

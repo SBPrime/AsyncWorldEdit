@@ -27,6 +27,7 @@ import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.Vector;
 import java.lang.reflect.Field;
+import java.util.UUID;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntityEntry;
@@ -50,7 +51,7 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
     /**
      * Player
      */
-    private final String m_player;
+    private final UUID m_player;
 
     /**
      * Inject entities to CuboidClipboard
@@ -78,7 +79,7 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
      * Get entities from CuboidClipboard
      *
      * @param cc
-     * @param value
+     * @return 
      */
     public static Object getEntities(CuboidClipboard cc) {
         try {
@@ -98,11 +99,11 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
         return null;
     }
     
-    public CuboidClipboardWrapper(String player, CuboidClipboard parrent) {
+    public CuboidClipboardWrapper(UUID player, CuboidClipboard parrent) {
         this(player, parrent, -1);
     }
 
-    public CuboidClipboardWrapper(String player, CuboidClipboard parrent, int jobId) {
+    public CuboidClipboardWrapper(UUID player, CuboidClipboard parrent, int jobId) {
         super(parrent);
 
         m_jobId = jobId;

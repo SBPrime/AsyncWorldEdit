@@ -39,6 +39,7 @@ import com.sk89q.worldedit.util.TreeGenerator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.World;
@@ -63,7 +64,7 @@ public class AsyncEditSession extends EditSession {
     /**
      * Player
      */
-    private final String m_player;
+    private final UUID m_player;
 
     /**
      * Player wraper
@@ -132,12 +133,12 @@ public class AsyncEditSession extends EditSession {
     private Mask m_mask;
     private Mask m_asyncMask;
 
-    public String getPlayer() {
+    public UUID getPlayer() {
         return m_player;
     }
 
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
-            String player, LocalWorld world, int maxBlocks) {
+            UUID player, LocalWorld world, int maxBlocks) {
         super(world, maxBlocks);
         m_jobId = -1;
         m_asyncTasks = new HashSet<BlockPlacerJobEntry>();
@@ -158,7 +159,7 @@ public class AsyncEditSession extends EditSession {
     }
 
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
-            String player, LocalWorld world, int maxBlocks,
+            UUID player, LocalWorld world, int maxBlocks,
             BlockBag blockBag) {
         super(world, maxBlocks, blockBag);
         m_jobId = -1;
@@ -1533,7 +1534,7 @@ public class AsyncEditSession extends EditSession {
     }
 
     public boolean doRawSetBlock(Vector location, BaseBlock block) {
-        String player = getPlayer();
+        UUID player = getPlayer();
         World w = getCBWorld();
         BaseBlock oldBlock = getBlock(location);
 

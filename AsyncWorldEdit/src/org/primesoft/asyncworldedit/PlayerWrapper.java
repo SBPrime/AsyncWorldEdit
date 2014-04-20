@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import java.util.UUID;
 import org.bukkit.entity.Player;
 
 /**
@@ -33,10 +34,12 @@ public class PlayerWrapper {
 
     private final Player m_player;
     private final String m_name;
-    private boolean m_mode;
+    private final UUID m_uuid;
+    private boolean m_mode;    
 
     public PlayerWrapper(Player player, String name, boolean mode) {
         m_player = player;
+        m_uuid = player.getUniqueId();
         m_name = name;
         m_mode = mode;
     }
@@ -45,6 +48,10 @@ public class PlayerWrapper {
         return m_player;
     }
 
+    public UUID getUUID() {
+        return m_uuid;
+    }
+    
     public String getName() {
         return m_name;
     }
