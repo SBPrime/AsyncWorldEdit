@@ -27,7 +27,7 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalWorld;
-import com.sk89q.worldedit.bags.BlockBag;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;

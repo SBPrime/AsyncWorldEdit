@@ -33,12 +33,12 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.WorldEditPermissionException;
 import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.WorldVectorFace;
-import com.sk89q.worldedit.bags.BlockBag;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.cui.CUIEvent;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.internal.cui.CUIEvent;
 import java.io.File;
 import java.util.UUID;
 import org.bukkit.entity.Player;
@@ -111,12 +111,7 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
     @Override
     public void dispatchCUIEvent(CUIEvent event) {
         m_parent.dispatchCUIEvent(event); 
-    }
-
-    @Override
-    public void dispatchCUIHandshake() {
-        m_parent.dispatchCUIHandshake(); 
-    }
+    }    
 
     @Override
     public void findFreePosition() {
@@ -174,11 +169,6 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
     }
 
     @Override
-    public BlockBag getInventoryBlockBag() {
-        return m_parent.getInventoryBlockBag(); 
-    }
-
-    @Override
     public int getItemInHand() {
         return m_parent.getItemInHand(); 
     }
@@ -202,11 +192,7 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
     public WorldVector getPosition() {
         return m_parent.getPosition(); 
     }
-
-    public ServerInterface getServer() {
-        return server;
-    }
-
+    
     @Override
     public WorldVector getSolidBlockTrace(int range) {
         return m_parent.getSolidBlockTrace(range); 
@@ -306,16 +292,17 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
     public void setPosition(Vector pos, float pitch, float yaw) {
         m_parent.setPosition(pos, pitch, yaw); 
     }
-
-    public void setServer(ServerInterface server) {
-        this.server = server;
-    }
-
+    
     @Override
     public BaseBlock getBlockInHand()
             throws WorldEditException {
         return m_parent.getBlockInHand();
     }
+
+    @Override
+    public BlockBag getInventoryBlockBag() {
+        return m_parent.getInventoryBlockBag();
+    }       
    
     @Override
     public String toString() {

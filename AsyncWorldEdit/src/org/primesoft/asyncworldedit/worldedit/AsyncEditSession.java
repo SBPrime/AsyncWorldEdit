@@ -28,9 +28,9 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.bags.BlockBag;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.expression.ExpressionException;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.internal.expression.ExpressionException;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
@@ -934,9 +934,9 @@ public class AsyncEditSession extends EditSession {
         return 0;
     }
 
-    @Override
+    @Override    
     public int moveRegion(final Region region, final Vector dir, final int distance,
-            final boolean copyAir, final BaseBlock replace) throws MaxChangedBlocksException, RegionOperationException {
+            final boolean copyAir, final BaseBlock replace) throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.moveCuboidRegion);
         if (!isAsync) {
             return super.moveRegion(region, dir, distance, copyAir, replace);
@@ -951,11 +951,7 @@ public class AsyncEditSession extends EditSession {
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
-                        try {
-                            return session.moveRegion(region, dir, distance, copyAir, replace);
-                        } catch (RegionOperationException ex) {
-                            return 0;
-                        }
+                        return session.moveRegion(region, dir, distance, copyAir, replace);
                     }
                 });
         return 0;

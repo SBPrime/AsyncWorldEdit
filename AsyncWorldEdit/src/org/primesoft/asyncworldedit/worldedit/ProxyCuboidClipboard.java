@@ -27,6 +27,7 @@ import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Countable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -83,7 +84,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
         }
         updateProps();
     }
-
+    
     @Override
     public List<Countable<Integer>> getBlockDistribution() {
         synchronized (m_parrent) {
@@ -149,6 +150,16 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
     }
 
     @Override
+    public void paste(EditSession editSession, Vector newOrigin, boolean noAir, boolean entities) throws MaxChangedBlocksException {
+        super.paste(editSession, newOrigin, noAir, entities); 
+        //No change needed this calls:
+        //public void paste(EditSession editSession, Vector newOrigin, boolean noAir)
+        //public LocalEntity[] pasteEntities(Vector pos)
+    }
+    
+    
+
+    @Override
     public void paste(EditSession editSession, Vector newOrigin, boolean noAir)
             throws MaxChangedBlocksException {
         synchronized (m_parrent) {
@@ -182,8 +193,8 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
     }
 
     @Override
-    public void saveSchematic(File path)
-            throws IOException, DataException {
+    public void saveSchematic(File path) 
+            throws IOException, DataException, com.sk89q.worldedit.world.DataException {
         synchronized (m_parrent) {
             m_parrent.saveSchematic(path);
         }
@@ -242,6 +253,7 @@ public class ProxyCuboidClipboard extends CuboidClipboard {
             PluginMain.log("Unable to set clipboard size: security exception.");
         }
     }
+        
     
     
     /** 

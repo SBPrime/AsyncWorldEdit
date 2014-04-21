@@ -24,11 +24,13 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
-import com.sk89q.worldedit.bags.BlockBag;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Countable;
+import com.sk89q.worldedit.world.World;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +47,7 @@ public class CancelabeEditSession extends EditSession {
     }
     private final AsyncEditSession m_parent;
     private boolean m_isCanceled;
-    private int m_jobId;
+    private final int m_jobId;
     private Mask m_mask;
 
     public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
@@ -146,7 +148,7 @@ public class CancelabeEditSession extends EditSession {
     }
 
     @Override
-    public LocalWorld getWorld() {
+    public World getWorld() {
         return m_parent.getWorld();
     }
 
