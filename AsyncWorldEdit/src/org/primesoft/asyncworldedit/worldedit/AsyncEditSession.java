@@ -25,10 +25,12 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.BiomeType;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.EditSessionStub;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.internal.expression.ExpressionException;
 import com.sk89q.worldedit.masks.Mask;
@@ -36,12 +38,15 @@ import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldedit.util.TreeGenerator;
+import com.sk89q.worldedit.util.eventbus.EventBus;
+import java.awt.font.TextAttribute;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
@@ -49,12 +54,13 @@ import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.*;
+import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncEditSession extends EditSession {
+public class AsyncEditSession extends EditSessionStub {
 
     /**
      * Maximum queued blocks
@@ -128,6 +134,13 @@ public class AsyncEditSession extends EditSession {
     private int m_blocksQueued;
 
     /**
+     * The event bus
+     */
+    private final EventBus m_eventBus;
+
+    private final EditSessionEvent m_editSessionEvent;
+
+    /**
      * Edit session mask
      */
     private Mask m_mask;
@@ -137,31 +150,23 @@ public class AsyncEditSession extends EditSession {
         return m_player;
     }
 
-    public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
-            UUID player, LocalWorld world, int maxBlocks) {
-        super(world, maxBlocks);
-        m_jobId = -1;
-        m_asyncTasks = new HashSet<BlockPlacerJobEntry>();
-        m_plugin = plugin;
-        m_bh = plugin.getBlocksHub();
-        m_factory = factory;
-        m_player = player;
-        m_blockPlacer = plugin.getBlockPlacer();
-        m_schedule = plugin.getServer().getScheduler();
-        if (world != null) {
-            m_world = plugin.getServer().getWorld(world.getName());
-        } else {
-            m_world = null;
-        }
-        m_asyncForced = false;
-        m_asyncDisabled = false;
-        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
+    public EventBus getEventBus() {
+        return m_eventBus;
+    }
+
+    public EditSessionEvent getEditSessionEvent() {
+        return m_editSessionEvent;
     }
 
     public AsyncEditSession(AsyncEditSessionFactory factory, PluginMain plugin,
-            UUID player, LocalWorld world, int maxBlocks,
-            BlockBag blockBag) {
-        super(world, maxBlocks, blockBag);
+            UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
+            int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
+
+        super(eventBus, world, maxBlocks, blockBag, event);
+
+        m_editSessionEvent = event;
+        m_eventBus = eventBus;
+
         m_jobId = -1;
         m_asyncTasks = new HashSet<BlockPlacerJobEntry>();
         m_plugin = plugin;
@@ -291,7 +296,7 @@ public class AsyncEditSession extends EditSession {
         m_jobId = -1;
         return r;
     }
-    
+
     public boolean setBlock(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         m_jobId = jobId;
@@ -333,7 +338,7 @@ public class AsyncEditSession extends EditSession {
                 }
                 if (!(job instanceof BlockPlacerUndoJob)) {
                     m_blockPlacer.cancelJob(m_player, id);
-                }                
+                }
             }
             minId--;
             if (minId >= 0 && minId != jobId) {
@@ -652,8 +657,8 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int makeBiomeShape(final Region region, final Vector zero, final Vector unit,
-                              final BiomeType biomeType, final String expressionString,
-                              final boolean hollow)
+            final BiomeType biomeType, final String expressionString,
+            final boolean hollow)
             throws ExpressionException, MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.makeBiomeShape);
         if (!isAsync) {
@@ -672,8 +677,7 @@ public class AsyncEditSession extends EditSession {
                     throws MaxChangedBlocksException {
                         try {
                             return session.makeBiomeShape(region, zero, unit, biomeType, expressionString, hollow);
-                        }
-                        catch (ExpressionException ex) {
+                        } catch (ExpressionException ex) {
                             return 0;
                         }
                     }
@@ -682,8 +686,6 @@ public class AsyncEditSession extends EditSession {
         return 0;
     }
 
-    
-    
     @Override
     public int makeCuboidFaces(final Region region, final BaseBlock block)
             throws MaxChangedBlocksException {
@@ -934,7 +936,7 @@ public class AsyncEditSession extends EditSession {
         return 0;
     }
 
-    @Override    
+    @Override
     public int moveRegion(final Region region, final Vector dir, final int distance,
             final boolean copyAir, final BaseBlock replace) throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.moveCuboidRegion);
@@ -985,7 +987,7 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int drawLine(final Pattern pattern, final Vector pos1, final Vector pos2, final double radius,
-                        final boolean filled)
+            final boolean filled)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.drawLine);
         if (!isAsync) {
@@ -1011,9 +1013,9 @@ public class AsyncEditSession extends EditSession {
 
     @Override
     public int drawSpline(final Pattern pattern,
-                          final List<Vector> nodevectors, final double tension, final double bias,
-                          final double continuity, final double quality, final double radius,
-                          final boolean filled)
+            final List<Vector> nodevectors, final double tension, final double bias,
+            final double continuity, final double quality, final double radius,
+            final boolean filled)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.drawLine);
         if (!isAsync) {
@@ -1036,7 +1038,6 @@ public class AsyncEditSession extends EditSession {
 
         return 0;
     }
-            
 
     @Override
     public int drainArea(final Vector pos, final double radius)
@@ -1299,8 +1300,7 @@ public class AsyncEditSession extends EditSession {
 
         return 0;
     }
-    
-    
+
     @Override
     public int green(final Vector pos, final double radius)
             throws MaxChangedBlocksException {
@@ -1493,8 +1493,6 @@ public class AsyncEditSession extends EditSession {
 
         return 0;
     }
-    
-    
 
     /**
      * Add async job
@@ -1605,7 +1603,6 @@ public class AsyncEditSession extends EditSession {
     private int getJobId() {
         return m_blockPlacer.getJobId(m_player);
     }
-
 
     /**
      * Queue sunced block get operation

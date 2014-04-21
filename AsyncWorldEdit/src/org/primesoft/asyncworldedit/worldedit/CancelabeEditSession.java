@@ -25,23 +25,26 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
+import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 /**
  *
  * @author SBPrime
  */
-public class CancelabeEditSession extends EditSession {
+public class CancelabeEditSession extends EditSessionStub {
 
     public class SessionCanceled extends Exception {
     }
@@ -51,7 +54,8 @@ public class CancelabeEditSession extends EditSession {
     private Mask m_mask;
 
     public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
-        super(parent.getWorld(), parent.getBlockChangeLimit());
+        super(parent.getEventBus(), parent.getWorld(), parent.getBlockChangeLimit(), 
+            parent.getBlockBag(), parent.getEditSessionEvent());
 
         m_jobId = jobId;
         m_parent = parent;
@@ -237,10 +241,6 @@ public class CancelabeEditSession extends EditSession {
     @Override
     public void setMask(Mask mask) {
         m_mask = mask;
-    }
-
-    public void setWorld(LocalWorld world) {
-        this.world = world;
     }
 
     @Override
