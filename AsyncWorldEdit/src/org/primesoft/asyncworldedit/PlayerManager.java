@@ -76,7 +76,7 @@ public class PlayerManager {
         }
 
         if (ConfigProvider.cleanOnLogoutEnabled()
-                && !PermissionManager.isAllowed(player, Permission.Ignore_Cleanup)) {
+                && !PermissionManager.isAllowed(player, Permission.IGNORE_CLEANUP)) {
             m_parrent.getBlockPlacer().purge(uuid);
         }
     }
@@ -115,7 +115,7 @@ public class PlayerManager {
             return 0;
         }
 
-        boolean isVip = PermissionManager.isAllowed(player, Permission.Queue_Vip);
+        boolean isVip = PermissionManager.isAllowed(player, Permission.QUEUE_VIP);
         return ConfigProvider.getBlockCount() + (isVip ? ConfigProvider.getVipBlockCount() : 0);
     }
 
@@ -127,8 +127,8 @@ public class PlayerManager {
             return false;
         }
 
-        boolean hasOn = PermissionManager.isAllowed(player, Permission.Mode_On);
-        boolean hasOff = PermissionManager.isAllowed(player, Permission.Mode_Off);
+        boolean hasOn = PermissionManager.isAllowed(player, Permission.MODE_ON);
+        boolean hasOff = PermissionManager.isAllowed(player, Permission.MODE_OFF);
 
         if (hasOn && hasOff) {
             return ConfigProvider.getDefaultMode();

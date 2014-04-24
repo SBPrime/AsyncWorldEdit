@@ -54,7 +54,7 @@ public class CancelCommand {
                 PluginMain.say(player, ChatColor.RED + "Command available ingame.");
                 return;
             }
-            if (!PermissionManager.isAllowed(player, Permission.Cancel_Self)) {
+            if (!PermissionManager.isAllowed(player, Permission.CANCEL_SELF)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
@@ -69,7 +69,7 @@ public class CancelCommand {
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
-                if (!PermissionManager.isAllowed(player, Permission.Cancel_Other)) {
+                if (!PermissionManager.isAllowed(player, Permission.CANCEL_OTHER)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }

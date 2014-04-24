@@ -240,7 +240,7 @@ public class PluginMain extends JavaPlugin {
 
     private void doReloadConfig(Player player) {
         if (player != null) {
-            if (!PermissionManager.isAllowed(player, Permission.Reload_Config)) {
+            if (!PermissionManager.isAllowed(player, Permission.RELOAD_CONFIG)) {
                 say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }

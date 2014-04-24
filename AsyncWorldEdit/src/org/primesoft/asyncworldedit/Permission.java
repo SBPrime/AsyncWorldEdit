@@ -10,97 +10,97 @@ public enum Permission {
     /**
      * Allows the use of the Reload command
      */
-    Reload_Config("admin.version"),
+    RELOAD_CONFIG("admin.version"),
 
     /**
      * Informs the user on login if the plugin is updated or not
      */
-    Announce_Version("admin.reload"),
+    ANNOUNCE_VERSION("admin.reload"),
 
     /**
      * Bypass the maximum queue limit
      */
-    Queue_Bypass("admin.queue-bypass"),
+    QUEUE_BYPASS("admin.queue-bypass"),
 
     /**
      * Allows the use of the VIP block queue
      */
-    Queue_Vip("user.vip-queue"),
+    QUEUE_VIP("user.vip-queue"),
 
     /**
      * Allows the use of the purge command
      */
-    Purge_Self("user.purge"),
+    PURGE_SELF("user.purge"),
 
     /**
      * Allows the use of the Purge command on another user
      */
-    Purge_Other("admin.purge"),
+    PURGE_OTHER("admin.purge"),
 
     /**
      * Allows the use of the Purge command on all users
      */
-    Purge_All("admin.purge.all"),
+    PURGE_ALL("admin.purge.all"),
 
     /**
      * Allows the use of the Jobs command
      */
-    Jobs_Self("user.jobs"),
+    JOBS_SELF("user.jobs"),
 
     /**
      * Allows the use of the Jobs command on another user
      */
-    Jobs_Other("admin.jobs"),
+    JOBS_OTHER("admin.jobs"),
 
     /**
      * Allows the use of the Jobs command on all users
      */
-    Jobs_All("admin.jobs.all"),
+    JOBS_ALL("admin.jobs.all"),
 
     /**
      * Allows the use of the Cancel command
      */
-    Cancel_Self("user.jobs.cancel"),
+    CANCEL_SELF("user.jobs.cancel"),
 
     /**
      * Allows the use of the Cancel command on another user
      */
-    Cancel_Other("admin.jobs.cancel"),
+    CANCEL_OTHER("admin.jobs.cancel"),
 
     /**
      * Allows the user to toggle AWE for himself
      */
-    Mode_Change("user.mode.change"),
+    MODE_CHANGE("user.mode.change"),
 
     /**
      * Sets AWE to ON when user logs in
      */
-    Mode_On("user.mode.on"),
+    MODE_ON("user.mode.on"),
 
     /**
      * Sets AWE to OFF when user logs in
      */
-    Mode_Off("user.mode.off"),
+    MODE_OFF("user.mode.off"),
 
     /**
      * Allows the user to toggle AWE for another user
      */
-    Mode_Change_Other("user.admin.change"),
+    MODE_CHANGE_OTHER("user.admin.change"),
 
     /**
      * Informs the user of his queue status
      */
-    Talkative_Queue("user.talkative"),
+    TALKATIVE_QUEUE("user.talkative"),
 
     /**
      * Informs the user of his queue status through BarAPI
      */
-    Progress_Bar("user.progressBar"),
+    PROGRESS_BAR("user.progressBar"),
 
     /**
      * Allows the user to retain his queue on logout
      */
-    Ignore_Cleanup("admin.noCleanupOnQuit");
+    IGNORE_CLEANUP("admin.noCleanupOnQuit");
 
     /**
      * Plugin permissions top node

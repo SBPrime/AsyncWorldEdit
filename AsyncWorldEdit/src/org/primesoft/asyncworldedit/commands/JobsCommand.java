@@ -54,7 +54,7 @@ public class JobsCommand {
 
         BlockPlacer bPlacer = sender.getBlockPlacer();
         String playerName = null;
-        Permission perm = Permission.Jobs_All;
+        Permission perm = Permission.JOBS_ALL;
         boolean onlyInGame = false;
         boolean all = false;
         int page = -1;
@@ -63,7 +63,7 @@ public class JobsCommand {
         switch (len) {
             case 1: {
                 playerName = player != null ? player.getName() : null;
-                perm = Permission.Jobs_Self;
+                perm = Permission.JOBS_SELF;
                 onlyInGame = true;
                 all = false;
                 page = -1;
@@ -72,20 +72,20 @@ public class JobsCommand {
             case 2: {
                 if (args[1].startsWith("u:")) {
                     playerName = args[1].substring(2);
-                    perm = Permission.Jobs_Other;
+                    perm = Permission.JOBS_OTHER;
                     onlyInGame = false;
                     all = false;
                     page = -1;
                 } else if (args[1].equalsIgnoreCase("all")) {
                     playerName = null;
-                    perm = Permission.Jobs_All;
+                    perm = Permission.JOBS_ALL;
                     onlyInGame = false;
                     all = true;
                     page = -1;
                 } else {
                     try {
                         playerName = player != null ? player.getName() : null;
-                        perm = Permission.Jobs_Self;
+                        perm = Permission.JOBS_SELF;
                         onlyInGame = true;
                         page = Integer.parseInt(args[1]);
                     } catch (NumberFormatException ex) {
@@ -98,12 +98,12 @@ public class JobsCommand {
             case 3: {
                 if (args[1].startsWith("u:")) {
                     playerName = args[1].substring(2);
-                    perm = Permission.Jobs_Other;
+                    perm = Permission.JOBS_OTHER;
                     onlyInGame = false;
                     all = false;
                 } else if (args[1].equalsIgnoreCase("all")) {
                     playerName = null;
-                    perm = Permission.Jobs_All;
+                    perm = Permission.JOBS_ALL;
                     onlyInGame = false;
                     all = true;
                 } else {
@@ -139,10 +139,10 @@ public class JobsCommand {
             UUID playerUuid = pm.getPlayerUUID(playerName);
             
             switch (perm) {
-                case Jobs_Self:
+                case JOBS_SELF:
                     lines.add(ChatColor.YELLOW + "You have " + bPlacer.getPlayerMessage(playerUuid));
                     break;
-                case Jobs_Other:
+                case JOBS_OTHER:
                     lines.add(ChatColor.YELLOW + "Player " + ChatColor.WHITE
                             + playerName + ChatColor.YELLOW + " has " + bPlacer.getPlayerMessage(playerUuid));
                     break;

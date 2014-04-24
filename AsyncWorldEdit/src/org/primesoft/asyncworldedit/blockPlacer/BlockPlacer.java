@@ -297,18 +297,18 @@ public class BlockPlacer implements Runnable {
                 entry.updateSpeed(cnt != null ? cnt : 0, timeDelte);
 
                 final Player p = PluginMain.getPlayer(playerUuid);
-                boolean bypass = PermissionManager.isAllowed(p, Permission.Queue_Bypass);
+                boolean bypass = PermissionManager.isAllowed(p, Permission.QUEUE_BYPASS);
                 if (entry.getQueue().isEmpty()) {
-                    if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
+                    if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                         m_barAPI.disableMessage(p);
                     }
                 } else {
-                    if (talk && PermissionManager.isAllowed(p, Permission.Talkative_Queue)) {
+                    if (talk && PermissionManager.isAllowed(p, Permission.TALKATIVE_QUEUE)) {
                         PluginMain.say(p, ChatColor.YELLOW + "[AWE] You have "
                                 + getPlayerMessage(entry, bypass));
                     }
 
-                    if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
+                    if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                         setBar(p, entry, bypass);
                     }
                 }
@@ -393,7 +393,7 @@ public class BlockPlacer implements Runnable {
                 if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
                     Player p = PluginMain.getPlayer(player);
-                    if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
+                    if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                         m_barAPI.disableMessage(p);
                     }
                 }
@@ -506,7 +506,7 @@ public class BlockPlacer implements Runnable {
                 return false;
             }
 
-            boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), Permission.Queue_Bypass);
+            boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), Permission.QUEUE_BYPASS);
             int size = 0;
             for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
                 size += queueEntry.getValue().getQueue().size();
@@ -659,7 +659,7 @@ public class BlockPlacer implements Runnable {
             } else {
                 m_blocks.remove(player);
                 Player p = PluginMain.getPlayer(player);
-                if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
+                if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                     m_barAPI.disableMessage(p);
                 }
             }
@@ -710,7 +710,7 @@ public class BlockPlacer implements Runnable {
                 result = queue.size();
                 m_blocks.remove(player);
                 Player p = PluginMain.getPlayer(player);
-                if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
+                if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                     m_barAPI.disableMessage(p);
                 }
             }
@@ -778,7 +778,7 @@ public class BlockPlacer implements Runnable {
         }
 
         boolean bypass = PermissionManager.isAllowed(PluginMain.getPlayer(player), 
-                Permission.Queue_Bypass);
+                Permission.QUEUE_BYPASS);
         return getPlayerMessage(entry, bypass);
     }
 
@@ -838,7 +838,7 @@ public class BlockPlacer implements Runnable {
                 continue;
             }
 
-            if (PermissionManager.isAllowed(player, Permission.Queue_Vip)
+            if (PermissionManager.isAllowed(player, Permission.QUEUE_VIP)
                     && !result.contains(uuid)) {
                 result.add(uuid);
             }

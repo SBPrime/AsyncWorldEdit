@@ -49,7 +49,7 @@ public class PurgeCommand {
                 PluginMain.say(player, ChatColor.RED + "Command available ingame.");
                 return;
             }
-            if (!PermissionManager.isAllowed(player, Permission.Purge_Self)) {
+            if (!PermissionManager.isAllowed(player, Permission.PURGE_SELF)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
@@ -59,7 +59,7 @@ public class PurgeCommand {
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
-                if (!PermissionManager.isAllowed(player, Permission.Purge_Other)) {
+                if (!PermissionManager.isAllowed(player, Permission.PURGE_OTHER)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
@@ -77,7 +77,7 @@ public class PurgeCommand {
                     return;
                 }
 
-                if (!PermissionManager.isAllowed(player, Permission.Purge_All)) {
+                if (!PermissionManager.isAllowed(player, Permission.PURGE_ALL)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }

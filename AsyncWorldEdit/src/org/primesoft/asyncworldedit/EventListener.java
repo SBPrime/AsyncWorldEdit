@@ -54,7 +54,7 @@ public class EventListener implements Listener {
 
         m_parent.getPlayerManager().addPlayer(player);
 
-        if (!PermissionManager.isAllowed(player, Permission.Announce_Version)) {
+        if (!PermissionManager.isAllowed(player, Permission.ANNOUNCE_VERSION)) {
             return;
         }
 
