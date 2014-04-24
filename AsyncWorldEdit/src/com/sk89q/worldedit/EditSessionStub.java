@@ -21,21 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package com.sk89q.worldedit;
 
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /**
  * Stub class to allow access to package visible constructor
+ *
  * @author SBPrime
  */
 public class EditSessionStub extends EditSession {
-    public EditSessionStub(EventBus eventBus, World world, int maxBlocks, 
+
+    static {
+        Class<?> c = EditSession.class;
+        for (Constructor ctor : c.getDeclaredConstructors()) {
+            if (!ctor.isAccessible()) {
+                ctor.setAccessible(true);
+            }
+            /*
+            try {
+                Field modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);                
+                modifiersField.setInt(ctor, Modifier.PUBLIC);
+                
+            } catch (NoSuchFieldException ex) {
+                Logger.getLogger(EditSessionStub.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SecurityException ex) {
+                Logger.getLogger(EditSessionStub.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(EditSessionStub.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(EditSessionStub.class.getName()).log(Level.SEVERE, null, ex);
+            } 
+            */
+        }
+    }
+
+    public EditSessionStub(EventBus eventBus, World world, int maxBlocks,
             @Nullable BlockBag blockBag, EditSessionEvent event) {
         super(eventBus, world, maxBlocks, blockBag, event);
     }

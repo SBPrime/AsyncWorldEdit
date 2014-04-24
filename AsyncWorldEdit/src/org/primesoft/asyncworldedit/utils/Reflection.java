@@ -95,17 +95,19 @@ public class Reflection {
             String message) {
         try {
             Field field = sourceClass.getDeclaredField(fieldName);
-            field.setAccessible(true);
+            boolean accessible = field.isAccessible();
+            
+            //field.setAccessible(true);
             Field modifiersField = Field.class.getDeclaredField("modifiers");
-
-            boolean accessible = modifiersField.isAccessible();
+            
             int modifiers = modifiersField.getModifiers();
             boolean isFinal = (modifiers & Modifier.FINAL) == Modifier.FINAL;
 
             if (!accessible) {
-                modifiersField.setAccessible(true);
+                field.setAccessible(true);
             }
             if (isFinal) {
+                modifiersField.setAccessible(true);
                 modifiersField.setInt(field, modifiers & ~Modifier.FINAL);
             }
             try {
@@ -115,7 +117,7 @@ public class Reflection {
                     modifiersField.setInt(field, modifiers | Modifier.FINAL);
                 }
                 if (!accessible) {
-                    modifiersField.setAccessible(false);
+                    field.setAccessible(false);
                 }
             }
         } catch (IllegalArgumentException ex) {

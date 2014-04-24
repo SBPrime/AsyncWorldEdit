@@ -37,7 +37,7 @@ public class SessionManagerWrapper extends SessionManager {
     public SessionManagerWrapper(WorldEdit worldEdit, PlayerManager playerManager) {
         super(worldEdit);
         
-        Reflection.set(WorldEdit.class, this, "sessions", 
+        Reflection.set(SessionManager.class, this, "sessions", 
                 new SpyHashMap(worldEdit.getConfiguration(), playerManager), 
                 "Unable to inject LocalSession factory");
     }

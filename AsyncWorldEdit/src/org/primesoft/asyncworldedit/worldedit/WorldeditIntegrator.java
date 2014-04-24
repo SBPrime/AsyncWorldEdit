@@ -35,8 +35,12 @@ import com.sk89q.worldedit.extension.platform.PlatformManager;
 import com.sk89q.worldedit.extension.platform.PlatformRejectionException;
 import com.sk89q.worldedit.session.SessionManager;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.utils.Reflection;
 
@@ -109,6 +113,14 @@ public class WorldeditIntegrator {
                 "commands", "Unable to store old commands");
         Reflection.set(m_commandManager, "commands", getCommandWrapper(), 
                 "Unable to inject new commands manager");
+        
+        for (Platform p : m_oldPlatforms) {
+            try {
+                m_platformManager.register(p);
+            } catch (PlatformRejectionException ex) {
+                Logger.getLogger(WorldeditIntegrator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     /**
@@ -137,10 +149,14 @@ public class WorldeditIntegrator {
     private CommandsManager<LocalPlayer> getCommandWrapper() {
         try {
             Class<?> innerClass = Class.forName("com.sk89q.worldedit.extension.platform.CommandManager$CommandsManagerImpl");
-            Constructor<?> ctor = innerClass.getConstructor(m_commandManager.getClass());
+            Constructor<?> ctor = innerClass.getDeclaredConstructor(CommandManager.class);
+            
+            ctor.setAccessible(true);
+            
             CommandsManager<LocalPlayer> parent = (CommandsManager<LocalPlayer>)ctor.newInstance(m_commandManager);
             parent.setInjector(new SimpleInjector(m_worldEdit));
             
+            ctor.setAccessible(false);
             return new CommandsWrapper(m_worldEdit, m_worldEditPlugin, parent);
         } catch (ClassNotFoundException ex) {
             PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
