@@ -25,14 +25,11 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.minecraft.util.commands.SimpleInjector;
 import com.sk89q.worldedit.EditSessionFactory;
-import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
