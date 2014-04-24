@@ -4,3 +4,8 @@
 /AsyncWorldEdit/lib/
 /AsyncWorldEdit/test/
 
+# Idea
+*.iml
+*.ipr
+*.iws
+.idea/
