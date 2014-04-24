@@ -271,6 +271,15 @@ public class AsyncEditSession extends EditSessionStub {
     }
 
     @Override
+    public Mask getMask() {
+        if (m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled)) {
+            return m_asyncMask;
+        } else {
+            return super.getMask();
+        }
+    }
+
+    @Override
     public void setMask(Mask mask) {
         if (m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled)) {
             m_blockPlacer.addTasks(m_player, new BlockPlacerMaskEntry(this, m_jobId, mask));
@@ -491,12 +500,12 @@ public class AsyncEditSession extends EditSessionStub {
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "removeAbove",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        return session.removeAbove(pos, size, height);
-                    }
-                });
+                return session.removeAbove(pos, size, height);
+            }
+        });
 
         return 0;
     }
