@@ -1,4 +1,4 @@
-package org.primesoft.asyncworldedit.worldedit;
+package org.primesoft.asyncworldedit;
 
 import org.bukkit.entity.Player;
 

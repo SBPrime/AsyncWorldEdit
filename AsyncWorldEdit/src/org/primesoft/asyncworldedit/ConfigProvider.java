@@ -53,7 +53,7 @@ public class ConfigProvider {
     private static boolean m_defaultMode = true;
 
     private static boolean m_checkUpdate = false;
-    
+
     private static boolean m_allowMetrics = false;
 
     private static boolean m_isConfigUpdate = false;
@@ -116,10 +116,10 @@ public class ConfigProvider {
     public static boolean getCheckUpdate() {
         return m_checkUpdate;
     }
-    
+
     /**
      * Is Metrics enabled
-     * 
+     *
      * @return true if enabled
      */
     public static boolean getAllowMetrics() {
@@ -271,7 +271,6 @@ public class ConfigProvider {
 
         m_configVersion = mainSection.getString("version", "?");
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
-        m_allowMetrics = mainSection.getBoolean("allowMetrics", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_isTalkative = mainSection.getBoolean("talkative", true);
         m_defaultMode = mainSection.getBoolean("defaultOn", true);

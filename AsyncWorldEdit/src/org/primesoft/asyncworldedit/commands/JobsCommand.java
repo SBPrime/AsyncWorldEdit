@@ -34,8 +34,8 @@ import org.primesoft.asyncworldedit.PlayerManager;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.PlayerEntry;
-import org.primesoft.asyncworldedit.worldedit.Permission;
-import org.primesoft.asyncworldedit.worldedit.PermissionManager;
+import org.primesoft.asyncworldedit.Permission;
+import org.primesoft.asyncworldedit.PermissionManager;
 
 /**
  *

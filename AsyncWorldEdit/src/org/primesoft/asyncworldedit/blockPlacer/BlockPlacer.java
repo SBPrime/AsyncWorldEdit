@@ -33,8 +33,8 @@ import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.PluginMain;
-import org.primesoft.asyncworldedit.worldedit.Permission;
-import org.primesoft.asyncworldedit.worldedit.PermissionManager;
+import org.primesoft.asyncworldedit.Permission;
+import org.primesoft.asyncworldedit.PermissionManager;
 
 /**
  *

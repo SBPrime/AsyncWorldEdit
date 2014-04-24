@@ -41,8 +41,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
-import org.primesoft.asyncworldedit.worldedit.Permission;
-import org.primesoft.asyncworldedit.worldedit.PermissionManager;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
 /**

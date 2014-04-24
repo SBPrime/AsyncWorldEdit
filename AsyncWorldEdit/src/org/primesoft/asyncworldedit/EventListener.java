@@ -30,8 +30,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.primesoft.asyncworldedit.worldedit.Permission;
-import org.primesoft.asyncworldedit.worldedit.PermissionManager;
 
 /**
  *

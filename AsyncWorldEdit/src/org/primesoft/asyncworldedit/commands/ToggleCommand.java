@@ -27,8 +27,8 @@ import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.*;
-import org.primesoft.asyncworldedit.worldedit.Permission;
-import org.primesoft.asyncworldedit.worldedit.PermissionManager;
+import org.primesoft.asyncworldedit.Permission;
+import org.primesoft.asyncworldedit.PermissionManager;
 
 /**
  *

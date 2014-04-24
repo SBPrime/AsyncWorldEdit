@@ -26,8 +26,6 @@ package org.primesoft.asyncworldedit;
 import java.util.HashMap;
 import java.util.UUID;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.worldedit.Permission;
-import org.primesoft.asyncworldedit.worldedit.PermissionManager;
 
 /**
  *
