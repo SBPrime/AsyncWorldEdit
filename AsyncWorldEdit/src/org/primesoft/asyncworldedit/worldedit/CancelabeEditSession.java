@@ -25,20 +25,17 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
-import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nullable;
 
 /**
  *
@@ -177,17 +174,17 @@ public class CancelabeEditSession extends EditSessionStub {
     }
 
     @Override
-    public boolean rawSetBlock(Vector pt, BaseBlock block) {
+    public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         if (m_mask != null) {
-            if (!m_mask.matches(this, pt)) {
+            if (!m_mask.matches(this, position)) {
                 return false;
             }
         }
 
-        return m_parent.rawSetBlock(pt, m_jobId, block);
+        return m_parent.setBlock(m_jobId, position, block, stage);
     }
 
     @Override
@@ -318,7 +315,7 @@ public class CancelabeEditSession extends EditSessionStub {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         return m_parent.smartSetBlock(pt, block);
-    }
+    }       
 
     public void resetAsync() {
         m_parent.resetAsync();

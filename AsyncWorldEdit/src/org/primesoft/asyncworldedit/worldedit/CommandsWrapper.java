@@ -31,10 +31,7 @@ import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.extension.platform.CommandManager;
 import java.lang.reflect.Method;
-import org.primesoft.asyncworldedit.PlayerWrapper;
-import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  *

@@ -27,10 +27,12 @@ import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.Vector;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntityEntry;
+import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  * This class is a wrapper to better handle entity paste Note: Do not use any
@@ -60,19 +62,7 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
      * @param value
      */
     public static void setEntities(CuboidClipboard cc, Object value) {
-        try {
-            Field field = cc.getClass().getDeclaredField("entities");
-            field.setAccessible(true);
-            field.set(cc, value);
-        } catch (IllegalArgumentException ex) {
-            PluginMain.log("Unable to set entities: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            PluginMain.log("Unable to set entities: security exception.");
-        } catch (NoSuchFieldException ex) {
-            PluginMain.log("Unable to set entities: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            PluginMain.log("Unable to set entities: security exception.");
-        }
+        Reflection.set(cc, "entities", value, "Unable to set entities");
     }
 
     /**
@@ -82,21 +72,7 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
      * @return 
      */
     public static Object getEntities(CuboidClipboard cc) {
-        try {
-            Field field = cc.getClass().getDeclaredField("entities");
-            field.setAccessible(true);
-            return field.get(cc);
-        } catch (IllegalArgumentException ex) {
-            PluginMain.log("Unable to set entities: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            PluginMain.log("Unable to set entities: security exception.");
-        } catch (NoSuchFieldException ex) {
-            PluginMain.log("Unable to set entities: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            PluginMain.log("Unable to set entities: security exception.");
-        }
-
-        return null;
+        return Reflection.get(cc, Object.class, "entities", "Unable to get entities");
     }
     
     public CuboidClipboardWrapper(UUID player, CuboidClipboard parrent) {

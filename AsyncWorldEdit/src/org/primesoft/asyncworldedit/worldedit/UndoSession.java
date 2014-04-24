@@ -24,42 +24,50 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.EditSessionStub;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.extent.NullExtent;
+import com.sk89q.worldedit.extent.reorder.MultiStageReorder;
+import com.sk89q.worldedit.util.eventbus.EventBus;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.worldedit.extent.QueueExtent;
 
 /**
  *
  * @author SBPrime
  */
-public class UndoSession extends EditSession {
-    private List<Entry<Vector, BaseBlock>> m_undoQueue;
+public class UndoSession extends EditSessionStub {
+    /**
+     * NUll event
+     */
+    private final static EditSessionEvent NULL_EVENT = new EditSessionEvent(null, null, 0, Stage.BEFORE_REORDER);
+    
+    private final List<Entry<Vector, BaseBlock>> m_undoQueue;
 
     @SuppressWarnings("unchecked")
-	public Entry<Vector, BaseBlock>[] getEntries()
-    {
+    public Entry<Vector, BaseBlock>[] getEntries() {
         return m_undoQueue.toArray(new Entry[0]);
     }
-    
-    
-    public UndoSession() {
-        super(null, -1);
-        
+
+    public UndoSession(EventBus eventBus) {
+        super(eventBus, null, 0, null, NULL_EVENT);
+
         m_undoQueue = new ArrayList<Entry<Vector, BaseBlock>>();
+        Extent extent = new QueueExtent(m_undoQueue);
+
+        Reflection.set(EditSession.class, "bypassHistory",
+                new MultiStageReorder(extent, false),
+                "Unable to inject history");
     }
-    
+
     @Override
-    public boolean smartSetBlock(Vector pt, BaseBlock block) {
-        m_undoQueue.add(new SimpleEntry<Vector, BaseBlock>(pt, block));
-        return true;
-    }
-    
-    
-    @Override
-    public void flushQueue()
-    {
+    public void flushQueue() {
     }
 }

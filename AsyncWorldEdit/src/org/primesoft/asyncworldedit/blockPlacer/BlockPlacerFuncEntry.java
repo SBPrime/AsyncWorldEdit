@@ -23,51 +23,48 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.EditSession.Stage;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import org.bukkit.World;
+import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
  * @author Prime
+ * @param <T>
  */
-public class BlockPlacerBlockEntry extends BlockPlacerEntry {
-    private final Vector m_location;
-    private final BaseBlock m_newBlock;
-    private final Stage m_stage;
+public class BlockPlacerFuncEntry<T> extends BlockPlacerEntry {
 
-    public Vector getLocation() {
-        return m_location;
-    }
-
-    public BaseBlock getNewBlock() {
-        return m_newBlock;
-    }
+    private final Func<T> m_action;
+    private final Object m_mutex = new Object();
+    private T m_result = null;
 
     @Override
     public boolean isDemanding() {
         return false;
     }
-    
-    
 
-    public BlockPlacerBlockEntry(AsyncEditSession editSession,
-            int jobId, Vector location, BaseBlock newBlock, Stage stage) {
+    public Func<T> getAction() {
+        return m_action;
+    }
+
+    public Object getMutex() {
+        return m_mutex;
+    }
+
+    public T getResult() {
+        return m_result;
+    }
+
+    public BlockPlacerFuncEntry(AsyncEditSession editSession,
+            int jobId, Func action) {
         super(editSession, jobId);
-        m_location = location;
-        m_newBlock = newBlock;
-        m_stage = stage;
+        m_action = action;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {        
-        final World world = m_editSession.getCBWorld();
-        
-        m_editSession.doSetBlock(m_location, m_newBlock, m_stage);
-        if (world != null) {
-            bp.getPhysicsWatcher().removeLocation(world.getName(), m_location);
+    public void Process(BlockPlacer bp) {
+        synchronized (m_mutex) {
+            m_result = m_action.Execute();
+            m_mutex.notifyAll();
         }
     }
 }

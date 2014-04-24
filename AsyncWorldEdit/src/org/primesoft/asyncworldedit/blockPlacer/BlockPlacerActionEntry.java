@@ -23,51 +23,48 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.EditSession.Stage;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import org.bukkit.World;
+import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *
  * @author Prime
  */
-public class BlockPlacerBlockEntry extends BlockPlacerEntry {
-    private final Vector m_location;
-    private final BaseBlock m_newBlock;
-    private final Stage m_stage;
+public class BlockPlacerActionEntry extends BlockPlacerEntry {
 
-    public Vector getLocation() {
-        return m_location;
-    }
-
-    public BaseBlock getNewBlock() {
-        return m_newBlock;
-    }
+    private final Action m_action;
+    private final Object m_mutex = new Object();
+    private boolean m_isDone = false;
 
     @Override
     public boolean isDemanding() {
         return false;
     }
-    
-    
 
-    public BlockPlacerBlockEntry(AsyncEditSession editSession,
-            int jobId, Vector location, BaseBlock newBlock, Stage stage) {
+    public Action getAction() {
+        return m_action;
+    }
+
+    public Object getMutex() {
+        return m_mutex;
+    }
+
+    public boolean isDone() {
+        return m_isDone;
+    }
+
+    public BlockPlacerActionEntry(AsyncEditSession editSession,
+            int jobId, Action action) {
         super(editSession, jobId);
-        m_location = location;
-        m_newBlock = newBlock;
-        m_stage = stage;
+        m_action = action;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {        
-        final World world = m_editSession.getCBWorld();
-        
-        m_editSession.doSetBlock(m_location, m_newBlock, m_stage);
-        if (world != null) {
-            bp.getPhysicsWatcher().removeLocation(world.getName(), m_location);
+    public void Process(BlockPlacer bp) {
+        synchronized (m_mutex) {
+            m_action.Execute();
+            m_isDone = true;
+            m_mutex.notifyAll();
         }
     }
 }

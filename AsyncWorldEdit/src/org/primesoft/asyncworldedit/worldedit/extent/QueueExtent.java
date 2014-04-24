@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,52 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.worldedit.extent;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import org.bukkit.World;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import com.sk89q.worldedit.extent.NullExtent;
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
  */
-public class BlockPlacerGetBlockEntry extends BlockPlacerEntry {
+public class QueueExtent extends NullExtent {
 
-    private final Vector m_location;
-    private final Object m_mutex = new Object();
-    private BaseBlock m_result = null;
+    private final List<Map.Entry<Vector, BaseBlock>> m_undoQueue;
 
-    @Override
-    public boolean isDemanding() {
-        return false;
-    }
-    
-    public Vector getLocation() {
-        return m_location;
-    }
-
-    public Object getMutex() {
-        return m_mutex;
-    }
-
-    public BaseBlock getResult() {
-        return m_result;
-    }
-
-    public BlockPlacerGetBlockEntry(AsyncEditSession editSession,
-            int jobId, Vector location) {
-        super(editSession, jobId);
-        m_location = location;
+    public QueueExtent(final List<Map.Entry<Vector, BaseBlock>> undoQueue) {
+        m_undoQueue = undoQueue;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
-        final World world = m_editSession.getCBWorld();       
-        synchronized (m_mutex) {
-            m_result = m_editSession.doRawGetBlock(m_location);
-            m_mutex.notifyAll();
-        }
+    public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
+        m_undoQueue.add(new AbstractMap.SimpleEntry<Vector, BaseBlock>(position, block));
+        return true;
     }
 }
