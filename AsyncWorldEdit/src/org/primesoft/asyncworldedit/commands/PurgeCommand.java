@@ -28,8 +28,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.worldedit.Permission;
+import org.primesoft.asyncworldedit.worldedit.PermissionManager;
 
 /**
  *
@@ -48,7 +49,7 @@ public class PurgeCommand {
                 PluginMain.say(player, ChatColor.RED + "Command available ingame.");
                 return;
             }
-            if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_Self)) {
+            if (!PermissionManager.isAllowed(player, Permission.Purge_Self)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
@@ -58,7 +59,7 @@ public class PurgeCommand {
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
-                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_Other)) {
+                if (!PermissionManager.isAllowed(player, Permission.Purge_Other)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
@@ -76,7 +77,7 @@ public class PurgeCommand {
                     return;
                 }
 
-                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_All)) {
+                if (!PermissionManager.isAllowed(player, Permission.Purge_All)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }

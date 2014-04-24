@@ -30,11 +30,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PlayerManager;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.PlayerEntry;
+import org.primesoft.asyncworldedit.worldedit.Permission;
+import org.primesoft.asyncworldedit.worldedit.PermissionManager;
 
 /**
  *
@@ -53,7 +54,7 @@ public class JobsCommand {
 
         BlockPlacer bPlacer = sender.getBlockPlacer();
         String playerName = null;
-        PermissionManager.Perms perm = PermissionManager.Perms.Jobs_All;
+        Permission perm = Permission.Jobs_All;
         boolean onlyInGame = false;
         boolean all = false;
         int page = -1;
@@ -62,7 +63,7 @@ public class JobsCommand {
         switch (len) {
             case 1: {
                 playerName = player != null ? player.getName() : null;
-                perm = PermissionManager.Perms.Jobs_Self;
+                perm = Permission.Jobs_Self;
                 onlyInGame = true;
                 all = false;
                 page = -1;
@@ -71,20 +72,20 @@ public class JobsCommand {
             case 2: {
                 if (args[1].startsWith("u:")) {
                     playerName = args[1].substring(2);
-                    perm = PermissionManager.Perms.Jobs_Other;
+                    perm = Permission.Jobs_Other;
                     onlyInGame = false;
                     all = false;
                     page = -1;
                 } else if (args[1].equalsIgnoreCase("all")) {
                     playerName = null;
-                    perm = PermissionManager.Perms.Jobs_All;
+                    perm = Permission.Jobs_All;
                     onlyInGame = false;
                     all = true;
                     page = -1;
                 } else {
                     try {
                         playerName = player != null ? player.getName() : null;
-                        perm = PermissionManager.Perms.Jobs_Self;
+                        perm = Permission.Jobs_Self;
                         onlyInGame = true;
                         page = Integer.parseInt(args[1]);
                     } catch (NumberFormatException ex) {
@@ -97,12 +98,12 @@ public class JobsCommand {
             case 3: {
                 if (args[1].startsWith("u:")) {
                     playerName = args[1].substring(2);
-                    perm = PermissionManager.Perms.Jobs_Other;
+                    perm = Permission.Jobs_Other;
                     onlyInGame = false;
                     all = false;
                 } else if (args[1].equalsIgnoreCase("all")) {
                     playerName = null;
-                    perm = PermissionManager.Perms.Jobs_All;
+                    perm = Permission.Jobs_All;
                     onlyInGame = false;
                     all = true;
                 } else {

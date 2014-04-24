@@ -31,9 +31,10 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.worldedit.Permission;
+import org.primesoft.asyncworldedit.worldedit.PermissionManager;
 
 /**
  *
@@ -296,18 +297,18 @@ public class BlockPlacer implements Runnable {
                 entry.updateSpeed(cnt != null ? cnt : 0, timeDelte);
 
                 final Player p = PluginMain.getPlayer(playerUuid);
-                boolean bypass = PermissionManager.isAllowed(p, PermissionManager.Perms.QueueBypass);
+                boolean bypass = PermissionManager.isAllowed(p, Permission.Queue_Bypass);
                 if (entry.getQueue().isEmpty()) {
-                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                    if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
                         m_barAPI.disableMessage(p);
                     }
                 } else {
-                    if (talk && PermissionManager.isAllowed(p, PermissionManager.Perms.TalkativeQueue)) {
+                    if (talk && PermissionManager.isAllowed(p, Permission.Talkative_Queue)) {
                         PluginMain.say(p, ChatColor.YELLOW + "[AWE] You have "
                                 + getPlayerMessage(entry, bypass));
                     }
 
-                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                    if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
                         setBar(p, entry, bypass);
                     }
                 }
@@ -392,7 +393,7 @@ public class BlockPlacer implements Runnable {
                 if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
                     Player p = PluginMain.getPlayer(player);
-                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                    if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
                         m_barAPI.disableMessage(p);
                     }
                 }
@@ -505,7 +506,7 @@ public class BlockPlacer implements Runnable {
                 return false;
             }
 
-            boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass);
+            boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), Permission.Queue_Bypass);
             int size = 0;
             for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
                 size += queueEntry.getValue().getQueue().size();
@@ -658,7 +659,7 @@ public class BlockPlacer implements Runnable {
             } else {
                 m_blocks.remove(player);
                 Player p = PluginMain.getPlayer(player);
-                if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
                     m_barAPI.disableMessage(p);
                 }
             }
@@ -709,7 +710,7 @@ public class BlockPlacer implements Runnable {
                 result = queue.size();
                 m_blocks.remove(player);
                 Player p = PluginMain.getPlayer(player);
-                if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                if (PermissionManager.isAllowed(p, Permission.Progress_Bar)) {
                     m_barAPI.disableMessage(p);
                 }
             }
@@ -777,7 +778,7 @@ public class BlockPlacer implements Runnable {
         }
 
         boolean bypass = PermissionManager.isAllowed(PluginMain.getPlayer(player), 
-                PermissionManager.Perms.QueueBypass);
+                Permission.Queue_Bypass);
         return getPlayerMessage(entry, bypass);
     }
 
@@ -837,7 +838,7 @@ public class BlockPlacer implements Runnable {
                 continue;
             }
 
-            if (PermissionManager.isAllowed(player, PermissionManager.Perms.QueueVip)
+            if (PermissionManager.isAllowed(player, Permission.Queue_Vip)
                     && !result.contains(uuid)) {
                 result.add(uuid);
             }

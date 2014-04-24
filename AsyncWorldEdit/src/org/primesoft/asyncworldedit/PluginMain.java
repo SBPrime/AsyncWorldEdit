@@ -41,6 +41,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
+import org.primesoft.asyncworldedit.worldedit.Permission;
+import org.primesoft.asyncworldedit.worldedit.PermissionManager;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
 /**
@@ -108,7 +110,7 @@ public class PluginMain extends JavaPlugin {
     /**
      * Get craft bukkit player
      *
-     * @param player
+     * @param uuid player
      * @return
      */
     public static Player getPlayer(UUID uuid) {
@@ -240,7 +242,7 @@ public class PluginMain extends JavaPlugin {
 
     private void doReloadConfig(Player player) {
         if (player != null) {
-            if (!PermissionManager.isAllowed(player, PermissionManager.Perms.ReloadConfig)) {
+            if (!PermissionManager.isAllowed(player, Permission.Reload_Config)) {
                 say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }

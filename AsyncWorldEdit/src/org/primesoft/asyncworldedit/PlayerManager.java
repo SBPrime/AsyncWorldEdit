@@ -26,6 +26,8 @@ package org.primesoft.asyncworldedit;
 import java.util.HashMap;
 import java.util.UUID;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.worldedit.Permission;
+import org.primesoft.asyncworldedit.worldedit.PermissionManager;
 
 /**
  *
@@ -76,7 +78,7 @@ public class PlayerManager {
         }
 
         if (ConfigProvider.cleanOnLogoutEnabled()
-                && !PermissionManager.isAllowed(player, PermissionManager.Perms.IgnoreCleanup)) {
+                && !PermissionManager.isAllowed(player, Permission.Ignore_Cleanup)) {
             m_parrent.getBlockPlacer().purge(uuid);
         }
     }
@@ -115,7 +117,7 @@ public class PlayerManager {
             return 0;
         }
 
-        boolean isVip = PermissionManager.isAllowed(player, PermissionManager.Perms.QueueVip);
+        boolean isVip = PermissionManager.isAllowed(player, Permission.Queue_Vip);
         return ConfigProvider.getBlockCount() + (isVip ? ConfigProvider.getVipBlockCount() : 0);
     }
 
@@ -127,8 +129,8 @@ public class PlayerManager {
             return false;
         }
 
-        boolean hasOn = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_On);
-        boolean hasOff = PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Off);
+        boolean hasOn = PermissionManager.isAllowed(player, Permission.Mode_On);
+        boolean hasOff = PermissionManager.isAllowed(player, Permission.Mode_Off);
 
         if (hasOn && hasOff) {
             return ConfigProvider.getDefaultMode();
