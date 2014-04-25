@@ -42,6 +42,7 @@ import com.sk89q.worldedit.internal.cui.CUIEvent;
 import java.io.File;
 import java.util.UUID;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.ConfigProvider;
 
 /**
  *
@@ -61,7 +62,7 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
             return ((BukkitPlayer)player).getPlayer().getUniqueId();
         }
         
-        throw new UnsupportedOperationException("Invalid argument type");
+        return ConfigProvider.DEFAULT_USER;
     }
     
     private UUID getUUID() {

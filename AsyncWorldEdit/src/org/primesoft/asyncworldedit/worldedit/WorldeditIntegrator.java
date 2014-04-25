@@ -157,7 +157,9 @@ public class WorldeditIntegrator {
             parent.setInjector(new SimpleInjector(m_worldEdit));
             
             ctor.setAccessible(false);
-            return new CommandsWrapper(m_worldEdit, m_worldEditPlugin, parent);
+            CommandsWrapper result = new CommandsWrapper(m_worldEdit, m_worldEditPlugin, parent);
+            result.setInjector(new SimpleInjector(m_worldEdit));
+            return result;
         } catch (ClassNotFoundException ex) {
             PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
         } catch (NoSuchMethodException ex) {
