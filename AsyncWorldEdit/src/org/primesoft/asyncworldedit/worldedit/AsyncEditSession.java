@@ -43,6 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_7_R3.CraftWorld;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.ConfigProvider;
@@ -185,11 +186,18 @@ public class AsyncEditSession extends EditSession {
         return this.rawSetBlock(pt, m_jobId, block);
     }
 
+    private boolean canPerformAsync(Vector pt) {
+        CraftWorld cw = (CraftWorld)m_world;
+        int x = pt.getBlockX() >> 4;
+        int z = pt.getBlockZ() >> 4;
+        
+        return cw.isChunkLoaded(x, z);
+    }
+
     @Override
     public int getBlockType(Vector pt) {
         try {
-            Chunk c = m_world.getChunkAt(pt.getBlockX(), pt.getBlockZ());
-            if (c.isLoaded()) {
+            if (canPerformAsync(pt)) {
                 return super.getBlockType(pt);
             }
         } catch (Exception ex) {
@@ -205,8 +213,7 @@ public class AsyncEditSession extends EditSession {
     @Override
     public BaseBlock getBlock(Vector pt) {
         try {
-            Chunk c = m_world.getChunkAt(pt.getBlockX(), pt.getBlockZ());
-            if (c.isLoaded()) {
+            if (canPerformAsync(pt)) {
                 return super.getBlock(pt);
             }
         } catch (Exception ex) {
@@ -222,8 +229,7 @@ public class AsyncEditSession extends EditSession {
     @Override
     public int getBlockData(Vector pt) {
         try {
-            Chunk c = m_world.getChunkAt(pt.getBlockX(), pt.getBlockZ());
-            if (c.isLoaded()) {
+            if (canPerformAsync(pt)) {
                 return super.getBlockData(pt);
             }
         } catch (Exception ex) {
@@ -239,8 +245,7 @@ public class AsyncEditSession extends EditSession {
     @Override
     public BaseBlock rawGetBlock(Vector pt) {
         try {
-            Chunk c = m_world.getChunkAt(pt.getBlockX(), pt.getBlockZ());
-            if (c.isLoaded()) {
+            if (canPerformAsync(pt)) {
                 return doRawGetBlock(pt);
             }
         } catch (Exception ex) {
