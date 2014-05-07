@@ -41,9 +41,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Chunk;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_7_R3.CraftWorld;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.ConfigProvider;
@@ -187,11 +185,10 @@ public class AsyncEditSession extends EditSession {
     }
 
     private boolean canPerformAsync(Vector pt) {
-        CraftWorld cw = (CraftWorld)m_world;
         int x = pt.getBlockX() >> 4;
         int z = pt.getBlockZ() >> 4;
         
-        return cw.isChunkLoaded(x, z);
+        return m_world.isChunkLoaded(x, z);
     }
 
     @Override
