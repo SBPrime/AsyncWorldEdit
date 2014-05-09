@@ -80,7 +80,7 @@ public class BlockPlacer implements Runnable {
     /**
      * Get blocks requests
      */
-    private final List<BlockPlacerGetBlockEntry> m_getBlocks = new ArrayList<BlockPlacerGetBlockEntry>();
+    private final List<BlockPlacerEntry> m_getBlocks = new ArrayList<BlockPlacerEntry>();
     /**
      * All locked queues
      */
@@ -221,13 +221,13 @@ public class BlockPlacer implements Runnable {
         boolean run = true;
         boolean processed = false;
         for (int i = 0; i < MAX_RETRIES && run; i++) {
-            final BlockPlacerGetBlockEntry[] tasks;
+            final BlockPlacerEntry[] tasks;
             synchronized (m_getBlocks) {
-                tasks = m_getBlocks.toArray(new BlockPlacerGetBlockEntry[0]);
+                tasks = m_getBlocks.toArray(new BlockPlacerEntry[0]);                                               
                 m_getBlocks.clear();
             }
 
-            for (BlockPlacerGetBlockEntry t : tasks) {
+            for (BlockPlacerEntry t : tasks) {
                 t.Process(this);
             }
             if (tasks.length > 0) {
@@ -865,7 +865,7 @@ public class BlockPlacer implements Runnable {
      *
      * @param block
      */
-    public void addGetTask(BlockPlacerGetBlockEntry block) {
+    public void addGetTask(BlockPlacerEntry block) {
         synchronized (m_getBlocks) {
             m_getBlocks.add(block);
         }

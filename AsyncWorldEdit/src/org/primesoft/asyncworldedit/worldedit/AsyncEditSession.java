@@ -48,6 +48,8 @@ import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.*;
+import org.primesoft.asyncworldedit.utils.Action;
+import org.primesoft.asyncworldedit.utils.Func;
 
 /**
  *
@@ -192,66 +194,49 @@ public class AsyncEditSession extends EditSession {
     }
 
     @Override
-    public int getBlockType(Vector pt) {
-        try {
-            if (canPerformAsync(pt)) {
-                return super.getBlockType(pt);
-            }
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
-        }
+    public int getBlockType(final Vector position) {
+        final AsyncEditSession es = this;
 
-        return queueBlockGet(pt).getType();
+        return performSafe(new Func<Integer>() {
+            @Override
+            public Integer Execute() {
+                return es.doGetBlockType(position);
+            }
+        });
     }
 
     @Override
-    public BaseBlock getBlock(Vector pt) {
-        try {
-            if (canPerformAsync(pt)) {
-                return super.getBlock(pt);
+    public BaseBlock getBlock(final Vector position) {
+        final AsyncEditSession es = this;
+        return performSafe(new Func<BaseBlock>() {
+            @Override
+            public BaseBlock Execute() {
+                return es.doGetBlock(position);
             }
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
-        }
-
-        return queueBlockGet(pt);
+        });
     }
 
     @Override
-    public int getBlockData(Vector pt) {
-        try {
-            if (canPerformAsync(pt)) {
-                return super.getBlockData(pt);
-            }
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
-        }
+    public int getBlockData(final Vector position) {
+        final AsyncEditSession es = this;
 
-        return queueBlockGet(pt).getData();
+        return performSafe(new Func<Integer>() {
+            @Override
+            public Integer Execute() {
+                return es.doGetBlockData(position);
+            }
+        });
     }
 
     @Override
-    public BaseBlock rawGetBlock(Vector pt) {
-        try {
-            if (canPerformAsync(pt)) {
-                return doRawGetBlock(pt);
+    public BaseBlock rawGetBlock(final Vector position) {
+        final AsyncEditSession es = this;
+        return performSafe(new Func<BaseBlock>() {
+            @Override
+            public BaseBlock Execute() {
+                return es.doRawGetBlock(position);
             }
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
-        }
-        return queueBlockGet(pt);
+        });
     }
 
     public BaseBlock doRawGetBlock(Vector pt) {
@@ -1626,16 +1611,59 @@ public class AsyncEditSession extends EditSession {
         return m_blockPlacer.getJobId(m_player);
     }
 
+    
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param action
+     */
+    public void performSafe(Action action) {
+        try {
+            action.Execute();
+            return;
+        } catch (Exception ex) {
+            /*
+             * Exception here indicates that async block get is not
+             * available. Therefore use the queue fallback.
+             */
+        }
+
+        queueOperation(action);
+    }
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param action
+     * @return
+     */
+    public <T> T performSafe(Func<T> action) {
+        try {
+            return action.Execute();
+        } catch (Exception ex) {
+            /*
+             * Exception here indicates that async block get is not
+             * available. Therefore use the queue fallback.
+             */
+        }
+
+        return queueOperation(action);
+    }
+    
     /**
      * Queue sunced block get operation
      *
-     * @param pt
+     * @param <T>
+     * @param action
      * @return
      */
-    private BaseBlock queueBlockGet(Vector pt) {
-        BlockPlacerGetBlockEntry getBlock = new BlockPlacerGetBlockEntry(this, m_jobId, pt);
+    private <T> T queueOperation(Func<T> action) {
+        BlockPlacerFuncEntry<T> getBlock = new BlockPlacerFuncEntry<T>(this, m_jobId, action);
         if (m_blockPlacer.isMainTask()) {
-            return doRawGetBlock(pt);
+            return action.Execute();
         }
 
         final Object mutex = getBlock.getMutex();
@@ -1650,5 +1678,43 @@ public class AsyncEditSession extends EditSession {
             }
         }
         return getBlock.getResult();
+    }
+    
+    /**
+     *
+     * @param action
+     * @return
+     */
+    private void queueOperation(Action action) {
+        BlockPlacerActionEntry actionEntry = new BlockPlacerActionEntry(this, m_jobId, action);
+        if (m_blockPlacer.isMainTask()) {
+            action.Execute();
+            return;
+        }
+
+        final Object mutex = actionEntry.getMutex();
+
+        m_blockPlacer.addGetTask(actionEntry);
+        synchronized (mutex) {
+            while (!actionEntry.isDone()) {
+                try {
+                    mutex.wait();
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
+    }
+    
+    
+        private BaseBlock doGetBlock(Vector position) {
+        return super.getBlock(position);
+    }
+
+    private Integer doGetBlockData(Vector position) {
+        return super.getBlockData(position);
+    }
+
+    private Integer doGetBlockType(Vector position) {
+        return super.getBlockType(position);
     }
 }
