@@ -46,6 +46,11 @@ public class PhysicsWatch implements Listener {
      * MTA mutex
      */
     private final Object m_mutex;
+    
+    
+    /**
+     * Locked blocks
+     */
     private final HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> m_locked;
 
     public PhysicsWatch() {

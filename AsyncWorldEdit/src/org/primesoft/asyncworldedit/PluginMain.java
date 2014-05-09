@@ -32,6 +32,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -57,6 +58,7 @@ public class PluginMain extends JavaPlugin {
     private MetricsLite m_metrics;
     private EventListener m_listener = new EventListener(this);
     private PhysicsWatch m_physicsWatcher = new PhysicsWatch();
+    private ChunkWatch m_chunkWatch = new ChunkWatch();
     private BlockPlacer m_blockPlacer;
     private WorldeditIntegrator m_weIntegrator;
     private PlotMeFix m_plotMeFix;
@@ -69,6 +71,10 @@ public class PluginMain extends JavaPlugin {
 
     public PhysicsWatch getPhysicsWatcher() {
         return m_physicsWatcher;
+    }
+    
+    public ChunkWatch getChunkWatch() {
+        return  m_chunkWatch;
     }
 
     public PlotMeFix getPlotMeFix() {
@@ -179,6 +185,7 @@ public class PluginMain extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(m_listener, this);
         pm.registerEvents(m_physicsWatcher, this);
+        pm.registerEvents(m_chunkWatch, this);
 
         m_isInitialized = true;
         m_playerManager.initalize();
@@ -190,6 +197,7 @@ public class PluginMain extends JavaPlugin {
     public void onDisable() {
         m_blockPlacer.stop();
         m_weIntegrator.queueStop();
+        m_chunkWatch.clear();
         log("Disabled");
     }
 
