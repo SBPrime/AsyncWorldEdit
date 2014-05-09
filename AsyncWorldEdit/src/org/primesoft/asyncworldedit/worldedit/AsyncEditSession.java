@@ -1649,6 +1649,7 @@ public class AsyncEditSession extends EditSession {
         if (canPerformAsync(cx, cz)) {
             try {
                 action.Execute();
+                m_chunkWatch.remove(cx, cz, worldName);
                 return;
             }
             catch (Exception ex) {
@@ -1685,7 +1686,9 @@ public class AsyncEditSession extends EditSession {
         m_chunkWatch.add(cx, cz, worldName);
         if (canPerformAsync(cx, cz)) {
             try {
-                return action.Execute();
+                T result = action.Execute();
+                m_chunkWatch.remove(cx, cz, worldName);
+                return result;
             }
             catch (Exception ex) {
                 /*
