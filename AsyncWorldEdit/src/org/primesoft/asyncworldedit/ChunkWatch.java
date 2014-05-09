@@ -98,7 +98,6 @@ public class ChunkWatch implements Listener {
             ChunkEntry ce = new ChunkEntry(cx, cz, worldName);
             if (!m_watchedChunks.contains(ce)) {
                 m_watchedChunks.add(ce);
-                PluginMain.log("[CHUNK] Added new watched chunk " + worldName + " " + cx + " " + cz);
             }
         }
     }
@@ -115,7 +114,6 @@ public class ChunkWatch implements Listener {
             ChunkEntry ce = new ChunkEntry(cx, cz, worldName);
             if (m_watchedChunks.contains(ce)) {
                 m_watchedChunks.remove(ce);
-                PluginMain.log("[CHUNK] Removed watched chunk " + worldName + " "  + cx + " " + cz);
             }
         }
     }
