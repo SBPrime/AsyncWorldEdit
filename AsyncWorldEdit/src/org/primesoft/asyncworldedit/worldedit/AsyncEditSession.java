@@ -1643,8 +1643,9 @@ public class AsyncEditSession extends EditSession {
     public void performSafe(Action action, Vector pos) {
         int cx = pos.getBlockX() >> 4;
         int cz = pos.getBlockZ() >> 4;
+        String worldName = m_world != null ? m_world.getName() : null;
         
-        m_chunkWatch.add(cx, cz);        
+        m_chunkWatch.add(cx, cz, worldName);        
         if (canPerformAsync(cx, cz)) {
             try {
                 action.Execute();
@@ -1662,7 +1663,7 @@ public class AsyncEditSession extends EditSession {
                     m_world.isChunkLoaded(cx, cz) + ", inUse " + m_world.isChunkInUse(cx, cz));
             }
         }
-        m_chunkWatch.remove(cx, cz);
+        m_chunkWatch.remove(cx, cz, worldName);
 
         queueOperation(action);
     }
@@ -1679,8 +1680,9 @@ public class AsyncEditSession extends EditSession {
     public <T> T performSafe(Func<T> action, Vector pos) {
         int cx = pos.getBlockX() >> 4;
         int cz = pos.getBlockZ() >> 4;
+        String worldName = m_world != null ? m_world.getName() : null;
         
-        m_chunkWatch.add(cx, cz);
+        m_chunkWatch.add(cx, cz, worldName);
         if (canPerformAsync(cx, cz)) {
             try {
                 return action.Execute();
@@ -1697,7 +1699,7 @@ public class AsyncEditSession extends EditSession {
                     m_world.isChunkLoaded(cx, cz) + ", inUse " + m_world.isChunkInUse(cx, cz));
             }
         }
-        m_chunkWatch.remove(cx, cz);
+        m_chunkWatch.remove(cx, cz, worldName);
         
         return queueOperation(action);
     }

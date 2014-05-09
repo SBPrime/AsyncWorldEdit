@@ -24,6 +24,8 @@
 package org.primesoft.asyncworldedit;
 
 import java.util.HashSet;
+import java.util.UUID;
+import javax.print.DocFlavor;
 import org.bukkit.Chunk;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -41,10 +43,13 @@ public class ChunkWatch implements Listener {
         private final int m_x;
 
         private final int m_z;
+        
+        private final String m_worldName;
 
-        public ChunkEntry(int x, int z) {
+        public ChunkEntry(int x, int z, String worldName) {
             m_x = x;
             m_z = z;
+            m_worldName = worldName;
         }
 
         @Override
@@ -55,12 +60,13 @@ public class ChunkWatch implements Listener {
 
             ChunkEntry ce = (ChunkEntry) obj;
 
-            return m_x == ce.m_x && m_z == ce.m_z;
+            return m_x == ce.m_x && m_z == ce.m_z && 
+                    ((m_worldName == null && ce.m_worldName == null) || (m_worldName != null && m_worldName.equals(ce.m_worldName)));
         }
 
         @Override
         public int hashCode() {
-            return m_x ^ m_z;
+            return m_x ^ m_z ^ (m_worldName != null ? m_worldName.hashCode() : 0);
         }
     }
 
@@ -85,13 +91,14 @@ public class ChunkWatch implements Listener {
      *
      * @param cx
      * @param cz
+     * @param worldName
      */
-    public void add(int cx, int cz) {
+    public void add(int cx, int cz, String worldName) {
         synchronized (m_watchedChunks) {
-            ChunkEntry ce = new ChunkEntry(cx, cz);
+            ChunkEntry ce = new ChunkEntry(cx, cz, worldName);
             if (!m_watchedChunks.contains(ce)) {
                 m_watchedChunks.add(ce);
-                PluginMain.log("[CHUNK] Added new watched chunk " + cx + " " + cz);
+                PluginMain.log("[CHUNK] Added new watched chunk " + worldName + " " + cx + " " + cz);
             }
         }
     }
@@ -101,13 +108,14 @@ public class ChunkWatch implements Listener {
      *
      * @param cx
      * @param cz
+     * @param worldName
      */
-    public void remove(int cx, int cz) {
+    public void remove(int cx, int cz, String worldName) {
         synchronized (m_watchedChunks) {
-            ChunkEntry ce = new ChunkEntry(cx, cz);
+            ChunkEntry ce = new ChunkEntry(cx, cz, worldName);
             if (m_watchedChunks.contains(ce)) {
                 m_watchedChunks.remove(ce);
-                PluginMain.log("[CHUNK] Removed watched chunk " + cx + " " + cz);
+                PluginMain.log("[CHUNK] Removed watched chunk " + worldName + " "  + cx + " " + cz);
             }
         }
     }
@@ -118,15 +126,16 @@ public class ChunkWatch implements Listener {
 
         int cx = chunk.getX();
         int cz = chunk.getZ();
+        String world = chunk.getWorld().getName();
 
-        ChunkEntry ce = new ChunkEntry(cx, cz);
+        ChunkEntry ce = new ChunkEntry(cx, cz, world);
 
         synchronized (m_watchedChunks) {
             if (m_watchedChunks.contains(ce)) {
                 event.setCancelled(true);
-                PluginMain.log("[CHUNK] Suppressed chunk unload " + cx + " " + cz);
+                PluginMain.log("[CHUNK] Suppressed chunk unload " + world + " " + cx + " " + cz);
             } else {
-                PluginMain.log("[CHUNK] Chunk unload " + cx + " " + cz);
+                PluginMain.log("[CHUNK] Chunk unload " + world + " "  + cx + " " + cz);
             }
         }
     }
