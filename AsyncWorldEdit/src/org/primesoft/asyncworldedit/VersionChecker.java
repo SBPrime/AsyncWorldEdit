@@ -83,6 +83,8 @@ public class VersionChecker {
         }
 
         String eVersion = null;
+        String vLatest = null;
+        
         JSONArray array = (JSONArray) JSONValue.parse(content);
         if (array.size() > 0) {
             final int latestId = 0;
@@ -101,10 +103,13 @@ public class VersionChecker {
                     sb.append(parts[j]);
                 }
                 eVersion = sb.toString();
+                if (vLatest == null) {
+                    vLatest = eVersion;
+                }
                 if (eVersion != null && eVersion.length() > 0 && version.equalsIgnoreCase(eVersion)) {
                     if (i != latestId) {
                         return "You have an old version of the plugin. Your version: " + version
-                                + ", available version: " + eVersion;
+                                + ", available version: " + vLatest;
                     } else {
                         return "You have the latest version of the plugin.";
                     }
