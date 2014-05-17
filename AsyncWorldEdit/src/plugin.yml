@@ -1,6 +1,6 @@
 name: AsyncWorldEdit
 main: org.primesoft.asyncworldedit.PluginMain
-version: 1.3
+version: 1.3-dev
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin attaches into WorldEdit and makes it asynchronous.
