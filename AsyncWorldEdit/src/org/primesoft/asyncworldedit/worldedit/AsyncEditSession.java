@@ -1656,11 +1656,10 @@ public class AsyncEditSession extends EditSession {
                  * Exception here indicates that async block get is not
                  * available. Therefore use the queue fallback.
                  */
-                PluginMain.log("[CHUNK] Error performing safe operation: " +
+                PluginMain.log("Error performing safe operation for " + worldName + 
+                        " cx:" + cx + " cy:" +  cz + " Loaded: " + m_world.isChunkLoaded(cx, cz) +
+                        ", inUse: " + m_world.isChunkInUse(cx, cz) + ". Error: " +
                         ex.toString());
-                
-                PluginMain.log("[CHUNK] Chunk " + cx + " " + cz + ", loaded " + 
-                    m_world.isChunkLoaded(cx, cz) + ", inUse " + m_world.isChunkInUse(cx, cz));
             }
         }
         m_chunkWatch.remove(cx, cz, worldName);
@@ -1694,11 +1693,10 @@ public class AsyncEditSession extends EditSession {
                  * Exception here indicates that async block get is not
                  * available. Therefore use the queue fallback.
                  */
-                PluginMain.log("[CHUNK] Error performing safe operation: " +
+                PluginMain.log("Error performing safe operation for " + worldName + 
+                        " cx:" + cx + " cy:" +  cz + " Loaded: " + m_world.isChunkLoaded(cx, cz) +
+                        ", inUse: " + m_world.isChunkInUse(cx, cz) + ". Error: " +
                         ex.toString());
-                
-                PluginMain.log("[CHUNK] Chunk " + cx + " " + cz + ", loaded " + 
-                    m_world.isChunkLoaded(cx, cz) + ", inUse " + m_world.isChunkInUse(cx, cz));
             }
         }
         m_chunkWatch.remove(cx, cz, worldName);

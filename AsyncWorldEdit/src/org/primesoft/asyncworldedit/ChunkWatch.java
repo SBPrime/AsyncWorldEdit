@@ -82,8 +82,6 @@ public class ChunkWatch implements Listener {
         synchronized (m_watchedChunks) {
             m_watchedChunks.clear();
         }
-        
-        PluginMain.log("[CHUNK] Watched chunks cleared");
     }
 
     /**
@@ -131,9 +129,6 @@ public class ChunkWatch implements Listener {
         synchronized (m_watchedChunks) {
             if (m_watchedChunks.contains(ce)) {
                 event.setCancelled(true);
-                PluginMain.log("[CHUNK] Suppressed chunk unload " + world + " " + cx + " " + cz);
-            } else {
-                PluginMain.log("[CHUNK] Chunk unload " + world + " "  + cx + " " + cz);
             }
         }
     }
