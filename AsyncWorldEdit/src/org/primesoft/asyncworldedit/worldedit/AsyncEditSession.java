@@ -32,6 +32,7 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.internal.expression.ExpressionException;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
@@ -157,9 +158,13 @@ public class AsyncEditSession extends EditSessionStub {
             UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
-        super(eventBus, new WorldExtent(world), maxBlocks, blockBag, event);
+        super(eventBus, world != null ? new WorldExtent(world) : null,
+                maxBlocks, blockBag, event);
 
-        ((WorldExtent) super.getWorld()).Initialize(this);
+        com.sk89q.worldedit.world.World pWorld = super.getWorld();
+        if (pWorld != null && pWorld instanceof WorldExtent) {
+            ((WorldExtent) pWorld).Initialize(this);
+        }
 
         m_editSessionEvent = event;
         m_eventBus = eventBus;
@@ -306,6 +311,7 @@ public class AsyncEditSession extends EditSessionStub {
         if (queued) {
             resetAsync();
         }
+        //TODO: Flush needs to by queued or set block from world needs to by queued
     }
 
     @Override
@@ -316,7 +322,15 @@ public class AsyncEditSession extends EditSessionStub {
         if (queued) {
             resetAsync();
         }
+        //TODO: Flush needs to by queued or set block from world needs to by queued
     }
+
+    @Override
+    public Operation commit() {
+        return super.commit(); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 
     @Override
     public void undo(final EditSession sess) {
@@ -1709,5 +1723,5 @@ public class AsyncEditSession extends EditSessionStub {
 
     private BaseBlock doGetLazyBlock(Vector position) {
         return super.getLazyBlock(position);
-    }
+    }        
 }
