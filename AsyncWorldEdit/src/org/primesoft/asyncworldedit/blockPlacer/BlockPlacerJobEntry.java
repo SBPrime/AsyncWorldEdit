@@ -82,7 +82,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     }
 
     public BlockPlacerJobEntry(UUID player, int jobId, String name) {
-        super(null, jobId);
+        super(jobId);
         m_player = player;
         m_name = name;
         m_status = JobStatus.Initializing;
@@ -93,7 +93,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     public BlockPlacerJobEntry(UUID player,
             CancelabeEditSession cEditSession,
             int jobId, String name) {
-        super(null, jobId);
+        super(jobId);
 
         m_player = player;
         m_name = name;
@@ -101,11 +101,10 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_cEditSession = cEditSession;
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
-
-    public BlockPlacerJobEntry(AsyncEditSession editSession,
-            CancelabeEditSession cEditSession,
+/*
+    public BlockPlacerJobEntry(CancelabeEditSession cEditSession,
             int jobId, String name) {
-        super(editSession, jobId);
+        super(jobId);
 
         m_player = editSession.getPlayer();
         m_name = name;
@@ -113,7 +112,7 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_cEditSession = cEditSession;
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
-
+*/
     public void addStateChangedListener(IJobEntryListener listener) {
         if (listener == null) {
             return;

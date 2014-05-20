@@ -36,7 +36,7 @@ public class BlockPlacerRegenerateEntry extends BlockPlacerEntry {
     private final Vector2D m_chunk;
 
     public BlockPlacerRegenerateEntry(int jobId, World world, Vector2D chunk) {
-        super(null, jobId);
+        super(jobId);
 
         m_chunk = chunk;
         m_world = world;

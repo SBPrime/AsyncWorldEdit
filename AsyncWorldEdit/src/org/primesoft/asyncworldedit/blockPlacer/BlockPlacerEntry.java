@@ -30,8 +30,7 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  * @author SBPrime
  */
 public abstract class BlockPlacerEntry {
-    private final int m_jobId;    
-    protected final AsyncEditSession m_editSession;
+    private final int m_jobId;
 
     /**
      * Is this task demanding
@@ -49,21 +48,11 @@ public abstract class BlockPlacerEntry {
     
     
     /**
-     * Job edit session
-     * @return 
-     */
-    public AsyncEditSession getEditSession() {
-        return m_editSession;
-    }
-    
-    
-    /**
      * Process the entry
      */
     public abstract void Process(BlockPlacer bp);
 
-    public BlockPlacerEntry(AsyncEditSession editSession, int jobId) {
-        m_editSession = editSession;
+    public BlockPlacerEntry(int jobId) {
         m_jobId = jobId;
     }
 }

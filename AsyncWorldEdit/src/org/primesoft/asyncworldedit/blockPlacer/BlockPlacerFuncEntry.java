@@ -54,9 +54,8 @@ public class BlockPlacerFuncEntry<T> extends BlockPlacerEntry {
         return m_result;
     }
 
-    public BlockPlacerFuncEntry(AsyncEditSession editSession,
-            int jobId, Func action) {
-        super(editSession, jobId);
+    public BlockPlacerFuncEntry(int jobId, Func action) {
+        super(jobId);
         m_action = action;
     }
 

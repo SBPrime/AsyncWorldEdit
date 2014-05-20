@@ -37,7 +37,16 @@ public class BlockPlacerBlockEntry extends BlockPlacerEntry {
     private final Vector m_location;
     private final BaseBlock m_newBlock;
     private final Stage m_stage;
+    private final AsyncEditSession m_editSession;
 
+    /**
+     * Job edit session
+     * @return 
+     */
+    public AsyncEditSession getEditSession() {
+        return m_editSession;
+    }
+    
     public Vector getLocation() {
         return m_location;
     }
@@ -55,7 +64,8 @@ public class BlockPlacerBlockEntry extends BlockPlacerEntry {
 
     public BlockPlacerBlockEntry(AsyncEditSession editSession,
             int jobId, Vector location, BaseBlock newBlock, Stage stage) {
-        super(editSession, jobId);
+        super(jobId);
+        m_editSession = editSession;
         m_location = location;
         m_newBlock = newBlock;
         m_stage = stage;

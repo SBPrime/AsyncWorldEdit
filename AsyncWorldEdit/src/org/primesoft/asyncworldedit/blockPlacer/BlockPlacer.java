@@ -131,12 +131,11 @@ public class BlockPlacer implements Runnable {
      * List of all job added listeners
      */
     private final List<IBlockPlacerListener> m_jobAddedListeners;
-    
+
     /**
      * Parent plugin main
      */
     private final PluginMain m_plugin;
-   
 
     /**
      * Get the physics watcher
@@ -488,7 +487,7 @@ public class BlockPlacer implements Runnable {
      *
      * @param player
      * @param entry
-     * @return 
+     * @return
      */
     public boolean addTasks(UUID player, BlockPlacerEntry entry) {
         synchronized (this) {
@@ -514,36 +513,36 @@ public class BlockPlacer implements Runnable {
 
             bypass |= entry instanceof BlockPlacerJobEntry;
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
-                if (player == null)
-                {
+                if (player == null) {
                     return false;
                 }
-                
-                if (!playerEntry.isInformed()){
+
+                if (!playerEntry.isInformed()) {
                     playerEntry.setInformed(true);
                     PluginMain.say(player, "Out of space on AWE block queue.");
                 }
-                
+
                 return false;
             } else {
-                if (playerEntry.isInformed()){
+                if (playerEntry.isInformed()) {
                     playerEntry.setInformed(false);
                 }
-                
+
                 synchronized (queue) {
                     queue.add(entry);
                 }
                 if (entry instanceof BlockPlacerBlockEntry) {
-                    World world = entry.getEditSession().getCBWorld();
+                    BlockPlacerBlockEntry bpEntry = (BlockPlacerBlockEntry) entry;
+                    World world = bpEntry.getEditSession().getCBWorld();
                     if (world != null) {
-                        m_physicsWatcher.addLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
+                        m_physicsWatcher.addLocation(world.getName(), bpEntry.getLocation());
                     }
                 }
                 if (entry instanceof BlockPlacerJobEntry) {
                     playerEntry.addJob((BlockPlacerJobEntry) entry);
                 }
                 if (queue.size() >= m_queueHardLimit && bypass) {
-                    m_lockedQueues.add(player);                    
+                    m_lockedQueues.add(player);
                     PluginMain.say(player, "Your block queue is full. Wait for items to finish drawing.");
                     return false;
                 }
@@ -608,7 +607,7 @@ public class BlockPlacer implements Runnable {
      *
      * @param player
      * @param jobId
-     * @return 
+     * @return
      */
     public int cancelJob(UUID player, int jobId) {
         int newSize, result;
@@ -637,9 +636,10 @@ public class BlockPlacer implements Runnable {
                 for (BlockPlacerEntry entry : queue) {
                     if (entry.getJobId() == jobId) {
                         if (entry instanceof BlockPlacerBlockEntry) {
-                            World world = entry.getEditSession().getCBWorld();
+                            BlockPlacerBlockEntry bpEntry = (BlockPlacerBlockEntry) entry;
+                            World world = bpEntry.getEditSession().getCBWorld();
                             if (world != null) {
-                                m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
+                                m_physicsWatcher.removeLocation(world.getName(), bpEntry.getLocation());
                             }
                         } else if (entry instanceof BlockPlacerJobEntry) {
                             BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;
@@ -679,7 +679,7 @@ public class BlockPlacer implements Runnable {
      * Remove all entries for player
      *
      * @param player
-     * @return 
+     * @return
      */
     public int purge(UUID player) {
         int result = 0;
@@ -690,9 +690,10 @@ public class BlockPlacer implements Runnable {
                 synchronized (queue) {
                     for (BlockPlacerEntry entry : queue) {
                         if (entry instanceof BlockPlacerBlockEntry) {
-                            World world = entry.getEditSession().getCBWorld();
+                            BlockPlacerBlockEntry bpEntry = (BlockPlacerBlockEntry) entry;
+                            World world = bpEntry.getEditSession().getCBWorld();
                             if (world != null) {
-                                m_physicsWatcher.removeLocation(world.getName(), ((BlockPlacerBlockEntry) entry).getLocation());
+                                m_physicsWatcher.removeLocation(world.getName(), bpEntry.getLocation());
                             }
                         } else if (entry instanceof BlockPlacerJobEntry) {
                             BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;
@@ -724,6 +725,7 @@ public class BlockPlacer implements Runnable {
 
     /**
      * Remove all entries
+     *
      * @return Number of purged job entries
      */
     public int purgeAll() {
@@ -777,7 +779,7 @@ public class BlockPlacer implements Runnable {
             }
         }
 
-        boolean bypass = PermissionManager.isAllowed(PluginMain.getPlayer(player), 
+        boolean bypass = PermissionManager.isAllowed(PluginMain.getPlayer(player),
                 Permission.QUEUE_BYPASS);
         return getPlayerMessage(entry, bypass);
     }
