@@ -149,6 +149,10 @@ public class AsyncEditSession extends EditSessionStub {
     public EventBus getEventBus() {
         return m_eventBus;
     }
+    
+    public BlockPlacer getBlockPlacer() {
+        return m_blockPlacer;
+    }
 
     public EditSessionEvent getEditSessionEvent() {
         return m_editSessionEvent;
@@ -159,12 +163,7 @@ public class AsyncEditSession extends EditSessionStub {
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
         super(eventBus, world != null ? new WorldExtent(world) : null,
-                maxBlocks, blockBag, event);
-
-        com.sk89q.worldedit.world.World pWorld = super.getWorld();
-        if (pWorld != null && pWorld instanceof WorldExtent) {
-            ((WorldExtent) pWorld).Initialize(this);
-        }
+                maxBlocks, blockBag, event);        
 
         m_editSessionEvent = event;
         m_eventBus = eventBus;
@@ -176,6 +175,12 @@ public class AsyncEditSession extends EditSessionStub {
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
         m_schedule = plugin.getServer().getScheduler();
+        
+        com.sk89q.worldedit.world.World pWorld = super.getWorld();
+        if (pWorld != null && pWorld instanceof WorldExtent) {
+            ((WorldExtent) pWorld).Initialize(this);
+        }
+        
         if (world != null) {
             m_world = plugin.getServer().getWorld(world.getName());
         } else {
@@ -190,11 +195,18 @@ public class AsyncEditSession extends EditSessionStub {
         if (!m_bh.canPlace(m_player, m_world, position)) {
             return false;
         }
-        if (m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled)) {
-            return m_blockPlacer.addTasks(m_player, new BlockPlacerBlockEntry(this, jobId, position, block, stage));
+
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
+        
+        if (block instanceof BaseBlockWrapper) {
+            BaseBlockWrapper wrapper = (BaseBlockWrapper)block;
+            wrapper.setAsync(isAsync);
+            wrapper.setPlayer(m_player);
         } else {
-            return doSetBlock(position, block, stage);
+            block = new BaseBlockWrapper(block, jobId, isAsync, m_player);
         }
+        
+        return super.setBlock(position, block, stage);
     }
 
     @Override
@@ -311,7 +323,6 @@ public class AsyncEditSession extends EditSessionStub {
         if (queued) {
             resetAsync();
         }
-        //TODO: Flush needs to by queued or set block from world needs to by queued
     }
 
     @Override
@@ -322,15 +333,7 @@ public class AsyncEditSession extends EditSessionStub {
         if (queued) {
             resetAsync();
         }
-        //TODO: Flush needs to by queued or set block from world needs to by queued
-    }
-
-    @Override
-    public Operation commit() {
-        return super.commit(); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    
+    }        
 
     @Override
     public void undo(final EditSession sess) {
@@ -1532,30 +1535,6 @@ public class AsyncEditSession extends EditSessionStub {
             }
         }
         return result;
-    }
-
-    public boolean doSetBlock(Vector location, BaseBlock block, Stage stage) {
-        UUID player = getPlayer();
-        World w = getCBWorld();
-        BaseBlock oldBlock = getBlock(location);
-
-        if (m_mask != null) {
-            if (!m_mask.matches(this, location)) {
-                return false;
-            }
-        }
-
-        boolean success = false;
-        try {
-            success = super.setBlock(location, block, stage);
-        } catch (WorldEditException ex) {
-            Logger.getLogger(AsyncEditSession.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if (success && w != null) {
-            m_bh.logBlock(player, w, location, oldBlock, block);
-        }
-        return success;
     }
 
     public void doSetMask(Mask mask) {

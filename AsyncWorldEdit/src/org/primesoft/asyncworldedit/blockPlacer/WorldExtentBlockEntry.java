@@ -25,28 +25,34 @@ package org.primesoft.asyncworldedit.blockPlacer;
 
 import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
 /**
  *
  * @author Prime
  */
-public class BlockPlacerBlockEntry extends BlockPlacerEntry {
+public class WorldExtentBlockEntry extends BlockPlacerEntry {
+
     private final Vector m_location;
     private final BaseBlock m_newBlock;
-    private final Stage m_stage;
-    private final AsyncEditSession m_editSession;
+    private final boolean m_bln;
+    private final WorldExtent m_worldExtent;
 
     /**
-     * Job edit session
-     * @return 
+     * World extent
+     *
+     * @return
      */
-    public AsyncEditSession getEditSession() {
-        return m_editSession;
+    public WorldExtent getWorldExtent() {
+        return m_worldExtent;
     }
-    
+
     public Vector getLocation() {
         return m_location;
     }
@@ -59,25 +65,25 @@ public class BlockPlacerBlockEntry extends BlockPlacerEntry {
     public boolean isDemanding() {
         return false;
     }
-    
-    
 
-    public BlockPlacerBlockEntry(AsyncEditSession editSession,
-            int jobId, Vector location, BaseBlock newBlock, Stage stage) {
+    public WorldExtentBlockEntry(WorldExtent worldExtent,
+            int jobId, Vector location, BaseBlock newBlock, boolean bln) {
         super(jobId);
-        m_editSession = editSession;
+        m_worldExtent = worldExtent;
         m_location = location;
+        m_bln = bln;
         m_newBlock = newBlock;
-        m_stage = stage;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {        
-        final World world = m_editSession.getCBWorld();
-        
-        m_editSession.doSetBlock(m_location, m_newBlock, m_stage);
-        if (world != null) {
-            bp.getPhysicsWatcher().removeLocation(world.getName(), m_location);
+    public void Process(BlockPlacer bp) {
+        final String worldName = m_worldExtent.getName();
+        try {
+            m_worldExtent.doSetBlock(m_location, m_newBlock, m_bln);
+        } catch (WorldEditException ex) {
+        }
+        if (worldName != null) {
+            bp.getPhysicsWatcher().removeLocation(worldName, m_location);
         }
     }
 }

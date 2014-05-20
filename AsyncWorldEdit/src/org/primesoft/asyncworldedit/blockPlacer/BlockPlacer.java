@@ -531,11 +531,11 @@ public class BlockPlacer implements Runnable {
                 synchronized (queue) {
                     queue.add(entry);
                 }
-                if (entry instanceof BlockPlacerBlockEntry) {
-                    BlockPlacerBlockEntry bpEntry = (BlockPlacerBlockEntry) entry;
-                    World world = bpEntry.getEditSession().getCBWorld();
-                    if (world != null) {
-                        m_physicsWatcher.addLocation(world.getName(), bpEntry.getLocation());
+                if (entry instanceof WorldExtentBlockEntry) {
+                    WorldExtentBlockEntry bpEntry = (WorldExtentBlockEntry) entry;
+                    String worldName = bpEntry.getWorldExtent().getName();
+                    if (worldName != null) {
+                        m_physicsWatcher.addLocation(worldName, bpEntry.getLocation());
                     }
                 }
                 if (entry instanceof BlockPlacerJobEntry) {
@@ -635,11 +635,11 @@ public class BlockPlacer implements Runnable {
             synchronized (queue) {
                 for (BlockPlacerEntry entry : queue) {
                     if (entry.getJobId() == jobId) {
-                        if (entry instanceof BlockPlacerBlockEntry) {
-                            BlockPlacerBlockEntry bpEntry = (BlockPlacerBlockEntry) entry;
-                            World world = bpEntry.getEditSession().getCBWorld();
-                            if (world != null) {
-                                m_physicsWatcher.removeLocation(world.getName(), bpEntry.getLocation());
+                        if (entry instanceof WorldExtentBlockEntry) {
+                            WorldExtentBlockEntry bpEntry = (WorldExtentBlockEntry) entry;
+                            String worldName = bpEntry.getWorldExtent().getName();
+                            if (worldName != null) {
+                                m_physicsWatcher.removeLocation(worldName, bpEntry.getLocation());
                             }
                         } else if (entry instanceof BlockPlacerJobEntry) {
                             BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;
@@ -689,11 +689,11 @@ public class BlockPlacer implements Runnable {
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 synchronized (queue) {
                     for (BlockPlacerEntry entry : queue) {
-                        if (entry instanceof BlockPlacerBlockEntry) {
-                            BlockPlacerBlockEntry bpEntry = (BlockPlacerBlockEntry) entry;
-                            World world = bpEntry.getEditSession().getCBWorld();
-                            if (world != null) {
-                                m_physicsWatcher.removeLocation(world.getName(), bpEntry.getLocation());
+                        if (entry instanceof WorldExtentBlockEntry) {
+                            WorldExtentBlockEntry bpEntry = (WorldExtentBlockEntry) entry;
+                            String name = bpEntry.getWorldExtent().getName();
+                            if (name != null) {
+                                m_physicsWatcher.removeLocation(name, bpEntry.getLocation());
                             }
                         } else if (entry instanceof BlockPlacerJobEntry) {
                             BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;

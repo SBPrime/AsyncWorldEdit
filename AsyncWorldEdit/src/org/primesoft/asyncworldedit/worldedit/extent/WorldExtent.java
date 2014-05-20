@@ -40,11 +40,16 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.WorldExtentBlockEntry;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.worldedit.BaseBlockWrapper;
 
 /**
  *
@@ -61,6 +66,11 @@ public class WorldExtent implements World {
      * Parent edit session
      */
     private AsyncEditSession m_editSession;
+    
+    /**
+     * The block placer
+     */
+    private BlockPlacer m_blockPlacer;
 
     public WorldExtent(World world) {
         m_parent = world;
@@ -72,6 +82,7 @@ public class WorldExtent implements World {
      */
     public void Initialize(AsyncEditSession editSession) {
         m_editSession = editSession;
+        m_blockPlacer = m_editSession.getBlockPlacer();
     }
 
     @Override
@@ -145,19 +156,29 @@ public class WorldExtent implements World {
         });
     }
 
+    public boolean doSetBlock(final Vector vector, BaseBlock bb, final boolean bln) throws WorldEditException {
+        return m_parent.setBlock(vector, bb, bln);
+    }
+
     @Override
-    public boolean setBlock(final Vector vector, final BaseBlock bb, final boolean bln) throws WorldEditException {
-        return m_editSession.performSafe(new Func<Boolean>() {
-            @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.setBlock(vector, bb, bln);
-                } catch (WorldEditException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
-                }
-            }
-        });
+    public boolean setBlock(final Vector vector, BaseBlock bb, final boolean bln) throws WorldEditException {
+        int jobId = -1;
+        boolean isAsync = false;
+        UUID player = ConfigProvider.DEFAULT_USER;
+        
+        if (bb instanceof BaseBlockWrapper) {
+            BaseBlockWrapper bbw = (BaseBlockWrapper) bb;
+            jobId = bbw.getId();
+            bb = bbw.getParent();
+            isAsync = bbw.isAsync();
+            player = bbw.getPlayer();
+        }
+
+        if (!isAsync) {
+            return m_parent.setBlock(vector, bb, bln);
+        }
+
+        return m_blockPlacer.addTasks(player, new WorldExtentBlockEntry(this, jobId, vector, bb, bln));
     }
 
     @Override
