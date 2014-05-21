@@ -23,9 +23,8 @@
  */
 package org.primesoft.asyncworldedit;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.UUID;
-import javax.print.DocFlavor;
 import org.bukkit.Chunk;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,44 +35,11 @@ import org.bukkit.event.world.ChunkUnloadEvent;
  * @author SBPrime
  */
 public class ChunkWatch implements Listener {
-    /**
-     * Suppressed chunk entry (simple x,z)
-     */
-    public class ChunkEntry {
-        private final int m_x;
-
-        private final int m_z;
-        
-        private final String m_worldName;
-
-        public ChunkEntry(int x, int z, String worldName) {
-            m_x = x;
-            m_z = z;
-            m_worldName = worldName;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof ChunkEntry)) {
-                return false;
-            }
-
-            ChunkEntry ce = (ChunkEntry) obj;
-
-            return m_x == ce.m_x && m_z == ce.m_z && 
-                    ((m_worldName == null && ce.m_worldName == null) || (m_worldName != null && m_worldName.equals(ce.m_worldName)));
-        }
-
-        @Override
-        public int hashCode() {
-            return m_x ^ m_z ^ (m_worldName != null ? m_worldName.hashCode() : 0);
-        }
-    }
 
     /**
      * Suppressed chunks
      */
-    private final HashSet<ChunkEntry> m_watchedChunks = new HashSet<ChunkEntry>();
+    private final HashMap<String, HashMap<Integer, HashSet<Integer>>> m_watchedChunks = new HashMap<String, HashMap<Integer, HashSet<Integer>>>();
 
     /**
      * Remove all chunk unload queues
@@ -93,10 +59,25 @@ public class ChunkWatch implements Listener {
      */
     public void add(int cx, int cz, String worldName) {
         synchronized (m_watchedChunks) {
-            ChunkEntry ce = new ChunkEntry(cx, cz, worldName);
-            if (!m_watchedChunks.contains(ce)) {
-                m_watchedChunks.add(ce);
+            HashMap<Integer, HashSet<Integer>> worldEntry = m_watchedChunks.get(worldName);
+            if (worldEntry == null) {
+                worldEntry = new HashMap<Integer, HashSet<Integer>>();
+
+                m_watchedChunks.put(worldName, worldEntry);
             }
+
+            HashSet<Integer> cxEntry = worldEntry.get(cx);
+            if (cxEntry == null) {
+                cxEntry = new HashSet<Integer>();
+
+                worldEntry.put(cx, cxEntry);
+            }
+
+            if (!cxEntry.contains(cz)) {
+                return;
+            }
+
+            cxEntry.add(cz);
         }
     }
 
@@ -109,9 +90,28 @@ public class ChunkWatch implements Listener {
      */
     public void remove(int cx, int cz, String worldName) {
         synchronized (m_watchedChunks) {
-            ChunkEntry ce = new ChunkEntry(cx, cz, worldName);
-            if (m_watchedChunks.contains(ce)) {
-                m_watchedChunks.remove(ce);
+            HashMap<Integer, HashSet<Integer>> worldEntry = m_watchedChunks.get(worldName);
+            if (worldEntry == null) {
+                return;
+            }
+
+            HashSet<Integer> cxEntry = worldEntry.get(cx);
+            if (cxEntry == null) {
+                return;
+            }
+
+            if (!cxEntry.contains(cz)) {
+                return;
+            }
+
+            cxEntry.remove(cz);
+
+            if (cxEntry.isEmpty()) {
+                worldEntry.remove(cx);
+            }
+
+            if (worldEntry.isEmpty()) {
+                m_watchedChunks.remove(worldName);
             }
         }
     }
@@ -122,12 +122,20 @@ public class ChunkWatch implements Listener {
 
         int cx = chunk.getX();
         int cz = chunk.getZ();
-        String world = chunk.getWorld().getName();
-
-        ChunkEntry ce = new ChunkEntry(cx, cz, world);
+        String worldName = chunk.getWorld().getName();
 
         synchronized (m_watchedChunks) {
-            if (m_watchedChunks.contains(ce)) {
+            HashMap<Integer, HashSet<Integer>> worldEntry = m_watchedChunks.get(worldName);
+            if (worldEntry == null) {
+                return;
+            }
+
+            HashSet<Integer> cxEntry = worldEntry.get(cx);
+            if (cxEntry == null) {
+                return;
+            }
+
+            if (cxEntry.contains(cz)) {
                 event.setCancelled(true);
             }
         }
