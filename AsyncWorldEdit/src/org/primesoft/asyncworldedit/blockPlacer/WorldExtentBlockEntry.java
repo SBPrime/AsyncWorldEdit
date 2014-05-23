@@ -23,42 +23,30 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.World;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
 /**
  *
  * @author Prime
  */
-public class WorldExtentBlockEntry extends BlockPlacerEntry {
+public class WorldExtentBlockEntry<T, TException extends Exception> 
+    extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
 
     private final Vector m_location;
-    private final BaseBlock m_newBlock;
-    private final boolean m_bln;
-    private final WorldExtent m_worldExtent;
+    private final FuncEx<T, TException> m_function;
+    private final String m_worldName;
 
-    /**
-     * World extent
-     *
-     * @return
-     */
-    public WorldExtent getWorldExtent() {
-        return m_worldExtent;
+    
+    @Override
+    public String getWorldName() {
+        return m_worldName;
     }
-
+    
+    @Override
     public Vector getLocation() {
         return m_location;
-    }
-
-    public BaseBlock getNewBlock() {
-        return m_newBlock;
     }
 
     @Override
@@ -67,23 +55,22 @@ public class WorldExtentBlockEntry extends BlockPlacerEntry {
     }
 
     public WorldExtentBlockEntry(WorldExtent worldExtent,
-            int jobId, Vector location, BaseBlock newBlock, boolean bln) {
+            int jobId, Vector location, FuncEx<T, TException> function) {
         super(jobId);
-        m_worldExtent = worldExtent;
         m_location = location;
-        m_bln = bln;
-        m_newBlock = newBlock;
+        m_function = function;
+        m_worldName = worldExtent.getName();
     }
 
     @Override
     public void Process(BlockPlacer bp) {
-        final String worldName = m_worldExtent.getName();
         try {
-            m_worldExtent.doSetBlock(m_location, m_newBlock, m_bln);
-        } catch (WorldEditException ex) {
+            //TODO: Shuld we ignore the function resoult?
+            m_function.Execute();
+        } catch (Exception ex) {
         }
-        if (worldName != null) {
-            bp.getPhysicsWatcher().removeLocation(worldName, m_location);
+        if (m_worldName != null) {
+            bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
         }
     }
 }

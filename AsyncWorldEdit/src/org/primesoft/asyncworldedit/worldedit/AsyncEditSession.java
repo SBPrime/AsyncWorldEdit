@@ -32,7 +32,6 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
-import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.internal.expression.ExpressionException;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
@@ -140,6 +139,10 @@ public class AsyncEditSession extends EditSessionStub {
      * Edit session mask
      */
     private Mask m_mask;
+    
+    /**
+     * Edit session mask
+     */
     private Mask m_asyncMask;
 
     public UUID getPlayer() {
@@ -161,7 +164,7 @@ public class AsyncEditSession extends EditSessionStub {
     public AsyncEditSession(PluginMain plugin,
             UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
-
+        
         super(eventBus, world != null ? new WorldExtent(world) : null,
                 maxBlocks, blockBag, event);        
 
@@ -177,36 +180,29 @@ public class AsyncEditSession extends EditSessionStub {
         m_schedule = plugin.getServer().getScheduler();
         
         com.sk89q.worldedit.world.World pWorld = super.getWorld();
-        if (pWorld != null && pWorld instanceof WorldExtent) {
-            ((WorldExtent) pWorld).Initialize(this);
-        }
-        
         if (world != null) {
             m_world = plugin.getServer().getWorld(world.getName());
         } else {
             m_world = null;
         }
+        
+        if (pWorld != null && pWorld instanceof WorldExtent) {
+            ((WorldExtent) pWorld).Initialize(this, m_bh, m_world);
+        }
+                
         m_asyncForced = false;
         m_asyncDisabled = false;
         m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
     }
 
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
+        //TODO: Move this to world
         if (!m_bh.canPlace(m_player, m_world, position)) {
             return false;
         }
 
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        
-        if (block instanceof BaseBlockWrapper) {
-            BaseBlockWrapper wrapper = (BaseBlockWrapper)block;
-            wrapper.setAsync(isAsync);
-            wrapper.setPlayer(m_player);
-        } else {
-            block = new BaseBlockWrapper(block, jobId, isAsync, m_player);
-        }
-        
-        return super.setBlock(position, block, stage);
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);        
+        return super.setBlock(position, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
     }
 
     @Override
@@ -293,10 +289,8 @@ public class AsyncEditSession extends EditSessionStub {
 
     public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
-        m_jobId = jobId;
-        boolean r = super.setBlockIfAir(pt, block);
-        m_jobId = -1;
-        return r;
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);        
+        return super.setBlockIfAir(pt, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
 
     public boolean setBlock(Vector pt, Pattern pat, int jobId)
@@ -309,10 +303,8 @@ public class AsyncEditSession extends EditSessionStub {
 
     public boolean setBlock(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
-        m_jobId = jobId;
-        boolean r = super.setBlock(pt, block);
-        m_jobId = -1;
-        return r;
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);        
+        return super.setBlock(pt, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
 
     public void flushQueue(int jobId) {

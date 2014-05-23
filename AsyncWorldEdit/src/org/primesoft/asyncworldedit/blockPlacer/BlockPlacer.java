@@ -25,7 +25,6 @@ package org.primesoft.asyncworldedit.blockPlacer;
 
 import java.util.*;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
@@ -531,9 +530,9 @@ public class BlockPlacer implements Runnable {
                 synchronized (queue) {
                     queue.add(entry);
                 }
-                if (entry instanceof WorldExtentBlockEntry) {
-                    WorldExtentBlockEntry bpEntry = (WorldExtentBlockEntry) entry;
-                    String worldName = bpEntry.getWorldExtent().getName();
+                if (entry instanceof IBlockPlacerLocationEntry) {
+                    IBlockPlacerLocationEntry bpEntry = (IBlockPlacerLocationEntry) entry;
+                    String worldName = bpEntry.getWorldName();
                     if (worldName != null) {
                         m_physicsWatcher.addLocation(worldName, bpEntry.getLocation());
                     }
@@ -635,9 +634,9 @@ public class BlockPlacer implements Runnable {
             synchronized (queue) {
                 for (BlockPlacerEntry entry : queue) {
                     if (entry.getJobId() == jobId) {
-                        if (entry instanceof WorldExtentBlockEntry) {
-                            WorldExtentBlockEntry bpEntry = (WorldExtentBlockEntry) entry;
-                            String worldName = bpEntry.getWorldExtent().getName();
+                        if (entry instanceof IBlockPlacerLocationEntry) {
+                            IBlockPlacerLocationEntry bpEntry = (IBlockPlacerLocationEntry) entry;
+                            String worldName = bpEntry.getWorldName();
                             if (worldName != null) {
                                 m_physicsWatcher.removeLocation(worldName, bpEntry.getLocation());
                             }
@@ -689,9 +688,9 @@ public class BlockPlacer implements Runnable {
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 synchronized (queue) {
                     for (BlockPlacerEntry entry : queue) {
-                        if (entry instanceof WorldExtentBlockEntry) {
-                            WorldExtentBlockEntry bpEntry = (WorldExtentBlockEntry) entry;
-                            String name = bpEntry.getWorldExtent().getName();
+                        if (entry instanceof IBlockPlacerLocationEntry) {
+                            IBlockPlacerLocationEntry bpEntry = (IBlockPlacerLocationEntry) entry;
+                            String name = bpEntry.getWorldName();
                             if (name != null) {
                                 m_physicsWatcher.removeLocation(name, bpEntry.getLocation());
                             }
