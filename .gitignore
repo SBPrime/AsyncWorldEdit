@@ -1,8 +1,8 @@
-/AsyncWorldEdit/nbproject/private/
-/AsyncWorldEdit/build/
-/AsyncWorldEdit/dist/
-/AsyncWorldEdit/lib/
-/AsyncWorldEdit/test/
+/*/nbproject/private/
+/*/build/
+/*/dist/
+/*/lib/
+/*/test/
 
 # Idea
 *.iml
