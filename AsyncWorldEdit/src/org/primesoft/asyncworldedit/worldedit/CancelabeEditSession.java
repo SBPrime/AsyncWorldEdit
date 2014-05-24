@@ -25,7 +25,9 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.history.changeset.ArrayListHistory;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
@@ -36,6 +38,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 
 /**
  *
@@ -58,7 +63,28 @@ public class CancelabeEditSession extends EditSessionStub {
         m_parent = parent;
         m_player = m_parent.getPlayer();
         m_isCanceled = false;
+        injectChangeSet();
         setMask(mask);
+    }
+
+    /**
+     * Injects an ArrayListHistory to allow fast and easy acces to changed
+     * blocks. The BlockOptimizedHistory (default) requires processing to allow
+     * history copy to the parent.
+     */
+    private void injectChangeSet() {
+        ArrayListHistory newChangeSet = new InjectedArrayListHistory();
+        ChangeSetExtent changeExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
+                this, "changeSetExtent", "Unable to get the ChangeSet");
+        if (changeExtent == null) {
+            PluginMain.log("Unable to get the changeSet from EditSession, undo and redo broken.");
+            return;
+        }
+
+        Reflection.set(changeExtent, "changeSet", newChangeSet,
+                "Unable to inject ChangeSet, undo and redo broken.");
+        Reflection.set(EditSession.class, this, "changeSet", newChangeSet,
+                "Unable to inject ChangeSet, undo and redo broken.");
     }
 
     public boolean isCanceled() {
@@ -87,16 +113,6 @@ public class CancelabeEditSession extends EditSessionStub {
     @Override
     public BlockBag getBlockBag() {
         return m_parent.getBlockBag();
-    }
-
-    @Override
-    public int getBlockChangeCount() {
-        return m_parent.getBlockChangeCount();
-    }
-
-    @Override
-    public int getBlockChangeLimit() {
-        return m_parent.getBlockChangeLimit();
     }
 
     @Override
@@ -160,7 +176,7 @@ public class CancelabeEditSession extends EditSessionStub {
 
     @Override
     public boolean setBlock(Vector pt, Pattern pat) throws MaxChangedBlocksException {
-            if (m_isCanceled) {
+        if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
