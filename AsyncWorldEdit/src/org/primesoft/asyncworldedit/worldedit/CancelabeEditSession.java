@@ -50,10 +50,21 @@ public class CancelabeEditSession extends EditSessionStub {
 
     public class SessionCanceled extends Exception {
     }
+    
+    /**
+     * Maximum queued blocks
+     */
+    private final int MAX_QUEUED = 10000;
+    
     private final AsyncEditSession m_parent;
     private boolean m_isCanceled;
     private final int m_jobId;
     private final UUID m_player;
+    
+    /**
+     * Number of queued blocks
+     */
+    private int m_blocksQueued;
 
     public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
         super(parent.getEventBus(), parent.getWorld(), parent.getBlockChangeLimit(),
@@ -161,6 +172,8 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
+        
+        forceFlush();
         return super.setBlock(position, BaseBlockWrapper.wrap(block, m_jobId, true, m_player), stage);
     }
 
@@ -277,5 +290,24 @@ public class CancelabeEditSession extends EditSessionStub {
 
     public AsyncEditSession getParent() {
         return m_parent;
+    }
+
+    @Override
+    public void flushQueue() {
+        m_blocksQueued = 0;
+        super.flushQueue();
+    }       
+    
+    /**
+     * Force block flush when to many has been queued
+     */
+    private void forceFlush() {
+        if (isQueueEnabled()) {
+            m_blocksQueued++;
+            if (m_blocksQueued > MAX_QUEUED) {
+                m_blocksQueued = 0;
+                super.flushQueue();
+            }
+        }
     }
 }

@@ -208,6 +208,7 @@ public class AsyncEditSession extends EditSessionStub {
             return false;
         }
 
+        forceFlush();
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
         return super.setBlock(position, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
     }
@@ -393,7 +394,15 @@ public class AsyncEditSession extends EditSessionStub {
     }
 
     @Override
-    public boolean smartSetBlock(Vector pt, BaseBlock block) {
+    public boolean smartSetBlock(Vector pt, BaseBlock block) {        
+        return super.smartSetBlock(pt, block);
+    }
+
+    
+    /**
+     * Force block flush when to many has been queued
+     */
+    private void forceFlush() {
         if (isQueueEnabled()) {
             m_blocksQueued++;
             if (m_blocksQueued > MAX_QUEUED) {
@@ -401,7 +410,6 @@ public class AsyncEditSession extends EditSessionStub {
                 super.flushQueue();
             }
         }
-        return super.smartSetBlock(pt, block);
     }
 
     @Override
