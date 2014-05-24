@@ -41,7 +41,7 @@ public class WorldExtentParam {
 
         if (bb instanceof BaseBlockWrapper) {
             BaseBlockWrapper bbw = (BaseBlockWrapper) bb;
-            jobId = bbw.getId();
+            jobId = bbw.getJobId();
             bb = bbw.getParent();
             isAsync = bbw.isAsync();
             player = bbw.getPlayer();

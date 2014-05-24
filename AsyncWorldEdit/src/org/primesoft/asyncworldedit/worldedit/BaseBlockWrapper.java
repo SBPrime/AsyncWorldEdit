@@ -36,7 +36,7 @@ import java.util.UUID;
 public class BaseBlockWrapper extends BaseBlock {
 
     public static BaseBlockWrapper wrap(BaseBlock block, int jobId, boolean isAsync, UUID player) {
-        BaseBlockWrapper result = null; 
+        BaseBlockWrapper result; 
         if (block instanceof BaseBlockWrapper) {
             result = (BaseBlockWrapper)block;
             result.setAsync(isAsync);
@@ -77,7 +77,7 @@ public class BaseBlockWrapper extends BaseBlock {
         return m_player;
     }
 
-    public BaseBlockWrapper(BaseBlock parent, int jobId, boolean isAsync, UUID player) {
+    private BaseBlockWrapper(BaseBlock parent, int jobId, boolean isAsync, UUID player) {
         super(0);
 
         m_jobId = jobId;

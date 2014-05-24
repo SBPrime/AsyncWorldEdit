@@ -57,7 +57,7 @@ public class BlockPlacer implements Runnable {
     /**
      * Bukkit scheduler
      */
-    private BukkitScheduler m_scheduler;
+    private final BukkitScheduler m_scheduler;
     /**
      * Current scheduler task
      */
