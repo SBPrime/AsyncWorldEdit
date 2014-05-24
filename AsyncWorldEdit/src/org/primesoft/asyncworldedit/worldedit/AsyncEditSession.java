@@ -48,6 +48,7 @@ import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
+import org.primesoft.asyncworldedit.ChunkWatch;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
@@ -114,6 +115,11 @@ public class AsyncEditSession extends EditSessionStub {
     private final BukkitScheduler m_schedule;
 
     /**
+     * The chunk watcher
+     */
+    private final ChunkWatch m_chunkWatch;
+
+    /**
      * Number of async tasks
      */
     private final HashSet<BlockPlacerJobEntry> m_asyncTasks;
@@ -139,7 +145,7 @@ public class AsyncEditSession extends EditSessionStub {
      * Edit session mask
      */
     private Mask m_mask;
-    
+
     /**
      * Edit session mask
      */
@@ -152,7 +158,7 @@ public class AsyncEditSession extends EditSessionStub {
     public EventBus getEventBus() {
         return m_eventBus;
     }
-    
+
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
@@ -164,9 +170,9 @@ public class AsyncEditSession extends EditSessionStub {
     public AsyncEditSession(PluginMain plugin,
             UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
-        
+
         super(eventBus, world != null ? new WorldExtent(world) : null,
-                maxBlocks, blockBag, event);        
+                maxBlocks, blockBag, event);
 
         m_editSessionEvent = event;
         m_eventBus = eventBus;
@@ -178,21 +184,22 @@ public class AsyncEditSession extends EditSessionStub {
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
         m_schedule = plugin.getServer().getScheduler();
-        
+
         com.sk89q.worldedit.world.World pWorld = super.getWorld();
         if (world != null) {
             m_world = plugin.getServer().getWorld(world.getName());
         } else {
             m_world = null;
         }
-        
+
         if (pWorld != null && pWorld instanceof WorldExtent) {
             ((WorldExtent) pWorld).Initialize(this, m_bh, m_world);
         }
-                
+
         m_asyncForced = false;
         m_asyncDisabled = false;
         m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
+        m_chunkWatch = m_plugin.getChunkWatch();
     }
 
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
@@ -201,7 +208,7 @@ public class AsyncEditSession extends EditSessionStub {
             return false;
         }
 
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);        
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
         return super.setBlock(position, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
     }
 
@@ -219,7 +226,7 @@ public class AsyncEditSession extends EditSessionStub {
             public BaseBlock Execute() {
                 return es.doGetBlock(position);
             }
-        });
+        }, position);
     }
 
     @Override
@@ -231,7 +238,7 @@ public class AsyncEditSession extends EditSessionStub {
             public Integer Execute() {
                 return es.doGetBlockData(position);
             }
-        });
+        }, position);
     }
 
     @Override
@@ -243,7 +250,7 @@ public class AsyncEditSession extends EditSessionStub {
             public Integer Execute() {
                 return es.doGetBlockType(position);
             }
-        });
+        }, position);
     }
 
     @Override
@@ -255,7 +262,7 @@ public class AsyncEditSession extends EditSessionStub {
             public BaseBlock Execute() {
                 return es.doGetLazyBlock(position);
             }
-        });
+        }, position);
     }
 
     /**
@@ -289,7 +296,7 @@ public class AsyncEditSession extends EditSessionStub {
 
     public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);        
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
         return super.setBlockIfAir(pt, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
 
@@ -303,7 +310,7 @@ public class AsyncEditSession extends EditSessionStub {
 
     public boolean setBlock(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);        
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
         return super.setBlock(pt, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
 
@@ -325,7 +332,7 @@ public class AsyncEditSession extends EditSessionStub {
         if (queued) {
             resetAsync();
         }
-    }        
+    }
 
     @Override
     public void undo(final EditSession sess) {
@@ -1587,21 +1594,41 @@ public class AsyncEditSession extends EditSessionStub {
         return m_blockPlacer.getJobId(m_player);
     }
 
+    private boolean canPerformAsync(int cx, int cz) {
+        return m_world.isChunkLoaded(cx, cz);
+    }
+
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
      * queue it on dispatcher
      *
      * @param action
+     * @param pos
      */
-    public void performSafe(Action action) {
+    public void performSafe(Action action, Vector pos) {
+        int cx = pos.getBlockX() >> 4;
+        int cz = pos.getBlockZ() >> 4;
+        String worldName = m_world != null ? m_world.getName() : null;
+
         try {
-            action.Execute();
-            return;
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
+            m_chunkWatch.add(cx, cz, worldName);
+            if (canPerformAsync(cx, cz)) {
+                try {
+                    action.Execute();
+                    return;
+                } catch (Exception ex) {
+                    /*
+                     * Exception here indicates that async block get is not
+                     * available. Therefore use the queue fallback.
+                     */
+                    PluginMain.log("Error performing safe operation for " + worldName
+                            + " cx:" + cx + " cy:" + cz + " Loaded: " + m_world.isChunkLoaded(cx, cz)
+                            + ", inUse: " + m_world.isChunkInUse(cx, cz) + ". Error: "
+                            + ex.toString());
+                }
+            }
+        } finally {
+            m_chunkWatch.remove(cx, cz, worldName);
         }
 
         queueOperation(action);
@@ -1613,18 +1640,81 @@ public class AsyncEditSession extends EditSessionStub {
      *
      * @param <T>
      * @param action
+     * @param pos
      * @return
      */
-    public <T> T performSafe(Func<T> action) {
+    public <T> T performSafe(Func<T> action, Vector pos) {
+        int cx = pos.getBlockX() >> 4;
+        int cz = pos.getBlockZ() >> 4;
+        String worldName = m_world != null ? m_world.getName() : null;
+
         try {
-            return action.Execute();
+            m_chunkWatch.add(cx, cz, worldName);
+            if (canPerformAsync(cx, cz)) {
+                try {
+                    T result = action.Execute();
+                    return result;
+                } catch (Exception ex) {
+                    /*
+                     * Exception here indicates that async block get is not
+                     * available. Therefore use the queue fallback.
+                     */
+                    PluginMain.log("Error performing safe operation for " + worldName
+                            + " cx:" + cx + " cy:" + cz + " Loaded: " + m_world.isChunkLoaded(cx, cz)
+                            + ", inUse: " + m_world.isChunkInUse(cx, cz) + ". Error: "
+                            + ex.toString());
+                }
+            }
+        } finally {
+            m_chunkWatch.remove(cx, cz, worldName);
+        }
+
+        return queueOperation(action);
+    }
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param action
+     * @param pos
+     */
+    public void performSafe(Action action) {
+        try {
+            action.Execute();
+            return;
         } catch (Exception ex) {
             /*
              * Exception here indicates that async block get is not
              * available. Therefore use the queue fallback.
              */
+            PluginMain.log("Error performing safe operation. Error: "
+                    + ex.toString());
         }
+        queueOperation(action);
+    }
 
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param action
+     * @param pos
+     * @return
+     */
+    public <T> T performSafe(Func<T> action) {
+        try {
+            T result = action.Execute();
+            return result;
+        } catch (Exception ex) {
+            /*
+             * Exception here indicates that async block get is not
+             * available. Therefore use the queue fallback.
+             */
+            PluginMain.log("Error performing safe operation. Error: "
+                    + ex.toString());
+        }
         return queueOperation(action);
     }
 
@@ -1694,5 +1784,5 @@ public class AsyncEditSession extends EditSessionStub {
 
     private BaseBlock doGetLazyBlock(Vector position) {
         return super.getLazyBlock(position);
-    }        
+    }
 }

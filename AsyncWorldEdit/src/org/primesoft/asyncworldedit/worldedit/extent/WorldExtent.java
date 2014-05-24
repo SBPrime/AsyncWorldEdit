@@ -156,7 +156,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.getBlockType(vector);
             }
-        });
+        },vector);
     }
 
     @Override
@@ -167,7 +167,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.getBlockData(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -212,7 +212,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.setBlockType(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -222,7 +222,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.setBlockTypeFast(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -232,7 +232,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.setBlockData(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -242,7 +242,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.setBlockDataFast(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -252,7 +252,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.setTypeIdAndData(vector, i, i1);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -262,7 +262,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.setTypeIdAndDataFast(vector, i, i1);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -272,7 +272,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.getBlockLightLevel(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -282,7 +282,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.clearContainerBlockContents(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -292,7 +292,7 @@ public class WorldExtent implements World {
             public BiomeType Execute() {
                 return m_parent.getBiome(vd);
             }
-        });
+        }, new Vector(vd.getX(), 0, vd.getZ()));
     }
 
     @Override
@@ -302,7 +302,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.setBiome(vd, bt);
             }
-        });
+        }, new Vector(vd.getX(), 0, vd.getZ()));
     }
 
     @Override
@@ -312,7 +312,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.dropItem(vector, bis, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -322,7 +322,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.dropItem(vector, bis);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -332,7 +332,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.simulateBlockMine(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -362,7 +362,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.killMobs(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -372,7 +372,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.killMobs(vector, i, bln);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -382,7 +382,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.killMobs(vector, d, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -392,7 +392,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.removeEntities(et, vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -417,7 +417,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -432,7 +432,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -447,7 +447,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -462,7 +462,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -477,7 +477,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -493,7 +493,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -503,7 +503,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.checkLoadedChunk(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -533,7 +533,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.playEffect(vector, i, i1);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -544,7 +544,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.queueBlockBreakEffect(si, vector, i, d);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -574,7 +574,7 @@ public class WorldExtent implements World {
             public BaseBlock Execute() {
                 return m_parent.getBlock(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -584,7 +584,7 @@ public class WorldExtent implements World {
             public BaseBlock Execute() {
                 return m_parent.getLazyBlock(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
