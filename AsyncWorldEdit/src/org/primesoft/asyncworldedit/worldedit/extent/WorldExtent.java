@@ -173,6 +173,10 @@ public class WorldExtent implements World {
     @Override
     public boolean setBlock(final Vector vector, BaseBlock bb, final boolean bln) throws WorldEditException {
         final WorldExtentParam param = WorldExtentParam.extract(bb);
+                
+        if (!m_blocksHub.canPlace(param.getPlayer(), m_cbWorld, vector)) {
+            return false;
+        }
 
         FuncEx<Boolean, WorldEditException> func = new FuncEx<Boolean, WorldEditException>() {
 
@@ -590,6 +594,10 @@ public class WorldExtent implements World {
     @Override
     public boolean setBlock(final Vector vector, final BaseBlock bb) throws WorldEditException {
         final WorldExtentParam param = WorldExtentParam.extract(bb);
+        
+        if (!m_blocksHub.canPlace(param.getPlayer(), m_cbWorld, vector)) {
+            return false;
+        }
 
         FuncEx<Boolean, WorldEditException> func = new FuncEx<Boolean, WorldEditException>() {
 

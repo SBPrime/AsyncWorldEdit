@@ -33,6 +33,7 @@ import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import org.primesoft.asyncworldedit.utils.SessionCanceled;
 
 /**
  *
@@ -99,7 +100,7 @@ public abstract class ClipboardAsyncTask extends BukkitRunnable {
         } catch (MaxChangedBlocksException ex) {
             PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
         } catch (IllegalArgumentException ex) {
-            if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
+            if (ex.getCause() instanceof SessionCanceled) {
                 PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
             }
         }

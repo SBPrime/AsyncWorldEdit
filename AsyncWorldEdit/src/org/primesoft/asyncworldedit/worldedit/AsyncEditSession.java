@@ -203,11 +203,6 @@ public class AsyncEditSession extends EditSessionStub {
     }
 
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
-        //TODO: Move this to world
-        if (!m_bh.canPlace(m_player, m_world, position)) {
-            return false;
-        }
-
         forceFlush();
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
         return super.setBlock(position, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);

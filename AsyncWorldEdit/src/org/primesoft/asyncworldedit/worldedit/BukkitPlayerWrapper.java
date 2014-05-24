@@ -39,6 +39,7 @@ import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
+import com.sk89q.worldedit.util.Location;
 import java.io.File;
 import java.util.UUID;
 import org.bukkit.entity.Player;
@@ -309,4 +310,9 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
     public String toString() {
         return m_parent.toString(); 
     }
+
+    @Override
+    public Location getLocation() {
+        return m_parent.getLocation();
+    }        
 }
