@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import org.bukkit.World;
@@ -35,6 +36,7 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 public class BlockPlacerBlockEntry extends BlockPlacerEntry {
     private final Vector m_location;
     private final BaseBlock m_newBlock;
+    private final Stage m_stage;
 
     public Vector getLocation() {
         return m_location;
@@ -52,17 +54,18 @@ public class BlockPlacerBlockEntry extends BlockPlacerEntry {
     
 
     public BlockPlacerBlockEntry(AsyncEditSession editSession,
-            int jobId, Vector location, BaseBlock newBlock) {
+            int jobId, Vector location, BaseBlock newBlock, Stage stage) {
         super(editSession, jobId);
         m_location = location;
         m_newBlock = newBlock;
+        m_stage = stage;
     }
 
     @Override
     public void Process(BlockPlacer bp) {        
         final World world = m_editSession.getCBWorld();
         
-        m_editSession.doRawSetBlock(m_location, m_newBlock);
+        m_editSession.doSetBlock(m_location, m_newBlock, m_stage);
         if (world != null) {
             bp.getPhysicsWatcher().removeLocation(world.getName(), m_location);
         }

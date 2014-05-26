@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,46 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit;
+package com.sk89q.worldedit;
 
-import java.util.UUID;
-import org.bukkit.entity.Player;
+import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.world.World;
+import javax.annotation.Nullable;
 
 /**
+ * Stub class to allow access to package visible constructor
  *
  * @author SBPrime
  */
-public class PlayerWrapper {
-
-    private final Player m_player;
-    private final String m_name;
-    private final UUID m_uuid;
-    private boolean m_mode;    
-
-    public PlayerWrapper(Player player, String name, boolean mode) {
-        m_player = player;
-        m_uuid = player.getUniqueId();
-        m_name = name;
-        m_mode = mode;
-    }
-
-    public Player getPlayer() {
-        return m_player;
-    }
-
-    public UUID getUUID() {
-        return m_uuid;
-    }
-    
-    public String getName() {
-        return m_name;
-    }
-
-    public boolean getMode() {
-        return m_mode;
-    }
-
-    public void setMode(boolean mode) {
-        m_mode = mode;
+public class EditSessionStub extends EditSession {
+    public EditSessionStub(EventBus eventBus, World world, int maxBlocks,
+            @Nullable BlockBag blockBag, EditSessionEvent event) {
+        super(eventBus, world, maxBlocks, blockBag, event);
     }
 }

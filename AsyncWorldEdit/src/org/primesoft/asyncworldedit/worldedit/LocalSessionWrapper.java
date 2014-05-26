@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
+import java.util.UUID;
 
 /**
  * This class is a LocalSession wrapper that provides clipboard injection points
@@ -41,7 +42,7 @@ public class LocalSessionWrapper extends LocalSession {
     /**
      * Player
      */
-    private final String m_player;
+    private final UUID m_player;
 
     /**
      * The parrent local session
@@ -52,7 +53,7 @@ public class LocalSessionWrapper extends LocalSession {
         return m_parrent;
     }
 
-    public LocalSessionWrapper(String player, LocalConfiguration configuration,
+    public LocalSessionWrapper(UUID player, LocalConfiguration configuration,
             LocalSession parrent) {
         super(configuration);
         m_player = player;

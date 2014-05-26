@@ -23,52 +23,32 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import com.sk89q.minecraft.util.commands.CommandsManager;
 import com.sk89q.minecraft.util.commands.SimpleInjector;
 import com.sk89q.worldedit.EditSessionFactory;
-import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import com.sk89q.worldedit.extension.platform.CommandManager;
+import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.extension.platform.PlatformManager;
+import com.sk89q.worldedit.extension.platform.PlatformRejectionException;
+import com.sk89q.worldedit.session.SessionManager;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  *
  * @author SBPrime
  */
-public class WorldeditIntegrator implements Runnable {
-
-    /**
-     * How often check if world edit integration is successfull
-     */
-    private final static int CHECK_INTERVAL = 40;
-
-    /**
-     * Bukkit scheduler
-     */
-    private BukkitScheduler m_scheduler;
-
-    /**
-     * Should block places shut down
-     */
-    private boolean m_shutdown;
-
-    /**
-     * Current scheduler task
-     */
-    private BukkitTask m_task;
-
-    /**
-     * THe world edit proxy
-     */
-    private WorldEditProxy m_worldeditProxy;
+public class WorldeditIntegrator {
 
     /**
      * The original world edit
@@ -78,17 +58,19 @@ public class WorldeditIntegrator implements Runnable {
     /**
      * The parent plugin
      */
-    private PluginMain m_parent;
+    private final PluginMain m_parent;
 
     /**
      * The world edit plugin
      */
-    private final WorldEditPlugin m_plugin;
-
-    /**
-     * Current world edit session factory
-     */
-    private AsyncEditSessionFactory m_factory;
+    private final WorldEditPlugin m_worldEditPlugin;
+    
+    private EditSessionFactory m_oldEditSessionFactory;
+    private SessionManager m_oldSessions;
+    private PlatformManager m_platformManager;
+    private CommandManager m_commandManager;
+    private Platform[] m_oldPlatforms;
+    private CommandsManager<LocalPlayer> m_oldCommands;
 
     /**
      * Create new instance of world edit integration checker and start it
@@ -98,151 +80,46 @@ public class WorldeditIntegrator implements Runnable {
      */
     public WorldeditIntegrator(PluginMain plugin, WorldEditPlugin worldEditPlugin) {
         m_parent = plugin;
-        m_plugin = worldEditPlugin;
-
+        m_worldEditPlugin = worldEditPlugin;
+        
         if (m_parent == null) {
-            m_shutdown = true;
             return;
         }
-
-        m_scheduler = plugin.getServer().getScheduler();
-        if (worldEditPlugin == null || m_scheduler == null) {
-            m_shutdown = true;
+        
+        if (worldEditPlugin == null) {
             PluginMain.log("Error initializeing Worldedit integrator");
             return;
         }
-
-        m_factory = new AsyncEditSessionFactory(m_parent);
-
-        m_task = m_scheduler.runTaskTimer(plugin, this,
-                CHECK_INTERVAL, CHECK_INTERVAL);
-
-        m_worldEdit = worldEditPlugin.getWorldEdit();
-        setLocalSessionFactory(m_worldEdit, new SpyHashMap(m_worldEdit.getConfiguration()));
-        m_worldeditProxy = createWorldEditProxy();
-
-        m_worldeditProxy.initialize(m_plugin, m_worldEdit, m_factory);
-        setController(worldEditPlugin, m_worldeditProxy);
-    }
-
-    private WorldEditProxy createWorldEditProxy() {
-        WorldEditProxy result;
-
-        Logger logger = getLogger();       
-        PrintStream oldErr = System.err;
         
-        System.setErr(new PrintStream(new ByteArrayOutputStream()));
-        if (logger == null) {
-            PluginMain.log("vvvvvvvvvvvvvvvvv  Please ignore  vvvvvvvvvvvvvvvvv");
-        } else {            
-            logger.setLevel(Level.OFF);            
+        m_worldEdit = worldEditPlugin.getWorldEdit();
+        
+        m_oldEditSessionFactory = m_worldEdit.getEditSessionFactory();
+        m_oldSessions = m_worldEdit.getSessionManager();
+        
+        Reflection.set(m_worldEdit, "editSessionFactory", new AsyncEditSessionFactory(m_parent, m_worldEdit.getEventBus()),
+                "Unable to inject edit session factory");
+        Reflection.set(m_worldEdit, "sessions", new SessionManagerWrapper(m_worldEdit, m_parent.getPlayerManager()),
+                "Unable to inject sessions");
+        
+        m_platformManager = m_worldEdit.getPlatformManager();
+        m_commandManager = m_platformManager.getCommandManager();
+        
+        m_oldPlatforms = m_platformManager.getPlatforms().toArray(new Platform[0]);        
+        for (Platform p : m_oldPlatforms) {
+            m_platformManager.unregister(p);
         }
-        result = new WorldEditProxy(m_worldEdit);
-        if (logger == null) {
-            PluginMain.log("^^^^^^^^^^^^^^^^^  Please ignore  ^^^^^^^^^^^^^^^^^");
-        } else {
-            logger.setLevel(Level.INFO);
-        }
-        System.setErr(oldErr);
-
-        return result;
-    }
-
-    private Logger getLogger() {
-        try {
-            Field field = SimpleInjector.class.getDeclaredField("logger");
-            field.setAccessible(true);
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-
-            Object o = field.get(null);
-            if (o instanceof Logger) {
-                return (Logger) o;
+        
+        m_oldCommands = Reflection.get(m_commandManager, CommandsManager.class, 
+                "commands", "Unable to store old commands");
+        Reflection.set(m_commandManager, "commands", getCommandWrapper(), 
+                "Unable to inject new commands manager");
+        
+        for (Platform p : m_oldPlatforms) {
+            try {
+                m_platformManager.register(p);
+            } catch (PlatformRejectionException ex) {
+                Logger.getLogger(WorldeditIntegrator.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return null;
-        } catch (IllegalArgumentException ex) {
-            PluginMain.log("Unable to set logger: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            PluginMain.log("Unable to set logger: security exception.");
-        } catch (NoSuchFieldException ex) {
-            PluginMain.log("Unable to set logger: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            PluginMain.log("Unable to set logger: security exception.");
-        }
-
-        return null;
-    }
-
-    @Override
-    public void run() {
-        synchronized (this) {
-            if (m_shutdown) {
-                stop();
-                return;
-            }
-
-            EditSessionFactory factory = m_worldEdit.getEditSessionFactory();
-            if (!(factory instanceof AsyncEditSessionFactory)) {
-                PluginMain.log("World edit session not set to AsyncWorldedit. Fixing.");
-                m_worldEdit.setEditSessionFactory(m_factory);
-            }
-        }
-    }
-
-    /**
-     * Inject a LocalSession wrapper factory using reflection
-     */
-    private void setLocalSessionFactory(WorldEdit worldedit,
-            final HashMap<String, LocalSession> sessionHash) {
-        try {
-            Field field = worldedit.getClass().getDeclaredField("sessions");
-            field.setAccessible(true);
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.set(worldedit, sessionHash);
-        } catch (IllegalArgumentException ex) {
-            PluginMain.log("Unable to inject LocalSession factory: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            PluginMain.log("Unable to inject LocalSession factory: security exception.");
-        } catch (NoSuchFieldException ex) {
-            PluginMain.log("Unable to inject LocalSession factory: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            PluginMain.log("Unable to inject LocalSession factory: security exception.");
-        }
-    }
-
-    /**
-     * Try to wrap the world edit
-     *
-     * @param worldEditPlugin
-     */
-    private void setController(WorldEditPlugin worldEditPlugin, WorldEdit worldEdit) {
-        try {
-            Field field = worldEditPlugin.getClass().getDeclaredField("controller");
-            field.setAccessible(true);
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.set(worldEditPlugin, worldEdit);
-        } catch (IllegalArgumentException ex) {
-            PluginMain.log("Unable to inject WorldEdit wrapper factory: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            PluginMain.log("Unable to inject WorldEdit wrapper: security exception.");
-        } catch (NoSuchFieldException ex) {
-            PluginMain.log("Unable to inject WorldEdit wrapper: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            PluginMain.log("Unable to inject WorldEdit wrapper: security exception.");
-        }
-    }
-
-    /**
-     * Stop the integrator
-     */
-    public void stop() {
-        if (m_task != null) {
-            m_task.cancel();
-            m_task = null;
         }
     }
 
@@ -250,10 +127,55 @@ public class WorldeditIntegrator implements Runnable {
      * Stop the wrapper
      */
     public void queueStop() {
-        m_shutdown = true;
+        List<Platform> platforms = m_platformManager.getPlatforms();
+        for (Platform platform : platforms) {
+            m_platformManager.unregister(platform);
+        }        
+        
+        Reflection.set(m_commandManager, "commands", m_oldCommands, 
+                "Unable to restore commands manager");
+        for (Platform platform : m_oldPlatforms) {
+            try {
+                m_platformManager.register(platform);
+            } catch (PlatformRejectionException ex) {
+                PluginMain.log("Error restoring platform " + platform.getPlatformName());
+            }
+        }
+        
+        Reflection.set(m_worldEdit, "editSessionFactory", m_oldEditSessionFactory, "Unable to restore edit session factory");
+        Reflection.set(m_worldEdit, "sessions", m_oldSessions, "Unable to restore sessions");
+    }
 
-        m_worldEdit.setEditSessionFactory(new EditSessionFactory());
-        setController(m_plugin, m_worldEdit);
-        setLocalSessionFactory(m_plugin.getWorldEdit(), new HashMap<String, LocalSession>());
+    private CommandsManager<LocalPlayer> getCommandWrapper() {
+        try {
+            Class<?> innerClass = Class.forName("com.sk89q.worldedit.extension.platform.CommandManager$CommandsManagerImpl");
+            Constructor<?> ctor = innerClass.getDeclaredConstructor(CommandManager.class);
+            
+            ctor.setAccessible(true);
+            
+            CommandsManager<LocalPlayer> parent = (CommandsManager<LocalPlayer>)ctor.newInstance(m_commandManager);
+            parent.setInjector(new SimpleInjector(m_worldEdit));
+            
+            ctor.setAccessible(false);
+            CommandsWrapper result = new CommandsWrapper(m_worldEdit, m_worldEditPlugin, parent);
+            result.setInjector(new SimpleInjector(m_worldEdit));
+            return result;
+        } catch (ClassNotFoundException ex) {
+            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+        } catch (NoSuchMethodException ex) {
+            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+        } catch (SecurityException ex) {
+            PluginMain.log("Unable to create commands manager: security exception.");
+        } catch (InstantiationException ex) {
+            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+        } catch (IllegalAccessException ex) {
+            PluginMain.log("Unable to create commands manager: security exception.");
+        } catch (IllegalArgumentException ex) {
+            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+        } catch (InvocationTargetException ex) {
+            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+        }
+        
+        return null;
     }
 }

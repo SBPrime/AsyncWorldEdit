@@ -21,46 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.injector;
 
-import java.util.UUID;
-import org.bukkit.entity.Player;
+import com.sk89q.worldedit.EditSession;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  *
  * @author SBPrime
  */
-public class PlayerWrapper {
+public class InjectorMain extends JavaPlugin {
+    private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
+    private static String s_prefix = null;
+    private static final String s_logFormat = "%s %s";
 
-    private final Player m_player;
-    private final String m_name;
-    private final UUID m_uuid;
-    private boolean m_mode;    
+    public static void log(String msg) {
+        if (s_log == null || msg == null || s_prefix == null) {
+            return;
+        }
 
-    public PlayerWrapper(Player player, String name, boolean mode) {
-        m_player = player;
-        m_uuid = player.getUniqueId();
-        m_name = name;
-        m_mode = mode;
+        s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
     }
 
-    public Player getPlayer() {
-        return m_player;
+    @Override
+    public void onEnable() {
+        PluginDescriptionFile desc = getDescription();
+        s_prefix = String.format("[%s]", desc.getName());
+
+        EditSession.ForceClassLoad();
+        log("Enabled");
     }
 
-    public UUID getUUID() {
-        return m_uuid;
-    }
-    
-    public String getName() {
-        return m_name;
-    }
-
-    public boolean getMode() {
-        return m_mode;
-    }
-
-    public void setMode(boolean mode) {
-        m_mode = mode;
+    @Override
+    public void onDisable() {
+        log("Disabled");
     }
 }

@@ -24,13 +24,11 @@
 package org.primesoft.asyncworldedit;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 
 /**
@@ -56,7 +54,7 @@ public class EventListener implements Listener {
 
         m_parent.getPlayerManager().addPlayer(player);
 
-        if (!PermissionManager.isAllowed(player, PermissionManager.Perms.AnnounceVersion)) {
+        if (!PermissionManager.isAllowed(player, Permission.ANNOUNCE_VERSION)) {
             return;
         }
 

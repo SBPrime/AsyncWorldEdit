@@ -23,11 +23,14 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.Permission;
+import org.primesoft.asyncworldedit.PermissionManager;
 
 /**
  *
@@ -46,23 +49,27 @@ public class PurgeCommand {
                 PluginMain.say(player, ChatColor.RED + "Command available ingame.");
                 return;
             }
-            if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_Self)) {
+            if (!PermissionManager.isAllowed(player, Permission.PURGE_SELF)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
 
-            int size = sender.getBlockPlacer().purge(player.getName());
+            int size = sender.getBlockPlacer().purge(player.getUniqueId());
             PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
-                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_Other)) {
+                if (!PermissionManager.isAllowed(player, Permission.PURGE_OTHER)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
-                String user = arg.substring(2);
-                int size = sender.getBlockPlacer().purge(user);
+                UUID uuid = sender.getPlayerManager().getPlayerUUID(arg.substring(2));
+                if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
+                    PluginMain.say(player, ChatColor.RED + "Player not found.");
+                    return;
+                }                
+                int size = sender.getBlockPlacer().purge(uuid);
                 PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
             } else {
                 if (!arg.equalsIgnoreCase("all")) {
@@ -70,7 +77,7 @@ public class PurgeCommand {
                     return;
                 }
 
-                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Purge_All)) {
+                if (!PermissionManager.isAllowed(player, Permission.PURGE_ALL)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }

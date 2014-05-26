@@ -23,12 +23,15 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.Permission;
+import org.primesoft.asyncworldedit.PermissionManager;
 
 /**
  *
@@ -44,14 +47,14 @@ public class CancelCommand {
 
         BlockPlacer bPlacer = sender.getBlockPlacer();
         int id;
-        String name;
+        UUID uuid;
         if (args.length == 2) {
             if (player == null)
             {
                 PluginMain.say(player, ChatColor.RED + "Command available ingame.");
                 return;
             }
-            if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Cancel_Self)) {
+            if (!PermissionManager.isAllowed(player, Permission.CANCEL_SELF)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
@@ -62,16 +65,20 @@ public class CancelCommand {
                 return;
             }
 
-            name = player.getName();            
+            uuid = player.getUniqueId();
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
-                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Cancel_Other)) {
+                if (!PermissionManager.isAllowed(player, Permission.CANCEL_OTHER)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
-                name = arg.substring(2);
+                uuid = sender.getPlayerManager().getPlayerUUID(arg.substring(2));
+                if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
+                    PluginMain.say(player, ChatColor.RED + "Player not found.");
+                    return;
+                }
                 try {
                     id = Integer.parseInt(args[1]);
                 } catch (NumberFormatException ex) {
@@ -84,7 +91,7 @@ public class CancelCommand {
 
             }
         }
-        int size = sender.getBlockPlacer().cancelJob(name, id);
+        int size = sender.getBlockPlacer().cancelJob(uuid, id);
         PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");            
     }
 }

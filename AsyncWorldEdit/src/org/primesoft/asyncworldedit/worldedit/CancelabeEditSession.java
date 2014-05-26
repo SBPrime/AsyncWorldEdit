@@ -24,11 +24,13 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
-import com.sk89q.worldedit.bags.BlockBag;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Countable;
+import com.sk89q.worldedit.world.World;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,17 +41,18 @@ import java.util.Set;
  *
  * @author SBPrime
  */
-public class CancelabeEditSession extends EditSession {
+public class CancelabeEditSession extends EditSessionStub {
 
     public class SessionCanceled extends Exception {
     }
     private final AsyncEditSession m_parent;
     private boolean m_isCanceled;
-    private int m_jobId;
+    private final int m_jobId;
     private Mask m_mask;
 
     public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
-        super(parent.getWorld(), parent.getBlockChangeLimit());
+        super(parent.getEventBus(), parent.getWorld(), parent.getBlockChangeLimit(), 
+            parent.getBlockBag(), parent.getEditSessionEvent());
 
         m_jobId = jobId;
         m_parent = parent;
@@ -146,7 +149,7 @@ public class CancelabeEditSession extends EditSession {
     }
 
     @Override
-    public LocalWorld getWorld() {
+    public World getWorld() {
         return m_parent.getWorld();
     }
 
@@ -171,17 +174,17 @@ public class CancelabeEditSession extends EditSession {
     }
 
     @Override
-    public boolean rawSetBlock(Vector pt, BaseBlock block) {
+    public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         if (m_mask != null) {
-            if (!m_mask.matches(this, pt)) {
+            if (!m_mask.matches(this, position)) {
                 return false;
             }
         }
 
-        return m_parent.rawSetBlock(pt, m_jobId, block);
+        return m_parent.setBlock(m_jobId, position, block, stage);
     }
 
     @Override
@@ -235,10 +238,6 @@ public class CancelabeEditSession extends EditSession {
     @Override
     public void setMask(Mask mask) {
         m_mask = mask;
-    }
-
-    public void setWorld(LocalWorld world) {
-        this.world = world;
     }
 
     @Override
@@ -316,7 +315,7 @@ public class CancelabeEditSession extends EditSession {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         return m_parent.smartSetBlock(pt, block);
-    }
+    }       
 
     public void resetAsync() {
         m_parent.resetAsync();

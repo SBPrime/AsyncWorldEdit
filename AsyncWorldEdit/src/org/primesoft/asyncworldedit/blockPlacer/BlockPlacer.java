@@ -26,15 +26,15 @@ package org.primesoft.asyncworldedit.blockPlacer;
 import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.bukkit.command.defaults.PlaySoundCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.Permission;
+import org.primesoft.asyncworldedit.PermissionManager;
 
 /**
  *
@@ -62,7 +62,7 @@ public class BlockPlacer implements Runnable {
     /**
      * Current scheduler task
      */
-    private BukkitTask m_task;
+    private final BukkitTask m_task;
     /**
      * Current scheduler get task
      */
@@ -76,7 +76,7 @@ public class BlockPlacer implements Runnable {
     /**
      * Logged events queue (per player)
      */
-    private HashMap<String, PlayerEntry> m_blocks;
+    private final HashMap<UUID, PlayerEntry> m_blocks;
     /**
      * Get blocks requests
      */
@@ -84,7 +84,7 @@ public class BlockPlacer implements Runnable {
     /**
      * All locked queues
      */
-    private HashSet<String> m_lockedQueues;
+    private final HashSet<UUID> m_lockedQueues;
     /**
      * Should block places shut down
      */
@@ -92,24 +92,24 @@ public class BlockPlacer implements Runnable {
     /**
      * Player block queue hard limit (max bloks count)
      */
-    private int m_queueHardLimit;
+    private final int m_queueHardLimit;
     /**
      * Player block queue soft limit (minimum number of blocks before queue is
      * unlocked)
      */
-    private int m_queueSoftLimit;
+    private final int m_queueSoftLimit;
     /**
      * Global queue max size
      */
-    private int m_queueMaxSize;
+    private final int m_queueMaxSize;
     /**
      * Block placing interval (in ticks)
      */
-    private long m_interval;
+    private final long m_interval;
     /**
      * Talk interval
      */
-    private int m_talkInterval;
+    private final int m_talkInterval;
     /**
      * Run number
      */
@@ -151,14 +151,13 @@ public class BlockPlacer implements Runnable {
      * Initialize new instance of the block placer
      *
      * @param plugin parent
-     * @param blockLogger instance block logger
      */
     public BlockPlacer(PluginMain plugin) {
         m_jobAddedListeners = new ArrayList<IBlockPlacerListener>();
         m_lastRunTime = System.currentTimeMillis();
         m_runNumber = 0;
-        m_blocks = new HashMap<String, PlayerEntry>();
-        m_lockedQueues = new HashSet<String>();
+        m_blocks = new HashMap<UUID, PlayerEntry>();
+        m_lockedQueues = new HashSet<UUID>();
         m_scheduler = plugin.getServer().getScheduler();
         m_barAPI = plugin.getBarAPI();
         m_interval = ConfigProvider.getInterval();
@@ -223,7 +222,7 @@ public class BlockPlacer implements Runnable {
         for (int i = 0; i < MAX_RETRIES && run; i++) {
             final BlockPlacerEntry[] tasks;
             synchronized (m_getBlocks) {
-                tasks = m_getBlocks.toArray(new BlockPlacerEntry[0]);                                               
+                tasks = m_getBlocks.toArray(new BlockPlacerEntry[0]);
                 m_getBlocks.clear();
             }
 
@@ -266,14 +265,14 @@ public class BlockPlacer implements Runnable {
         final List<BlockPlacerJobEntry> jobsToCancel = new ArrayList<BlockPlacerJobEntry>();
 
         synchronized (this) {
-            final String[] keys = m_blocks.keySet().toArray(new String[0]);
+            final UUID[] keys = m_blocks.keySet().toArray(new UUID[0]);
 
-            final HashSet<String> vips = getVips(keys);
-            final String[] vipKeys = vips.toArray(new String[0]);
+            final HashSet<UUID> vips = getVips(keys);
+            final UUID[] vipKeys = vips.toArray(new UUID[0]);
 
             final int blockCount = ConfigProvider.getBlockCount();
             final int blockCountVip = ConfigProvider.getVipBlockCount();
-            final HashMap<String, Integer> blocksPlaced = new HashMap<String, Integer>();
+            final HashMap<UUID, Integer> blocksPlaced = new HashMap<UUID, Integer>();
 
             added |= fetchBlocks(blockCount, keys, entries, blocksPlaced, jobsToCancel);
             added |= fetchBlocks(blockCountVip, vipKeys, entries, blocksPlaced, jobsToCancel);
@@ -290,26 +289,26 @@ public class BlockPlacer implements Runnable {
             }
             final long timeDelte = now - m_lastRunTime;
 
-            for (Map.Entry<String, PlayerEntry> queueEntry : m_blocks.entrySet()) {
-                String player = queueEntry.getKey();
+            for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
+                UUID playerUuid = queueEntry.getKey();
                 PlayerEntry entry = queueEntry.getValue();
-                Integer cnt = blocksPlaced.get(player);
+                Integer cnt = blocksPlaced.get(playerUuid);
 
                 entry.updateSpeed(cnt != null ? cnt : 0, timeDelte);
 
-                final Player p = PluginMain.getPlayer(player);
-                boolean bypass = PermissionManager.isAllowed(p, PermissionManager.Perms.QueueBypass);
+                final Player p = PluginMain.getPlayer(playerUuid);
+                boolean bypass = PermissionManager.isAllowed(p, Permission.QUEUE_BYPASS);
                 if (entry.getQueue().isEmpty()) {
-                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                    if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                         m_barAPI.disableMessage(p);
                     }
                 } else {
-                    if (talk && PermissionManager.isAllowed(p, PermissionManager.Perms.TalkativeQueue)) {
+                    if (talk && PermissionManager.isAllowed(p, Permission.TALKATIVE_QUEUE)) {
                         PluginMain.say(p, ChatColor.YELLOW + "[AWE] You have "
                                 + getPlayerMessage(entry, bypass));
                     }
 
-                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                    if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                         setBar(p, entry, bypass);
                     }
                 }
@@ -338,8 +337,8 @@ public class BlockPlacer implements Runnable {
      * @param entries destination blocks entrie
      * @return blocks fatched
      */
-    private boolean fetchBlocks(final int blockCnt, final String[] playerNames,
-            List<BlockPlacerEntry> entries, final HashMap<String, Integer> blocksPlaced,
+    private boolean fetchBlocks(final int blockCnt, final UUID[] playerNames,
+            List<BlockPlacerEntry> entries, final HashMap<UUID, Integer> blocksPlaced,
             final List<BlockPlacerJobEntry> jobsToCancel) {
         if (blockCnt <= 0 || playerNames == null || playerNames.length == 0) {
             return false;
@@ -352,7 +351,7 @@ public class BlockPlacer implements Runnable {
         final int maxRetry = playerNames.length;
         int retry = playerNames.length;
         for (int i = 0; i < blockCnt && retry > 0 && !gotDemanding; i += added ? 1 : 0) {
-            final String player = playerNames[keyPos];
+            final UUID player = playerNames[keyPos];
             PlayerEntry playerEntry = m_blocks.get(player);
             if (playerEntry != null) {
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
@@ -394,7 +393,7 @@ public class BlockPlacer implements Runnable {
                 if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
                     Player p = PluginMain.getPlayer(player);
-                    if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                    if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                         m_barAPI.disableMessage(p);
                     }
                 }
@@ -437,24 +436,24 @@ public class BlockPlacer implements Runnable {
     /**
      * Get next job id for player
      *
-     * @param playerName
+     * @param player
      * @return
      */
-    public int getJobId(String player) {
+    public int getJobId(UUID player) {
         PlayerEntry playerEntry;
         synchronized (this) {
-            if (!m_blocks.containsKey(player)) {
+            if (m_blocks.containsKey(player)) {
+                playerEntry = m_blocks.get(player);
+            } else {
                 playerEntry = new PlayerEntry();
                 m_blocks.put(player, playerEntry);
-            } else {
-                playerEntry = m_blocks.get(player);
             }
         }
 
         return playerEntry.getNextJobId();
     }
 
-    public BlockPlacerJobEntry getJob(String player, int jobId) {
+    public BlockPlacerJobEntry getJob(UUID player, int jobId) {
         synchronized (this) {
             if (!m_blocks.containsKey(player)) {
                 return null;
@@ -464,7 +463,7 @@ public class BlockPlacer implements Runnable {
         }
     }
 
-    public void addJob(String player, BlockPlacerJobEntry job) {
+    public void addJob(UUID player, BlockPlacerJobEntry job) {
         synchronized (this) {
             PlayerEntry playerEntry;
 
@@ -487,8 +486,11 @@ public class BlockPlacer implements Runnable {
     /**
      * Add task to perform in async mode
      *
+     * @param player
+     * @param entry
+     * @return 
      */
-    public boolean addTasks(String player, BlockPlacerEntry entry) {
+    public boolean addTasks(UUID player, BlockPlacerEntry entry) {
         synchronized (this) {
             PlayerEntry playerEntry;
 
@@ -504,9 +506,9 @@ public class BlockPlacer implements Runnable {
                 return false;
             }
 
-            boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass);
+            boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), Permission.QUEUE_BYPASS);
             int size = 0;
-            for (Map.Entry<String, PlayerEntry> queueEntry : m_blocks.entrySet()) {
+            for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
                 size += queueEntry.getValue().getQueue().size();
             }
 
@@ -557,7 +559,7 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @param job
      */
-    public void cancelJob(String player, BlockPlacerJobEntry job) {
+    public void cancelJob(UUID player, BlockPlacerJobEntry job) {
         if (job instanceof BlockPlacerUndoJob) {
             PluginMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
             return;
@@ -606,10 +608,10 @@ public class BlockPlacer implements Runnable {
      *
      * @param player
      * @param jobId
+     * @return 
      */
-    public int cancelJob(String player, int jobId) {
-        int newSize = 0;
-        int result = 0;
+    public int cancelJob(UUID player, int jobId) {
+        int newSize, result;
         PlayerEntry playerEntry;
         Queue<BlockPlacerEntry> queue;
         BlockPlacerJobEntry job;
@@ -657,7 +659,7 @@ public class BlockPlacer implements Runnable {
             } else {
                 m_blocks.remove(player);
                 Player p = PluginMain.getPlayer(player);
-                if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                     m_barAPI.disableMessage(p);
                 }
             }
@@ -677,8 +679,9 @@ public class BlockPlacer implements Runnable {
      * Remove all entries for player
      *
      * @param player
+     * @return 
      */
-    public int purge(String player) {
+    public int purge(UUID player) {
         int result = 0;
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
@@ -707,7 +710,7 @@ public class BlockPlacer implements Runnable {
                 result = queue.size();
                 m_blocks.remove(player);
                 Player p = PluginMain.getPlayer(player);
-                if (PermissionManager.isAllowed(p, PermissionManager.Perms.ProgressBar)) {
+                if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                     m_barAPI.disableMessage(p);
                 }
             }
@@ -721,11 +724,12 @@ public class BlockPlacer implements Runnable {
 
     /**
      * Remove all entries
+     * @return Number of purged job entries
      */
     public int purgeAll() {
         int result = 0;
         synchronized (this) {
-            for (String user : getAllPlayers()) {
+            for (UUID user : getAllPlayers()) {
                 result += purge(user);
             }
         }
@@ -738,9 +742,9 @@ public class BlockPlacer implements Runnable {
      *
      * @return players list
      */
-    public String[] getAllPlayers() {
+    public UUID[] getAllPlayers() {
         synchronized (this) {
-            return m_blocks.keySet().toArray(new String[0]);
+            return m_blocks.keySet().toArray(new UUID[0]);
         }
     }
 
@@ -750,7 +754,7 @@ public class BlockPlacer implements Runnable {
      * @param player player login
      * @return number of stored events
      */
-    public PlayerEntry getPlayerEvents(String player) {
+    public PlayerEntry getPlayerEvents(UUID player) {
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 return m_blocks.get(player);
@@ -765,7 +769,7 @@ public class BlockPlacer implements Runnable {
      * @param player player login
      * @return
      */
-    public String getPlayerMessage(String player) {
+    public String getPlayerMessage(UUID player) {
         PlayerEntry entry = null;
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
@@ -773,7 +777,8 @@ public class BlockPlacer implements Runnable {
             }
         }
 
-        boolean bypass = PermissionManager.isAllowed(PluginMain.getPlayer(player), PermissionManager.Perms.QueueBypass);
+        boolean bypass = PermissionManager.isAllowed(PluginMain.getPlayer(player), 
+                Permission.QUEUE_BYPASS);
         return getPlayerMessage(entry, bypass);
     }
 
@@ -820,22 +825,22 @@ public class BlockPlacer implements Runnable {
      * @param playerNames
      * @return
      */
-    private HashSet<String> getVips(String[] playerNames) {
+    private HashSet<UUID> getVips(UUID[] playerNames) {
         if (playerNames == null || playerNames.length == 0) {
-            return new HashSet<String>();
+            return new HashSet<UUID>();
         }
 
-        HashSet<String> result = new HashSet<String>(playerNames.length);
+        HashSet<UUID> result = new HashSet<UUID>(playerNames.length);
 
-        for (String login : playerNames) {
-            Player player = PluginMain.getPlayer(login);
+        for (UUID uuid : playerNames) {
+            Player player = PluginMain.getPlayer(uuid);
             if (player == null) {
                 continue;
             }
 
-            if (PermissionManager.isAllowed(player, PermissionManager.Perms.QueueVip)
-                    && !result.contains(login)) {
-                result.add(login);
+            if (PermissionManager.isAllowed(player, Permission.QUEUE_VIP)
+                    && !result.contains(uuid)) {
+                result.add(uuid);
             }
         }
 
@@ -848,7 +853,7 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @param jobEntry
      */
-    public void removeJob(final String player, BlockPlacerJobEntry jobEntry) {
+    public void removeJob(final UUID player, BlockPlacerJobEntry jobEntry) {
         PlayerEntry playerEntry;
         synchronized (this) {
             playerEntry = m_blocks.get(player);

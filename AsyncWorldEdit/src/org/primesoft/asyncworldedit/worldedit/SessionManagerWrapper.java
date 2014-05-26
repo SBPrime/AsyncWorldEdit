@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,46 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit;
 
-import java.util.UUID;
-import org.bukkit.entity.Player;
+package org.primesoft.asyncworldedit.worldedit;
+
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.session.SessionManager;
+import org.primesoft.asyncworldedit.PlayerManager;
+import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  *
  * @author SBPrime
  */
-public class PlayerWrapper {
-
-    private final Player m_player;
-    private final String m_name;
-    private final UUID m_uuid;
-    private boolean m_mode;    
-
-    public PlayerWrapper(Player player, String name, boolean mode) {
-        m_player = player;
-        m_uuid = player.getUniqueId();
-        m_name = name;
-        m_mode = mode;
-    }
-
-    public Player getPlayer() {
-        return m_player;
-    }
-
-    public UUID getUUID() {
-        return m_uuid;
+public class SessionManagerWrapper extends SessionManager {
+    public SessionManagerWrapper(WorldEdit worldEdit, PlayerManager playerManager) {
+        super(worldEdit);
+        
+        Reflection.set(SessionManager.class, this, "sessions", 
+                new SpyHashMap(worldEdit.getConfiguration(), playerManager), 
+                "Unable to inject LocalSession factory");
     }
     
-    public String getName() {
-        return m_name;
-    }
-
-    public boolean getMode() {
-        return m_mode;
-    }
-
-    public void setMode(boolean mode) {
-        m_mode = mode;
-    }
 }

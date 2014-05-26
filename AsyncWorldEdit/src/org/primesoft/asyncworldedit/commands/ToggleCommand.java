@@ -23,9 +23,12 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.*;
+import org.primesoft.asyncworldedit.Permission;
+import org.primesoft.asyncworldedit.PermissionManager;
 
 /**
  *
@@ -47,12 +50,12 @@ public class ToggleCommand {
                 PluginMain.say(player, ChatColor.RED + "Command available ingame.");
                 return;
             }
-            if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
+            if (!PermissionManager.isAllowed(player, Permission.MODE_CHANGE)) {
                 PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
 
-            wrapper = manager.getPlayer(player.getName());
+            wrapper = manager.getPlayer(player.getUniqueId());
             if (wrapper == null) {
                 return;
             }
@@ -60,13 +63,18 @@ public class ToggleCommand {
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
-                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change_Other)) {
+                if (!PermissionManager.isAllowed(player, Permission.MODE_CHANGE_OTHER)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
                 String name = arg.substring(2);
-                wrapper = manager.getPlayer(name);
+                UUID uuid = sender.getPlayerManager().getPlayerUUID(name);
+                if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
+                    PluginMain.say(player, ChatColor.RED + "Player not found.");
+                    return;
+                }
+                wrapper = manager.getPlayer(uuid);
                 if (wrapper == null) {
                     PluginMain.say(player, ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
                     return;
@@ -90,7 +98,7 @@ public class ToggleCommand {
                     PluginMain.say(player, ChatColor.RED + "Command available ingame.");
                     return;
                 }
-                if (!PermissionManager.isAllowed(player, PermissionManager.Perms.Mode_Change)) {
+                if (!PermissionManager.isAllowed(player, Permission.MODE_CHANGE)) {
                     PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
@@ -102,7 +110,7 @@ public class ToggleCommand {
                     Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
                     return;
                 }
-                wrapper = manager.getPlayer(player.getName());
+                wrapper = manager.getPlayer(player.getUniqueId());
             }
         }
 

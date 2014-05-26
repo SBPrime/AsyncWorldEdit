@@ -26,8 +26,11 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.LocalPlayer;
-import com.sk89q.worldedit.LocalWorld;
-import com.sk89q.worldedit.bags.BlockBag;
+import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.world.World;
+import java.util.UUID;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 
@@ -36,35 +39,48 @@ import org.primesoft.asyncworldedit.PluginMain;
  * @author SBPrime
  */
 public class AsyncEditSessionFactory extends EditSessionFactory {
-    private PluginMain m_parent;
-    
-    public AsyncEditSessionFactory(PluginMain parent) {
+
+    private final PluginMain m_parent;
+    private final EventBus m_eventBus;
+
+    public AsyncEditSessionFactory(PluginMain parent, EventBus eventBus) {
         m_parent = parent;
-    }
-    
-    @Override
-    public EditSession getEditSession(LocalWorld world, int maxBlocks) {
-        return new AsyncEditSession(this, m_parent, ConfigProvider.DEFAULT_USER, world, maxBlocks);
+        m_eventBus = eventBus;
     }
 
     @Override
-    public EditSession getEditSession(LocalWorld world, int maxBlocks, LocalPlayer player) {
-        AsyncEditSession result = new AsyncEditSession(this, m_parent, player.getName(), world, maxBlocks);
-                
-        m_parent.getPlotMeFix().setMask(m_parent.getServer().getPlayer(player.getName()));
+    public EditSession getEditSession(World world, int maxBlocks) {
+        return new AsyncEditSession(m_parent, ConfigProvider.DEFAULT_USER,
+                m_eventBus, world, maxBlocks, null,
+                new EditSessionEvent(world, null, maxBlocks, null));
+    }
+
+    @Override
+    public EditSession getEditSession(World world, int maxBlocks, LocalPlayer player) {
+        UUID uuid = BukkitPlayerWrapper.getUUID(player);
+        AsyncEditSession result = new AsyncEditSession(m_parent, uuid,
+                m_eventBus, world, maxBlocks, null,
+                new EditSessionEvent(world, player, maxBlocks, null));
+        m_parent.getPlotMeFix().setMask(PluginMain.getPlayer(uuid));
+
         return result;
     }
 
     @Override
-    public EditSession getEditSession(LocalWorld world, int maxBlocks, BlockBag blockBag) {
-        return new AsyncEditSession(this, m_parent, ConfigProvider.DEFAULT_USER , world, maxBlocks, blockBag);
+    public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag) {
+        return new AsyncEditSession(m_parent, ConfigProvider.DEFAULT_USER,
+                m_eventBus, world, maxBlocks, blockBag,
+                new EditSessionEvent(world, null, maxBlocks, null));
     }
 
     @Override
-    public EditSession getEditSession(LocalWorld world, int maxBlocks, BlockBag blockBag,
-            LocalPlayer player) {
-        AsyncEditSession result = new AsyncEditSession(this, m_parent, player.getName(), world, maxBlocks, blockBag);
-        m_parent.getPlotMeFix().setMask(m_parent.getServer().getPlayer(player.getName()));
+    public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, LocalPlayer player) {
+        UUID uuid = BukkitPlayerWrapper.getUUID(player);
+        AsyncEditSession result = new AsyncEditSession(m_parent, uuid,
+                m_eventBus, world, maxBlocks, blockBag,
+                new EditSessionEvent(world, player, maxBlocks, null));
+        m_parent.getPlotMeFix().setMask(PluginMain.getPlayer(uuid));
+
         return result;
     }
 }

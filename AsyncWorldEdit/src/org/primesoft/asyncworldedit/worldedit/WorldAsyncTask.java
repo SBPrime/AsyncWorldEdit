@@ -25,6 +25,7 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -47,13 +48,13 @@ public abstract class WorldAsyncTask extends BukkitRunnable {
     /**
      * The player
      */
-    private final String m_player;
+    private final UUID m_player;
     private final BlockPlacer m_blockPlacer;
     private final BlockPlacerJobEntry m_job;
     private final EditSession m_editSession;
     private final World m_world;
 
-    public WorldAsyncTask(final World world, final EditSession editSession, final String player,
+    public WorldAsyncTask(final World world, final EditSession editSession, final UUID player,
             final String commandName, BlockPlacer blocksPlacer, BlockPlacerJobEntry job) {
 
         m_world = world;

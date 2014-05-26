@@ -30,6 +30,7 @@ import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.regions.Region;
+import java.util.UUID;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.ConfigProvider;
@@ -63,14 +64,14 @@ public class ProxyLocalWorld extends BukkitWorld {
     /**
      * The player
      */
-    private final String m_player;
+    private final UUID m_player;
 
     /**
      * The blocks placer
      */
     private final BlockPlacer m_blockPlacer;
     
-    public ProxyLocalWorld(String player, World world) {
+    public ProxyLocalWorld(UUID player, World world) {
         super(world);
         m_player = player;
         m_plugin = PluginMain.getInstance();
