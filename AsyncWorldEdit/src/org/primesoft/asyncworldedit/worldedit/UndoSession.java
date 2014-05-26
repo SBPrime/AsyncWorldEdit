@@ -62,7 +62,7 @@ public class UndoSession extends EditSessionStub {
         m_undoQueue = new ArrayList<Entry<Vector, BaseBlock>>();
         Extent extent = new QueueExtent(m_undoQueue);
 
-        Reflection.set(EditSession.class, "bypassHistory",
+        Reflection.set(EditSession.class, this, "bypassHistory",
                 new MultiStageReorder(extent, false),
                 "Unable to inject history");
     }

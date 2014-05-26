@@ -25,17 +25,24 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.history.changeset.ArrayListHistory;
 import com.sk89q.worldedit.masks.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
-import com.sk89q.worldedit.world.World;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import org.primesoft.asyncworldedit.utils.SessionCanceled;
+import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.worldedit.extent.CancelableWorld;
+import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 
 /**
  *
@@ -43,29 +50,61 @@ import java.util.Set;
  */
 public class CancelabeEditSession extends EditSessionStub {
 
-    public class SessionCanceled extends Exception {
-    }
+    /**
+     * Maximum queued blocks
+     */
+    private final int MAX_QUEUED = 10000;
+
     private final AsyncEditSession m_parent;
-    private boolean m_isCanceled;
+    private final CancelableWorld m_cWorld;
     private final int m_jobId;
-    private Mask m_mask;
+    private final UUID m_player;
+
+    /**
+     * Number of queued blocks
+     */
+    private int m_blocksQueued;
 
     public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
-        super(parent.getEventBus(), parent.getWorld(), parent.getBlockChangeLimit(), 
-            parent.getBlockBag(), parent.getEditSessionEvent());
+        super(parent.getEventBus(), new CancelableWorld(parent.getWorld()),
+                parent.getBlockChangeLimit(), parent.getBlockBag(),
+                parent.getEditSessionEvent());
 
         m_jobId = jobId;
         m_parent = parent;
-        m_isCanceled = false;
-        m_mask = mask;
+        m_player = m_parent.getPlayer();        
+        m_cWorld = (CancelableWorld)getWorld();
+        
+        injectChangeSet();
+        setMask(mask);
+    }
+
+    /**
+     * Injects an ArrayListHistory to allow fast and easy acces to changed
+     * blocks. The BlockOptimizedHistory (default) requires processing to allow
+     * history copy to the parent.
+     */
+    private void injectChangeSet() {
+        ArrayListHistory newChangeSet = new InjectedArrayListHistory();
+        ChangeSetExtent changeExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
+                this, "changeSetExtent", "Unable to get the ChangeSet");
+        if (changeExtent == null) {
+            PluginMain.log("Unable to get the changeSet from EditSession, undo and redo broken.");
+            return;
+        }
+
+        Reflection.set(changeExtent, "changeSet", newChangeSet,
+                "Unable to inject ChangeSet, undo and redo broken.");
+        Reflection.set(EditSession.class, this, "changeSet", newChangeSet,
+                "Unable to inject ChangeSet, undo and redo broken.");
     }
 
     public boolean isCanceled() {
-        return m_isCanceled;
+        return m_cWorld.isCanceled();
     }
 
     public void cancel() {
-        m_isCanceled = true;
+        m_cWorld.cancel();
     }
 
     @Override
@@ -79,21 +118,6 @@ public class CancelabeEditSession extends EditSessionStub {
     }
 
     @Override
-    public void disableQueue() {
-        m_parent.disableQueue();
-    }
-
-    @Override
-    public void enableQueue() {
-        m_parent.enableQueue();
-    }
-
-    @Override
-    public void flushQueue() {
-        m_parent.flushQueue(m_jobId);
-    }
-
-    @Override
     public BaseBlock getBlock(Vector pt) {
         return m_parent.getBlock(pt);
     }
@@ -101,16 +125,6 @@ public class CancelabeEditSession extends EditSessionStub {
     @Override
     public BlockBag getBlockBag() {
         return m_parent.getBlockBag();
-    }
-
-    @Override
-    public int getBlockChangeCount() {
-        return m_parent.getBlockChangeCount();
-    }
-
-    @Override
-    public int getBlockChangeLimit() {
-        return m_parent.getBlockChangeLimit();
     }
 
     @Override
@@ -144,26 +158,6 @@ public class CancelabeEditSession extends EditSessionStub {
     }
 
     @Override
-    public Mask getMask() {
-        return m_mask;
-    }
-
-    @Override
-    public World getWorld() {
-        return m_parent.getWorld();
-    }
-
-    @Override
-    public boolean hasFastMode() {
-        return m_parent.hasFastMode();
-    }
-
-    @Override
-    public boolean isQueueEnabled() {
-        return m_parent.isQueueEnabled();
-    }
-
-    @Override
     public Map<Integer, Integer> popMissingBlocks() {
         return m_parent.popMissingBlocks();
     }
@@ -175,74 +169,47 @@ public class CancelabeEditSession extends EditSessionStub {
 
     @Override
     public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException {
-        if (m_isCanceled) {
+        if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        if (m_mask != null) {
-            if (!m_mask.matches(this, position)) {
-                return false;
-            }
-        }
 
-        return m_parent.setBlock(m_jobId, position, block, stage);
-    }
-
-    @Override
-    public void rememberChange(Vector pt, BaseBlock existing, BaseBlock block) {
-        m_parent.rememberChange(pt, existing, block);
+        forceFlush();
+        return super.setBlock(position, BaseBlockWrapper.wrap(block, m_jobId, true, m_player), stage);
     }
 
     @Override
     public boolean setBlock(Vector pt, BaseBlock block)
             throws MaxChangedBlocksException {
-        if (m_isCanceled) {
+        if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return m_parent.setBlock(pt, block, m_jobId);
+        return super.setBlock(pt, BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override
     public boolean setBlock(Vector pt, Pattern pat) throws MaxChangedBlocksException {
-        if (m_isCanceled) {
+        if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlock(pt, pat, m_jobId);
-    }
 
-    @Override
-    public void setBlockBag(BlockBag blockBag) {
-        m_parent.setBlockBag(blockBag);
-    }
-
-    @Override
-    public void setBlockChangeLimit(int maxBlocks) {
-        m_parent.setBlockChangeLimit(maxBlocks);
+        return super.setBlock(pt, pat);
     }
 
     @Override
     public boolean setBlockIfAir(Vector pt, BaseBlock block) throws MaxChangedBlocksException {
-        return m_parent.setBlockIfAir(pt, block, m_jobId);
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        return super.setBlockIfAir(pt, BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override
     public boolean setChanceBlockIfAir(Vector pos, BaseBlock block, double c) throws MaxChangedBlocksException {
-        return m_parent.setChanceBlockIfAir(pos, block, c);
-    }
-
-    @Override
-    public void setFastMode(boolean fastMode) {
-        m_parent.setFastMode(fastMode);
-    }        
-
-    @Override
-    public void setMask(Mask mask) {
-        m_mask = mask;
-    }
-
-    @Override
-    public int size() {
-        return m_parent.size();
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        return super.setChanceBlockIfAir(pos, BaseBlockWrapper.wrap(block, m_jobId, true, m_player), c);
     }
 
     @Override
@@ -254,8 +221,8 @@ public class CancelabeEditSession extends EditSessionStub {
         //checkAsync(WorldeditOperations.undo);
         UndoSession undoSession = m_parent.doUndo();
 
-//        Mask oldMask = sess.getMask();
-//        sess.setMask(getMask());
+        Mask oldMask = sess.getMask();
+        sess.setMask(getMask());
 
         final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
         final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> placedBlocks = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
@@ -293,14 +260,14 @@ public class CancelabeEditSession extends EditSessionStub {
         }
 
         sess.flushQueue();
-//        sess.setMask(oldMask);
+        sess.setMask(oldMask);
     }
 
     @Override
     public void redo(EditSession sess) {
         doRedo(sess);
     }
-    
+
     public void doRedo(EditSession sess) {
         Mask mask = sess.getMask();
         sess.setMask(getMask());
@@ -311,11 +278,11 @@ public class CancelabeEditSession extends EditSessionStub {
 
     @Override
     public boolean smartSetBlock(Vector pt, BaseBlock block) {
-        if (m_isCanceled) {
+        if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.smartSetBlock(pt, block);
-    }       
+        return super.smartSetBlock(pt, BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
+    }
 
     public void resetAsync() {
         m_parent.resetAsync();
@@ -325,4 +292,22 @@ public class CancelabeEditSession extends EditSessionStub {
         return m_parent;
     }
 
+    @Override
+    public void flushQueue() {
+        m_blocksQueued = 0;
+        super.flushQueue();
+    }
+
+    /**
+     * Force block flush when to many has been queued
+     */
+    private void forceFlush() {
+        if (isQueueEnabled()) {
+            m_blocksQueued++;
+            if (m_blocksQueued > MAX_QUEUED) {
+                m_blocksQueued = 0;
+                super.flushQueue();
+            }
+        }
+    }
 }

@@ -23,7 +23,16 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.history.change.BlockChange;
+import com.sk89q.worldedit.history.change.Change;
+import com.sk89q.worldedit.history.changeset.ArrayListHistory;
+import com.sk89q.worldedit.history.changeset.ChangeSet;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -31,6 +40,8 @@ import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import org.primesoft.asyncworldedit.utils.SessionCanceled;
+import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 
 /**
  *
@@ -92,14 +103,71 @@ public abstract class AsyncTask extends BukkitRunnable {
         } catch (MaxChangedBlocksException ex) {
             PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
         } catch (IllegalArgumentException ex) {
-            if (ex.getCause() instanceof CancelabeEditSession.SessionCanceled) {
+            if (ex.getCause() instanceof SessionCanceled) {
                 PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
                 m_job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
             }
         }
 
         m_job.taskDone();
-        m_editSession.getParent().removeAsync(m_job);
+        AsyncEditSession parent = m_editSession.getParent();
+        copyChangeSet(parent);
+        parent.removeAsync(m_job);
+    }
+
+    /**
+     * Copy changed items to parent edit session This works best when change set
+     * is set to ArrayListHistory
+     *
+     * @param parent
+     */
+    private void copyChangeSet(AsyncEditSession parent) {                
+        ChangeSet cs = m_editSession.getChangeSet();
+        ChangeSet csParent = parent.getChangeSet();
+        
+        if (cs.size() == 0) {
+            return;
+        }
+                
+        if ((cs instanceof InjectedArrayListHistory)) {
+            for (Iterator<Change> it = cs.forwardIterator(); it.hasNext();) {
+                csParent.add(it.next());
+            }
+            return;
+        }
+
+        PluginMain.log("Warning: ChangeSet is not set to ArrayListHistory, rebuilding...");
+        HashMap<BlockVector, BaseBlock> oldBlocks = new HashMap<BlockVector, BaseBlock>();
+
+        for (Iterator<Change> it = cs.backwardIterator(); it.hasNext();) {
+            Change chg = it.next();
+            if (chg instanceof BlockChange) {
+                BlockChange bchg = (BlockChange) chg;
+                BlockVector pos = bchg.getPosition();
+                BaseBlock oldBlock = bchg.getPrevious();
+
+                if (oldBlocks.containsKey(pos)) {
+                    oldBlocks.remove(pos);
+                }
+                oldBlocks.put(pos, oldBlock);
+            }
+        }
+
+        for (Iterator<Change> it = cs.forwardIterator(); it.hasNext();) {
+            Change chg = it.next();
+            if (chg instanceof BlockChange) {
+                BlockChange bchg = (BlockChange) chg;
+                BlockVector pos = bchg.getPosition();
+                BaseBlock block = bchg.getCurrent();
+                BaseBlock oldBlock = oldBlocks.get(pos);
+
+                if (oldBlock != null) {
+                    csParent.add(new BlockChange(pos, oldBlock, block));
+                }
+            } else {
+                csParent.add(chg);
+            }
+        }
     }
 
     /**

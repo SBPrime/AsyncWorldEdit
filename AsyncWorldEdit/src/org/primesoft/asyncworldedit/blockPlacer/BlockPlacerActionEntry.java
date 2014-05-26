@@ -53,9 +53,8 @@ public class BlockPlacerActionEntry extends BlockPlacerEntry {
         return m_isDone;
     }
 
-    public BlockPlacerActionEntry(AsyncEditSession editSession,
-            int jobId, Action action) {
-        super(editSession, jobId);
+    public BlockPlacerActionEntry(int jobId, Action action) {
+        super(jobId);
         m_action = action;
     }
 

@@ -23,51 +23,54 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import org.bukkit.World;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.utils.FuncEx;
+import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
 /**
  *
  * @author Prime
  */
-public class BlockPlacerBlockEntry extends BlockPlacerEntry {
-    private final Vector m_location;
-    private final BaseBlock m_newBlock;
-    private final Stage m_stage;
+public class WorldExtentBlockEntry<T, TException extends Exception> 
+    extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
 
+    private final Vector m_location;
+    private final FuncEx<T, TException> m_function;
+    private final String m_worldName;
+
+    
+    @Override
+    public String getWorldName() {
+        return m_worldName;
+    }
+    
+    @Override
     public Vector getLocation() {
         return m_location;
-    }
-
-    public BaseBlock getNewBlock() {
-        return m_newBlock;
     }
 
     @Override
     public boolean isDemanding() {
         return false;
     }
-    
-    
 
-    public BlockPlacerBlockEntry(AsyncEditSession editSession,
-            int jobId, Vector location, BaseBlock newBlock, Stage stage) {
-        super(editSession, jobId);
+    public WorldExtentBlockEntry(WorldExtent worldExtent,
+            int jobId, Vector location, FuncEx<T, TException> function) {
+        super(jobId);
         m_location = location;
-        m_newBlock = newBlock;
-        m_stage = stage;
+        m_function = function;
+        m_worldName = worldExtent.getName();
     }
 
     @Override
-    public void Process(BlockPlacer bp) {        
-        final World world = m_editSession.getCBWorld();
-        
-        m_editSession.doSetBlock(m_location, m_newBlock, m_stage);
-        if (world != null) {
-            bp.getPhysicsWatcher().removeLocation(world.getName(), m_location);
+    public void Process(BlockPlacer bp) {
+        try {
+            //TODO: Shuld we ignore the function resoult?
+            m_function.Execute();
+        } catch (Exception ex) {
+        }
+        if (m_worldName != null) {
+            bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
         }
     }
 }

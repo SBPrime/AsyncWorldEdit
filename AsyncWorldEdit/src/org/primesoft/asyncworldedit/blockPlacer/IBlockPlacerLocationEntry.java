@@ -21,38 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.Vector2D;
-import org.bukkit.World;
+import com.sk89q.worldedit.Vector;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
  */
-public class BlockPlacerRegenerateEntry extends BlockPlacerEntry {
-
-    private final World m_world;
-    private final Vector2D m_chunk;
-
-    public BlockPlacerRegenerateEntry(int jobId, World world, Vector2D chunk) {
-        super(jobId);
-
-        m_chunk = chunk;
-        m_world = world;
-    }
-    
-    @Override
-    public boolean isDemanding() {
-        return true;
-    }
-
-    @Override
-    public void Process(BlockPlacer bp) {
-        try {
-            m_world.regenerateChunk(m_chunk.getBlockX(), m_chunk.getBlockZ());
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
+public interface IBlockPlacerLocationEntry {
+    String getWorldName();
+    Vector getLocation();
 }

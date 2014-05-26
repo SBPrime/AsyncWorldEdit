@@ -32,6 +32,7 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
  */
 public class BlockPlacerMaskEntry extends BlockPlacerEntry {
     private final Mask m_mask;
+    private final AsyncEditSession m_editSession;
 
     public Mask getMask() {
         return m_mask;
@@ -44,7 +45,8 @@ public class BlockPlacerMaskEntry extends BlockPlacerEntry {
 
     public BlockPlacerMaskEntry(AsyncEditSession editSession,
             int jobId, Mask mask) {
-        super(editSession, jobId);
+        super(jobId);
+        m_editSession = editSession;
         m_mask = mask;
     }
 

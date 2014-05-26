@@ -32,3 +32,4 @@ package org.primesoft.asyncworldedit.utils;
 public interface Func<T> {
     T Execute();
 }
+

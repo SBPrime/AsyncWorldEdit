@@ -42,8 +42,12 @@ import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.BlocksHubIntegration;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.WorldExtentBlockEntry;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
@@ -62,6 +66,21 @@ public class WorldExtent implements World {
      */
     private AsyncEditSession m_editSession;
 
+    /**
+     * The block placer
+     */
+    private BlockPlacer m_blockPlacer;
+
+    /**
+     * The blocks hub
+     */
+    private BlocksHubIntegration m_blocksHub;
+    
+    /**
+     * Craft bukkit world - used for block loging
+     */
+    private org.bukkit.World m_cbWorld;
+
     public WorldExtent(World world) {
         m_parent = world;
     }
@@ -69,9 +88,15 @@ public class WorldExtent implements World {
     /**
      *
      * @param editSession
+     * @param bh
+     * @param bWorld
      */
-    public void Initialize(AsyncEditSession editSession) {
+    public void Initialize(AsyncEditSession editSession, BlocksHubIntegration bh,
+            org.bukkit.World bWorld) {
         m_editSession = editSession;
+        m_blockPlacer = m_editSession.getBlockPlacer();
+        m_blocksHub = bh;
+        m_cbWorld = bWorld;
     }
 
     @Override
@@ -131,7 +156,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.getBlockType(vector);
             }
-        });
+        },vector);
     }
 
     @Override
@@ -142,22 +167,46 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.getBlockData(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
-    public boolean setBlock(final Vector vector, final BaseBlock bb, final boolean bln) throws WorldEditException {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean setBlock(final Vector vector, BaseBlock bb, final boolean bln) throws WorldEditException {
+        final WorldExtentParam param = WorldExtentParam.extract(bb);
+                
+        if (!m_blocksHub.canPlace(param.getPlayer(), m_cbWorld, vector)) {
+            return false;
+        }
+
+        FuncEx<Boolean, WorldEditException> func = new FuncEx<Boolean, WorldEditException>() {
+
             @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.setBlock(vector, bb, bln);
-                } catch (WorldEditException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
+            public Boolean Execute() throws WorldEditException {
+                BaseBlock old = m_parent.getBlock(vector);
+                boolean result = m_parent.setBlock(vector, param.getBlock(), bln);
+                if (result) {
+                    logBlock(param, vector, old);
                 }
+
+                return result;
             }
-        });
+        };
+
+        if (!param.isAsync()) {
+            return func.Execute();
+        }
+
+        return m_blockPlacer.addTasks(param.getPlayer(), new WorldExtentBlockEntry(this, param.getJobId(), vector, func));
+    }
+
+    
+    /**
+     * Log placed block using blocks hub
+     * @param param
+     * @param old 
+     */
+    private void logBlock(WorldExtentParam param, Vector location, BaseBlock old) {
+        m_blocksHub.logBlock(param.getPlayer(), m_cbWorld, location, old, param.getBlock());
     }
 
     @Override
@@ -167,7 +216,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.setBlockType(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -177,7 +226,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.setBlockTypeFast(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -187,7 +236,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.setBlockData(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -197,7 +246,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.setBlockDataFast(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -207,7 +256,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.setTypeIdAndData(vector, i, i1);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -217,7 +266,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.setTypeIdAndDataFast(vector, i, i1);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -227,7 +276,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.getBlockLightLevel(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -237,7 +286,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.clearContainerBlockContents(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -247,7 +296,7 @@ public class WorldExtent implements World {
             public BiomeType Execute() {
                 return m_parent.getBiome(vd);
             }
-        });
+        }, new Vector(vd.getX(), 0, vd.getZ()));
     }
 
     @Override
@@ -257,7 +306,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.setBiome(vd, bt);
             }
-        });
+        }, new Vector(vd.getX(), 0, vd.getZ()));
     }
 
     @Override
@@ -267,7 +316,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.dropItem(vector, bis, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -277,7 +326,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.dropItem(vector, bis);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -287,7 +336,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.simulateBlockMine(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -317,7 +366,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.killMobs(vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -327,7 +376,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.killMobs(vector, i, bln);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -337,7 +386,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.killMobs(vector, d, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -347,7 +396,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.removeEntities(et, vector, i);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -372,7 +421,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -387,7 +436,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -402,7 +451,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -417,7 +466,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -432,7 +481,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -448,7 +497,7 @@ public class WorldExtent implements World {
                     return false;
                 }
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -458,7 +507,7 @@ public class WorldExtent implements World {
             public void Execute() {
                 m_parent.checkLoadedChunk(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -488,7 +537,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.playEffect(vector, i, i1);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -499,7 +548,7 @@ public class WorldExtent implements World {
             public Boolean Execute() {
                 return m_parent.queueBlockBreakEffect(si, vector, i, d);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -529,7 +578,7 @@ public class WorldExtent implements World {
             public BaseBlock Execute() {
                 return m_parent.getBlock(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
@@ -539,22 +588,36 @@ public class WorldExtent implements World {
             public BaseBlock Execute() {
                 return m_parent.getLazyBlock(vector);
             }
-        });
+        }, vector);
     }
 
     @Override
     public boolean setBlock(final Vector vector, final BaseBlock bb) throws WorldEditException {
-        return m_editSession.performSafe(new Func<Boolean>() {
+        final WorldExtentParam param = WorldExtentParam.extract(bb);
+        
+        if (!m_blocksHub.canPlace(param.getPlayer(), m_cbWorld, vector)) {
+            return false;
+        }
+
+        FuncEx<Boolean, WorldEditException> func = new FuncEx<Boolean, WorldEditException>() {
+
             @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.setBlock(vector, bb);
-                } catch (WorldEditException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
+            public Boolean Execute() throws WorldEditException {
+                BaseBlock old = m_parent.getBlock(vector);
+                boolean result = m_parent.setBlock(vector, param.getBlock());
+                if (result) {
+                    logBlock(param, vector, old);
                 }
+
+                return result;
             }
-        });
+        };
+
+        if (!param.isAsync()) {
+            return func.Execute();
+        }
+
+        return m_blockPlacer.addTasks(param.getPlayer(), new WorldExtentBlockEntry(this, param.getJobId(), vector, func));
     }
 
     @Override

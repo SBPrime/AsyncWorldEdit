@@ -47,9 +47,8 @@ public class BlockPlacerEntityEntry extends BlockPlacerEntry {
      */
     private final CuboidClipboard m_clipboard;
 
-    public BlockPlacerEntityEntry(AsyncEditSession editSession,
-            int jobId, Object data, Vector location, CuboidClipboard clipboard) {
-        super(editSession, jobId);
+    public BlockPlacerEntityEntry(int jobId, Object data, Vector location, CuboidClipboard clipboard) {
+        super(jobId);
 
         m_data = data;
         m_location = location;
