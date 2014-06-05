@@ -34,17 +34,18 @@ import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.Permission;
 import org.primesoft.asyncworldedit.PermissionManager;
+import org.primesoft.asyncworldedit.utils.InOutParam;
 
 /**
  *
  * @author SBPrime
  */
 public class BlockPlacer implements Runnable {
-
     /**
      * Maximum number of retries
      */
     private final int MAX_RETRIES = 200;
+
     /**
      * MTA mutex
      */
@@ -54,14 +55,17 @@ public class BlockPlacer implements Runnable {
      * The physics watcher
      */
     private final PhysicsWatch m_physicsWatcher;
+
     /**
      * Bukkit scheduler
      */
     private final BukkitScheduler m_scheduler;
+
     /**
      * Current scheduler task
      */
     private final BukkitTask m_task;
+
     /**
      * Current scheduler get task
      */
@@ -76,51 +80,63 @@ public class BlockPlacer implements Runnable {
      * Logged events queue (per player)
      */
     private final HashMap<UUID, PlayerEntry> m_blocks;
+
     /**
      * Get blocks requests
      */
     private final List<BlockPlacerEntry> m_getBlocks = new ArrayList<BlockPlacerEntry>();
+
     /**
      * All locked queues
      */
     private final HashSet<UUID> m_lockedQueues;
+
     /**
      * Should block places shut down
      */
     private boolean m_shutdown;
+
     /**
      * Player block queue hard limit (max bloks count)
      */
     private final int m_queueHardLimit;
+
     /**
      * Player block queue soft limit (minimum number of blocks before queue is
      * unlocked)
      */
     private final int m_queueSoftLimit;
+
     /**
      * Global queue max size
      */
     private final int m_queueMaxSize;
+
     /**
      * Block placing interval (in ticks)
      */
     private final long m_interval;
+
     /**
      * Talk interval
      */
     private final int m_talkInterval;
+
     /**
      * Run number
      */
     private int m_runNumber;
+
     /**
      * Last run time
      */
     private long m_lastRunTime;
+
     /**
      * The main thread
      */
     private Thread m_mainThread;
+
     /**
      * The bar API
      */
@@ -179,7 +195,6 @@ public class BlockPlacer implements Runnable {
                 return;
             }
             m_getTask = m_scheduler.runTaskTimer(m_plugin, new Runnable() {
-
                 @Override
                 public void run() {
                     m_mainThread = Thread.currentThread();
@@ -233,7 +248,8 @@ public class BlockPlacer implements Runnable {
                 try {
                     //Force thread release!
                     Thread.sleep(1);
-                } catch (InterruptedException ex) {
+                }
+                catch (InterruptedException ex) {
                 }
             }
         }
@@ -256,118 +272,144 @@ public class BlockPlacer implements Runnable {
     public void run() {
         m_mainThread = Thread.currentThread();
 
-        long now = System.currentTimeMillis();
-        List<BlockPlacerEntry> entries = new ArrayList<BlockPlacerEntry>(ConfigProvider.getBlockCount() + ConfigProvider.getVipBlockCount());
-        boolean added = false;
-        boolean retry = true;
+        long enterFunctionTime = System.currentTimeMillis();
+        final long timeDelte = enterFunctionTime - m_lastRunTime;
+
+        boolean talk = false;
         final List<BlockPlacerJobEntry> jobsToCancel = new ArrayList<BlockPlacerJobEntry>();
 
+        final UUID[] keys, vipKeys;
+        final HashSet<UUID> vips;
+        final int blockCount, blockCountVip;
+        final int time, timeVip;
+        //Number of blocks placed for player
+        final HashMap<UUID, Integer> blocksPlaced = new HashMap<UUID, Integer>();
+
         synchronized (this) {
-            final UUID[] keys = m_blocks.keySet().toArray(new UUID[0]);
+            keys = m_blocks.keySet().toArray(new UUID[0]);
 
-            final HashSet<UUID> vips = getVips(keys);
-            final UUID[] vipKeys = vips.toArray(new UUID[0]);
+            vips = getVips(keys);
+            vipKeys = vips.toArray(new UUID[0]);
 
-            final int blockCount = ConfigProvider.getBlockCount();
-            final int blockCountVip = ConfigProvider.getVipBlockCount();
-            final HashMap<UUID, Integer> blocksPlaced = new HashMap<UUID, Integer>();
-
-            added |= fetchBlocks(blockCount, keys, entries, blocksPlaced, jobsToCancel);
-            added |= fetchBlocks(blockCountVip, vipKeys, entries, blocksPlaced, jobsToCancel);
-
-            if (!added && m_shutdown) {
-                stop();
-            }
+            blockCount = ConfigProvider.getBlockCount();
+            blockCountVip = ConfigProvider.getVipBlockCount();
+            time = ConfigProvider.getBlockPlacingTime();
+            timeVip = ConfigProvider.getVipBlockPlacingTime();
 
             m_runNumber++;
-            boolean talk = false;
-            if (m_runNumber > m_talkInterval) {
-                m_runNumber = 0;
-                talk = true;
-            }
-            final long timeDelte = now - m_lastRunTime;
-
-            for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
-                UUID playerUuid = queueEntry.getKey();
-                PlayerEntry entry = queueEntry.getValue();
-                Integer cnt = blocksPlaced.get(playerUuid);
-
-                entry.updateSpeed(cnt != null ? cnt : 0, timeDelte);
-
-                final Player p = PluginMain.getPlayer(playerUuid);
-                boolean bypass = PermissionManager.isAllowed(p, Permission.QUEUE_BYPASS);
-                if (entry.getQueue().isEmpty()) {
-                    if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
-                        m_barAPI.disableMessage(p);
-                    }
-                } else {
-                    if (talk && PermissionManager.isAllowed(p, Permission.TALKATIVE_QUEUE)) {
-                        PluginMain.say(p, ChatColor.YELLOW + "[AWE] You have "
-                                + getPlayerMessage(entry, bypass));
-                    }
-
-                    if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
-                        setBar(p, entry, bypass);
-                    }
-                }
-            }
+        }
+        if (m_runNumber > m_talkInterval) {
+            m_runNumber = 0;
+            talk = true;
         }
 
-        for (BlockPlacerEntry entry : entries) {
+        synchronized (this) {
+            if (m_shutdown) {
+                stop();
+            }
+        }
+        InOutParam<Integer> seqNumber = InOutParam.Ref(0);
+        long startTime = System.currentTimeMillis();
+        int blocks = 0;
+        boolean process = true;
+        while (process) {
+            BlockPlacerEntry entry;
+            synchronized (this) {
+                entry = fetchBlocks(keys, seqNumber, blocksPlaced, jobsToCancel);
+            }
             if (entry != null) {
                 entry.Process(this);
             }
+
+
+            if (entry != null) {
+                process = !entry.isDemanding(); //Allow only one demanding task
+                process &= time == -1 || (System.currentTimeMillis() - startTime) < time;
+                process &= blockCount == -1 || blocks <= blockCount;
+            } else {
+                process = false;
+            }
         }
 
-        for (BlockPlacerJobEntry job : jobsToCancel) {
+
+        seqNumber.setValue(0);
+        startTime = System.currentTimeMillis();
+        blocks = 0;
+        process = true;
+        while (process) {
+            BlockPlacerEntry entry;
+            synchronized (this) {
+                entry = fetchBlocks(vipKeys, seqNumber, blocksPlaced, jobsToCancel);
+            }
+            if (entry != null) {
+                entry.Process(this);
+            }
+
+            if (entry != null) {
+                process = !entry.isDemanding(); //Allow only one demanding task
+                process &= time == -1 || (System.currentTimeMillis() - startTime) < timeVip;
+                process &= blockCount == -1 || blocks <= blockCountVip;
+            } else {
+                process = false;
+            }
+        }
+
+        synchronized (this) {
+            for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
+                UUID playerUUID = queueEntry.getKey();
+                PlayerEntry entry = queueEntry.getValue();
+                Integer cnt = blocksPlaced.get(playerUUID);
+
+                showProgress(playerUUID, entry, cnt != null ? cnt : 0, timeDelte, talk);
+            }
+        }
+
+        for (BlockPlacerJobEntry job
+                : jobsToCancel) {
             job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
             onJobRemoved(job);
         }
 
-        m_lastRunTime = now;
+        m_lastRunTime = enterFunctionTime;
     }
 
     /**
-     * Fetch the blocks that are going to by placed in this run
+     * Fetch next block that is going to by placed in this run
      *
-     * @param blockCnt number of blocks to fetch
      * @param playerNames list of all players
-     * @param entries destination blocks entrie
-     * @return blocks fatched
+     * @param seqNumber sequence number in player names (everyone is treated
+     * equally)
+     * @param blocksPlaced number of blocks placed for player
+     * @param jobsToCancel jobs to cancel
+     * @return fatched block
      */
-    private boolean fetchBlocks(final int blockCnt, final UUID[] playerNames,
-            List<BlockPlacerEntry> entries, final HashMap<UUID, Integer> blocksPlaced,
-            final List<BlockPlacerJobEntry> jobsToCancel) {
-        if (blockCnt <= 0 || playerNames == null || playerNames.length == 0) {
-            return false;
+    private BlockPlacerEntry fetchBlocks(final UUID[] playerNames,
+                                         InOutParam<Integer> seqNumber,
+                                         final HashMap<UUID, Integer> blocksPlaced,
+                                         final List<BlockPlacerJobEntry> jobsToCancel) {
+        if (playerNames == null || playerNames.length == 0) {
+            return null;
         }
 
-        int keyPos = 0;
-        boolean added = false;
-        boolean result = false;
-        boolean gotDemanding = false;
-        final int maxRetry = playerNames.length;
-        int retry = playerNames.length;
-        for (int i = 0; i < blockCnt && retry > 0 && !gotDemanding; i += added ? 1 : 0) {
+        int keyPos = seqNumber.getValue();
+        BlockPlacerEntry result = null;
+
+        for (int retry = playerNames.length; result == null && retry > 0; retry --) {
             final UUID player = playerNames[keyPos];
-            PlayerEntry playerEntry = m_blocks.get(player);
+            final PlayerEntry playerEntry = m_blocks.get(player);
             if (playerEntry != null) {
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 synchronized (queue) {
                     if (!queue.isEmpty()) {
                         BlockPlacerEntry entry = queue.poll();
                         if (entry != null) {
-                            entries.add(entry);
-
-                            added = true;
+                            result = entry;
 
                             if (blocksPlaced.containsKey(player)) {
                                 blocksPlaced.put(player, blocksPlaced.get(player) + 1);
                             } else {
                                 blocksPlaced.put(player, 1);
                             }
-
-                            gotDemanding |= entry.isDemanding();
                         }
                     } else {
                         for (BlockPlacerJobEntry job : playerEntry.getJobs()) {
@@ -383,10 +425,10 @@ public class BlockPlacer implements Runnable {
                         }
                     }
                 }
+
                 final int size = queue.size();
-                if (size < m_queueSoftLimit && m_lockedQueues.contains(player)) {
-                    PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
-                    m_lockedQueues.remove(player);
+                if (size < m_queueSoftLimit) {
+                    unlockQueue(player, true);
                 }
                 if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
@@ -395,18 +437,13 @@ public class BlockPlacer implements Runnable {
                         m_barAPI.disableMessage(p);
                     }
                 }
-            } else if (m_lockedQueues.contains(player)) {
-                PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
-                m_lockedQueues.remove(player);
+            } else {
+                unlockQueue(player, true);
             }
             keyPos = (keyPos + 1) % playerNames.length;
-            if (added) {
-                retry = maxRetry;
-                result = true;
-            } else {
-                retry--;
-            }
         }
+
+        seqNumber.setValue(keyPos);
         return result;
     }
 
@@ -584,7 +621,8 @@ public class BlockPlacer implements Runnable {
             try {
                 Thread.sleep(10);
                 maxWaitTime--;
-            } catch (InterruptedException ex) {
+            }
+            catch (InterruptedException ex) {
             }
             status = job.getStatus();
         }
@@ -662,13 +700,8 @@ public class BlockPlacer implements Runnable {
                     m_barAPI.disableMessage(p);
                 }
             }
-            if (m_lockedQueues.contains(player)) {
-                if (newSize == 0) {
-                    m_lockedQueues.remove(player);
-                } else if (newSize < m_queueSoftLimit) {
-                    PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
-                    m_lockedQueues.remove(player);
-                }
+            if (newSize == 0 || newSize < m_queueSoftLimit) {
+                unlockQueue(player, newSize != 0);
             }
         }
         return result;
@@ -714,9 +747,7 @@ public class BlockPlacer implements Runnable {
                     m_barAPI.disableMessage(p);
                 }
             }
-            if (m_lockedQueues.contains(player)) {
-                m_lockedQueues.remove(player);
-            }
+            unlockQueue(player, false);
         }
 
         return result;
@@ -928,6 +959,52 @@ public class BlockPlacer implements Runnable {
             for (IBlockPlacerListener listener : m_jobAddedListeners) {
                 listener.jobRemoved(job);
             }
+        }
+    }
+
+    /**
+     * Show player operation progress and update speed
+     *
+     * @param playerUuid the player UUID
+     * @param entry Player entry
+     * @param placedBlocks number of blocks placed in this run
+     * @param timeDelte ellapsed time from last run
+     * @param talk "tell" the stats on chat
+     */
+    private void showProgress(UUID playerUuid, PlayerEntry entry,
+                              int placedBlocks, final long timeDelte,
+                              final boolean talk) {
+        entry.updateSpeed(placedBlocks, timeDelte);
+
+        final Player p = PluginMain.getPlayer(playerUuid);
+        boolean bypass = PermissionManager.isAllowed(p, Permission.QUEUE_BYPASS);
+        if (entry.getQueue().isEmpty()) {
+            if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
+                m_barAPI.disableMessage(p);
+            }
+        } else {
+            if (talk && PermissionManager.isAllowed(p, Permission.TALKATIVE_QUEUE)) {
+                PluginMain.say(p, ChatColor.YELLOW + "[AWE] You have "
+                        + getPlayerMessage(entry, bypass));
+            }
+
+            if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
+                setBar(p, entry, bypass);
+            }
+        }
+    }
+
+    /**
+     * Unlock player queue
+     *
+     * @param player
+     */
+    private void unlockQueue(final UUID player, boolean talk) {
+        if (m_lockedQueues.contains(player)) {
+            if (talk) {
+                PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
+            }
+            m_lockedQueues.remove(player);
         }
     }
 }

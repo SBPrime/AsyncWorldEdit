@@ -60,6 +60,10 @@ public class ConfigProvider {
 
     private static long m_interval;
 
+    private static int m_timeCount;
+    
+    private static int m_vipTimeCount;
+    
     private static int m_blocksCnt;
 
     private static int m_vipBlocksCnt;
@@ -135,6 +139,23 @@ public class ConfigProvider {
         return m_interval;
     }
 
+    /**
+     * Maximum time in miliseconds spend on rendering blocks
+     * @return 
+     */
+    public static int getBlockPlacingTime(){
+        return m_timeCount;
+    }
+    
+    
+    /**
+     * Maximum time in miliseconds spend on rendering blocks
+     * @return 
+     */
+    public static int getVipBlockPlacingTime(){
+        return m_vipTimeCount;
+    }
+    
     /**
      * Get the number of blocks placed
      *
@@ -306,6 +327,8 @@ public class ConfigProvider {
     private static void parseRenderSection(ConfigurationSection mainSection) {
         ConfigurationSection renderSection = mainSection.getConfigurationSection("rendering");
         if (renderSection == null) {
+            m_timeCount = 20;
+            m_vipTimeCount = 10;
             m_blocksCnt = 1000;
             m_vipBlocksCnt = 1000;
             m_interval = 15;
@@ -316,6 +339,8 @@ public class ConfigProvider {
         } else {
             m_blocksCnt = renderSection.getInt("blocks", 1000);
             m_vipBlocksCnt = renderSection.getInt("blocks-vip", 1000);
+            m_timeCount = renderSection.getInt("time", 20);
+            m_vipTimeCount = renderSection.getInt("time-vip", 10);
             m_interval = renderSection.getInt("interval", 15);
             m_queueTalkInterval = renderSection.getInt("talk-interval", 10);
             m_queueSoftLimit = renderSection.getInt("queue-limit-soft", 250000);
@@ -325,6 +350,20 @@ public class ConfigProvider {
             if (m_queueMaxSize <= 0) {
                 PluginMain.log("Warinig: Block queue is disabled!");
             }
+            
+            if (m_timeCount < 0 && m_blocksCnt < 0)
+            {
+                PluginMain.log("Warinig: Time and blocks are set to unlimited!");
+                m_timeCount = 20;
+                m_blocksCnt = -1;
+            }
+            if (m_vipTimeCount < 0 && m_vipBlocksCnt < 0)
+            {
+                PluginMain.log("Warinig: Vip time and blocks are set to unlimited!");
+                m_vipTimeCount = 20;
+                m_vipBlocksCnt = -1;
+            }
+            
         }
     }
 
