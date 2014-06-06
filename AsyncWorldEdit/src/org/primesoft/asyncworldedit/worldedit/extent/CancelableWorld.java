@@ -40,9 +40,15 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.BaseBlockWrapper;
+import org.primesoft.asyncworldedit.worldedit.BlockVector2DWrapper;
+import org.primesoft.asyncworldedit.worldedit.Vector2DWrapper;
+import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
 
 /**
  *
@@ -118,7 +124,8 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlock(vector, BaseBlockWrapper.wrap(bb, m_jobId, true, m_player), bln);
+        return m_parent.setBlock(VectorWrapper.wrap(vector, m_jobId, true, m_player), 
+                BaseBlockWrapper.wrap(bb, m_jobId, true, m_player), bln);
     }
 
     @Override
@@ -126,7 +133,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlockType(vector, i);
+        return m_parent.setBlockType(VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
     }
 
     @Override
@@ -134,7 +141,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlockTypeFast(vector, i);
+        return m_parent.setBlockTypeFast(VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
     }
 
     @Override
@@ -142,7 +149,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        m_parent.setBlockData(vector, i);
+        m_parent.setBlockData(VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
     }
 
     @Override
@@ -150,7 +157,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        m_parent.setBlockDataFast(vector, i);
+        m_parent.setBlockDataFast(VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
     }
 
     @Override
@@ -158,7 +165,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setTypeIdAndData(vector, i, i1);
+        return m_parent.setTypeIdAndData(VectorWrapper.wrap(vector, m_jobId, true, m_player), i, i1);
     }
 
     @Override
@@ -166,7 +173,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setTypeIdAndDataFast(vector, i, i1);
+        return m_parent.setTypeIdAndDataFast(VectorWrapper.wrap(vector, m_jobId, true, m_player), i, i1);
     }
 
     @Override
@@ -176,7 +183,7 @@ public class CancelableWorld implements World {
 
     @Override
     public boolean clearContainerBlockContents(Vector vector) {
-        return m_parent.clearContainerBlockContents(vector);
+        return m_parent.clearContainerBlockContents(VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
     @Override
@@ -189,22 +196,22 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        m_parent.setBiome(vd, bt);
+        m_parent.setBiome(Vector2DWrapper.wrap(vd, m_jobId, true, m_player), bt);
     }
 
     @Override
     public void dropItem(Vector vector, BaseItemStack bis, int i) {
-        m_parent.dropItem(vector, bis, i);
+        m_parent.dropItem(VectorWrapper.wrap(vector, m_jobId, true, m_player), bis, i);
     }
 
     @Override
     public void dropItem(Vector vector, BaseItemStack bis) {
-        m_parent.dropItem(vector, bis);
+        m_parent.dropItem(VectorWrapper.wrap(vector, m_jobId, true, m_player), bis);
     }
 
     @Override
     public void simulateBlockMine(Vector vector) {
-        m_parent.simulateBlockMine(vector);
+        m_parent.simulateBlockMine(VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
     @Override
@@ -225,7 +232,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.killMobs(vector, i);
+        return m_parent.killMobs(VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
     }
 
     @Override
@@ -233,7 +240,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.killMobs(vector, i, bln);
+        return m_parent.killMobs(VectorWrapper.wrap(vector, m_jobId, true, m_player), i, bln);
     }
 
     @Override
@@ -241,7 +248,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.killMobs(vector, d, i);
+        return m_parent.killMobs(VectorWrapper.wrap(vector, m_jobId, true, m_player), d, i);
     }
 
     @Override
@@ -250,7 +257,7 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.removeEntities(et, vector, i);
+        return m_parent.removeEntities(et, VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
     }
 
     @Override
@@ -268,7 +275,7 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.generateTree(tt, es, vector);
+        return m_parent.generateTree(tt, es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
     @Override
@@ -277,7 +284,7 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.generateTree(es, vector);
+        return m_parent.generateTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
     @Override
@@ -286,7 +293,7 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.generateBigTree(es, vector);
+        return m_parent.generateBigTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
     @Override
@@ -295,7 +302,7 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.generateBirchTree(es, vector);
+        return m_parent.generateBirchTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
     @Override
@@ -304,7 +311,7 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.generateRedwoodTree(es, vector);
+        return m_parent.generateRedwoodTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
     @Override
@@ -313,7 +320,7 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.generateTallRedwoodTree(es, vector);
+        return m_parent.generateTallRedwoodTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
     @Override
@@ -323,22 +330,30 @@ public class CancelableWorld implements World {
 
     @Override
     public void fixAfterFastMode(Iterable<BlockVector2D> itrbl) {
-        m_parent.fixAfterFastMode(itrbl);
+        List<BlockVector2D> tmp = new ArrayList<BlockVector2D>();
+        for (Iterator<BlockVector2D> it = tmp.iterator(); it.hasNext();) {
+            tmp.add(BlockVector2DWrapper.wrap(it.next(), m_jobId, true, m_player));            
+        }
+        m_parent.fixAfterFastMode(tmp);
     }
 
     @Override
     public void fixLighting(Iterable<BlockVector2D> itrbl) {
-        m_parent.fixLighting(itrbl);
+        List<BlockVector2D> tmp = new ArrayList<BlockVector2D>();
+        for (Iterator<BlockVector2D> it = tmp.iterator(); it.hasNext();) {
+            tmp.add(BlockVector2DWrapper.wrap(it.next(), m_jobId, true, m_player));            
+        }
+        m_parent.fixLighting(tmp);
     }
 
     @Override
     public boolean playEffect(Vector vector, int i, int i1) {
-        return m_parent.playEffect(vector, i, i1);
+        return m_parent.playEffect(VectorWrapper.wrap(vector, m_jobId, true, m_player), i, i1);
     }
 
     @Override
     public boolean queueBlockBreakEffect(ServerInterface si, Vector vector, int i, double d) {
-        return m_parent.queueBlockBreakEffect(si, vector, i, d);
+        return m_parent.queueBlockBreakEffect(si, VectorWrapper.wrap(vector, m_jobId, true, m_player), i, d);
     }
 
     @Override
@@ -375,7 +390,8 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.setBlock(vector, BaseBlockWrapper.wrap(bb, m_jobId, true, m_player));
+        return m_parent.setBlock(VectorWrapper.wrap(vector, m_jobId, true, m_player), 
+                BaseBlockWrapper.wrap(bb, m_jobId, true, m_player));
     }
         
 

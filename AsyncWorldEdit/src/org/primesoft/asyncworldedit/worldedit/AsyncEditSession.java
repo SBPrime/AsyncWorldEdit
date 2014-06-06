@@ -205,7 +205,8 @@ public class AsyncEditSession extends EditSessionStub {
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
         forceFlush();
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlock(position, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
+        return super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player), 
+                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
     }
 
     @Override
@@ -293,7 +294,8 @@ public class AsyncEditSession extends EditSessionStub {
     public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlockIfAir(pt, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
+        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player), 
+                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
 
     public boolean setBlock(Vector pt, Pattern pat, int jobId)
@@ -307,7 +309,8 @@ public class AsyncEditSession extends EditSessionStub {
     public boolean setBlock(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlock(pt, BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
+        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player), 
+                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
 
     public void flushQueue(int jobId) {

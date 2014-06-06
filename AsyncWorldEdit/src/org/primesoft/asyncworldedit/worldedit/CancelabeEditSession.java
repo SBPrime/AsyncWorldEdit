@@ -49,15 +49,17 @@ import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
  * @author SBPrime
  */
 public class CancelabeEditSession extends EditSessionStub {
-
     /**
      * Maximum queued blocks
      */
     private final int MAX_QUEUED = 10000;
 
     private final AsyncEditSession m_parent;
+
     private final CancelableWorld m_cWorld;
+
     private final int m_jobId;
+
     private final UUID m_player;
 
     /**
@@ -66,16 +68,16 @@ public class CancelabeEditSession extends EditSessionStub {
     private int m_blocksQueued;
 
     public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
-        super(parent.getEventBus(), 
+        super(parent.getEventBus(),
                 new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
                 parent.getBlockChangeLimit(), parent.getBlockBag(),
                 parent.getEditSessionEvent());
 
         m_jobId = jobId;
         m_parent = parent;
-        m_player = m_parent.getPlayer();        
-        m_cWorld = (CancelableWorld)getWorld();
-        
+        m_player = m_parent.getPlayer();
+        m_cWorld = (CancelableWorld) getWorld();
+
         injectChangeSet();
         setMask(mask);
     }
@@ -154,7 +156,8 @@ public class CancelabeEditSession extends EditSessionStub {
     }
 
     @Override
-    public int getHighestTerrainBlock(int x, int z, int minY, int maxY, boolean naturalOnly) {
+    public int getHighestTerrainBlock(int x, int z, int minY, int maxY,
+                                      boolean naturalOnly) {
         return m_parent.getHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
     }
 
@@ -169,13 +172,15 @@ public class CancelabeEditSession extends EditSessionStub {
     }
 
     @Override
-    public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException {
+    public boolean setBlock(Vector position, BaseBlock block, Stage stage)
+            throws WorldEditException {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
         forceFlush();
-        return super.setBlock(position, BaseBlockWrapper.wrap(block, m_jobId, true, m_player), stage);
+        return super.setBlock(VectorWrapper.wrap(position, m_jobId, true, m_player), 
+                BaseBlockWrapper.wrap(block, m_jobId, true, m_player), stage);
     }
 
     @Override
@@ -185,32 +190,38 @@ public class CancelabeEditSession extends EditSessionStub {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return super.setBlock(pt, BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
+        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player), 
+                BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override
-    public boolean setBlock(Vector pt, Pattern pat) throws MaxChangedBlocksException {
+    public boolean setBlock(Vector pt, Pattern pat)
+            throws MaxChangedBlocksException {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return super.setBlock(pt, pat);
+        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player), pat);
     }
 
     @Override
-    public boolean setBlockIfAir(Vector pt, BaseBlock block) throws MaxChangedBlocksException {
+    public boolean setBlockIfAir(Vector pt, BaseBlock block)
+            throws MaxChangedBlocksException {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return super.setBlockIfAir(pt, BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
+        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, true, m_player), 
+                BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override
-    public boolean setChanceBlockIfAir(Vector pos, BaseBlock block, double c) throws MaxChangedBlocksException {
+    public boolean setChanceBlockIfAir(Vector pos, BaseBlock block, double c)
+            throws MaxChangedBlocksException {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return super.setChanceBlockIfAir(pos, BaseBlockWrapper.wrap(block, m_jobId, true, m_player), c);
+        return super.setChanceBlockIfAir(VectorWrapper.wrap(pos, m_jobId, true, m_player), 
+                BaseBlockWrapper.wrap(block, m_jobId, true, m_player), c);
     }
 
     @Override
@@ -282,7 +293,8 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return super.smartSetBlock(pt, BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
+        return super.smartSetBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player), 
+                BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     public void resetAsync() {
