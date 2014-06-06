@@ -32,8 +32,12 @@ import java.util.UUID;
  *
  * @author SBPrime
  */
-public class VectorWrapper extends Vector {
-    public static VectorWrapper wrap(Vector v, int jobId, boolean isAsync, UUID player) {
+public class VectorWrapper extends Vector implements IAsyncWrapper {
+    public static Vector wrap(Vector v, int jobId, boolean isAsync, UUID player) {        
+        if (v instanceof BlockVector) {
+            return BlockVectorWrapper.wrap((BlockVector)v, jobId, isAsync, player);
+        }
+        
         VectorWrapper result;
         if (v instanceof VectorWrapper) {
             result = (VectorWrapper) v;
@@ -54,14 +58,17 @@ public class VectorWrapper extends Vector {
 
     private UUID m_player;
 
+    @Override
     public int getJobId() {
         return m_jobId;
     }
 
+    @Override
     public Vector getParent() {
         return m_parent;
     }
 
+    @Override
     public boolean isAsync() {
         return m_isAsync;
     }
@@ -87,7 +94,7 @@ public class VectorWrapper extends Vector {
         m_player = player;
     }
 
-    private VectorWrapper wrap(Vector v) {
+    private Vector wrap(Vector v) {
         return wrap(v, m_jobId, m_isAsync, m_player);
     }
     

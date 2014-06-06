@@ -23,34 +23,32 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import com.sk89q.worldedit.Vector;
+import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
+
 /**
  *
- * @author SBPrime
+ * @author Prime
  */
-public abstract class BlockPlacerEntry {
-    private final int m_jobId;
+public class WorldExtentFuncEntry<T>
+        extends WorldExtentBlockEntry {
 
-    /**
-     * Is this task demanding
-     * @return 
-     */
-    public abstract boolean isDemanding();
-    
-    /**
-     * The job ID
-     * @return 
-     */
-    public int getJobId(){
-        return m_jobId;
+    private final Func<T> m_function;
+
+    public WorldExtentFuncEntry(WorldExtent worldExtent,
+            int jobId, Vector location, Func<T> function) {
+        super(worldExtent, jobId, location);
+        m_function = function;
     }
-    
-    
-    /**
-     * Process the entry
-     */
-    public abstract void Process(BlockPlacer bp);
 
-    public BlockPlacerEntry(int jobId) {
-        m_jobId = jobId;
+    @Override
+    public void Process(BlockPlacer bp) {
+        //TODO: Shuld we ignore the function resoult?
+        m_function.Execute();
+
+        if (m_worldName != null) {
+            bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
+        }
     }
 }

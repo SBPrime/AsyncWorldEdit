@@ -24,7 +24,6 @@
 package org.primesoft.asyncworldedit.blockPlacer;
 
 import org.primesoft.asyncworldedit.utils.Action;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 
 /**
  *

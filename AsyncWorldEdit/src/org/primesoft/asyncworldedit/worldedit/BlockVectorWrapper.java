@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 Prime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,10 +30,10 @@ import java.util.UUID;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
  */
-public class BlockVectorWrapper extends BlockVector {
-    public static BlockVectorWrapper wrap(BlockVector v, int jobId,
+public class BlockVectorWrapper extends BlockVector implements IAsyncWrapper {
+    public static BlockVector wrap(BlockVector v, int jobId,
                                           boolean isAsync, UUID player) {
         BlockVectorWrapper result;
         if (v instanceof BlockVectorWrapper) {
@@ -55,14 +55,17 @@ public class BlockVectorWrapper extends BlockVector {
 
     private UUID m_player;
 
+    @Override
     public int getJobId() {
         return m_jobId;
     }
 
+    @Override
     public BlockVector getParent() {
         return m_parent;
     }
 
+    @Override
     public boolean isAsync() {
         return m_isAsync;
     }
@@ -75,6 +78,7 @@ public class BlockVectorWrapper extends BlockVector {
         m_player = player;
     }
 
+    @Override
     public UUID getPlayer() {
         return m_player;
     }
@@ -89,7 +93,7 @@ public class BlockVectorWrapper extends BlockVector {
         m_player = player;
     }
 
-    private BlockVectorWrapper wrap(BlockVector v) {
+    private BlockVector wrap(BlockVector v) {
         return wrap(v, m_jobId, m_isAsync, m_player);
     }
 

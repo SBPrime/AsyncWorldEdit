@@ -26,37 +26,45 @@ package org.primesoft.asyncworldedit.worldedit.extent;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.worldedit.BaseBlockWrapper;
+import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**
  *
  * @author SBPrime
+ * @param <T>
  */
-public class WorldExtentParam {
+public class WorldExtentParam<T> {
+    static BaseBlock extract;
 
-    public static WorldExtentParam extract(BaseBlock bb) {
+    /**
+     * Extract parameters
+     * @param <T>
+     * @param data
+     * @return
+     */
+    public static <T> WorldExtentParam<T> extract(T data) {
         int jobId = -1;
         boolean isAsync = false;
         UUID player = ConfigProvider.DEFAULT_USER;
 
-        if (bb instanceof BaseBlockWrapper) {
-            BaseBlockWrapper bbw = (BaseBlockWrapper) bb;
-            jobId = bbw.getJobId();
-            bb = bbw.getParent();
-            isAsync = bbw.isAsync();
-            player = bbw.getPlayer();
+        if (data instanceof IAsyncWrapper) {
+            IAsyncWrapper wrapper = (IAsyncWrapper) data;
+            jobId = wrapper.getJobId();
+            data = (T)wrapper.getParent();
+            isAsync = wrapper.isAsync();
+            player = wrapper.getPlayer();
         }
 
-        return new WorldExtentParam(bb, isAsync, jobId, player);
+        return new WorldExtentParam(data, isAsync, jobId, player);
     }
 
     private final boolean m_isAsync;
-    private final BaseBlock m_block;
+    private final T m_data;
     private final int m_jobId;
     private final UUID m_player;
 
-    private WorldExtentParam(BaseBlock block, boolean isAsync, int jobId, UUID player) {
-        m_block = block;
+    private WorldExtentParam(T data, boolean isAsync, int jobId, UUID player) {
+        m_data = data;
         m_isAsync = isAsync;
         m_jobId = jobId;
         m_player = player;
@@ -66,8 +74,8 @@ public class WorldExtentParam {
         return m_isAsync;
     }
 
-    public BaseBlock getBlock() {
-        return m_block;
+    public T getData() {
+        return m_data;
     }
 
     public int getJobId() {

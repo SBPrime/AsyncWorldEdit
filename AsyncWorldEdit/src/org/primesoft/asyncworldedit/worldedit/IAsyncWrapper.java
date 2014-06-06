@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,36 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+
+package org.primesoft.asyncworldedit.worldedit;
+
+import com.sk89q.worldedit.blocks.BaseBlock;
+import java.util.UUID;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class BlockPlacerEntry {
-    private final int m_jobId;
+public interface IAsyncWrapper {
+    int getJobId();
 
-    /**
-     * Is this task demanding
-     * @return 
-     */
-    public abstract boolean isDemanding();
-    
-    /**
-     * The job ID
-     * @return 
-     */
-    public int getJobId(){
-        return m_jobId;
-    }
-    
-    
-    /**
-     * Process the entry
-     */
-    public abstract void Process(BlockPlacer bp);
+    Object getParent();
 
-    public BlockPlacerEntry(int jobId) {
-        m_jobId = jobId;
-    }
+    boolean isAsync();
+
+    UUID getPlayer();
 }

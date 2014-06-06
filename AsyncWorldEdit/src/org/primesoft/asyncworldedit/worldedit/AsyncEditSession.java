@@ -203,7 +203,6 @@ public class AsyncEditSession extends EditSessionStub {
     }
 
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
-        forceFlush();
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
         return super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player), 
                 BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
@@ -301,7 +300,8 @@ public class AsyncEditSession extends EditSessionStub {
     public boolean setBlock(Vector pt, Pattern pat, int jobId)
             throws MaxChangedBlocksException {
         m_jobId = jobId;
-        boolean r = super.setBlock(pt, pat);
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);        
+        boolean r = super.setBlock(VectorWrapper.wrap(pt, jobId, isAsync, m_player), pat);
         m_jobId = -1;
         return r;
     }
@@ -1706,7 +1706,6 @@ public class AsyncEditSession extends EditSessionStub {
      *
      * @param <T>
      * @param action
-     * @param pos
      * @return
      */
     public <T> T performSafe(Func<T> action) {

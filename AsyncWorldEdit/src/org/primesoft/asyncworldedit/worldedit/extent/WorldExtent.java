@@ -40,11 +40,12 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.UUID;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.WorldExtentBlockEntry;
+import org.primesoft.asyncworldedit.blockPlacer.WorldExtentActionEntry;
+import org.primesoft.asyncworldedit.blockPlacer.WorldExtentFuncEntry;
+import org.primesoft.asyncworldedit.blockPlacer.WorldExtentFuncEntryEx;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.FuncEx;
@@ -75,7 +76,7 @@ public class WorldExtent implements World {
      * The blocks hub
      */
     private BlocksHubIntegration m_blocksHub;
-    
+
     /**
      * Craft bukkit world - used for block loging
      */
@@ -156,7 +157,7 @@ public class WorldExtent implements World {
             public Integer Execute() {
                 return m_parent.getBlockType(vector);
             }
-        },vector);
+        }, vector);
     }
 
     @Override
@@ -171,10 +172,15 @@ public class WorldExtent implements World {
     }
 
     @Override
-    public boolean setBlock(final Vector vector, BaseBlock bb, final boolean bln) throws WorldEditException {
-        final WorldExtentParam param = WorldExtentParam.extract(bb);
-                
-        if (!m_blocksHub.canPlace(param.getPlayer(), m_cbWorld, vector)) {
+    public boolean setBlock(Vector vector, BaseBlock bb, final boolean bln) throws WorldEditException {
+        final WorldExtentParam<BaseBlock> paramBlock = WorldExtentParam.extract(bb);
+        final WorldExtentParam<Vector> paramVector = WorldExtentParam.extract(vector);
+
+        final BaseBlock newBlock = paramBlock.getData();
+        final Vector v = paramVector.getData();
+        final UUID player = paramBlock.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
             return false;
         }
 
@@ -182,81 +188,198 @@ public class WorldExtent implements World {
 
             @Override
             public Boolean Execute() throws WorldEditException {
-                BaseBlock old = m_parent.getBlock(vector);
-                boolean result = m_parent.setBlock(vector, param.getBlock(), bln);
+                final BaseBlock oldBlock = m_parent.getBlock(v);
+                final boolean result = m_parent.setBlock(v, newBlock, bln);
                 if (result) {
-                    logBlock(param, vector, old);
+                    logBlock(v, player, oldBlock, newBlock);
                 }
 
                 return result;
             }
         };
 
-        if (!param.isAsync()) {
-            return func.Execute();
+        if (paramBlock.isAsync() || paramVector.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));
         }
 
-        return m_blockPlacer.addTasks(param.getPlayer(), new WorldExtentBlockEntry(this, param.getJobId(), vector, func));
+        return func.Execute();
     }
 
     @Override
-    public boolean setBlockType(final Vector vector, final int i) {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean setBlockType(Vector vector, final int i) {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
-                return m_parent.setBlockType(vector, i);
+                final BaseBlock oldBlock = m_parent.getBlock(v);
+                final boolean result = m_parent.setBlockType(v, i);
+                if (result) {
+                    logBlock(v, player, oldBlock, new BaseBlock(i, oldBlock.getData()));
+                }
+
+                return result;
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
-    public boolean setBlockTypeFast(final Vector vector, final int i) {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean setBlockTypeFast(Vector vector, final int i) {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
-                return m_parent.setBlockTypeFast(vector, i);
+                final BaseBlock oldBlock = m_parent.getBlock(v);
+                final boolean result = m_parent.setBlockTypeFast(v, i);
+                if (result) {
+                    logBlock(v, player, oldBlock, new BaseBlock(i, oldBlock.getData()));
+                }
+
+                return result;
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
     public void setBlockData(final Vector vector, final int i) {
-        m_editSession.performSafe(new Action() {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return;
+        }
+
+        Action func = new Action() {
             @Override
             public void Execute() {
                 m_parent.setBlockData(vector, i);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            m_blockPlacer.addTasks(player,
+                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+            return;
+        }
+
+        func.Execute();
     }
 
     @Override
-    public void setBlockDataFast(final Vector vector, final int i) {
-        m_editSession.performSafe(new Action() {
+    public void setBlockDataFast(Vector vector, final int i) {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return;
+        }
+
+        Action func = new Action() {
             @Override
             public void Execute() {
-                m_parent.setBlockDataFast(vector, i);
+                m_parent.setBlockDataFast(v, i);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            m_blockPlacer.addTasks(player,
+                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+            return;
+        }
+
+        func.Execute();
     }
 
     @Override
-    public boolean setTypeIdAndData(final Vector vector, final int i, final int i1) {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean setTypeIdAndData(Vector vector, final int i, final int i1) {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
-                return m_parent.setTypeIdAndData(vector, i, i1);
+                final BaseBlock oldBlock = m_parent.getBlock(v);
+                final boolean result = m_parent.setTypeIdAndData(v, i, i1);
+                if (result) {
+                    logBlock(v, player, oldBlock, new BaseBlock(i, i1));
+                }
+
+                return result;
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
-    public boolean setTypeIdAndDataFast(final Vector vector, final int i, final int i1) {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean setTypeIdAndDataFast(Vector vector, final int i, final int i1) {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
-                return m_parent.setTypeIdAndDataFast(vector, i, i1);
+                final BaseBlock oldBlock = m_parent.getBlock(v);
+                final boolean result = m_parent.setTypeIdAndDataFast(v, i, i1);
+                if (result) {
+                    logBlock(v, player, oldBlock, new BaseBlock(i, i1));
+                }
+
+                return result;
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
@@ -271,12 +394,27 @@ public class WorldExtent implements World {
 
     @Override
     public boolean clearContainerBlockContents(final Vector vector) {
-        return m_editSession.performSafe(new Func<Boolean>() {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
                 return m_parent.clearContainerBlockContents(vector);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
@@ -290,43 +428,108 @@ public class WorldExtent implements World {
     }
 
     @Override
-    public void setBiome(final Vector2D vd, final BiomeType bt) {
-        m_editSession.performSafe(new Action() {
+    public void setBiome(Vector2D vd, final BiomeType bt) {
+        final WorldExtentParam<Vector2D> param = WorldExtentParam.extract(vd);
+        final Vector2D v = param.getData();
+        final UUID player = param.getPlayer();
+        final Vector tmpV = new Vector(v.getX(), 0, v.getZ());
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, tmpV)) {
+            return;
+        }
+
+        Action func = new Action() {
             @Override
             public void Execute() {
-                m_parent.setBiome(vd, bt);
+                m_parent.setBiome(v, bt);
             }
-        }, new Vector(vd.getX(), 0, vd.getZ()));
+        };
+
+        if (param.isAsync()) {
+            m_blockPlacer.addTasks(player,
+                    new WorldExtentActionEntry(this, param.getJobId(), tmpV, func));
+            return;
+        }
+
+        func.Execute();
     }
 
     @Override
-    public void dropItem(final Vector vector, final BaseItemStack bis, final int i) {
-        m_editSession.performSafe(new Action() {
+    public void dropItem(Vector vector, final BaseItemStack bis, final int i) {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return;
+        }
+
+        Action func = new Action() {
             @Override
             public void Execute() {
-                m_parent.dropItem(vector, bis, i);
+                m_parent.dropItem(v, bis, i);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            m_blockPlacer.addTasks(player,
+                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+            return;
+        }
+
+        func.Execute();
     }
 
     @Override
     public void dropItem(final Vector vector, final BaseItemStack bis) {
-        m_editSession.performSafe(new Action() {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return;
+        }
+
+        Action func = new Action() {
             @Override
             public void Execute() {
-                m_parent.dropItem(vector, bis);
+                m_parent.dropItem(v, bis);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            m_blockPlacer.addTasks(player,
+                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+            return;
+        }
+
+        func.Execute();
     }
 
     @Override
-    public void simulateBlockMine(final Vector vector) {
-        m_editSession.performSafe(new Action() {
+    public void simulateBlockMine(Vector vector) {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return;
+        }
+
+        Action func = new Action() {
             @Override
             public void Execute() {
-                m_parent.simulateBlockMine(vector);
+                m_parent.simulateBlockMine(v);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            m_blockPlacer.addTasks(player,
+                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+            return;
+        }
+
+        func.Execute();
     }
 
     @Override
@@ -400,94 +603,153 @@ public class WorldExtent implements World {
     }
 
     @Override
-    public boolean generateTree(final TreeGenerator.TreeType tt, final EditSession es, final Vector vector) throws MaxChangedBlocksException {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean generateTree(final TreeGenerator.TreeType tt, final EditSession es, Vector vector) throws MaxChangedBlocksException {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.generateTree(tt, es, vector);
-                } catch (MaxChangedBlocksException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
-                }
+            public Boolean Execute() throws MaxChangedBlocksException {
+                return m_parent.generateTree(tt, es, v);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
-    public boolean generateTree(final EditSession es, final Vector vector) throws MaxChangedBlocksException {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean generateTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.generateTree(es, vector);
-                } catch (MaxChangedBlocksException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
-                }
+            public Boolean Execute() throws MaxChangedBlocksException {
+                return m_parent.generateTree(es, v);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
-    public boolean generateBigTree(final EditSession es, final Vector vector) throws MaxChangedBlocksException {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean generateBigTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.generateBigTree(es, vector);
-                } catch (MaxChangedBlocksException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
-                }
+            public Boolean Execute() throws MaxChangedBlocksException {
+                return m_parent.generateBigTree(es, v);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
-    public boolean generateBirchTree(final EditSession es, final Vector vector) throws MaxChangedBlocksException {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean generateBirchTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.generateBirchTree(es, vector);
-                } catch (MaxChangedBlocksException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
-                }
+            public Boolean Execute() throws MaxChangedBlocksException {
+                return m_parent.generateBirchTree(es, v);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
-    public boolean generateRedwoodTree(final EditSession es, final Vector vector) throws MaxChangedBlocksException {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean generateRedwoodTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.generateRedwoodTree(es, vector);
-                } catch (MaxChangedBlocksException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
-                }
+            public Boolean Execute() throws MaxChangedBlocksException {
+                return m_parent.generateRedwoodTree(es, v);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
-    public boolean generateTallRedwoodTree(final EditSession es, final Vector vector)
-            throws MaxChangedBlocksException {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean generateTallRedwoodTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() {
-                try {
-                    return m_parent.generateTallRedwoodTree(es, vector);
-                } catch (MaxChangedBlocksException ex) {
-                    Logger.getLogger(WorldExtent.class.getName()).log(Level.SEVERE, null, ex);
-                    return false;
-                }
+            public Boolean Execute() throws MaxChangedBlocksException {
+                return m_parent.generateTallRedwoodTree(es, v);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
@@ -521,24 +783,54 @@ public class WorldExtent implements World {
     }
 
     @Override
-    public boolean playEffect(final Vector vector, final int i, final int i1) {
-        return m_editSession.performSafe(new Func<Boolean>() {
+    public boolean playEffect(Vector vector, final int i, final int i1) {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
-                return m_parent.playEffect(vector, i, i1);
+                return m_parent.playEffect(v, i, i1);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
-    public boolean queueBlockBreakEffect(final ServerInterface si, final Vector vector,
+    public boolean queueBlockBreakEffect(final ServerInterface si, Vector vector,
             final int i, final double d) {
-        return m_editSession.performSafe(new Func<Boolean>() {
+        final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
+        final Vector v = param.getData();
+        final UUID player = param.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
+            return false;
+        }
+
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
-                return m_parent.queueBlockBreakEffect(si, vector, i, d);
+                return m_parent.queueBlockBreakEffect(si, v, i, d);
             }
-        }, vector);
+        };
+
+        if (param.isAsync()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+        }
+
+        return func.Execute();
     }
 
     @Override
@@ -583,8 +875,10 @@ public class WorldExtent implements World {
 
     @Override
     public boolean setBlock(final Vector vector, final BaseBlock bb) throws WorldEditException {
-        final WorldExtentParam param = WorldExtentParam.extract(bb);
-        
+        final WorldExtentParam<BaseBlock> param = WorldExtentParam.extract(bb);
+        final BaseBlock newBlock = param.getData();
+        final UUID player = param.getPlayer();
+
         if (!m_blocksHub.canPlace(param.getPlayer(), m_cbWorld, vector)) {
             return false;
         }
@@ -593,10 +887,10 @@ public class WorldExtent implements World {
 
             @Override
             public Boolean Execute() throws WorldEditException {
-                BaseBlock old = m_parent.getBlock(vector);
-                boolean result = m_parent.setBlock(vector, param.getBlock());
+                final BaseBlock oldBlock = m_parent.getBlock(vector);
+                final boolean result = m_parent.setBlock(vector, newBlock);
                 if (result) {
-                    logBlock(param, vector, old);
+                    logBlock(vector, player, oldBlock, newBlock);
                 }
 
                 return result;
@@ -607,7 +901,8 @@ public class WorldExtent implements World {
             return func.Execute();
         }
 
-        return m_blockPlacer.addTasks(param.getPlayer(), new WorldExtentBlockEntry(this, param.getJobId(), vector, func));
+        return m_blockPlacer.addTasks(param.getPlayer(), 
+                new WorldExtentFuncEntryEx(this, param.getJobId(), vector, func));
     }
 
     @Override
@@ -619,14 +914,11 @@ public class WorldExtent implements World {
             }
         });
     }
-    
-        
+
     /**
      * Log placed block using blocks hub
-     * @param param
-     * @param old 
      */
-    private void logBlock(WorldExtentParam param, Vector location, BaseBlock old) {
-        m_blocksHub.logBlock(param.getPlayer(), m_cbWorld, location, old, param.getBlock());
+    private void logBlock(Vector location, UUID player, BaseBlock oldBlock, BaseBlock newBlock) {
+        m_blocksHub.logBlock(player, m_cbWorld, location, oldBlock, newBlock);
     }
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,29 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package org.primesoft.asyncworldedit.blockPlacer;
 
 import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
  */
-public class WorldExtentBlockEntry<T, TException extends Exception> 
-    extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
+public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
+    protected final Vector m_location;
+    protected final String m_worldName;
 
-    private final Vector m_location;
-    private final FuncEx<T, TException> m_function;
-    private final String m_worldName;
+    public WorldExtentBlockEntry(WorldExtent worldExtent,
+            int jobId, Vector location) {
+        super(jobId);
+        
+        m_location = location;
+        m_worldName = worldExtent.getName();
+    }
 
-    
     @Override
     public String getWorldName() {
         return m_worldName;
     }
-    
+
     @Override
     public Vector getLocation() {
         return m_location;
@@ -53,24 +57,5 @@ public class WorldExtentBlockEntry<T, TException extends Exception>
     public boolean isDemanding() {
         return false;
     }
-
-    public WorldExtentBlockEntry(WorldExtent worldExtent,
-            int jobId, Vector location, FuncEx<T, TException> function) {
-        super(jobId);
-        m_location = location;
-        m_function = function;
-        m_worldName = worldExtent.getName();
-    }
-
-    @Override
-    public void Process(BlockPlacer bp) {
-        try {
-            //TODO: Shuld we ignore the function resoult?
-            m_function.Execute();
-        } catch (Exception ex) {
-        }
-        if (m_worldName != null) {
-            bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
-        }
-    }
+    
 }

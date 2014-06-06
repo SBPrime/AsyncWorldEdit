@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,34 +23,35 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import com.sk89q.worldedit.Vector;
+import org.primesoft.asyncworldedit.utils.FuncEx;
+import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
+
 /**
  *
- * @author SBPrime
+ * @author Prime
  */
-public abstract class BlockPlacerEntry {
-    private final int m_jobId;
-
-    /**
-     * Is this task demanding
-     * @return 
-     */
-    public abstract boolean isDemanding();
+public class WorldExtentFuncEntryEx<T, TException extends Exception> 
+    extends WorldExtentBlockEntry {
     
-    /**
-     * The job ID
-     * @return 
-     */
-    public int getJobId(){
-        return m_jobId;
+    private final FuncEx<T, TException> m_function;
+
+    public WorldExtentFuncEntryEx(WorldExtent worldExtent,
+            int jobId, Vector location, FuncEx<T, TException> function) {
+        super(worldExtent, jobId, location);
+        
+        m_function = function;        
     }
-    
-    
-    /**
-     * Process the entry
-     */
-    public abstract void Process(BlockPlacer bp);
 
-    public BlockPlacerEntry(int jobId) {
-        m_jobId = jobId;
+    @Override
+    public void Process(BlockPlacer bp) {
+        try {
+            //TODO: Shuld we ignore the function resoult?
+            m_function.Execute();
+        } catch (Exception ex) {
+        }
+        if (m_worldName != null) {
+            bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
+        }
     }
 }

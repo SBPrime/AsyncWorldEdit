@@ -33,7 +33,7 @@ import java.util.UUID;
  *
  * @author SBPrime
  */
-public class BaseBlockWrapper extends BaseBlock {
+public class BaseBlockWrapper extends BaseBlock implements IAsyncWrapper {
     public static BaseBlockWrapper wrap(BaseBlock block, int jobId,
                                         boolean isAsync, UUID player) {
         BaseBlockWrapper result;
@@ -56,14 +56,17 @@ public class BaseBlockWrapper extends BaseBlock {
 
     private UUID m_player;
 
+    @Override
     public int getJobId() {
         return m_jobId;
     }
 
+    @Override
     public BaseBlock getParent() {
         return m_parent;
     }
 
+    @Override
     public boolean isAsync() {
         return m_isAsync;
     }
@@ -76,6 +79,7 @@ public class BaseBlockWrapper extends BaseBlock {
         m_player = player;
     }
 
+    @Override
     public UUID getPlayer() {
         return m_player;
     }
