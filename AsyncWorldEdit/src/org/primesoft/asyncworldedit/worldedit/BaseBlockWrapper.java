@@ -34,23 +34,26 @@ import java.util.UUID;
  * @author SBPrime
  */
 public class BaseBlockWrapper extends BaseBlock {
-
-    public static BaseBlockWrapper wrap(BaseBlock block, int jobId, boolean isAsync, UUID player) {
-        BaseBlockWrapper result; 
+    public static BaseBlockWrapper wrap(BaseBlock block, int jobId,
+                                        boolean isAsync, UUID player) {
+        BaseBlockWrapper result;
         if (block instanceof BaseBlockWrapper) {
-            result = (BaseBlockWrapper)block;
+            result = (BaseBlockWrapper) block;
             result.setAsync(isAsync);
             result.setPlayer(player);
         } else {
             result = new BaseBlockWrapper(block, jobId, isAsync, player);
         }
-        
+
         return result;
     }
 
     private final BaseBlock m_parent;
+
     private final int m_jobId;
+
     private boolean m_isAsync;
+
     private UUID m_player;
 
     public int getJobId() {
@@ -77,7 +80,8 @@ public class BaseBlockWrapper extends BaseBlock {
         return m_player;
     }
 
-    private BaseBlockWrapper(BaseBlock parent, int jobId, boolean isAsync, UUID player) {
+    private BaseBlockWrapper(BaseBlock parent, int jobId, boolean isAsync,
+                             UUID player) {
         super(0);
 
         m_jobId = jobId;
@@ -93,11 +97,17 @@ public class BaseBlockWrapper extends BaseBlock {
 
     @Override
     public boolean equals(Object o) {
+        if (o instanceof BaseBlockWrapper) {
+            o = ((BaseBlockWrapper) o).getParent();
+        }
         return m_parent.equals(o);
     }
 
     @Override
     public boolean equalsFuzzy(BaseBlock o) {
+        if (o instanceof BaseBlockWrapper) {
+            o = ((BaseBlockWrapper) o).getParent();
+        }
         return m_parent.equalsFuzzy(o);
     }
 
@@ -187,7 +197,8 @@ public class BaseBlockWrapper extends BaseBlock {
     }
 
     @Override
-    public void setNbtData(CompoundTag nbtData) throws DataException {
+    public void setNbtData(CompoundTag nbtData)
+            throws DataException {
         m_parent.setNbtData(nbtData);
     }
 

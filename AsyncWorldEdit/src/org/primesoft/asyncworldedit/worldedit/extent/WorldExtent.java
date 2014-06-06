@@ -199,16 +199,6 @@ public class WorldExtent implements World {
         return m_blockPlacer.addTasks(param.getPlayer(), new WorldExtentBlockEntry(this, param.getJobId(), vector, func));
     }
 
-    
-    /**
-     * Log placed block using blocks hub
-     * @param param
-     * @param old 
-     */
-    private void logBlock(WorldExtentParam param, Vector location, BaseBlock old) {
-        m_blocksHub.logBlock(param.getPlayer(), m_cbWorld, location, old, param.getBlock());
-    }
-
     @Override
     public boolean setBlockType(final Vector vector, final int i) {
         return m_editSession.performSafe(new Func<Boolean>() {
@@ -628,5 +618,15 @@ public class WorldExtent implements World {
                 return m_parent.commit();
             }
         });
+    }
+    
+        
+    /**
+     * Log placed block using blocks hub
+     * @param param
+     * @param old 
+     */
+    private void logBlock(WorldExtentParam param, Vector location, BaseBlock old) {
+        m_blocksHub.logBlock(param.getPlayer(), m_cbWorld, location, old, param.getBlock());
     }
 }

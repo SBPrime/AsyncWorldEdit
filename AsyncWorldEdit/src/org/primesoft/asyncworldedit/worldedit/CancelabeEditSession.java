@@ -66,7 +66,8 @@ public class CancelabeEditSession extends EditSessionStub {
     private int m_blocksQueued;
 
     public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
-        super(parent.getEventBus(), new CancelableWorld(parent.getWorld()),
+        super(parent.getEventBus(), 
+                new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
                 parent.getBlockChangeLimit(), parent.getBlockBag(),
                 parent.getEditSessionEvent());
 

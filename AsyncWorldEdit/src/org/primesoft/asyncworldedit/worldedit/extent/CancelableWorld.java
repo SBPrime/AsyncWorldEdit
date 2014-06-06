@@ -40,7 +40,9 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
+import java.util.UUID;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
+import org.primesoft.asyncworldedit.worldedit.BaseBlockWrapper;
 
 /**
  *
@@ -49,17 +51,29 @@ import org.primesoft.asyncworldedit.utils.SessionCanceled;
 public class CancelableWorld implements World {
 
     private final World m_parent;
+    private final int m_jobId;
+    private final UUID m_player;
     private boolean m_isCanceled;
 
-    public CancelableWorld(World parent) {
+    public CancelableWorld(World parent, int jobId, UUID player) {
         m_parent = parent;
         m_isCanceled = false;
+        m_jobId = jobId;
+        m_player = player;
     }
 
+    
+    /**
+     * Cancel all further operations
+     */
     public void cancel() {
         m_isCanceled = true;
     }
-
+    
+    /**
+     * Is world operation canceled
+     * @return 
+     */
     public boolean isCanceled() {
         return m_isCanceled;
     }
@@ -104,7 +118,7 @@ public class CancelableWorld implements World {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlock(vector, bb, bln);
+        return m_parent.setBlock(vector, BaseBlockWrapper.wrap(bb, m_jobId, true, m_player), bln);
     }
 
     @Override
@@ -361,8 +375,9 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.setBlock(vector, bb);
+        return m_parent.setBlock(vector, BaseBlockWrapper.wrap(bb, m_jobId, true, m_player));
     }
+        
 
     @Override
     public Operation commit() {
