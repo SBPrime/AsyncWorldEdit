@@ -45,16 +45,20 @@ public class CancelabeEditSession extends EditSession {
     }
     private final AsyncEditSession m_parent;
     private boolean m_isCanceled;
-    private int m_jobId;
+    private final int m_jobId;
     private Mask m_mask;
 
     public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
-        super(parent.getWorld(), parent.getBlockChangeLimit());
-
+        super(new LocalWorldWrapper(parent.getWorld(), jobId, 
+                parent.getPlayer(), parent.getBlockPlacer()), 
+                parent.getBlockChangeLimit());
+        
         m_jobId = jobId;
         m_parent = parent;
         m_isCanceled = false;
         m_mask = mask;
+        
+        ((LocalWorldWrapper)super.getWorld()).setSession(parent);
     }
 
     public boolean isCanceled() {
@@ -147,7 +151,8 @@ public class CancelabeEditSession extends EditSession {
 
     @Override
     public LocalWorld getWorld() {
-        return m_parent.getWorld();
+        //return m_parent.getWorld();
+        return super.getWorld();
     }
 
     @Override

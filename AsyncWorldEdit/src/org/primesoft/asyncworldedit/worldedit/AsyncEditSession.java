@@ -1765,4 +1765,8 @@ public class AsyncEditSession extends EditSession {
     private Integer doGetBlockType(Vector position) {
         return super.getBlockType(position);
     }
+
+    public BlockPlacer getBlockPlacer() {
+        return m_blockPlacer;
+    }
 }
