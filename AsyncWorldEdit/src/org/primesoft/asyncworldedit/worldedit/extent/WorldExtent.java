@@ -198,7 +198,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (paramBlock.isAsync() || paramVector.isAsync()) {
+        if (paramBlock.isAsync() || paramVector.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));
         }
@@ -229,7 +229,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
@@ -260,7 +260,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
@@ -285,7 +285,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             m_blockPlacer.addTasks(player,
                     new WorldExtentActionEntry(this, param.getJobId(), v, func));
             return;
@@ -311,7 +311,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             m_blockPlacer.addTasks(player,
                     new WorldExtentActionEntry(this, param.getJobId(), v, func));
             return;
@@ -343,7 +343,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
@@ -374,7 +374,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
@@ -409,7 +409,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
@@ -445,7 +445,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             m_blockPlacer.addTasks(player,
                     new WorldExtentActionEntry(this, param.getJobId(), tmpV, func));
             return;
@@ -471,7 +471,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             m_blockPlacer.addTasks(player,
                     new WorldExtentActionEntry(this, param.getJobId(), v, func));
             return;
@@ -497,7 +497,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             m_blockPlacer.addTasks(player,
                     new WorldExtentActionEntry(this, param.getJobId(), v, func));
             return;
@@ -523,7 +523,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             m_blockPlacer.addTasks(player,
                     new WorldExtentActionEntry(this, param.getJobId(), v, func));
             return;
@@ -619,7 +619,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
@@ -644,7 +644,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
@@ -669,7 +669,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
@@ -694,7 +694,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
@@ -719,7 +719,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
@@ -744,7 +744,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
@@ -799,7 +799,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
@@ -825,7 +825,7 @@ public class WorldExtent implements World {
             }
         };
 
-        if (param.isAsync()) {
+        if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
@@ -875,13 +875,17 @@ public class WorldExtent implements World {
 
     @Override
     public boolean setBlock(final Vector vector, final BaseBlock bb) throws WorldEditException {
-        final WorldExtentParam<BaseBlock> param = WorldExtentParam.extract(bb);
-        final BaseBlock newBlock = param.getData();
-        final UUID player = param.getPlayer();
+        final WorldExtentParam<BaseBlock> paramBlock = WorldExtentParam.extract(bb);
+        final WorldExtentParam<Vector> paramVector = WorldExtentParam.extract(vector);
 
-        if (!m_blocksHub.canPlace(param.getPlayer(), m_cbWorld, vector)) {
+        final BaseBlock newBlock = paramBlock.getData();
+        final Vector v = paramVector.getData();
+        final UUID player = paramBlock.getPlayer();
+
+        if (!m_blocksHub.canPlace(player, m_cbWorld, v)) {
             return false;
         }
+
 
         FuncEx<Boolean, WorldEditException> func = new FuncEx<Boolean, WorldEditException>() {
 
@@ -897,12 +901,12 @@ public class WorldExtent implements World {
             }
         };
 
-        if (!param.isAsync()) {
-            return func.Execute();
+        if (paramBlock.isAsync() || paramVector.isAsync() || !m_blockPlacer.isMainTask()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));                    
         }
 
-        return m_blockPlacer.addTasks(param.getPlayer(), 
-                new WorldExtentFuncEntryEx(this, param.getJobId(), vector, func));
+        return func.Execute();        
     }
 
     @Override
