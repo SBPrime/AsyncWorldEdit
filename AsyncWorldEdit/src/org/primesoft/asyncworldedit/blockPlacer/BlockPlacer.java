@@ -189,18 +189,19 @@ public class BlockPlacer implements Runnable {
     }
 
     private void startGetTask() {
-        synchronized (m_mutex) {
-            m_getTaskRunsRemaining = MAX_RETRIES;
-            if (m_getTask != null) {
-                return;
-            }
-            m_getTask = m_scheduler.runTaskTimer(m_plugin, new Runnable() {
+        final Runnable func = new Runnable() {
                 @Override
                 public void run() {
                     m_mainThread = Thread.currentThread();
                     processGet();
                 }
-            }, 1, 1);
+        };
+        synchronized (m_mutex) {
+            m_getTaskRunsRemaining = MAX_RETRIES;
+            if (m_getTask != null) {
+                return;
+            }        
+            m_getTask = m_scheduler.runTaskTimer(m_plugin, func, 1, 1);
         }
     }
 
@@ -231,8 +232,11 @@ public class BlockPlacer implements Runnable {
      */
     public void processGet() {
         boolean run = true;
-        boolean processed = false;
+
+        boolean processed = false;        
         for (int i = 0; i < MAX_RETRIES && run; i++) {
+            run = false;
+            
             final BlockPlacerEntry[] tasks;
             synchronized (m_getBlocks) {
                 tasks = m_getBlocks.toArray(new BlockPlacerEntry[0]);
@@ -247,14 +251,14 @@ public class BlockPlacer implements Runnable {
                 run = true;
                 try {
                     //Force thread release!
-                    Thread.sleep(1);
+                    Thread.sleep(1);                    
                 }
                 catch (InterruptedException ex) {
                 }
             }
         }
 
-        if (!processed) {
+        if (!processed) {            
             synchronized (m_mutex) {
                 m_getTaskRunsRemaining--;
                 if (m_getTaskRunsRemaining <= 0 && m_getTask != null) {
