@@ -221,6 +221,8 @@ public class BlockPlacer implements Runnable {
         boolean run = true;
         boolean processed = false;
         for (int i = 0; i < MAX_RETRIES && run; i++) {
+            run = false;
+            
             final BlockPlacerEntry[] tasks;
             synchronized (m_getBlocks) {
                 tasks = m_getBlocks.toArray(new BlockPlacerEntry[0]);                                               
