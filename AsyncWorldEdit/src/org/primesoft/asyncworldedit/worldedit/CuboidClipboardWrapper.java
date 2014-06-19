@@ -26,8 +26,6 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.Vector;
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;

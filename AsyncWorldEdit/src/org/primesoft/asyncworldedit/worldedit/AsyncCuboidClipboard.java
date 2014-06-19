@@ -132,7 +132,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         m_blockPlacer.addJob(m_player, job);
 
 
-        m_schedule.runTaskAsynchronously(m_plugin, new ClipboardAsyncTask(cc, editSession, m_player, "place",
+        m_schedule.runTaskAsynchronously(m_plugin, new ClipboardAsyncTask(cc, session, m_player, "place",
                 m_blockPlacer, job) {
             @Override
             public void task(CuboidClipboard cc)
@@ -167,7 +167,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         }
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new ClipboardAsyncTask(cc, editSession, m_player, "paste",
+        m_schedule.runTaskAsynchronously(m_plugin, new ClipboardAsyncTask(cc, session, m_player, "paste",
                 m_blockPlacer, job) {
             @Override
             public void task(CuboidClipboard cc)
@@ -204,7 +204,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         m_blockPlacer.addJob(m_player, job);
 
 
-        m_schedule.runTaskAsynchronously(m_plugin, new ClipboardAsyncTask(cc, editSession, m_player, "paste",
+        m_schedule.runTaskAsynchronously(m_plugin, new ClipboardAsyncTask(cc, session, m_player, "paste",
                 m_blockPlacer, job) {
             @Override
             public void task(CuboidClipboard cc)

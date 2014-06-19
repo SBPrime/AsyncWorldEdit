@@ -28,34 +28,21 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import java.util.UUID;
 import org.bukkit.ChatColor;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
-import org.primesoft.asyncworldedit.utils.SessionCanceled;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class ClipboardAsyncTask extends BukkitRunnable {
+public abstract class ClipboardAsyncTask extends BaseTask {
 
-    /**
-     * Command name
-     */
-    private final String m_command;
     /**
      * Clipboard
      */
     private final CuboidClipboard m_clipboard;
-    /**
-     * The player
-     */
-    private final UUID m_player;
-    private final BlockPlacer m_blockPlacer;
-    private final BlockPlacerJobEntry m_job;
-    private final AsyncEditSession m_editSession;
 
     /**
      *
@@ -69,45 +56,22 @@ public abstract class ClipboardAsyncTask extends BukkitRunnable {
     public ClipboardAsyncTask(final CuboidClipboard clipboard, final EditSession editSession,
             final UUID player, final String commandName, BlockPlacer blocksPlacer,
             BlockPlacerJobEntry job) {
+        super(editSession, player, commandName, blocksPlacer, job);
+
         m_clipboard = clipboard;
-        m_player = player;
-        m_command = commandName;
-        m_blockPlacer = blocksPlacer;
-        m_job = job;
-        m_editSession = (editSession instanceof AsyncEditSession) ? (AsyncEditSession) editSession : null;
-        if (m_editSession != null) {
-            m_editSession.addAsync(job);
-        }
     }
 
     @Override
-    public void run() {
-        try {
-            m_job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
-            if (ConfigProvider.isTalkative()) {
-                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
-                        + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
-            }
-            m_blockPlacer.addTasks(m_player, m_job);
-            task(m_clipboard);
+    protected Object doRun() throws MaxChangedBlocksException {
+        task(m_clipboard);
 
-            if (m_editSession != null && m_editSession.isQueueEnabled()) {
-                m_editSession.flushQueue();
-            }
-            m_job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
-            m_blockPlacer.addTasks(m_player, m_job);
+        return null;
+    }
+
+    @Override
+    protected void doPostRun(Object result) {
+        if (ConfigProvider.isTalkative()) {
             PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Clipboard operation done.");
-        } catch (MaxChangedBlocksException ex) {
-            PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
-        } catch (IllegalArgumentException ex) {
-            if (ex.getCause() instanceof SessionCanceled) {
-                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
-            }
-        }
-
-        m_job.taskDone();
-        if (m_editSession != null) {
-            m_editSession.removeAsync(m_job);
         }
     }
 
