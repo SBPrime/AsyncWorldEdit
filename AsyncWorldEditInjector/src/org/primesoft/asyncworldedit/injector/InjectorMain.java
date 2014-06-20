@@ -24,9 +24,9 @@
 package org.primesoft.asyncworldedit.injector;
 
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.command.ClipboardCommands;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -38,13 +38,55 @@ public class InjectorMain extends JavaPlugin {
     private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
     private static String s_prefix = null;
     private static final String s_logFormat = "%s %s";
+    
+    /**
+     * The WorldEdit class factory
+     */
+    private IClassFactory m_classFactory = new BaseClassFactory();
+    
+    /**
+     * Instance of the main class
+     */
+    private static InjectorMain s_instance;
 
+    /**
+     * Get plugin instance
+     * @return 
+     */
+    public static InjectorMain getInstance() {
+        return s_instance;
+    }
+       
     public static void log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
             return;
         }
 
         s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
+    }
+    
+    
+    /**
+     * Set new class factory
+     * @param factory 
+     */    
+    public void setClassFactory(IClassFactory factory){
+        if (factory == null) {            
+            factory = new BaseClassFactory();
+            log("New class factory set to default factory.");
+        } else {
+            log("New class factory set to: " + factory.getClass().getName());
+        }
+        
+        m_classFactory = factory;        
+    }
+    
+    /**
+     * Get the class factory
+     * @return 
+     */
+    public IClassFactory getClassFactory(){
+        return m_classFactory;
     }
 
     @Override
@@ -53,11 +95,18 @@ public class InjectorMain extends JavaPlugin {
         s_prefix = String.format("[%s]", desc.getName());
 
         EditSession.ForceClassLoad();
+        ClipboardCommands.ForceClassLoad();
+        
+        s_instance = this;
+        
         log("Enabled");
     }
 
     @Override
     public void onDisable() {
+        
+        s_instance = null;
+        
         log("Disabled");
     }
 }

@@ -2272,7 +2272,7 @@ public class EditSession implements Extent {
     private static final double lengthSq(double x, double z) {
         return (x * x) + (z * z);
     }
-
+       
     public static Class<?> ForceClassLoad(){
         return EditSession.class;
     }
