@@ -65,14 +65,32 @@ public class CommandsWrapper extends CommandsManager<LocalPlayer> {
     }
 
     @Override
-    public void invokeMethod(Method parent, String[] args, LocalPlayer player, 
+    public void invokeMethod(Method parent, String[] args, LocalPlayer player,
             Method method, Object instance, Object[] methodArgs, int level) throws CommandException {
-        
+
+        LocalPlayer newPlayer;
+
         if (player != null && (player instanceof BukkitPlayer)) {
-            player = new BukkitPlayerWrapper(m_wePlugin, m_worldEdit.getServer(), 
-                    (BukkitPlayer)player);
+            newPlayer = new BukkitPlayerWrapper(m_wePlugin, m_worldEdit.getServer(),
+                    (BukkitPlayer) player);
+        } else {
+            newPlayer = player;
         }
-        m_parent.invokeMethod(parent, args, player, method, instance, methodArgs, level);
+
+        if (methodArgs != null) {
+            for (int i = 0; i < methodArgs.length; i++) {
+                Object arg = methodArgs[i];
+                if (arg instanceof BukkitPlayer) {
+                    if (arg == player) {
+                        methodArgs[i] = newPlayer;
+                    } else {
+                        methodArgs[i] = new BukkitPlayerWrapper(m_wePlugin, m_worldEdit.getServer(), (BukkitPlayer) arg);
+                    }
+                }
+            }
+        }        
+
+        m_parent.invokeMethod(parent, args, newPlayer, method, instance, methodArgs, level);
     }
 
 }
