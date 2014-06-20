@@ -32,7 +32,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.PlayerManager;
 import org.primesoft.asyncworldedit.PlayerWrapper;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.PlayerEntry;
 import org.primesoft.asyncworldedit.Permission;
 import org.primesoft.asyncworldedit.PermissionManager;
@@ -45,7 +45,7 @@ public class JobsCommand {
 
     private final static int MAX_LINES = 6;
 
-    public static void Execte(PluginMain sender, Player player, String[] args) {
+    public static void Execte(AsyncWorldEditMain sender, Player player, String[] args) {
         final List<String> lines = new ArrayList<String>();
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_JOBS);
@@ -126,11 +126,11 @@ public class JobsCommand {
             return;
         }
         if (onlyInGame && player == null) {
-            PluginMain.say(player, ChatColor.RED + "Command available ingame.");
+            AsyncWorldEditMain.say(player, ChatColor.RED + "Command available ingame.");
             return;
         }
         if (!PermissionManager.isAllowed(player, perm)) {
-            PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+            AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
             return;
         }
         
@@ -181,7 +181,7 @@ public class JobsCommand {
 
             int maxPages = l.length / MAX_LINES + 1;
             say(player, l, (page - 1) * MAX_LINES, page * MAX_LINES);
-            PluginMain.say(player, "page " + page + " of " + maxPages);
+            AsyncWorldEditMain.say(player, "page " + page + " of " + maxPages);
         }
     }
 
@@ -189,7 +189,7 @@ public class JobsCommand {
         from = Math.max(from, 0);
         to = Math.min(to, lines.length);
         for (int i = from; i < to; i++) {
-            PluginMain.say(player, lines[i]);
+            AsyncWorldEditMain.say(player, lines[i]);
         }
     }
 }

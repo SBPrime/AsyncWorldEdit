@@ -29,7 +29,7 @@ import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
@@ -61,7 +61,7 @@ public abstract class WorldAsyncTask extends BaseTask {
     @Override
     protected void doPostRun(Object result) {
         if (ConfigProvider.isTalkative()) {
-            PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "World operation done.");
+            AsyncWorldEditMain.say(m_player, ChatColor.LIGHT_PURPLE + "World operation done.");
         }
     }
 

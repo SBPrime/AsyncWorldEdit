@@ -24,10 +24,13 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.regions.Region;
 import java.util.UUID;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.EntityEntry;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -39,11 +42,12 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  * @author SBPrime
  */
 public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
+
     /**
      * The job id
      */
     private final int m_jobId;
-    
+
     /**
      * The blocks placer
      */
@@ -67,12 +71,12 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
      * Get entities from CuboidClipboard
      *
      * @param cc
-     * @return 
+     * @return
      */
     public static Object getEntities(CuboidClipboard cc) {
         return Reflection.get(cc, Object.class, "entities", "Unable to get entities");
     }
-    
+
     public CuboidClipboardWrapper(UUID player, CuboidClipboard parrent) {
         this(player, parrent, -1);
     }
@@ -81,7 +85,7 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
         super(parrent);
 
         m_jobId = jobId;
-        m_blocksPlacer = PluginMain.getInstance().getBlockPlacer();
+        m_blocksPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
         m_player = player;
     }
 
@@ -90,11 +94,48 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
         synchronized (m_parrent) {
             final Object entities = getEntities(m_parrent);
             final int jobId = m_jobId < 0 ? m_blocksPlacer.getJobId(m_player) : m_jobId;
-            final EntityEntry entry =
-                    new EntityEntry(jobId, entities, pos, m_parrent);
+            final EntityEntry entry
+                    = new EntityEntry(jobId, entities, pos, m_parrent);
 
             m_blocksPlacer.addTasks(m_player, entry);
         }
         return new LocalEntity[0];
+    }
+
+    @Override
+    public void copy(EditSession editSession) {
+        CuboidClipboard tmp = new CuboidClipboard(getSize(), getOrigin(), getOffset());
+        tmp.copy(editSession);
+        
+        cloneData(tmp);
+    }
+
+    @Override
+    public void copy(EditSession editSession, Region region) {
+        CuboidClipboard tmp = new CuboidClipboard(getSize(), getOrigin(), getOffset());
+        tmp.copy(editSession, region);
+        
+        cloneData(tmp);
+    }
+
+    
+    /**
+     * Clone data from clipboard to this
+     * @param source 
+     */
+    private void cloneData(CuboidClipboard source) {
+        synchronized (m_parrent){
+            BaseBlock[][][] data = Reflection.get(source, BaseBlock[][][].class, "data", "Unable to clone clipboard data");
+            
+            if (data == null) {
+                return;
+            }
+            
+            setOffset(source.getOffset());
+            setOrigin(source.getOrigin());
+            setSize(source.getSize());
+            
+            Reflection.set(CuboidClipboard.class, m_parrent, "data", data, "Unable to clone clipboard data");
+        }
     }
 }

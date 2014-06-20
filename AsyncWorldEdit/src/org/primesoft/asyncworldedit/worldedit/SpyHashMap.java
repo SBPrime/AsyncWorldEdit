@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.PlayerManager;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 
 /**
  * This hash map autimaticly injects LocalSessionWrapper for each LocalSession
@@ -116,7 +116,7 @@ public class SpyHashMap extends HashMap<String, LocalSession> {
                 return super.put(key, value);
             }
 
-            PluginMain.log("Warning: put request found on LocalSession hash. The integration might be incorrect.");
+            AsyncWorldEditMain.log("Warning: put request found on LocalSession hash. The integration might be incorrect.");
             return createAndAdd(key, value);
 
         }
@@ -141,7 +141,7 @@ public class SpyHashMap extends HashMap<String, LocalSession> {
         }
 
         if (showError) {
-            PluginMain.log("Warning: putAll request found on LocalSession hash. The integration might be incorrect.");
+            AsyncWorldEditMain.log("Warning: putAll request found on LocalSession hash. The integration might be incorrect.");
         }
     }
 }

@@ -86,7 +86,7 @@ public final class Help {
         }
 
         for (String string : help) {
-            PluginMain.say(player, string);
+            AsyncWorldEditMain.say(player, string);
         }
 
         return true;

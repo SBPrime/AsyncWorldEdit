@@ -35,7 +35,7 @@ import org.primesoft.asyncworldedit.PermissionManager;
  * @author SBPrime
  */
 public class ToggleCommand {
-    public static void Execte(PluginMain sender, Player player, String[] args) {
+    public static void Execte(AsyncWorldEditMain sender, Player player, String[] args) {
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
             return;
@@ -47,11 +47,11 @@ public class ToggleCommand {
 
         if (args.length == 1) {
             if (player == null) {
-                PluginMain.say(player, ChatColor.RED + "Command available ingame.");
+                AsyncWorldEditMain.say(player, ChatColor.RED + "Command available ingame.");
                 return;
             }
             if (!PermissionManager.isAllowed(player, Permission.MODE_CHANGE)) {
-                PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+                AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
 
@@ -64,19 +64,19 @@ public class ToggleCommand {
             String arg = args[1];
             if (arg.startsWith("u:")) {
                 if (!PermissionManager.isAllowed(player, Permission.MODE_CHANGE_OTHER)) {
-                    PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+                    AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
                 String name = arg.substring(2);
                 UUID uuid = sender.getPlayerManager().getPlayerUUID(name);
                 if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
-                    PluginMain.say(player, ChatColor.RED + "Player not found.");
+                    AsyncWorldEditMain.say(player, ChatColor.RED + "Player not found.");
                     return;
                 }
                 wrapper = manager.getPlayer(uuid);
                 if (wrapper == null) {
-                    PluginMain.say(player, ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
+                    AsyncWorldEditMain.say(player, ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
                     return;
                 }
 
@@ -95,11 +95,11 @@ public class ToggleCommand {
                 }
             } else {
                 if (player == null) {
-                    PluginMain.say(player, ChatColor.RED + "Command available ingame.");
+                    AsyncWorldEditMain.say(player, ChatColor.RED + "Command available ingame.");
                     return;
                 }
                 if (!PermissionManager.isAllowed(player, Permission.MODE_CHANGE)) {
-                    PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+                    AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
                 if (arg.equalsIgnoreCase("on")) {
@@ -115,6 +115,6 @@ public class ToggleCommand {
         }
 
         wrapper.setMode(mode);
-        PluginMain.say(player, "AsyncWorldEdit: " + (wrapper.getMode() ? "on" : "off"));
+        AsyncWorldEditMain.say(player, "AsyncWorldEdit: " + (wrapper.getMode() ? "on" : "off"));
     }
 }

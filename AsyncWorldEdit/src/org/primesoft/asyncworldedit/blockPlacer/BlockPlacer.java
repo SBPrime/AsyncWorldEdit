@@ -33,7 +33,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PhysicsWatch;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.Permission;
 import org.primesoft.asyncworldedit.PermissionManager;
 import org.primesoft.asyncworldedit.utils.InOutParam;
@@ -155,7 +155,7 @@ public class BlockPlacer implements Runnable {
     /**
      * Parent plugin main
      */
-    private final PluginMain m_plugin;
+    private final AsyncWorldEditMain m_plugin;
 
     /**
      * Get the physics watcher
@@ -171,7 +171,7 @@ public class BlockPlacer implements Runnable {
      *
      * @param plugin parent
      */
-    public BlockPlacer(PluginMain plugin) {
+    public BlockPlacer(AsyncWorldEditMain plugin) {
         m_jobAddedListeners = new ArrayList<IBlockPlacerListener>();
         m_lastRunTime = System.currentTimeMillis();
         m_runNumber = 0;
@@ -447,7 +447,7 @@ public class BlockPlacer implements Runnable {
                 }
                 if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
-                    Player p = PluginMain.getPlayer(player);
+                    Player p = AsyncWorldEditMain.getPlayer(player);
                     if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                         m_barAPI.disableMessage(p);
                     }
@@ -567,7 +567,7 @@ public class BlockPlacer implements Runnable {
                 return false;
             }
 
-            boolean bypass = !PermissionManager.isAllowed(PluginMain.getPlayer(player), Permission.QUEUE_BYPASS);
+            boolean bypass = !PermissionManager.isAllowed(AsyncWorldEditMain.getPlayer(player), Permission.QUEUE_BYPASS);
             int size = 0;
             for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
                 size += queueEntry.getValue().getQueue().size();
@@ -581,7 +581,7 @@ public class BlockPlacer implements Runnable {
 
                 if (!playerEntry.isInformed()) {
                     playerEntry.setInformed(true);
-                    PluginMain.say(player, "Out of space on AWE block queue.");
+                    AsyncWorldEditMain.say(player, "Out of space on AWE block queue.");
                 }
 
                 return false;
@@ -605,7 +605,7 @@ public class BlockPlacer implements Runnable {
                 }
                 if (queue.size() >= m_queueHardLimit && bypass) {
                     m_lockedQueues.add(player);
-                    PluginMain.say(player, "Your block queue is full. Wait for items to finish drawing.");
+                    AsyncWorldEditMain.say(player, "Your block queue is full. Wait for items to finish drawing.");
                     return false;
                 }
             }
@@ -622,7 +622,7 @@ public class BlockPlacer implements Runnable {
      */
     public void cancelJob(UUID player, JobEntry job) {
         if (job instanceof UndoJob) {
-            PluginMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
+            AsyncWorldEditMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
             return;
         }
         cancelJob(player, job.getJobId());
@@ -635,7 +635,7 @@ public class BlockPlacer implements Runnable {
      */
     private void waitForJob(JobEntry job) {
         if (job instanceof UndoJob) {
-            PluginMain.log("Warning: Undo jobs shuld not by canceled, ingoring!");
+            AsyncWorldEditMain.log("Warning: Undo jobs shuld not by canceled, ingoring!");
             return;
         }
 
@@ -655,11 +655,11 @@ public class BlockPlacer implements Runnable {
 
         if (status != JobEntry.JobStatus.Done
                 && !job.isTaskDone()) {
-            PluginMain.log("-----------------------------------------------------------------------");
-            PluginMain.log("Warning: timeout waiting for job to finish. Manual job cancel.");
-            PluginMain.log("Job Id: " + job.getJobId() + ", " + job.getName() + " Done:" + job.isTaskDone() + " Status: " + job.getStatus());
-            PluginMain.log("Send this message to the author of the plugin!");
-            PluginMain.log("-----------------------------------------------------------------------");
+            AsyncWorldEditMain.log("-----------------------------------------------------------------------");
+            AsyncWorldEditMain.log("Warning: timeout waiting for job to finish. Manual job cancel.");
+            AsyncWorldEditMain.log("Job Id: " + job.getJobId() + ", " + job.getName() + " Done:" + job.isTaskDone() + " Status: " + job.getStatus());
+            AsyncWorldEditMain.log("Send this message to the author of the plugin!");
+            AsyncWorldEditMain.log("-----------------------------------------------------------------------");
             job.cancel();
             job.setStatus(JobEntry.JobStatus.Done);
         }
@@ -684,7 +684,7 @@ public class BlockPlacer implements Runnable {
             playerEntry = m_blocks.get(player);
             job = playerEntry.getJob(jobId);
             if (job instanceof UndoJob) {
-                PluginMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
+                AsyncWorldEditMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
                 return 0;
             }
 
@@ -721,7 +721,7 @@ public class BlockPlacer implements Runnable {
                 playerEntry.updateQueue(filtered);
             } else {
                 m_blocks.remove(player);
-                Player p = PluginMain.getPlayer(player);
+                Player p = AsyncWorldEditMain.getPlayer(player);
                 if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                     m_barAPI.disableMessage(p);
                 }
@@ -768,7 +768,7 @@ public class BlockPlacer implements Runnable {
                 }
                 result = queue.size();
                 m_blocks.remove(player);
-                Player p = PluginMain.getPlayer(player);
+                Player p = AsyncWorldEditMain.getPlayer(player);
                 if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
                     m_barAPI.disableMessage(p);
                 }
@@ -835,7 +835,7 @@ public class BlockPlacer implements Runnable {
             }
         }
 
-        boolean bypass = PermissionManager.isAllowed(PluginMain.getPlayer(player),
+        boolean bypass = PermissionManager.isAllowed(AsyncWorldEditMain.getPlayer(player),
                 Permission.QUEUE_BYPASS);
         return getPlayerMessage(entry, bypass);
     }
@@ -891,7 +891,7 @@ public class BlockPlacer implements Runnable {
         HashSet<UUID> result = new HashSet<UUID>(playerNames.length);
 
         for (UUID uuid : playerNames) {
-            Player player = PluginMain.getPlayer(uuid);
+            Player player = AsyncWorldEditMain.getPlayer(uuid);
             if (player == null) {
                 continue;
             }
@@ -1009,7 +1009,7 @@ public class BlockPlacer implements Runnable {
                               final boolean talk) {
         entry.updateSpeed(placedBlocks, timeDelte);
 
-        final Player p = PluginMain.getPlayer(playerUuid);
+        final Player p = AsyncWorldEditMain.getPlayer(playerUuid);
         boolean bypass = PermissionManager.isAllowed(p, Permission.QUEUE_BYPASS);
         if (entry.getQueue().isEmpty()) {
             if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
@@ -1017,7 +1017,7 @@ public class BlockPlacer implements Runnable {
             }
         } else {
             if (talk && PermissionManager.isAllowed(p, Permission.TALKATIVE_QUEUE)) {
-                PluginMain.say(p, ChatColor.YELLOW + "[AWE] You have "
+                AsyncWorldEditMain.say(p, ChatColor.YELLOW + "[AWE] You have "
                         + getPlayerMessage(entry, bypass));
             }
 
@@ -1035,7 +1035,7 @@ public class BlockPlacer implements Runnable {
     private void unlockQueue(final UUID player, boolean talk) {
         if (m_lockedQueues.contains(player)) {
             if (talk) {
-                PluginMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
+                AsyncWorldEditMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
             }
             m_lockedQueues.remove(player);
         }

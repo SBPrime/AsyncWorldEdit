@@ -73,6 +73,7 @@ awe:
     - deformRegion
     - hollowOutRegion
     - paste
+    - copy
     - regenerate
     - center
     - drawLine

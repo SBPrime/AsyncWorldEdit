@@ -36,7 +36,7 @@ import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
@@ -111,7 +111,7 @@ public abstract class BaseTask extends BukkitRunnable {
         try {
             m_job.setStatus(JobEntry.JobStatus.Preparing);
             if (ConfigProvider.isTalkative()) {
-                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
+                AsyncWorldEditMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                         + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
             }
             m_blockPlacer.addTasks(m_player, m_job);
@@ -133,10 +133,10 @@ public abstract class BaseTask extends BukkitRunnable {
             m_blockPlacer.addTasks(m_player, m_job);
             doPostRun(result);
         } catch (MaxChangedBlocksException ex) {
-            PluginMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
+            AsyncWorldEditMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof SessionCanceled) {
-                PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
+                AsyncWorldEditMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
             }
         }
 
@@ -171,7 +171,7 @@ public abstract class BaseTask extends BukkitRunnable {
             return;
         }
 
-        PluginMain.log("Warning: ChangeSet is not set to ArrayListHistory, rebuilding...");
+        AsyncWorldEditMain.log("Warning: ChangeSet is not set to ArrayListHistory, rebuilding...");
         HashMap<BlockVector, BaseBlock> oldBlocks = new HashMap<BlockVector, BaseBlock>();
 
         for (Iterator<Change> it = csSource.backwardIterator(); it.hasNext();) {

@@ -54,7 +54,7 @@ import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.ChunkWatch;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.*;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
@@ -110,7 +110,7 @@ public class AsyncEditSession extends EditSessionStub {
     /**
      * Plugin instance
      */
-    private final PluginMain m_plugin;
+    private final AsyncWorldEditMain m_plugin;
 
     /**
      * Bukkit schedule
@@ -170,7 +170,7 @@ public class AsyncEditSession extends EditSessionStub {
         return m_editSessionEvent;
     }
 
-    public AsyncEditSession(PluginMain plugin,
+    public AsyncEditSession(AsyncWorldEditMain plugin,
             UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
@@ -1630,7 +1630,7 @@ public class AsyncEditSession extends EditSessionStub {
                      * Exception here indicates that async block get is not
                      * available. Therefore use the queue fallback.
                      */
-                    PluginMain.log("Error performing safe operation for " + worldName
+                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
                             + " cx:" + cx + " cy:" + cz + " Loaded: " + m_world.isChunkLoaded(cx, cz)
                             + ", inUse: " + m_world.isChunkInUse(cx, cz) + ". Error: "
                             + ex.toString());
@@ -1668,7 +1668,7 @@ public class AsyncEditSession extends EditSessionStub {
                      * Exception here indicates that async block get is not
                      * available. Therefore use the queue fallback.
                      */
-                    PluginMain.log("Error performing safe operation for " + worldName
+                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
                             + " cx:" + cx + " cy:" + cz + " Loaded: " + m_world.isChunkLoaded(cx, cz)
                             + ", inUse: " + m_world.isChunkInUse(cx, cz) + ". Error: "
                             + ex.toString());
@@ -1697,7 +1697,7 @@ public class AsyncEditSession extends EditSessionStub {
              * Exception here indicates that async block get is not
              * available. Therefore use the queue fallback.
              */
-            PluginMain.log("Error performing safe operation. Error: "
+            AsyncWorldEditMain.log("Error performing safe operation. Error: "
                     + ex.toString());
         }
         queueGetOperation(action);
@@ -1720,7 +1720,7 @@ public class AsyncEditSession extends EditSessionStub {
              * Exception here indicates that async block get is not
              * available. Therefore use the queue fallback.
              */
-            PluginMain.log("Error performing safe operation. Error: "
+            AsyncWorldEditMain.log("Error performing safe operation. Error: "
                     + ex.toString());
         }
         return queueGetOperation(action);

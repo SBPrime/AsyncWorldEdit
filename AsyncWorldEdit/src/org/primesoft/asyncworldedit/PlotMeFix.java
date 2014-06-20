@@ -66,7 +66,7 @@ public class PlotMeFix
 
             if (m_isEnabled)
             {
-                PluginMain.log("PlotMe fix enabled.");
+                AsyncWorldEditMain.log("PlotMe fix enabled.");
             }
         }
     }

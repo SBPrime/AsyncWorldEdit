@@ -32,7 +32,7 @@ import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 
 /**
  *
@@ -40,10 +40,10 @@ import org.primesoft.asyncworldedit.PluginMain;
  */
 public class AsyncEditSessionFactory extends EditSessionFactory {
 
-    private final PluginMain m_parent;
+    private final AsyncWorldEditMain m_parent;
     private final EventBus m_eventBus;
 
-    public AsyncEditSessionFactory(PluginMain parent, EventBus eventBus) {
+    public AsyncEditSessionFactory(AsyncWorldEditMain parent, EventBus eventBus) {
         m_parent = parent;
         m_eventBus = eventBus;
     }
@@ -61,7 +61,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
         AsyncEditSession result = new AsyncEditSession(m_parent, uuid,
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, player, maxBlocks, null));
-        m_parent.getPlotMeFix().setMask(PluginMain.getPlayer(uuid));
+        m_parent.getPlotMeFix().setMask(AsyncWorldEditMain.getPlayer(uuid));
 
         return result;
     }
@@ -79,7 +79,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
         AsyncEditSession result = new AsyncEditSession(m_parent, uuid,
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, player, maxBlocks, null));
-        m_parent.getPlotMeFix().setMask(PluginMain.getPlayer(uuid));
+        m_parent.getPlotMeFix().setMask(AsyncWorldEditMain.getPlayer(uuid));
 
         return result;
     }

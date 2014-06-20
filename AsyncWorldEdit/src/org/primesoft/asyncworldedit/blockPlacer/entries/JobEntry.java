@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
@@ -275,7 +275,7 @@ public class JobEntry extends BlockPlacerEntry {
         }
 
         if (ConfigProvider.isTalkative()) {
-            PluginMain.say(player, ChatColor.YELLOW + "Job " + toString()
+            AsyncWorldEditMain.say(player, ChatColor.YELLOW + "Job " + toString()
                     + ChatColor.YELLOW + " - " + getStatusString());
         }
         

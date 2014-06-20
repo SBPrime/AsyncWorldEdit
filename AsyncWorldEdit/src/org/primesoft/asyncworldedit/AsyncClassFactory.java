@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,46 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.worldedit;
+
+package org.primesoft.asyncworldedit;
+
+import com.sk89q.worldedit.CuboidClipboard;
+import com.sk89q.worldedit.Vector;
+import java.util.UUID;
+import org.primesoft.asyncworldedit.injector.BaseClassFactory;
+import org.primesoft.asyncworldedit.worldedit.AsyncCuboidClipboard;
 
 /**
- * All operations that can by done in async mode
+ *
  * @author SBPrime
  */
-public enum WorldeditOperations 
-{
-    undo,
-    redo,
-    fillXZ,
-    removeAbove,
-    removeBelow,
-    removeNear,
-    setBlocks,
-    replaceBlocks,
-    makeCuboidFaces,
-    makeCuboidWalls,
-    overlayCuboidBlocks,
-    naturalizeCuboidBlocks,
-    stackCuboidRegion,
-    moveCuboidRegion,
-    drainArea,
-    fixLiquid,
-    makeCylinder,
-    makeSphere,
-    makePyramid,
-    thaw,
-    simulateSnow,
-    green,
-    makePumpkinPatches,
-    makeForest,
-    makeShape,
-    deformRegion,
-    hollowOutRegion,
-    paste,
-    copy,
-    regenerate,
-    center,
-    drawLine,
-    drawSpline,
-    makeBiomeShape
+public class AsyncClassFactory extends BaseClassFactory {
+    @Override
+    public CuboidClipboard createCuboidClipboard(UUID player, Vector size, Vector origin, Vector offset) {
+        return new AsyncCuboidClipboard(player, 
+                super.createCuboidClipboard(player, size, origin, offset));
+    }
+    
 }

@@ -35,7 +35,7 @@ import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RegenerateEntry;
@@ -59,7 +59,7 @@ public class ProxyLocalWorld extends BukkitWorld {
     /**
      * The plugin
      */
-    private final PluginMain m_plugin;
+    private final AsyncWorldEditMain m_plugin;
 
     /**
      * The player
@@ -74,7 +74,7 @@ public class ProxyLocalWorld extends BukkitWorld {
     public ProxyLocalWorld(UUID player, World world) {
         super(world);
         m_player = player;
-        m_plugin = PluginMain.getInstance();
+        m_plugin = AsyncWorldEditMain.getInstance();
         m_blockPlacer = m_plugin.getBlockPlacer();
         m_schedule = m_plugin.getServer().getScheduler();
         m_wrapper = m_plugin.getPlayerManager().getPlayer(player);

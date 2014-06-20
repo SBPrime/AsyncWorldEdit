@@ -33,14 +33,14 @@ import org.bukkit.entity.Player;
  */
 public class PlayerManager {
 
-    private final PluginMain m_parrent;
+    private final AsyncWorldEditMain m_parrent;
 
     /**
      * List of know players
      */
     private final HashMap<UUID, PlayerWrapper> m_playersUids;
 
-    public PlayerManager(PluginMain parent) {
+    public PlayerManager(AsyncWorldEditMain parent) {
         m_playersUids = new HashMap<UUID, PlayerWrapper>();
         m_parrent = parent;
     }

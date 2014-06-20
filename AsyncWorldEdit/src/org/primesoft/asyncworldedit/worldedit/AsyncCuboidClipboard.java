@@ -24,11 +24,12 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.regions.Region;
 import java.util.UUID;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
@@ -68,12 +69,12 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
     /**
      * The plugin
      */
-    private final PluginMain m_plugin;
+    private final AsyncWorldEditMain m_plugin;
 
     public AsyncCuboidClipboard(UUID player, CuboidClipboard parrent) {
         super(new ProxyCuboidClipboard(parrent));
 
-        m_plugin = PluginMain.getInstance();
+        m_plugin = AsyncWorldEditMain.getInstance();
         m_schedule = m_plugin.getServer().getScheduler();
         m_clipboard = parrent;
         m_blockPlacer = m_plugin.getBlockPlacer();
@@ -206,6 +207,68 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
                     public void task(CuboidClipboard cc)
                     throws MaxChangedBlocksException {
                         cc.paste(session, newOrigin, noAir, entities);
+                    }
+                });
+    }
+
+    @Override
+    public void copy(EditSession editSession) {
+        boolean isAsync = checkAsync(WorldeditOperations.copy, editSession);
+        if (!isAsync) {
+            super.copy(editSession);
+            return;
+        }
+
+        final int jobId = getJobId();
+        final EditSession session;
+        final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
+        final JobEntry job;
+        if (editSession instanceof AsyncEditSession) {
+            AsyncEditSession aSession = (AsyncEditSession) editSession;
+            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+            job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "copy");
+        } else {
+            session = editSession;
+            job = new JobEntry(m_player, jobId, "copy");
+        }
+        m_blockPlacer.addJob(m_player, job);
+
+        m_schedule.runTaskAsynchronously(m_plugin, new ClipboardAsyncTask(cc, session, m_player, "copy",
+                m_blockPlacer, job) {
+                    @Override
+                    public void task(CuboidClipboard cc) throws MaxChangedBlocksException {
+                        cc.copy(session);
+                    }
+                });
+    }
+
+    @Override
+    public void copy(EditSession editSession, final Region region) {
+        boolean isAsync = checkAsync(WorldeditOperations.copy, editSession);
+        if (!isAsync) {
+            super.copy(editSession, region);
+            return;
+        }
+
+        final int jobId = getJobId();
+        final EditSession session;
+        final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
+        final JobEntry job;
+        if (editSession instanceof AsyncEditSession) {
+            AsyncEditSession aSession = (AsyncEditSession) editSession;
+            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+            job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "copy");
+        } else {
+            session = editSession;
+            job = new JobEntry(m_player, jobId, "copy");
+        }
+        m_blockPlacer.addJob(m_player, job);
+
+        m_schedule.runTaskAsynchronously(m_plugin, new ClipboardAsyncTask(cc, session, m_player, "copy",
+                m_blockPlacer, job) {
+                    @Override
+                    public void task(CuboidClipboard cc) throws MaxChangedBlocksException {
+                        cc.copy(session, region);
                     }
                 });
     }

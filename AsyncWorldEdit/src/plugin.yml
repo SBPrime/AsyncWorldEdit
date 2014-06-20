@@ -1,5 +1,5 @@
 name: AsyncWorldEdit
-main: org.primesoft.asyncworldedit.PluginMain
+main: org.primesoft.asyncworldedit.AsyncWorldEditMain
 version: 2.0-RC2
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki

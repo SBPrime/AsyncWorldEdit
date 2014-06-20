@@ -41,7 +41,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
@@ -58,7 +58,7 @@ public class WorldeditIntegrator {
     /**
      * The parent plugin
      */
-    private final PluginMain m_parent;
+    private final AsyncWorldEditMain m_parent;
 
     /**
      * The world edit plugin
@@ -78,7 +78,7 @@ public class WorldeditIntegrator {
      * @param plugin
      * @param worldEditPlugin
      */
-    public WorldeditIntegrator(PluginMain plugin, WorldEditPlugin worldEditPlugin) {
+    public WorldeditIntegrator(AsyncWorldEditMain plugin, WorldEditPlugin worldEditPlugin) {
         m_parent = plugin;
         m_worldEditPlugin = worldEditPlugin;
         
@@ -87,7 +87,7 @@ public class WorldeditIntegrator {
         }
         
         if (worldEditPlugin == null) {
-            PluginMain.log("Error initializeing Worldedit integrator");
+            AsyncWorldEditMain.log("Error initializeing Worldedit integrator");
             return;
         }
         
@@ -138,7 +138,7 @@ public class WorldeditIntegrator {
             try {
                 m_platformManager.register(platform);
             } catch (PlatformRejectionException ex) {
-                PluginMain.log("Error restoring platform " + platform.getPlatformName());
+                AsyncWorldEditMain.log("Error restoring platform " + platform.getPlatformName());
             }
         }
         
@@ -161,19 +161,19 @@ public class WorldeditIntegrator {
             result.setInjector(new SimpleInjector(m_worldEdit));
             return result;
         } catch (ClassNotFoundException ex) {
-            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
         } catch (NoSuchMethodException ex) {
-            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
         } catch (SecurityException ex) {
-            PluginMain.log("Unable to create commands manager: security exception.");
+            AsyncWorldEditMain.log("Unable to create commands manager: security exception.");
         } catch (InstantiationException ex) {
-            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
         } catch (IllegalAccessException ex) {
-            PluginMain.log("Unable to create commands manager: security exception.");
+            AsyncWorldEditMain.log("Unable to create commands manager: security exception.");
         } catch (IllegalArgumentException ex) {
-            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
         } catch (InvocationTargetException ex) {
-            PluginMain.log("Unable to create commands manager: unsupported WorldEdit version.");
+            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
         }
         
         return null;

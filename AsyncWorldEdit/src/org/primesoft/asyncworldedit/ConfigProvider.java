@@ -277,7 +277,7 @@ public class ConfigProvider {
      * @param plugin parent plugin
      * @return true if config loaded
      */
-    public static boolean load(PluginMain plugin) {
+    public static boolean load(AsyncWorldEditMain plugin) {
         if (plugin == null) {
             return false;
         }
@@ -348,18 +348,18 @@ public class ConfigProvider {
             m_queueMaxSize = renderSection.getInt("queue-max-size", 10000000);
 
             if (m_queueMaxSize <= 0) {
-                PluginMain.log("Warinig: Block queue is disabled!");
+                AsyncWorldEditMain.log("Warinig: Block queue is disabled!");
             }
             
             if (m_timeCount < 0 && m_blocksCnt < 0)
             {
-                PluginMain.log("Warinig: Time and blocks are set to unlimited!");
+                AsyncWorldEditMain.log("Warinig: Time and blocks are set to unlimited!");
                 m_timeCount = 20;
                 m_blocksCnt = -1;
             }
             if (m_vipTimeCount < 0 && m_vipBlocksCnt < 0)
             {
-                PluginMain.log("Warinig: Vip time and blocks are set to unlimited!");
+                AsyncWorldEditMain.log("Warinig: Vip time and blocks are set to unlimited!");
                 m_vipTimeCount = 20;
                 m_vipBlocksCnt = -1;
             }
@@ -382,19 +382,19 @@ public class ConfigProvider {
                 result.add(WorldeditOperations.valueOf(string));
             }
             catch (Exception e) {
-                PluginMain.log("* unknown operation name " + string);
+                AsyncWorldEditMain.log("* unknown operation name " + string);
             }
         }
         if (result.isEmpty()) {
             //Add all entries
-            PluginMain.log("Warning: No operations defined in config file. Enabling all.");
+            AsyncWorldEditMain.log("Warning: No operations defined in config file. Enabling all.");
             for (WorldeditOperations op : WorldeditOperations.values()) {
                 result.add(op);
             }
         }
         //PluginMain.Log("World edit operations:");
         //for (WorldeditOperations op : WorldeditOperations.values()) {
-        //    PluginMain.Log("* " + op + "..." + (result.contains(op) ? "async" : "regular"));
+        //    AsyncWorldEditMain.Log("* " + op + "..." + (result.contains(op) ? "async" : "regular"));
         //}
 
 

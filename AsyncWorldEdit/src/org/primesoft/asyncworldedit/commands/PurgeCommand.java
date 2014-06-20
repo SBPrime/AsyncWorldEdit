@@ -28,7 +28,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.Permission;
 import org.primesoft.asyncworldedit.PermissionManager;
 
@@ -37,7 +37,7 @@ import org.primesoft.asyncworldedit.PermissionManager;
  * @author SBPrime
  */
 public class PurgeCommand {
-    public static void Execte(PluginMain sender, Player player, String[] args) {
+    public static void Execte(AsyncWorldEditMain sender, Player player, String[] args) {
         if (args.length < 1 || args.length > 2) {
             Help.ShowHelp(player, Commands.COMMAND_PURGE);
             return;
@@ -46,31 +46,31 @@ public class PurgeCommand {
         if (args.length == 1) {
             if (player == null)
             {
-                PluginMain.say(player, ChatColor.RED + "Command available ingame.");
+                AsyncWorldEditMain.say(player, ChatColor.RED + "Command available ingame.");
                 return;
             }
             if (!PermissionManager.isAllowed(player, Permission.PURGE_SELF)) {
-                PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+                AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
 
             int size = sender.getBlockPlacer().purge(player.getUniqueId());
-            PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+            AsyncWorldEditMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
                 if (!PermissionManager.isAllowed(player, Permission.PURGE_OTHER)) {
-                    PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+                    AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
                 UUID uuid = sender.getPlayerManager().getPlayerUUID(arg.substring(2));
                 if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
-                    PluginMain.say(player, ChatColor.RED + "Player not found.");
+                    AsyncWorldEditMain.say(player, ChatColor.RED + "Player not found.");
                     return;
                 }                
                 int size = sender.getBlockPlacer().purge(uuid);
-                PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+                AsyncWorldEditMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
             } else {
                 if (!arg.equalsIgnoreCase("all")) {
                     Help.ShowHelp(player, Commands.COMMAND_PURGE);
@@ -78,12 +78,12 @@ public class PurgeCommand {
                 }
 
                 if (!PermissionManager.isAllowed(player, Permission.PURGE_ALL)) {
-                    PluginMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+                    AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
                 int size = sender.getBlockPlacer().purgeAll();
-                PluginMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+                AsyncWorldEditMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
             }
         }
     }

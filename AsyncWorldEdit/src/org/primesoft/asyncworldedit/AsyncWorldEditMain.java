@@ -34,13 +34,13 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventPriority;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.commands.*;
+import org.primesoft.asyncworldedit.injector.InjectorMain;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
@@ -48,24 +48,25 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
  *
  * @author SBPrime
  */
-public class PluginMain extends JavaPlugin {
+public class AsyncWorldEditMain extends JavaPlugin {
 
     private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
     private static ConsoleCommandSender s_console;
     private static String s_prefix = null;
-    private static String s_logFormat = "%s %s";
-    private static PluginMain s_instance;
+    private static final String s_logFormat = "%s %s";
+    private static AsyncWorldEditMain s_instance;
     private BlocksHubIntegration m_blocksHub;
     private Boolean m_isInitialized = false;
     private MetricsLite m_metrics;
-    private EventListener m_listener = new EventListener(this);
-    private PhysicsWatch m_physicsWatcher = new PhysicsWatch();
-    private ChunkWatch m_chunkWatch = new ChunkWatch();
+    private final EventListener m_listener = new EventListener(this);
+    private final PhysicsWatch m_physicsWatcher = new PhysicsWatch();
+    private final ChunkWatch m_chunkWatch = new ChunkWatch();
     private BlockPlacer m_blockPlacer;
     private WorldeditIntegrator m_weIntegrator;
     private PlotMeFix m_plotMeFix;
-    private PlayerManager m_playerManager = new PlayerManager(this);
+    private final PlayerManager m_playerManager = new PlayerManager(this);
     private BarAPIntegrator m_barApi;
+    private InjectorMain m_aweInjector;
 
     public PlayerManager getPlayerManager() {
         return m_playerManager;
@@ -95,7 +96,7 @@ public class PluginMain extends JavaPlugin {
         return s_prefix;
     }
 
-    public static PluginMain getInstance() {
+    public static AsyncWorldEditMain getInstance() {
         return s_instance;
     }
 
@@ -173,6 +174,9 @@ public class PluginMain extends JavaPlugin {
             log("World edit not found.");
             return;
         }
+        
+        m_aweInjector = getAWEInjector(this);
+        m_aweInjector.setClassFactory(new AsyncClassFactory());
 
         m_barApi = new BarAPIntegrator(this);
         m_blocksHub = new BlocksHubIntegration(this);
@@ -327,5 +331,21 @@ public class PluginMain extends JavaPlugin {
         }
 
         return (WorldEditPlugin) wPlugin;
+    }
+
+    /**
+     * Get instance of the world edit plugin
+     *
+     * @param plugin
+     * @return
+     */
+    public static InjectorMain getAWEInjector(JavaPlugin plugin) {
+        final Plugin wPlugin = plugin.getServer().getPluginManager().getPlugin("AsyncWorldEditInjector");
+
+        if ((wPlugin == null) || (!(wPlugin instanceof InjectorMain))) {
+            return null;
+        }
+
+        return (InjectorMain) wPlugin;
     }
 }

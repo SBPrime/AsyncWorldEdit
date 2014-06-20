@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
-import org.primesoft.asyncworldedit.PluginMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.extent.CancelableWorld;
 import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
@@ -92,7 +92,7 @@ public class CancelabeEditSession extends EditSessionStub {
         ChangeSetExtent changeExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
                 this, "changeSetExtent", "Unable to get the ChangeSet");
         if (changeExtent == null) {
-            PluginMain.log("Unable to get the changeSet from EditSession, undo and redo broken.");
+            AsyncWorldEditMain.log("Unable to get the changeSet from EditSession, undo and redo broken.");
             return;
         }
 

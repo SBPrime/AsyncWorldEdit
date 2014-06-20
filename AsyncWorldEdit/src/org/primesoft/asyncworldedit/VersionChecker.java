@@ -64,7 +64,7 @@ public class VersionChecker {
 
             return sb.toString();
         } catch (Exception e) {
-            PluginMain.log("Error downloading file: " + e.getMessage());
+            AsyncWorldEditMain.log("Error downloading file: " + e.getMessage());
             return null;
         }
     }

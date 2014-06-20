@@ -63,7 +63,7 @@ public class BlocksHubIntegration {
         }
     }    
 
-    public BlocksHubIntegration(PluginMain plugin) {
+    public BlocksHubIntegration(AsyncWorldEditMain plugin) {
         m_playerManager = plugin.getPlayerManager();
         BlocksHub bh = getBlocksHub(plugin);
         m_blocksApi = bh != null ? bh.getApi() : null;
@@ -100,10 +100,10 @@ public class BlocksHubIntegration {
         try {
             return m_blocksApi.canPlace(player, world, location);
         } catch (Exception ex) {
-            PluginMain.log("Error checking block place perms: " + ex.toString());
-            PluginMain.log("Player: " + player);
-            PluginMain.log("World: " + world);
-            PluginMain.log("Location: " + location);
+            AsyncWorldEditMain.log("Error checking block place perms: " + ex.toString());
+            AsyncWorldEditMain.log("Player: " + player);
+            AsyncWorldEditMain.log("World: " + world);
+            AsyncWorldEditMain.log("Location: " + location);
             return true;
         }
     }
@@ -126,10 +126,10 @@ public class BlocksHubIntegration {
             PlayerWrapper pw = m_playerManager.getPlayer(playerUuid);
             String name = pw == null ? playerUuid.toString() : pw.getName();
 
-            PluginMain.log("Error checking block place perms: " + ex.toString());
-            PluginMain.log("Player: " + name);
-            PluginMain.log("World: " + world);
-            PluginMain.log("Location: " + l);
+            AsyncWorldEditMain.log("Error checking block place perms: " + ex.toString());
+            AsyncWorldEditMain.log("Player: " + name);
+            AsyncWorldEditMain.log("World: " + world);
+            AsyncWorldEditMain.log("Location: " + l);
             return true;
         }
     }
@@ -156,12 +156,12 @@ public class BlocksHubIntegration {
             PlayerWrapper pw = m_playerManager.getPlayer(playerUuid);
             String name = pw == null ? playerUuid.toString() : pw.getName();
             
-            PluginMain.log("Error logging block: " + ex.toString());
-            PluginMain.log("Player: " + name);
-            PluginMain.log("World: " + world);
-            PluginMain.log("Location: " + l);
-            PluginMain.log("Old: " + oldBlock);
-            PluginMain.log("New: " + newBlock);
+            AsyncWorldEditMain.log("Error logging block: " + ex.toString());
+            AsyncWorldEditMain.log("Player: " + name);
+            AsyncWorldEditMain.log("World: " + world);
+            AsyncWorldEditMain.log("Location: " + l);
+            AsyncWorldEditMain.log("Old: " + oldBlock);
+            AsyncWorldEditMain.log("New: " + newBlock);
         }
     }
 }

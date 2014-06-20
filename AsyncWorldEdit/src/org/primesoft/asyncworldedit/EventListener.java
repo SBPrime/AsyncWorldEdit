@@ -37,9 +37,9 @@ import org.bukkit.plugin.PluginDescriptionFile;
  */
 public class EventListener implements Listener {
 
-    private PluginMain m_parent;
+    private AsyncWorldEditMain m_parent;
 
-    public EventListener(PluginMain parent) {
+    public EventListener(AsyncWorldEditMain parent) {
         m_parent = parent;
     }
     
@@ -64,14 +64,14 @@ public class EventListener implements Listener {
             public void run() {
                 if (ConfigProvider.getCheckUpdate()) {
                     PluginDescriptionFile desc = m_parent.getDescription();
-                    PluginMain.say(player, ChatColor.BLUE + PluginMain.getPrefix()
+                    AsyncWorldEditMain.say(player, ChatColor.BLUE + AsyncWorldEditMain.getPrefix()
                             + VersionChecker.CheckVersion(desc.getVersion()));
                 }
             }
         }).start();
 
         if (!ConfigProvider.isConfigUpdated()) {
-            PluginMain.say(player, ChatColor.BLUE + PluginMain.getPrefix()
+            AsyncWorldEditMain.say(player, ChatColor.BLUE + AsyncWorldEditMain.getPrefix()
                     + "Please update your config file!");
         }
     }    
