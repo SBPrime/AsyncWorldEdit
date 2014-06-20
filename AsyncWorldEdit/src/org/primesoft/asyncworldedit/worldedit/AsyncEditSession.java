@@ -58,6 +58,7 @@ import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.*;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
 /**
@@ -154,6 +155,20 @@ public class AsyncEditSession extends EditSessionStub {
      */
     private Mask m_asyncMask;
 
+    /**
+     * The function wait object
+     */
+    private final WaitFor m_wait = new WaitFor();
+
+    /**
+     * Get the wait object
+     *
+     * @return
+     */
+    public WaitFor getWait() {
+        return m_wait;
+    }
+
     public UUID getPlayer() {
         return m_player;
     }
@@ -207,7 +222,7 @@ public class AsyncEditSession extends EditSessionStub {
 
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player), 
+        return super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
                 BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
     }
 
@@ -296,14 +311,14 @@ public class AsyncEditSession extends EditSessionStub {
     public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player), 
+        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player),
                 BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
 
     public boolean setBlock(Vector pt, Pattern pat, int jobId)
             throws MaxChangedBlocksException {
         m_jobId = jobId;
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);        
+        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
         boolean r = super.setBlock(VectorWrapper.wrap(pt, jobId, isAsync, m_player), pat);
         m_jobId = -1;
         return r;
@@ -312,7 +327,7 @@ public class AsyncEditSession extends EditSessionStub {
     public boolean setBlock(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player), 
+        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player),
                 BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
 
@@ -378,6 +393,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         session.undo(sess);
                         return 0;
                     }
@@ -395,11 +411,10 @@ public class AsyncEditSession extends EditSessionStub {
     }
 
     @Override
-    public boolean smartSetBlock(Vector pt, BaseBlock block) {        
+    public boolean smartSetBlock(Vector pt, BaseBlock block) {
         return super.smartSetBlock(pt, block);
     }
 
-    
     /**
      * Force block flush when to many has been queued
      */
@@ -434,6 +449,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         session.redo(sess);
                         return 0;
                     }
@@ -460,6 +476,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.fillXZ(origin, block, radius, depth, recursive);
                     }
                 });
@@ -487,6 +504,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.fillXZ(origin, pattern, radius, depth, recursive);
                     }
                 });
@@ -512,6 +530,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.removeAbove(pos, size, height);
                     }
                 });
@@ -537,6 +556,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.removeBelow(pos, size, height);
                     }
                 });
@@ -562,6 +582,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.removeNear(pos, blockType, size);
                     }
                 });
@@ -588,6 +609,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.setBlocks(region, block);
                     }
                 });
@@ -614,6 +636,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.setBlocks(region, pattern);
                     }
                 });
@@ -641,6 +664,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.replaceBlocks(region, fromBlockTypes, toBlock);
                     }
                 });
@@ -667,6 +691,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.replaceBlocks(region, fromBlockTypes, pattern);
                     }
                 });
@@ -693,6 +718,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         try {
                             return session.makeBiomeShape(region, zero, unit, biomeType, expressionString, hollow);
                         } catch (ExpressionException ex) {
@@ -722,6 +748,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeCuboidFaces(region, block);
                     }
                 });
@@ -746,6 +773,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeFaces(region, pattern);
                     }
                 });
@@ -771,6 +799,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeCuboidFaces(region, pattern);
                     }
                 });
@@ -795,6 +824,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeWalls(region, pattern);
                     }
                 });
@@ -820,6 +850,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeCuboidWalls(region, block);
                     }
                 });
@@ -845,6 +876,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeCuboidWalls(region, pattern);
                     }
                 });
@@ -870,6 +902,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.overlayCuboidBlocks(region, block);
                     }
                 });
@@ -895,6 +928,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.overlayCuboidBlocks(region, pattern);
                     }
                 });
@@ -920,6 +954,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.naturalizeCuboidBlocks(region);
                     }
                 });
@@ -947,6 +982,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.stackCuboidRegion(region, dir, count, copyAir);
                     }
                 });
@@ -971,6 +1007,7 @@ public class AsyncEditSession extends EditSessionStub {
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.moveRegion(region, dir, distance, copyAir, replace);
                     }
                 });
@@ -997,6 +1034,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.moveCuboidRegion(region, dir, distance, copyAir, replace);
                     }
                 });
@@ -1022,6 +1060,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.drawLine(pattern, pos1, pos2, radius, filled);
                     }
                 });
@@ -1050,6 +1089,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.drawSpline(pattern, nodevectors, tension, bias, continuity, quality, radius, filled);
                     }
                 });
@@ -1075,6 +1115,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.drainArea(pos, radius);
                     }
                 });
@@ -1101,6 +1142,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.fixLiquid(pos, radius, moving, stationary);
                     }
                 });
@@ -1128,6 +1170,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeCylinder(pos, block, radius, height, filled);
                     }
                 });
@@ -1156,6 +1199,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeCylinder(pos, block, radiusX, radiusZ, height, filled);
                     }
                 });
@@ -1183,6 +1227,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeSphere(pos, block, radius, filled);
                     }
                 });
@@ -1211,6 +1256,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeSphere(pos, block, radiusX, radiusY, radiusZ, filled);
                     }
                 });
@@ -1237,6 +1283,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makePyramid(pos, block, size, filled);
                     }
                 });
@@ -1262,6 +1309,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.thaw(pos, radius);
                     }
                 });
@@ -1287,6 +1335,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.simulateSnow(pos, radius);
                     }
                 });
@@ -1312,6 +1361,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.green(pos, radius, onlyNormalDirt);
                     }
                 });
@@ -1337,6 +1387,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.green(pos, radius);
                     }
                 });
@@ -1362,6 +1413,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makePumpkinPatches(basePos, size);
                     }
                 });
@@ -1389,6 +1441,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.makeForest(basePos, size, density, treeGenerator);
                     }
                 });
@@ -1417,6 +1470,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         try {
                             return session.makeShape(region, zero, unit, pattern, expressionString, hollow);
                         } catch (ExpressionException ex) {
@@ -1449,6 +1503,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         try {
                             return session.deformRegion(region, zero, unit, expressionString);
                         } catch (ExpressionException ex) {
@@ -1480,6 +1535,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.hollowOutRegion(region, thickness, pattern);
                     }
                 });
@@ -1505,6 +1561,7 @@ public class AsyncEditSession extends EditSessionStub {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
                         return session.center(region, pattern);
                     }
                 });

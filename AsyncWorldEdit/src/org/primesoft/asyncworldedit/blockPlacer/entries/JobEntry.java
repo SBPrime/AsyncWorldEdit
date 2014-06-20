@@ -100,6 +100,15 @@ public class JobEntry extends BlockPlacerEntry {
     }
 
     /**
+     * Get the player UUID
+     * @return 
+     */
+    public UUID getPlayer() {
+        return m_player;
+    }
+        
+
+    /**
      * Create new instance of the class
      * @param player player uuid
      * @param jobId job id
