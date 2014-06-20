@@ -1579,7 +1579,7 @@ public class AsyncEditSession extends EditSessionStub {
      *
      * @param operation
      */
-    private boolean checkAsync(WorldeditOperations operation) {
+    public boolean checkAsync(WorldeditOperations operation) {
         boolean result = m_asyncForced || (ConfigProvider.isAsyncAllowed(operation)
                 && (m_wrapper == null || m_wrapper.getMode()));
 
