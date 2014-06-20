@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,38 +29,55 @@ import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
- *
+ * Job description empty
  * @author SBPrime
  */
-public class BlockPlacerJobEntry extends BlockPlacerEntry {
+public class JobEntry extends BlockPlacerEntry {
 
     /**
      * Job status
      */
     public enum JobStatus {
 
-        Initializing,
-        Preparing,
-        Waiting,
-        PlacingBlocks,
-        Done
+        Initializing(0),
+        Preparing(1),
+        Waiting(2),
+        PlacingBlocks(3),
+        Done(4);
+        
+        /**
+         * The sequence number
+         */
+        private final int m_seqNumber;
+        
+        JobStatus(int seqNumber) {
+            m_seqNumber = seqNumber;
+        }        
+        
+        public int getSeqNumber() { return m_seqNumber; }
     }
+    
     /**
      * Job name
      */
     private final String m_name;
+    
     /**
      * Is the job status
      */
     private JobStatus m_status;
+    
     /**
      * Cancelable edit session
      */
     private final CancelabeEditSession m_cEditSession;
+    
     /**
      * The player name
      */
@@ -75,13 +92,20 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
      * All job state changed events
      */
     private final List<IJobEntryListener> m_jobStateChanged;
+
     
     @Override
     public boolean isDemanding() {
         return false;
     }
 
-    public BlockPlacerJobEntry(UUID player, int jobId, String name) {
+    /**
+     * Create new instance of the class
+     * @param player player uuid
+     * @param jobId job id
+     * @param name operation name
+     */
+    public JobEntry(UUID player, int jobId, String name) {
         super(jobId);
         m_player = player;
         m_name = name;
@@ -90,7 +114,15 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
 
-    public BlockPlacerJobEntry(UUID player,
+    
+    /**     
+     * Create new instance of the class
+     * @param player player uuid
+     * @param jobId job id
+     * @param name operation name
+     * @param cEditSession the cancelable edit session
+     */
+    public JobEntry(UUID player, 
             CancelabeEditSession cEditSession,
             int jobId, String name) {
         super(jobId);
@@ -101,18 +133,11 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         m_cEditSession = cEditSession;
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
-/*
-    public BlockPlacerJobEntry(CancelabeEditSession cEditSession,
-            int jobId, String name) {
-        super(jobId);
 
-        m_player = editSession.getPlayer();
-        m_name = name;
-        m_status = JobStatus.Initializing;
-        m_cEditSession = cEditSession;
-        m_jobStateChanged = new ArrayList<IJobEntryListener>();
-    }
-*/
+    /**
+     * Add job state change listener
+     * @param listener 
+     */
     public void addStateChangedListener(IJobEntryListener listener) {
         if (listener == null) {
             return;
@@ -125,6 +150,11 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         }
     }
 
+    
+    /**
+     * Remove the change state listener
+     * @param listener 
+     */
     public void removeStateChangedListener(IJobEntryListener listener) {
         if (listener == null) {
             return;
@@ -164,13 +194,22 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         return m_status;
     }
 
+    /**
+     * Get the operation name
+     * @return 
+     */
     public String getName() {
         return m_name;
     }
 
+    
+    /**
+     * Set the job state
+     * @param newStatus 
+     */
     public void setStatus(JobStatus newStatus) {
-        int newS = getStatusId(newStatus);
-        int oldS = getStatusId(m_status);
+        int newS = newStatus.getSeqNumber();
+        int oldS = m_status.getSeqNumber();
 
         if (newS < oldS) {
             return;
@@ -179,35 +218,21 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
         callStateChangedEvents();
     }
 
+    
+    /**
+     * Cancel the job
+     */
     public void cancel() {
         if (m_cEditSession != null) {
             m_cEditSession.cancel();
         }
     }
 
+    
     /**
-     * Get job status order code
-     *
-     * @param status
-     * @return
+     * Convert job status to string
+     * @return 
      */
-    private int getStatusId(JobStatus status) {
-        switch (status) {
-            case Done:
-                return 4;
-            case Initializing:
-                return 0;
-            case PlacingBlocks:
-                return 3;
-            case Preparing:
-                return 1;
-            case Waiting:
-                return 2;
-            default:
-                return -1;
-        }
-    }
-
     public String getStatusString() {
         switch (m_status) {
             case Done:
@@ -231,21 +256,21 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
+    public boolean Process(BlockPlacer bp) {
         final UUID player = m_player;
 
         switch (m_status) {
             case Done:
                 bp.removeJob(player, this);
-                return;
+                return true;
             case PlacingBlocks:
-                setStatus(BlockPlacerJobEntry.JobStatus.Done);
+                setStatus(JobEntry.JobStatus.Done);
                 bp.removeJob(player, this);
                 break;
             case Initializing:
             case Preparing:
             case Waiting:
-                setStatus(BlockPlacerJobEntry.JobStatus.PlacingBlocks);
+                setStatus(JobEntry.JobStatus.PlacingBlocks);
                 break;
         }
 
@@ -253,8 +278,14 @@ public class BlockPlacerJobEntry extends BlockPlacerEntry {
             PluginMain.say(player, ChatColor.YELLOW + "Job " + toString()
                     + ChatColor.YELLOW + " - " + getStatusString());
         }
+        
+        return true;
     }
 
+    
+    /**
+     * Inform the listener of state changed
+     */
     private void callStateChangedEvents() {
         synchronized (m_jobStateChanged) {
             for (IJobEntryListener listener : m_jobStateChanged) {

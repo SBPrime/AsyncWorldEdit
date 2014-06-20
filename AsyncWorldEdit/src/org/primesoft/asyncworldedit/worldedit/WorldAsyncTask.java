@@ -31,7 +31,7 @@ import org.bukkit.World;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 /**
  *
@@ -45,7 +45,7 @@ public abstract class WorldAsyncTask extends BaseTask {
     private final World m_world;
 
     public WorldAsyncTask(final World world, final EditSession editSession, final UUID player,
-            final String commandName, BlockPlacer blocksPlacer, BlockPlacerJobEntry job) {
+            final String commandName, BlockPlacer blocksPlacer, JobEntry job) {
         super(editSession, player, commandName, blocksPlacer, job);
 
         m_world = world;

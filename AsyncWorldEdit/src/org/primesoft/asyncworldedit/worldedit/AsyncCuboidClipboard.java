@@ -30,7 +30,7 @@ import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 /**
  * This clipboar is used to async clipboard operations Note: Do not use any
@@ -89,7 +89,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
 
         final int jobId = getJobId();
         final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, jobId, "pasteEntities");
+        final JobEntry job = new JobEntry(m_player, jobId, "pasteEntities");
         m_blockPlacer.addJob(m_player, job);
 
 
@@ -118,15 +118,15 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         final int jobId = getJobId();
         final EditSession session;
         final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
-        final BlockPlacerJobEntry job;
+        final JobEntry job;
 
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
-            job = new BlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
+            job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
         } else {
             session = editSession;
-            job = new BlockPlacerJobEntry(m_player, jobId, "place");
+            job = new JobEntry(m_player, jobId, "place");
         }
 
         m_blockPlacer.addJob(m_player, job);
@@ -155,15 +155,15 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         final int jobId = getJobId();
         final EditSession session;
         final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
-        final BlockPlacerJobEntry job;
+        final JobEntry job;
 
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
-            job = new BlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
+            job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
         } else {
             session = editSession;
-            job = new BlockPlacerJobEntry(m_player, jobId, "place");
+            job = new JobEntry(m_player, jobId, "place");
         }
         m_blockPlacer.addJob(m_player, job);
 
@@ -192,14 +192,14 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         final int jobId = getJobId();
         final EditSession session;
         final CuboidClipboardWrapper cc = new CuboidClipboardWrapper(m_player, m_clipboard, jobId);
-        final BlockPlacerJobEntry job;
+        final JobEntry job;
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
-            job = new BlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
+            job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
         } else {
             session = editSession;
-            job = new BlockPlacerJobEntry(m_player, jobId, "place");
+            job = new JobEntry(m_player, jobId, "place");
         }
         m_blockPlacer.addJob(m_player, job);
 

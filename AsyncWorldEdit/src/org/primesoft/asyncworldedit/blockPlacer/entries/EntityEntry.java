@@ -21,66 +21,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.worldedit;
+package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import java.util.UUID;
-import org.bukkit.ChatColor;
-import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PluginMain;
+import com.sk89q.worldedit.Vector;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
 /**
- *
+ * Paste entities task
  * @author SBPrime
  */
-public abstract class ClipboardAsyncTask extends BaseTask {
+public class EntityEntry extends BlockPlacerEntry {
 
     /**
-     * Clipboard
+     * Entity data
+     */
+    private final Object m_data;
+    /**
+     * Paste location
+     */
+    private final Vector m_location;
+    /**
+     * The clipboard
      */
     private final CuboidClipboard m_clipboard;
 
+    
     /**
-     *
-     * @param clipboard
-     * @param editSession
-     * @param player
-     * @param commandName
-     * @param blocksPlacer
-     * @param job
+     * New instance of the class
+     * @param jobId
+     * @param data
+     * @param location
+     * @param clipboard 
      */
-    public ClipboardAsyncTask(final CuboidClipboard clipboard, final EditSession editSession,
-            final UUID player, final String commandName, BlockPlacer blocksPlacer,
-            JobEntry job) {
-        super(editSession, player, commandName, blocksPlacer, job);
+    public EntityEntry(int jobId, Object data, Vector location, CuboidClipboard clipboard) {
+        super(jobId);
 
+        m_data = data;
+        m_location = location;
         m_clipboard = clipboard;
     }
-
+    
     @Override
-    protected Object doRun() throws MaxChangedBlocksException {
-        task(m_clipboard);
-
-        return null;
+    public boolean isDemanding() {
+        return true;
     }
 
     @Override
-    protected void doPostRun(Object result) {
-        if (ConfigProvider.isTalkative()) {
-            PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Clipboard operation done.");
+    public boolean Process(BlockPlacer bp) {
+        synchronized (m_clipboard) {
+            Object old = CuboidClipboardWrapper.getEntities(m_clipboard);
+            CuboidClipboardWrapper.setEntities(m_clipboard, m_data);
+            m_clipboard.pasteEntities(m_location);
+
+            CuboidClipboardWrapper.setEntities(m_clipboard, old);
         }
+        
+        return true;
     }
-
-    /**
-     * Task to run
-     *
-     * @param clipboard
-     * @throws com.sk89q.worldedit.MaxChangedBlocksException
-     */
-    public abstract void task(CuboidClipboard clipboard)
-            throws MaxChangedBlocksException;
 }

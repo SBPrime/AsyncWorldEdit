@@ -27,7 +27,8 @@ package org.primesoft.asyncworldedit.blockPlacer;
 import com.sk89q.worldedit.Vector;
 
 /**
- *
+ * Interface for block placer entries that provide world location.
+ * Used for block loging
  * @author SBPrime
  */
 public interface IBlockPlacerLocationEntry {

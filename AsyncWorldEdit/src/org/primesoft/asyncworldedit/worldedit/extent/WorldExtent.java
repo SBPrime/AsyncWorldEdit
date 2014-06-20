@@ -43,9 +43,9 @@ import com.sk89q.worldedit.world.World;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.WorldExtentActionEntry;
-import org.primesoft.asyncworldedit.blockPlacer.WorldExtentFuncEntry;
-import org.primesoft.asyncworldedit.blockPlacer.WorldExtentFuncEntryEx;
+import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentActionEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntryEx;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.FuncEx;
@@ -189,6 +189,11 @@ public class WorldExtent implements World {
             @Override
             public Boolean Execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
+                
+                if (oldBlock.equals(newBlock)) {
+                    return false;
+                }
+                
                 final boolean result = m_parent.setBlock(v, newBlock, bln);
                 if (result) {
                     logBlock(v, player, oldBlock, newBlock);
@@ -220,6 +225,10 @@ public class WorldExtent implements World {
             @Override
             public Boolean Execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
+                if (oldBlock.getType() == i) {
+                    return false;
+                }
+
                 final boolean result = m_parent.setBlockType(v, i);
                 if (result) {
                     logBlock(v, player, oldBlock, new BaseBlock(i, oldBlock.getData()));
@@ -251,6 +260,10 @@ public class WorldExtent implements World {
             @Override
             public Boolean Execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
+                if (oldBlock.getType() == i) {
+                    return false;
+                }
+
                 final boolean result = m_parent.setBlockTypeFast(v, i);
                 if (result) {
                     logBlock(v, player, oldBlock, new BaseBlock(i, oldBlock.getData()));
@@ -269,7 +282,7 @@ public class WorldExtent implements World {
     }
 
     @Override
-    public void setBlockData(final Vector vector, final int i) {
+    public void setBlockData(Vector vector, final int i) {
         final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
         final Vector v = param.getData();
         final UUID player = param.getPlayer();
@@ -278,16 +291,22 @@ public class WorldExtent implements World {
             return;
         }
 
-        Action func = new Action() {
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public void Execute() {
-                m_parent.setBlockData(vector, i);
+            public Boolean Execute() {
+                final BaseBlock oldBlock = m_parent.getBlock(v);
+                if (oldBlock.getData() == i) {
+                    return false;
+                }
+                m_parent.setBlockData(v, i);
+                logBlock(v, player, oldBlock, new BaseBlock(oldBlock.getType(), i));
+                return true;
             }
         };
 
         if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             m_blockPlacer.addTasks(player,
-                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
             return;
         }
 
@@ -304,16 +323,23 @@ public class WorldExtent implements World {
             return;
         }
 
-        Action func = new Action() {
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public void Execute() {
+            public Boolean Execute() {
+                final BaseBlock oldBlock = m_parent.getBlock(v);
+                if (oldBlock.getData() == i) {
+                    return false;
+                }
+
                 m_parent.setBlockDataFast(v, i);
+                logBlock(v, player, oldBlock, new BaseBlock(oldBlock.getType(), i));
+                return true;
             }
         };
 
         if (param.isAsync() || !m_blockPlacer.isMainTask()) {
             m_blockPlacer.addTasks(player,
-                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
             return;
         }
 
@@ -334,6 +360,11 @@ public class WorldExtent implements World {
             @Override
             public Boolean Execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
+
+                if (oldBlock.getType() == i && oldBlock.getData() == i1) {
+                    return false;
+                }
+
                 final boolean result = m_parent.setTypeIdAndData(v, i, i1);
                 if (result) {
                     logBlock(v, player, oldBlock, new BaseBlock(i, i1));
@@ -365,6 +396,10 @@ public class WorldExtent implements World {
             @Override
             public Boolean Execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
+                if (oldBlock.getType() == i && oldBlock.getData() == i1) {
+                    return false;
+                }
+                
                 final boolean result = m_parent.setTypeIdAndDataFast(v, i, i1);
                 if (result) {
                     logBlock(v, player, oldBlock, new BaseBlock(i, i1));
@@ -886,12 +921,16 @@ public class WorldExtent implements World {
             return false;
         }
 
-
         FuncEx<Boolean, WorldEditException> func = new FuncEx<Boolean, WorldEditException>() {
 
             @Override
             public Boolean Execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(vector);
+                
+                if (oldBlock.equals(newBlock)) {
+                    return false;
+                }
+                
                 final boolean result = m_parent.setBlock(vector, newBlock);
                 if (result) {
                     logBlock(vector, player, oldBlock, newBlock);
@@ -903,10 +942,10 @@ public class WorldExtent implements World {
 
         if (paramBlock.isAsync() || paramVector.isAsync() || !m_blockPlacer.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));                    
+                    new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));
         }
 
-        return func.Execute();        
+        return func.Execute();
     }
 
     @Override

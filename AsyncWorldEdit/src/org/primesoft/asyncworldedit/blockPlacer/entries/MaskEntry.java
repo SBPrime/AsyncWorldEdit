@@ -21,53 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.masks.Mask;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
-import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
 /**
- *
- * @author SBPrime
+ * Set mask entry
+ * @author Prime
  */
-public class BlockPlacerEntityEntry extends BlockPlacerEntry {
+public class MaskEntry extends BlockPlacerEntry {
+    private final Mask m_mask;
+    private final AsyncEditSession m_editSession;
 
-    /**
-     * Entity data
-     */
-    private final Object m_data;
-    /**
-     * Paste location
-     */
-    private final Vector m_location;
-    /**
-     * The clipboard
-     */
-    private final CuboidClipboard m_clipboard;
-
-    public BlockPlacerEntityEntry(int jobId, Object data, Vector location, CuboidClipboard clipboard) {
-        super(jobId);
-
-        m_data = data;
-        m_location = location;
-        m_clipboard = clipboard;
+    public Mask getMask() {
+        return m_mask;
     }
     
     @Override
     public boolean isDemanding() {
-        return true;
+        return false;
+    }
+
+    public MaskEntry(AsyncEditSession editSession,
+            int jobId, Mask mask) {
+        super(jobId);
+        m_editSession = editSession;
+        m_mask = mask;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
-        synchronized (m_clipboard) {
-            Object old = CuboidClipboardWrapper.getEntities(m_clipboard);
-            CuboidClipboardWrapper.setEntities(m_clipboard, m_data);
-            m_clipboard.pasteEntities(m_location);
-
-            CuboidClipboardWrapper.setEntities(m_clipboard, old);
-        }
+    public boolean Process(BlockPlacer bp) {
+        m_editSession.doSetMask(m_mask);
+        
+        return true;
     }
 }

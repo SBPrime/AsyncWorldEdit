@@ -38,7 +38,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 
@@ -81,10 +81,10 @@ public abstract class BaseTask extends BukkitRunnable {
     /**
      * Job instance
      */
-    protected final BlockPlacerJobEntry m_job;
+    protected final JobEntry m_job;
 
     public BaseTask(final EditSession editSession, final UUID player,
-            final String commandName, BlockPlacer blocksPlacer, BlockPlacerJobEntry job) {
+            final String commandName, BlockPlacer blocksPlacer, JobEntry job) {
 
         m_editSession = editSession;
         m_cancelableEditSession = (editSession instanceof CancelabeEditSession) ? (CancelabeEditSession) editSession : null;
@@ -109,7 +109,7 @@ public abstract class BaseTask extends BukkitRunnable {
     public void run() {
         Object result = null;
         try {
-            m_job.setStatus(BlockPlacerJobEntry.JobStatus.Preparing);
+            m_job.setStatus(JobEntry.JobStatus.Preparing);
             if (ConfigProvider.isTalkative()) {
                 PluginMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                         + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
@@ -129,7 +129,7 @@ public abstract class BaseTask extends BukkitRunnable {
                 }
             }
 
-            m_job.setStatus(BlockPlacerJobEntry.JobStatus.Waiting);
+            m_job.setStatus(JobEntry.JobStatus.Waiting);
             m_blockPlacer.addTasks(m_player, m_job);
             doPostRun(result);
         } catch (MaxChangedBlocksException ex) {

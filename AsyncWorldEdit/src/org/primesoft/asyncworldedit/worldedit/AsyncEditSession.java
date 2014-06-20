@@ -23,6 +23,9 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.MaskEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import com.sk89q.worldedit.BiomeType;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionStub;
@@ -122,7 +125,7 @@ public class AsyncEditSession extends EditSessionStub {
     /**
      * Number of async tasks
      */
-    private final HashSet<BlockPlacerJobEntry> m_asyncTasks;
+    private final HashSet<JobEntry> m_asyncTasks;
 
     /**
      * Current job id
@@ -178,7 +181,7 @@ public class AsyncEditSession extends EditSessionStub {
         m_eventBus = eventBus;
 
         m_jobId = -1;
-        m_asyncTasks = new HashSet<BlockPlacerJobEntry>();
+        m_asyncTasks = new HashSet<JobEntry>();
         m_plugin = plugin;
         m_bh = plugin.getBlocksHub();
         m_player = player;
@@ -282,7 +285,7 @@ public class AsyncEditSession extends EditSessionStub {
     @Override
     public void setMask(Mask mask) {
         if (m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled)) {
-            m_blockPlacer.addTasks(m_player, new BlockPlacerMaskEntry(this, m_jobId, mask));
+            m_blockPlacer.addTasks(m_player, new MaskEntry(this, m_jobId, mask));
         } else {
             doSetMask(mask);
         }
@@ -339,19 +342,19 @@ public class AsyncEditSession extends EditSessionStub {
         int minId = jobId;
 
         synchronized (m_asyncTasks) {
-            for (BlockPlacerJobEntry job : m_asyncTasks) {
+            for (JobEntry job : m_asyncTasks) {
                 int id = job.getJobId();
                 if (id < minId) {
                     minId = id;
                 }
-                if (!(job instanceof BlockPlacerUndoJob)) {
+                if (!(job instanceof UndoJob)) {
                     m_blockPlacer.cancelJob(m_player, id);
                 }
             }
             minId--;
             if (minId >= 0 && minId != jobId) {
-                BlockPlacerJobEntry job = m_blockPlacer.getJob(m_player, minId);
-                if (job != null && !(job instanceof BlockPlacerUndoJob)) {
+                JobEntry job = m_blockPlacer.getJob(m_player, minId);
+                if (job != null && !(job instanceof UndoJob)) {
                     m_blockPlacer.cancelJob(m_player, job);
                 }
             }
@@ -367,7 +370,7 @@ public class AsyncEditSession extends EditSessionStub {
             return;
         }
 
-        final BlockPlacerJobEntry job = new BlockPlacerUndoJob(m_player, session, jobId, "undo");
+        final JobEntry job = new UndoJob(m_player, session, jobId, "undo");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "undo",
@@ -423,7 +426,7 @@ public class AsyncEditSession extends EditSessionStub {
             return;
         }
 
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "redo");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "redo");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "redo",
@@ -449,7 +452,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "fillXZ");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "fillXZ");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "fillXZ",
@@ -476,7 +479,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "fillXZ");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "fillXZ");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "fillXZ",
@@ -501,7 +504,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "removeAbove");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "removeAbove");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "removeAbove",
@@ -526,7 +529,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "removeBelow");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "removeBelow");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "removeBelow",
@@ -551,7 +554,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "removeNear");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "removeNear");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "removeNear",
@@ -577,7 +580,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "setBlocks");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "setBlocks");
 
         m_blockPlacer.addJob(m_player, job);
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "setBlocks",
@@ -603,7 +606,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "setBlocks");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "setBlocks");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "setBlocks",
@@ -630,7 +633,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "replaceBlocks");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "replaceBlocks");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "replaceBlocks",
@@ -656,7 +659,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "replaceBlocks");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "replaceBlocks");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "replaceBlocks",
@@ -682,7 +685,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeBiomeShape");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeBiomeShape");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeBiomeShape",
@@ -711,7 +714,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeCuboidFaces");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidFaces");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCuboidFaces",
@@ -735,7 +738,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeFaces");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeFaces");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeFaces",
@@ -760,7 +763,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeCuboidFaces");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidFaces");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCuboidFaces",
@@ -784,7 +787,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeWalls");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeWalls");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeWalls",
@@ -809,7 +812,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeCuboidWalls");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidWalls");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCuboidWalls",
@@ -834,7 +837,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeCuboidWalls");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidWalls");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCuboidWalls",
@@ -859,7 +862,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "overlayCuboidBlocks");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "overlayCuboidBlocks");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "overlayCuboidBlocks",
@@ -884,7 +887,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "overlayCuboidBlocks");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "overlayCuboidBlocks");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "overlayCuboidBlocks",
@@ -909,7 +912,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "naturalizeCuboidBlocks");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "naturalizeCuboidBlocks");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "naturalizeCuboidBlocks",
@@ -936,7 +939,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "stackCuboidRegion");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "stackCuboidRegion");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "stackCuboidRegion",
@@ -961,7 +964,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "moveRegion");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "moveRegion");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "moveRegion",
@@ -986,7 +989,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "moveCuboidRegion");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "moveCuboidRegion");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "moveCuboidRegion",
@@ -1011,7 +1014,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "drawLine");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "drawLine");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "drawLine",
@@ -1039,7 +1042,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "drawLine");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "drawLine");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "drawLine",
@@ -1064,7 +1067,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "drainArea");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "drainArea");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "drainArea",
@@ -1090,7 +1093,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "fixLiquid");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "fixLiquid");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "fixLiquid",
@@ -1117,7 +1120,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeCylinder");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeCylinder");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCylinder",
@@ -1145,7 +1148,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeCylinder");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeCylinder");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCylinder",
@@ -1172,7 +1175,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeSphere");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeSphere");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeSphere",
@@ -1200,7 +1203,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeSphere");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeSphere");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeSphere",
@@ -1226,7 +1229,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makePyramid");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makePyramid");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makePyramid",
@@ -1251,7 +1254,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "thaw");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "thaw");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "thaw",
@@ -1276,7 +1279,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "simulateSnow");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "simulateSnow");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "simulateSnow",
@@ -1301,7 +1304,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "green");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "green");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "green",
@@ -1326,7 +1329,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "green");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "green");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "green",
@@ -1351,7 +1354,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makePumpkinPatches");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makePumpkinPatches");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makePumpkinPatches",
@@ -1378,7 +1381,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeForest");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeForest");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeForest",
@@ -1406,7 +1409,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "makeShape");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "makeShape");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeShape",
@@ -1438,7 +1441,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "deformRegion");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "deformRegion");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "deformRegion",
@@ -1469,7 +1472,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "hollowOutRegion");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "hollowOutRegion");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "hollowOutRegion",
@@ -1494,7 +1497,7 @@ public class AsyncEditSession extends EditSessionStub {
 
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
-        final BlockPlacerJobEntry job = new BlockPlacerJobEntry(m_player, session, jobId, "center");
+        final JobEntry job = new JobEntry(m_player, session, jobId, "center");
         m_blockPlacer.addJob(m_player, job);
 
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "center",
@@ -1514,7 +1517,7 @@ public class AsyncEditSession extends EditSessionStub {
      *
      * @param job
      */
-    public void addAsync(BlockPlacerJobEntry job) {
+    public void addAsync(JobEntry job) {
         synchronized (m_asyncTasks) {
             m_asyncTasks.add(job);
         }
@@ -1525,7 +1528,7 @@ public class AsyncEditSession extends EditSessionStub {
      *
      * @param job
      */
-    public void removeAsync(BlockPlacerJobEntry job) {
+    public void removeAsync(JobEntry job) {
         synchronized (m_asyncTasks) {
             m_asyncTasks.remove(job);
         }
@@ -1637,7 +1640,7 @@ public class AsyncEditSession extends EditSessionStub {
             m_chunkWatch.remove(cx, cz, worldName);
         }
 
-        queueOperation(action);
+        queueGetOperation(action);
     }
 
     /**
@@ -1675,7 +1678,7 @@ public class AsyncEditSession extends EditSessionStub {
             m_chunkWatch.remove(cx, cz, worldName);
         }
 
-        return queueOperation(action);
+        return queueGetOperation(action);
     }
 
     /**
@@ -1697,7 +1700,7 @@ public class AsyncEditSession extends EditSessionStub {
             PluginMain.log("Error performing safe operation. Error: "
                     + ex.toString());
         }
-        queueOperation(action);
+        queueGetOperation(action);
     }
 
     /**
@@ -1720,7 +1723,7 @@ public class AsyncEditSession extends EditSessionStub {
             PluginMain.log("Error performing safe operation. Error: "
                     + ex.toString());
         }
-        return queueOperation(action);
+        return queueGetOperation(action);
     }
 
     /**
@@ -1730,8 +1733,8 @@ public class AsyncEditSession extends EditSessionStub {
      * @param action
      * @return
      */
-    private <T> T queueOperation(Func<T> action) {
-        BlockPlacerFuncEntry<T> getBlock = new BlockPlacerFuncEntry<T>(m_jobId, action);
+    private <T> T queueGetOperation(Func<T> action) {
+        BlockPlacerGetFunc<T> getBlock = new BlockPlacerGetFunc<T>(m_jobId, action);
         if (m_blockPlacer.isMainTask()) {
             return action.Execute();
         }
@@ -1755,8 +1758,8 @@ public class AsyncEditSession extends EditSessionStub {
      * @param action
      * @return
      */
-    private void queueOperation(Action action) {
-        BlockPlacerActionEntry actionEntry = new BlockPlacerActionEntry(m_jobId, action);
+    private void queueGetOperation(Action action) {
+        BlockPlacerGetAction actionEntry = new BlockPlacerGetAction(m_jobId, action);
         if (m_blockPlacer.isMainTask()) {
             action.Execute();
             return;

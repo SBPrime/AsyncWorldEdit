@@ -23,10 +23,12 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+
 /**
  *
  * @author SBPrime
  */
 public interface IJobEntryListener {
-    void jobStateChanged(BlockPlacerJobEntry job);
+    void jobStateChanged(JobEntry job);
 }

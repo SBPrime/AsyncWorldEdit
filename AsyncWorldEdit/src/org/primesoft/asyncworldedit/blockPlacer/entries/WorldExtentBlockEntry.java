@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2013 SBPrime.
+ * Copyright 2014 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,37 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.masks.Mask;
-import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+package org.primesoft.asyncworldedit.blockPlacer.entries;
+
+import com.sk89q.worldedit.Vector;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerLocationEntry;
+import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
  */
-public class BlockPlacerMaskEntry extends BlockPlacerEntry {
-    private final Mask m_mask;
-    private final AsyncEditSession m_editSession;
+public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
+    protected final Vector m_location;
+    protected final String m_worldName;
 
-    public Mask getMask() {
-        return m_mask;
+    public WorldExtentBlockEntry(WorldExtent worldExtent,
+            int jobId, Vector location) {
+        super(jobId);
+        
+        m_location = location;
+        m_worldName = worldExtent.getName();
     }
-    
+
+    @Override
+    public String getWorldName() {
+        return m_worldName;
+    }
+
+    @Override
+    public Vector getLocation() {
+        return m_location;
+    }
+
     @Override
     public boolean isDemanding() {
         return false;
-    }
-
-    public BlockPlacerMaskEntry(AsyncEditSession editSession,
-            int jobId, Mask mask) {
-        super(jobId);
-        m_editSession = editSession;
-        m_mask = mask;
-    }
-
-    @Override
-    public void Process(BlockPlacer bp) {
-        m_editSession.doSetMask(m_mask);
-    }
+    }   
 }

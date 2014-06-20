@@ -29,7 +29,7 @@ import com.sk89q.worldedit.Vector;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntityEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.EntityEntry;
 import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
@@ -90,8 +90,8 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
         synchronized (m_parrent) {
             final Object entities = getEntities(m_parrent);
             final int jobId = m_jobId < 0 ? m_blocksPlacer.getJobId(m_player) : m_jobId;
-            final BlockPlacerEntityEntry entry =
-                    new BlockPlacerEntityEntry(jobId, entities, pos, m_parrent);
+            final EntityEntry entry =
+                    new EntityEntry(jobId, entities, pos, m_parrent);
 
             m_blocksPlacer.addTasks(m_player, entry);
         }

@@ -28,10 +28,13 @@ package org.primesoft.asyncworldedit.blockPlacer;
  * @author SBPrime
  */
 public abstract class BlockPlacerEntry {
+    /**
+     * THe job ID
+     */
     private final int m_jobId;
 
     /**
-     * Is this task demanding
+     * Is this task demanding, only one demanding task is allowed
      * @return 
      */
     public abstract boolean isDemanding();
@@ -46,11 +49,18 @@ public abstract class BlockPlacerEntry {
     
     
     /**
-     * Process the entry
+     * New instance of block placer entry
+     * @param jobId THe job id
      */
-    public abstract void Process(BlockPlacer bp);
-
     public BlockPlacerEntry(int jobId) {
         m_jobId = jobId;
     }
+    
+    
+    /**
+     * Process the entry
+     * @param bp
+     * @return true if operation was successful
+     */
+    public abstract boolean Process(BlockPlacer bp);
 }

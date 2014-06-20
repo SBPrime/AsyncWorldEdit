@@ -21,37 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.utils.FuncEx;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
 /**
  *
  * @author Prime
  */
-public class WorldExtentFuncEntryEx<T, TException extends Exception> 
-    extends WorldExtentBlockEntry {
-    
-    private final FuncEx<T, TException> m_function;
+public class WorldExtentActionEntry
+        extends WorldExtentBlockEntry {
 
-    public WorldExtentFuncEntryEx(WorldExtent worldExtent,
-            int jobId, Vector location, FuncEx<T, TException> function) {
+    private final Action m_function;
+
+    public WorldExtentActionEntry(WorldExtent worldExtent,
+            int jobId, Vector location, Action function) {
         super(worldExtent, jobId, location);
-        
-        m_function = function;        
+        m_function = function;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
-        try {
-            //TODO: Shuld we ignore the function resoult?
-            m_function.Execute();
-        } catch (Exception ex) {
-        }
+    public boolean Process(BlockPlacer bp) {
+        m_function.Execute();
+
         if (m_worldName != null) {
             bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
         }
+        
+        return true;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 SBPrime.
+ * Copyright 2013 SBPrime.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,36 +23,48 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.Vector2D;
-import org.bukkit.World;
+import org.primesoft.asyncworldedit.utils.Func;
 
 /**
  *
  * @author Prime
+ * @param <T>
  */
-public class BlockPlacerRegenerateEntry extends BlockPlacerEntry {
+public class BlockPlacerGetFunc<T> extends BlockPlacerEntry {
 
-    private final World m_world;
-    private final Vector2D m_chunk;
+    private final Func<T> m_action;
+    private final Object m_mutex = new Object();
+    private T m_result = null;
 
-    public BlockPlacerRegenerateEntry(int jobId, World world, Vector2D chunk) {
-        super(jobId);
-
-        m_chunk = chunk;
-        m_world = world;
-    }
-    
     @Override
     public boolean isDemanding() {
-        return true;
+        return false;
+    }
+
+    public Func<T> getAction() {
+        return m_action;
+    }
+
+    public Object getMutex() {
+        return m_mutex;
+    }
+
+    public T getResult() {
+        return m_result;
+    }
+
+    public BlockPlacerGetFunc(int jobId, Func action) {
+        super(jobId);
+        m_action = action;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
-        try {
-            m_world.regenerateChunk(m_chunk.getBlockX(), m_chunk.getBlockZ());
-        } catch (Throwable t) {
-            t.printStackTrace();
+    public boolean Process(BlockPlacer bp) {
+        synchronized (m_mutex) {
+            m_result = m_action.Execute();
+            m_mutex.notifyAll();
         }
+        
+        return true;
     }
 }

@@ -21,41 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-package org.primesoft.asyncworldedit.blockPlacer;
-
-import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
+import com.sk89q.worldedit.Vector2D;
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 
 /**
- *
- * @author SBPrime
+ * Regenerate chunk entry
+ * @author Prime
  */
-public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
-    protected final Vector m_location;
-    protected final String m_worldName;
+public class RegenerateEntry extends BlockPlacerEntry {
 
-    public WorldExtentBlockEntry(WorldExtent worldExtent,
-            int jobId, Vector location) {
+    private final World m_world;
+    private final Vector2D m_chunk;
+
+    public RegenerateEntry(int jobId, World world, Vector2D chunk) {
         super(jobId);
-        
-        m_location = location;
-        m_worldName = worldExtent.getName();
-    }
 
-    @Override
-    public String getWorldName() {
-        return m_worldName;
-    }
-
-    @Override
-    public Vector getLocation() {
-        return m_location;
-    }
-
-    @Override
-    public boolean isDemanding() {
-        return false;
+        m_chunk = chunk;
+        m_world = world;
     }
     
+    @Override
+    public boolean isDemanding() {
+        return true;
+    }
+
+    @Override
+    public boolean Process(BlockPlacer bp) {
+        try {
+            m_world.regenerateChunk(m_chunk.getBlockX(), m_chunk.getBlockZ());
+            return true;
+            
+        } catch (Throwable t) {
+            t.printStackTrace();
+            
+            return false;
+        }
+    }
 }

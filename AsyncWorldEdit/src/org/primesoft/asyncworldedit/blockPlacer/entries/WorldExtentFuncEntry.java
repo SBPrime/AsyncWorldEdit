@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
@@ -43,12 +44,17 @@ public class WorldExtentFuncEntry<T>
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
-        //TODO: Shuld we ignore the function resoult?
-        m_function.Execute();
+    public boolean Process(BlockPlacer bp) {        
+        T result = m_function.Execute();
 
         if (m_worldName != null) {
             bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
         }
+        
+        if (result instanceof Boolean) {
+            return (Boolean)result;
+        }
+        
+        return true;
     }
 }

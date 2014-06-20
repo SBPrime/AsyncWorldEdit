@@ -21,34 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.utils.Action;
-import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
 
 /**
  *
  * @author Prime
+ * @param <T> Func result type
+ * @param <TException> Exception type
  */
-public class WorldExtentActionEntry
+public class WorldExtentFuncEntryEx<T, TException extends Exception>
         extends WorldExtentBlockEntry {
 
-    private final Action m_function;
+    private final FuncEx<T, TException> m_function;
 
-    public WorldExtentActionEntry(WorldExtent worldExtent,
-            int jobId, Vector location, Action function) {
+    public WorldExtentFuncEntryEx(WorldExtent worldExtent,
+            int jobId, Vector location, FuncEx<T, TException> function) {
         super(worldExtent, jobId, location);
+
         m_function = function;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
-        m_function.Execute();
+    public boolean Process(BlockPlacer bp) {
+        T funcResult;
 
-        if (m_worldName != null) {
-            bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
+        try {
+            funcResult = m_function.Execute();
+        } catch (Exception ex) {
+            return false;
+        }
+        finally
+        {
+            if (m_worldName != null) {
+                bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
+            }
+        }
+
+        if (funcResult instanceof Boolean) {
+            return (Boolean) funcResult;
+        } else {
+            return true;
         }
     }
 }

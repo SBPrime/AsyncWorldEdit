@@ -29,40 +29,76 @@ import org.primesoft.asyncworldedit.utils.Action;
  *
  * @author Prime
  */
-public class BlockPlacerActionEntry extends BlockPlacerEntry {
-
+public class BlockPlacerGetAction extends BlockPlacerEntry {
+    /**
+     * Action to perform
+     */
     private final Action m_action;
+    
+    /**
+     * The MTA mutex
+     */
     private final Object m_mutex = new Object();
+    
+    /**
+     * Is the task done
+     */
     private boolean m_isDone = false;
 
+    
+    /**
+     * The tas is not demanding
+     * @return 
+     */
     @Override
     public boolean isDemanding() {
         return false;
     }
 
+    
+    /**
+     * The action
+     * @return 
+     */
     public Action getAction() {
         return m_action;
     }
 
+    
+    /**
+     * MTA mutex
+     * @return 
+     */
     public Object getMutex() {
         return m_mutex;
     }
 
+    /**
+     * Is the operation done
+     * @return 
+     */
     public boolean isDone() {
         return m_isDone;
     }
 
-    public BlockPlacerActionEntry(int jobId, Action action) {
+    /**
+     * Create new instance of class
+     * @param jobId job id
+     * @param action action to perform
+     */
+    public BlockPlacerGetAction(int jobId, Action action) {
         super(jobId);
         m_action = action;
     }
 
     @Override
-    public void Process(BlockPlacer bp) {
+    public boolean Process(BlockPlacer bp) {
         synchronized (m_mutex) {
             m_action.Execute();
             m_isDone = true;
             m_mutex.notifyAll();
         }
+        
+        return true;
     }
 }

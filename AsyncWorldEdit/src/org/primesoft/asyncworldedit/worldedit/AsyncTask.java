@@ -29,7 +29,7 @@ import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 /**
  *
@@ -38,7 +38,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
 public abstract class AsyncTask extends BaseTask {
 
     public AsyncTask(final CancelabeEditSession session, final UUID player,
-            final String commandName, BlockPlacer blocksPlacer, BlockPlacerJobEntry job) {
+            final String commandName, BlockPlacer blocksPlacer, JobEntry job) {
         super(session, player, commandName, blocksPlacer, job);
     }
 

@@ -23,6 +23,8 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -42,7 +44,10 @@ import org.primesoft.asyncworldedit.utils.InOutParam;
  */
 public class BlockPlacer implements Runnable {
     /**
-     * Maximum number of retries
+     * Maximum number of retries for get blocks.
+     * If no block get is exeuted for X the get task stops.
+     * If a block get is executed, this is the number of retries
+     * for dequeuing operations.
      */
     private final int MAX_RETRIES = 200;
 
@@ -188,6 +193,10 @@ public class BlockPlacer implements Runnable {
         m_physicsWatcher = plugin.getPhysicsWatcher();
     }
 
+    
+    /**
+     * Start the get task
+     */
     private void startGetTask() {
         final Runnable func = new Runnable() {
                 @Override
@@ -205,6 +214,11 @@ public class BlockPlacer implements Runnable {
         }
     }
 
+    
+    /**
+     * Add event listener
+     * @param listener 
+     */
     public void addListener(IBlockPlacerListener listener) {
         if (listener == null) {
             return;
@@ -216,6 +230,10 @@ public class BlockPlacer implements Runnable {
         }
     }
 
+    /**
+     * Remove event listener
+     * @param listener 
+     */
     public void removeListener(IBlockPlacerListener listener) {
         if (listener == null) {
             return;
@@ -280,7 +298,7 @@ public class BlockPlacer implements Runnable {
         final long timeDelte = enterFunctionTime - m_lastRunTime;
 
         boolean talk = false;
-        final List<BlockPlacerJobEntry> jobsToCancel = new ArrayList<BlockPlacerJobEntry>();
+        final List<JobEntry> jobsToCancel = new ArrayList<JobEntry>();
 
         final UUID[] keys, vipKeys;
         final HashSet<UUID> vips;
@@ -312,51 +330,9 @@ public class BlockPlacer implements Runnable {
                 stop();
             }
         }
-        InOutParam<Integer> seqNumber = InOutParam.Ref(0);
-        long startTime = System.currentTimeMillis();
-        int blocks = 0;
-        boolean process = true;
-        while (process) {
-            BlockPlacerEntry entry;
-            synchronized (this) {
-                entry = fetchBlocks(keys, seqNumber, blocksPlaced, jobsToCancel);
-            }
-            if (entry != null) {
-                entry.Process(this);
-            }
-
-
-            if (entry != null) {
-                process = !entry.isDemanding(); //Allow only one demanding task
-                process &= time == -1 || (System.currentTimeMillis() - startTime) < time;
-                process &= blockCount == -1 || blocks <= blockCount;
-            } else {
-                process = false;
-            }
-        }
-
-
-        seqNumber.setValue(0);
-        startTime = System.currentTimeMillis();
-        blocks = 0;
-        process = true;
-        while (process) {
-            BlockPlacerEntry entry;
-            synchronized (this) {
-                entry = fetchBlocks(vipKeys, seqNumber, blocksPlaced, jobsToCancel);
-            }
-            if (entry != null) {
-                entry.Process(this);
-            }
-
-            if (entry != null) {
-                process = !entry.isDemanding(); //Allow only one demanding task
-                process &= time == -1 || (System.currentTimeMillis() - startTime) < timeVip;
-                process &= blockCount == -1 || blocks <= blockCountVip;
-            } else {
-                process = false;
-            }
-        }
+        
+        processQueue(keys, time, blockCount, blocksPlaced, jobsToCancel);
+        processQueue(vipKeys, timeVip, blockCountVip, blocksPlaced, jobsToCancel);
 
         synchronized (this) {
             for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
@@ -368,13 +344,48 @@ public class BlockPlacer implements Runnable {
             }
         }
 
-        for (BlockPlacerJobEntry job
+        for (JobEntry job
                 : jobsToCancel) {
-            job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
+            job.setStatus(JobEntry.JobStatus.Done);
             onJobRemoved(job);
         }
 
         m_lastRunTime = enterFunctionTime;
+    }
+
+    
+    /**
+     * Process queued blocks
+     * @param playerUUID players to process
+     * @param maxTime maximum time spend placing blocks
+     * @param maxBlocksCount maximum blocks placed
+     * @param blocksPlaced number of blocksplaced for players
+     * @param jobsToCancel canceled blocks
+     */
+    private void processQueue(final UUID[] playerUUID, 
+            final int maxTime, final int maxBlocksCount,
+            final HashMap<UUID, Integer> blocksPlaced, final List<JobEntry> jobsToCancel) {
+        InOutParam<Integer> seqNumber = InOutParam.Ref(0);
+        long startTime = System.currentTimeMillis();
+        int blocks = 0;
+        boolean process = true;
+        while (process) {
+            BlockPlacerEntry entry;
+            synchronized (this) {
+                entry = fetchBlocks(playerUUID, seqNumber, blocksPlaced, jobsToCancel);
+            }
+                        
+            if (entry != null) {
+                entry.Process(this);
+                blocks++;
+                
+                process = !entry.isDemanding(); //Allow only one demanding task
+                process &= maxTime == -1 || (System.currentTimeMillis() - startTime) < maxTime;
+                process &= maxBlocksCount == -1 || blocks <= maxBlocksCount;
+            } else {
+                process = false;
+            }
+        }
     }
 
     /**
@@ -390,7 +401,7 @@ public class BlockPlacer implements Runnable {
     private BlockPlacerEntry fetchBlocks(final UUID[] playerNames,
                                          InOutParam<Integer> seqNumber,
                                          final HashMap<UUID, Integer> blocksPlaced,
-                                         final List<BlockPlacerJobEntry> jobsToCancel) {
+                                         final List<JobEntry> jobsToCancel) {
         if (playerNames == null || playerNames.length == 0) {
             return null;
         }
@@ -416,15 +427,15 @@ public class BlockPlacer implements Runnable {
                             }
                         }
                     } else {
-                        for (BlockPlacerJobEntry job : playerEntry.getJobs()) {
-                            BlockPlacerJobEntry.JobStatus jStatus = job.getStatus();
-                            if (jStatus == BlockPlacerJobEntry.JobStatus.Done
-                                    || jStatus == BlockPlacerJobEntry.JobStatus.Waiting) {
+                        for (JobEntry job : playerEntry.getJobs()) {
+                            JobEntry.JobStatus jStatus = job.getStatus();
+                            if (jStatus == JobEntry.JobStatus.Done
+                                    || jStatus == JobEntry.JobStatus.Waiting) {
                                 jobsToCancel.add(job);
                             }
                         }
 
-                        for (BlockPlacerJobEntry job : jobsToCancel) {
+                        for (JobEntry job : jobsToCancel) {
                             playerEntry.removeJob(job);
                         }
                     }
@@ -492,7 +503,13 @@ public class BlockPlacer implements Runnable {
         return playerEntry.getNextJobId();
     }
 
-    public BlockPlacerJobEntry getJob(UUID player, int jobId) {
+    /**
+     * Get the player job
+     * @param player player uuid
+     * @param jobId job ID
+     * @return 
+     */
+    public JobEntry getJob(UUID player, int jobId) {
         synchronized (this) {
             if (!m_blocks.containsKey(player)) {
                 return null;
@@ -502,7 +519,12 @@ public class BlockPlacer implements Runnable {
         }
     }
 
-    public void addJob(UUID player, BlockPlacerJobEntry job) {
+    /**
+     * Add new job for player
+     * @param player player UUID
+     * @param job the job
+     */
+    public void addJob(UUID player, JobEntry job) {
         synchronized (this) {
             PlayerEntry playerEntry;
 
@@ -512,7 +534,7 @@ public class BlockPlacer implements Runnable {
             } else {
                 playerEntry = m_blocks.get(player);
             }
-            playerEntry.addJob((BlockPlacerJobEntry) job);
+            playerEntry.addJob((JobEntry) job);
         }
 
         synchronized (m_jobAddedListeners) {
@@ -551,7 +573,7 @@ public class BlockPlacer implements Runnable {
                 size += queueEntry.getValue().getQueue().size();
             }
 
-            bypass |= entry instanceof BlockPlacerJobEntry;
+            bypass |= entry instanceof JobEntry;
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
                 if (player == null) {
                     return false;
@@ -578,8 +600,8 @@ public class BlockPlacer implements Runnable {
                         m_physicsWatcher.addLocation(worldName, bpEntry.getLocation());
                     }
                 }
-                if (entry instanceof BlockPlacerJobEntry) {
-                    playerEntry.addJob((BlockPlacerJobEntry) entry);
+                if (entry instanceof JobEntry) {
+                    playerEntry.addJob((JobEntry) entry);
                 }
                 if (queue.size() >= m_queueHardLimit && bypass) {
                     m_lockedQueues.add(player);
@@ -598,8 +620,8 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @param job
      */
-    public void cancelJob(UUID player, BlockPlacerJobEntry job) {
-        if (job instanceof BlockPlacerUndoJob) {
+    public void cancelJob(UUID player, JobEntry job) {
+        if (job instanceof UndoJob) {
             PluginMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
             return;
         }
@@ -611,16 +633,16 @@ public class BlockPlacer implements Runnable {
      *
      * @param job
      */
-    private void waitForJob(BlockPlacerJobEntry job) {
-        if (job instanceof BlockPlacerUndoJob) {
+    private void waitForJob(JobEntry job) {
+        if (job instanceof UndoJob) {
             PluginMain.log("Warning: Undo jobs shuld not by canceled, ingoring!");
             return;
         }
 
         final int SLEEP = 10;
         int maxWaitTime = 1000 / SLEEP;
-        BlockPlacerJobEntry.JobStatus status = job.getStatus();
-        while (status != BlockPlacerJobEntry.JobStatus.Initializing
+        JobEntry.JobStatus status = job.getStatus();
+        while (status != JobEntry.JobStatus.Initializing
                 && !job.isTaskDone() && maxWaitTime > 0) {
             try {
                 Thread.sleep(10);
@@ -631,7 +653,7 @@ public class BlockPlacer implements Runnable {
             status = job.getStatus();
         }
 
-        if (status != BlockPlacerJobEntry.JobStatus.Done
+        if (status != JobEntry.JobStatus.Done
                 && !job.isTaskDone()) {
             PluginMain.log("-----------------------------------------------------------------------");
             PluginMain.log("Warning: timeout waiting for job to finish. Manual job cancel.");
@@ -639,7 +661,7 @@ public class BlockPlacer implements Runnable {
             PluginMain.log("Send this message to the author of the plugin!");
             PluginMain.log("-----------------------------------------------------------------------");
             job.cancel();
-            job.setStatus(BlockPlacerJobEntry.JobStatus.Done);
+            job.setStatus(JobEntry.JobStatus.Done);
         }
     }
 
@@ -654,14 +676,14 @@ public class BlockPlacer implements Runnable {
         int newSize, result;
         PlayerEntry playerEntry;
         Queue<BlockPlacerEntry> queue;
-        BlockPlacerJobEntry job;
+        JobEntry job;
         synchronized (this) {
             if (!m_blocks.containsKey(player)) {
                 return 0;
             }
             playerEntry = m_blocks.get(player);
             job = playerEntry.getJob(jobId);
-            if (job instanceof BlockPlacerUndoJob) {
+            if (job instanceof UndoJob) {
                 PluginMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
                 return 0;
             }
@@ -682,8 +704,8 @@ public class BlockPlacer implements Runnable {
                             if (worldName != null) {
                                 m_physicsWatcher.removeLocation(worldName, bpEntry.getLocation());
                             }
-                        } else if (entry instanceof BlockPlacerJobEntry) {
-                            BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;
+                        } else if (entry instanceof JobEntry) {
+                            JobEntry jobEntry = (JobEntry) entry;
                             playerEntry.removeJob(jobEntry);
                             onJobRemoved(jobEntry);
                         }
@@ -731,16 +753,16 @@ public class BlockPlacer implements Runnable {
                             if (name != null) {
                                 m_physicsWatcher.removeLocation(name, bpEntry.getLocation());
                             }
-                        } else if (entry instanceof BlockPlacerJobEntry) {
-                            BlockPlacerJobEntry jobEntry = (BlockPlacerJobEntry) entry;
+                        } else if (entry instanceof JobEntry) {
+                            JobEntry jobEntry = (JobEntry) entry;
                             playerEntry.removeJob(jobEntry);
                             onJobRemoved(jobEntry);
                         }
                     }
                 }
 
-                Collection<BlockPlacerJobEntry> jobs = playerEntry.getJobs();
-                for (BlockPlacerJobEntry job : jobs.toArray(new BlockPlacerJobEntry[0])) {
+                Collection<JobEntry> jobs = playerEntry.getJobs();
+                for (JobEntry job : jobs.toArray(new JobEntry[0])) {
                     playerEntry.removeJob(job.getJobId());
                     onJobRemoved(job);
                 }
@@ -889,7 +911,7 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @param jobEntry
      */
-    public void removeJob(final UUID player, BlockPlacerJobEntry jobEntry) {
+    public void removeJob(final UUID player, JobEntry jobEntry) {
         PlayerEntry playerEntry;
         synchronized (this) {
             playerEntry = m_blocks.get(player);
@@ -923,6 +945,13 @@ public class BlockPlacer implements Runnable {
         return m_mainThread == Thread.currentThread();
     }
 
+    
+    /**
+     * Set progress bar value
+     * @param player 
+     * @param entry
+     * @param bypass 
+     */
     private void setBar(Player player, PlayerEntry entry, boolean bypass) {
         final String format = ChatColor.YELLOW + "Jobs: " + ChatColor.WHITE + "%d"
                 + ChatColor.YELLOW + ", Placing speed: " + ChatColor.WHITE + "%.2fbps"
@@ -958,7 +987,7 @@ public class BlockPlacer implements Runnable {
      *
      * @param job
      */
-    private void onJobRemoved(BlockPlacerJobEntry job) {
+    private void onJobRemoved(JobEntry job) {
         synchronized (m_jobAddedListeners) {
             for (IBlockPlacerListener listener : m_jobAddedListeners) {
                 listener.jobRemoved(job);

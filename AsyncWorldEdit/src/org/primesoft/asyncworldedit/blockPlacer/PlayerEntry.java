@@ -23,14 +23,13 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.PluginMain;
 
 /**
  * Operation queue player entry
@@ -38,7 +37,6 @@ import org.primesoft.asyncworldedit.PluginMain;
  * @author SBPrime
  */
 public class PlayerEntry {
-
     /**
      * Maximum job number
      */
@@ -62,7 +60,7 @@ public class PlayerEntry {
     /**
      * List of jobs
      */
-    private final HashMap<Integer, BlockPlacerJobEntry> m_jobs;
+    private final HashMap<Integer, JobEntry> m_jobs;
 
     
     /**
@@ -77,7 +75,7 @@ public class PlayerEntry {
         m_queue = new ArrayDeque();
         m_speed = 0;
         m_jobId = 0;
-        m_jobs = new HashMap<Integer, BlockPlacerJobEntry>();
+        m_jobs = new HashMap<Integer, JobEntry>();
     }
 
     /**
@@ -108,7 +106,8 @@ public class PlayerEntry {
 
     /**
      * Update block placing speed
-     * @param blocks 
+     * @param blocks number of blocks
+     * @param timeDelta time spend
      */
     public void updateSpeed(double blocks, long timeDelta) {
         double delta = timeDelta / 1000.0;        
@@ -133,7 +132,7 @@ public class PlayerEntry {
      * Add new job
      * @param job 
      */
-    public void addJob(BlockPlacerJobEntry job) {
+    public void addJob(JobEntry job) {
         synchronized (m_jobs) {
             int id = job.getJobId();
             if (m_jobs.containsKey(id)) {
@@ -149,7 +148,7 @@ public class PlayerEntry {
      * Remove job
      * @param job 
      */
-    public void removeJob(BlockPlacerJobEntry job) {
+    public void removeJob(JobEntry job) {
         synchronized (m_jobs) {
             int id = job.getJobId();
             if (!m_jobs.containsKey(id)) {
@@ -180,7 +179,7 @@ public class PlayerEntry {
      * Get all jobs
      * @return 
      */    
-    public Collection<BlockPlacerJobEntry> getJobs() {
+    public Collection<JobEntry> getJobs() {
         synchronized (m_jobs) {
             return m_jobs.values();
         }
@@ -197,7 +196,7 @@ public class PlayerEntry {
                 return;
             }
             lines.add(ChatColor.YELLOW + "Jobs: ");
-            for (BlockPlacerJobEntry job : m_jobs.values()) {
+            for (JobEntry job : m_jobs.values()) {
                 lines.add(ChatColor.YELLOW + " * " + job.toString()
                         + ChatColor.YELLOW + " - " + job.getStatusString());
             }
@@ -221,7 +220,7 @@ public class PlayerEntry {
      * @param jobId job ID
      * @return 
      */
-    public BlockPlacerJobEntry getJob(int jobId) {
+    public JobEntry getJob(int jobId) {
         synchronized (m_jobs) {
             return m_jobs.get(jobId);
         }

@@ -37,8 +37,8 @@ import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.PluginMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerJobEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerRegenerateEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.RegenerateEntry;
 
 /**
  *
@@ -89,15 +89,15 @@ public class ProxyLocalWorld extends BukkitWorld {
         
         final int jobId = getJobId();
         final EditSession session;
-        final BlockPlacerJobEntry job;
+        final JobEntry job;
         
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
-            job = new BlockPlacerJobEntry(m_player, (CancelabeEditSession) session, jobId, "regenerate");
+            job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "regenerate");
         } else {
             session = editSession;
-            job = new BlockPlacerJobEntry(m_player, jobId, "regenerate");
+            job = new JobEntry(m_player, jobId, "regenerate");
         }
         
         m_blockPlacer.addJob(m_player, job);
@@ -139,7 +139,7 @@ public class ProxyLocalWorld extends BukkitWorld {
                 }
             }
             
-            m_blockPlacer.addTasks(m_player, new BlockPlacerRegenerateEntry(jobId, world, chunk));
+            m_blockPlacer.addTasks(m_player, new RegenerateEntry(jobId, world, chunk));
 
             // Then restore
             for (int x = 0; x < 16; ++x) {
