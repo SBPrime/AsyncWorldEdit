@@ -139,6 +139,7 @@ public abstract class BaseTask extends BukkitRunnable {
                 AsyncWorldEditMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
             }
         }
+        postProcess();
 
         m_job.taskDone();
         if (m_cancelableEditSession != null) {
@@ -208,4 +209,6 @@ public abstract class BaseTask extends BukkitRunnable {
     protected abstract Object doRun() throws MaxChangedBlocksException;
 
     protected abstract void doPostRun(Object result);
+    
+    protected void postProcess() {}
 }

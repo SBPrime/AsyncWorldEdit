@@ -111,11 +111,17 @@ public class CancelableWorld implements World {
 
     @Override
     public int getBlockType(Vector vector) {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
         return m_parent.getBlockType(vector);
     }
 
     @Override
     public int getBlockData(Vector vector) {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
         return m_parent.getBlockData(vector);
     }
 

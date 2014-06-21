@@ -534,7 +534,7 @@ public class BlockPlacer implements Runnable {
             } else {
                 playerEntry = m_blocks.get(player);
             }
-            playerEntry.addJob((JobEntry) job);
+            playerEntry.addJob(job);
         }
 
         synchronized (m_jobAddedListeners) {

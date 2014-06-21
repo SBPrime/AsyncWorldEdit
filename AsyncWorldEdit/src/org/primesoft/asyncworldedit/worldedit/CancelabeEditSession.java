@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -122,6 +124,14 @@ public class CancelabeEditSession extends EditSessionStub {
 
     @Override
     public BaseBlock getBlock(Vector pt) {
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CancelabeEditSession.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return m_parent.getBlock(pt);
     }
 
@@ -132,6 +142,10 @@ public class CancelabeEditSession extends EditSessionStub {
 
     @Override
     public int getBlockData(Vector pt) {
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        
         return m_parent.getBlockData(pt);
     }
 
@@ -147,6 +161,10 @@ public class CancelabeEditSession extends EditSessionStub {
 
     @Override
     public int getBlockType(Vector pt) {
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        
         return m_parent.getBlockType(pt);
     }
 
@@ -168,6 +186,10 @@ public class CancelabeEditSession extends EditSessionStub {
 
     @Override
     public BaseBlock rawGetBlock(Vector pt) {
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        
         return m_parent.rawGetBlock(pt);
     }
 
@@ -309,7 +331,7 @@ public class CancelabeEditSession extends EditSessionStub {
     public void flushQueue() {
         m_blocksQueued = 0;
         super.flushQueue();
-    }
+    }    
 
     /**
      * Force block flush when to many has been queued

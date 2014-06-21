@@ -28,6 +28,7 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import org.bukkit.ChatColor;
 
@@ -53,10 +54,7 @@ public class PlayerEntry {
      * Current block placing speed (blocks per second)
      */
     private double m_speed;
-    /**
-     * Job id
-     */
-    private int m_jobId;
+    
     /**
      * List of jobs
      */
@@ -74,7 +72,6 @@ public class PlayerEntry {
     public PlayerEntry() {
         m_queue = new ArrayDeque();
         m_speed = 0;
-        m_jobId = 0;
         m_jobs = new HashMap<Integer, JobEntry>();
     }
 
@@ -119,12 +116,15 @@ public class PlayerEntry {
      * @return 
      */
     public int getNextJobId() {
-        int result;
-        synchronized (this) {
-            result = m_jobId;
-            m_jobId = (m_jobId + 1) % MAX_JOBS;
+        int maxId = -1;
+        synchronized (m_jobs) {
+            for (Integer id : m_jobs.keySet()) {
+                if (maxId < id) {
+                    maxId = id;
+                }
+            }            
         }
-        return result;
+        return maxId + 1;
     }
 
     
