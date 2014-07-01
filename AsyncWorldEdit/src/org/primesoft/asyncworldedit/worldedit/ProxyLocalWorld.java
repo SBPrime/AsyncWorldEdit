@@ -93,7 +93,7 @@ public class ProxyLocalWorld extends BukkitWorld {
         
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+            session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
             job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "regenerate");
         } else {
             session = editSession;

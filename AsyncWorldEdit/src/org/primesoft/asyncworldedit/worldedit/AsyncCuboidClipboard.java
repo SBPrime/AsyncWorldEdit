@@ -126,7 +126,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             wait = aSession.getWait();
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+            session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
             job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
         } else {
             session = editSession;
@@ -168,7 +168,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             wait = aSession.getWait();
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+            session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
             job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
         } else {
             session = editSession;
@@ -209,7 +209,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             wait = aSession.getWait();
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+            session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
             job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "place");
         } else {
             session = editSession;
@@ -248,7 +248,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             wait = aSession.getWait();
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+            session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
             job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "copy");
         } else {
             session = editSession;
@@ -292,7 +292,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             wait = aSession.getWait();
-            session = new CancelabeEditSession(aSession, aSession.getAsyncMask(), jobId);
+            session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
             job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "copy");
         } else {
             session = editSession;

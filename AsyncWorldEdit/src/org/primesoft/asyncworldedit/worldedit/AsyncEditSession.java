@@ -23,9 +23,6 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
-import org.primesoft.asyncworldedit.blockPlacer.entries.MaskEntry;
-import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import com.sk89q.worldedit.BiomeType;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionStub;
@@ -50,12 +47,14 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.ChunkWatch;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.*;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.WaitFor;
@@ -90,7 +89,7 @@ public class AsyncEditSession extends EditSessionStub {
     /**
      * Current craftbukkit world
      */
-    private final World m_world;
+    private final World m_bukkitWorld;
 
     /**
      * The blocks hub integrator
@@ -146,19 +145,15 @@ public class AsyncEditSession extends EditSessionStub {
     private final EditSessionEvent m_editSessionEvent;
 
     /**
-     * Edit session mask
+     * The parent world
      */
-    private Mask m_mask;
-
-    /**
-     * Edit session mask
-     */
-    private Mask m_asyncMask;
+    private final com.sk89q.worldedit.world.World m_world;
 
     /**
      * The function wait object
      */
     private final WaitFor m_wait = new WaitFor();
+    
 
     /**
      * Get the wait object
@@ -189,8 +184,7 @@ public class AsyncEditSession extends EditSessionStub {
             UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
-        super(eventBus, world != null ? new WorldExtent(world) : null,
-                maxBlocks, blockBag, event);
+        super(eventBus, world != null ? new WorldExtent(world) : null, maxBlocks, blockBag, event);
 
         m_editSessionEvent = event;
         m_eventBus = eventBus;
@@ -202,24 +196,26 @@ public class AsyncEditSession extends EditSessionStub {
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
         m_schedule = plugin.getServer().getScheduler();
+        m_world = world;
+
+        if (world != null) {
+            m_bukkitWorld = plugin.getServer().getWorld(world.getName());
+        } else {
+            m_bukkitWorld = null;
+        }
 
         com.sk89q.worldedit.world.World pWorld = super.getWorld();
-        if (world != null) {
-            m_world = plugin.getServer().getWorld(world.getName());
-        } else {
-            m_world = null;
-        }
-
         if (pWorld != null && pWorld instanceof WorldExtent) {
-            ((WorldExtent) pWorld).Initialize(this, m_bh, m_world);
+            WorldExtent worldExtent = (WorldExtent) pWorld;
+            worldExtent.Initialize(this, m_bh, m_bukkitWorld);
         }
-
+        
         m_asyncForced = false;
         m_asyncDisabled = false;
         m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
         m_chunkWatch = m_plugin.getChunkWatch();
     }
-
+    
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
         boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
         return super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
@@ -279,34 +275,6 @@ public class AsyncEditSession extends EditSessionStub {
         }, position);
     }
 
-    /**
-     * Get current async mask
-     *
-     * @return
-     */
-    public Mask getAsyncMask() {
-        return m_asyncMask;
-    }
-
-    @Override
-    public Mask getMask() {
-        if (m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled)) {
-            return m_asyncMask;
-        } else {
-            return super.getMask();
-        }
-    }
-
-    @Override
-    public void setMask(Mask mask) {
-        if (m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled)) {
-            m_blockPlacer.addTasks(m_player, new MaskEntry(this, m_jobId, mask));
-        } else {
-            doSetMask(mask);
-        }
-
-        m_asyncMask = mask;
-    }
 
     public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
@@ -376,7 +344,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         boolean isAsync = checkAsync(WorldeditOperations.undo);
-        Mask mask = isAsync ? m_asyncMask : getMask();
+        Mask mask = getMask();
         final CancelabeEditSession session = new CancelabeEditSession(this, mask, jobId);
 
         if (!isAsync) {
@@ -432,7 +400,7 @@ public class AsyncEditSession extends EditSessionStub {
     public void redo(final EditSession sess) {
         boolean isAsync = checkAsync(WorldeditOperations.redo);
 
-        Mask mask = isAsync ? m_asyncMask : getMask();
+        Mask mask = getMask();
         final int jobId = getJobId();
         final CancelabeEditSession session = new CancelabeEditSession(this, mask, jobId);
         if (!isAsync) {
@@ -467,7 +435,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "fillXZ");
         m_blockPlacer.addJob(m_player, job);
 
@@ -495,7 +463,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "fillXZ");
         m_blockPlacer.addJob(m_player, job);
 
@@ -521,7 +489,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "removeAbove");
         m_blockPlacer.addJob(m_player, job);
 
@@ -547,7 +515,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "removeBelow");
         m_blockPlacer.addJob(m_player, job);
 
@@ -573,7 +541,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "removeNear");
         m_blockPlacer.addJob(m_player, job);
 
@@ -600,7 +568,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "setBlocks");
 
         m_blockPlacer.addJob(m_player, job);
@@ -627,7 +595,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "setBlocks");
         m_blockPlacer.addJob(m_player, job);
 
@@ -655,7 +623,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "replaceBlocks");
         m_blockPlacer.addJob(m_player, job);
 
@@ -682,7 +650,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "replaceBlocks");
         m_blockPlacer.addJob(m_player, job);
 
@@ -709,7 +677,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeBiomeShape");
         m_blockPlacer.addJob(m_player, job);
 
@@ -739,7 +707,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidFaces");
         m_blockPlacer.addJob(m_player, job);
 
@@ -764,7 +732,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeFaces");
         m_blockPlacer.addJob(m_player, job);
 
@@ -790,7 +758,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidFaces");
         m_blockPlacer.addJob(m_player, job);
 
@@ -815,7 +783,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeWalls");
         m_blockPlacer.addJob(m_player, job);
 
@@ -841,7 +809,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidWalls");
         m_blockPlacer.addJob(m_player, job);
 
@@ -867,7 +835,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidWalls");
         m_blockPlacer.addJob(m_player, job);
 
@@ -893,7 +861,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "overlayCuboidBlocks");
         m_blockPlacer.addJob(m_player, job);
 
@@ -919,7 +887,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "overlayCuboidBlocks");
         m_blockPlacer.addJob(m_player, job);
 
@@ -945,7 +913,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "naturalizeCuboidBlocks");
         m_blockPlacer.addJob(m_player, job);
 
@@ -973,7 +941,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "stackCuboidRegion");
         m_blockPlacer.addJob(m_player, job);
 
@@ -999,7 +967,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "moveRegion");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1025,7 +993,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "moveCuboidRegion");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1051,7 +1019,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "drawLine");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1080,7 +1048,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "drawLine");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1106,7 +1074,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "drainArea");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1133,7 +1101,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "fixLiquid");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1161,7 +1129,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeCylinder");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1190,7 +1158,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeCylinder");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1218,7 +1186,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeSphere");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1247,7 +1215,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeSphere");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1274,7 +1242,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makePyramid");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1300,7 +1268,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "thaw");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1326,7 +1294,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "simulateSnow");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1352,7 +1320,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "green");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1378,7 +1346,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "green");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1404,7 +1372,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makePumpkinPatches");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1432,7 +1400,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeForest");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1461,7 +1429,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeShape");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1494,7 +1462,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "deformRegion");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1526,7 +1494,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "hollowOutRegion");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1552,7 +1520,7 @@ public class AsyncEditSession extends EditSessionStub {
         }
 
         final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, m_asyncMask, jobId);
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
         final JobEntry job = new JobEntry(m_player, session, jobId, "center");
         m_blockPlacer.addJob(m_player, job);
 
@@ -1602,14 +1570,9 @@ public class AsyncEditSession extends EditSessionStub {
         return result;
     }
 
-    public void doSetMask(Mask mask) {
-        super.setMask(mask);
-        m_mask = mask;
-
-    }
 
     public World getCBWorld() {
-        return m_world;
+        return m_bukkitWorld;
     }
 
     /**
@@ -1661,7 +1624,7 @@ public class AsyncEditSession extends EditSessionStub {
     }
 
     private boolean canPerformAsync(int cx, int cz) {
-        return m_world.isChunkLoaded(cx, cz);
+        return m_bukkitWorld.isChunkLoaded(cx, cz);
     }
 
     /**
@@ -1674,7 +1637,7 @@ public class AsyncEditSession extends EditSessionStub {
     public void performSafe(Action action, Vector pos) {
         int cx = pos.getBlockX() >> 4;
         int cz = pos.getBlockZ() >> 4;
-        String worldName = m_world != null ? m_world.getName() : null;
+        String worldName = m_bukkitWorld != null ? m_bukkitWorld.getName() : null;
 
         try {
             m_chunkWatch.add(cx, cz, worldName);
@@ -1688,8 +1651,8 @@ public class AsyncEditSession extends EditSessionStub {
                      * available. Therefore use the queue fallback.
                      */
                     AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                            + " cx:" + cx + " cy:" + cz + " Loaded: " + m_world.isChunkLoaded(cx, cz)
-                            + ", inUse: " + m_world.isChunkInUse(cx, cz) + ". Error: "
+                            + " cx:" + cx + " cy:" + cz + " Loaded: " + m_bukkitWorld.isChunkLoaded(cx, cz)
+                            + ", inUse: " + m_bukkitWorld.isChunkInUse(cx, cz) + ". Error: "
                             + ex.toString());
                 }
             }
@@ -1712,7 +1675,7 @@ public class AsyncEditSession extends EditSessionStub {
     public <T> T performSafe(Func<T> action, Vector pos) {
         int cx = pos.getBlockX() >> 4;
         int cz = pos.getBlockZ() >> 4;
-        String worldName = m_world != null ? m_world.getName() : null;
+        String worldName = m_bukkitWorld != null ? m_bukkitWorld.getName() : null;
 
         try {
             m_chunkWatch.add(cx, cz, worldName);
@@ -1726,8 +1689,8 @@ public class AsyncEditSession extends EditSessionStub {
                      * available. Therefore use the queue fallback.
                      */
                     AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                            + " cx:" + cx + " cy:" + cz + " Loaded: " + m_world.isChunkLoaded(cx, cz)
-                            + ", inUse: " + m_world.isChunkInUse(cx, cz) + ". Error: "
+                            + " cx:" + cx + " cy:" + cz + " Loaded: " + m_bukkitWorld.isChunkLoaded(cx, cz)
+                            + ", inUse: " + m_bukkitWorld.isChunkInUse(cx, cz) + ". Error: "
                             + ex.toString());
                 }
             }
