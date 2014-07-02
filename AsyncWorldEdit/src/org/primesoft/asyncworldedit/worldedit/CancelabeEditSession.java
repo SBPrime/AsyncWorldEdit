@@ -127,11 +127,7 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(CancelabeEditSession.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
         return m_parent.getBlock(pt);
     }
 
