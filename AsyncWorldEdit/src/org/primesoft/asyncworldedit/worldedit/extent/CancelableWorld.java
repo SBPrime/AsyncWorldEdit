@@ -29,12 +29,12 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EntityType;
 import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.ServerInterface;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BaseItemStack;
+import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
@@ -358,8 +358,8 @@ public class CancelableWorld implements World {
     }
 
     @Override
-    public boolean queueBlockBreakEffect(ServerInterface si, Vector vector, int i, double d) {
-        return m_parent.queueBlockBreakEffect(si, VectorWrapper.wrap(vector, m_jobId, true, m_player), i, d);
+    public boolean queueBlockBreakEffect(Platform pltform, Vector vector, int i, double d) {    
+        return m_parent.queueBlockBreakEffect(pltform, VectorWrapper.wrap(vector, m_jobId, true, m_player), i, d);
     }
 
     @Override

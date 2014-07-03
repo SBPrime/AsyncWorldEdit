@@ -29,12 +29,12 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EntityType;
 import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.ServerInterface;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BaseItemStack;
+import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
@@ -189,11 +189,11 @@ public class WorldExtent implements World {
             @Override
             public Boolean Execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
-                
+
                 if (oldBlock.equals(newBlock)) {
                     return false;
                 }
-                
+
                 final boolean result = m_parent.setBlock(v, newBlock, bln);
                 if (result) {
                     logBlock(v, player, oldBlock, newBlock);
@@ -399,7 +399,7 @@ public class WorldExtent implements World {
                 if (oldBlock.getType() == i && oldBlock.getData() == i1) {
                     return false;
                 }
-                
+
                 final boolean result = m_parent.setTypeIdAndDataFast(v, i, i1);
                 if (result) {
                     logBlock(v, player, oldBlock, new BaseBlock(i, i1));
@@ -843,8 +843,7 @@ public class WorldExtent implements World {
     }
 
     @Override
-    public boolean queueBlockBreakEffect(final ServerInterface si, Vector vector,
-            final int i, final double d) {
+    public boolean queueBlockBreakEffect(final Platform pltform, Vector vector, final int i, final double d) {
         final WorldExtentParam<Vector> param = WorldExtentParam.extract(vector);
         final Vector v = param.getData();
         final UUID player = param.getPlayer();
@@ -856,7 +855,7 @@ public class WorldExtent implements World {
         Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
-                return m_parent.queueBlockBreakEffect(si, v, i, d);
+                return m_parent.queueBlockBreakEffect(pltform, v, i, d);
             }
         };
 
@@ -926,11 +925,11 @@ public class WorldExtent implements World {
             @Override
             public Boolean Execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(vector);
-                
+
                 if (oldBlock.equals(newBlock)) {
                     return false;
                 }
-                
+
                 final boolean result = m_parent.setBlock(vector, newBlock);
                 if (result) {
                     logBlock(vector, player, oldBlock, newBlock);
