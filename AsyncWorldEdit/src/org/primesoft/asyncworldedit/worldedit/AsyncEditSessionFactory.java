@@ -26,6 +26,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionFactory;
 import com.sk89q.worldedit.LocalPlayer;
+import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
@@ -43,6 +44,14 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
 
     private final AsyncWorldEditMain m_parent;
     private final EventBus m_eventBus;
+    
+    private static UUID getUUID(com.sk89q.worldedit.entity.Player player){
+        if (player instanceof BukkitPlayer) {
+            return ((BukkitPlayer)player).getPlayer().getUniqueId();
+        }
+        
+        return ConfigProvider.DEFAULT_USER;
+    }
 
     public AsyncEditSessionFactory(AsyncWorldEditMain parent, EventBus eventBus) {
         m_parent = parent;
@@ -58,7 +67,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
     
     @Override
     public EditSession getEditSession(World world, int maxBlocks, Player player) {
-        UUID uuid = BukkitPlayerWrapper.getUUID(player);
+        UUID uuid = getUUID(player);
         AsyncEditSession result = new AsyncEditSession(m_parent, uuid,
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, player, maxBlocks, null));
@@ -76,7 +85,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
 
     @Override
     public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, Player player) {
-        UUID uuid = BukkitPlayerWrapper.getUUID(player);
+        UUID uuid = getUUID(player);
         AsyncEditSession result = new AsyncEditSession(m_parent, uuid,
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, player, maxBlocks, null));

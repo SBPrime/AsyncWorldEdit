@@ -56,15 +56,7 @@ public class BukkitPlayerWrapper extends BukkitPlayer {
         super(plugin, server, player.getPlayer());
         
         m_parent = player;
-    }
-    
-    public static UUID getUUID(com.sk89q.worldedit.entity.Player player){
-        if (player instanceof BukkitPlayer) {
-            return ((BukkitPlayer)player).getPlayer().getUniqueId();
-        }
-        
-        return ConfigProvider.DEFAULT_USER;
-    }
+    }       
     
     private UUID getUUID() {
         return m_parent.getPlayer().getUniqueId();

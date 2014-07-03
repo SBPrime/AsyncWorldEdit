@@ -75,9 +75,9 @@ public class AsyncWorldEditMain extends JavaPlugin {
     public PhysicsWatch getPhysicsWatcher() {
         return m_physicsWatcher;
     }
-    
+
     public ChunkWatch getChunkWatch() {
-        return  m_chunkWatch;
+        return m_chunkWatch;
     }
 
     public PlotMeFix getPlotMeFix() {
@@ -87,8 +87,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
-    
-    public BarAPIntegrator getBarAPI() {    
+
+    public BarAPIntegrator getBarAPI() {
         return m_barApi;
     }
 
@@ -122,17 +122,18 @@ public class AsyncWorldEditMain extends JavaPlugin {
         if (s_instance == null) {
             return null;
         }
-        
-        Server server = s_instance.getServer();
-        Player[] allPlayers = server.getOnlinePlayers();
-        for (Player p : allPlayers) {
-            if (p.isOnline() && 
-                p.getUniqueId().equals(uuid)) {
-                return p;
-            }
+
+        PlayerManager pManager = s_instance.getPlayerManager();
+        PlayerWrapper player = pManager.getPlayer(uuid);
+        if (player == null) {
+            return null;
         }
-        
-        return null;        
+        Player bPlayer = player.getPlayer();
+        if (bPlayer == null || !bPlayer.isOnline()) {
+            return null;
+        }
+
+        return bPlayer;
     }
 
     public static void say(Player player, String msg) {
@@ -158,14 +159,14 @@ public class AsyncWorldEditMain extends JavaPlugin {
             log("Error loading config");
             return;
         }
-        
+
         if (ConfigProvider.getAllowMetrics()) {
-	        try {
-	            m_metrics = new MetricsLite(this);
-	            m_metrics.start();
-	        } catch (IOException e) {
-	            log("Error initializing MCStats: " + e.getMessage());
-	        }
+            try {
+                m_metrics = new MetricsLite(this);
+                m_metrics.start();
+            } catch (IOException e) {
+                log("Error initializing MCStats: " + e.getMessage());
+            }
         }
 
         s_console = getServer().getConsoleSender();
@@ -174,7 +175,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
             log("World edit not found.");
             return;
         }
-        
+
         m_aweInjector = getAWEInjector(this);
         m_aweInjector.setClassFactory(new AsyncClassFactory());
 
@@ -191,7 +192,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
         }
 
         m_weIntegrator = new WorldeditIntegrator(this, worldEdit);
-        
+
         if (ConfigProvider.isPhysicsFreezEnabled()) {
             m_physicsWatcher.Enable();
         } else {

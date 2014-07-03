@@ -107,6 +107,19 @@ public class PlayerManager {
         }
     }
 
+    
+    /**
+     * Get list of all players
+     * @return 
+     */
+    public PlayerWrapper[] getAllPlayers() {
+        PlayerWrapper[] result;
+        synchronized (m_playersUids) {
+            result = m_playersUids.values().toArray(new PlayerWrapper[0]);
+        }
+        return result;
+    }
+    
     /**
      * Get default block placing speed
      */
