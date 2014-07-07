@@ -19,6 +19,7 @@
 
 package com.sk89q.worldedit;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
@@ -79,7 +80,6 @@ import com.sk89q.worldedit.world.World;
 import javax.annotation.Nullable;
 import java.util.*;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sk89q.worldedit.regions.Regions.*;
 
@@ -2281,7 +2281,7 @@ public class EditSession implements Extent {
     private static final double lengthSq(double x, double z) {
         return (x * x) + (z * z);
     }
-       
+
     public static Class<?> ForceClassLoad(){
         return EditSession.class;
     }
