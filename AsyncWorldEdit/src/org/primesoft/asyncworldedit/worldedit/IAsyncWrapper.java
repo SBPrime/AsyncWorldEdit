@@ -24,7 +24,6 @@
 
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.UUID;
 
 /**

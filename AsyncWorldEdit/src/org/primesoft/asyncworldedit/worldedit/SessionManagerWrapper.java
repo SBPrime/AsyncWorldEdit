@@ -41,5 +41,4 @@ public class SessionManagerWrapper extends SessionManager {
                 new SpyHashMap(worldEdit.getConfiguration(), playerManager), 
                 "Unable to inject LocalSession factory");
     }
-    
 }

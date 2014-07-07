@@ -347,5 +347,5 @@ public class Vector2DWrapper extends Vector2D implements IAsyncWrapper {
     public Vector2D transform2D(double angle, double aboutX, double aboutZ,
                                 double translateX, double translateZ) {
         return wrap(m_parent.transform2D(angle, aboutX, aboutZ, translateX, translateZ));
-    }       
+    }
 }

@@ -342,5 +342,5 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
      */
     private int getJobId() {
         return m_blockPlacer.getJobId(m_player);
-    }
+    }      
 }

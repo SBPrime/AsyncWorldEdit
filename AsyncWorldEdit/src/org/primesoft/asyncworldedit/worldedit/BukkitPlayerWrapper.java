@@ -24,7 +24,6 @@
 
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.PlayerDirection;
 import com.sk89q.worldedit.ServerInterface;
@@ -43,7 +42,6 @@ import com.sk89q.worldedit.util.Location;
 import java.io.File;
 import java.util.UUID;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.ConfigProvider;
 
 /**
  *

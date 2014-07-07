@@ -36,8 +36,6 @@ import com.sk89q.worldedit.session.SessionManager;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.utils.Reflection;
 
