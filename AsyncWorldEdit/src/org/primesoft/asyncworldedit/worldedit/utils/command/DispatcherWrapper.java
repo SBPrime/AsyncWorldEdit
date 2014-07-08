@@ -27,7 +27,6 @@ package org.primesoft.asyncworldedit.worldedit.utils.command;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandLocals;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.util.command.CommandCallable;
 import com.sk89q.worldedit.util.command.CommandMapping;
 import com.sk89q.worldedit.util.command.Description;
@@ -85,26 +84,22 @@ public class DispatcherWrapper implements Dispatcher {
     }
 
     @Override
-    public boolean call(String arguments, CommandLocals locals, String[] parentCommands) throws CommandException {
-        CommandLocals newLocals = locals;
-        
-        Map<Object, Object> values = Reflection.get(newLocals, Map.class, "locals", "Unable to get locals, player not injected.");
+    public boolean call(String arguments, CommandLocals locals, String[] parentCommands) throws CommandException {        
+        Map<Object, Object> valuesMap = Reflection.get(locals, Map.class, "locals", "Unable to get locals, player not injected.");
+        Map.Entry<Object, Object>[] values = valuesMap.entrySet().toArray(new Map.Entry[0]);
         if (values != null) {
-            newLocals = new CommandLocals();
-            //AbstractPlayerActor
-            for (Map.Entry<Object, Object> entry : values.entrySet()) {
+            for (Map.Entry<Object, Object> entry : values) {
                 Object key = entry.getKey();
                 Object v = entry.getValue();
                 
                 if (v instanceof Player){
-                    v = new PlayerWrapper((Player)v);
+                    valuesMap.remove(key);
+                    valuesMap.put(key, new PlayerWrapper((Player)v));
                 }
-                
-                newLocals.put(key, v);
             }
         }
         
-        return m_parent.call(arguments, newLocals, parentCommands);
+        return m_parent.call(arguments, locals, parentCommands);
     }
 
     @Override
