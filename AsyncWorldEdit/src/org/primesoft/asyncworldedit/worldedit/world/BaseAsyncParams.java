@@ -22,41 +22,43 @@
  * THE SOFTWARE.
  */
 
-package org.primesoft.asyncworldedit.blockPlacer.entries;
+package org.primesoft.asyncworldedit.worldedit.world;
 
-import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerLocationEntry;
-import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
+import java.util.UUID;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
-    protected final Vector m_location;
-    protected final String m_worldName;
+public abstract class BaseAsyncParams {
+    private final boolean m_isAsync;
+    private final int m_jobId;
+    private final UUID m_player;
+    private final boolean m_empty;
 
-    public WorldExtentBlockEntry(AsyncWorld worldExtent,
-            int jobId, Vector location) {
-        super(jobId);
-        
-        m_location = location;
-        m_worldName = worldExtent.getName();
+    
+    public boolean isEmpty() {
+        return m_empty;
+    }
+    
+    public boolean isAsync() {
+        return m_isAsync;
     }
 
-    @Override
-    public String getWorldName() {
-        return m_worldName;
+    
+    public int getJobId() {
+        return m_jobId;
     }
 
-    @Override
-    public Vector getLocation() {
-        return m_location;
+    public UUID getPlayer() {
+        return m_player;
     }
-
-    @Override
-    public boolean isDemanding() {
-        return false;
-    }   
+    
+    public BaseAsyncParams(boolean isAsync, int jobId, boolean isEmpty, UUID player) {
+        m_isAsync = isAsync;
+        m_jobId = jobId;
+        m_player = player;
+        m_empty = isEmpty;
+    }
+    
 }

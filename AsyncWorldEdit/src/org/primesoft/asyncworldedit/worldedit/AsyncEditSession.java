@@ -49,16 +49,15 @@ import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
-import org.primesoft.asyncworldedit.ChunkWatch;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.blockPlacer.*;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
-import org.primesoft.asyncworldedit.utils.Action;
+import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.WaitFor;
-import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
+import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
  *
@@ -85,7 +84,14 @@ public class AsyncEditSession extends EditSessionStub {
      * Async block placer
      */
     private final BlockPlacer m_blockPlacer;
-
+    
+    
+    /**
+     * The dispatcher class
+     */
+    private final TaskDispatcher m_dispatcher;
+    
+    
     /**
      * Current craftbukkit world
      */
@@ -117,10 +123,6 @@ public class AsyncEditSession extends EditSessionStub {
      */
     private final BukkitScheduler m_schedule;
 
-    /**
-     * The chunk watcher
-     */
-    private final ChunkWatch m_chunkWatch;
 
     /**
      * Number of async tasks
@@ -175,7 +177,8 @@ public class AsyncEditSession extends EditSessionStub {
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
-
+    
+    
     public EditSessionEvent getEditSessionEvent() {
         return m_editSessionEvent;
     }
@@ -184,7 +187,7 @@ public class AsyncEditSession extends EditSessionStub {
             UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
-        super(eventBus, world != null ? new WorldExtent(world) : null, maxBlocks, blockBag, event);
+        super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);
 
         m_editSessionEvent = event;
         m_eventBus = eventBus;
@@ -195,6 +198,7 @@ public class AsyncEditSession extends EditSessionStub {
         m_bh = plugin.getBlocksHub();
         m_player = player;
         m_blockPlacer = plugin.getBlockPlacer();
+        m_dispatcher = plugin.getTaskDispatcher();
         m_schedule = plugin.getServer().getScheduler();
         m_world = world;
 
@@ -203,17 +207,10 @@ public class AsyncEditSession extends EditSessionStub {
         } else {
             m_bukkitWorld = null;
         }
-
-        com.sk89q.worldedit.world.World pWorld = super.getWorld();
-        if (pWorld != null && pWorld instanceof WorldExtent) {
-            WorldExtent worldExtent = (WorldExtent) pWorld;
-            worldExtent.Initialize(this, m_bh, m_bukkitWorld);
-        }
         
         m_asyncForced = false;
         m_asyncDisabled = false;
-        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
-        m_chunkWatch = m_plugin.getChunkWatch();
+        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);        
     }
     
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
@@ -231,48 +228,48 @@ public class AsyncEditSession extends EditSessionStub {
     public BaseBlock getBlock(final Vector position) {
         final AsyncEditSession es = this;
 
-        return performSafe(new Func<BaseBlock>() {
+        return m_dispatcher.performSafe(new Func<BaseBlock>() {
             @Override
             public BaseBlock Execute() {
                 return es.doGetBlock(position);
             }
-        }, position);
+        }, m_bukkitWorld, position);
     }
 
     @Override
     public int getBlockData(final Vector position) {
         final AsyncEditSession es = this;
 
-        return performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return es.doGetBlockData(position);
             }
-        }, position);
+        }, m_bukkitWorld, position);
     }
 
     @Override
     public int getBlockType(final Vector position) {
         final AsyncEditSession es = this;
 
-        return performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return es.doGetBlockType(position);
             }
-        }, position);
+        }, m_bukkitWorld, position);
     }
 
     @Override
     public BaseBlock getLazyBlock(final Vector position) {
         final AsyncEditSession es = this;
 
-        return performSafe(new Func<BaseBlock>() {
+        return m_dispatcher.performSafe(new Func<BaseBlock>() {
             @Override
             public BaseBlock Execute() {
                 return es.doGetLazyBlock(position);
             }
-        }, position);
+        }, m_bukkitWorld, position);
     }
 
 
@@ -1624,180 +1621,6 @@ public class AsyncEditSession extends EditSessionStub {
         return m_blockPlacer.getJobId(m_player);
     }
 
-    private boolean canPerformAsync(int cx, int cz) {
-        return m_bukkitWorld.isChunkLoaded(cx, cz);
-    }
-
-    /**
-     * Perform operation using a safe wrapper. If the basic operation fails
-     * queue it on dispatcher
-     *
-     * @param action
-     * @param pos
-     */
-    public void performSafe(Action action, Vector pos) {
-        int cx = pos.getBlockX() >> 4;
-        int cz = pos.getBlockZ() >> 4;
-        String worldName = m_bukkitWorld != null ? m_bukkitWorld.getName() : null;
-
-        try {
-            m_chunkWatch.add(cx, cz, worldName);
-            if (canPerformAsync(cx, cz)) {
-                try {
-                    action.Execute();
-                    return;
-                } catch (Exception ex) {
-                    /*
-                     * Exception here indicates that async block get is not
-                     * available. Therefore use the queue fallback.
-                     */
-                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                            + " cx:" + cx + " cy:" + cz + " Loaded: " + m_bukkitWorld.isChunkLoaded(cx, cz)
-                            + ", inUse: " + m_bukkitWorld.isChunkInUse(cx, cz) + ". Error: "
-                            + ex.toString());
-                }
-            }
-        } finally {
-            m_chunkWatch.remove(cx, cz, worldName);
-        }
-
-        queueGetOperation(action);
-    }
-
-    /**
-     * Perform operation using a safe wrapper. If the basic operation fails
-     * queue it on dispatcher
-     *
-     * @param <T>
-     * @param action
-     * @param pos
-     * @return
-     */
-    public <T> T performSafe(Func<T> action, Vector pos) {
-        int cx = pos.getBlockX() >> 4;
-        int cz = pos.getBlockZ() >> 4;
-        String worldName = m_bukkitWorld != null ? m_bukkitWorld.getName() : null;
-
-        try {
-            m_chunkWatch.add(cx, cz, worldName);
-            if (canPerformAsync(cx, cz)) {
-                try {
-                    T result = action.Execute();
-                    return result;
-                } catch (Exception ex) {
-                    /*
-                     * Exception here indicates that async block get is not
-                     * available. Therefore use the queue fallback.
-                     */
-                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                            + " cx:" + cx + " cy:" + cz + " Loaded: " + m_bukkitWorld.isChunkLoaded(cx, cz)
-                            + ", inUse: " + m_bukkitWorld.isChunkInUse(cx, cz) + ". Error: "
-                            + ex.toString());
-                }
-            }
-        } finally {
-            m_chunkWatch.remove(cx, cz, worldName);
-        }
-
-        return queueGetOperation(action);
-    }
-
-    /**
-     * Perform operation using a safe wrapper. If the basic operation fails
-     * queue it on dispatcher
-     *
-     * @param action
-     * @param pos
-     */
-    public void performSafe(Action action) {
-        try {
-            action.Execute();
-            return;
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
-            AsyncWorldEditMain.log("Error performing safe operation. Error: "
-                    + ex.toString());
-        }
-        queueGetOperation(action);
-    }
-
-    /**
-     * Perform operation using a safe wrapper. If the basic operation fails
-     * queue it on dispatcher
-     *
-     * @param <T>
-     * @param action
-     * @return
-     */
-    public <T> T performSafe(Func<T> action) {
-        try {
-            T result = action.Execute();
-            return result;
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
-            AsyncWorldEditMain.log("Error performing safe operation. Error: "
-                    + ex.toString());
-        }
-        return queueGetOperation(action);
-    }
-
-    /**
-     * Queue sunced block get operation
-     *
-     * @param <T>
-     * @param action
-     * @return
-     */
-    private <T> T queueGetOperation(Func<T> action) {
-        BlockPlacerGetFunc<T> getBlock = new BlockPlacerGetFunc<T>(m_jobId, action);
-        if (m_blockPlacer.isMainTask()) {
-            return action.Execute();
-        }
-
-        final Object mutex = getBlock.getMutex();
-
-        m_blockPlacer.addGetTask(getBlock);
-        synchronized (mutex) {
-            while (getBlock.getResult() == null) {
-                try {
-                    mutex.wait();
-                } catch (InterruptedException ex) {
-                }
-            }
-        }
-        return getBlock.getResult();
-    }
-
-    /**
-     *
-     * @param action
-     * @return
-     */
-    private void queueGetOperation(Action action) {
-        BlockPlacerGetAction actionEntry = new BlockPlacerGetAction(m_jobId, action);
-        if (m_blockPlacer.isMainTask()) {
-            action.Execute();
-            return;
-        }
-
-        final Object mutex = actionEntry.getMutex();
-
-        m_blockPlacer.addGetTask(actionEntry);
-        synchronized (mutex) {
-            while (!actionEntry.isDone()) {
-                try {
-                    mutex.wait();
-                } catch (InterruptedException ex) {
-                }
-            }
-        }
-    }
 
     private BaseBlock doGetBlock(Vector position) {
         return super.getBlock(position);

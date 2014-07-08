@@ -22,41 +22,35 @@
  * THE SOFTWARE.
  */
 
-package org.primesoft.asyncworldedit.blockPlacer.entries;
-
-import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerLocationEntry;
-import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
+package org.primesoft.asyncworldedit.taskdispatcher;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
-    protected final Vector m_location;
-    protected final String m_worldName;
-
-    public WorldExtentBlockEntry(AsyncWorld worldExtent,
-            int jobId, Vector location) {
-        super(jobId);
+public abstract class BaseDispatcherEntry implements IDispatcherEntry {
+    /**
+     * The MTA mutex
+     */
+    private final Object m_mutex = new Object();
+    
+    @Override
+    public Object getMutex() {
+        return m_mutex;
+    }
+    
+    /**
+     * The task to execute
+     */
+    public abstract void Execute();
+    
+    @Override
+    public boolean Process() {
+        synchronized (m_mutex) {
+            Execute();            
+            m_mutex.notifyAll();
+        }
         
-        m_location = location;
-        m_worldName = worldExtent.getName();
+        return true;
     }
-
-    @Override
-    public String getWorldName() {
-        return m_worldName;
-    }
-
-    @Override
-    public Vector getLocation() {
-        return m_location;
-    }
-
-    @Override
-    public boolean isDemanding() {
-        return false;
-    }   
 }

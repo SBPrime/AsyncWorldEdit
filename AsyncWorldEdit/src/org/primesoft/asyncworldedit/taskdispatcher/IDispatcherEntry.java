@@ -21,42 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-package org.primesoft.asyncworldedit.blockPlacer.entries;
-
-import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerLocationEntry;
-import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
+package org.primesoft.asyncworldedit.taskdispatcher;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
-    protected final Vector m_location;
-    protected final String m_worldName;
+public interface IDispatcherEntry {
+    /**
+     * MTA mutex
+     *
+     * @return
+     */
+    Object getMutex();
 
-    public WorldExtentBlockEntry(AsyncWorld worldExtent,
-            int jobId, Vector location) {
-        super(jobId);
-        
-        m_location = location;
-        m_worldName = worldExtent.getName();
-    }
-
-    @Override
-    public String getWorldName() {
-        return m_worldName;
-    }
-
-    @Override
-    public Vector getLocation() {
-        return m_location;
-    }
-
-    @Override
-    public boolean isDemanding() {
-        return false;
-    }   
+    /**
+     * Process the entry
+     * @return 
+     */
+    boolean Process();
 }

@@ -35,6 +35,8 @@ import com.sk89q.worldedit.world.World;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.PlayerManager;
+import org.primesoft.asyncworldedit.worldedit.entity.PlayerWrapper;
 
 /**
  *
@@ -44,18 +46,23 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
 
     private final AsyncWorldEditMain m_parent;
     private final EventBus m_eventBus;
+    private final PlayerManager m_playerManager;
     
-    private static UUID getUUID(com.sk89q.worldedit.entity.Player player){
+    private UUID getUUID(com.sk89q.worldedit.entity.Player player){
         if (player instanceof BukkitPlayer) {
             return ((BukkitPlayer)player).getPlayer().getUniqueId();
         }
+        else if (player instanceof PlayerWrapper) {
+            return ((PlayerWrapper)player).getUUID();
+        }
         
-        return ConfigProvider.DEFAULT_USER;
-    }
+        return m_playerManager.getPlayerUUID(player.getName());
+    }    
 
     public AsyncEditSessionFactory(AsyncWorldEditMain parent, EventBus eventBus) {
         m_parent = parent;
         m_eventBus = eventBus;
+        m_playerManager = parent.getPlayerManager();
     }
 
     @Override

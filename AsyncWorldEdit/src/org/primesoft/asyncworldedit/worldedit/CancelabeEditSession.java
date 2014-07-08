@@ -41,7 +41,7 @@ import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
-import org.primesoft.asyncworldedit.worldedit.extent.CancelableWorld;
+import org.primesoft.asyncworldedit.worldedit.world.CancelableWorld;
 import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 
 /**

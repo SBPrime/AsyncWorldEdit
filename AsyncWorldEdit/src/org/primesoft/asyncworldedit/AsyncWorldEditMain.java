@@ -39,6 +39,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.injector.InjectorMain;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
@@ -62,6 +63,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
     private final PhysicsWatch m_physicsWatcher = new PhysicsWatch();
     private final ChunkWatch m_chunkWatch = new ChunkWatch();
     private BlockPlacer m_blockPlacer;
+    private TaskDispatcher m_dispatcher;
     private WorldeditIntegrator m_weIntegrator;
     private PlotMeFix m_plotMeFix;
     private final PlayerManager m_playerManager = new PlayerManager(this);
@@ -86,6 +88,10 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
+    }
+        
+    public TaskDispatcher getTaskDispatcher() {
+        return m_dispatcher;
     }
 
     public BarAPIntegrator getBarAPI() {
@@ -182,6 +188,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
         m_barApi = new BarAPIntegrator(this);
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
+        m_dispatcher = new TaskDispatcher(this);
         m_plotMeFix = new PlotMeFix(this);
 
         if (ConfigProvider.getCheckUpdate()) {
@@ -213,6 +220,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
     @Override
     public void onDisable() {
         m_blockPlacer.stop();
+        m_dispatcher.stop();
         m_weIntegrator.queueStop();
         m_chunkWatch.clear();
         log("Disabled");

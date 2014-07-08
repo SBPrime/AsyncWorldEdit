@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.worldedit.extent;
+package org.primesoft.asyncworldedit.worldedit.world;
 
-import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
@@ -33,18 +32,17 @@ import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
  * @author SBPrime
  * @param <T>
  */
-public class WorldExtentParam<T> {
-    static BaseBlock extract;
-
+public class DataAsyncParams<T> extends BaseAsyncParams {
     /**
      * Extract parameters
      * @param <T>
      * @param data
      * @return
      */
-    public static <T> WorldExtentParam<T> extract(T data) {
+    public static <T> DataAsyncParams<T> extract(T data) {
         int jobId = -1;
         boolean isAsync = false;
+        boolean empty = true;
         UUID player = ConfigProvider.DEFAULT_USER;
 
         if (data instanceof IAsyncWrapper) {
@@ -53,36 +51,20 @@ public class WorldExtentParam<T> {
             data = (T)wrapper.getParent();
             isAsync = wrapper.isAsync();
             player = wrapper.getPlayer();
+            empty = false;
         }
 
-        return new WorldExtentParam(data, isAsync, jobId, player);
+        return new DataAsyncParams(data, isAsync, jobId, empty, player);
     }
-
-    private final boolean m_isAsync;
+    
     private final T m_data;
-    private final int m_jobId;
-    private final UUID m_player;
 
-    private WorldExtentParam(T data, boolean isAsync, int jobId, UUID player) {
-        m_data = data;
-        m_isAsync = isAsync;
-        m_jobId = jobId;
-        m_player = player;
-    }
-
-    public boolean isAsync() {
-        return m_isAsync;
+    private DataAsyncParams(T data, boolean isAsync, int jobId, boolean isEmpty, UUID player) {
+        super(isAsync, jobId, isEmpty, player);
+        m_data = data;        
     }
 
     public T getData() {
         return m_data;
-    }
-
-    public int getJobId() {
-        return m_jobId;
-    }
-
-    public UUID getPlayer() {
-        return m_player;
     }
 }

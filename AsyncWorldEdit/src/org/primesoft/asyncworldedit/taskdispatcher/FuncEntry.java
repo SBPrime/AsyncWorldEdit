@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.taskdispatcher;
 
 import org.primesoft.asyncworldedit.utils.Func;
 
@@ -30,41 +30,25 @@ import org.primesoft.asyncworldedit.utils.Func;
  * @author Prime
  * @param <T>
  */
-public class BlockPlacerGetFunc<T> extends BlockPlacerEntry {
+public class FuncEntry<T> extends BaseDispatcherEntry {
 
     private final Func<T> m_action;
-    private final Object m_mutex = new Object();
     private T m_result = null;
-
-    @Override
-    public boolean isDemanding() {
-        return false;
-    }
 
     public Func<T> getAction() {
         return m_action;
-    }
-
-    public Object getMutex() {
-        return m_mutex;
     }
 
     public T getResult() {
         return m_result;
     }
 
-    public BlockPlacerGetFunc(int jobId, Func action) {
-        super(jobId);
+    public FuncEntry(Func action) {
         m_action = action;
     }
 
     @Override
-    public boolean Process(BlockPlacer bp) {
-        synchronized (m_mutex) {
-            m_result = m_action.Execute();
-            m_mutex.notifyAll();
-        }
-        
-        return true;
+    public void Execute() {
+        m_result = m_action.Execute();
     }
 }

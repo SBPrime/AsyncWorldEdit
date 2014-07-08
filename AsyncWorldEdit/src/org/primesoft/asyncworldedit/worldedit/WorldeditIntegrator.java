@@ -23,21 +23,16 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.minecraft.util.commands.CommandsManager;
-import com.sk89q.minecraft.util.commands.SimpleInjector;
 import com.sk89q.worldedit.EditSessionFactory;
-import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.extension.platform.CommandManager;
-import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.extension.platform.PlatformManager;
 import com.sk89q.worldedit.session.SessionManager;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
+import com.sk89q.worldedit.util.command.Dispatcher;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.worldedit.utils.command.DispatcherWrapper;
 
 /**
  *
@@ -55,17 +50,11 @@ public class WorldeditIntegrator {
      */
     private final AsyncWorldEditMain m_parent;
 
-    /**
-     * The world edit plugin
-     */
-    private final WorldEditPlugin m_worldEditPlugin;
-
     private EditSessionFactory m_oldEditSessionFactory;
     private SessionManager m_oldSessions;
     private PlatformManager m_platformManager;
     private CommandManager m_commandManager;
-    private Platform[] m_oldPlatforms;
-    private CommandsManager<LocalPlayer> m_oldCommands;
+    private Dispatcher m_oldDispatcher;
 
     /**
      * Create new instance of world edit integration checker and start it
@@ -75,8 +64,6 @@ public class WorldeditIntegrator {
      */
     public WorldeditIntegrator(AsyncWorldEditMain plugin, WorldEditPlugin worldEditPlugin) {
         m_parent = plugin;
-        m_worldEditPlugin = worldEditPlugin;
-
         if (m_parent == null) {
             return;
         }
@@ -99,18 +86,11 @@ public class WorldeditIntegrator {
         m_platformManager = m_worldEdit.getPlatformManager();
         m_commandManager = m_platformManager.getCommandManager();
 
-        m_oldPlatforms = m_platformManager.getPlatforms().toArray(new Platform[0]);
-        for (Platform p : m_oldPlatforms) {
-            m_platformManager.unregister(p);
-        }
-
-        m_oldCommands = Reflection.get(m_commandManager, CommandsManager.class,
-                "commands", "Unable to store old commands");
-        Reflection.set(m_commandManager, "commands", getCommandWrapper(),
+        m_oldDispatcher = Reflection.get(m_commandManager, Dispatcher.class,
+                "dispatcher", "Unable to get the dispatcher");
+        if (m_oldDispatcher != null) {
+            Reflection.set(m_commandManager, "dispatcher", new DispatcherWrapper(m_oldDispatcher),
                 "Unable to inject new commands manager");
-
-        for (Platform p : m_oldPlatforms) {
-            m_platformManager.register(p);
         }
     }
 
@@ -118,51 +98,10 @@ public class WorldeditIntegrator {
      * Stop the wrapper
      */
     public void queueStop() {
-        List<Platform> platforms = m_platformManager.getPlatforms();
-        for (Platform platform : platforms) {
-            m_platformManager.unregister(platform);
-        }
-
-        Reflection.set(m_commandManager, "commands", m_oldCommands,
-                "Unable to restore commands manager");
-        for (Platform platform : m_oldPlatforms) {
-            m_platformManager.register(platform);
-        }
+        Reflection.set(m_commandManager, "dispatcher", m_oldDispatcher,
+                "Unable to restore dispatcher");
 
         Reflection.set(m_worldEdit, "editSessionFactory", m_oldEditSessionFactory, "Unable to restore edit session factory");
         Reflection.set(m_worldEdit, "sessions", m_oldSessions, "Unable to restore sessions");
-    }
-
-    private CommandsManager<LocalPlayer> getCommandWrapper() {
-        try {
-            Class<?> innerClass = Class.forName("com.sk89q.worldedit.extension.platform.CommandManager$CommandsManagerImpl");
-            Constructor<?> ctor = innerClass.getDeclaredConstructor(CommandManager.class);
-
-            ctor.setAccessible(true);
-
-            CommandsManager<LocalPlayer> parent = (CommandsManager<LocalPlayer>) ctor.newInstance(m_commandManager);
-            parent.setInjector(new SimpleInjector(m_worldEdit));
-
-            ctor.setAccessible(false);
-            CommandsWrapper result = new CommandsWrapper(m_worldEdit, m_worldEditPlugin, parent);
-            result.setInjector(new SimpleInjector(m_worldEdit));
-            return result;
-        } catch (ClassNotFoundException ex) {
-            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
-        } catch (NoSuchMethodException ex) {
-            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
-        } catch (SecurityException ex) {
-            AsyncWorldEditMain.log("Unable to create commands manager: security exception.");
-        } catch (InstantiationException ex) {
-            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
-        } catch (IllegalAccessException ex) {
-            AsyncWorldEditMain.log("Unable to create commands manager: security exception.");
-        } catch (IllegalArgumentException ex) {
-            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
-        } catch (InvocationTargetException ex) {
-            AsyncWorldEditMain.log("Unable to create commands manager: unsupported WorldEdit version.");
-        }
-
-        return null;
     }
 }

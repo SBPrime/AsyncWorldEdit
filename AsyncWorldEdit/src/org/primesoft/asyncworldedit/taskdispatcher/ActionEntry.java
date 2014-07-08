@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.taskdispatcher;
 
 import org.primesoft.asyncworldedit.utils.Action;
 
@@ -29,16 +29,12 @@ import org.primesoft.asyncworldedit.utils.Action;
  *
  * @author Prime
  */
-public class BlockPlacerGetAction extends BlockPlacerEntry {
+public class ActionEntry extends BaseDispatcherEntry {
     /**
      * Action to perform
      */
     private final Action m_action;
-    
-    /**
-     * The MTA mutex
-     */
-    private final Object m_mutex = new Object();
+        
     
     /**
      * Is the task done
@@ -47,30 +43,11 @@ public class BlockPlacerGetAction extends BlockPlacerEntry {
 
     
     /**
-     * The tas is not demanding
-     * @return 
-     */
-    @Override
-    public boolean isDemanding() {
-        return false;
-    }
-
-    
-    /**
      * The action
      * @return 
      */
     public Action getAction() {
         return m_action;
-    }
-
-    
-    /**
-     * MTA mutex
-     * @return 
-     */
-    public Object getMutex() {
-        return m_mutex;
     }
 
     /**
@@ -83,22 +60,15 @@ public class BlockPlacerGetAction extends BlockPlacerEntry {
 
     /**
      * Create new instance of class
-     * @param jobId job id
      * @param action action to perform
      */
-    public BlockPlacerGetAction(int jobId, Action action) {
-        super(jobId);
+    public ActionEntry(Action action) {
         m_action = action;
     }
 
     @Override
-    public boolean Process(BlockPlacer bp) {
-        synchronized (m_mutex) {
-            m_action.Execute();
-            m_isDone = true;
-            m_mutex.notifyAll();
-        }
-        
-        return true;
-    }
+    public void Execute() {
+        m_action.Execute();
+        m_isDone = true;
+    }        
 }

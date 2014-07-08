@@ -43,13 +43,11 @@ import org.primesoft.asyncworldedit.utils.InOutParam;
  * @author SBPrime
  */
 public class BlockPlacer implements Runnable {
+
     /**
-     * Maximum number of retries for get blocks.
-     * If no block get is exeuted for X the get task stops.
-     * If a block get is executed, this is the number of retries
-     * for dequeuing operations.
+     * Bukkit scheduler
      */
-    private final int MAX_RETRIES = 200;
+    private final BukkitScheduler m_scheduler;
 
     /**
      * MTA mutex
@@ -62,34 +60,14 @@ public class BlockPlacer implements Runnable {
     private final PhysicsWatch m_physicsWatcher;
 
     /**
-     * Bukkit scheduler
-     */
-    private final BukkitScheduler m_scheduler;
-
-    /**
      * Current scheduler task
      */
     private final BukkitTask m_task;
 
     /**
-     * Current scheduler get task
-     */
-    private BukkitTask m_getTask;
-
-    /**
-     * Number of get task run remaining
-     */
-    private int m_getTaskRunsRemaining;
-
-    /**
      * Logged events queue (per player)
      */
     private final HashMap<UUID, PlayerEntry> m_blocks;
-
-    /**
-     * Get blocks requests
-     */
-    private final List<BlockPlacerEntry> m_getBlocks = new ArrayList<BlockPlacerEntry>();
 
     /**
      * All locked queues
@@ -137,10 +115,6 @@ public class BlockPlacer implements Runnable {
      */
     private long m_lastRunTime;
 
-    /**
-     * The main thread
-     */
-    private Thread m_mainThread;
 
     /**
      * The bar API
@@ -184,8 +158,6 @@ public class BlockPlacer implements Runnable {
                 m_interval, m_interval);
         m_plugin = plugin;
 
-        startGetTask();
-
         m_talkInterval = ConfigProvider.getQueueTalkInterval();
         m_queueHardLimit = ConfigProvider.getQueueHardLimit();
         m_queueSoftLimit = ConfigProvider.getQueueSoftLimit();
@@ -193,31 +165,10 @@ public class BlockPlacer implements Runnable {
         m_physicsWatcher = plugin.getPhysicsWatcher();
     }
 
-    
-    /**
-     * Start the get task
-     */
-    private void startGetTask() {
-        final Runnable func = new Runnable() {
-                @Override
-                public void run() {
-                    m_mainThread = Thread.currentThread();
-                    processGet();
-                }
-        };
-        synchronized (m_mutex) {
-            m_getTaskRunsRemaining = MAX_RETRIES;
-            if (m_getTask != null) {
-                return;
-            }        
-            m_getTask = m_scheduler.runTaskTimer(m_plugin, func, 1, 1);
-        }
-    }
-
-    
     /**
      * Add event listener
-     * @param listener 
+     *
+     * @param listener
      */
     public void addListener(IBlockPlacerListener listener) {
         if (listener == null) {
@@ -232,7 +183,8 @@ public class BlockPlacer implements Runnable {
 
     /**
      * Remove event listener
-     * @param listener 
+     *
+     * @param listener
      */
     public void removeListener(IBlockPlacerListener listener) {
         if (listener == null) {
@@ -245,55 +197,12 @@ public class BlockPlacer implements Runnable {
         }
     }
 
-    /**
-     * Process the get requests
-     */
-    public void processGet() {
-        boolean run = true;
-
-        boolean processed = false;        
-        for (int i = 0; i < MAX_RETRIES && run; i++) {
-            run = false;
-            
-            final BlockPlacerEntry[] tasks;
-            synchronized (m_getBlocks) {
-                tasks = m_getBlocks.toArray(new BlockPlacerEntry[0]);
-                m_getBlocks.clear();
-            }
-
-            for (BlockPlacerEntry t : tasks) {
-                t.Process(this);
-            }
-            if (tasks.length > 0) {
-                processed = true;
-                run = true;
-                try {
-                    //Force thread release!
-                    Thread.sleep(1);                    
-                }
-                catch (InterruptedException ex) {
-                }
-            }
-        }
-
-        if (!processed) {            
-            synchronized (m_mutex) {
-                m_getTaskRunsRemaining--;
-                if (m_getTaskRunsRemaining <= 0 && m_getTask != null) {
-                    m_getTask.cancel();
-                    m_getTask = null;
-                }
-            }
-        }
-    }
 
     /**
      * Block placer main loop
      */
     @Override
     public void run() {
-        m_mainThread = Thread.currentThread();
-
         long enterFunctionTime = System.currentTimeMillis();
         final long timeDelte = enterFunctionTime - m_lastRunTime;
 
@@ -330,7 +239,7 @@ public class BlockPlacer implements Runnable {
                 stop();
             }
         }
-        
+
         processQueue(keys, time, blockCount, blocksPlaced, jobsToCancel);
         processQueue(vipKeys, timeVip, blockCountVip, blocksPlaced, jobsToCancel);
 
@@ -353,16 +262,16 @@ public class BlockPlacer implements Runnable {
         m_lastRunTime = enterFunctionTime;
     }
 
-    
     /**
      * Process queued blocks
+     *
      * @param playerUUID players to process
      * @param maxTime maximum time spend placing blocks
      * @param maxBlocksCount maximum blocks placed
      * @param blocksPlaced number of blocksplaced for players
      * @param jobsToCancel canceled blocks
      */
-    private void processQueue(final UUID[] playerUUID, 
+    private void processQueue(final UUID[] playerUUID,
             final int maxTime, final int maxBlocksCount,
             final HashMap<UUID, Integer> blocksPlaced, final List<JobEntry> jobsToCancel) {
         InOutParam<Integer> seqNumber = InOutParam.Ref(0);
@@ -374,11 +283,11 @@ public class BlockPlacer implements Runnable {
             synchronized (this) {
                 entry = fetchBlocks(playerUUID, seqNumber, blocksPlaced, jobsToCancel);
             }
-                        
+
             if (entry != null) {
                 entry.Process(this);
                 blocks++;
-                
+
                 process = !entry.isDemanding(); //Allow only one demanding task
                 process &= maxTime == -1 || (System.currentTimeMillis() - startTime) < maxTime;
                 process &= maxBlocksCount == -1 || blocks <= maxBlocksCount;
@@ -399,9 +308,9 @@ public class BlockPlacer implements Runnable {
      * @return fatched block
      */
     private BlockPlacerEntry fetchBlocks(final UUID[] playerNames,
-                                         InOutParam<Integer> seqNumber,
-                                         final HashMap<UUID, Integer> blocksPlaced,
-                                         final List<JobEntry> jobsToCancel) {
+            InOutParam<Integer> seqNumber,
+            final HashMap<UUID, Integer> blocksPlaced,
+            final List<JobEntry> jobsToCancel) {
         if (playerNames == null || playerNames.length == 0) {
             return null;
         }
@@ -409,7 +318,7 @@ public class BlockPlacer implements Runnable {
         int keyPos = seqNumber.getValue();
         BlockPlacerEntry result = null;
 
-        for (int retry = playerNames.length; result == null && retry > 0; retry --) {
+        for (int retry = playerNames.length; result == null && retry > 0; retry--) {
             final UUID player = playerNames[keyPos];
             final PlayerEntry playerEntry = m_blocks.get(player);
             if (playerEntry != null) {
@@ -474,13 +383,6 @@ public class BlockPlacer implements Runnable {
      */
     public void stop() {
         m_task.cancel();
-        synchronized (m_mutex) {
-            if (m_getTask != null) {
-                m_getTask.cancel();
-                m_getTask = null;
-            }
-        }
-
     }
 
     /**
@@ -505,9 +407,10 @@ public class BlockPlacer implements Runnable {
 
     /**
      * Get the player job
+     *
      * @param player player uuid
      * @param jobId job ID
-     * @return 
+     * @return
      */
     public JobEntry getJob(UUID player, int jobId) {
         synchronized (this) {
@@ -521,6 +424,7 @@ public class BlockPlacer implements Runnable {
 
     /**
      * Add new job for player
+     *
      * @param player player UUID
      * @param job the job
      */
@@ -647,8 +551,7 @@ public class BlockPlacer implements Runnable {
             try {
                 Thread.sleep(10);
                 maxWaitTime--;
-            }
-            catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
             }
             status = job.getStatus();
         }
@@ -923,34 +826,13 @@ public class BlockPlacer implements Runnable {
         }
     }
 
-    /**
-     * Add new get block task (high priority tasks!)
-     *
-     * @param block
-     */
-    public void addGetTask(BlockPlacerEntry block) {
-        synchronized (m_getBlocks) {
-            m_getBlocks.add(block);
-        }
 
-        startGetTask();
-    }
-
-    /**
-     * Is this thread the main bukkit thread
-     *
-     * @return
-     */
-    public boolean isMainTask() {
-        return m_mainThread == Thread.currentThread();
-    }
-
-    
     /**
      * Set progress bar value
-     * @param player 
+     *
+     * @param player
      * @param entry
-     * @param bypass 
+     * @param bypass
      */
     private void setBar(Player player, PlayerEntry entry, boolean bypass) {
         final String format = ChatColor.YELLOW + "Jobs: " + ChatColor.WHITE + "%d"
@@ -1005,8 +887,8 @@ public class BlockPlacer implements Runnable {
      * @param talk "tell" the stats on chat
      */
     private void showProgress(UUID playerUuid, PlayerEntry entry,
-                              int placedBlocks, final long timeDelte,
-                              final boolean talk) {
+            int placedBlocks, final long timeDelte,
+            final boolean talk) {
         entry.updateSpeed(placedBlocks, timeDelte);
 
         final Player p = AsyncWorldEditMain.getPlayer(playerUuid);

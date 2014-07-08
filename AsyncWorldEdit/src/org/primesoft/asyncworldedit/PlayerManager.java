@@ -95,12 +95,8 @@ public class PlayerManager {
         synchronized (m_playersUids) {
             PlayerWrapper result = m_playersUids.get(player);
             if (result == null) {
-                Player cbPlayer = m_parrent.getPlayer(player);
-                if (cbPlayer == null) {
-                    return null;
-                }
-
-                result = addPlayer(cbPlayer);
+                //TODO: Shuld we get the player from the server?
+                return null;
             }
 
             return result;
@@ -122,6 +118,8 @@ public class PlayerManager {
     
     /**
      * Get default block placing speed
+     * @param player
+     * @return 
      */
     public static int getMaxSpeed(Player player) {
         if (player == null) {
@@ -134,6 +132,8 @@ public class PlayerManager {
 
     /**
      * Get default user mode
+     * @param player
+     * @return 
      */
     public static boolean getDefaultMode(Player player) {
         if (player == null) {
@@ -156,6 +156,8 @@ public class PlayerManager {
 
     /**
      * PLayer has async mode enabled
+     * @param player
+     * @return 
      */
     public boolean hasAsyncMode(UUID player) {
         PlayerWrapper wrapper = getPlayer(player);
@@ -182,7 +184,7 @@ public class PlayerManager {
 
         wrapper.setMode(mode);
     }
-
+    
     public void initalize() {
         Player[] players = m_parrent.getServer().getOnlinePlayers();
         for (Player player : players) {

@@ -26,7 +26,7 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 import com.sk89q.worldedit.Vector;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.utils.FuncEx;
-import org.primesoft.asyncworldedit.worldedit.extent.WorldExtent;
+import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
  *
@@ -39,7 +39,7 @@ public class WorldExtentFuncEntryEx<T, TException extends Exception>
 
     private final FuncEx<T, TException> m_function;
 
-    public WorldExtentFuncEntryEx(WorldExtent worldExtent,
+    public WorldExtentFuncEntryEx(AsyncWorld worldExtent,
             int jobId, Vector location, FuncEx<T, TException> function) {
         super(worldExtent, jobId, location);
 
