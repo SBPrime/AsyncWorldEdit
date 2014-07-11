@@ -25,7 +25,6 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.BiomeType;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.EditSessionStub;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
@@ -48,76 +47,18 @@ import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
-import org.primesoft.asyncworldedit.blockPlacer.*;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
-import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.WaitFor;
-import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncEditSession extends EditSessionStub {
-
-    /**
-     * Maximum queued blocks
-     */
-    private final int MAX_QUEUED = 10000;
-
-    /**
-     * Player
-     */
-    private final UUID m_player;
-
-    /**
-     * Player wraper
-     */
-    private final PlayerWrapper m_wrapper;
-
-    /**
-     * Async block placer
-     */
-    private final BlockPlacer m_blockPlacer;
-    
-    
-    /**
-     * The dispatcher class
-     */
-    private final TaskDispatcher m_dispatcher;
-    
-    
-    /**
-     * Current craftbukkit world
-     */
-    private final World m_bukkitWorld;
-
-    /**
-     * The blocks hub integrator
-     */
-    private final BlocksHubIntegration m_bh;
-
-    /**
-     * Force all functions to by performed in async mode this is used to
-     * override the config by API calls
-     */
-    private boolean m_asyncForced;
-
-    /**
-     * Indicates that the async mode has been disabled (inner state)
-     */
-    private boolean m_asyncDisabled;
-
-    /**
-     * Plugin instance
-     */
-    private final AsyncWorldEditMain m_plugin;
-
+public class AsyncEditSession extends ThreadSafeEditSession {
     /**
      * Bukkit schedule
      */
@@ -129,15 +70,6 @@ public class AsyncEditSession extends EditSessionStub {
      */
     private final HashSet<JobEntry> m_asyncTasks;
 
-    /**
-     * Current job id
-     */
-    private int m_jobId;
-
-    /**
-     * Number of queued blocks
-     */
-    private int m_blocksQueued;
 
     /**
      * The event bus
@@ -146,10 +78,6 @@ public class AsyncEditSession extends EditSessionStub {
 
     private final EditSessionEvent m_editSessionEvent;
 
-    /**
-     * The parent world
-     */
-    private final com.sk89q.worldedit.world.World m_world;
 
     /**
      * The function wait object
@@ -166,16 +94,8 @@ public class AsyncEditSession extends EditSessionStub {
         return m_wait;
     }
 
-    public UUID getPlayer() {
-        return m_player;
-    }
-
     public EventBus getEventBus() {
         return m_eventBus;
-    }
-
-    public BlockPlacer getBlockPlacer() {
-        return m_blockPlacer;
     }
     
     
@@ -187,133 +107,14 @@ public class AsyncEditSession extends EditSessionStub {
             UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
-        super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);
+        //super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);
+        super(plugin, player, eventBus, world, maxBlocks, blockBag, event);
 
         m_editSessionEvent = event;
         m_eventBus = eventBus;
 
-        m_jobId = -1;
         m_asyncTasks = new HashSet<JobEntry>();
-        m_plugin = plugin;
-        m_bh = plugin.getBlocksHub();
-        m_player = player;
-        m_blockPlacer = plugin.getBlockPlacer();
-        m_dispatcher = plugin.getTaskDispatcher();
         m_schedule = plugin.getServer().getScheduler();
-        m_world = world;
-
-        if (world != null) {
-            m_bukkitWorld = plugin.getServer().getWorld(world.getName());
-        } else {
-            m_bukkitWorld = null;
-        }
-        
-        m_asyncForced = false;
-        m_asyncDisabled = false;
-        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);        
-    }
-    
-    public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
-    }
-
-    @Override
-    public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException {
-        return setBlock(m_jobId, position, block, stage);
-    }
-
-    @Override
-    public BaseBlock getBlock(final Vector position) {
-        final AsyncEditSession es = this;
-
-        return m_dispatcher.performSafe(new Func<BaseBlock>() {
-            @Override
-            public BaseBlock Execute() {
-                return es.doGetBlock(position);
-            }
-        }, m_bukkitWorld, position);
-    }
-
-    @Override
-    public int getBlockData(final Vector position) {
-        final AsyncEditSession es = this;
-
-        return m_dispatcher.performSafe(new Func<Integer>() {
-            @Override
-            public Integer Execute() {
-                return es.doGetBlockData(position);
-            }
-        }, m_bukkitWorld, position);
-    }
-
-    @Override
-    public int getBlockType(final Vector position) {
-        final AsyncEditSession es = this;
-
-        return m_dispatcher.performSafe(new Func<Integer>() {
-            @Override
-            public Integer Execute() {
-                return es.doGetBlockType(position);
-            }
-        }, m_bukkitWorld, position);
-    }
-
-    @Override
-    public BaseBlock getLazyBlock(final Vector position) {
-        final AsyncEditSession es = this;
-
-        return m_dispatcher.performSafe(new Func<BaseBlock>() {
-            @Override
-            public BaseBlock Execute() {
-                return es.doGetLazyBlock(position);
-            }
-        }, m_bukkitWorld, position);
-    }
-
-
-    public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
-            throws MaxChangedBlocksException {
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
-    }
-
-    public boolean setBlock(Vector pt, Pattern pat, int jobId)
-            throws MaxChangedBlocksException {
-        m_jobId = jobId;
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        boolean r = super.setBlock(VectorWrapper.wrap(pt, jobId, isAsync, m_player), pat);
-        m_jobId = -1;
-        return r;
-    }
-
-    public boolean setBlock(Vector pt, BaseBlock block, int jobId)
-            throws MaxChangedBlocksException {
-        boolean isAsync = m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
-        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
-    }
-
-    public void flushQueue(int jobId) {
-        boolean queued = isQueueEnabled();
-        m_jobId = jobId;
-        super.flushQueue();
-        m_jobId = -1;
-        if (queued) {
-            resetAsync();
-        }
-    }
-
-    @Override
-    public void flushQueue() {
-        boolean queued = isQueueEnabled();
-        super.flushQueue();
-        m_blocksQueued = 0;
-        if (queued) {
-            resetAsync();
-        }
     }
 
     @Override
@@ -374,24 +175,29 @@ public class AsyncEditSession extends EditSessionStub {
     public void doRedo(EditSession session) {
         super.redo(session);
     }
-
-    @Override
-    public boolean smartSetBlock(Vector pt, BaseBlock block) {
-        return super.smartSetBlock(pt, block);
-    }
-
-    /**
-     * Force block flush when to many has been queued
-     */
-    private void forceFlush() {
-        if (isQueueEnabled()) {
-            m_blocksQueued++;
-            if (m_blocksQueued > MAX_QUEUED) {
-                m_blocksQueued = 0;
-                super.flushQueue();
-            }
+    
+   
+    public void flushQueue(int jobId) {
+        boolean queued = isQueueEnabled();
+        m_jobId = jobId;
+        super.flushQueue();
+        m_jobId = -1;
+        if (queued) {
+            resetAsync();
         }
     }
+    
+    
+    public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
+        boolean isAsync = isAsyncEnabled();
+        boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
+                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
+        if (r) {
+            forceFlush();
+        }
+        return r;
+    }
+
 
     @Override
     public void redo(final EditSession sess) {
@@ -1568,50 +1374,6 @@ public class AsyncEditSession extends EditSessionStub {
         return result;
     }
 
-
-    public World getCBWorld() {
-        return m_bukkitWorld;
-    }
-
-    /**
-     * Enables or disables the async mode configuration bypass this function
-     * should by used only by other plugins
-     *
-     * @param value true to enable async mode force
-     */
-    public void setAsyncForced(boolean value) {
-        m_asyncForced = value;
-    }
-
-    /**
-     * Check if async mode is forced
-     *
-     * @return
-     */
-    public boolean isAsyncForced() {
-        return m_asyncForced;
-    }
-
-    /**
-     * This function checks if async mode is enabled for specific command
-     *
-     * @param operation
-     */
-    public boolean checkAsync(WorldeditOperations operation) {
-        boolean result = m_asyncForced || (ConfigProvider.isAsyncAllowed(operation)
-                && (m_wrapper == null || m_wrapper.getMode()));
-
-        m_asyncDisabled = !result;
-        return result;
-    }
-
-    /**
-     * Reset async disabled inner state (enable async mode)
-     */
-    public void resetAsync() {
-        m_asyncDisabled = false;
-    }
-
     /**
      * Get next job id for current player
      *
@@ -1619,22 +1381,5 @@ public class AsyncEditSession extends EditSessionStub {
      */
     private int getJobId() {
         return m_blockPlacer.getJobId(m_player);
-    }
-
-
-    private BaseBlock doGetBlock(Vector position) {
-        return super.getBlock(position);
-    }
-
-    private Integer doGetBlockData(Vector position) {
-        return super.getBlockData(position);
-    }
-
-    private Integer doGetBlockType(Vector position) {
-        return super.getBlockType(position);
-    }
-
-    private BaseBlock doGetLazyBlock(Vector position) {
-        return super.getLazyBlock(position);
     }
 }
