@@ -360,10 +360,9 @@ public class ConfigProvider {
             if (m_vipTimeCount < 0 && m_vipBlocksCnt < 0)
             {
                 AsyncWorldEditMain.log("Warinig: Vip time and blocks are set to unlimited!");
-                m_vipTimeCount = 20;
+                m_vipTimeCount = 10;
                 m_vipBlocksCnt = -1;
             }
-            
         }
     }
 

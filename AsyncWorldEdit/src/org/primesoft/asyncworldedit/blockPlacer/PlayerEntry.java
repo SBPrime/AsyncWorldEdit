@@ -65,6 +65,13 @@ public class PlayerEntry {
      * Is the player informed about queue limit reached
      */
     private boolean m_isInformed;
+    
+    
+    /**
+     * Maximum number of blocks on queue
+     * Used to display the progress bar
+     */
+    private int m_maxBlocksOnQueue;
 
     /**
      * Create new player entry
@@ -73,6 +80,23 @@ public class PlayerEntry {
         m_queue = new ArrayDeque();
         m_speed = 0;
         m_jobs = new HashMap<Integer, JobEntry>();
+    }
+    
+    
+    /**
+     * Maximum number of blocks on queue
+     * @return 
+     */
+    public int getMaxQueueBlocks() {
+        return m_maxBlocksOnQueue;
+    }
+    
+    
+    /**
+     * Set the maximum number of blocks on queue
+     */
+    public void setMaxQueueBlocks(int val) {
+        m_maxBlocksOnQueue = val;
     }
 
     /**

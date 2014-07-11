@@ -115,7 +115,6 @@ public class BlockPlacer implements Runnable {
      */
     private long m_lastRunTime;
 
-
     /**
      * The bar API
      */
@@ -196,7 +195,6 @@ public class BlockPlacer implements Runnable {
             }
         }
     }
-
 
     /**
      * Block placer main loop
@@ -358,7 +356,7 @@ public class BlockPlacer implements Runnable {
                     m_blocks.remove(playerNames[keyPos]);
                     Player p = AsyncWorldEditMain.getPlayer(player);
                     if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
-                        m_barAPI.disableMessage(p);
+                        hideProgressBar(p, playerEntry);
                     }
                 }
             } else {
@@ -626,7 +624,7 @@ public class BlockPlacer implements Runnable {
                 m_blocks.remove(player);
                 Player p = AsyncWorldEditMain.getPlayer(player);
                 if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
-                    m_barAPI.disableMessage(p);
+                    hideProgressBar(p, playerEntry);
                 }
             }
             if (newSize == 0 || newSize < m_queueSoftLimit) {
@@ -673,7 +671,7 @@ public class BlockPlacer implements Runnable {
                 m_blocks.remove(player);
                 Player p = AsyncWorldEditMain.getPlayer(player);
                 if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
-                    m_barAPI.disableMessage(p);
+                    hideProgressBar(p, playerEntry);
                 }
             }
             unlockQueue(player, false);
@@ -826,6 +824,18 @@ public class BlockPlacer implements Runnable {
         }
     }
 
+    /**
+     * Hide the progress bar
+     *
+     * @param p
+     */
+    private void hideProgressBar(Player player, PlayerEntry entry) {
+        if (entry != null) {
+            entry.setMaxQueueBlocks(0);
+        }
+
+        m_barAPI.disableMessage(player);
+    }
 
     /**
      * Set progress bar value
@@ -841,6 +851,7 @@ public class BlockPlacer implements Runnable {
                 + ChatColor.YELLOW + " left.";
 
         int blocks = 0;
+        int maxBlocks = 0;
         int jobs = 0;
         double speed = 0;
         double time = 0;
@@ -849,15 +860,19 @@ public class BlockPlacer implements Runnable {
         if (entry != null) {
             jobs = entry.getJobs().size();
             blocks = entry.getQueue().size();
+            maxBlocks = entry.getMaxQueueBlocks();
             speed = entry.getSpeed();
         }
         if (speed > 0) {
             time = blocks / speed;
-            double max = 60;
-            while (time > max * 1.05) {
-                max *= 2;
-            }
-            percentage = 100 - Math.min(100, 100 * time / max);
+        }
+
+        int newMax = Math.max(blocks, maxBlocks);
+        if (newMax > 0) {
+            percentage = 100 - 100 * blocks / newMax;
+        }
+        if (newMax != maxBlocks && entry != null) {
+            entry.setMaxQueueBlocks(newMax);
         }
 
         String message = String.format(format, jobs, speed, time);
@@ -895,7 +910,7 @@ public class BlockPlacer implements Runnable {
         boolean bypass = PermissionManager.isAllowed(p, Permission.QUEUE_BYPASS);
         if (entry.getQueue().isEmpty()) {
             if (PermissionManager.isAllowed(p, Permission.PROGRESS_BAR)) {
-                m_barAPI.disableMessage(p);
+                hideProgressBar(p, entry);
             }
         } else {
             if (talk && PermissionManager.isAllowed(p, Permission.TALKATIVE_QUEUE)) {
