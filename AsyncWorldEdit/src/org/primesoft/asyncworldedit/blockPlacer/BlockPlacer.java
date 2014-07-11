@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import java.util.*;
@@ -36,7 +37,11 @@ import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.Permission;
 import org.primesoft.asyncworldedit.PermissionManager;
+import org.primesoft.asyncworldedit.utils.FuncParamEx;
 import org.primesoft.asyncworldedit.utils.InOutParam;
+import org.primesoft.asyncworldedit.worldedit.AsyncTask;
+import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
+import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
 /**
  *
@@ -936,5 +941,30 @@ public class BlockPlacer implements Runnable {
             }
             m_lockedQueues.remove(player);
         }
+    }
+
+    
+    /**
+     * Wrap action into AsyncWorldEdit job and perform it asynchronicly
+     * @param editSession
+     * @param player
+     * @param jobName
+     * @param action      
+     */
+    public void PerformAsAsyncJob(final ThreadSafeEditSession editSession, 
+            final UUID player, final String jobName,
+            final FuncParamEx<Integer, CancelabeEditSession, MaxChangedBlocksException> action) {
+        final int jobId = getJobId(player);
+        final CancelabeEditSession session = new CancelabeEditSession(editSession, editSession.getMask(), jobId);
+        final JobEntry job = new JobEntry(player, session, jobId, jobName);
+        addJob(player, job);
+        m_scheduler.runTaskAsynchronously(m_plugin, new AsyncTask(session, player, jobName,
+                this, job) {
+                    @Override
+                    public int task(CancelabeEditSession session)
+                        throws MaxChangedBlocksException {
+                        return action.Execute(session);
+                    }
+                });
     }
 }

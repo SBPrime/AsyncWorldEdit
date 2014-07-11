@@ -62,20 +62,6 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
 
     /**
-     * Number of async tasks
-     */
-    private final HashSet<JobEntry> m_asyncTasks;
-
-
-    /**
-     * The event bus
-     */
-    private final EventBus m_eventBus;
-
-    private final EditSessionEvent m_editSessionEvent;
-
-
-    /**
      * The function wait object
      */
     private final WaitFor m_wait = new WaitFor();
@@ -89,15 +75,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     public WaitFor getWait() {
         return m_wait;
     }
-
-    public EventBus getEventBus() {
-        return m_eventBus;
-    }
-    
-    
-    public EditSessionEvent getEditSessionEvent() {
-        return m_editSessionEvent;
-    }
+   
 
     public AsyncEditSession(AsyncWorldEditMain plugin,
             UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
@@ -105,44 +83,21 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         //super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);
         super(plugin, player, eventBus, world, maxBlocks, blockBag, event);
-
-        m_editSessionEvent = event;
-        m_eventBus = eventBus;
-
-        m_asyncTasks = new HashSet<JobEntry>();
+        
         m_schedule = plugin.getServer().getScheduler();
     }
 
     @Override
     public void undo(final EditSession sess) {
         final int jobId = getJobId();
-        int minId = jobId;
-
-        synchronized (m_asyncTasks) {
-            for (JobEntry job : m_asyncTasks) {
-                int id = job.getJobId();
-                if (id < minId) {
-                    minId = id;
-                }
-                if (!(job instanceof UndoJob)) {
-                    m_blockPlacer.cancelJob(m_player, id);
-                }
-            }
-            minId--;
-            if (minId >= 0 && minId != jobId) {
-                JobEntry job = m_blockPlacer.getJob(m_player, minId);
-                if (job != null && !(job instanceof UndoJob)) {
-                    m_blockPlacer.cancelJob(m_player, job);
-                }
-            }
-        }
+        
+        cancelJobs(jobId);
 
         boolean isAsync = checkAsync(WorldeditOperations.undo);
         Mask mask = getMask();
         final CancelabeEditSession session = new CancelabeEditSession(this, mask, jobId);
 
         if (!isAsync) {
-            //doUndo(sess);
             session.undo(sess);
             return;
         }
@@ -160,18 +115,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                         return 0;
                     }
                 });
-    }
-
-    public UndoSession doUndo() {
-        UndoSession result = new UndoSession(m_eventBus);
-        super.undo(result);
-        return result;
-    }
-
-    public void doRedo(EditSession session) {
-        super.redo(session);
-    }
-    
+    }   
    
     public void flushQueue(int jobId) {
         boolean queued = isQueueEnabled();
@@ -1334,48 +1278,5 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                 });
 
         return 0;
-    }
-    
-
-    /**
-     * Add async job
-     *
-     * @param job
-     */
-    public void addAsync(JobEntry job) {
-        synchronized (m_asyncTasks) {
-            m_asyncTasks.add(job);
-        }
-    }
-
-    /**
-     * Remov async job (done or canceled)
-     *
-     * @param job
-     */
-    public void removeAsync(JobEntry job) {
-        synchronized (m_asyncTasks) {
-            m_asyncTasks.remove(job);
-        }
-    }
-
-    @Override
-    public int size() {
-        final int result = super.size();
-        synchronized (m_asyncTasks) {
-            if (result <= 0 && m_asyncTasks.size() > 0) {
-                return 1;
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Get next job id for current player
-     *
-     * @return Job id
-     */
-    private int getJobId() {
-        return m_blockPlacer.getJobId(m_player);
     }
 }

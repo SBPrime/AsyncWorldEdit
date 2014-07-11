@@ -54,7 +54,7 @@ public class CancelabeEditSession extends EditSessionStub {
      */
     private final int MAX_QUEUED = 10000;
 
-    private final AsyncEditSession m_parent;
+    private final ThreadSafeEditSession m_parent;
 
     private final CancelableWorld m_cWorld;
 
@@ -67,7 +67,7 @@ public class CancelabeEditSession extends EditSessionStub {
      */
     private int m_blocksQueued;
 
-    public CancelabeEditSession(AsyncEditSession parent, Mask mask, int jobId) {
+    public CancelabeEditSession(ThreadSafeEditSession parent, Mask mask, int jobId) {
         super(parent.getEventBus(),
                 new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
                 parent.getBlockChangeLimit(), parent.getBlockBag(),
@@ -317,7 +317,7 @@ public class CancelabeEditSession extends EditSessionStub {
         m_parent.resetAsync();
     }
 
-    public AsyncEditSession getParent() {
+    public ThreadSafeEditSession getParent() {
         return m_parent;
     }
 

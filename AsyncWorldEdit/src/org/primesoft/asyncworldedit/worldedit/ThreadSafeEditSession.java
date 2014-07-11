@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionStub;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
@@ -30,8 +31,12 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.util.eventbus.EventBus;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import org.bukkit.World;
@@ -40,6 +45,8 @@ import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.blockPlacer.*;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
@@ -102,6 +109,11 @@ public class ThreadSafeEditSession extends EditSessionStub {
     private int m_blocksQueued;
 
     /**
+     * Number of async tasks
+     */
+    private final HashSet<JobEntry> m_asyncTasks;
+
+    /**
      * Player
      */
     protected final UUID m_player;
@@ -110,6 +122,16 @@ public class ThreadSafeEditSession extends EditSessionStub {
      * Current craftbukkit world
      */
     private final World m_bukkitWorld;
+
+    /**
+     * The event bus
+     */
+    private final EventBus m_eventBus;
+
+    /**
+     * The edit session event
+     */
+    private final EditSessionEvent m_editSessionEvent;
 
     /**
      * The parent world
@@ -127,7 +149,15 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public World getCBWorld() {
         return m_bukkitWorld;
     }
-    
+
+    public EventBus getEventBus() {
+        return m_eventBus;
+    }
+
+    public EditSessionEvent getEditSessionEvent() {
+        return m_editSessionEvent;
+    }
+
     protected boolean isAsyncEnabled() {
         return m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
     }
@@ -138,6 +168,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);
 
+        m_asyncTasks = new HashSet<JobEntry>();
         m_plugin = plugin;
         m_bh = plugin.getBlocksHub();
         m_blockPlacer = plugin.getBlockPlacer();
@@ -146,6 +177,8 @@ public class ThreadSafeEditSession extends EditSessionStub {
         m_player = player;
         m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
         m_world = world;
+        m_editSessionEvent = event;
+        m_eventBus = eventBus;
 
         if (world != null) {
             m_bukkitWorld = plugin.getServer().getWorld(world.getName());
@@ -253,6 +286,66 @@ public class ThreadSafeEditSession extends EditSessionStub {
     }
 
     @Override
+    public void undo(final EditSession sess) {
+        final int jobId = getJobId();
+        cancelJobs(jobId);
+        
+        UndoSession undoSession = doUndo();
+
+        Mask oldMask = sess.getMask();
+        sess.setMask(getMask());
+
+        final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
+        final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> placedBlocks = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
+
+        for (int i = blocks.length - 1; i >= 0; i--) {
+            Map.Entry<Vector, BaseBlock> entry = blocks[i];
+            Vector pos = entry.getKey();
+            BaseBlock block = entry.getValue();
+
+            int x = pos.getBlockX();
+            int y = pos.getBlockY();
+            int z = pos.getBlockZ();
+            boolean ignore = false;
+
+            HashMap<Integer, HashSet<Integer>> mapX = placedBlocks.get(x);
+            if (mapX == null) {
+                mapX = new HashMap<Integer, HashSet<Integer>>();
+                placedBlocks.put(x, mapX);
+            }
+
+            HashSet<Integer> mapY = mapX.get(y);
+            if (mapY == null) {
+                mapY = new HashSet<Integer>();
+                mapX.put(y, mapY);
+            }
+            if (mapY.contains(z)) {
+                ignore = true;
+            } else {
+                mapY.add(z);
+            }
+
+            if (!ignore) {
+                sess.smartSetBlock(pos, block);
+            }
+        }
+
+        sess.flushQueue();
+        sess.setMask(oldMask);
+    }
+
+    @Override
+    public int size() {
+        final int result = super.size();
+        synchronized (m_asyncTasks) {
+            if (result <= 0 && m_asyncTasks.size() > 0) {
+                return 1;
+            }
+        }
+        return result;
+    }
+
+    @Override
     public void flushQueue() {
         boolean queued = isQueueEnabled();
         super.flushQueue();
@@ -314,6 +407,60 @@ public class ThreadSafeEditSession extends EditSessionStub {
         m_asyncDisabled = false;
     }
 
+    protected void cancelJobs(final int jobId) {
+        int minId = jobId;
+
+        synchronized (m_asyncTasks) {
+            for (JobEntry job : m_asyncTasks) {
+                int id = job.getJobId();
+                if (id < minId) {
+                    minId = id;
+                }
+                if (!(job instanceof UndoJob)) {
+                    m_blockPlacer.cancelJob(m_player, id);
+                }
+            }
+            minId--;
+            if (minId >= 0 && minId != jobId) {
+                JobEntry job = m_blockPlacer.getJob(m_player, minId);
+                if (job != null && !(job instanceof UndoJob)) {
+                    m_blockPlacer.cancelJob(m_player, job);
+                }
+            }
+        }
+    }
+
+    /**
+     * Add async job
+     *
+     * @param job
+     */
+    public void addAsync(JobEntry job) {
+        synchronized (m_asyncTasks) {
+            m_asyncTasks.add(job);
+        }
+    }
+
+    /**
+     * Remov async job (done or canceled)
+     *
+     * @param job
+     */
+    public void removeAsync(JobEntry job) {
+        synchronized (m_asyncTasks) {
+            m_asyncTasks.remove(job);
+        }
+    }
+
+    /**
+     * Get next job id for current player
+     *
+     * @return Job id
+     */
+    protected int getJobId() {
+        return m_blockPlacer.getJobId(m_player);
+    }
+
     private BaseBlock doGetBlock(Vector position) {
         return super.getBlock(position);
     }
@@ -328,5 +475,15 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
     private BaseBlock doGetLazyBlock(Vector position) {
         return super.getLazyBlock(position);
+    }
+
+    public UndoSession doUndo() {
+        UndoSession result = new UndoSession(m_eventBus);
+        super.undo(result);
+        return result;
+    }
+
+    public void doRedo(EditSession session) {
+        super.redo(session);
     }
 }

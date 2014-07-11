@@ -64,9 +64,10 @@ public abstract class BaseTask extends BukkitRunnable {
     protected final CancelabeEditSession m_cancelableEditSession;
 
     /**
-     * Async edit session
+     * Thread safe edit session
      */
-    protected final AsyncEditSession m_asyncEditSession;
+    protected final ThreadSafeEditSession m_safeEditSession;
+    
 
     /**
      * The edit session
@@ -95,13 +96,13 @@ public abstract class BaseTask extends BukkitRunnable {
         m_job = job;
 
         if (m_cancelableEditSession != null) {
-            m_asyncEditSession = m_cancelableEditSession.getParent();
+            m_safeEditSession = m_cancelableEditSession.getParent();
         } else {
-            m_asyncEditSession = (editSession instanceof AsyncEditSession) ? (AsyncEditSession) editSession : null;
+            m_safeEditSession = (editSession instanceof ThreadSafeEditSession) ? (ThreadSafeEditSession) editSession : null;
         }
         
-        if (m_asyncEditSession != null) {
-            m_asyncEditSession.addAsync(job);
+        if (m_safeEditSession != null) {
+            m_safeEditSession.addAsync(job);
         }
     }
 
@@ -124,8 +125,8 @@ public abstract class BaseTask extends BukkitRunnable {
                     m_editSession.flushQueue();
                 } else if (m_cancelableEditSession != null) {
                     m_cancelableEditSession.resetAsync();
-                } else if (m_asyncEditSession != null) {
-                    m_asyncEditSession.resetAsync();
+                } else if (m_safeEditSession != null) {
+                    m_safeEditSession.resetAsync();
                 }
             }
 
@@ -143,11 +144,11 @@ public abstract class BaseTask extends BukkitRunnable {
 
         m_job.taskDone();
         if (m_cancelableEditSession != null) {
-            AsyncEditSession parent = m_cancelableEditSession.getParent();
+            ThreadSafeEditSession parent = m_cancelableEditSession.getParent();
             copyChangeSet(m_cancelableEditSession, parent);
             parent.removeAsync(m_job);
-        } else if (m_asyncEditSession != null) {
-            m_asyncEditSession.removeAsync(m_job);
+        } else if (m_safeEditSession != null) {
+            m_safeEditSession.removeAsync(m_job);
         }        
     }
 
