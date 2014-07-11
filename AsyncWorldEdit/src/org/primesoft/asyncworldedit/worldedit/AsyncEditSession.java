@@ -44,14 +44,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
-import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.ConfigProvider;
-import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
-import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 
 /**
