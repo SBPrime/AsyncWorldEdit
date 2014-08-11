@@ -26,15 +26,18 @@ package org.primesoft.asyncworldedit.worldedit.entity;
 import com.sk89q.worldedit.PlayerDirection;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.WorldEditPermissionException;
 import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.WorldVectorFace;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
+import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
+import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.UUID;
@@ -115,9 +118,10 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public void checkPermission(String permission) throws WorldEditPermissionException {
-        m_parent.checkPermission(permission);
+    public void checkPermission(String string) throws AuthorizationException {
+        m_parent.checkPermission(string);
     }
+       
 
     @Override
     public boolean descendLevel() {
@@ -334,5 +338,35 @@ public class PlayerWrapper implements Player {
     @Override
     public Location getLocation() {
         return m_parent.getLocation();
+    }
+
+    @Override
+    public BaseEntity getState() {
+        return m_parent.getState();
+    }
+
+    @Override
+    public Extent getExtent() {
+        return m_parent.getExtent();
+    }
+
+    @Override
+    public boolean remove() {
+        return m_parent.remove();
+    }
+
+    @Override
+    public <T> T getFacet(Class<? extends T> type) {
+        return m_parent.getFacet(type);
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return m_parent.getUniqueId();
+    }
+
+    @Override
+    public SessionKey getSessionKey() {
+        return m_parent.getSessionKey();
     }
 }

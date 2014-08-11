@@ -24,21 +24,20 @@
 
 package org.primesoft.asyncworldedit;
 
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
+import com.sk89q.worldedit.regions.Region;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.injector.BaseClassFactory;
-import org.primesoft.asyncworldedit.worldedit.AsyncCuboidClipboard;
 
 /**
  *
  * @author SBPrime
  */
 public class AsyncClassFactory extends BaseClassFactory {
+
     @Override
-    public CuboidClipboard createCuboidClipboard(UUID player, Vector size, Vector origin, Vector offset) {
-        return new AsyncCuboidClipboard(player, 
-                super.createCuboidClipboard(player, size, origin, offset));
+    public BlockArrayClipboard createBlockArrayClipboard(UUID player, Region region) {
+        //return new BlockArrayClipboard(player, super.createBlockArrayClipboard(player, region)); 
+        return super.createBlockArrayClipboard(player, region); 
     }
-    
 }

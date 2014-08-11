@@ -23,7 +23,6 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.BiomeType;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
@@ -37,7 +36,7 @@ import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
-import java.util.HashSet;
+import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -409,9 +408,10 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    
     @Override
     public int makeBiomeShape(final Region region, final Vector zero, final Vector unit,
-            final BiomeType biomeType, final String expressionString,
+            final BaseBiome biomeType, final String expressionString,
             final boolean hollow)
             throws ExpressionException, MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.makeBiomeShape);

@@ -23,10 +23,8 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import com.sk89q.worldedit.BiomeType;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.EntityType;
 import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
@@ -34,12 +32,17 @@ import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BaseItemStack;
+import com.sk89q.worldedit.entity.BaseEntity;
+import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.registry.WorldData;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -143,14 +146,6 @@ public class CancelableWorld implements World {
     }
 
     @Override
-    public boolean setBlockTypeFast(Vector vector, int i) {
-        if (m_isCanceled) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        return m_parent.setBlockTypeFast(VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
-    }
-
-    @Override
     public void setBlockData(Vector vector, int i) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
@@ -159,27 +154,11 @@ public class CancelableWorld implements World {
     }
 
     @Override
-    public void setBlockDataFast(Vector vector, int i) {
-        if (m_isCanceled) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        m_parent.setBlockDataFast(VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
-    }
-
-    @Override
     public boolean setTypeIdAndData(Vector vector, int i, int i1) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         return m_parent.setTypeIdAndData(VectorWrapper.wrap(vector, m_jobId, true, m_player), i, i1);
-    }
-
-    @Override
-    public boolean setTypeIdAndDataFast(Vector vector, int i, int i1) {
-        if (m_isCanceled) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        return m_parent.setTypeIdAndDataFast(VectorWrapper.wrap(vector, m_jobId, true, m_player), i, i1);
     }
 
     @Override
@@ -193,16 +172,16 @@ public class CancelableWorld implements World {
     }
 
     @Override
-    public BiomeType getBiome(Vector2D vd) {
+    public BaseBiome getBiome(Vector2D vd) {
         return m_parent.getBiome(vd);
     }
 
     @Override
-    public void setBiome(Vector2D vd, BiomeType bt) {
+    public boolean setBiome(Vector2D vd, BaseBiome bt) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        m_parent.setBiome(Vector2DWrapper.wrap(vd, m_jobId, true, m_player), bt);
+        return m_parent.setBiome(Vector2DWrapper.wrap(vd, m_jobId, true, m_player), bt);
     }
 
     @Override
@@ -221,51 +200,15 @@ public class CancelableWorld implements World {
     }
 
     @Override
-    public LocalEntity[] getEntities(Region region) {
+    public List<? extends Entity> getEntities() {        
+        return m_parent.getEntities();
+    }
+    
+    @Override
+    public List<? extends Entity> getEntities(Region region) {
         return m_parent.getEntities(region);
     }
-
-    @Override
-    public int killEntities(LocalEntity... les) {
-        if (m_isCanceled) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        return m_parent.killEntities(les);
-    }
-
-    @Override
-    public int killMobs(Vector vector, int i) {
-        if (m_isCanceled) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        return m_parent.killMobs(VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
-    }
-
-    @Override
-    public int killMobs(Vector vector, int i, boolean bln) {
-        if (m_isCanceled) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        return m_parent.killMobs(VectorWrapper.wrap(vector, m_jobId, true, m_player), i, bln);
-    }
-
-    @Override
-    public int killMobs(Vector vector, double d, int i) {
-        if (m_isCanceled) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        return m_parent.killMobs(VectorWrapper.wrap(vector, m_jobId, true, m_player), d, i);
-    }
-
-    @Override
-    public int removeEntities(EntityType et, Vector vector, int i) {
-        if (m_isCanceled) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        
-        return m_parent.removeEntities(et, VectorWrapper.wrap(vector, m_jobId, true, m_player), i);
-    }
-
+    
     @Override
     public boolean regenerate(Region region, EditSession es) {
         if (m_isCanceled) {
@@ -407,5 +350,23 @@ public class CancelableWorld implements World {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         return m_parent.commit();
+    }
+
+    @Override
+    public Entity createEntity(Location lctn, BaseEntity be) {
+                if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        
+        return m_parent.createEntity(lctn, be);
+    }
+
+    @Override
+    public WorldData getWorldData() {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        
+        return m_parent.getWorldData();
     }
 }

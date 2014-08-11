@@ -23,10 +23,8 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import com.sk89q.worldedit.BiomeType;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.EntityType;
 import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
@@ -35,12 +33,18 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.entity.BaseEntity;
+import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.registry.WorldData;
+import java.util.List;
 import java.util.UUID;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
@@ -316,41 +320,6 @@ public class AsyncWorld implements World {
     }
 
     @Override
-    public boolean setBlockTypeFast(Vector vector, final int i) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
-        final Vector v = param.getData();
-        final UUID player = getPlayer(param);
-
-        if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
-            return false;
-        }
-
-        Func<Boolean> func = new Func<Boolean>() {
-            @Override
-            public Boolean Execute() {
-                final BaseBlock oldBlock = m_parent.getBlock(v);
-                if (oldBlock.getType() == i) {
-                    return false;
-                }
-
-                final boolean result = m_parent.setBlockTypeFast(v, i);
-                if (result) {
-                    logBlock(v, player, oldBlock, new BaseBlock(i, oldBlock.getData()));
-                }
-
-                return result;
-            }
-        };
-
-        if (param.isAsync() || !m_dispatcher.isMainTask()) {
-            return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
-        }
-
-        return func.Execute();
-    }
-
-    @Override
     public void setBlockData(Vector vector, final int i) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
@@ -368,39 +337,6 @@ public class AsyncWorld implements World {
                     return false;
                 }
                 m_parent.setBlockData(v, i);
-                logBlock(v, player, oldBlock, new BaseBlock(oldBlock.getType(), i));
-                return true;
-            }
-        };
-
-        if (param.isAsync() || !m_dispatcher.isMainTask()) {
-            m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
-            return;
-        }
-
-        func.Execute();
-    }
-
-    @Override
-    public void setBlockDataFast(Vector vector, final int i) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
-        final Vector v = param.getData();
-        final UUID player = getPlayer(param);
-
-        if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
-            return;
-        }
-
-        Func<Boolean> func = new Func<Boolean>() {
-            @Override
-            public Boolean Execute() {
-                final BaseBlock oldBlock = m_parent.getBlock(v);
-                if (oldBlock.getData() == i) {
-                    return false;
-                }
-
-                m_parent.setBlockDataFast(v, i);
                 logBlock(v, player, oldBlock, new BaseBlock(oldBlock.getType(), i));
                 return true;
             }
@@ -451,40 +387,6 @@ public class AsyncWorld implements World {
         return func.Execute();
     }
 
-    @Override
-    public boolean setTypeIdAndDataFast(Vector vector, final int i, final int i1) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
-        final Vector v = param.getData();
-        final UUID player = getPlayer(param);
-
-        if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
-            return false;
-        }
-
-        Func<Boolean> func = new Func<Boolean>() {
-            @Override
-            public Boolean Execute() {
-                final BaseBlock oldBlock = m_parent.getBlock(v);
-                if (oldBlock.getType() == i && oldBlock.getData() == i1) {
-                    return false;
-                }
-
-                final boolean result = m_parent.setTypeIdAndDataFast(v, i, i1);
-                if (result) {
-                    logBlock(v, player, oldBlock, new BaseBlock(i, i1));
-                }
-
-                return result;
-            }
-        };
-
-        if (param.isAsync() || !m_dispatcher.isMainTask()) {
-            return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
-        }
-
-        return func.Execute();
-    }
 
     @Override
     public int getBlockLightLevel(final Vector vector) {
@@ -522,40 +424,59 @@ public class AsyncWorld implements World {
     }
 
     @Override
-    public BiomeType getBiome(final Vector2D vd) {
-        return m_dispatcher.performSafe(new Func<BiomeType>() {
+    public BaseBiome getBiome(final Vector2D vd) {
+        return m_dispatcher.performSafe(new Func<BaseBiome>() {
             @Override
-            public BiomeType Execute() {
+            public BaseBiome Execute() {
                 return m_parent.getBiome(vd);
             }
         }, m_bukkitWorld, new Vector(vd.getX(), 0, vd.getZ()));
+    }    
+    
+    @Override
+    public WorldData getWorldData() {
+        return m_dispatcher.performSafe(new Func<WorldData>() {
+            @Override
+            public WorldData Execute() {
+                return m_parent.getWorldData();
+            }
+        });
     }
 
     @Override
-    public void setBiome(Vector2D vd, final BiomeType bt) {
+    public Entity createEntity(final Location lctn, final BaseEntity be) {
+        return m_dispatcher.performSafe(new Func<Entity>() {
+            @Override
+            public Entity Execute() {
+                return m_parent.createEntity(lctn, be);
+            }
+        }, m_bukkitWorld, new Vector(lctn.getX(), lctn.getY(), lctn.getZ()));
+    }
+
+    @Override
+    public boolean setBiome(Vector2D vd, final BaseBiome bb) {
         final DataAsyncParams<Vector2D> param = DataAsyncParams.extract(vd);
         final Vector2D v = param.getData();
         final UUID player = getPlayer(param);
         final Vector tmpV = new Vector(v.getX(), 0, v.getZ());
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, tmpV)) {
-            return;
+            return false;
         }
 
-        Action func = new Action() {
+        Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public void Execute() {
-                m_parent.setBiome(v, bt);
+            public Boolean Execute() {
+                return m_parent.setBiome(v, bb);
             }
         };
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
-            m_blockPlacer.addTasks(player,
-                    new WorldExtentActionEntry(this, param.getJobId(), tmpV, func));
-            return;
+            return m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, param.getJobId(), tmpV, func));
         }
 
-        func.Execute();
+        return func.Execute();
     }
 
     @Override
@@ -637,65 +558,25 @@ public class AsyncWorld implements World {
     }
 
     @Override
-    public LocalEntity[] getEntities(final Region region) {
-        return m_dispatcher.performSafe(new Func<LocalEntity[]>() {
+    public List<? extends Entity> getEntities(final Region region) {
+        return m_dispatcher.performSafe(new Func<List<? extends Entity>>() {
             @Override
-            public LocalEntity[] Execute() {
+            public List<? extends Entity> Execute() {
                 return m_parent.getEntities(region);
             }
         });
     }
 
     @Override
-    public int killEntities(final LocalEntity... les) {
-        return m_dispatcher.performSafe(new Func<Integer>() {
+    public List<? extends Entity> getEntities() {
+        return m_dispatcher.performSafe(new Func<List<? extends Entity>>() {
             @Override
-            public Integer Execute() {
-                return m_parent.killEntities(les);
+            public List<? extends Entity> Execute() {
+                return m_parent.getEntities();
             }
         });
-    }
-
-    @Override
-    public int killMobs(final Vector vector, final int i) {
-        return m_dispatcher.performSafe(new Func<Integer>() {
-            @Override
-            public Integer Execute() {
-                return m_parent.killMobs(vector, i);
-            }
-        }, m_bukkitWorld, vector);
-    }
-
-    @Override
-    public int killMobs(final Vector vector, final int i, final boolean bln) {
-        return m_dispatcher.performSafe(new Func<Integer>() {
-            @Override
-            public Integer Execute() {
-                return m_parent.killMobs(vector, i, bln);
-            }
-        }, m_bukkitWorld, vector);
-    }
-
-    @Override
-    public int killMobs(final Vector vector, final double d, final int i) {
-        return m_dispatcher.performSafe(new Func<Integer>() {
-            @Override
-            public Integer Execute() {
-                return m_parent.killMobs(vector, d, i);
-            }
-        }, m_bukkitWorld, vector);
-    }
-
-    @Override
-    public int removeEntities(final EntityType et, final Vector vector, final int i) {
-        return m_dispatcher.performSafe(new Func<Integer>() {
-            @Override
-            public Integer Execute() {
-                return m_parent.removeEntities(et, vector, i);
-            }
-        }, m_bukkitWorld, vector);
-    }
-
+    }    
+    
     @Override
     public boolean regenerate(final Region region, final EditSession editSession) {
         boolean isAsync = checkAsync(WorldeditOperations.regenerate);
