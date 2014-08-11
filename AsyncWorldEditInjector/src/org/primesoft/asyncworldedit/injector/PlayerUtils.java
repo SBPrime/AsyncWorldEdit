@@ -23,8 +23,8 @@
  */
 package org.primesoft.asyncworldedit.injector;
 
-import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extension.platform.AbstractPlayerActor;
 import java.util.UUID;
 
 /**
@@ -34,10 +34,10 @@ import java.util.UUID;
 public class PlayerUtils {
 
     public static UUID getUUID(Player player) {
-        if (!(player instanceof BukkitPlayer)) {
-            return new UUID(0, 0);
+        if (!(player instanceof AbstractPlayerActor)) {
+                    return new UUID(0, 0);
         }
         
-        return ((BukkitPlayer)player).getPlayer().getUniqueId();
+        return ((AbstractPlayerActor)player).getUniqueId();
     }
 }

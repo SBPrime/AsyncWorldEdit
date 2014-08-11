@@ -24,8 +24,8 @@
 
 package org.primesoft.asyncworldedit.injector;
 
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
+import com.sk89q.worldedit.regions.Region;
 import java.util.UUID;
 
 /**
@@ -33,5 +33,5 @@ import java.util.UUID;
  * @author SBPrime
  */
 public interface IClassFactory {
-    CuboidClipboard createCuboidClipboard(UUID player, Vector size, Vector origin, Vector offset);
+    BlockArrayClipboard createBlockArrayClipboard(UUID player, Region region);
 }

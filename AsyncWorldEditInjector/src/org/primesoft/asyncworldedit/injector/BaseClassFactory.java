@@ -26,6 +26,8 @@ package org.primesoft.asyncworldedit.injector;
 
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
+import com.sk89q.worldedit.regions.Region;
 import java.util.UUID;
 
 /**
@@ -35,7 +37,7 @@ import java.util.UUID;
 public class BaseClassFactory implements IClassFactory {
 
     @Override
-    public CuboidClipboard createCuboidClipboard(UUID player, Vector size, Vector origin, Vector offset) {
-        return new CuboidClipboard(size, origin, offset);
+    public BlockArrayClipboard  createBlockArrayClipboard(UUID player, Region region) {
+        return new BlockArrayClipboard(region);
     }    
 }
