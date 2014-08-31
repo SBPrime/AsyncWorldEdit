@@ -354,6 +354,32 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     @Override
+    public int replaceBlocks(final Region region, final Mask mask, 
+            final Pattern pattern) throws MaxChangedBlocksException {
+        boolean isAsync = checkAsync(WorldeditOperations.replaceBlocks);
+
+        if (!isAsync) {
+            return super.replaceBlocks(region, mask, pattern);
+        }
+
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
+        final JobEntry job = new JobEntry(m_player, session, jobId, "replaceBlocks");
+        m_blockPlacer.addJob(m_player, job);
+
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "replaceBlocks",
+                m_blockPlacer, job) {
+                    @Override
+                    public int task(CancelabeEditSession session)
+                    throws MaxChangedBlocksException {
+                        m_wait.checkAndWait(null);
+                        return session.replaceBlocks(region, mask, pattern);
+                    }
+                });
+        return 0;
+    }        
+        
+    @Override
     public int replaceBlocks(final Region region,
             final Set<BaseBlock> fromBlockTypes,
             final BaseBlock toBlock)

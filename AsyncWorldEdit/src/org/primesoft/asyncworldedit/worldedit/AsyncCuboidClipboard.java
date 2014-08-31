@@ -40,6 +40,7 @@ import org.primesoft.asyncworldedit.utils.WaitFor;
  *
  * @author SBPrime
  */
+@Deprecated
 public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
 
     /**

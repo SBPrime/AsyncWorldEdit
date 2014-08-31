@@ -391,6 +391,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
      * This function checks if async mode is enabled for specific command
      *
      * @param operation
+     * @return 
      */
     public boolean checkAsync(WorldeditOperations operation) {
         boolean result = m_asyncForced || (ConfigProvider.isAsyncAllowed(operation)

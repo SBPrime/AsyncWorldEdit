@@ -26,7 +26,6 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.world.DataException;
 import java.util.UUID;
 
 /**
@@ -201,11 +200,10 @@ public class BaseBlockWrapper extends BaseBlock implements IAsyncWrapper {
     }
 
     @Override
-    public void setNbtData(CompoundTag nbtData)
-            throws DataException {
-        m_parent.setNbtData(nbtData);
+    public void setNbtData(CompoundTag ct) {
+        m_parent.setNbtData(ct);
     }
-
+    
     @Override
     public void setType(int type) {
         m_parent.setType(type);

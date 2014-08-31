@@ -41,6 +41,7 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  *
  * @author SBPrime
  */
+@Deprecated
 public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
 
     /**

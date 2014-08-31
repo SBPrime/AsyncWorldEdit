@@ -388,4 +388,14 @@ public class BlockVectorWrapper extends BlockVector implements IAsyncWrapper {
                               double translateX, double translateZ) {
         return wrap(m_parent.transform2D(angle, aboutX, aboutZ, translateX, translateZ));
     }
+
+    @Override
+    public float toPitch() {
+        return m_parent.toPitch();
+    }       
+
+    @Override
+    public float toYaw() {
+        return m_parent.toYaw();
+    }
 }
