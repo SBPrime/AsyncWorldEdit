@@ -24,20 +24,9 @@
 
 package org.primesoft.asyncworldedit.injector;
 
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
-import com.sk89q.worldedit.regions.Region;
-import java.util.UUID;
-
 /**
  *
  * @author SBPrime
  */
 public class BaseClassFactory implements IClassFactory {
-
-    @Override
-    public BlockArrayClipboard  createBlockArrayClipboard(UUID player, Region region) {
-        return new BlockArrayClipboard(region);
-    }    
 }

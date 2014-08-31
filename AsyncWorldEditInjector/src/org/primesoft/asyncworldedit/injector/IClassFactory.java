@@ -24,14 +24,10 @@
 
 package org.primesoft.asyncworldedit.injector;
 
-import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
-import com.sk89q.worldedit.regions.Region;
-import java.util.UUID;
-
 /**
  * Interface for injected WorldEdit classes factory
  * @author SBPrime
  */
 public interface IClassFactory {
-    BlockArrayClipboard createBlockArrayClipboard(UUID player, Region region);
+    
 }

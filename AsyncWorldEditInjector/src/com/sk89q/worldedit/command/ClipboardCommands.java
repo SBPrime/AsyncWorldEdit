@@ -19,12 +19,9 @@
 
 package com.sk89q.worldedit.command;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.minecraft.util.commands.Logging;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.PLACEMENT;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
@@ -49,8 +46,10 @@ import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.command.binding.Switch;
 import com.sk89q.worldedit.util.command.parametric.Optional;
-import org.primesoft.asyncworldedit.injector.InjectorMain;
-import org.primesoft.asyncworldedit.injector.PlayerUtils;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sk89q.minecraft.util.commands.Logging.LogMode.PLACEMENT;
+import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
 
 /**
  * Clipboard commands.
@@ -86,9 +85,8 @@ public class ClipboardCommands {
                      @Selection Region region, @Switch('e') boolean copyEntities,
                      @Switch('m') Mask mask) throws WorldEditException {
 
-        BlockArrayClipboard clipboard = InjectorMain.getInstance().getClassFactory().createBlockArrayClipboard(PlayerUtils.getUUID(player), region);
+        BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
         clipboard.setOrigin(session.getPlacementPosition(player));
-
         ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
         if (mask != null) {
             copy.setSourceMask(mask);
@@ -118,8 +116,7 @@ public class ClipboardCommands {
                     @Selection Region region, @Optional("air") Pattern leavePattern, @Switch('e') boolean copyEntities,
                     @Switch('m') Mask mask) throws WorldEditException {
 
-        BlockArrayClipboard clipboard = InjectorMain.getInstance().getClassFactory().createBlockArrayClipboard(PlayerUtils.getUUID(player), region);
-                
+        BlockArrayClipboard clipboard = new BlockArrayClipboard(region);
         clipboard.setOrigin(session.getPlacementPosition(player));
         ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, clipboard, region.getMinimumPoint());
         copy.setSourceFunction(new BlockReplace(editSession, leavePattern));
@@ -257,8 +254,7 @@ public class ClipboardCommands {
     public void clearClipboard(Player player, LocalSession session, EditSession editSession) throws WorldEditException {
         session.setClipboard(null);
         player.print("Clipboard cleared.");
-    }
-    
+    }    
     
     public static Class<?> ForceClassLoad(){
         return ClipboardCommands.class;
