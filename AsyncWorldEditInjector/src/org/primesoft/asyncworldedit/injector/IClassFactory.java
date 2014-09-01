@@ -29,5 +29,5 @@ package org.primesoft.asyncworldedit.injector;
  * @author SBPrime
  */
 public interface IClassFactory {
-    IOperationProcessor getOperationProcessor();    
+    
 }

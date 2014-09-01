@@ -24,7 +24,7 @@
 package org.primesoft.asyncworldedit.injector;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.command.ClipboardCommands;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -95,7 +95,7 @@ public class InjectorMain extends JavaPlugin {
         s_prefix = String.format("[%s]", desc.getName());
 
         EditSession.ForceClassLoad();
-        Operations.ForceClassLoad();
+        ClipboardCommands.ForceClassLoad();
         
         s_instance = this;
         
