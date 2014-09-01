@@ -24,10 +24,13 @@
 
 package org.primesoft.asyncworldedit.injector;
 
+import com.sk89q.worldedit.function.operation.Operation;
+
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
+ * @param <TException>
  */
-public interface IClassFactory {
-    IOperationProcessor getOperationProcessor();    
+public interface ExceptionOperationAction<TException extends Exception> {
+    void Execute(Operation op) throws TException;
 }

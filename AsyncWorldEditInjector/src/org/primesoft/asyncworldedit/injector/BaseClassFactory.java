@@ -24,9 +24,17 @@
 
 package org.primesoft.asyncworldedit.injector;
 
+
 /**
  *
  * @author SBPrime
  */
-public class BaseClassFactory implements IClassFactory {
+public class BaseClassFactory implements IClassFactory {    
+    private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();
+    
+    @Override
+    public IOperationProcessor getOperationProcessor() {
+        return m_operationProcessor;
+    }
+
 }
