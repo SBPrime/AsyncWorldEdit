@@ -25,6 +25,7 @@ package org.primesoft.asyncworldedit.injector;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.command.ClipboardCommands;
+import com.sk89q.worldedit.function.operation.Operations;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -35,15 +36,16 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author SBPrime
  */
 public class InjectorMain extends JavaPlugin {
+
     private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
     private static String s_prefix = null;
     private static final String s_logFormat = "%s %s";
-    
+
     /**
      * The WorldEdit class factory
      */
     private IClassFactory m_classFactory = new BaseClassFactory();
-    
+
     /**
      * Instance of the main class
      */
@@ -51,12 +53,13 @@ public class InjectorMain extends JavaPlugin {
 
     /**
      * Get plugin instance
-     * @return 
+     *
+     * @return
      */
     public static InjectorMain getInstance() {
         return s_instance;
     }
-       
+
     public static void log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
             return;
@@ -64,28 +67,29 @@ public class InjectorMain extends JavaPlugin {
 
         s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
     }
-    
-    
+
     /**
      * Set new class factory
-     * @param factory 
-     */    
-    public void setClassFactory(IClassFactory factory){
-        if (factory == null) {            
+     *
+     * @param factory
+     */
+    public void setClassFactory(IClassFactory factory) {
+        if (factory == null) {
             factory = new BaseClassFactory();
             log("New class factory set to default factory.");
         } else {
             log("New class factory set to: " + factory.getClass().getName());
         }
-        
-        m_classFactory = factory;        
+
+        m_classFactory = factory;
     }
-    
+
     /**
      * Get the class factory
-     * @return 
+     *
+     * @return
      */
-    public IClassFactory getClassFactory(){
+    public IClassFactory getClassFactory() {
         return m_classFactory;
     }
 
@@ -96,7 +100,8 @@ public class InjectorMain extends JavaPlugin {
 
         EditSession.ForceClassLoad();
         ClipboardCommands.ForceClassLoad();
-        
+        Operations.ForceClassLoad();
+
         s_instance = this;
         
         log("Enabled");
@@ -104,9 +109,9 @@ public class InjectorMain extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        
+
         s_instance = null;
-        
+
         log("Disabled");
     }
 }

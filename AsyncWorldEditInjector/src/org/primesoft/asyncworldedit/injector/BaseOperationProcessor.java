@@ -21,17 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package org.primesoft.asyncworldedit.injector;
+
+import com.sk89q.worldedit.function.operation.Operation;
 
 /**
  *
  * @author SBPrime
  */
-public class BaseClassFactory implements IClassFactory {
-    private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();
+public class BaseOperationProcessor implements IOperationProcessor {
 
     @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
+    public <TException extends Exception> void process(Operation op, ExceptionOperationAction<TException> action) throws TException {
+        action.Execute(op);
+    }
+
+    @Override
+    public void process(Operation op, OperationAction action) {
+        action.Execute(op);
     }
 }

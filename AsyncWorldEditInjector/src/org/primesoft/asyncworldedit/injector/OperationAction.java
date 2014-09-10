@@ -23,15 +23,13 @@
  */
 package org.primesoft.asyncworldedit.injector;
 
+import com.sk89q.worldedit.function.operation.Operation;
+
 /**
  *
  * @author SBPrime
  */
-public class BaseClassFactory implements IClassFactory {
-    private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();
+public interface OperationAction {
 
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
-    }
+    void Execute(Operation op);
 }
