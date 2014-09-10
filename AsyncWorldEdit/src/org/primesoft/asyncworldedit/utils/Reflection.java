@@ -131,4 +131,44 @@ public class Reflection {
             AsyncWorldEditMain.log(message + ": security exception.");
         }
     }
+    
+    
+    public static void set(Object instance, Field field, Object value,
+            String message) {
+        try {
+            boolean accessible = field.isAccessible();
+            
+            //field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            
+            int modifiers = modifiersField.getModifiers();
+            boolean isFinal = (modifiers & Modifier.FINAL) == Modifier.FINAL;
+
+            if (!accessible) {
+                field.setAccessible(true);
+            }
+            if (isFinal) {
+                modifiersField.setAccessible(true);
+                modifiersField.setInt(field, modifiers & ~Modifier.FINAL);
+            }
+            try {
+                field.set(instance, value);
+            } finally {
+                if (isFinal) {
+                    modifiersField.setInt(field, modifiers | Modifier.FINAL);
+                }
+                if (!accessible) {
+                    field.setAccessible(false);
+                }
+            }
+        } catch (IllegalArgumentException ex) {
+            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version.");
+        } catch (IllegalAccessException ex) {
+            AsyncWorldEditMain.log(message + ": security exception.");
+        } catch (NoSuchFieldException ex) {
+            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version, field modifiers not found.");
+        } catch (SecurityException ex) {
+            AsyncWorldEditMain.log(message + ": security exception.");
+        }
+    }
 }

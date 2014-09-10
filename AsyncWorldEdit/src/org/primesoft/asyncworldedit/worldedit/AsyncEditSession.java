@@ -330,27 +330,27 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     @Override
     public int setBlocks(final Region region, final Pattern pattern)
             throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.setBlocks);
-
-        if (!isAsync) {
+//        boolean isAsync = checkAsync(WorldeditOperations.setBlocks);
+//
+//        if (!isAsync) {
             return super.setBlocks(region, pattern);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "setBlocks");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "setBlocks",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.setBlocks(region, pattern);
-                    }
-                });
-        return 0;
+//        }
+//
+//        final int jobId = getJobId();
+//        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
+//        final JobEntry job = new JobEntry(m_player, session, jobId, "setBlocks");
+//        m_blockPlacer.addJob(m_player, job);
+//
+//        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "setBlocks",
+//                m_blockPlacer, job) {
+//                    @Override
+//                    public int task(CancelabeEditSession session)
+//                    throws MaxChangedBlocksException {
+//                        m_wait.checkAndWait(null);
+//                        return session.setBlocks(region, pattern);
+//                    }
+//                });
+//        return 0;
     }
 
     @Override

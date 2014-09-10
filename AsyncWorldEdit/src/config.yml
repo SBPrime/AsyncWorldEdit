@@ -12,9 +12,9 @@ awe:
     #blocks to place (per-interval) for users with the permission AWE.user.vip-queue
     blocks-vip: 2000
     #Maximum number of miliseconds spend on placing blocks, use -1 for no limit
-    time: 20
+    time: 40
     #Additional time to spend on placink blocks for users with the permission AWE.user.vip-queue
-    time-vip: 10
+    time-vip: 20
     #maximum size of the blocks queue
     queue-max-size: 10000000
     #maximum size of the player block queue

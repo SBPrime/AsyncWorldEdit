@@ -29,7 +29,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -42,6 +41,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.injector.InjectorMain;
+import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
@@ -181,15 +181,16 @@ public class AsyncWorldEditMain extends JavaPlugin {
             log("World edit not found.");
             return;
         }
-
-        m_aweInjector = getAWEInjector(this);
-        m_aweInjector.setClassFactory(new AsyncClassFactory());
-
+        
         m_barApi = new BarAPIntegrator(this);
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
         m_dispatcher = new TaskDispatcher(this);
         m_plotMeFix = new PlotMeFix(this);
+        
+        m_aweInjector = getAWEInjector(this);
+        m_aweInjector.setClassFactory(new AsyncClassFactory(this));
+
 
         if (ConfigProvider.getCheckUpdate()) {
             log(VersionChecker.CheckVersion(desc.getVersion()));

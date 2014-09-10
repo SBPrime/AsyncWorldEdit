@@ -21,13 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package org.primesoft.asyncworldedit.injector.async;
 
-package org.primesoft.asyncworldedit;
-
-import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
-import com.sk89q.worldedit.regions.Region;
-import java.util.UUID;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.injector.BaseClassFactory;
+import org.primesoft.asyncworldedit.injector.IOperationProcessor;
 
 /**
  *
@@ -35,9 +33,18 @@ import org.primesoft.asyncworldedit.injector.BaseClassFactory;
  */
 public class AsyncClassFactory extends BaseClassFactory {
 
+    /**
+     * The operation processor
+     */
+    private final AsyncOperationProcessor m_operationProcessor;
+
+    public AsyncClassFactory(AsyncWorldEditMain plugin)
+    {
+        m_operationProcessor = new AsyncOperationProcessor(plugin);
+    }
+    
     @Override
-    public BlockArrayClipboard createBlockArrayClipboard(UUID player, Region region) {
-        //return new BlockArrayClipboard(player, super.createBlockArrayClipboard(player, region)); 
-        return super.createBlockArrayClipboard(player, region); 
+    public IOperationProcessor getOperationProcessor() {
+        return m_operationProcessor;
     }
 }
