@@ -386,6 +386,21 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public boolean isAsyncForced() {
         return m_asyncForced;
     }
+    
+    /**
+     * This function checks if async mode is enabled for specific command
+     *
+     * @param operationName
+     * @return 
+     */
+    public boolean checkAsync(String operationName) {
+        boolean result = m_asyncForced ||
+                // use operation name?
+                (/*ConfigProvider.isAsyncAllowed(operation) && */(m_wrapper == null || m_wrapper.getMode()));
+
+        m_asyncDisabled = !result;
+        return result;
+    }
 
     /**
      * This function checks if async mode is enabled for specific command

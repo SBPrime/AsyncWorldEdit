@@ -76,7 +76,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
     @Override
     public <TException extends Exception> void process(final Operation op,
             final ExceptionOperationAction<TException> action) throws TException {
-        final InOutParam<String> operationName = InOutParam.Out();
+        InOutParam<String> operationName = InOutParam.Out();
         
         if (!StackValidator.isVaild(operationName) || !OperationValidator.isValid(op)) {
             action.Execute(op);
@@ -90,18 +90,24 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         }
 
         final AsyncEditSession asyncSession = sessions.get(0).getValue();
+        final String name = operationName.getValue();
+        if (!asyncSession.checkAsync(name))
+        {
+            action.Execute(op);
+            return;
+        }
+        
         final WaitFor wait = asyncSession.getWait();
         final UUID playerUuid = asyncSession.getPlayer();
         final int jobId = m_blockPlacer.getJobId(playerUuid);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
-        final JobEntry job = new JobEntry(playerUuid, cancelableSession, jobId, 
-                operationName.getValue());
+        final JobEntry job = new JobEntry(playerUuid, cancelableSession, jobId, name);
 
         injectEditSession(sessions, cancelableSession);
 
         m_blockPlacer.addJob(playerUuid, job);
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(cancelableSession, playerUuid, 
-                operationName.getValue(), m_blockPlacer, job) {
+                name, m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
@@ -124,7 +130,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
     @Override
     public void process(final Operation op, final OperationAction action) {
-        final InOutParam<String> operationName = InOutParam.Out();
+        InOutParam<String> operationName = InOutParam.Out();
         
         if (!StackValidator.isVaild(operationName) || !OperationValidator.isValid(op)) {
             action.Execute(op);
@@ -138,18 +144,25 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         }
 
         final AsyncEditSession asyncSession = sessions.get(0).getValue();
+        final String name = operationName.getValue();
+        
+        if (!asyncSession.checkAsync(name))
+        {
+            action.Execute(op);
+            return;
+        }
+        
         final WaitFor wait = asyncSession.getWait();
         final UUID playerUuid = asyncSession.getPlayer();
         final int jobId = m_blockPlacer.getJobId(playerUuid);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
-        final JobEntry job = new JobEntry(playerUuid, cancelableSession, jobId, 
-                operationName.getValue());
+        final JobEntry job = new JobEntry(playerUuid, cancelableSession, jobId, name);
 
         injectEditSession(sessions, cancelableSession);
 
         m_blockPlacer.addJob(playerUuid, job);
         m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(cancelableSession, playerUuid, 
-                operationName.getValue(), m_blockPlacer, job) {
+                name, m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
