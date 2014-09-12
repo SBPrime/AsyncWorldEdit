@@ -38,7 +38,6 @@ import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -216,111 +215,6 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                     throws MaxChangedBlocksException {
                         m_wait.checkAndWait(null);
                         return session.fillXZ(origin, pattern, radius, depth, recursive);
-                    }
-                });
-
-        return 0;
-    }
-
-    @Override
-    public int removeAbove(final Vector pos, final int size, final int height)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.removeAbove);
-        if (!isAsync) {
-            return super.removeAbove(pos, size, height);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "removeAbove");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "removeAbove",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.removeAbove(pos, size, height);
-                    }
-                });
-
-        return 0;
-    }
-
-    @Override
-    public int removeBelow(final Vector pos, final int size, final int height)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.removeBelow);
-        if (!isAsync) {
-            return super.removeBelow(pos, size, height);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "removeBelow");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "removeBelow",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.removeBelow(pos, size, height);
-                    }
-                });
-
-        return 0;
-    }
-
-    @Override
-    public int removeNear(final Vector pos, final int blockType, final int size)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.removeNear);
-        if (!isAsync) {
-            return super.removeNear(pos, blockType, size);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "removeNear");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "removeNear",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.removeNear(pos, blockType, size);
-                    }
-                });
-
-        return 0;
-    }
-
-    @Override
-    public int setBlocks(final Region region, final BaseBlock block)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.setBlocks);
-
-        if (!isAsync) {
-            return super.setBlocks(region, block);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "setBlocks");
-
-        m_blockPlacer.addJob(m_player, job);
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "setBlocks",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.setBlocks(region, block);
                     }
                 });
 
