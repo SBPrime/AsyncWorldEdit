@@ -25,6 +25,7 @@ package org.primesoft.asyncworldedit.injector.validators;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.primesoft.asyncworldedit.utils.InOutParam;
 
 /**
  * Validateif operation call stack allows asyncing of the operation
@@ -47,9 +48,10 @@ public class StackValidator {
     /**
      * Does the stack trace allow asyncing
      *
+     * @param methodName 
      * @return
      */
-    public static boolean isVaild() {
+    public static boolean isVaild(InOutParam<String> methodName) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         System.out.println("Stack trace:");
@@ -64,9 +66,9 @@ public class StackValidator {
                     continue;
                 }
 
-                String methodName = element.getMethodName();
+                String name = element.getMethodName();
                 for (Pattern pattern : entry.getMethodBlackList()) {
-                    m = pattern.matcher(methodName);
+                    m = pattern.matcher(name);
                     if (m.matches()) {
                         System.out.println("* on blacklist");
                         return false;
@@ -74,9 +76,11 @@ public class StackValidator {
                 }
 
                 for (Pattern pattern : entry.getMethodWhiteList()) {
-                    m = pattern.matcher(methodName);
+                    m = pattern.matcher(name);
                     if (m.matches()) {
                         System.out.println("* on whitelist");
+                        
+                        methodName.setValue(name);
                         return true;
                     }
                 }
@@ -84,6 +88,6 @@ public class StackValidator {
         }
 
         System.out.println("* No match");
-        return true;
+        return false;
     }
 }
