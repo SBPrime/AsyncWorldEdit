@@ -32,6 +32,7 @@ import com.sk89q.worldedit.world.World;
 import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
@@ -139,7 +140,7 @@ public class ClassScanner {
             }
         }
 
-        for (Field f : oClass.getDeclaredFields()) {
+        for (Field f : getAllFields(oClass)) {
             boolean restore = !f.isAccessible();
             if (restore) {
                 f.setAccessible(true);
@@ -165,5 +166,24 @@ public class ClassScanner {
         }
 
         return false;
+    }
+
+    
+    /**
+     * Get all fields for class (including supper)
+     * @param oClass
+     * @param fields
+     * @return 
+     */
+    private static List<Field> getAllFields(Class<?> oClass) {
+        List<Field> result = new ArrayList<Field>();
+     
+        while (oClass != null)
+        {
+            result.addAll(Arrays.asList(oClass.getDeclaredFields()));
+            oClass = oClass.getSuperclass();
+        }
+        
+        return result;
     }
 }
