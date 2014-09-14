@@ -192,8 +192,7 @@ public class CancelabeEditSession extends EditSessionStub {
             throws WorldEditException {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
-        }
-
+        }        
         forceFlush();
         return super.setBlock(VectorWrapper.wrap(position, m_jobId, true, m_player), 
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player), stage);
@@ -202,10 +201,11 @@ public class CancelabeEditSession extends EditSessionStub {
     @Override
     public boolean setBlock(Vector pt, BaseBlock block)
             throws MaxChangedBlocksException {
+        
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-
+        
         return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player), 
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
@@ -213,6 +213,7 @@ public class CancelabeEditSession extends EditSessionStub {
     @Override
     public boolean setBlock(Vector pt, Pattern pat)
             throws MaxChangedBlocksException {
+                
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -226,6 +227,7 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
+                
         return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, true, m_player), 
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }

@@ -38,11 +38,12 @@ public class StackValidator {
      * Operations entry
      */
     private static final StackValidatorEntry[] s_data = new StackValidatorEntry[]{
-        new StackValidatorEntry(".*primesoft.*ThreadSafeEditSession", "", ".*"),
-        new StackValidatorEntry(".*primesoft.*AsyncEditSession.*", "", "task"),
+        //new StackValidatorEntry("*.sk89q.*ClipboardCommands", ".*", ""),
         new StackValidatorEntry(".*sk89q.*EditSession", ".*", new String[]{
             "flushQueue"
-        })
+        }),
+        new StackValidatorEntry(".*primesoft.*ThreadSafeEditSession", "", ".*"),
+        new StackValidatorEntry(".*primesoft.*AsyncEditSession.*", "", "task")
     };
 
     /**

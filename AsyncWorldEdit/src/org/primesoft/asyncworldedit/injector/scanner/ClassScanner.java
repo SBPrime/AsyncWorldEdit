@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
@@ -44,6 +45,7 @@ import java.util.UUID;
  * @author SBPrime
  */
 public class ClassScanner {
+
     private final static Class<?>[] s_blackList = new Class<?>[]{
         ChangeSet.class,
         EditSession.class,
@@ -69,18 +71,20 @@ public class ClassScanner {
 
         Queue<ScannerQueueEntry> toScan = new ArrayDeque<ScannerQueueEntry>();
         HashSet<Object> scanned = new HashSet<Object>();
+        
         toScan.add(new ScannerQueueEntry(o, null, null));
 
         while (!toScan.isEmpty()) {
             ScannerQueueEntry entry = toScan.poll();
             Object cObject = entry.getValue();
 
-            if (!scanned.contains(cObject)) {
-                Class<?> cClass = cObject.getClass();
+            Class<?> cClass = cObject.getClass();
 
-                if (type.isAssignableFrom(cClass)) {
-                    result.add(new ClassScannerResult<T>((T) cObject, entry.getParent(), entry.getField()));
-                }
+            if (type.isAssignableFrom(cClass)) {
+                //Should duplicates by ignored?
+                result.add(new ClassScannerResult<T>((T) cObject, entry.getParent(), entry.getField()));
+            }
+            if (!scanned.contains(cObject)) {
                 for (ScannerQueueEntry f : unpack(cClass, cObject)) {
                     Object t = f.getValue();
                     if (t != null) {
@@ -115,7 +119,7 @@ public class ClassScanner {
      * @return
      */
     private static Iterable<ScannerQueueEntry> unpack(Class<?> oClass, Object o) {
-        HashSet<ScannerQueueEntry> result = new HashSet<ScannerQueueEntry>();
+        HashSet<ScannerQueueEntry> result = new HashSet<ScannerQueueEntry>();        
 
         if (isPrimitive(oClass) || isBlackList(oClass)) {
             return result;
@@ -168,22 +172,21 @@ public class ClassScanner {
         return false;
     }
 
-    
     /**
      * Get all fields for class (including supper)
+     *
      * @param oClass
      * @param fields
-     * @return 
+     * @return
      */
     private static List<Field> getAllFields(Class<?> oClass) {
         List<Field> result = new ArrayList<Field>();
-     
-        while (oClass != null)
-        {
+
+        while (oClass != null) {
             result.addAll(Arrays.asList(oClass.getDeclaredFields()));
             oClass = oClass.getSuperclass();
         }
-        
+
         return result;
     }
 }

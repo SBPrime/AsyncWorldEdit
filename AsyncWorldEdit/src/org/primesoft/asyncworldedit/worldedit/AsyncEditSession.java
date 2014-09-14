@@ -85,6 +85,10 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         m_schedule = plugin.getServer().getScheduler();
     }
 
+    /**
+     * Do not change! Requires special processing
+     * @param sess 
+     */
     @Override
     public void undo(final EditSession sess) {
         final int jobId = getJobId();
@@ -136,7 +140,10 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return r;
     }
 
-
+    /**
+     * Do not change! Requires special processing
+     * @param sess 
+     */
     @Override
     public void redo(final EditSession sess) {
         boolean isAsync = checkAsync(WorldeditOperations.redo);
@@ -166,6 +173,18 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     
+    /**
+     * Does not use Operations - do not change!
+     * @param region
+     * @param zero
+     * @param unit
+     * @param biomeType
+     * @param expressionString
+     * @param hollow
+     * @return
+     * @throws ExpressionException
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makeBiomeShape(final Region region, final Vector zero, final Vector unit,
             final BaseBiome biomeType, final String expressionString,
@@ -231,6 +250,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    /**
+     * Does not use Operations - do not change!
+     * @param region
+     * @param pattern
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makeWalls(final Region region, final Pattern pattern) throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.makeCuboidWalls);
@@ -255,210 +281,17 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         return 0;
     }
-
-    @Override
-    public int makeCuboidWalls(final Region region, final BaseBlock block)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.makeCuboidWalls);
-        if (!isAsync) {
-            return super.makeCuboidWalls(region, block);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidWalls");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCuboidWalls",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makeCuboidWalls(region, block);
-                    }
-                });
-
-        return 0;
-    }
-
-    @Override
-    public int makeCuboidWalls(final Region region, final Pattern pattern)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.makeCuboidWalls);
-        if (!isAsync) {
-            return super.makeCuboidWalls(region, pattern);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "makeCuboidWalls");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCuboidWalls",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makeCuboidWalls(region, pattern);
-                    }
-                });
-
-        return 0;
-    }
-
-    @Override
-    public int overlayCuboidBlocks(final Region region, final BaseBlock block)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.overlayCuboidBlocks);
-        if (!isAsync) {
-            return super.overlayCuboidBlocks(region, block);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "overlayCuboidBlocks");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "overlayCuboidBlocks",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.overlayCuboidBlocks(region, block);
-                    }
-                });
-
-        return 0;
-    }
-
-    @Override
-    public int overlayCuboidBlocks(final Region region, final Pattern pattern)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.overlayCuboidBlocks);
-        if (!isAsync) {
-            return super.overlayCuboidBlocks(region, pattern);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "overlayCuboidBlocks");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "overlayCuboidBlocks",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.overlayCuboidBlocks(region, pattern);
-                    }
-                });
-
-        return 0;
-    }
-
-    @Override
-    public int naturalizeCuboidBlocks(final Region region)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.naturalizeCuboidBlocks);
-        if (!isAsync) {
-            return super.naturalizeCuboidBlocks(region);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "naturalizeCuboidBlocks");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "naturalizeCuboidBlocks",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.naturalizeCuboidBlocks(region);
-                    }
-                });
-
-        return 0;
-    }
-
-
-    /**
-     * This should work --> fix me!
-     * @param region
-     * @param dir
-     * @param distance
-     * @param copyAir
-     * @param replace
-     * @return
-     * @throws MaxChangedBlocksException 
-     */
-    @Override
-    public int moveRegion(final Region region, final Vector dir, final int distance,
-            final boolean copyAir, final BaseBlock replace) throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.moveCuboidRegion);
-        if (!isAsync) {
-            return super.moveRegion(region, dir, distance, copyAir, replace);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "moveRegion");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "moveRegion",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session) throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.moveRegion(region, dir, distance, copyAir, replace);
-                    }
-                });
-        return 0;
-    }
-
     
     /**
-     * This should work --> fix me!
-     * @param region
-     * @param dir
-     * @param distance
-     * @param copyAir
-     * @param replace
+     * Does not use Operations - do not change!
+     * @param pattern
+     * @param pos1
+     * @param pos2
+     * @param radius
+     * @param filled
      * @return
      * @throws MaxChangedBlocksException 
      */
-    @Override
-    public int moveCuboidRegion(final Region region, final Vector dir,
-            final int distance,
-            final boolean copyAir, final BaseBlock replace)
-            throws MaxChangedBlocksException {
-        boolean isAsync = checkAsync(WorldeditOperations.moveCuboidRegion);
-        if (!isAsync) {
-            return super.moveCuboidRegion(region, dir, distance, copyAir, replace);
-        }
-
-        final int jobId = getJobId();
-        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
-        final JobEntry job = new JobEntry(m_player, session, jobId, "moveCuboidRegion");
-        m_blockPlacer.addJob(m_player, job);
-
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "moveCuboidRegion",
-                m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
-                    throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.moveCuboidRegion(region, dir, distance, copyAir, replace);
-                    }
-                });
-        return 0;
-    }
-
     @Override
     public int drawLine(final Pattern pattern, final Vector pos1, final Vector pos2, final double radius,
             final boolean filled)
@@ -486,6 +319,19 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    /**
+     * Does not use Operations - do not change!
+     * @param pattern
+     * @param nodevectors
+     * @param tension
+     * @param bias
+     * @param continuity
+     * @param quality
+     * @param radius
+     * @param filled
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int drawSpline(final Pattern pattern,
             final List<Vector> nodevectors, final double tension, final double bias,
@@ -515,6 +361,17 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    
+    /**
+     * Does not use Operations - do not change!
+     * @param pos
+     * @param block
+     * @param radius
+     * @param height
+     * @param filled
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makeCylinder(final Vector pos, final Pattern block,
             final double radius, final int height,
@@ -543,6 +400,18 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    
+    /**
+     * Does not use Operations - do not change!
+     * @param pos
+     * @param block
+     * @param radiusX
+     * @param radiusZ
+     * @param height
+     * @param filled
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makeCylinder(final Vector pos, final Pattern block,
             final double radiusX,
@@ -572,6 +441,16 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    
+    /**
+     * Does not use Operations - do not change!
+     * @param pos
+     * @param block
+     * @param radius
+     * @param filled
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makeSphere(final Vector pos, final Pattern block,
             final double radius,
@@ -600,6 +479,18 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    
+    /**
+     * Does not use Operations - do not change!
+     * @param pos
+     * @param block
+     * @param radiusX
+     * @param radiusY
+     * @param radiusZ
+     * @param filled
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makeSphere(final Vector pos, final Pattern block,
             final double radiusX,
@@ -629,6 +520,15 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    /**
+     * Does not use Operations - do not change!
+     * @param pos
+     * @param block
+     * @param size
+     * @param filled
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makePyramid(final Vector pos, final Pattern block, final int size,
             final boolean filled)
@@ -689,6 +589,14 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    
+    /**
+     * Does not use Operations - do not change!
+     * @param pos
+     * @param radius
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int simulateSnow(final Vector pos, final double radius)
             throws MaxChangedBlocksException {
@@ -715,6 +623,14 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    /**
+     * Does not use Operations - do not change!
+     * @param pos
+     * @param radius
+     * @param onlyNormalDirt
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int green(final Vector pos, final double radius, final boolean onlyNormalDirt)
             throws MaxChangedBlocksException {
@@ -741,6 +657,14 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    
+    /**
+     * Does not use Operations - do not change!
+     * @param pos
+     * @param radius
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int green(final Vector pos, final double radius)
             throws MaxChangedBlocksException {
@@ -767,6 +691,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    /**
+     * TODO: Broken
+     * @param basePos
+     * @param size
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makePumpkinPatches(final Vector basePos, final int size)
             throws MaxChangedBlocksException {
@@ -793,6 +724,15 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    /**
+     * Does not use Operations - do not change!
+     * @param basePos
+     * @param size
+     * @param density
+     * @param treeGenerator
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makeForest(final Vector basePos, final int size,
             final double density,
@@ -821,6 +761,18 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    /**
+     * Does not use Operations - do not change!
+     * @param region
+     * @param zero
+     * @param unit
+     * @param pattern
+     * @param expressionString
+     * @param hollow
+     * @return
+     * @throws ExpressionException
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int makeShape(final Region region, final Vector zero,
             final Vector unit,
@@ -898,6 +850,15 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
+    
+    /**
+     * Does not use Operations - do not change!
+     * @param region
+     * @param thickness
+     * @param pattern
+     * @return
+     * @throws MaxChangedBlocksException 
+     */
     @Override
     public int hollowOutRegion(final Region region, final int thickness,
             final Pattern pattern)
