@@ -145,66 +145,10 @@ public abstract class BaseTask extends BukkitRunnable {
         m_job.taskDone();
         if (m_cancelableEditSession != null) {
             ThreadSafeEditSession parent = m_cancelableEditSession.getParent();
-            copyChangeSet(m_cancelableEditSession, parent);
             parent.removeAsync(m_job);
         } else if (m_safeEditSession != null) {
             m_safeEditSession.removeAsync(m_job);
         }        
-    }
-
-    /**
-     * Copy changed items to parent edit session This works best when change set
-     * is set to ArrayListHistory
-     *
-     * @param destination
-     */
-    private void copyChangeSet(EditSession source, EditSession destination) {
-        ChangeSet csSource = source.getChangeSet();
-        ChangeSet csDestination = destination.getChangeSet();
-
-        if (csSource.size() == 0) {
-            return;
-        }
-
-        if ((csSource instanceof InjectedArrayListHistory)) {
-            for (Iterator<Change> it = csSource.forwardIterator(); it.hasNext();) {
-                csDestination.add(it.next());
-            }
-            return;
-        }
-
-        AsyncWorldEditMain.log("Warning: ChangeSet is not set to ArrayListHistory, rebuilding...");
-        HashMap<BlockVector, BaseBlock> oldBlocks = new HashMap<BlockVector, BaseBlock>();
-
-        for (Iterator<Change> it = csSource.backwardIterator(); it.hasNext();) {
-            Change chg = it.next();
-            if (chg instanceof BlockChange) {
-                BlockChange bchg = (BlockChange) chg;
-                BlockVector pos = bchg.getPosition();
-                BaseBlock oldBlock = bchg.getPrevious();
-
-                if (oldBlocks.containsKey(pos)) {
-                    oldBlocks.remove(pos);
-                }
-                oldBlocks.put(pos, oldBlock);
-            }
-        }
-
-        for (Iterator<Change> it = csSource.forwardIterator(); it.hasNext();) {
-            Change chg = it.next();
-            if (chg instanceof BlockChange) {
-                BlockChange bchg = (BlockChange) chg;
-                BlockVector pos = bchg.getPosition();
-                BaseBlock block = bchg.getCurrent();
-                BaseBlock oldBlock = oldBlocks.get(pos);
-
-                if (oldBlock != null) {
-                    csDestination.add(new BlockChange(pos, oldBlock, block));
-                }
-            } else {
-                csDestination.add(chg);
-            }
-        }
     }
 
     protected abstract Object doRun() throws MaxChangedBlocksException;

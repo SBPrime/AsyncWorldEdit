@@ -29,6 +29,7 @@ import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.history.changeset.ArrayListHistory;
+import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
@@ -80,6 +81,8 @@ public class CancelabeEditSession extends EditSessionStub {
 
         injectChangeSet();
         setMask(mask);
+        
+        setChangeSet(parent.getChangeSet());
     }
 
     /**
@@ -340,5 +343,20 @@ public class CancelabeEditSession extends EditSessionStub {
                 super.flushQueue();
             }
         }
+    }
+
+    private void setChangeSet(ChangeSet changeSet) {
+        Reflection.set(EditSession.class, this, "changeSet", changeSet, 
+                "Unable to inject changeset");
+        ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
+                this, "changeSetExtent", "Unable to get the changeset");
+        
+        if (changesetExtent == null) 
+        {
+            return;
+        }
+        
+        Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", changeSet, 
+                "Unable to inject changeset to extent");
     }
 }
