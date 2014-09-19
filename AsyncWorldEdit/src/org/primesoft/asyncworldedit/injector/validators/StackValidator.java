@@ -38,8 +38,8 @@ public class StackValidator {
      * Operations entry
      */
     private static final StackValidatorEntry[] s_data = new StackValidatorEntry[]{
-        //new StackValidatorEntry("*.sk89q.*ClipboardCommands", ".*", ""),        
         new StackValidatorEntry(".*sk89q.*EditSession", "", ".*"),
+        new StackValidatorEntry(".*sk89q.*ClipboardCommands", new String[]{"copy", "paste", "cut"}, ""),
         new StackValidatorEntry(".*primesoft.*ThreadSafeEditSession", "", ".*"),
         new StackValidatorEntry(".*primesoft.*AsyncEditSession.*", ".*", new String[]{
             "undo", "redo", "task", "flushQueue"
@@ -49,7 +49,7 @@ public class StackValidator {
     /**
      * Does the stack trace allow asyncing
      *
-     * @param methodName 
+     * @param methodName
      * @return
      */
     public static boolean isVaild(InOutParam<String> methodName) {
@@ -80,7 +80,7 @@ public class StackValidator {
                     m = pattern.matcher(name);
                     if (m.matches()) {
                         System.out.println("* on whitelist");
-                        
+
                         methodName.setValue(name);
                         return true;
                     }
