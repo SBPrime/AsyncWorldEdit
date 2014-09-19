@@ -98,8 +98,7 @@ public class InjectorMain extends JavaPlugin {
         PluginDescriptionFile desc = getDescription();
         s_prefix = String.format("[%s]", desc.getName());
 
-        EditSession.ForceClassLoad();
-        ClipboardCommands.ForceClassLoad();
+        EditSession.ForceClassLoad();        
         Operations.ForceClassLoad();
 
         s_instance = this;
