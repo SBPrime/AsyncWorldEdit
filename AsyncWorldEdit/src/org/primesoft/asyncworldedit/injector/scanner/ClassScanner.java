@@ -124,7 +124,6 @@ public class ClassScanner {
             return result;
         }
 
-        System.out.println("Scanning: " + oClass);
         if (oClass.isArray()) {
             for (Object t : (Object[]) o) {
                 result.add(new ScannerQueueEntry(t, o, null));

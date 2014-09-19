@@ -57,10 +57,8 @@ public class StackValidator {
     public static boolean isVaild(InOutParam<String> methodName) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
-        System.out.println("Stack trace:");
         for (int i = stackTrace.length - 1; i >= 0; i--) {
             StackTraceElement element = stackTrace[i];
-            System.out.println(" * " + element.getClassName() + "\t" + element.getMethodName() + "\t" + element.getLineNumber());
 
             for (StackValidatorEntry entry : s_data) {
                 Matcher m = entry.getClassPattern().matcher(element.getClassName());
@@ -73,7 +71,6 @@ public class StackValidator {
                 for (Pattern pattern : entry.getMethodBlackList()) {
                     m = pattern.matcher(name);
                     if (m.matches()) {
-                        System.out.println("* on blacklist");
                         return false;
                     }
                 }
@@ -81,8 +78,6 @@ public class StackValidator {
                 for (Pattern pattern : entry.getMethodWhiteList()) {
                     m = pattern.matcher(name);
                     if (m.matches()) {
-                        System.out.println("* on whitelist");
-
                         methodName.setValue(name);
                         return true;
                     }
@@ -90,7 +85,6 @@ public class StackValidator {
             }
         }
 
-        System.out.println("* No match");
         return false;
     }
 }

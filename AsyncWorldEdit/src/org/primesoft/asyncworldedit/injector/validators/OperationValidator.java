@@ -28,14 +28,16 @@ import java.util.regex.Pattern;
 
 /**
  * Validate if operation should by asynced
+ *
  * @author SBPrime
  */
 public class OperationValidator {
+
     /**
      * The blacklisted operations regexp
      */
     private static final Pattern[] s_blackList;
-    
+
     /**
      * The whitelisted operations regexp
      */
@@ -52,29 +54,26 @@ public class OperationValidator {
 
     /**
      * Is the operation enabled for asyncing
+     *
      * @param op
-     * @return 
+     * @return
      */
     public static boolean isValid(Operation op) {
         Class c = op.getClass();
         String className = c.getCanonicalName();
 
-        System.out.println("Operation: " + className);
         for (Pattern p : s_blackList) {
             if (p.matcher(className).matches()) {
-                System.out.println("* on black list");
                 return false;
             }
         }
-        
+
         for (Pattern p : s_whiteList) {
             if (p.matcher(className).matches()) {
-                System.out.println("* on white list");
                 return true;
             }
         }
-        
-        System.out.println("* not found");
+
         return false;
     }
 }
