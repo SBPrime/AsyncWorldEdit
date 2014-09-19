@@ -40,6 +40,8 @@ public class StackValidator {
     private static final StackValidatorEntry[] s_data = new StackValidatorEntry[]{
         new StackValidatorEntry(".*sk89q.*EditSession", "", ".*"),
         new StackValidatorEntry(".*sk89q.*ClipboardCommands", new String[]{"copy", "paste", "cut"}, ""),
+        new StackValidatorEntry(".*sk89q.*RegionCommands", new String[]{"forest", "flora"}, ""),
+        new StackValidatorEntry(".*sk89q.*BiomeCommands", new String[]{"setBiome"}, ""),
         new StackValidatorEntry(".*primesoft.*ThreadSafeEditSession", "", ".*"),
         new StackValidatorEntry(".*primesoft.*AsyncEditSession.*", ".*", new String[]{
             "undo", "redo", "task", "flushQueue"
