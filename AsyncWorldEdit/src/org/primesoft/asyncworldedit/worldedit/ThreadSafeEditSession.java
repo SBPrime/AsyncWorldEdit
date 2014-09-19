@@ -289,7 +289,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public void undo(final EditSession sess) {
         final int jobId = getJobId();
         cancelJobs(jobId);
-        
+
         UndoSession undoSession = doUndo();
 
         Mask oldMask = sess.getMask();
@@ -386,27 +386,26 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public boolean isAsyncForced() {
         return m_asyncForced;
     }
-    
+
     /**
      * This function checks if async mode is enabled for specific command
      *
      * @param operationName
-     * @return 
+     * @return
      */
     public boolean checkAsync(String operationName) {
-        boolean result = m_asyncForced ||
-                // use operation name?
-                (/*ConfigProvider.isAsyncAllowed(operation) && */(m_wrapper == null || m_wrapper.getMode()));
-
-        m_asyncDisabled = !result;
-        return result;
+        try {
+            return checkAsync(WorldeditOperations.valueOf(operationName));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
      * This function checks if async mode is enabled for specific command
      *
      * @param operation
-     * @return 
+     * @return
      */
     public boolean checkAsync(WorldeditOperations operation) {
         boolean result = m_asyncForced || (ConfigProvider.isAsyncAllowed(operation)

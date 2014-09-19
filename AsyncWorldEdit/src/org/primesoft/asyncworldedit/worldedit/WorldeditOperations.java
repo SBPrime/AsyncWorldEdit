@@ -58,9 +58,13 @@ public enum WorldeditOperations
     hollowOutRegion,
     paste,
     copy,
+    cut,
     regenerate,
     center,
     drawLine,
     drawSpline,
-    makeBiomeShape
+    makeBiomeShape,
+    forest,
+    flora,
+    setBiome
 }

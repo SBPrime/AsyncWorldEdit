@@ -74,8 +74,12 @@ awe:
     - hollowOutRegion
     - paste
     - copy
+    - cut
     - regenerate
     - center
     - drawLine
     - drawSpline
     - makeBiomeShape
+    - forest
+    - flora
+    - setBiome
