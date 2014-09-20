@@ -89,7 +89,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
-        
+
     public TaskDispatcher getTaskDispatcher() {
         return m_dispatcher;
     }
@@ -166,13 +166,14 @@ public class AsyncWorldEditMain extends JavaPlugin {
             return;
         }
 
-        if (ConfigProvider.getAllowMetrics()) {
-            try {
-                m_metrics = new MetricsLite(this);
+        try {
+            MetricsLite metrics = new MetricsLite(this);
+            if (!metrics.isOptOut()) {
+                m_metrics = metrics;
                 m_metrics.start();
-            } catch (IOException e) {
-                log("Error initializing MCStats: " + e.getMessage());
             }
+        } catch (IOException e) {
+            log("Error initializing MCStats: " + e.getMessage());
         }
 
         s_console = getServer().getConsoleSender();
@@ -181,16 +182,15 @@ public class AsyncWorldEditMain extends JavaPlugin {
             log("World edit not found.");
             return;
         }
-        
+
         m_barApi = new BarAPIntegrator(this);
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
         m_dispatcher = new TaskDispatcher(this);
         m_plotMeFix = new PlotMeFix(this);
-        
+
         m_aweInjector = getAWEInjector(this);
         m_aweInjector.setClassFactory(new AsyncClassFactory(this));
-
 
         if (ConfigProvider.getCheckUpdate()) {
             log(VersionChecker.CheckVersion(desc.getVersion()));

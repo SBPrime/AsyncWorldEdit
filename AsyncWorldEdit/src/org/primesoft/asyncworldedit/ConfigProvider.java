@@ -54,8 +54,6 @@ public class ConfigProvider {
 
     private static boolean m_checkUpdate = false;
 
-    private static boolean m_allowMetrics = false;
-
     private static boolean m_isConfigUpdate = false;
 
     private static long m_interval;
@@ -119,15 +117,6 @@ public class ConfigProvider {
      */
     public static boolean getCheckUpdate() {
         return m_checkUpdate;
-    }
-
-    /**
-     * Is Metrics enabled
-     *
-     * @return true if enabled
-     */
-    public static boolean getAllowMetrics() {
-    	return m_allowMetrics;
     }
 
     /**
