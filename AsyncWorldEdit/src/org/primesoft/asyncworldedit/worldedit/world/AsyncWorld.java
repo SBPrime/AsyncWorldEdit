@@ -25,7 +25,6 @@ package org.primesoft.asyncworldedit.worldedit.world;
 
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
@@ -65,6 +64,7 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.WorldAsyncTask;
 import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
+import org.primesoft.asyncworldedit.worldedit.entity.EntityLazyWrapper;
 
 /**
  *
@@ -387,7 +387,6 @@ public class AsyncWorld implements World {
         return func.Execute();
     }
 
-
     @Override
     public int getBlockLightLevel(final Vector vector) {
         return m_dispatcher.performSafe(new Func<Integer>() {
@@ -431,8 +430,8 @@ public class AsyncWorld implements World {
                 return m_parent.getBiome(vd);
             }
         }, m_bukkitWorld, new Vector(vd.getX(), 0, vd.getZ()));
-    }    
-    
+    }
+
     @Override
     public WorldData getWorldData() {
         return m_dispatcher.performSafe(new Func<WorldData>() {
@@ -445,19 +444,47 @@ public class AsyncWorld implements World {
 
     @Override
     public Entity createEntity(final Location lctn, final BaseEntity be) {
-        return m_dispatcher.performSafe(new Func<Entity>() {
+        final DataAsyncParams<Location> paramLocation = DataAsyncParams.extract(lctn);
+        final DataAsyncParams<BaseEntity> paramEntity = DataAsyncParams.extract(be);
+        final Location location = paramLocation.getData();
+        final BaseEntity entity = paramEntity.getData();
+        final UUID player = getPlayer(paramLocation, paramEntity);
+
+        if (!m_blocksHub.canPlace(player, m_bukkitWorld, location.toVector())) {
+            return null;
+        }
+
+        final EntityLazyWrapper entityWrapper = new EntityLazyWrapper(location, this);
+        Func<Entity> func = new Func<Entity>() {
             @Override
             public Entity Execute() {
-                return m_parent.createEntity(lctn, be);
+                Entity result = m_parent.createEntity(location, entity);
+
+                if (result != null) {
+                    entityWrapper.setEntity(result);
+                }
+                return result;
             }
-        }, m_bukkitWorld, new Vector(lctn.getX(), lctn.getY(), lctn.getZ()));
+        };
+
+        if (paramEntity.isAsync() || paramLocation.isAsync() || !m_dispatcher.isMainTask()) {
+            if (!m_blockPlacer.addTasks(player,
+                    new WorldExtentFuncEntry(this, paramLocation.getJobId(), location.toVector(), func))) {
+                return null;
+            }
+            return entityWrapper;
+        }
+
+        return func.Execute();
     }
 
     @Override
     public boolean setBiome(Vector2D vd, final BaseBiome bb) {
-        final DataAsyncParams<Vector2D> param = DataAsyncParams.extract(vd);
-        final Vector2D v = param.getData();
-        final UUID player = getPlayer(param);
+        final DataAsyncParams<Vector2D> paramVector = DataAsyncParams.extract(vd);
+        final DataAsyncParams<BaseBiome> paramBiome = DataAsyncParams.extract(bb);
+        final Vector2D v = paramVector.getData();
+        final BaseBiome biome = paramBiome.getData();
+        final UUID player = getPlayer(paramBiome, paramVector);
         final Vector tmpV = new Vector(v.getX(), 0, v.getZ());
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, tmpV)) {
@@ -467,13 +494,13 @@ public class AsyncWorld implements World {
         Func<Boolean> func = new Func<Boolean>() {
             @Override
             public Boolean Execute() {
-                return m_parent.setBiome(v, bb);
+                return m_parent.setBiome(v, biome);
             }
         };
 
-        if (param.isAsync() || !m_dispatcher.isMainTask()) {
+        if (paramBiome.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), tmpV, func));
+                    new WorldExtentFuncEntry(this, paramBiome.getJobId(), tmpV, func));
         }
 
         return func.Execute();
@@ -575,8 +602,8 @@ public class AsyncWorld implements World {
                 return m_parent.getEntities();
             }
         });
-    }    
-    
+    }
+
     @Override
     public boolean regenerate(final Region region, final EditSession editSession) {
         boolean isAsync = checkAsync(WorldeditOperations.regenerate);
@@ -966,7 +993,7 @@ public class AsyncWorld implements World {
         }
 
         return func.Execute();
-    }
+    }        
 
     @Override
     public Operation commit() {

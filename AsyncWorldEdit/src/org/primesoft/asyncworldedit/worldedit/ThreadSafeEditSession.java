@@ -23,19 +23,30 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
+import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
+import org.primesoft.asyncworldedit.worldedit.world.biome.BaseBiomeWrapper;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionStub;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.entity.BaseEntity;
+import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.patterns.Pattern;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Countable;
+import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -71,11 +82,6 @@ public class ThreadSafeEditSession extends EditSessionStub {
      * Async block placer
      */
     protected final BlockPlacer m_blockPlacer;
-
-    /**
-     * The blocks hub integrator
-     */
-    private final BlocksHubIntegration m_bh;
 
     /**
      * The dispatcher class
@@ -170,7 +176,6 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         m_asyncTasks = new HashSet<JobEntry>();
         m_plugin = plugin;
-        m_bh = plugin.getBlocksHub();
         m_blockPlacer = plugin.getBlockPlacer();
         m_dispatcher = plugin.getTaskDispatcher();
 
@@ -202,12 +207,32 @@ public class ThreadSafeEditSession extends EditSessionStub {
         return r;
     }
 
+    public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
+        boolean isAsync = isAsyncEnabled();
+        boolean r = super.setBlock(VectorWrapper.wrap(position, jobId, isAsync, m_player),
+                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
+        if (r) {
+            forceFlush();
+        }
+        return r;
+    }
+
+    
     public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
-        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player),
+        return super.setBlockIfAir(VectorWrapper.wrap(pt, jobId, isAsync, m_player),
                 BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
     }
+
+    @Override
+    public boolean setBlockIfAir(Vector position, BaseBlock block) throws MaxChangedBlocksException {
+        boolean isAsync = isAsyncEnabled();
+        return super.setBlockIfAir(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
+                BaseBlockWrapper.wrap(block, m_jobId, isAsync, m_player));
+    }
+    
+    
 
     public boolean setBlock(Vector pt, Pattern pat, int jobId)
             throws MaxChangedBlocksException {
@@ -224,8 +249,19 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public boolean setBlock(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(VectorWrapper.wrap(pt, m_jobId, isAsync, m_player),
+        boolean r = super.setBlock(VectorWrapper.wrap(pt, jobId, isAsync, m_player),
                 BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
+        if (r) {
+            forceFlush();
+        }
+        return r;
+    }        
+
+    @Override
+    public boolean setBiome(Vector2D position, BaseBiome biome) {
+        boolean isAsync = isAsyncEnabled();
+        boolean r = super.setBiome(Vector2DWrapper.wrap(position, m_jobId, isAsync, m_player),
+                BaseBiomeWrapper.wrap(biome, m_jobId, isAsync, m_player));
         if (r) {
             forceFlush();
         }
@@ -233,9 +269,40 @@ public class ThreadSafeEditSession extends EditSessionStub {
     }
 
     @Override
+    public boolean setBlock(Vector position, BaseBlock block) throws MaxChangedBlocksException {
+        boolean isAsync = isAsyncEnabled();
+        boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
+                BaseBlockWrapper.wrap(block, m_jobId, isAsync, m_player));
+        if (r) {
+            forceFlush();
+        }
+        return r;
+    }
+
+    @Override
+    public boolean setBlock(Vector position, Pattern pattern) throws MaxChangedBlocksException {
+        boolean isAsync = isAsyncEnabled();
+        boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player), pattern);
+
+        if (r) {
+            forceFlush();
+        }
+        return r;        
+    }    
+
+    @Override
     public boolean smartSetBlock(Vector pt, BaseBlock block) {
         return super.smartSetBlock(pt, block);
     }
+    
+    
+    @Override
+    public Entity createEntity(Location location, BaseEntity entity) {
+        boolean isAsync = isAsyncEnabled();
+        return super.createEntity(LocationWrapper.wrap(location, m_jobId, isAsync, m_player),
+                entity);
+    }
+
 
     @Override
     public BaseBlock getBlock(final Vector position) {
@@ -286,8 +353,146 @@ public class ThreadSafeEditSession extends EditSessionStub {
     }
 
     @Override
+    public BaseBiome getBiome(final Vector2D position) {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<BaseBiome>() {
+            @Override
+            public BaseBiome Execute() {
+                return es.doGetBiome(position);
+            }
+        }, m_bukkitWorld, new Vector(position.getX(), 0, position.getZ()));
+    }
+
+    @Override
+    public int getBlockChangeCount() {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<Integer>() {
+            @Override
+            public Integer Execute() {
+                return es.doGetBlockChangeCount();
+            }
+        });
+    }
+
+    @Override
+    public int getBlockChangeLimit() {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<Integer>() {
+            @Override
+            public Integer Execute() {
+                return es.doGetBlockChangeLimit();
+            }
+        });
+    }
+
+    @Override
+    public List<Countable<Integer>> getBlockDistribution(final Region region) {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<List<Countable<Integer>>>() {
+            @Override
+            public List<Countable<Integer>> Execute() {
+                return es.doGetBlockDistribution(region);
+            }
+        }, m_bukkitWorld, region);
+    }
+
+    @Override
+    public List<Countable<BaseBlock>> getBlockDistributionWithData(final Region region) {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<List<Countable<BaseBlock>>>() {
+            @Override
+            public List<Countable<BaseBlock>> Execute() {
+                return es.doGetBlockDistributionWithData(region);
+            }
+        }, m_bukkitWorld, region);
+    }
+
+    @Override
+    public List<? extends Entity> getEntities() {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<List<? extends Entity>>() {
+            @Override
+            public List<? extends Entity> Execute() {
+                return es.doGetEntities();
+            }
+        });
+    }
+
+    @Override
+    public List<? extends Entity> getEntities(final Region region) {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<List<? extends Entity>>() {
+            @Override
+            public List<? extends Entity> Execute() {
+                return es.doGetEntities(region);
+            }
+        }, m_bukkitWorld, region);
+    }
+
+    @Override
+    public int getHighestTerrainBlock(final int x, final int z, final int minY, final int maxY) {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<Integer>() {
+            @Override
+            public Integer Execute() {
+                return es.doGetHighestTerrainBlock(x, z, minY, maxY);
+            }
+        }, m_bukkitWorld, new Vector(x, minY, z));
+    }
+        
+    @Override
+    public int getHighestTerrainBlock(final int x, final int z, 
+            final int minY, final int maxY, final boolean naturalOnly) {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<Integer>() {
+            @Override
+            public Integer Execute() {
+                return es.doGetHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
+            }
+        }, m_bukkitWorld, new Vector(x, minY, z));
+    }
+
+    @Override
+    public Vector getMaximumPoint() {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<Vector>() {
+            @Override
+            public Vector Execute() {
+                return es.doGetMaximumPoint();
+            }
+        });
+    }
+
+    @Override
+    public Vector getMinimumPoint() {
+        final ThreadSafeEditSession es = this;
+
+        return m_dispatcher.performSafe(new Func<Vector>() {
+            @Override
+            public Vector Execute() {
+                return es.doGetMinimumPoint();
+            }
+        });
+    }
+
+    /**
+     * Do not change! Requires special processing
+     * @param sess 
+     */
+    @Override
     public void undo(final EditSession sess) {
         final int jobId = getJobId();
+        
         cancelJobs(jobId);
 
         UndoSession undoSession = doUndo();
@@ -422,6 +627,10 @@ public class ThreadSafeEditSession extends EditSessionStub {
         m_asyncDisabled = false;
     }
 
+    /**
+     * Cancel a job
+     * @param jobId 
+     */
     protected void cancelJobs(final int jobId) {
         int minId = jobId;
 
@@ -490,6 +699,50 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
     private BaseBlock doGetLazyBlock(Vector position) {
         return super.getLazyBlock(position);
+    }
+
+    public BaseBiome doGetBiome(Vector2D position) {
+        return super.getBiome(position);
+    }
+
+    public int doGetBlockChangeCount() {
+        return super.getBlockChangeCount();
+    }
+
+    public int doGetBlockChangeLimit() {
+        return super.getBlockChangeLimit();
+    }
+
+    public List<Countable<Integer>> doGetBlockDistribution(Region region) {
+        return super.getBlockDistribution(region);
+    }
+
+    public List<Countable<BaseBlock>> doGetBlockDistributionWithData(Region region) {
+        return super.getBlockDistributionWithData(region);
+    }
+
+    public List<? extends Entity> doGetEntities() {
+        return super.getEntities();
+    }
+
+    public List<? extends Entity> doGetEntities(Region region) {
+        return super.getEntities(region);
+    }
+
+    public int doGetHighestTerrainBlock(int x, int z, int minY, int maxY) {
+        return super.getHighestTerrainBlock(x, z, minY, maxY);
+    }
+
+    public int doGetHighestTerrainBlock(int x, int z, int minY, int maxY, boolean naturalOnly) {
+        return super.getHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
+    }
+
+    public Vector doGetMaximumPoint() {
+        return super.getMaximumPoint();
+    }
+
+    public Vector doGetMinimumPoint() {
+        return super.getMinimumPoint();
     }
 
     public UndoSession doUndo() {

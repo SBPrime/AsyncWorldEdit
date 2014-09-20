@@ -25,7 +25,6 @@ package org.primesoft.asyncworldedit.worldedit.world;
 
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
@@ -48,7 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
-import org.primesoft.asyncworldedit.worldedit.BaseBlockWrapper;
+import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 import org.primesoft.asyncworldedit.worldedit.BlockVector2DWrapper;
 import org.primesoft.asyncworldedit.worldedit.Vector2DWrapper;
 import org.primesoft.asyncworldedit.worldedit.VectorWrapper;

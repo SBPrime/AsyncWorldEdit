@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.primesoft.asyncworldedit.worldedit;
+package org.primesoft.asyncworldedit.worldedit.blocks;
 
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**
  *

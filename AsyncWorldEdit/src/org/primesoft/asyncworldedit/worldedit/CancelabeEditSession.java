@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.extent.ChangeSetExtent;

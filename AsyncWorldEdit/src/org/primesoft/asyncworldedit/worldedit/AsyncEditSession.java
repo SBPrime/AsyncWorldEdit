@@ -26,7 +26,6 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
@@ -130,17 +129,6 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         }
     }
     
-    
-    public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
-        boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
-        if (r) {
-            forceFlush();
-        }
-        return r;
-    }
-
     /**
      * Do not change! Requires special processing
      * @param sess 
@@ -1005,6 +993,4 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     public int stackCuboidRegion(Region region, Vector dir, int count, boolean copyAir) throws MaxChangedBlocksException {
         return super.stackCuboidRegion(region, dir, count, copyAir); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
 }

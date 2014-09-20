@@ -24,8 +24,11 @@
 package org.primesoft.asyncworldedit.taskdispatcher;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.regions.Region;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
@@ -58,8 +61,7 @@ public class TaskDispatcher implements Runnable {
      * Bukkit scheduler
      */
     private final BukkitScheduler m_scheduler;
-    
-    
+
     /**
      * The chunk watcher
      */
@@ -192,18 +194,18 @@ public class TaskDispatcher implements Runnable {
     public boolean isMainTask() {
         return m_mainThread == Thread.currentThread();
     }
-    
+
     /**
      * Check if world operation is allowed to continue
+     *
      * @param world
      * @param cx
      * @param cz
-     * @return 
+     * @return
      */
     private boolean canPerform(World world, int cx, int cz) {
         return isMainTask() || world.isChunkLoaded(cx, cz);
     }
-
 
     /**
      * Queue sunced block get operation
@@ -292,6 +294,98 @@ public class TaskDispatcher implements Runnable {
         }
 
         queueFastOperation(action);
+    }
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param action
+     * @param world
+     * @param region
+     */
+    public void performSafe(Action action, World world, Region region) {
+        Set<Vector2D> chunks = region.getChunks();
+        String worldName = world != null ? world.getName() : null;
+
+        try {
+            boolean canPerform = true;
+            for (Vector2D vector : chunks) {
+                int cx = vector.getBlockX();
+                int cz = vector.getBlockZ();
+                m_chunkWatch.add(cx, cz, worldName);
+                canPerform &= canPerform(world, cx, cz);
+            }
+            if (canPerform) {
+                try {
+                    action.Execute();
+                    return;
+                } catch (Exception ex) {
+                    /*
+                     * Exception here indicates that async block get is not
+                     * available. Therefore use the queue fallback.
+                     */
+                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
+                            + " for region " + region.toString() + ". Error: "
+                            + ex.toString());
+                }
+            }
+        } finally {
+            for (Vector2D vector : chunks) {
+                int cx = vector.getBlockX();
+                int cz = vector.getBlockZ();
+                m_chunkWatch.remove(cx, cz, worldName);
+            }
+        }
+
+        queueFastOperation(action);
+    }
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param action
+     * @param world
+     * @param region
+     * @return
+     */
+    public <T> T performSafe(Func<T> action, World world, Region region) {
+        Set<Vector2D> chunks = region.getChunks();
+        String worldName = world != null ? world.getName() : null;
+
+        try {
+            boolean canPerform = true;
+            for (Vector2D vector : chunks) {
+                int cx = vector.getBlockX();
+                int cz = vector.getBlockZ();
+                m_chunkWatch.add(cx, cz, worldName);
+                canPerform &= canPerform(world, cx, cz);
+            }
+            if (canPerform) {
+                try {
+                    T result = action.Execute();
+                    return result;
+                } catch (Exception ex) {
+                    /*
+                     * Exception here indicates that async block get is not
+                     * available. Therefore use the queue fallback.
+                     */
+                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
+                            + " for region " + region.toString() + ". Error: "
+                            + ex.toString());
+                }
+            }
+        } finally {
+            for (Vector2D vector : chunks) {
+                int cx = vector.getBlockX();
+                int cz = vector.getBlockZ();
+                m_chunkWatch.remove(cx, cz, worldName);
+            }
+        }
+
+        return queueFastOperation(action);
     }
 
     /**
