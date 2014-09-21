@@ -2,7 +2,6 @@ package org.primesoft.asyncworldedit.permissions;
 
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 
 public class PermissionManager {
@@ -29,7 +28,7 @@ public class PermissionManager {
     /**
      * Gets the permissions group for player
      *
-     * @param playerWrapper
+     * @param player
      * @return
      */
     public static PermissionGroup getPermissionGroup(Player player) {

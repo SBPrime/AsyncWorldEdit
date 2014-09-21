@@ -258,7 +258,7 @@ public class PermissionGroup {
         m_isDefault = config.getBoolean("isDefault", forceDefault);
         m_maxJobs = validate(config.getInt("maxJobs", defaults.getMaxJobs()), defaults.getMaxJobs(), true);
         m_cleanOnLogout = config.getBoolean("cleanOnLogout", defaults.getCleanOnLogout());
-        m_isOnByDefault = config.getString("defaultMode", defaults.isOnByDefault() ? "on" : "off").equalsIgnoreCase("on");
+        m_isOnByDefault = config.getBoolean("defaultMode", defaults.isOnByDefault());
 
         ConfigurationSection rendererSection = config.getConfigurationSection("renderer");
         ConfigurationSection queueSection = config.getConfigurationSection("queue");
