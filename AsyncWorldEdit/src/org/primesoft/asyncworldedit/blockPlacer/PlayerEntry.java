@@ -28,9 +28,11 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
  * Operation queue player entry
@@ -38,6 +40,7 @@ import org.bukkit.ChatColor;
  * @author SBPrime
  */
 public class PlayerEntry {
+
     /**
      * Maximum job number
      */
@@ -54,22 +57,19 @@ public class PlayerEntry {
      * Current block placing speed (blocks per second)
      */
     private double m_speed;
-    
+
     /**
      * List of jobs
      */
     private final HashMap<Integer, JobEntry> m_jobs;
 
-    
     /**
      * Is the player informed about queue limit reached
      */
     private boolean m_isInformed;
-    
-    
+
     /**
-     * Maximum number of blocks on queue
-     * Used to display the progress bar
+     * Maximum number of blocks on queue Used to display the progress bar
      */
     private int m_maxBlocksOnQueue;
 
@@ -81,17 +81,16 @@ public class PlayerEntry {
         m_speed = 0;
         m_jobs = new HashMap<Integer, JobEntry>();
     }
-    
-    
+
     /**
      * Maximum number of blocks on queue
-     * @return 
+     *
+     * @return
      */
     public int getMaxQueueBlocks() {
         return m_maxBlocksOnQueue;
     }
-    
-    
+
     /**
      * Set the maximum number of blocks on queue
      */
@@ -101,25 +100,26 @@ public class PlayerEntry {
 
     /**
      * Get block entries queue
+     *
      * @return
      */
     public Queue<BlockPlacerEntry> getQueue() {
         return m_queue;
     }
 
-    
     /**
      * Change current queue to new queue
-     * @param newQueue 
+     *
+     * @param newQueue
      */
     public void updateQueue(Queue<BlockPlacerEntry> newQueue) {
         m_queue = newQueue;
     }
 
-    
     /**
      * Get block placing speed (blocks per second)
-     * @return 
+     *
+     * @return
      */
     public double getSpeed() {
         return m_speed;
@@ -127,17 +127,19 @@ public class PlayerEntry {
 
     /**
      * Update block placing speed
+     *
      * @param blocks number of blocks
      * @param timeDelta time spend
      */
     public void updateSpeed(double blocks, long timeDelta) {
-        double delta = timeDelta / 1000.0;        
+        double delta = timeDelta / 1000.0;
         m_speed = (m_speed * (AVG_SAMPLES - 1) + (blocks / delta)) / AVG_SAMPLES;
     }
 
     /**
      * Get next job id
-     * @return 
+     *
+     * @return
      */
     public int getNextJobId() {
         int maxId = -1;
@@ -146,15 +148,15 @@ public class PlayerEntry {
                 if (maxId < id) {
                     maxId = id;
                 }
-            }            
+            }
         }
         return maxId + 1;
     }
 
-    
     /**
      * Add new job
-     * @param job 
+     *
+     * @param job
      */
     public void addJob(JobEntry job) {
         synchronized (m_jobs) {
@@ -167,10 +169,10 @@ public class PlayerEntry {
         }
     }
 
-    
     /**
      * Remove job
-     * @param job 
+     *
+     * @param job
      */
     public void removeJob(JobEntry job) {
         synchronized (m_jobs) {
@@ -183,10 +185,10 @@ public class PlayerEntry {
         }
     }
 
-    
     /**
      * Remove job
-     * @param jobId 
+     *
+     * @param jobId
      */
     public void removeJob(int jobId) {
         synchronized (m_jobs) {
@@ -198,20 +200,20 @@ public class PlayerEntry {
         }
     }
 
-    
     /**
      * Get all jobs
-     * @return 
-     */    
+     *
+     * @return
+     */
     public Collection<JobEntry> getJobs() {
         synchronized (m_jobs) {
             return m_jobs.values();
         }
     }
 
-    
     /**
      * Print jobs message
+     *
      * @param lines
      */
     public void printJobs(List<String> lines) {
@@ -227,10 +229,10 @@ public class PlayerEntry {
         }
     }
 
-    
     /**
      * Has any job entries
-     * @return 
+     *
+     * @return
      */
     public boolean hasJobs() {
         synchronized (m_jobs) {
@@ -238,31 +240,31 @@ public class PlayerEntry {
         }
     }
 
-    
     /**
      * Get job ID
+     *
      * @param jobId job ID
-     * @return 
+     * @return
      */
     public JobEntry getJob(int jobId) {
         synchronized (m_jobs) {
             return m_jobs.get(jobId);
         }
     }
-       
-    
+
     /**
      * Is the player informed about queue overload
-     * @return 
+     *
+     * @return
      */
     public boolean isInformed() {
         return m_isInformed;
     }
 
-
     /**
      * Set isInformed state
-     * @param state 
+     *
+     * @param state
      */
     public void setInformed(boolean state) {
         m_isInformed = state;

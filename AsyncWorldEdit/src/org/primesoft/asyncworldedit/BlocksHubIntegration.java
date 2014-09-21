@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.UUID;

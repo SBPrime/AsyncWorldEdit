@@ -27,7 +27,7 @@ import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.regions.Region;
 import java.util.UUID;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.PlayerWrapper;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;

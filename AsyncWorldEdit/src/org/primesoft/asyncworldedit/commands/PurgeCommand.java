@@ -26,11 +26,11 @@ package org.primesoft.asyncworldedit.commands;
 import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.Permission;
-import org.primesoft.asyncworldedit.PermissionManager;
+import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
  *

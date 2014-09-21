@@ -28,7 +28,7 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
@@ -60,7 +60,7 @@ public abstract class WorldAsyncTask extends BaseTask {
 
     @Override
     protected void doPostRun(Object result) {
-        if (ConfigProvider.isTalkative()) {
+        if (m_group.isTalkative()) {
             AsyncWorldEditMain.say(m_player, ChatColor.LIGHT_PURPLE + "World operation done.");
         }
     }

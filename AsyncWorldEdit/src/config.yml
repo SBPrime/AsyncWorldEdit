@@ -1,48 +1,71 @@
 awe:
   #Do not change
-  version: 1
+  version: 2
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
     interval: 15
     #how often that a user will get an update on the current que (number of intervals)
     talk-interval: 10
-    #blocks to place (per-interval), this determines the max speed of block placing
-    #if you experience lag lower this and the next number, use -1 for no limit
-    blocks: 10000
-    #blocks to place (per-interval) for users with the permission AWE.user.vip-queue
-    blocks-vip: 2000
-    #Maximum number of miliseconds spend on placing blocks, use -1 for no limit
-    time: 40
-    #Additional time to spend on placink blocks for users with the permission AWE.user.vip-queue
-    time-vip: 20
     #maximum size of the blocks queue
     queue-max-size: 10000000
-    #maximum size of the player block queue
-    queue-limit-hard: 500000
-    #number of blocks on the player queue when to stop placing blocks
-    queue-limit-soft: 250000
   #check for updates
   checkVersion: true
-  #allow metrics to run
-  allowMetrics: true
-  #Whether or not to set messages using BarAPI
-  use-barapi: true
-  #is async world edit talkative 
-  talkative: true
-  #Default AWE status for loging in players if the player does not have 
-  #AWE.user.mode.on or AWE.user.mode.off permission
-  defaultOn: true
   #Disable or enable blocks physics freeze when placing blocks
   physicsFreez: true
   #Enable PlotMe Global Mask Fix
   plotMeFixEnabled: true
-  #Enable or disable auto job cancelation on player quit
-  cleanOnLogout: true
+  #Blocks hub plugin options
   blocksHub:
     #Enable block chang loggin
     logBlocks: true
     #Enable blocks access control
     checkAccess: false
+  #Player permission groups.
+  #Permission node: AWE.Groups.<group name>  
+  permissionGroups:
+    #The group entry (at least one group is required!)
+    #If a player has multiple groups, the las one defined in the config
+    #is assigned.
+    default:
+      #Indicates that the group is default.
+      #Only one group can by default, if multiple groups are set to default
+      #the first one is used asdefault. The default group is used for players
+      #that do not have any other permission groups.
+      isDefault: true
+      #Maximum number of jobs a player can have. -1 --> no job limit
+      maxJobs: 1
+      #Enable or disable auto job cancelation on player quit
+      cleanOnLogout: true
+      #Default AWE status for loging in players 
+      defaultMode: on
+      renderer:
+        #blocks to place (per-interval), this determines the max speed of block placing
+        #if you experience lag lower this and the next number, use -1 for no limit
+        blocks: 10000
+        #Maximum number of miliseconds spend on placing blocks, use -1 for no limit
+        time: 40
+      queue:
+        #maximum size of the player block queue
+        limit-hard: 500000
+        #number of blocks on the player queue when to stop placing blocks
+        limit-soft: 250000
+      messages:
+        #Whether or not to show progress using BarAPI
+        progress-bar: true
+        #Whether or not to show progress using the chat messages
+        progress-chat: true
+        #is async world edit talkative 
+        talkative: true
+    vip:
+      #you can remove this, the isDefault is by default set to false
+      isDefault: false 
+      maxJobs: -1
+      cleanOnLogout: false
+      #You can omit entries with that are same value as in the default group
+      #defaultMode: on
+      renderer:
+        blocks: 2000
+        time: 20
   #AWE will make the following WorldEdit actions async
   enabledOperations:
     - undo

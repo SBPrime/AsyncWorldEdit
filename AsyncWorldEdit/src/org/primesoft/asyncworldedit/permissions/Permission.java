@@ -1,6 +1,4 @@
-package org.primesoft.asyncworldedit;
-
-import org.bukkit.entity.Player;
+package org.primesoft.asyncworldedit.permissions;
 
 /**
  * List of all permissions
@@ -21,11 +19,6 @@ public enum Permission {
      * Bypass the maximum queue limit
      */
     QUEUE_BYPASS("admin.queue-bypass"),
-
-    /**
-     * Allows the use of the VIP block queue
-     */
-    QUEUE_VIP("user.vip-queue"),
 
     /**
      * Allows the use of the purge command
@@ -73,44 +66,14 @@ public enum Permission {
     MODE_CHANGE("user.mode.change"),
 
     /**
-     * Sets AWE to ON when user logs in
-     */
-    MODE_ON("user.mode.on"),
-
-    /**
-     * Sets AWE to OFF when user logs in
-     */
-    MODE_OFF("user.mode.off"),
-
-    /**
      * Allows the user to toggle AWE for another user
      */
-    MODE_CHANGE_OTHER("user.admin.change"),
-
-    /**
-     * Informs the user of his queue status
-     */
-    TALKATIVE_QUEUE("user.talkative"),
-
-    /**
-     * Informs the user of his queue status through BarAPI
-     */
-    PROGRESS_BAR("user.progressBar"),
-
-    /**
-     * Allows the user to retain his queue on logout
-     */
-    IGNORE_CLEANUP("admin.noCleanupOnQuit");
-
-    /**
-     * Plugin permissions top node
-     */
-    private static final String s_prefix = "AWE.";
+    MODE_CHANGE_OTHER("user.admin.change");
 
     /**
      * Plugin permission without base
      */
-    private String permission;
+    private final String permission;
 
     Permission(String permission) {
         this.permission = permission;
@@ -122,7 +85,6 @@ public enum Permission {
      * @return Entire permission node including base
      */
     public String getNode() {
-        return s_prefix + permission;
+        return PermissionManager.AWE_PREFIX + permission;
     }
-
 }

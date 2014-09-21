@@ -23,6 +23,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import com.worldcretornica.plotme.PlotManager;
 import com.worldcretornica.plotme.PlotMe;
 import com.worldcretornica.plotme.PlotWorldEdit;

@@ -27,11 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.ChatColor;
-import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
+import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
@@ -283,7 +285,8 @@ public class JobEntry extends BlockPlacerEntry {
                 break;
         }
 
-        if (ConfigProvider.isTalkative()) {
+        PermissionGroup group = PermissionManager.getPermissionGroup(AsyncWorldEditMain.getPlayer(player));
+        if (group.isTalkative()) {
             AsyncWorldEditMain.say(player, ChatColor.YELLOW + "Job " + toString()
                     + ChatColor.YELLOW + " - " + getStatusString());
         }

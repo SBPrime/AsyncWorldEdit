@@ -23,6 +23,9 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
 import java.util.UUID;

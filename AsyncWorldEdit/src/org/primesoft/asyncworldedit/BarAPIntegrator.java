@@ -23,10 +23,12 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import me.confuser.barapi.BarAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
  *
@@ -66,7 +68,7 @@ public class BarAPIntegrator {
             return;
         }
 
-        if (!ConfigProvider.useBarAPI()) {
+        if (!PermissionManager.getPermissionGroup(player).isBarApiProgressEnabled()) {
             return;
         }
 
@@ -87,7 +89,7 @@ public class BarAPIntegrator {
             return;
         }
 
-        if (!ConfigProvider.useBarAPI()) {
+        if (!PermissionManager.getPermissionGroup(player).isBarApiProgressEnabled()) {
             return;
         }
 

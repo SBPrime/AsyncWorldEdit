@@ -24,7 +24,7 @@
 package org.primesoft.asyncworldedit.worldedit.world;
 
 import java.util.UUID;
-import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**

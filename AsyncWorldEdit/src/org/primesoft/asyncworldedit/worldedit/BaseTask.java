@@ -35,10 +35,12 @@ import java.util.Iterator;
 import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.primesoft.asyncworldedit.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 
@@ -83,6 +85,12 @@ public abstract class BaseTask extends BukkitRunnable {
      * Job instance
      */
     protected final JobEntry m_job;
+    
+    
+    /**
+     * The permission group
+     */
+    protected final PermissionGroup m_group;
 
     public BaseTask(final EditSession editSession, final UUID player,
             final String commandName, BlockPlacer blocksPlacer, JobEntry job) {
@@ -91,6 +99,7 @@ public abstract class BaseTask extends BukkitRunnable {
         m_cancelableEditSession = (editSession instanceof CancelabeEditSession) ? (CancelabeEditSession) editSession : null;
         
         m_player = player;
+        m_group = PermissionManager.getPermissionGroup(AsyncWorldEditMain.getPlayer(m_player));
         m_command = commandName;
         m_blockPlacer = blocksPlacer;
         m_job = job;
@@ -110,8 +119,8 @@ public abstract class BaseTask extends BukkitRunnable {
     public void run() {
         Object result = null;
         try {
-            m_job.setStatus(JobEntry.JobStatus.Preparing);
-            if (ConfigProvider.isTalkative()) {
+            m_job.setStatus(JobEntry.JobStatus.Preparing);            
+            if (m_group.isTalkative()) {
                 AsyncWorldEditMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                         + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
             }

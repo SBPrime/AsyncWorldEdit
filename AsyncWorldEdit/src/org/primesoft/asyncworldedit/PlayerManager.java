@@ -23,6 +23,9 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import java.util.HashMap;
 import java.util.UUID;
 import org.bukkit.entity.Player;
@@ -75,8 +78,7 @@ public class PlayerManager {
             m_playersUids.remove(uuid);
         }
 
-        if (ConfigProvider.cleanOnLogoutEnabled()
-                && !PermissionManager.isAllowed(player, Permission.IGNORE_CLEANUP)) {
+        if (PermissionManager.getPermissionGroup(player).getCleanOnLogout()) {
             m_parrent.getBlockPlacer().purge(uuid);
         }
     }
@@ -103,10 +105,10 @@ public class PlayerManager {
         }
     }
 
-    
     /**
      * Get list of all players
-     * @return 
+     *
+     * @return
      */
     public PlayerWrapper[] getAllPlayers() {
         PlayerWrapper[] result;
@@ -115,49 +117,40 @@ public class PlayerManager {
         }
         return result;
     }
-    
+
     /**
      * Get default block placing speed
+     *
      * @param player
-     * @return 
+     * @return
      */
     public static int getMaxSpeed(Player player) {
         if (player == null) {
             return 0;
         }
 
-        boolean isVip = PermissionManager.isAllowed(player, Permission.QUEUE_VIP);
-        return ConfigProvider.getBlockCount() + (isVip ? ConfigProvider.getVipBlockCount() : 0);
+        return PermissionManager.getPermissionGroup(player).getRendererBlocks();        
     }
 
     /**
      * Get default user mode
+     *
      * @param player
-     * @return 
+     * @return
      */
     public static boolean getDefaultMode(Player player) {
         if (player == null) {
             return false;
         }
 
-        boolean hasOn = PermissionManager.isAllowed(player, Permission.MODE_ON);
-        boolean hasOff = PermissionManager.isAllowed(player, Permission.MODE_OFF);
-
-        if (hasOn && hasOff) {
-            return ConfigProvider.getDefaultMode();
-        } else if (hasOn) {
-            return true;
-        } else if (hasOff) {
-            return false;
-        } else {
-            return ConfigProvider.getDefaultMode();
-        }
+        return PermissionManager.getPermissionGroup(player).isOnByDefault();
     }
 
     /**
      * PLayer has async mode enabled
+     *
      * @param player
-     * @return 
+     * @return
      */
     public boolean hasAsyncMode(UUID player) {
         PlayerWrapper wrapper = getPlayer(player);
@@ -184,7 +177,7 @@ public class PlayerManager {
 
         wrapper.setMode(mode);
     }
-    
+
     public void initalize() {
         Player[] players = m_parrent.getServer().getOnlinePlayers();
         for (Player player : players) {
@@ -192,11 +185,11 @@ public class PlayerManager {
         }
     }
 
-    
     /**
      * Gets player UUID from player name
+     *
      * @param playerName
-     * @return 
+     * @return
      */
     public UUID getPlayerUUID(String playerName) {
         synchronized (m_playersUids) {
