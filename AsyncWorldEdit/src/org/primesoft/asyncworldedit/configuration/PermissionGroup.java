@@ -272,7 +272,7 @@ public class PermissionGroup {
                 defaults.getRendererTime(), true);
 
         if (rendererBlocks == -1 && rendererTime == -1) {
-            AsyncWorldEditMain.log("Warinig: Time and blocks are set to unlimited! For group " + m_name);
+            AsyncWorldEditMain.log("Warning: Time and blocks are set to unlimited! For group " + m_name);
             rendererBlocks = s_defaultValue.getRendererBlocks();
             rendererTime = s_defaultValue.getRendererTime();
         }
