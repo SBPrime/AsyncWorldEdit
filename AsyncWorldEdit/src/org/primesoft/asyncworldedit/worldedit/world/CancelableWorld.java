@@ -73,15 +73,14 @@ import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
  *
  * @author SBPrime
  */
-public class CancelableWorld implements World {
-
-    private final World m_parent;
+public class CancelableWorld extends AbstractWorldWrapper {
     private final int m_jobId;
     private final UUID m_player;
     private boolean m_isCanceled;
 
     public CancelableWorld(World parent, int jobId, UUID player) {
-        m_parent = parent;
+        super(parent);
+        
         m_isCanceled = false;
         m_jobId = jobId;
         m_player = player;

@@ -87,7 +87,7 @@ import org.primesoft.asyncworldedit.worldedit.entity.EntityLazyWrapper;
  *
  * @author SBPrime
  */
-public class AsyncWorld implements World {
+public class AsyncWorld extends AbstractWorldWrapper {
 
     /**
      * Wrap the world (if needed)
@@ -129,11 +129,6 @@ public class AsyncWorld implements World {
     private final UUID m_player;
 
     /**
-     * The parrent world
-     */
-    private final World m_parent;
-
-    /**
      * The bukkit world
      */
     private final org.bukkit.World m_bukkitWorld;
@@ -154,6 +149,8 @@ public class AsyncWorld implements World {
     private final BlocksHubIntegration m_blocksHub;
 
     public AsyncWorld(World world, UUID player) {
+        super(world);
+        
         m_plugin = AsyncWorldEditMain.getInstance();
         m_player = player;
         m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
@@ -162,7 +159,6 @@ public class AsyncWorld implements World {
         m_dispatcher = m_plugin.getTaskDispatcher();
         m_blocksHub = m_plugin.getBlocksHub();
 
-        m_parent = world;
         if (world instanceof BukkitWorld) {
             m_bukkitWorld = ((BukkitWorld) world).getWorld();
         } else {
