@@ -78,11 +78,14 @@ public final class Help {
         ChatColor.BLUE + " Jobs <u:playerName> [page]" + ChatColor.WHITE + " - displays other player operations",
         ChatColor.BLUE + " Jobs all [page]" + ChatColor.WHITE + " - displays all queued operations",};
     private final static String[] HelpCancel = new String[]{
-        ChatColor.YELLOW + "Cancel " + ChatColor.WHITE + " - cancel queued job",        
+        ChatColor.YELLOW + "Cancel " + ChatColor.WHITE + " - cancel queued job",
         ChatColor.BLUE + " Cancel #id" + ChatColor.WHITE + " - cancel your job",
         ChatColor.BLUE + " Cancel <u:playerName> #id" + ChatColor.WHITE + " - cancel other player job",};
     private final static String[] HelpReload = new String[]{
-        ChatColor.YELLOW + "Reload " + ChatColor.WHITE + " - Reload AWE configuration file",};
+        ChatColor.YELLOW + "Reload" + ChatColor.WHITE + " - Reload AWE configuration file",
+        ChatColor.BLUE + " Reload All" + ChatColor.WHITE + " - reload configuration entries and update groups",
+        ChatColor.BLUE + " Reload Config" + ChatColor.WHITE + " - reload only the configuration ",
+        ChatColor.BLUE + " Reload Groups" + ChatColor.WHITE + " - update only the player groups", };
 
     public static boolean ShowHelp(PlayerEntry player, String command) {
         String[] help = HelpGlobal;

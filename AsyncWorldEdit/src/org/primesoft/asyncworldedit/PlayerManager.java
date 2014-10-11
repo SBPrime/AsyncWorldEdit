@@ -78,6 +78,22 @@ public class PlayerManager {
             addPlayer(player);
         }
     }
+    
+    
+    /**
+     * Update AWE permission groups
+     */
+    public void updateGroups()
+    {
+        synchronized (m_playersUids)
+        {
+            for (PlayerEntry pe : m_playersUids.values())
+            {
+                Player player = pe.getPlayer();
+                pe.update(player, PermissionManager.getPermissionGroup(player));
+            }
+        }
+    }
 
     /**
      * Wrap new player

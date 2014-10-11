@@ -126,7 +126,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     /**
      * Send message to the log
-     * @param msg 
+     *
+     * @param msg
      */
     public static void log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
@@ -138,7 +139,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     /**
      * Send message to the console
-     * @param msg 
+     *
+     * @param msg
      */
     public static void sayConsole(String msg) {
         s_console.sendRawMessage(msg);
@@ -232,7 +234,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
         String name = (args != null && args.length > 0) ? args[0] : "";
 
         if (name.equalsIgnoreCase(Commands.COMMAND_RELOAD)) {
-            doReloadConfig(player);
+            doReloadConfig(player, args != null && args.length > 1 ? args[1] : "");
             return true;
         } else if (name.equalsIgnoreCase(Commands.COMMAND_HELP)) {
             String arg = args.length > 1 ? args[1] : null;
@@ -254,33 +256,59 @@ public class AsyncWorldEditMain extends JavaPlugin {
         return Help.ShowHelp(player, null);
     }
 
-    private void doReloadConfig(PlayerEntry player) {
+    private void doReloadConfig(PlayerEntry player, String arg) {
         if (!player.isAllowed(Permission.RELOAD_CONFIG)) {
             player.say(ChatColor.RED + "You have no permissions to do that.");
             return;
         }
 
-        log(player.getName() + " reloading config...");
-
-        reloadConfig();
-        m_isInitialized = false;
-
-        if (!ConfigProvider.load(this)) {
-            player.say("Error loading config");
+        if (arg == null || arg.length() == 0) {
+            Help.ShowHelp(player, Commands.COMMAND_RELOAD);
             return;
         }
 
-        m_blockPlacer.queueStop();
-        m_blockPlacer = new BlockPlacer(this);
+        boolean reloadConfig, flushGroups;
 
-        if (ConfigProvider.isPhysicsFreezEnabled()) {
-            m_physicsWatcher.Enable();
+        if (arg.equalsIgnoreCase("all")) {
+            reloadConfig = true;
+            flushGroups = true;
+        } else if (arg.equalsIgnoreCase("config")) {
+            reloadConfig = true;
+            flushGroups = false;
+        } else if (arg.equalsIgnoreCase("groups")) {
+            reloadConfig = false;
+            flushGroups = true;
         } else {
-            m_physicsWatcher.Disable();
+            Help.ShowHelp(player, Commands.COMMAND_RELOAD);
+            return;
+        }
+
+        log(player.getName() + " reloading config (" + arg + ")...");
+        if (reloadConfig) {
+            reloadConfig();
+            m_isInitialized = false;
+
+            if (!ConfigProvider.load(this)) {
+                player.say("Error loading config");
+                return;
+            }
+        }
+
+        if (flushGroups) {
+            m_playerManager.updateGroups();
+        }
+        if (reloadConfig) {
+            m_blockPlacer.loadConfig();
+
+            if (ConfigProvider.isPhysicsFreezEnabled()) {
+                m_physicsWatcher.Enable();
+            } else {
+                m_physicsWatcher.Disable();
+            }
         }
 
         m_isInitialized = true;
-        player.say("Config reloaded");
+        player.say("Done");
     }
 
     private void doToggle(PlayerEntry player, String[] args) {

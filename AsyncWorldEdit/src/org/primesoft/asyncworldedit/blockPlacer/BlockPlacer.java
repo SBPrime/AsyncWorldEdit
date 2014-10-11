@@ -46,7 +46,6 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.PhysicsWatch;
@@ -54,7 +53,6 @@ import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import org.primesoft.asyncworldedit.utils.FuncParamEx;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.worldedit.AsyncTask;
@@ -65,7 +63,7 @@ import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
  *
  * @author SBPrime
  */
-public class BlockPlacer implements Runnable {
+public class BlockPlacer {
 
     /**
      * Bukkit scheduler
@@ -85,7 +83,7 @@ public class BlockPlacer implements Runnable {
     /**
      * Current scheduler task
      */
-    private final BukkitTask m_task;
+    private BlockPlacerTask m_task;
 
     /**
      * Logged events queue (per player)
@@ -98,24 +96,14 @@ public class BlockPlacer implements Runnable {
     private final HashSet<PlayerEntry> m_lockedQueues;
 
     /**
-     * Should block places shut down
-     */
-    private boolean m_shutdown;
-
-    /**
      * Global queue max size
      */
-    private final int m_queueMaxSize;
-
-    /**
-     * Block placing interval (in ticks)
-     */
-    private final long m_interval;
+    private int m_queueMaxSize;
 
     /**
      * Talk interval
      */
-    private final int m_talkInterval;
+    private int m_talkInterval;
 
     /**
      * Run number
@@ -142,7 +130,6 @@ public class BlockPlacer implements Runnable {
      */
     private final AsyncWorldEditMain m_plugin;
 
-
     /**
      * Get the physics watcher
      *
@@ -165,14 +152,32 @@ public class BlockPlacer implements Runnable {
         m_lockedQueues = new HashSet<PlayerEntry>();
         m_scheduler = plugin.getServer().getScheduler();
         m_barAPI = plugin.getBarAPI();
-        m_interval = ConfigProvider.getInterval();
-        m_task = m_scheduler.runTaskTimer(plugin, this,
-                m_interval, m_interval);
-        m_plugin = plugin;
 
+        m_plugin = plugin;
+        m_physicsWatcher = plugin.getPhysicsWatcher();
+
+        loadConfig();
+    }
+
+    /**
+     * Reload the AWE configuration
+     */
+    public final void loadConfig() {
+        final BlockPlacer blocPlacer = this;
+
+        long interval = ConfigProvider.getInterval();
         m_talkInterval = ConfigProvider.getQueueTalkInterval();
         m_queueMaxSize = ConfigProvider.getQueueMaxSize();
-        m_physicsWatcher = plugin.getPhysicsWatcher();
+
+        if (m_task != null) {
+            m_task.queueStop();
+        }
+        m_task = new BlockPlacerTask(m_plugin, m_scheduler, interval) {
+            @Override
+            public void run(BlockPlacerTask task) {
+                blocPlacer.run(task);
+            }
+        };
     }
 
     /**
@@ -210,8 +215,7 @@ public class BlockPlacer implements Runnable {
     /**
      * Block placer main loop
      */
-    @Override
-    public void run() {
+    private void run(BlockPlacerTask task) {
         long enterFunctionTime = System.currentTimeMillis();
         final long timeDelte = enterFunctionTime - m_lastRunTime;
 
@@ -224,7 +228,7 @@ public class BlockPlacer implements Runnable {
         synchronized (this) {
             final PlayerEntry[] keys = m_blocks.keySet().toArray(new PlayerEntry[0]);
             for (PlayerEntry player : keys) {
-                PermissionGroup group = PermissionManager.getPermissionGroup(player != null ? player.getPlayer() : null);
+                PermissionGroup group = player.getPermissionGroup();
 
                 HashSet<PlayerEntry> uuids;
                 if (!groups.containsKey(group)) {
@@ -246,10 +250,8 @@ public class BlockPlacer implements Runnable {
             talk = true;
         }
 
-        synchronized (this) {
-            if (m_shutdown) {
-                stop();
-            }
+        if (m_task.isShutingDown()) {
+            return;
         }
 
         for (Map.Entry<PermissionGroup, HashSet<PlayerEntry>> entry : groups.entrySet()) {
@@ -392,17 +394,10 @@ public class BlockPlacer implements Runnable {
     }
 
     /**
-     * Queue stop command
-     */
-    public void queueStop() {
-        m_shutdown = true;
-    }
-
-    /**
      * stop block logger
      */
     public void stop() {
-        m_task.cancel();
+        m_task.stop();
     }
 
     /**

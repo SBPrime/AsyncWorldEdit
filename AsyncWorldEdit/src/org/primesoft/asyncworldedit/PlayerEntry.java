@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit;
 
 import java.util.UUID;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
@@ -109,7 +110,16 @@ public class PlayerEntry {
     }
 
     public void setMode(boolean mode) {
+        if (mode == m_mode)
+        {
+            return;
+        }
+        
         m_mode = mode;
+        
+        say(ChatColor.YELLOW + "Your " + ChatColor.BLUE + "AsyncWorldEdit " +
+            ChatColor.YELLOW + "is now set to " + ChatColor.WHITE + (mode ? "On" : "Off"));
+        
     }
 
     public boolean isAllowed(Permission permission) {
