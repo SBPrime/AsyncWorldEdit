@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit;
 
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import java.util.HashMap;
 import java.util.UUID;
@@ -62,13 +62,29 @@ public class PlayerManager {
     public PlayerManager(AsyncWorldEditMain parent) {
         m_playersUids = new HashMap<UUID, PlayerEntry>();
         m_parrent = parent;
-        
+
         synchronized (m_playersUids) {
             m_playersUids.put(PlayerEntry.UUID_CONSOLE, PlayerEntry.CONSOLE);
             m_playersUids.put(PlayerEntry.UUID_UNKNOWN, PlayerEntry.UNKNOWN);
         }
-    }       
+    }
 
+    /**
+     * Initialize the player manager
+     */
+    public void initalize() {
+        Player[] players = m_parrent.getServer().getOnlinePlayers();
+        for (Player player : players) {
+            addPlayer(player);
+        }
+    }
+
+    /**
+     * Wrap new player
+     *
+     * @param player
+     * @return
+     */
     public PlayerEntry addPlayer(Player player) {
         if (player == null) {
             return PlayerEntry.CONSOLE;
@@ -78,7 +94,7 @@ public class PlayerManager {
         String pName = player.getName();
         synchronized (m_playersUids) {
             PlayerEntry wrapper = m_playersUids.get(uuid);
-            
+
             if (wrapper != null) {
                 wrapper.update(player, PermissionManager.getPermissionGroup(player));
                 return wrapper;
@@ -90,6 +106,11 @@ public class PlayerManager {
         }
     }
 
+    /**
+     * Remove player
+     *
+     * @param player
+     */
     public void removePlayer(Player player) {
         if (player == null) {
             return;
@@ -107,8 +128,7 @@ public class PlayerManager {
     }
 
     /**
-     * Get the player wrapper based on bukkit player class
-     * (null = console)
+     * Get the player wrapper based on bukkit player class (null = console)
      *
      * @param player
      * @return
@@ -116,120 +136,44 @@ public class PlayerManager {
     public PlayerEntry getPlayer(Player player) {
         return getPlayer(player != null ? player.getUniqueId() : PlayerEntry.UUID_CONSOLE);
     }
-    
+
     /**
      * Get the player wrapper based on UUID
      *
-     * @param player
-     * @return
+     * @param playerUuid
+     * @return NEver returns null
      */
-    public PlayerEntry getPlayer(UUID player) {
-        if (player == null) {
+    public PlayerEntry getPlayer(UUID playerUuid) {
+        if (playerUuid == null) {
             return PlayerEntry.CONSOLE;
         }
 
+        PlayerEntry result;
+
         synchronized (m_playersUids) {
-            PlayerEntry result = m_playersUids.get(player);
-            if (result == null) {
-                return PlayerEntry.UNKNOWN;
+            result = m_playersUids.get(playerUuid);
+            if (result != null) {
+                return result;
             }
-
-            return result;
         }
+
+        /**
+         * Unknown player try to find it
+         */
+        return findPlayer(null, playerUuid);
     }
 
     /**
-     * Get list of all players
-     *
-     * @return
-     */
-    public PlayerEntry[] getAllPlayers() {
-        PlayerEntry[] result;
-        synchronized (m_playersUids) {
-            result = m_playersUids.values().toArray(new PlayerEntry[0]);
-        }
-        return result;
-    }
-
-    /**
-     * Get default block placing speed
-     *
-     * @param player
-     * @return
-     */
-    public static int getMaxSpeed(Player player) {
-        if (player == null) {
-            return 0;
-        }
-
-        return PermissionManager.getPermissionGroup(player).getRendererBlocks();        
-    }
-
-    /**
-     * Get default user mode
-     *
-     * @param player
-     * @return
-     */
-    public static boolean getDefaultMode(Player player) {
-        if (player == null) {
-            return false;
-        }
-
-        return PermissionManager.getPermissionGroup(player).isOnByDefault();
-    }
-
-    /**
-     * PLayer has async mode enabled
-     *
-     * @param player
-     * @return
-     */
-    public boolean hasAsyncMode(UUID player) {
-        PlayerEntry wrapper = getPlayer(player);
-
-        if (wrapper == null) {
-            return true;
-        }
-
-        return wrapper.getMode();
-    }
-
-    /**
-     * Set the AWE player mode
-     *
-     * @param player
-     * @param mode
-     */
-    public void setMode(UUID player, boolean mode) {
-        PlayerEntry wrapper = getPlayer(player);
-
-        if (wrapper == null) {
-            return;
-        }
-
-        wrapper.setMode(mode);
-    }
-
-    public void initalize() {
-        Player[] players = m_parrent.getServer().getOnlinePlayers();
-        for (Player player : players) {
-            addPlayer(player);
-        }
-    }
-    
-    /**
-     * Gets player UUID from player name
+     * Gets player wrapper from player name
      *
      * @param playerName
-     * @return
+     * @return never returns null
      */
     public PlayerEntry getPlayer(String playerName) {
-        if (playerName == null || playerName.length() == 0)
-        {
+        if (playerName == null || playerName.length() == 0) {
             return PlayerEntry.CONSOLE;
         }
-        
+
         synchronized (m_playersUids) {
             for (PlayerEntry p : m_playersUids.values()) {
                 if (p.getName().equalsIgnoreCase(playerName)) {
@@ -237,29 +181,44 @@ public class PlayerManager {
                 }
             }
         }
-        
-        return PlayerEntry.UNKNOWN;
+
+        /**
+         * Player name not found try using it as GUID
+         */
+        try {
+            return getPlayer(UUID.fromString(playerName));
+        } catch (IllegalArgumentException ex) {
+            //This was not 
+        }
+
+        return findPlayer(playerName, null);
     }
 
     /**
-     * Gets player UUID from player name
+     * Search the block placer queues for player entry
      *
      * @param playerName
-     * @return
+     * @param playerUuid
+     * @return Never returns null
      */
-    public UUID getPlayerUUID(String playerName) {
-        synchronized (m_playersUids) {
-            for (PlayerEntry p : m_playersUids.values()) {
-                if (p.getName().equalsIgnoreCase(playerName)) {
-                    return p.getUUID();
-                }
+    private PlayerEntry findPlayer(String playerName, UUID playerUuid) {
+        if (playerName == null && playerUuid == null) {
+            return PlayerEntry.UNKNOWN;
+        }
+
+        BlockPlacer bp = m_parrent.getBlockPlacer();
+        PlayerEntry[] queuedEntries = bp.getAllPlayers();
+        if (queuedEntries == null) {
+            return PlayerEntry.UNKNOWN;
+        }
+
+        for (PlayerEntry pe : queuedEntries) {
+            if ((playerUuid != null && playerUuid.equals(pe.getUUID()))
+                    || (playerName != null && playerName.equalsIgnoreCase(pe.getName()))) {
+                return pe;
             }
         }
 
-        try {
-            return UUID.fromString(playerName);
-        } catch (IllegalArgumentException ex) {
-            return PlayerEntry.UUID_UNKNOWN;
-        }
+        return PlayerEntry.UNKNOWN;
     }
 }

@@ -51,7 +51,6 @@ import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.PlayerManager;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
@@ -143,10 +142,6 @@ public class BlockPlacer implements Runnable {
      */
     private final AsyncWorldEditMain m_plugin;
 
-    /**
-     * The player manager
-     */
-    private final PlayerManager m_playerManager;
 
     /**
      * Get the physics watcher
@@ -178,7 +173,6 @@ public class BlockPlacer implements Runnable {
         m_talkInterval = ConfigProvider.getQueueTalkInterval();
         m_queueMaxSize = ConfigProvider.getQueueMaxSize();
         m_physicsWatcher = plugin.getPhysicsWatcher();
-        m_playerManager = plugin.getPlayerManager();
     }
 
     /**

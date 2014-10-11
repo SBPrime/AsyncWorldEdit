@@ -113,7 +113,8 @@ public class PlayerWrapper implements Player {
                         m_uuid = ((BukkitPlayer) m_parent).getPlayer().getUniqueId();
                     } else {
                         PlayerManager pm = AsyncWorldEditMain.getInstance().getPlayerManager();
-                        m_uuid = pm.getPlayerUUID(m_parent.getName());
+                        PlayerEntry entry = pm.getPlayer(m_parent.getName());
+                        return entry.getUUID();
                     }
                 }
             }

@@ -88,7 +88,7 @@ public class PlayerEntry {
         }
 
         if (m_canTalk) {
-            AsyncWorldEditMain.say(msg);
+            AsyncWorldEditMain.sayConsole(msg);
         }
     }
 

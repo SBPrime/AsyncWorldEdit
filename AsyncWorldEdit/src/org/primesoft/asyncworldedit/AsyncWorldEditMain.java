@@ -42,10 +42,8 @@ package org.primesoft.asyncworldedit;
 
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.permissions.Permission;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -126,6 +124,10 @@ public class AsyncWorldEditMain extends JavaPlugin {
         return s_instance;
     }
 
+    /**
+     * Send message to the log
+     * @param msg 
+     */
     public static void log(String msg) {
         if (s_log == null || msg == null || s_prefix == null) {
             return;
@@ -135,30 +137,10 @@ public class AsyncWorldEditMain extends JavaPlugin {
     }
 
     /**
-     * Get craft bukkit player
-     *
-     * @param uuid player
-     * @return
+     * Send message to the console
+     * @param msg 
      */
-    public static Player getPlayer(UUID uuid) {
-        if (s_instance == null) {
-            return null;
-        }
-
-        PlayerManager pManager = s_instance.getPlayerManager();
-        PlayerEntry player = pManager.getPlayer(uuid);
-        if (player == null) {
-            return null;
-        }
-        Player bPlayer = player.getPlayer();
-        if (bPlayer == null || !bPlayer.isOnline()) {
-            return null;
-        }
-
-        return bPlayer;
-    }
-
-    public static void say(String msg) {
+    public static void sayConsole(String msg) {
         s_console.sendRawMessage(msg);
     }
 
