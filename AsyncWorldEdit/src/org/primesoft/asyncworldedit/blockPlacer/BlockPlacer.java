@@ -225,7 +225,7 @@ public class BlockPlacer {
         final HashMap<PlayerEntry, Integer> blocksPlaced = new HashMap<PlayerEntry, Integer>();
         final HashMap<PermissionGroup, HashSet<PlayerEntry>> groups = new HashMap<PermissionGroup, HashSet<PlayerEntry>>();
 
-        synchronized (this) {
+        synchronized (m_mutex) {
             final PlayerEntry[] keys = m_blocks.keySet().toArray(new PlayerEntry[0]);
             for (PlayerEntry player : keys) {
                 PermissionGroup group = player.getPermissionGroup();
@@ -261,7 +261,7 @@ public class BlockPlacer {
             processQueue(keys, permissionGroup, blocksPlaced, jobsToCancel);
         }
 
-        synchronized (this) {
+        synchronized (m_mutex) {
             for (Map.Entry<PlayerEntry, BlockPlacerPlayer> queueEntry : m_blocks.entrySet()) {
                 PlayerEntry playerEntry = queueEntry.getKey();
                 BlockPlacerPlayer entry = queueEntry.getValue();
@@ -301,7 +301,7 @@ public class BlockPlacer {
 
         while (process) {
             BlockPlacerEntry entry;
-            synchronized (this) {
+            synchronized (m_mutex) {
                 entry = fetchBlocks(playerUUID, permissionGroup,
                         seqNumber, blocksPlaced, jobsToCancel);
             }
@@ -409,7 +409,7 @@ public class BlockPlacer {
      */
     public int getJobId(PlayerEntry player) {
         BlockPlacerPlayer playerEntry;
-        synchronized (this) {
+        synchronized (m_mutex) {
             if (m_blocks.containsKey(player)) {
                 playerEntry = m_blocks.get(player);
             } else {
@@ -429,7 +429,7 @@ public class BlockPlacer {
      * @return
      */
     public JobEntry getJob(PlayerEntry player, int jobId) {
-        synchronized (this) {
+        synchronized (m_mutex) {
             if (!m_blocks.containsKey(player)) {
                 return null;
             }
@@ -447,7 +447,7 @@ public class BlockPlacer {
     public boolean addJob(PlayerEntry player, JobEntry job) {
         boolean result;
 
-        synchronized (this) {
+        synchronized (m_mutex) {
             BlockPlacerPlayer playerEntry;
 
             if (!m_blocks.containsKey(player)) {
@@ -469,7 +469,7 @@ public class BlockPlacer {
             player.say(ChatColor.RED + "You have too many jobs queued, operation canceled.");
             job.cancel();
         }
-        
+
         return result;
     }
 
@@ -485,7 +485,7 @@ public class BlockPlacer {
             return false;
         }
 
-        synchronized (this) {
+        synchronized (m_mutex) {
             BlockPlacerPlayer playerEntry;
 
             if (!m_blocks.containsKey(player)) {
@@ -546,20 +546,6 @@ public class BlockPlacer {
     }
 
     /**
-     * Cancel job
-     *
-     * @param player
-     * @param job
-     */
-    public void cancelJob(PlayerEntry player, JobEntry job) {
-        if (job instanceof UndoJob) {
-            player.say(ChatColor.RED + "Warning: Undo jobs shuld not by canceled, ingoring!");
-            return;
-        }
-        cancelJob(player, job.getJobId());
-    }
-
-    /**
      * Wait for job to finish
      *
      * @param job
@@ -567,6 +553,10 @@ public class BlockPlacer {
     private void waitForJob(JobEntry job) {
         if (job instanceof UndoJob) {
             AsyncWorldEditMain.log("Warning: Undo jobs shuld not by canceled, ingoring!");
+            return;
+        }
+
+        if (job == null) {
             return;
         }
 
@@ -606,53 +596,65 @@ public class BlockPlacer {
     public int cancelJob(PlayerEntry player, int jobId) {
         int newSize, result;
         BlockPlacerPlayer playerEntry;
-        Queue<BlockPlacerEntry> queue;
-        JobEntry job;
-        synchronized (this) {
+        Queue<BlockPlacerEntry> queue = null;
+        JobEntry job = null;
+        synchronized (m_mutex) {
             if (!m_blocks.containsKey(player)) {
                 return 0;
             }
+
             playerEntry = m_blocks.get(player);
-            job = playerEntry.getJob(jobId);
-            if (job instanceof UndoJob) {
-                player.say(ChatColor.RED + "Warning: Undo jobs shuld not by canceled, ingoring!");
-                return 0;
-            }
+            if (playerEntry != null) {
+                job = playerEntry.getJob(jobId);
+                if (job instanceof UndoJob) {
+                    player.say(ChatColor.RED + "Warning: Undo jobs shuld not by canceled, ingoring!");
+                    return 0;
+                }
 
-            queue = playerEntry.getQueue();
-            playerEntry.removeJob(job);
-            onJobRemoved(job);
-        }
-        waitForJob(job);
+                queue = playerEntry.getQueue();
 
-        synchronized (this) {
-            Queue<BlockPlacerEntry> filtered = new ArrayDeque<BlockPlacerEntry>();
-            synchronized (queue) {
-                for (BlockPlacerEntry entry : queue) {
-                    if (entry.getJobId() == jobId) {
-                        if (entry instanceof IBlockPlacerLocationEntry) {
-                            IBlockPlacerLocationEntry bpEntry = (IBlockPlacerLocationEntry) entry;
-                            String worldName = bpEntry.getWorldName();
-                            if (worldName != null) {
-                                m_physicsWatcher.removeLocation(worldName, bpEntry.getLocation());
-                            }
-                        } else if (entry instanceof JobEntry) {
-                            JobEntry jobEntry = (JobEntry) entry;
-                            playerEntry.removeJob(jobEntry);
-                            onJobRemoved(jobEntry);
-                        }
-                    } else {
-                        filtered.add(entry);
-                    }
+                if (job != null) {
+                    playerEntry.removeJob(job);
+                    onJobRemoved(job);
                 }
             }
+        }
 
-            newSize = filtered.size();
-            result = queue.size() - filtered.size();
-            PermissionGroup group = player.getPermissionGroup();
-            if (newSize > 0) {
-                playerEntry.updateQueue(filtered);
+        waitForJob(job);
+
+        synchronized (m_mutex) {
+            Queue<BlockPlacerEntry> filtered = new ArrayDeque<BlockPlacerEntry>();
+            if (queue != null) {
+                synchronized (queue) {
+                    for (BlockPlacerEntry entry : queue) {
+                        if (entry.getJobId() == jobId) {
+                            if (entry instanceof IBlockPlacerLocationEntry) {
+                                IBlockPlacerLocationEntry bpEntry = (IBlockPlacerLocationEntry) entry;
+                                String worldName = bpEntry.getWorldName();
+                                if (worldName != null) {
+                                    m_physicsWatcher.removeLocation(worldName, bpEntry.getLocation());
+                                }
+                            } else if (playerEntry != null && entry instanceof JobEntry) {
+                                JobEntry jobEntry = (JobEntry) entry;
+                                playerEntry.removeJob(jobEntry);
+                                onJobRemoved(jobEntry);
+                            }
+                        } else {
+                            filtered.add(entry);
+                        }
+                    }
+                }
+
+                newSize = filtered.size();
+                result = queue.size() - filtered.size();
             } else {
+                newSize = 0;
+                result = 0;
+            }
+            PermissionGroup group = player.getPermissionGroup();
+            if (newSize > 0 && playerEntry != null) {
+                playerEntry.updateQueue(filtered);
+            } else if (newSize == 0) {
                 m_blocks.remove(player);
                 if (group.isBarApiProgressEnabled()) {
                     hideProgressBar(player, playerEntry);
@@ -673,7 +675,7 @@ public class BlockPlacer {
      */
     public int purge(PlayerEntry player) {
         int result = 0;
-        synchronized (this) {
+        synchronized (m_mutex) {
             if (m_blocks.containsKey(player)) {
                 BlockPlacerPlayer playerEntry = m_blocks.get(player);
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
@@ -718,7 +720,7 @@ public class BlockPlacer {
      */
     public int purgeAll() {
         int result = 0;
-        synchronized (this) {
+        synchronized (m_mutex) {
             for (PlayerEntry user : getAllPlayers()) {
                 result += purge(user);
             }
@@ -733,7 +735,7 @@ public class BlockPlacer {
      * @return players list
      */
     public PlayerEntry[] getAllPlayers() {
-        synchronized (this) {
+        synchronized (m_mutex) {
             return m_blocks.keySet().toArray(new PlayerEntry[0]);
         }
     }
@@ -745,7 +747,7 @@ public class BlockPlacer {
      * @return number of stored events
      */
     public BlockPlacerPlayer getPlayerEvents(PlayerEntry player) {
-        synchronized (this) {
+        synchronized (m_mutex) {
             if (m_blocks.containsKey(player)) {
                 return m_blocks.get(player);
             }
@@ -761,7 +763,7 @@ public class BlockPlacer {
      */
     public String getPlayerMessage(PlayerEntry player) {
         BlockPlacerPlayer entry = null;
-        synchronized (this) {
+        synchronized (m_mutex) {
             if (m_blocks.containsKey(player)) {
                 entry = m_blocks.get(player);
             }
@@ -818,7 +820,7 @@ public class BlockPlacer {
      */
     public void removeJob(final PlayerEntry player, JobEntry jobEntry) {
         BlockPlacerPlayer playerEntry;
-        synchronized (this) {
+        synchronized (m_mutex) {
             playerEntry = m_blocks.get(player);
         }
 

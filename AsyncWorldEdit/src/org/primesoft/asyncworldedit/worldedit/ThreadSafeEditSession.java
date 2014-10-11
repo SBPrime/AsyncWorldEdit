@@ -657,7 +657,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
             if (minId >= 0 && minId != jobId) {
                 JobEntry job = m_blockPlacer.getJob(m_player, minId);
                 if (job != null && !(job instanceof UndoJob)) {
-                    m_blockPlacer.cancelJob(m_player, job);
+                    m_blockPlacer.cancelJob(m_player, job.getJobId());
                 }
             }
         }

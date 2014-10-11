@@ -210,6 +210,10 @@ public class BlockPlacerPlayer {
      * @param job
      */
     public void removeJob(JobEntry job) {
+        if (job == null)
+        {
+            return;
+        }
         synchronized (m_jobs) {
             int id = job.getJobId();
             if (!m_jobs.containsKey(id)) {
