@@ -43,7 +43,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
-import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
 
 /**
  *
@@ -51,7 +51,7 @@ import java.util.UUID;
  */
 public class BlockVector2DWrapper extends BlockVector2D implements IAsyncWrapper {
     public static BlockVector2D wrap(BlockVector2D v, int jobId,
-                                            boolean isAsync, UUID player) {
+                                            boolean isAsync, PlayerEntry player) {
         BlockVector2DWrapper result;
         if (v instanceof BlockVector2DWrapper) {
             result = (BlockVector2DWrapper) v;
@@ -70,7 +70,7 @@ public class BlockVector2DWrapper extends BlockVector2D implements IAsyncWrapper
 
     private boolean m_isAsync;
 
-    private UUID m_player;
+    private PlayerEntry m_player;
 
     @Override
     public int getJobId() {
@@ -91,17 +91,17 @@ public class BlockVector2DWrapper extends BlockVector2D implements IAsyncWrapper
         m_isAsync = async;
     }
 
-    public void setPlayer(UUID player) {
+    public void setPlayer(PlayerEntry player) {
         m_player = player;
     }
 
     @Override
-    public UUID getPlayer() {
+    public PlayerEntry getPlayer() {
         return m_player;
     }
 
     private BlockVector2DWrapper(BlockVector2D parent, int jobId,
-                                 boolean isAsync, UUID player) {
+                                 boolean isAsync, PlayerEntry player) {
         super(0, 0);
 
         m_jobId = jobId;

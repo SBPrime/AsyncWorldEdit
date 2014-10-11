@@ -42,6 +42,7 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
 
 /**
  *
@@ -54,5 +55,5 @@ public interface IAsyncWrapper {
 
     boolean isAsync();
 
-    UUID getPlayer();
+    PlayerEntry getPlayer();
 }

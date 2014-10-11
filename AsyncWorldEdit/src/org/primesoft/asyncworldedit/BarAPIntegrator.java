@@ -40,12 +40,9 @@
  */
 package org.primesoft.asyncworldedit;
 
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import me.confuser.barapi.BarAPI;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
  *
@@ -53,7 +50,7 @@ import org.primesoft.asyncworldedit.permissions.PermissionManager;
  */
 public class BarAPIntegrator {
 
-    private boolean m_isInitialized;
+    private final boolean m_isInitialized;
 
     /**
      * Get instance of the core blocks hub plugin
@@ -80,12 +77,12 @@ public class BarAPIntegrator {
         m_isInitialized = ba != null;
     }
 
-    public void setMessage(Player player, String message, double percent) {
-        if (!m_isInitialized || player == null) {
+    public void setMessage(PlayerEntry player, String message, double percent) {
+        if (!m_isInitialized || player == null || player.getPlayer() == null) {
             return;
         }
 
-        if (!PermissionManager.getPermissionGroup(player).isBarApiProgressEnabled()) {
+        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
             return;
         }
 
@@ -98,18 +95,18 @@ public class BarAPIntegrator {
             percent = 100;
         }
         
-        BarAPI.setMessage(player, message, (float)percent);
+        BarAPI.setMessage(player.getPlayer(), message, (float)percent);
     }
 
-    public void disableMessage(Player player) {
-        if (!m_isInitialized || player == null) {
+    public void disableMessage(PlayerEntry player) {
+        if (!m_isInitialized || player == null || player.getPlayer() == null) {
             return;
         }
 
-        if (!PermissionManager.getPermissionGroup(player).isBarApiProgressEnabled()) {
+        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
             return;
         }
 
-        BarAPI.removeBar(player);
+        BarAPI.removeBar(player.getPlayer());
     }
 }

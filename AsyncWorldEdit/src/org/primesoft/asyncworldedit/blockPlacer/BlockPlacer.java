@@ -45,7 +45,6 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import java.util.*;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.BarAPIntegrator;
@@ -53,7 +52,7 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerManager;
-import org.primesoft.asyncworldedit.PlayerWrapper;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
@@ -92,12 +91,12 @@ public class BlockPlacer implements Runnable {
     /**
      * Logged events queue (per player)
      */
-    private final HashMap<UUID, PlayerEntry> m_blocks;
+    private final HashMap<PlayerEntry, BlockPlacerPlayer> m_blocks;
 
     /**
      * All locked queues
      */
-    private final HashSet<UUID> m_lockedQueues;
+    private final HashSet<PlayerEntry> m_lockedQueues;
 
     /**
      * Should block places shut down
@@ -167,8 +166,8 @@ public class BlockPlacer implements Runnable {
         m_jobAddedListeners = new ArrayList<IBlockPlacerListener>();
         m_lastRunTime = System.currentTimeMillis();
         m_runNumber = 0;
-        m_blocks = new HashMap<UUID, PlayerEntry>();
-        m_lockedQueues = new HashSet<UUID>();
+        m_blocks = new HashMap<PlayerEntry, BlockPlacerPlayer>();
+        m_lockedQueues = new HashSet<PlayerEntry>();
         m_scheduler = plugin.getServer().getScheduler();
         m_barAPI = plugin.getBarAPI();
         m_interval = ConfigProvider.getInterval();
@@ -225,25 +224,24 @@ public class BlockPlacer implements Runnable {
         boolean talk = false;
         final List<JobEntry> jobsToCancel = new ArrayList<JobEntry>();
         //Number of blocks placed for player
-        final HashMap<UUID, Integer> blocksPlaced = new HashMap<UUID, Integer>();
-        final HashMap<PermissionGroup, HashSet<UUID>> groups = new HashMap<PermissionGroup, HashSet<UUID>>();
+        final HashMap<PlayerEntry, Integer> blocksPlaced = new HashMap<PlayerEntry, Integer>();
+        final HashMap<PermissionGroup, HashSet<PlayerEntry>> groups = new HashMap<PermissionGroup, HashSet<PlayerEntry>>();
 
         synchronized (this) {
-            final UUID[] keys = m_blocks.keySet().toArray(new UUID[0]);
-            for (UUID key : keys) {
-                PlayerWrapper player = m_playerManager.getPlayer(key);
+            final PlayerEntry[] keys = m_blocks.keySet().toArray(new PlayerEntry[0]);
+            for (PlayerEntry player : keys) {
                 PermissionGroup group = PermissionManager.getPermissionGroup(player != null ? player.getPlayer() : null);
 
-                HashSet<UUID> uuids;
+                HashSet<PlayerEntry> uuids;
                 if (!groups.containsKey(group)) {
-                    uuids = new HashSet<UUID>();
-                    uuids.add(key);
+                    uuids = new HashSet<PlayerEntry>();
+                    uuids.add(player);
                     groups.put(group, uuids);
                 } else {
                     uuids = groups.get(group);
-                    if (!uuids.contains(key)) //Should not happen but better be safe then sorry ;)
+                    if (!uuids.contains(player)) //Should not happen but better be safe then sorry ;)
                     {
-                        uuids.add(key);
+                        uuids.add(player);
                     }
                 }
             }
@@ -260,20 +258,20 @@ public class BlockPlacer implements Runnable {
             }
         }
 
-        for (Map.Entry<PermissionGroup, HashSet<UUID>> entry : groups.entrySet()) {
+        for (Map.Entry<PermissionGroup, HashSet<PlayerEntry>> entry : groups.entrySet()) {
             PermissionGroup permissionGroup = entry.getKey();
-            UUID[] keys = entry.getValue().toArray(new UUID[0]);
+            PlayerEntry[] keys = entry.getValue().toArray(new PlayerEntry[0]);
 
             processQueue(keys, permissionGroup, blocksPlaced, jobsToCancel);
         }
 
         synchronized (this) {
-            for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
-                UUID playerUUID = queueEntry.getKey();
-                PlayerEntry entry = queueEntry.getValue();
-                Integer cnt = blocksPlaced.get(playerUUID);
+            for (Map.Entry<PlayerEntry, BlockPlacerPlayer> queueEntry : m_blocks.entrySet()) {
+                PlayerEntry playerEntry = queueEntry.getKey();
+                BlockPlacerPlayer entry = queueEntry.getValue();
+                Integer cnt = blocksPlaced.get(playerEntry);
 
-                showProgress(playerUUID, entry, cnt != null ? cnt : 0, timeDelte, talk);
+                showProgress(playerEntry, entry, cnt != null ? cnt : 0, timeDelte, talk);
             }
         }
 
@@ -294,9 +292,9 @@ public class BlockPlacer implements Runnable {
      * @param blocksPlaced number of blocksplaced for players
      * @param jobsToCancel canceled blocks
      */
-    private void processQueue(final UUID[] playerUUID,
+    private void processQueue(final PlayerEntry[] playerUUID,
             PermissionGroup permissionGroup,
-            final HashMap<UUID, Integer> blocksPlaced, final List<JobEntry> jobsToCancel) {
+            final HashMap<PlayerEntry, Integer> blocksPlaced, final List<JobEntry> jobsToCancel) {
         InOutParam<Integer> seqNumber = InOutParam.Ref(0);
         long startTime = System.currentTimeMillis();
         int blocks = 0;
@@ -335,10 +333,10 @@ public class BlockPlacer implements Runnable {
      * @param jobsToCancel jobs to cancel
      * @return fatched block
      */
-    private BlockPlacerEntry fetchBlocks(final UUID[] playerNames,
+    private BlockPlacerEntry fetchBlocks(final PlayerEntry[] playerNames,
             PermissionGroup permissionGroup,
             InOutParam<Integer> seqNumber,
-            final HashMap<UUID, Integer> blocksPlaced,
+            final HashMap<PlayerEntry, Integer> blocksPlaced,
             final List<JobEntry> jobsToCancel) {
         if (playerNames == null || playerNames.length == 0) {
             return null;
@@ -348,8 +346,8 @@ public class BlockPlacer implements Runnable {
         BlockPlacerEntry result = null;
 
         for (int retry = playerNames.length; result == null && retry > 0; retry--) {
-            final UUID player = playerNames[keyPos];
-            final PlayerEntry playerEntry = m_blocks.get(player);
+            final PlayerEntry player = playerNames[keyPos];
+            final BlockPlacerPlayer playerEntry = m_blocks.get(player);
             if (playerEntry != null) {
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 synchronized (queue) {
@@ -385,9 +383,8 @@ public class BlockPlacer implements Runnable {
                 }
                 if (size == 0 && !playerEntry.hasJobs()) {
                     m_blocks.remove(playerNames[keyPos]);
-                    Player p = AsyncWorldEditMain.getPlayer(player);
                     if (permissionGroup.isBarApiProgressEnabled()) {
-                        hideProgressBar(p, playerEntry);
+                        hideProgressBar(player, playerEntry);
                     }
                 }
             } else {
@@ -420,13 +417,13 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @return
      */
-    public int getJobId(UUID player) {
-        PlayerEntry playerEntry;
+    public int getJobId(PlayerEntry player) {
+        BlockPlacerPlayer playerEntry;
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 playerEntry = m_blocks.get(player);
             } else {
-                playerEntry = new PlayerEntry();
+                playerEntry = new BlockPlacerPlayer();
                 m_blocks.put(player, playerEntry);
             }
         }
@@ -441,12 +438,12 @@ public class BlockPlacer implements Runnable {
      * @param jobId job ID
      * @return
      */
-    public JobEntry getJob(UUID player, int jobId) {
+    public JobEntry getJob(PlayerEntry player, int jobId) {
         synchronized (this) {
             if (!m_blocks.containsKey(player)) {
                 return null;
             }
-            PlayerEntry playerEntry = m_blocks.get(player);
+            BlockPlacerPlayer playerEntry = m_blocks.get(player);
             return playerEntry.getJob(jobId);
         }
     }
@@ -457,12 +454,12 @@ public class BlockPlacer implements Runnable {
      * @param player player UUID
      * @param job the job
      */
-    public void addJob(UUID player, JobEntry job) {
+    public void addJob(PlayerEntry player, JobEntry job) {
         synchronized (this) {
-            PlayerEntry playerEntry;
+            BlockPlacerPlayer playerEntry;
 
             if (!m_blocks.containsKey(player)) {
-                playerEntry = new PlayerEntry();
+                playerEntry = new BlockPlacerPlayer();
                 m_blocks.put(player, playerEntry);
             } else {
                 playerEntry = m_blocks.get(player);
@@ -484,12 +481,16 @@ public class BlockPlacer implements Runnable {
      * @param entry
      * @return
      */
-    public boolean addTasks(UUID player, BlockPlacerEntry entry) {
+    public boolean addTasks(PlayerEntry player, BlockPlacerEntry entry) {
+        if (player == null) {
+            return false;
+        }
+
         synchronized (this) {
-            PlayerEntry playerEntry;
+            BlockPlacerPlayer playerEntry;
 
             if (!m_blocks.containsKey(player)) {
-                playerEntry = new PlayerEntry();
+                playerEntry = new BlockPlacerPlayer();
                 m_blocks.put(player, playerEntry);
             } else {
                 playerEntry = m_blocks.get(player);
@@ -500,23 +501,19 @@ public class BlockPlacer implements Runnable {
                 return false;
             }
 
-            boolean bypass = !PermissionManager.isAllowed(AsyncWorldEditMain.getPlayer(player), Permission.QUEUE_BYPASS);
-            PermissionGroup group = PermissionManager.getPermissionGroup(AsyncWorldEditMain.getPlayer(player));
+            boolean bypass = !player.isAllowed(Permission.QUEUE_BYPASS);
+            PermissionGroup group = player.getPermissionGroup();
 
             int size = 0;
-            for (Map.Entry<UUID, PlayerEntry> queueEntry : m_blocks.entrySet()) {
+            for (Map.Entry<PlayerEntry, BlockPlacerPlayer> queueEntry : m_blocks.entrySet()) {
                 size += queueEntry.getValue().getQueue().size();
             }
 
             bypass |= entry instanceof JobEntry;
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
-                if (player == null) {
-                    return false;
-                }
-
                 if (!playerEntry.isInformed()) {
                     playerEntry.setInformed(true);
-                    AsyncWorldEditMain.say(player, "Out of space on AWE block queue.");
+                    player.say("Out of space on AWE block queue.");
                 }
 
                 return false;
@@ -540,7 +537,7 @@ public class BlockPlacer implements Runnable {
                 }
                 if (queue.size() >= group.getQueueHardLimit() && bypass) {
                     m_lockedQueues.add(player);
-                    AsyncWorldEditMain.say(player, "Your block queue is full. Wait for items to finish drawing.");
+                    player.say("Your block queue is full. Wait for items to finish drawing.");
                     return false;
                 }
             }
@@ -555,9 +552,9 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @param job
      */
-    public void cancelJob(UUID player, JobEntry job) {
+    public void cancelJob(PlayerEntry player, JobEntry job) {
         if (job instanceof UndoJob) {
-            AsyncWorldEditMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
+            player.say("Warning: Undo jobs shuld not by canceled, ingoring!");
             return;
         }
         cancelJob(player, job.getJobId());
@@ -606,9 +603,9 @@ public class BlockPlacer implements Runnable {
      * @param jobId
      * @return
      */
-    public int cancelJob(UUID player, int jobId) {
+    public int cancelJob(PlayerEntry player, int jobId) {
         int newSize, result;
-        PlayerEntry playerEntry;
+        BlockPlacerPlayer playerEntry;
         Queue<BlockPlacerEntry> queue;
         JobEntry job;
         synchronized (this) {
@@ -618,7 +615,7 @@ public class BlockPlacer implements Runnable {
             playerEntry = m_blocks.get(player);
             job = playerEntry.getJob(jobId);
             if (job instanceof UndoJob) {
-                AsyncWorldEditMain.say(player, "Warning: Undo jobs shuld not by canceled, ingoring!");
+                player.say("Warning: Undo jobs shuld not by canceled, ingoring!");
                 return 0;
             }
 
@@ -652,14 +649,13 @@ public class BlockPlacer implements Runnable {
 
             newSize = filtered.size();
             result = queue.size() - filtered.size();
-            Player p = AsyncWorldEditMain.getPlayer(player);
-            PermissionGroup group = PermissionManager.getPermissionGroup(p);
+            PermissionGroup group = player.getPermissionGroup();
             if (newSize > 0) {
                 playerEntry.updateQueue(filtered);
             } else {
                 m_blocks.remove(player);
                 if (group.isBarApiProgressEnabled()) {
-                    hideProgressBar(p, playerEntry);
+                    hideProgressBar(player, playerEntry);
                 }
             }
             if (newSize == 0 || newSize < group.getQueueSoftLimit()) {
@@ -675,11 +671,11 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @return
      */
-    public int purge(UUID player) {
+    public int purge(PlayerEntry player) {
         int result = 0;
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
-                PlayerEntry playerEntry = m_blocks.get(player);
+                BlockPlacerPlayer playerEntry = m_blocks.get(player);
                 Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
                 synchronized (queue) {
                     for (BlockPlacerEntry entry : queue) {
@@ -704,10 +700,9 @@ public class BlockPlacer implements Runnable {
                 }
                 result = queue.size();
                 m_blocks.remove(player);
-                Player p = AsyncWorldEditMain.getPlayer(player);
-                PermissionGroup group = PermissionManager.getPermissionGroup(p);
+                PermissionGroup group = player.getPermissionGroup();
                 if (group.isBarApiProgressEnabled()) {
-                    hideProgressBar(p, playerEntry);
+                    hideProgressBar(player, playerEntry);
                 }
             }
             unlockQueue(player, false);
@@ -724,7 +719,7 @@ public class BlockPlacer implements Runnable {
     public int purgeAll() {
         int result = 0;
         synchronized (this) {
-            for (UUID user : getAllPlayers()) {
+            for (PlayerEntry user : getAllPlayers()) {
                 result += purge(user);
             }
         }
@@ -737,9 +732,9 @@ public class BlockPlacer implements Runnable {
      *
      * @return players list
      */
-    public UUID[] getAllPlayers() {
+    public PlayerEntry[] getAllPlayers() {
         synchronized (this) {
-            return m_blocks.keySet().toArray(new UUID[0]);
+            return m_blocks.keySet().toArray(new PlayerEntry[0]);
         }
     }
 
@@ -749,7 +744,7 @@ public class BlockPlacer implements Runnable {
      * @param player player login
      * @return number of stored events
      */
-    public PlayerEntry getPlayerEvents(UUID player) {
+    public BlockPlacerPlayer getPlayerEvents(PlayerEntry player) {
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 return m_blocks.get(player);
@@ -764,17 +759,16 @@ public class BlockPlacer implements Runnable {
      * @param player player login
      * @return
      */
-    public String getPlayerMessage(UUID player) {
-        PlayerEntry entry = null;
+    public String getPlayerMessage(PlayerEntry player) {
+        BlockPlacerPlayer entry = null;
         synchronized (this) {
             if (m_blocks.containsKey(player)) {
                 entry = m_blocks.get(player);
             }
         }
 
-        boolean bypass = PermissionManager.isAllowed(AsyncWorldEditMain.getPlayer(player),
-                Permission.QUEUE_BYPASS);
-        PermissionGroup group = PermissionManager.getPermissionGroup(AsyncWorldEditMain.getPlayer(player));
+        boolean bypass = player.isAllowed(Permission.QUEUE_BYPASS);
+        PermissionGroup group = player.getPermissionGroup();
         return getPlayerMessage(entry, group, bypass);
     }
 
@@ -784,7 +778,7 @@ public class BlockPlacer implements Runnable {
      * @param player player login
      * @return
      */
-    private String getPlayerMessage(PlayerEntry player, PermissionGroup group, boolean bypass) {
+    private String getPlayerMessage(BlockPlacerPlayer player, PermissionGroup group, boolean bypass) {
         final String format = ChatColor.WHITE + "%d"
                 + ChatColor.YELLOW + " out of " + ChatColor.WHITE + "%d"
                 + ChatColor.YELLOW + " blocks (" + ChatColor.WHITE + "%.2f%%"
@@ -822,8 +816,8 @@ public class BlockPlacer implements Runnable {
      * @param player
      * @param jobEntry
      */
-    public void removeJob(final UUID player, JobEntry jobEntry) {
-        PlayerEntry playerEntry;
+    public void removeJob(final PlayerEntry player, JobEntry jobEntry) {
+        BlockPlacerPlayer playerEntry;
         synchronized (this) {
             playerEntry = m_blocks.get(player);
         }
@@ -839,7 +833,7 @@ public class BlockPlacer implements Runnable {
      *
      * @param p
      */
-    private void hideProgressBar(Player player, PlayerEntry entry) {
+    private void hideProgressBar(PlayerEntry player, BlockPlacerPlayer entry) {
         if (entry != null) {
             entry.setMaxQueueBlocks(0);
         }
@@ -854,7 +848,7 @@ public class BlockPlacer implements Runnable {
      * @param entry
      * @param bypass
      */
-    private void setBar(Player player, PlayerEntry entry, boolean bypass) {
+    private void setBar(PlayerEntry player, BlockPlacerPlayer entry, boolean bypass) {
         final String format = ChatColor.YELLOW + "Jobs: " + ChatColor.WHITE + "%d"
                 + ChatColor.YELLOW + ", Placing speed: " + ChatColor.WHITE + "%.2fbps"
                 + ChatColor.YELLOW + ", " + ChatColor.WHITE + "%.2fs"
@@ -905,32 +899,31 @@ public class BlockPlacer implements Runnable {
     /**
      * Show player operation progress and update speed
      *
-     * @param playerUuid the player UUID
+     * @param playerEntry the player UUID
      * @param entry Player entry
      * @param placedBlocks number of blocks placed in this run
      * @param timeDelte ellapsed time from last run
      * @param talk "tell" the stats on chat
      */
-    private void showProgress(UUID playerUuid, PlayerEntry entry,
+    private void showProgress(PlayerEntry playerEntry, BlockPlacerPlayer entry,
             int placedBlocks, final long timeDelte,
             final boolean talk) {
         entry.updateSpeed(placedBlocks, timeDelte);
 
-        final Player p = AsyncWorldEditMain.getPlayer(playerUuid);        
-        final PermissionGroup group = PermissionManager.getPermissionGroup(p);
-        boolean bypass = PermissionManager.isAllowed(p, Permission.QUEUE_BYPASS);
-        if (entry.getQueue().isEmpty()) {            
+        final PermissionGroup group = playerEntry.getPermissionGroup();
+        boolean bypass = playerEntry.isAllowed(Permission.QUEUE_BYPASS);
+        if (entry.getQueue().isEmpty()) {
             if (group.isBarApiProgressEnabled()) {
-                hideProgressBar(p, entry);
+                hideProgressBar(playerEntry, entry);
             }
         } else {
             if (talk && group.isChatProgressEnabled()) {
-                AsyncWorldEditMain.say(p, ChatColor.YELLOW + "[AWE] You have "
+                playerEntry.say(ChatColor.YELLOW + "[AWE] You have "
                         + getPlayerMessage(entry, group, bypass));
             }
 
             if (group.isBarApiProgressEnabled()) {
-                setBar(p, entry, bypass);
+                setBar(playerEntry, entry, bypass);
             }
         }
     }
@@ -940,10 +933,10 @@ public class BlockPlacer implements Runnable {
      *
      * @param player
      */
-    private void unlockQueue(final UUID player, boolean talk) {
+    private void unlockQueue(final PlayerEntry player, boolean talk) {
         if (m_lockedQueues.contains(player)) {
             if (talk) {
-                AsyncWorldEditMain.say(player, "Your block queue is unlocked. You can use WorldEdit.");
+                player.say("Your block queue is unlocked. You can use WorldEdit.");
             }
             m_lockedQueues.remove(player);
         }
@@ -958,7 +951,7 @@ public class BlockPlacer implements Runnable {
      * @param action
      */
     public void PerformAsAsyncJob(final ThreadSafeEditSession editSession,
-            final UUID player, final String jobName,
+            final PlayerEntry player, final String jobName,
             final FuncParamEx<Integer, CancelabeEditSession, MaxChangedBlocksException> action) {
         final int jobId = getJobId(player);
         final CancelabeEditSession session = new CancelabeEditSession(editSession, editSession.getMask(), jobId);

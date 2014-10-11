@@ -65,13 +65,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.PlayerWrapper;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.*;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
@@ -106,11 +104,6 @@ public class ThreadSafeEditSession extends EditSessionStub {
     private final TaskDispatcher m_dispatcher;
 
     /**
-     * Player wraper
-     */
-    private final PlayerWrapper m_wrapper;
-
-    /**
      * Indicates that the async mode has been disabled (inner state)
      */
     private boolean m_asyncDisabled;
@@ -139,7 +132,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     /**
      * Player
      */
-    protected final UUID m_player;
+    protected final PlayerEntry m_player;
 
     /**
      * Current craftbukkit world
@@ -165,7 +158,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
         return m_blockPlacer;
     }
 
-    public UUID getPlayer() {
+    public PlayerEntry getPlayer() {
         return m_player;
     }
 
@@ -182,11 +175,11 @@ public class ThreadSafeEditSession extends EditSessionStub {
     }
 
     protected boolean isAsyncEnabled() {
-        return m_asyncForced || ((m_wrapper == null || m_wrapper.getMode()) && !m_asyncDisabled);
+        return m_asyncForced || (m_player.getMode() && !m_asyncDisabled);
     }
 
     public ThreadSafeEditSession(AsyncWorldEditMain plugin,
-            UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
+            PlayerEntry player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
         super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);
@@ -197,7 +190,6 @@ public class ThreadSafeEditSession extends EditSessionStub {
         m_dispatcher = plugin.getTaskDispatcher();
 
         m_player = player;
-        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
         m_world = world;
         m_editSessionEvent = event;
         m_eventBus = eventBus;
@@ -631,7 +623,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
      */
     public boolean checkAsync(WorldeditOperations operation) {
         boolean result = m_asyncForced || (ConfigProvider.isAsyncAllowed(operation)
-                && (m_wrapper == null || m_wrapper.getMode()));
+                && m_player.getMode());
 
         m_asyncDisabled = !result;
         return result;

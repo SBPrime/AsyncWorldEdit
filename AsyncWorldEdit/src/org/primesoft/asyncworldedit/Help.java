@@ -41,7 +41,6 @@
 package org.primesoft.asyncworldedit;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.commands.Commands;
 
 /**
@@ -85,7 +84,7 @@ public final class Help {
     private final static String[] HelpReload = new String[]{
         ChatColor.YELLOW + "Reload " + ChatColor.WHITE + " - Reload AWE configuration file",};
 
-    public static boolean ShowHelp(Player player, String command) {
+    public static boolean ShowHelp(PlayerEntry player, String command) {
         String[] help = HelpGlobal;
 
         if (command != null) {
@@ -103,7 +102,7 @@ public final class Help {
         }
 
         for (String string : help) {
-            AsyncWorldEditMain.say(player, string);
+            player.say(string);
         }
 
         return true;

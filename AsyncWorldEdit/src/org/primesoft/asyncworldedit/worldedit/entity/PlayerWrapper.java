@@ -60,6 +60,7 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.PlayerManager;
 import org.primesoft.asyncworldedit.utils.Pair;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
@@ -78,6 +79,8 @@ public class PlayerWrapper implements Player {
     private final Object m_mutex = new Object();
 
     private UUID m_uuid = null;
+    
+    private PlayerEntry m_entry = null;
 
     private Pair<World, AsyncWorld> m_world = null;
 
@@ -85,6 +88,19 @@ public class PlayerWrapper implements Player {
         m_parent = player;
     }
 
+    
+    private PlayerEntry getEntry() {        
+        if (m_entry == null) {
+            synchronized (m_mutex) {
+                if (m_entry == null) {
+                    PlayerManager pm = AsyncWorldEditMain.getInstance().getPlayerManager();
+                    m_entry = pm.getPlayer(m_parent.getName());
+                }
+            }
+        }
+        return m_entry;
+    }
+        
     /**
      * Ge the player UUID
      * @return 
@@ -237,7 +253,7 @@ public class PlayerWrapper implements Player {
         
         synchronized (m_mutex) {
             if (m_world == null || m_world.getX1() != world) {
-                AsyncWorld aWorld = AsyncWorld.wrap(world, getUUID());
+                AsyncWorld aWorld = AsyncWorld.wrap(world, getEntry());
                 if (aWorld != null) {
                     m_world = new Pair<World, AsyncWorld>(world, aWorld);
                     world = aWorld;

@@ -42,10 +42,9 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.regions.Region;
-import java.util.UUID;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.PlayerWrapper;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
@@ -63,12 +62,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
     /**
      * The player
      */
-    private final UUID m_player;
-
-    /**
-     * Player wraper
-     */
-    private final PlayerWrapper m_wrapper;
+    private final PlayerEntry m_player;
 
     /**
      * The blocks placer
@@ -90,7 +84,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
      */
     private final AsyncWorldEditMain m_plugin;
 
-    public AsyncCuboidClipboard(UUID player, CuboidClipboard parrent) {
+    public AsyncCuboidClipboard(PlayerEntry player, CuboidClipboard parrent) {
         super(new ProxyCuboidClipboard(parrent));
 
         m_plugin = AsyncWorldEditMain.getInstance();
@@ -98,7 +92,6 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         m_clipboard = parrent;
         m_blockPlacer = m_plugin.getBlockPlacer();
         m_player = player;
-        m_wrapper = m_plugin.getPlayerManager().getPlayer(player);
     }
 
     @Override
@@ -350,7 +343,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
         if (session != null && session instanceof AsyncEditSession) {
             return ((AsyncEditSession) session).checkAsync(operation);
         }
-        return ConfigProvider.isAsyncAllowed(operation) && (m_wrapper == null || m_wrapper.getMode());
+        return ConfigProvider.isAsyncAllowed(operation) && m_player.getMode();
     }
 
     /**

@@ -42,7 +42,7 @@ package org.primesoft.asyncworldedit.worldedit.entity;
 
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.entity.BaseEntity;
-import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**
@@ -51,7 +51,7 @@ import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
  */
 public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
     public static BaseEntityWrapper wrap(BaseEntityWrapper entity, int jobId,
-                                        boolean isAsync, UUID player) {
+                                        boolean isAsync, PlayerEntry player) {
         BaseEntityWrapper result;
         if (entity instanceof BaseEntityWrapper) {
             result = (BaseEntityWrapper) entity;
@@ -70,7 +70,7 @@ public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
 
     private boolean m_isAsync;
 
-    private UUID m_player;
+    private PlayerEntry m_player;
     
     @Override
     public int getJobId() {
@@ -91,17 +91,17 @@ public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
         m_isAsync = async;
     }
 
-    public void setPlayer(UUID player) {
+    public void setPlayer(PlayerEntry player) {
         m_player = player;
     }
 
     @Override
-    public UUID getPlayer() {
+    public PlayerEntry getPlayer() {
         return m_player;
     }
     
     private BaseEntityWrapper(BaseEntity parent, int jobId, boolean isAsync,
-                             UUID player) {
+                             PlayerEntry player) {
         super("");
 
         m_jobId = jobId;

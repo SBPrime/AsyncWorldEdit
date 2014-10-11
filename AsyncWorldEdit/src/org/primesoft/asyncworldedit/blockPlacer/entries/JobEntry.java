@@ -42,15 +42,12 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.bukkit.ChatColor;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
@@ -100,7 +97,7 @@ public class JobEntry extends BlockPlacerEntry {
     /**
      * The player name
      */
-    private final UUID m_player;
+    private final PlayerEntry m_player;
 
     /**
      * Is the async task done
@@ -122,7 +119,7 @@ public class JobEntry extends BlockPlacerEntry {
      * Get the player UUID
      * @return 
      */
-    public UUID getPlayer() {
+    public PlayerEntry getPlayer() {
         return m_player;
     }
         
@@ -133,7 +130,7 @@ public class JobEntry extends BlockPlacerEntry {
      * @param jobId job id
      * @param name operation name
      */
-    public JobEntry(UUID player, int jobId, String name) {
+    public JobEntry(PlayerEntry player, int jobId, String name) {
         super(jobId);
         m_player = player;
         m_name = name;
@@ -150,7 +147,7 @@ public class JobEntry extends BlockPlacerEntry {
      * @param name operation name
      * @param cEditSession the cancelable edit session
      */
-    public JobEntry(UUID player, 
+    public JobEntry(PlayerEntry player, 
             CancelabeEditSession cEditSession,
             int jobId, String name) {
         super(jobId);
@@ -285,7 +282,7 @@ public class JobEntry extends BlockPlacerEntry {
 
     @Override
     public boolean Process(BlockPlacer bp) {
-        final UUID player = m_player;
+        final PlayerEntry player = m_player;
 
         switch (m_status) {
             case Done:
@@ -302,9 +299,9 @@ public class JobEntry extends BlockPlacerEntry {
                 break;
         }
 
-        PermissionGroup group = PermissionManager.getPermissionGroup(AsyncWorldEditMain.getPlayer(player));
+        PermissionGroup group = player.getPermissionGroup();
         if (group.isTalkative()) {
-            AsyncWorldEditMain.say(player, ChatColor.YELLOW + "Job " + toString()
+            player.say(ChatColor.YELLOW + "Job " + toString()
                     + ChatColor.YELLOW + " - " + getStatusString());
         }
         

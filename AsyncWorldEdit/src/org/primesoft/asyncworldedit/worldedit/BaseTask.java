@@ -40,26 +40,15 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.history.change.BlockChange;
-import com.sk89q.worldedit.history.change.Change;
-import com.sk89q.worldedit.history.changeset.ChangeSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
-import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 
 /**
  *
@@ -75,7 +64,7 @@ public abstract class BaseTask extends BukkitRunnable {
     /**
      * The player
      */
-    protected final UUID m_player;
+    protected final PlayerEntry m_player;
 
     /**
      * Cancelable edit session
@@ -109,14 +98,14 @@ public abstract class BaseTask extends BukkitRunnable {
      */
     protected final PermissionGroup m_group;
 
-    public BaseTask(final EditSession editSession, final UUID player,
+    public BaseTask(final EditSession editSession, final PlayerEntry player,
             final String commandName, BlockPlacer blocksPlacer, JobEntry job) {
 
         m_editSession = editSession;
         m_cancelableEditSession = (editSession instanceof CancelabeEditSession) ? (CancelabeEditSession) editSession : null;
         
         m_player = player;
-        m_group = PermissionManager.getPermissionGroup(AsyncWorldEditMain.getPlayer(m_player));
+        m_group = m_player.getPermissionGroup();
         m_command = commandName;
         m_blockPlacer = blocksPlacer;
         m_job = job;
@@ -138,7 +127,7 @@ public abstract class BaseTask extends BukkitRunnable {
         try {
             m_job.setStatus(JobEntry.JobStatus.Preparing);            
             if (m_group.isTalkative()) {
-                AsyncWorldEditMain.say(m_player, ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
+                m_player.say(ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
                         + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
             }
             m_blockPlacer.addTasks(m_player, m_job);
@@ -160,10 +149,10 @@ public abstract class BaseTask extends BukkitRunnable {
             m_blockPlacer.addTasks(m_player, m_job);
             doPostRun(result);
         } catch (MaxChangedBlocksException ex) {
-            AsyncWorldEditMain.say(m_player, ChatColor.RED + "Maximum block change limit.");
+            m_player.say(ChatColor.RED + "Maximum block change limit.");
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof SessionCanceled) {
-                AsyncWorldEditMain.say(m_player, ChatColor.LIGHT_PURPLE + "Job canceled.");
+                m_player.say(ChatColor.LIGHT_PURPLE + "Job canceled.");
             }
         }
         postProcess();

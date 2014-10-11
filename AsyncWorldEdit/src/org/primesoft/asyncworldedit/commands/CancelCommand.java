@@ -40,15 +40,12 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
-import java.util.UUID;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.permissions.Permission;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
  *
@@ -56,7 +53,7 @@ import org.primesoft.asyncworldedit.permissions.PermissionManager;
  */
 public class CancelCommand {
 
-    public static void Execte(AsyncWorldEditMain sender, Player player, String[] args) {
+    public static void Execte(AsyncWorldEditMain sender, PlayerEntry player, String[] args) {
         if (args.length < 2 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_CANCEL);
             return;
@@ -64,42 +61,43 @@ public class CancelCommand {
 
         BlockPlacer bPlacer = sender.getBlockPlacer();
         int id;
-        UUID uuid;
+        PlayerEntry entry;
         if (args.length == 2) {
-            if (player == null)
+            if (!player.isInGame())
             {
-                AsyncWorldEditMain.say(player, ChatColor.RED + "Command available ingame.");
+                player.say(ChatColor.RED + "Command available ingame.");
                 return;
             }
-            if (!PermissionManager.isAllowed(player, Permission.CANCEL_SELF)) {
-                AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+            if (!player.isAllowed(Permission.CANCEL_SELF)) {
+                player.say(ChatColor.RED + "You have no permissions to do that.");
                 return;
             }
             try {
                 id = Integer.parseInt(args[1]);
             } catch (NumberFormatException ex) {
-                AsyncWorldEditMain.say(player, ChatColor.RED + "Number expected.");
+                player.say(ChatColor.RED + "Number expected.");
                 return;
             }
 
-            uuid = player.getUniqueId();
+            entry = player;
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
-                if (!PermissionManager.isAllowed(player, Permission.CANCEL_OTHER)) {
-                    AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+                if (!player.isAllowed(Permission.CANCEL_OTHER)) {
+                    player.say(ChatColor.RED + "You have no permissions to do that.");
                     return;
                 }
 
-                uuid = sender.getPlayerManager().getPlayerUUID(arg.substring(2));
-                if (uuid.equals(ConfigProvider.DEFAULT_USER)) {
-                    AsyncWorldEditMain.say(player, ChatColor.RED + "Player not found.");
+                String name = arg.substring(2);
+                entry = sender.getPlayerManager().getPlayer(name);
+                if (!entry.isPlayer()) {
+                    player.say(ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
                     return;
                 }
                 try {
                     id = Integer.parseInt(args[1]);
                 } catch (NumberFormatException ex) {
-                    AsyncWorldEditMain.say(player, ChatColor.RED + "Number expected.");
+                    player.say(ChatColor.RED + "Number expected.");
                     return;
                 }                                
             } else {
@@ -108,7 +106,7 @@ public class CancelCommand {
 
             }
         }
-        int size = sender.getBlockPlacer().cancelJob(uuid, id);
-        AsyncWorldEditMain.say(player, "" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");            
+        int size = sender.getBlockPlacer().cancelJob(entry, id);
+        player.say("" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");            
     }
 }

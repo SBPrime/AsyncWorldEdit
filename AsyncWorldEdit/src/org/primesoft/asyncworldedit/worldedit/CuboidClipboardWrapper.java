@@ -46,8 +46,8 @@ import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.regions.Region;
-import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.EntityEntry;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -73,7 +73,7 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
     /**
      * Player
      */
-    private final UUID m_player;
+    private final PlayerEntry m_player;
 
     /**
      * Inject entities to CuboidClipboard
@@ -95,11 +95,11 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
         return Reflection.get(cc, Object.class, "entities", "Unable to get entities");
     }
 
-    public CuboidClipboardWrapper(UUID player, CuboidClipboard parrent) {
+    public CuboidClipboardWrapper(PlayerEntry player, CuboidClipboard parrent) {
         this(player, parrent, -1);
     }
 
-    public CuboidClipboardWrapper(UUID player, CuboidClipboard parrent, int jobId) {
+    public CuboidClipboardWrapper(PlayerEntry player, CuboidClipboard parrent, int jobId) {
         super(parrent);
 
         m_jobId = jobId;

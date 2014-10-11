@@ -46,9 +46,9 @@ import org.primesoft.asyncworldedit.injector.validators.StackValidator;
 import com.sk89q.worldedit.function.operation.Operation;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.UUID;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.injector.ExceptionOperationAction;
@@ -115,15 +115,15 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         }
         
         final WaitFor wait = asyncSession.getWait();
-        final UUID playerUuid = asyncSession.getPlayer();
-        final int jobId = m_blockPlacer.getJobId(playerUuid);
+        final PlayerEntry playerEntry = asyncSession.getPlayer();
+        final int jobId = m_blockPlacer.getJobId(playerEntry);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
-        final JobEntry job = new JobEntry(playerUuid, cancelableSession, jobId, name);
+        final JobEntry job = new JobEntry(playerEntry, cancelableSession, jobId, name);
 
         injectEditSession(sessions, cancelableSession);
 
-        m_blockPlacer.addJob(playerUuid, job);
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(cancelableSession, playerUuid, 
+        m_blockPlacer.addJob(playerEntry, job);
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(cancelableSession, playerEntry, 
                 name, m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -170,15 +170,15 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         }
         
         final WaitFor wait = asyncSession.getWait();
-        final UUID playerUuid = asyncSession.getPlayer();
-        final int jobId = m_blockPlacer.getJobId(playerUuid);
+        final PlayerEntry playerEntry = asyncSession.getPlayer();
+        final int jobId = m_blockPlacer.getJobId(playerEntry);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
-        final JobEntry job = new JobEntry(playerUuid, cancelableSession, jobId, name);
+        final JobEntry job = new JobEntry(playerEntry, cancelableSession, jobId, name);
 
         injectEditSession(sessions, cancelableSession);
 
-        m_blockPlacer.addJob(playerUuid, job);
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(cancelableSession, playerUuid, 
+        m_blockPlacer.addJob(playerEntry, job);
+        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(cancelableSession, playerEntry, 
                 name, m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)

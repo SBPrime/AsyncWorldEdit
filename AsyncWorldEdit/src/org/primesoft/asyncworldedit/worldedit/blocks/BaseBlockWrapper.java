@@ -43,7 +43,7 @@ package org.primesoft.asyncworldedit.worldedit.blocks;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**
@@ -52,7 +52,7 @@ import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
  */
 public class BaseBlockWrapper extends BaseBlock implements IAsyncWrapper {
     public static BaseBlockWrapper wrap(BaseBlock block, int jobId,
-                                        boolean isAsync, UUID player) {
+                                        boolean isAsync, PlayerEntry player) {
         BaseBlockWrapper result;
         if (block instanceof BaseBlockWrapper) {
             result = (BaseBlockWrapper) block;
@@ -71,7 +71,7 @@ public class BaseBlockWrapper extends BaseBlock implements IAsyncWrapper {
 
     private boolean m_isAsync;
 
-    private UUID m_player;
+    private PlayerEntry m_player;
 
     @Override
     public int getJobId() {
@@ -92,17 +92,17 @@ public class BaseBlockWrapper extends BaseBlock implements IAsyncWrapper {
         m_isAsync = async;
     }
 
-    public void setPlayer(UUID player) {
+    public void setPlayer(PlayerEntry player) {
         m_player = player;
     }
 
     @Override
-    public UUID getPlayer() {
+    public PlayerEntry getPlayer() {
         return m_player;
     }
 
     private BaseBlockWrapper(BaseBlock parent, int jobId, boolean isAsync,
-                             UUID player) {
+                             PlayerEntry player) {
         super(0);
 
         m_jobId = jobId;

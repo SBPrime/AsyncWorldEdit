@@ -42,17 +42,14 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionFactory;
-import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
-import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.PlayerManager;
-import org.primesoft.asyncworldedit.worldedit.entity.PlayerWrapper;
 
 /**
  *
@@ -70,14 +67,8 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
      * @param player
      * @return
      */
-    private UUID getUUID(com.sk89q.worldedit.entity.Player player) {
-        if (player instanceof BukkitPlayer) {
-            return ((BukkitPlayer) player).getPlayer().getUniqueId();
-        } else if (player instanceof PlayerWrapper) {
-            return ((PlayerWrapper) player).getUUID();
-        }
-
-        return m_playerManager.getPlayerUUID(player.getName());
+    private PlayerEntry getPlayerEntry(com.sk89q.worldedit.entity.Player player) {
+        return m_playerManager.getPlayer(player.getName());
     }
 
     public AsyncEditSessionFactory(AsyncWorldEditMain parent, EventBus eventBus) {
@@ -88,25 +79,25 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
 
     @Override
     public EditSession getEditSession(World world, int maxBlocks) {
-        return new AsyncEditSession(m_parent, ConfigProvider.DEFAULT_USER,
+        return new AsyncEditSession(m_parent, PlayerEntry.UNKNOWN,
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, null, maxBlocks, null));
     }
 
     @Override
     public EditSession getEditSession(World world, int maxBlocks, Player player) {
-        UUID uuid = getUUID(player);
-        AsyncEditSession result = new AsyncEditSession(m_parent, uuid,
+        PlayerEntry entry = getPlayerEntry(player);
+        AsyncEditSession result = new AsyncEditSession(m_parent, entry,
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, player, maxBlocks, null));
-        m_parent.getPlotMeFix().setMask(AsyncWorldEditMain.getPlayer(uuid));
+        m_parent.getPlotMeFix().setMask(entry);
 
         return result;
     }
 
     @Override
     public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag) {
-        return new AsyncEditSession(m_parent, ConfigProvider.DEFAULT_USER,
+        return new AsyncEditSession(m_parent, PlayerEntry.UNKNOWN,
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, null, maxBlocks, null));
     }
@@ -114,46 +105,46 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
     @Override
     public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, 
             Player player) {
-        UUID uuid = getUUID(player);
-        AsyncEditSession result = new AsyncEditSession(m_parent, uuid,
+        PlayerEntry entry = getPlayerEntry(player);
+        AsyncEditSession result = new AsyncEditSession(m_parent, entry,
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, player, maxBlocks, null));
-        m_parent.getPlotMeFix().setMask(AsyncWorldEditMain.getPlayer(uuid));
+        m_parent.getPlotMeFix().setMask(entry);
 
         return result;
     }
 
     public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks) {
-        return new ThreadSafeEditSession(m_parent, ConfigProvider.DEFAULT_USER,
+        return new ThreadSafeEditSession(m_parent, PlayerEntry.UNKNOWN,
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, null, maxBlocks, null));
     }
 
     public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, 
             Player player) {
-        UUID uuid = getUUID(player);
-        ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, uuid,
+        PlayerEntry entry = getPlayerEntry(player);
+        ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, entry,
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, player, maxBlocks, null));
-        m_parent.getPlotMeFix().setMask(AsyncWorldEditMain.getPlayer(uuid));
+        m_parent.getPlotMeFix().setMask(entry);
 
         return result;
     }
 
     public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
             BlockBag blockBag) {
-        return new ThreadSafeEditSession(m_parent, ConfigProvider.DEFAULT_USER,
+        return new ThreadSafeEditSession(m_parent, PlayerEntry.UNKNOWN,
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, null, maxBlocks, null));
     }
 
     public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
             BlockBag blockBag, Player player) {
-        UUID uuid = getUUID(player);
-        ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, uuid,
+        PlayerEntry entry = getPlayerEntry(player);
+        ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, entry,
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, player, maxBlocks, null));
-        m_parent.getPlotMeFix().setMask(AsyncWorldEditMain.getPlayer(uuid));
+        m_parent.getPlotMeFix().setMask(entry);
 
         return result;
     }

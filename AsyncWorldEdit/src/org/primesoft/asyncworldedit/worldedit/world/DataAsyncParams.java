@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit.worldedit.world;
 
 import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
@@ -60,7 +61,7 @@ public class DataAsyncParams<T> extends BaseAsyncParams {
         int jobId = -1;
         boolean isAsync = false;
         boolean empty = true;
-        UUID player = ConfigProvider.DEFAULT_USER;
+        PlayerEntry player = null;
 
         if (data instanceof IAsyncWrapper) {
             IAsyncWrapper wrapper = (IAsyncWrapper) data;
@@ -76,7 +77,7 @@ public class DataAsyncParams<T> extends BaseAsyncParams {
     
     private final T m_data;
 
-    private DataAsyncParams(T data, boolean isAsync, int jobId, boolean isEmpty, UUID player) {
+    private DataAsyncParams(T data, boolean isAsync, int jobId, boolean isEmpty, PlayerEntry player) {
         super(isAsync, jobId, isEmpty, player);
         m_data = data;        
     }

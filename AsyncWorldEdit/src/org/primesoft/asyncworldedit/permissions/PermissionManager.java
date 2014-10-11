@@ -83,15 +83,17 @@ public class PermissionManager {
             return defaultGroup;
         }
 
-        PermissionGroup result = defaultGroup;
         if (groups != null) {
-            for (PermissionGroup group : groups) {
+            for (int i = groups.length - 1;i>=0;i--)
+            {
+                PermissionGroup group = groups[i];
+            
                 if (player.isOp() || player.hasPermission(group.getPermissionNode())) {
-                    result = group;
+                    return group;
                 }
             }
         }
 
-        return result;
+        return defaultGroup;
     }
 }

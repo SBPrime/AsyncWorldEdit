@@ -63,11 +63,6 @@ public class ConfigProvider {
     public static final int TICKS_PER_SECOND = 20;
 
     /**
-     * Default user name when no user is available
-     */
-    public static final UUID DEFAULT_USER = UUID.randomUUID();
-
-    /**
      * The config file version
      */
     private static final int CONFIG_VERSION = 2;

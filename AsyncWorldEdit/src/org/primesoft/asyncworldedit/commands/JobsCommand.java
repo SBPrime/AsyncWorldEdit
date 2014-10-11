@@ -42,17 +42,14 @@ package org.primesoft.asyncworldedit.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.PlayerManager;
-import org.primesoft.asyncworldedit.PlayerWrapper;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.blockPlacer.PlayerEntry;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerPlayer;
 import org.primesoft.asyncworldedit.permissions.Permission;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
  *
@@ -62,7 +59,7 @@ public class JobsCommand {
 
     private final static int MAX_LINES = 6;
 
-    public static void Execte(AsyncWorldEditMain sender, Player player, String[] args) {
+    public static void Execte(AsyncWorldEditMain sender, PlayerEntry player, String[] args) {
         final List<String> lines = new ArrayList<String>();
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_JOBS);
@@ -79,7 +76,7 @@ public class JobsCommand {
 
         switch (len) {
             case 1: {
-                playerName = player != null ? player.getName() : null;
+                playerName = player.isPlayer() ? player.getName() : null;
                 perm = Permission.JOBS_SELF;
                 onlyInGame = true;
                 all = false;
@@ -101,7 +98,7 @@ public class JobsCommand {
                     page = -1;
                 } else {
                     try {
-                        playerName = player != null ? player.getName() : null;
+                        playerName = player.isPlayer() ? player.getName() : null;
                         perm = Permission.JOBS_SELF;
                         onlyInGame = true;
                         page = Integer.parseInt(args[1]);
@@ -142,42 +139,41 @@ public class JobsCommand {
             Help.ShowHelp(player, Commands.COMMAND_JOBS);
             return;
         }
-        if (onlyInGame && player == null) {
-            AsyncWorldEditMain.say(player, ChatColor.RED + "Command available ingame.");
+        if (onlyInGame && !player.isInGame()) {
+            player.say(ChatColor.RED + "Command available ingame.");
             return;
         }
-        if (!PermissionManager.isAllowed(player, perm)) {
-            AsyncWorldEditMain.say(player, ChatColor.RED + "You have no permissions to do that.");
+        if (!player.isAllowed(perm)) {
+            player.say(ChatColor.RED + "You have no permissions to do that.");
             return;
         }
-        
+
         final PlayerManager pm = sender.getPlayerManager();
-        if (!all) {            
-            UUID playerUuid = pm.getPlayerUUID(playerName);
-            
+        if (!all) {
+            PlayerEntry playerEntry = pm.getPlayer(playerName);
+
             switch (perm) {
                 case JOBS_SELF:
-                    lines.add(ChatColor.YELLOW + "You have " + bPlacer.getPlayerMessage(playerUuid));
+                    lines.add(ChatColor.YELLOW + "You have " + bPlacer.getPlayerMessage(playerEntry));
                     break;
                 case JOBS_OTHER:
                     lines.add(ChatColor.YELLOW + "Player " + ChatColor.WHITE
-                            + playerName + ChatColor.YELLOW + " has " + bPlacer.getPlayerMessage(playerUuid));
+                            + playerName + ChatColor.YELLOW + " has " + bPlacer.getPlayerMessage(playerEntry));
                     break;
             }
-            PlayerEntry entry = bPlacer.getPlayerEvents(playerUuid);
+            BlockPlacerPlayer entry = bPlacer.getPlayerEvents(playerEntry);
             if (entry != null) {
                 entry.printJobs(lines);
             }
         } else {
-            UUID[] users = bPlacer.getAllPlayers();
+            PlayerEntry[] users = bPlacer.getAllPlayers();
             if (users.length == 0) {
                 lines.add(ChatColor.YELLOW + "No operations queued.");
             } else {
-                for (UUID user : users) {
-                    PlayerEntry entry = bPlacer.getPlayerEvents(user);
-                    int cnt = entry != null ? entry.getQueue().size() : 0;
-                    PlayerWrapper pw = pm.getPlayer(user);
-                    String name = pw != null ? pw.getName() : user.toString();
+                for (PlayerEntry pw : users) {
+                    BlockPlacerPlayer entry = bPlacer.getPlayerEvents(pw);
+                    int cnt = entry != null ? entry.getQueue().size() : 0;                    
+                    String name = pw.getName();
                     lines.add(ChatColor.YELLOW + "Player " + ChatColor.WHITE
                             + name + ChatColor.YELLOW + " has " + ChatColor.WHITE + cnt
                             + ChatColor.YELLOW + " block operations queued.");
@@ -198,15 +194,15 @@ public class JobsCommand {
 
             int maxPages = l.length / MAX_LINES + 1;
             say(player, l, (page - 1) * MAX_LINES, page * MAX_LINES);
-            AsyncWorldEditMain.say(player, "page " + page + " of " + maxPages);
+            player.say("page " + page + " of " + maxPages);
         }
     }
 
-    private static void say(Player player, String[] lines, int from, int to) {
+    private static void say(PlayerEntry player, String[] lines, int from, int to) {
         from = Math.max(from, 0);
         to = Math.min(to, lines.length);
         for (int i = from; i < to; i++) {
-            AsyncWorldEditMain.say(player, lines[i]);
+            player.say(lines[i]);
         }
     }
 }

@@ -43,7 +43,6 @@ package org.primesoft.asyncworldedit;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import com.worldcretornica.plotme.PlotManager;
 import com.worldcretornica.plotme.PlotMe;
-import com.worldcretornica.plotme.PlotWorldEdit;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -102,13 +101,14 @@ public class PlotMeFix {
         }
     }
 
-    public void setMask(Player p) {
-        if (!m_isEnabled || p == null) {
+    public void setMask(PlayerEntry entry) {
+        if (!m_isEnabled || entry == null || entry.getPlayer() == null) {
             return;
         }
 
-        if (PlotManager.isPlotWorld(p)) {
-            setMask(!PlotMe.isIgnoringWELimit(p), p);
+        Player player = entry.getPlayer();
+        if (PlotManager.isPlotWorld(player)) {
+            setMask(!PlotMe.isIgnoringWELimit(player), player);
         }
     }
 

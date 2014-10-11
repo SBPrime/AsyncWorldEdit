@@ -56,8 +56,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.world.CancelableWorld;
@@ -79,7 +79,7 @@ public class CancelabeEditSession extends EditSessionStub {
 
     private final int m_jobId;
 
-    private final UUID m_player;
+    private final PlayerEntry m_player;
 
     /**
      * Number of queued blocks

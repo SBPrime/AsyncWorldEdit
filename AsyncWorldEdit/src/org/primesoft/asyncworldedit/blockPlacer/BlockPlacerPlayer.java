@@ -47,16 +47,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.configuration.PermissionGroup;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
  * Operation queue player entry
  *
  * @author SBPrime
  */
-public class PlayerEntry {
+public class BlockPlacerPlayer {
 
     /**
      * Maximum job number
@@ -93,7 +90,7 @@ public class PlayerEntry {
     /**
      * Create new player entry
      */
-    public PlayerEntry() {
+    public BlockPlacerPlayer() {
         m_queue = new ArrayDeque();
         m_speed = 0;
         m_jobs = new HashMap<Integer, JobEntry>();

@@ -43,7 +43,6 @@ package org.primesoft.asyncworldedit;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import java.util.UUID;
 import org.PrimeSoft.blocksHub.BlocksHub;
 import org.PrimeSoft.blocksHub.IBlocksHubApi;
 import org.bukkit.Location;
@@ -88,32 +87,30 @@ public class BlocksHubIntegration {
         m_isInitialized = m_blocksApi != null && m_blocksApi.getVersion() >= 1.0;
     }
 
-    public void logBlock(UUID playerUuid, World world, Location location,
+    public void logBlock(PlayerEntry playerEntry, World world, Location location,
             int oldBlockType, byte oldBlockData,
             int newBlockType, byte newBlockData) {
         if (!m_isInitialized || !ConfigProvider.getLogBlocks()) {
             return;
         }
-
-        PlayerWrapper pw = m_playerManager.getPlayer(playerUuid);
-        if (pw == null) {
+        
+        if (playerEntry == null) {
             return;
         }
-        String player = pw.getName();
+        String player = playerEntry.getName();
         
         m_blocksApi.logBlock(player, world, location, oldBlockType, oldBlockData, newBlockType, newBlockData);
     }
 
-    public boolean canPlace(UUID playerUuid, World world, Location location) {
+    public boolean canPlace(PlayerEntry playerEntry, World world, Location location) {
         if (!m_isInitialized || !ConfigProvider.getCheckAccess()) {
             return true;
         }
-
-        PlayerWrapper pw = m_playerManager.getPlayer(playerUuid);
-        if (pw == null) {
+        
+        if (playerEntry == null) {
             return true;
         }
-        String player = pw.getName();
+        String player = playerEntry.getName();
         
         try {
             return m_blocksApi.canPlace(player, world, location);
@@ -126,7 +123,7 @@ public class BlocksHubIntegration {
         }
     }
 
-    public boolean canPlace(UUID playerUuid, World world, Vector location) {
+    public boolean canPlace(PlayerEntry playerEntry, World world, Vector location) {
         if (location == null) {
             return false;
         }
@@ -138,11 +135,10 @@ public class BlocksHubIntegration {
         Location l = new Location(world, location.getX(), location.getY(), location.getZ());               
         
         try {
-            return canPlace(playerUuid, world, l);
+            return canPlace(playerEntry, world, l);
 
-        } catch (Exception ex) {
-            PlayerWrapper pw = m_playerManager.getPlayer(playerUuid);
-            String name = pw == null ? playerUuid.toString() : pw.getName();
+        } catch (Exception ex) {            
+            String name = playerEntry.getName();
 
             AsyncWorldEditMain.log("Error checking block place perms: " + ex.toString());
             AsyncWorldEditMain.log("Player: " + name);
@@ -152,7 +148,7 @@ public class BlocksHubIntegration {
         }
     }
 
-    public void logBlock(UUID playerUuid, World world, Vector location, 
+    public void logBlock(PlayerEntry playerEntry, World world, Vector location, 
             BaseBlock oldBlock, BaseBlock newBlock) {
         if (location == null || !ConfigProvider.getLogBlocks()) {
             return;
@@ -167,12 +163,11 @@ public class BlocksHubIntegration {
 
         Location l = new Location(world, location.getX(), location.getY(), location.getZ());
         try {
-            logBlock(playerUuid, world, l, oldBlock.getType(), (byte) oldBlock.getData(),
+            logBlock(playerEntry, world, l, oldBlock.getType(), (byte) oldBlock.getData(),
                     newBlock.getType(), (byte) newBlock.getData());
         } catch (Exception ex)
-        {
-            PlayerWrapper pw = m_playerManager.getPlayer(playerUuid);
-            String name = pw == null ? playerUuid.toString() : pw.getName();
+        {            
+            String name = playerEntry.getName();
             
             AsyncWorldEditMain.log("Error logging block: " + ex.toString());
             AsyncWorldEditMain.log("Player: " + name);

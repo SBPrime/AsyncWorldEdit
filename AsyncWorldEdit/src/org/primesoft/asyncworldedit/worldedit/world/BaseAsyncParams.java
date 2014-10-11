@@ -24,7 +24,7 @@
 
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
 
 /**
  *
@@ -33,7 +33,7 @@ import java.util.UUID;
 public abstract class BaseAsyncParams {
     private final boolean m_isAsync;
     private final int m_jobId;
-    private final UUID m_player;
+    private final PlayerEntry m_player;
     private final boolean m_empty;
 
     
@@ -50,15 +50,14 @@ public abstract class BaseAsyncParams {
         return m_jobId;
     }
 
-    public UUID getPlayer() {
+    public PlayerEntry getPlayer() {
         return m_player;
     }
     
-    public BaseAsyncParams(boolean isAsync, int jobId, boolean isEmpty, UUID player) {
+    public BaseAsyncParams(boolean isAsync, int jobId, boolean isEmpty, PlayerEntry player) {
         m_isAsync = isAsync;
         m_jobId = jobId;
         m_player = player;
         m_empty = isEmpty;
     }
-    
 }

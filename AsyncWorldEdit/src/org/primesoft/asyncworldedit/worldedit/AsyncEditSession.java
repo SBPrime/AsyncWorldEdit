@@ -61,6 +61,7 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.utils.WaitFor;
@@ -93,7 +94,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
    
 
     public AsyncEditSession(AsyncWorldEditMain plugin,
-            UUID player, EventBus eventBus, com.sk89q.worldedit.world.World world,
+            PlayerEntry player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
         //super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);

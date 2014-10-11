@@ -41,7 +41,7 @@
 
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
@@ -49,7 +49,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  * @author SBPrime
  */
 public class UndoJob extends JobEntry {
-    public UndoJob(UUID player, CancelabeEditSession cEditSession, int jobId, String name) {
+    public UndoJob(PlayerEntry player, CancelabeEditSession cEditSession, int jobId, String name) {
         super(player, cEditSession, jobId, name);
     }
 }

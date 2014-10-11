@@ -42,23 +42,54 @@ package org.primesoft.asyncworldedit;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
  *
  * @author SBPrime
  */
-public class PlayerWrapper {
+public class PlayerEntry {
+
+    public final static UUID UUID_CONSOLE = UUID.randomUUID();
+    public final static UUID UUID_UNKNOWN = UUID.randomUUID();
+
+    public final static PlayerEntry CONSOLE = new PlayerEntry(null, "<Console>", UUID_CONSOLE, PermissionGroup.getDefaultGroup(), true);
+    public final static PlayerEntry UNKNOWN = new PlayerEntry(null, "<Unknown>", UUID_UNKNOWN, PermissionGroup.getDefaultGroup(), false);
 
     private final Player m_player;
     private final String m_name;
     private final UUID m_uuid;
-    private boolean m_mode;    
+    private boolean m_mode;
+    private PermissionGroup m_group;
+    private final boolean m_canTalk;
 
-    public PlayerWrapper(Player player, String name, boolean mode) {
+    public PlayerEntry(Player player, String name, PermissionGroup group) {
+        this(player, name, player.getUniqueId(), group, true);
+    }
+
+    private PlayerEntry(Player player, String name, UUID uuid,
+            PermissionGroup group, boolean canTalk) {
+        m_canTalk = canTalk;
+        m_group = group;
         m_player = player;
-        m_uuid = player.getUniqueId();
+        m_uuid = uuid;
         m_name = name;
-        m_mode = mode;
+        m_mode = group.isOnByDefault();
+    }
+
+    public void say(String msg) {
+        if (m_player != null) {
+            if (m_player.isOnline()) {
+                m_player.sendRawMessage(msg);
+            }
+            return;
+        }
+
+        if (m_canTalk) {
+            AsyncWorldEditMain.say(msg);
+        }
     }
 
     public Player getPlayer() {
@@ -68,7 +99,7 @@ public class PlayerWrapper {
     public UUID getUUID() {
         return m_uuid;
     }
-    
+
     public String getName() {
         return m_name;
     }
@@ -79,5 +110,56 @@ public class PlayerWrapper {
 
     public void setMode(boolean mode) {
         m_mode = mode;
+    }
+
+    public boolean isAllowed(Permission permission) {
+        return PermissionManager.isAllowed(m_player, permission);
+    }
+
+    /**
+     * Is this player the console
+     *
+     * @return
+     */
+    public boolean isConsole() {
+        return UUID_CONSOLE.equals(m_uuid);
+    }
+
+    public boolean isUnknown() {
+        return UUID_UNKNOWN.equals(m_uuid);
+    }
+
+    public boolean isPlayer() {
+        return m_player != null
+                && !UUID_CONSOLE.equals(m_uuid)
+                && !UUID_UNKNOWN.equals(m_uuid);
+    }
+
+    public boolean isInGame() {
+        return isPlayer() && m_player.isOnline();
+    }
+
+    @Override
+    public int hashCode() {
+        return m_uuid.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PlayerEntry other = (PlayerEntry) obj;
+        if (this.m_uuid != other.m_uuid && (this.m_uuid == null || !this.m_uuid.equals(other.m_uuid))) {
+            return false;
+        }
+        return true;
+    }
+
+    public PermissionGroup getPermissionGroup() {
+        return m_group;
     }
 }

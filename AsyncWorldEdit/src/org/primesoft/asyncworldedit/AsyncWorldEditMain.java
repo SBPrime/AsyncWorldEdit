@@ -134,10 +134,6 @@ public class AsyncWorldEditMain extends JavaPlugin {
         s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
     }
 
-    public static void say(UUID uuid, String msg) {
-        say(getPlayer(uuid), msg);
-    }
-
     /**
      * Get craft bukkit player
      *
@@ -150,7 +146,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
         }
 
         PlayerManager pManager = s_instance.getPlayerManager();
-        PlayerWrapper player = pManager.getPlayer(uuid);
+        PlayerEntry player = pManager.getPlayer(uuid);
         if (player == null) {
             return null;
         }
@@ -162,12 +158,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
         return bPlayer;
     }
 
-    public static void say(Player player, String msg) {
-        if (player == null) {
-            s_console.sendRawMessage(msg);
-        } else {
-            player.sendRawMessage(msg);
-        }
+    public static void say(String msg) {
+        s_console.sendRawMessage(msg);
     }
 
     public BlocksHubIntegration getBlocksHub() {
@@ -249,7 +241,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Player player = (sender instanceof Player) ? (Player) sender : null;
+        PlayerEntry player = m_playerManager.getPlayer((sender instanceof Player) ? (Player) sender : null);
 
         if (!command.getName().equalsIgnoreCase(Commands.COMMAND_MAIN)) {
             return false;
@@ -280,21 +272,19 @@ public class AsyncWorldEditMain extends JavaPlugin {
         return Help.ShowHelp(player, null);
     }
 
-    private void doReloadConfig(Player player) {
-        if (player != null) {
-            if (!PermissionManager.isAllowed(player, Permission.RELOAD_CONFIG)) {
-                say(player, ChatColor.RED + "You have no permissions to do that.");
-                return;
-            }
+    private void doReloadConfig(PlayerEntry player) {
+        if (!player.isAllowed(Permission.RELOAD_CONFIG)) {
+            player.say(ChatColor.RED + "You have no permissions to do that.");
+            return;
         }
 
-        log(player != null ? player.getName() : "console " + " reloading config...");
+        log(player.getName() + " reloading config...");
 
         reloadConfig();
         m_isInitialized = false;
 
         if (!ConfigProvider.load(this)) {
-            say(player, "Error loading config");
+            player.say("Error loading config");
             return;
         }
 
@@ -308,39 +298,39 @@ public class AsyncWorldEditMain extends JavaPlugin {
         }
 
         m_isInitialized = true;
-        say(player, "Config reloaded");
+        player.say("Config reloaded");
     }
 
-    private void doToggle(Player player, String[] args) {
+    private void doToggle(PlayerEntry player, String[] args) {
         if (!m_isInitialized) {
-            say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            player.say(ChatColor.RED + "Module not initialized, contact administrator.");
             return;
         }
 
         ToggleCommand.Execte(this, player, args);
     }
 
-    private void doPurge(Player player, String[] args) {
+    private void doPurge(PlayerEntry player, String[] args) {
         if (!m_isInitialized) {
-            say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            player.say(ChatColor.RED + "Module not initialized, contact administrator.");
             return;
         }
 
         PurgeCommand.Execte(this, player, args);
     }
 
-    private void doJobs(Player player, String[] args) {
+    private void doJobs(PlayerEntry player, String[] args) {
         if (!m_isInitialized) {
-            say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            player.say(ChatColor.RED + "Module not initialized, contact administrator.");
             return;
         }
 
         JobsCommand.Execte(this, player, args);
     }
 
-    private void doCancel(Player player, String[] args) {
+    private void doCancel(PlayerEntry player, String[] args) {
         if (!m_isInitialized) {
-            say(player, ChatColor.RED + "Module not initialized, contact administrator.");
+            player.say(ChatColor.RED + "Module not initialized, contact administrator.");
             return;
         }
 
