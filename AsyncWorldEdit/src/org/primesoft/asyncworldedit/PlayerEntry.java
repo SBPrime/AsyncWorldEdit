@@ -58,8 +58,8 @@ public class PlayerEntry {
     public final static PlayerEntry CONSOLE = new PlayerEntry(null, "<Console>", UUID_CONSOLE, PermissionGroup.getDefaultGroup(), true);
     public final static PlayerEntry UNKNOWN = new PlayerEntry(null, "<Unknown>", UUID_UNKNOWN, PermissionGroup.getDefaultGroup(), false);
 
-    private final Player m_player;
-    private final String m_name;
+    private Player m_player;
+    private String m_name;
     private final UUID m_uuid;
     private boolean m_mode;
     private PermissionGroup m_group;
@@ -153,6 +153,7 @@ public class PlayerEntry {
             return false;
         }
         final PlayerEntry other = (PlayerEntry) obj;
+        
         if (this.m_uuid != other.m_uuid && (this.m_uuid == null || !this.m_uuid.equals(other.m_uuid))) {
             return false;
         }
@@ -161,5 +162,16 @@ public class PlayerEntry {
 
     public PermissionGroup getPermissionGroup() {
         return m_group;
+    }
+
+    
+    /**
+     * Update the player after relogin
+     * @param player
+     * @param permissionGroup 
+     */
+    public void update(Player player, PermissionGroup permissionGroup) {
+        m_player = player;
+        m_group = permissionGroup;
     }
 }

@@ -62,6 +62,7 @@ public class CancelCommand {
         BlockPlacer bPlacer = sender.getBlockPlacer();
         int id;
         PlayerEntry entry;
+        
         if (args.length == 2) {
             if (!player.isInGame())
             {
@@ -95,7 +96,7 @@ public class CancelCommand {
                     return;
                 }
                 try {
-                    id = Integer.parseInt(args[1]);
+                    id = Integer.parseInt(args[2]);
                 } catch (NumberFormatException ex) {
                     player.say(ChatColor.RED + "Number expected.");
                     return;

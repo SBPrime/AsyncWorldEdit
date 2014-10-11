@@ -78,8 +78,9 @@ public class PlayerManager {
         String pName = player.getName();
         synchronized (m_playersUids) {
             PlayerEntry wrapper = m_playersUids.get(uuid);
-
+            
             if (wrapper != null) {
+                wrapper.update(player, PermissionManager.getPermissionGroup(player));
                 return wrapper;
             }
 

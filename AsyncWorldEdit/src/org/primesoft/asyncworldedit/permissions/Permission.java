@@ -93,12 +93,12 @@ public enum Permission {
     /**
      * Allows the use of the Cancel command
      */
-    CANCEL_SELF("user.jobs.cancel"),
+    CANCEL_SELF("user.cancel"),
 
     /**
      * Allows the use of the Cancel command on another user
      */
-    CANCEL_OTHER("admin.jobs.cancel"),
+    CANCEL_OTHER("admin.cancel"),
 
     /**
      * Allows the user to toggle AWE for himself
@@ -108,7 +108,7 @@ public enum Permission {
     /**
      * Allows the user to toggle AWE for another user
      */
-    MODE_CHANGE_OTHER("user.admin.change");
+    MODE_CHANGE_OTHER("admin.mode.change");
 
     /**
      * Plugin permission without base
@@ -124,7 +124,7 @@ public enum Permission {
      *
      * @return Entire permission node including base
      */
-    public String getNode() {
+    public String getNode() {        
         return PermissionManager.AWE_PREFIX + permission;
     }
 }
