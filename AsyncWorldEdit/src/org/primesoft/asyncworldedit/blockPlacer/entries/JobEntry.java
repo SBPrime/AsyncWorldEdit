@@ -52,6 +52,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
  * Job description empty
+ *
  * @author SBPrime
  */
 public class JobEntry extends BlockPlacerEntry {
@@ -67,34 +68,36 @@ public class JobEntry extends BlockPlacerEntry {
         PlacingBlocks(3),
         Done(4),
         Canceled(5);
-        
+
         /**
          * The sequence number
          */
         private final int m_seqNumber;
-        
+
         JobStatus(int seqNumber) {
             m_seqNumber = seqNumber;
-        }        
-        
-        public int getSeqNumber() { return m_seqNumber; }
+        }
+
+        public int getSeqNumber() {
+            return m_seqNumber;
+        }
     }
-    
+
     /**
      * Job name
      */
     private final String m_name;
-    
+
     /**
      * Is the job status
      */
     private JobStatus m_status;
-    
+
     /**
      * Cancelable edit session
      */
     private final CancelabeEditSession m_cEditSession;
-    
+
     /**
      * The player name
      */
@@ -110,7 +113,6 @@ public class JobEntry extends BlockPlacerEntry {
      */
     private final List<IJobEntryListener> m_jobStateChanged;
 
-    
     @Override
     public boolean isDemanding() {
         return false;
@@ -118,15 +120,16 @@ public class JobEntry extends BlockPlacerEntry {
 
     /**
      * Get the player UUID
-     * @return 
+     *
+     * @return
      */
     public PlayerEntry getPlayer() {
         return m_player;
     }
-        
 
     /**
      * Create new instance of the class
+     *
      * @param player player uuid
      * @param jobId job id
      * @param name operation name
@@ -140,15 +143,15 @@ public class JobEntry extends BlockPlacerEntry {
         m_jobStateChanged = new ArrayList<IJobEntryListener>();
     }
 
-    
-    /**     
+    /**
      * Create new instance of the class
+     *
      * @param player player uuid
      * @param jobId job id
      * @param name operation name
      * @param cEditSession the cancelable edit session
      */
-    public JobEntry(PlayerEntry player, 
+    public JobEntry(PlayerEntry player,
             CancelabeEditSession cEditSession,
             int jobId, String name) {
         super(jobId);
@@ -162,7 +165,8 @@ public class JobEntry extends BlockPlacerEntry {
 
     /**
      * Add job state change listener
-     * @param listener 
+     *
+     * @param listener
      */
     public void addStateChangedListener(IJobEntryListener listener) {
         if (listener == null) {
@@ -176,10 +180,10 @@ public class JobEntry extends BlockPlacerEntry {
         }
     }
 
-    
     /**
      * Remove the change state listener
-     * @param listener 
+     *
+     * @param listener
      */
     public void removeStateChangedListener(IJobEntryListener listener) {
         if (listener == null) {
@@ -222,16 +226,17 @@ public class JobEntry extends BlockPlacerEntry {
 
     /**
      * Get the operation name
-     * @return 
+     *
+     * @return
      */
     public String getName() {
         return m_name;
     }
 
-    
     /**
      * Set the job state
-     * @param newStatus 
+     *
+     * @param newStatus
      */
     public void setStatus(JobStatus newStatus) {
         int newS = newStatus.getSeqNumber();
@@ -244,21 +249,23 @@ public class JobEntry extends BlockPlacerEntry {
         callStateChangedEvents();
     }
 
-    
     /**
      * Cancel the job
      */
     public void cancel() {
-        setStatus(JobStatus.Canceled);
+        JobStatus status = getStatus();
+        if (status != JobStatus.Done && !m_taskDone) {
+            setStatus(JobStatus.Canceled);
+        }
         if (m_cEditSession != null) {
             m_cEditSession.cancel();
         }
     }
 
-    
     /**
      * Convert job status to string
-     * @return 
+     *
+     * @return
      */
     public String getStatusString() {
         switch (m_status) {
@@ -309,11 +316,10 @@ public class JobEntry extends BlockPlacerEntry {
             player.say(ChatColor.YELLOW + "Job " + toString()
                     + ChatColor.YELLOW + " - " + getStatusString());
         }
-        
+
         return true;
     }
 
-    
     /**
      * Inform the listener of state changed
      */
