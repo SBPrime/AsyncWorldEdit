@@ -40,11 +40,11 @@
  */
 package org.primesoft.asyncworldedit.configuration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
@@ -88,6 +88,8 @@ public class ConfigProvider {
     private static boolean m_logBlocks;
 
     private static boolean m_plotMeFixEnabled;
+    
+    private static File m_pluginFolder; 
 
     /**
      * The default permissions group
@@ -102,10 +104,21 @@ public class ConfigProvider {
     public static PermissionGroup getDefaultGroup() {
         return m_defaultGroup;
     }
+    
 
     public static PermissionGroup[] getGroups() {
         return m_groups;
     }
+    
+    /**
+     * Plugin root folder
+     *
+     * @return
+     */
+    public static File getPluginFolder() {
+        return m_pluginFolder;
+    }
+    
 
     /**
      * Get the config version
@@ -199,6 +212,7 @@ public class ConfigProvider {
         }
 
         plugin.saveDefaultConfig();
+        m_pluginFolder = plugin.getDataFolder();
 
         Configuration config = plugin.getConfig();
         ConfigurationSection mainSection = config.getConfigurationSection("awe");
@@ -339,11 +353,10 @@ public class ConfigProvider {
 
         m_defaultGroup = new PermissionGroup(defaultGroup, true);
         List<PermissionGroup> groups = new ArrayList<PermissionGroup>(subSections.size());
-        for (ConfigurationSection subSection : subSections)
-        {
+        for (ConfigurationSection subSection : subSections) {
             groups.add(new PermissionGroup(subSection, m_defaultGroup, false));
         }
-        
+
         m_groups = groups.toArray(new PermissionGroup[0]);
     }
 }

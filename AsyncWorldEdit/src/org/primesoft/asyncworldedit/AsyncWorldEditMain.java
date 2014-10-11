@@ -308,7 +308,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
         }
 
         m_isInitialized = true;
-        player.say(ChatColor.GREEN + "Done");
+        player.say(ChatColor.GREEN + "Reload done");
     }
 
     private void doToggle(PlayerEntry player, String[] args) {
