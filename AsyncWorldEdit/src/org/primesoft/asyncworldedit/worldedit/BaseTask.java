@@ -75,7 +75,6 @@ public abstract class BaseTask extends BukkitRunnable {
      * Thread safe edit session
      */
     protected final ThreadSafeEditSession m_safeEditSession;
-    
 
     /**
      * The edit session
@@ -91,8 +90,7 @@ public abstract class BaseTask extends BukkitRunnable {
      * Job instance
      */
     protected final JobEntry m_job;
-    
-    
+
     /**
      * The permission group
      */
@@ -103,7 +101,7 @@ public abstract class BaseTask extends BukkitRunnable {
 
         m_editSession = editSession;
         m_cancelableEditSession = (editSession instanceof CancelabeEditSession) ? (CancelabeEditSession) editSession : null;
-        
+
         m_player = player;
         m_group = m_player.getPermissionGroup();
         m_command = commandName;
@@ -115,7 +113,7 @@ public abstract class BaseTask extends BukkitRunnable {
         } else {
             m_safeEditSession = (editSession instanceof ThreadSafeEditSession) ? (ThreadSafeEditSession) editSession : null;
         }
-        
+
         if (m_safeEditSession != null) {
             m_safeEditSession.addAsync(job);
         }
@@ -124,14 +122,21 @@ public abstract class BaseTask extends BukkitRunnable {
     @Override
     public void run() {
         Object result = null;
+
+        if (m_job.getStatus() == JobEntry.JobStatus.Canceled) {
+            return;
+        }
+
+        m_job.setStatus(JobEntry.JobStatus.Preparing);
+        if (m_group.isTalkative()) {
+            m_player.say(ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
+                    + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
+        }
+        m_blockPlacer.addTasks(m_player, m_job);
+
         try {
-            m_job.setStatus(JobEntry.JobStatus.Preparing);            
-            if (m_group.isTalkative()) {
-                m_player.say(ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
-                        + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
-            }
-            m_blockPlacer.addTasks(m_player, m_job);
-            if (m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled()) {
+            if ((m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled())
+                    && (m_job.getStatus() != JobEntry.JobStatus.Canceled)) {
                 result = doRun();
             }
 
@@ -163,12 +168,13 @@ public abstract class BaseTask extends BukkitRunnable {
             parent.removeAsync(m_job);
         } else if (m_safeEditSession != null) {
             m_safeEditSession.removeAsync(m_job);
-        }        
+        }
     }
 
     protected abstract Object doRun() throws MaxChangedBlocksException;
 
     protected abstract void doPostRun(Object result);
-    
-    protected void postProcess() {}
+
+    protected void postProcess() {
+    }
 }

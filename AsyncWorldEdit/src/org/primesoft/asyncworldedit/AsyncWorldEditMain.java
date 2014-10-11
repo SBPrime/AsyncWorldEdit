@@ -289,7 +289,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
             m_isInitialized = false;
 
             if (!ConfigProvider.load(this)) {
-                player.say("Error loading config");
+                player.say(ChatColor.RED + "Error loading config");
                 return;
             }
         }
@@ -308,7 +308,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
         }
 
         m_isInitialized = true;
-        player.say("Done");
+        player.say(ChatColor.GREEN + "Done");
     }
 
     private void doToggle(PlayerEntry player, String[] args) {

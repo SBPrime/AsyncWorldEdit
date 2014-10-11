@@ -194,7 +194,8 @@ public class JobsCommand {
 
             int maxPages = l.length / MAX_LINES + 1;
             say(player, l, (page - 1) * MAX_LINES, page * MAX_LINES);
-            player.say("page " + page + " of " + maxPages);
+            player.say(ChatColor.YELLOW + "page " + ChatColor.WHITE + page + 
+                    ChatColor.YELLOW +  " of " + ChatColor.WHITE + maxPages);
         }
     }
 

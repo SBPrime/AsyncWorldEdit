@@ -65,7 +65,8 @@ public class JobEntry extends BlockPlacerEntry {
         Preparing(1),
         Waiting(2),
         PlacingBlocks(3),
-        Done(4);
+        Done(4),
+        Canceled(5);
         
         /**
          * The sequence number
@@ -248,6 +249,7 @@ public class JobEntry extends BlockPlacerEntry {
      * Cancel the job
      */
     public void cancel() {
+        setStatus(JobStatus.Canceled);
         if (m_cEditSession != null) {
             m_cEditSession.cancel();
         }
@@ -262,6 +264,8 @@ public class JobEntry extends BlockPlacerEntry {
         switch (m_status) {
             case Done:
                 return ChatColor.GREEN + "done";
+            case Canceled:
+                return ChatColor.RED + "canceled";
             case Initializing:
                 return ChatColor.WHITE + "initializing";
             case PlacingBlocks:
@@ -285,6 +289,7 @@ public class JobEntry extends BlockPlacerEntry {
         final PlayerEntry player = m_player;
 
         switch (m_status) {
+            case Canceled:
             case Done:
                 bp.removeJob(player, this);
                 return true;

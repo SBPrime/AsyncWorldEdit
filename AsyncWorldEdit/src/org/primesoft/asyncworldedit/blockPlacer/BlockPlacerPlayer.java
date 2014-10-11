@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
 import org.bukkit.ChatColor;
+import org.primesoft.asyncworldedit.PlayerEntry;
 
 /**
  * Operation queue player entry
@@ -54,11 +55,6 @@ import org.bukkit.ChatColor;
  * @author SBPrime
  */
 public class BlockPlacerPlayer {
-
-    /**
-     * Maximum job number
-     */
-    private final int MAX_JOBS = 1024;
     /**
      * Number of samples used in AVG count
      */
@@ -86,11 +82,20 @@ public class BlockPlacerPlayer {
      * Maximum number of blocks on queue Used to display the progress bar
      */
     private int m_maxBlocksOnQueue;
+    
+    
+    /**
+     * The player
+     */
+    private final PlayerEntry m_player;
+    
 
     /**
      * Create new player entry
+     * @param player
      */
-    public BlockPlacerPlayer() {
+    public BlockPlacerPlayer(PlayerEntry player) {
+        m_player = player;
         m_queue = new ArrayDeque();
         m_speed = 0;
         m_jobs = new HashMap<Integer, JobEntry>();
@@ -107,6 +112,7 @@ public class BlockPlacerPlayer {
 
     /**
      * Set the maximum number of blocks on queue
+     * @param val
      */
     public void setMaxQueueBlocks(int val) {
         m_maxBlocksOnQueue = val;
@@ -171,16 +177,31 @@ public class BlockPlacerPlayer {
      * Add new job
      *
      * @param job
+     * @param force
+     * @return 
      */
-    public void addJob(JobEntry job) {
+    public boolean addJob(JobEntry job, boolean force) {
+        boolean add;
+        int maxJobs = m_player.getPermissionGroup().getMaxJobs();
         synchronized (m_jobs) {
             int id = job.getJobId();
-            if (m_jobs.containsKey(id)) {
+            int count = m_jobs.size();
+            boolean contains = m_jobs.containsKey(id);
+            add = contains || force ||
+                    (count + 1) <= maxJobs || maxJobs < 0;
+            
+            if (contains)
+            {
                 m_jobs.remove(id);
             }
 
-            m_jobs.put(id, job);
+            if (add)
+            {
+                m_jobs.put(id, job);                
+            }
         }
+        
+        return add;
     }
 
     /**

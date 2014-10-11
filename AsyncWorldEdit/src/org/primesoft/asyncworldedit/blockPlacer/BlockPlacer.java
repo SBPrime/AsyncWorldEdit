@@ -362,7 +362,8 @@ public class BlockPlacer {
                         for (JobEntry job : playerEntry.getJobs()) {
                             JobEntry.JobStatus jStatus = job.getStatus();
                             if (jStatus == JobEntry.JobStatus.Done
-                                    || jStatus == JobEntry.JobStatus.Waiting) {
+                                    || jStatus == JobEntry.JobStatus.Waiting
+                                    || jStatus == JobEntry.JobStatus.Canceled) {
                                 jobsToCancel.add(job);
                             }
                         }
@@ -412,7 +413,7 @@ public class BlockPlacer {
             if (m_blocks.containsKey(player)) {
                 playerEntry = m_blocks.get(player);
             } else {
-                playerEntry = new BlockPlacerPlayer();
+                playerEntry = new BlockPlacerPlayer(player);
                 m_blocks.put(player, playerEntry);
             }
         }
@@ -443,24 +444,33 @@ public class BlockPlacer {
      * @param player player UUID
      * @param job the job
      */
-    public void addJob(PlayerEntry player, JobEntry job) {
+    public boolean addJob(PlayerEntry player, JobEntry job) {
+        boolean result;
+
         synchronized (this) {
             BlockPlacerPlayer playerEntry;
 
             if (!m_blocks.containsKey(player)) {
-                playerEntry = new BlockPlacerPlayer();
+                playerEntry = new BlockPlacerPlayer(player);
                 m_blocks.put(player, playerEntry);
             } else {
                 playerEntry = m_blocks.get(player);
             }
-            playerEntry.addJob(job);
+            result = playerEntry.addJob(job, false);
         }
 
-        synchronized (m_jobAddedListeners) {
-            for (IBlockPlacerListener listener : m_jobAddedListeners) {
-                listener.jobAdded(job);
+        if (result) {
+            synchronized (m_jobAddedListeners) {
+                for (IBlockPlacerListener listener : m_jobAddedListeners) {
+                    listener.jobAdded(job);
+                }
             }
+        } else {
+            player.say(ChatColor.RED + "You have too many jobs queued, operation canceled.");
+            job.cancel();
         }
+        
+        return result;
     }
 
     /**
@@ -479,7 +489,7 @@ public class BlockPlacer {
             BlockPlacerPlayer playerEntry;
 
             if (!m_blocks.containsKey(player)) {
-                playerEntry = new BlockPlacerPlayer();
+                playerEntry = new BlockPlacerPlayer(player);
                 m_blocks.put(player, playerEntry);
             } else {
                 playerEntry = m_blocks.get(player);
@@ -502,7 +512,7 @@ public class BlockPlacer {
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
                 if (!playerEntry.isInformed()) {
                     playerEntry.setInformed(true);
-                    player.say("Out of space on AWE block queue.");
+                    player.say(ChatColor.RED + "Out of space on AWE block queue.");
                 }
 
                 return false;
@@ -522,11 +532,11 @@ public class BlockPlacer {
                     }
                 }
                 if (entry instanceof JobEntry) {
-                    playerEntry.addJob((JobEntry) entry);
+                    playerEntry.addJob((JobEntry) entry, true);
                 }
                 if (queue.size() >= group.getQueueHardLimit() && bypass) {
                     m_lockedQueues.add(player);
-                    player.say("Your block queue is full. Wait for items to finish drawing.");
+                    player.say(ChatColor.RED + "Your block queue is full. Wait for items to finish drawing.");
                     return false;
                 }
             }
@@ -543,7 +553,7 @@ public class BlockPlacer {
      */
     public void cancelJob(PlayerEntry player, JobEntry job) {
         if (job instanceof UndoJob) {
-            player.say("Warning: Undo jobs shuld not by canceled, ingoring!");
+            player.say(ChatColor.RED + "Warning: Undo jobs shuld not by canceled, ingoring!");
             return;
         }
         cancelJob(player, job.getJobId());
@@ -574,6 +584,7 @@ public class BlockPlacer {
         }
 
         if (status != JobEntry.JobStatus.Done
+                && status != JobEntry.JobStatus.Canceled
                 && !job.isTaskDone()) {
             AsyncWorldEditMain.log("-----------------------------------------------------------------------");
             AsyncWorldEditMain.log("Warning: timeout waiting for job to finish. Manual job cancel.");
@@ -604,7 +615,7 @@ public class BlockPlacer {
             playerEntry = m_blocks.get(player);
             job = playerEntry.getJob(jobId);
             if (job instanceof UndoJob) {
-                player.say("Warning: Undo jobs shuld not by canceled, ingoring!");
+                player.say(ChatColor.RED + "Warning: Undo jobs shuld not by canceled, ingoring!");
                 return 0;
             }
 
@@ -925,7 +936,7 @@ public class BlockPlacer {
     private void unlockQueue(final PlayerEntry player, boolean talk) {
         if (m_lockedQueues.contains(player)) {
             if (talk) {
-                player.say("Your block queue is unlocked. You can use WorldEdit.");
+                player.say(ChatColor.GREEN + "Your block queue is unlocked. You can use WorldEdit.");
             }
             m_lockedQueues.remove(player);
         }

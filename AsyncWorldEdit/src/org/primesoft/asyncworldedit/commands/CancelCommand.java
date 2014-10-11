@@ -108,6 +108,7 @@ public class CancelCommand {
             }
         }
         int size = sender.getBlockPlacer().cancelJob(entry, id);
-        player.say("" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");            
+        player.say(ChatColor.WHITE + Integer.toString(size) +
+                ChatColor.YELLOW + " queue entries removed.");            
     }
 }

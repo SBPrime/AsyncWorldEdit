@@ -122,6 +122,6 @@ public class ToggleCommand {
         }
 
         wrapper.setMode(mode);
-        player.say("AsyncWorldEdit: " + (wrapper.getMode() ? "on" : "off"));
+        player.say(ChatColor.YELLOW + "AsyncWorldEdit is now set to " + ChatColor.WHITE + (wrapper.getMode() ? "on" : "off"));
     }
 }

@@ -69,7 +69,8 @@ public class PurgeCommand {
             }
 
             int size = sender.getBlockPlacer().purge(player);
-            player.say("" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+            player.say(ChatColor.WHITE + Integer.toString(size) + 
+                    ChatColor.YELLOW + " queue entries removed.");
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
@@ -86,7 +87,8 @@ public class PurgeCommand {
                     return;
                 }
                 int size = sender.getBlockPlacer().purge(playerEntry);
-                player.say("" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+                player.say(ChatColor.WHITE + Integer.toString(size) + 
+                        ChatColor.YELLOW + " queue entries removed.");
             } else {
                 if (!arg.equalsIgnoreCase("all")) {
                     Help.ShowHelp(player, Commands.COMMAND_PURGE);
@@ -99,7 +101,8 @@ public class PurgeCommand {
                 }
 
                 int size = sender.getBlockPlacer().purgeAll();
-                player.say("" + ChatColor.WHITE + size + ChatColor.YELLOW + " queue entries removed.");
+                player.say(ChatColor.WHITE + Integer.toString(size) + 
+                        ChatColor.YELLOW + " queue entries removed.");
             }
         }
     }
