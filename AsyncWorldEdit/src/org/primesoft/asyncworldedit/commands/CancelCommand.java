@@ -46,6 +46,7 @@ import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
@@ -66,17 +67,17 @@ public class CancelCommand {
         if (args.length == 2) {
             if (!player.isInGame())
             {
-                player.say(ChatColor.RED + "Command available ingame.");
+                player.say(MessageType.INGAME.format());
                 return;
             }
             if (!player.isAllowed(Permission.CANCEL_SELF)) {
-                player.say(ChatColor.RED + "You have no permissions to do that.");
+                player.say(MessageType.NO_PERMS.format());
                 return;
             }
             try {
                 id = Integer.parseInt(args[1]);
             } catch (NumberFormatException ex) {
-                player.say(ChatColor.RED + "Number expected.");
+                player.say(MessageType.NUMBER_EXPECTED.format());
                 return;
             }
 
@@ -85,20 +86,20 @@ public class CancelCommand {
             String arg = args[1];
             if (arg.startsWith("u:")) {
                 if (!player.isAllowed(Permission.CANCEL_OTHER)) {
-                    player.say(ChatColor.RED + "You have no permissions to do that.");
+                    player.say(MessageType.NO_PERMS.format());
                     return;
                 }
 
                 String name = arg.substring(2);
                 entry = sender.getPlayerManager().getPlayer(name);
                 if (!entry.isPlayer()) {
-                    player.say(ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
+                    player.say(MessageType.PLAYER_NOT_FOUND.format());
                     return;
                 }
                 try {
                     id = Integer.parseInt(args[2]);
                 } catch (NumberFormatException ex) {
-                    player.say(ChatColor.RED + "Number expected.");
+                    player.say(MessageType.NUMBER_EXPECTED.format());
                     return;
                 }                                
             } else {
@@ -108,7 +109,6 @@ public class CancelCommand {
             }
         }
         int size = sender.getBlockPlacer().cancelJob(entry, id);
-        player.say(ChatColor.WHITE + Integer.toString(size) +
-                ChatColor.YELLOW + " queue entries removed.");            
+        player.say(MessageType.CMD_CANCEL_REMOVED.format(Integer.toString(size)));  
     }
 }

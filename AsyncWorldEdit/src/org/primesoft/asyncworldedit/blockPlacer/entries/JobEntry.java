@@ -42,12 +42,12 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
@@ -270,17 +270,17 @@ public class JobEntry extends BlockPlacerEntry {
     public String getStatusString() {
         switch (m_status) {
             case Done:
-                return ChatColor.GREEN + "done";
+                return MessageType.CMD_JOBS_STATUS_DONE.format();
             case Canceled:
-                return ChatColor.RED + "canceled";
+                return MessageType.CMD_JOBS_STATUS_CANCELED.format();
             case Initializing:
-                return ChatColor.WHITE + "initializing";
+                return MessageType.CMD_JOBS_STATUS_INITIALIZING.format();
             case PlacingBlocks:
-                return ChatColor.GREEN + "placing blocks";
+                return MessageType.CMD_JOBS_STATUS_PLACING_BLOCKS.format();
             case Preparing:
-                return ChatColor.RED + "preparing blocks";
+                return MessageType.CMD_JOBS_STATUS_PREPARING.format();
             case Waiting:
-                return ChatColor.YELLOW + "waiting";
+                return MessageType.CMD_JOBS_STATUS_WAITING.format();
         }
 
         return "";
@@ -288,7 +288,7 @@ public class JobEntry extends BlockPlacerEntry {
 
     @Override
     public String toString() {
-        return ChatColor.WHITE + "[" + getJobId() + "] " + getName();
+        return MessageType.CMD_JOBS_FORMAT.format(getJobId(), getName());
     }
 
     @Override
@@ -313,8 +313,7 @@ public class JobEntry extends BlockPlacerEntry {
 
         PermissionGroup group = player.getPermissionGroup();
         if (group.isTalkative()) {
-            player.say(ChatColor.YELLOW + "Job " + toString()
-                    + ChatColor.YELLOW + " - " + getStatusString());
+            player.say(MessageType.CMD_JOBS_STATUS.format(toString(), getStatusString()));
         }
 
         return true;

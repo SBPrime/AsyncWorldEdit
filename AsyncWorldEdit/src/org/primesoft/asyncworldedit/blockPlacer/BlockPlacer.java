@@ -44,7 +44,6 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import java.util.*;
-import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -53,6 +52,7 @@ import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.FuncParamEx;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.worldedit.AsyncTask;
@@ -443,6 +443,7 @@ public class BlockPlacer {
      *
      * @param player player UUID
      * @param job the job
+     * @return 
      */
     public boolean addJob(PlayerEntry player, JobEntry job) {
         boolean result;
@@ -466,7 +467,7 @@ public class BlockPlacer {
                 }
             }
         } else {
-            player.say(ChatColor.RED + "You have too many jobs queued, operation canceled.");
+            player.say(MessageType.BLOCK_PLACER_JOBS_LIMIT.format());
             job.cancel();
         }
 
@@ -512,7 +513,7 @@ public class BlockPlacer {
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
                 if (!playerEntry.isInformed()) {
                     playerEntry.setInformed(true);
-                    player.say(ChatColor.RED + "Out of space on AWE block queue.");
+                    player.say(MessageType.BLOCK_PLACER_GLOBAL_QUEUE_FULL.format());
                 }
 
                 return false;
@@ -536,7 +537,7 @@ public class BlockPlacer {
                 }
                 if (queue.size() >= group.getQueueHardLimit() && bypass) {
                     m_lockedQueues.add(player);
-                    player.say(ChatColor.RED + "Your block queue is full. Wait for items to finish drawing.");
+                    player.say(MessageType.BLOCK_PLACER_QUEUE_FULL.format());
                     return false;
                 }
             }
@@ -607,7 +608,7 @@ public class BlockPlacer {
             if (playerEntry != null) {
                 job = playerEntry.getJob(jobId);
                 if (job instanceof UndoJob) {
-                    player.say(ChatColor.RED + "Warning: Undo jobs shuld not by canceled, ingoring!");
+                    player.say(MessageType.BLOCK_PLACER_CANCEL_UNDO.format());
                     return 0;
                 }
 
@@ -781,17 +782,6 @@ public class BlockPlacer {
      * @return
      */
     private String getPlayerMessage(BlockPlacerPlayer player, PermissionGroup group, boolean bypass) {
-        final String format = ChatColor.WHITE + "%d"
-                + ChatColor.YELLOW + " out of " + ChatColor.WHITE + "%d"
-                + ChatColor.YELLOW + " blocks (" + ChatColor.WHITE + "%.2f%%"
-                + ChatColor.YELLOW + ") queued. Placing speed: " + ChatColor.WHITE + "%.2fbps"
-                + ChatColor.YELLOW + ", " + ChatColor.WHITE + "%.2fs"
-                + ChatColor.YELLOW + " left.";
-        final String formatShort = ChatColor.WHITE + "%d"
-                + ChatColor.YELLOW + " blocks queued. Placing speed: " + ChatColor.WHITE + "%.2fbps"
-                + ChatColor.YELLOW + ", " + ChatColor.WHITE + "%.2fs"
-                + ChatColor.YELLOW + " left.";
-
         int blocks = 0;
         double speed = 0;
         double time = 0;
@@ -805,11 +795,11 @@ public class BlockPlacer {
         }
 
         if (bypass) {
-            return String.format(formatShort, blocks, speed, time);
+            return MessageType.CMD_JOBS_SHORT.format(blocks, speed, time);
         }
 
         int queueHardLimit = group.getQueueHardLimit();
-        return String.format(format, blocks, queueHardLimit, 100.0 * blocks / queueHardLimit, speed, time);
+        return MessageType.CMD_JOBS_LONG.format(blocks, queueHardLimit, 100.0 * blocks / queueHardLimit, speed, time);
     }
 
     /**
@@ -851,11 +841,6 @@ public class BlockPlacer {
      * @param bypass
      */
     private void setBar(PlayerEntry player, BlockPlacerPlayer entry, boolean bypass) {
-        final String format = ChatColor.YELLOW + "Jobs: " + ChatColor.WHITE + "%d"
-                + ChatColor.YELLOW + ", Placing speed: " + ChatColor.WHITE + "%.2fbps"
-                + ChatColor.YELLOW + ", " + ChatColor.WHITE + "%.2fs"
-                + ChatColor.YELLOW + " left.";
-
         int blocks = 0;
         int maxBlocks = 0;
         int jobs = 0;
@@ -881,7 +866,7 @@ public class BlockPlacer {
             entry.setMaxQueueBlocks(newMax);
         }
 
-        String message = String.format(format, jobs, speed, time);
+        String message = MessageType.CMD_JOBS_PROGRESS_BAR.format(jobs, speed, time);
         m_barAPI.setMessage(player, message, percentage);
     }
 
@@ -920,8 +905,7 @@ public class BlockPlacer {
             }
         } else {
             if (talk && group.isChatProgressEnabled()) {
-                playerEntry.say(ChatColor.YELLOW + "[AWE] You have "
-                        + getPlayerMessage(entry, group, bypass));
+                playerEntry.say(MessageType.CMD_JOBS_PROGRESS_MSG.format(getPlayerMessage(entry, group, bypass)));
             }
 
             if (group.isBarApiProgressEnabled()) {
@@ -938,7 +922,7 @@ public class BlockPlacer {
     private void unlockQueue(final PlayerEntry player, boolean talk) {
         if (m_lockedQueues.contains(player)) {
             if (talk) {
-                player.say(ChatColor.GREEN + "Your block queue is unlocked. You can use WorldEdit.");
+                player.say(MessageType.BLOCK_PLACER_QUEUE_UNLOCKED.format());
             }
             m_lockedQueues.remove(player);
         }

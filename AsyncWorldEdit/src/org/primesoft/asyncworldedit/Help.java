@@ -40,70 +40,33 @@
  */
 package org.primesoft.asyncworldedit;
 
-import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.commands.Commands;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
  * @author SBPrime
  */
 public final class Help {
-
-    private final static String[] HelpGlobal = new String[]{
-        ChatColor.YELLOW + "Async WorldEdit help:\n",
-        ChatColor.BLUE + "Help" + ChatColor.WHITE + " - diaplay help screen",
-        ChatColor.BLUE + "Jobs" + ChatColor.WHITE + " - display queued block operations",
-        ChatColor.BLUE + "Cancel" + ChatColor.WHITE + " - cancel queued job",
-        ChatColor.BLUE + "Purge" + ChatColor.WHITE + " - remove all queued block operations",
-        ChatColor.BLUE + "Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off",
-        ChatColor.BLUE + "Reload" + ChatColor.WHITE + " - reload configuration",
-        ChatColor.YELLOW + "To display help on command use: " + ChatColor.BLUE + "/Help <command>"
-    };
-    private final static String[] HelpToggle = new String[]{
-        ChatColor.YELLOW + "Toggle " + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off",
-        ChatColor.BLUE + " Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit",
-        ChatColor.BLUE + " Toggle on" + ChatColor.WHITE + " - toggle AsyncWorldEdit on",
-        ChatColor.BLUE + " Toggle off" + ChatColor.WHITE + " - toggle AsyncWorldEdit off",
-        ChatColor.BLUE + " Toggle <u:playerName> " + ChatColor.WHITE + " - toggle AsyncWorldEdit",
-        ChatColor.BLUE + " Toggle <u:playerName> on" + ChatColor.WHITE + " - toggle AsyncWorldEdit on",
-        ChatColor.BLUE + " Toggle <u:playerName> off" + ChatColor.WHITE + " - toggle AsyncWorldEdit off",};
-    private final static String[] HelpPurge = new String[]{
-        ChatColor.YELLOW + "Purge " + ChatColor.WHITE + " - remove all queued block operations",
-        ChatColor.BLUE + " Purge" + ChatColor.WHITE + " - purges your operations",
-        ChatColor.BLUE + " Purge <u:playerName>" + ChatColor.WHITE + " - purges other player operations",
-        ChatColor.BLUE + " Purge all" + ChatColor.WHITE + " - purges all operations",};
-    private final static String[] HelpJobs = new String[]{
-        ChatColor.YELLOW + "Jobs " + ChatColor.WHITE + " - display queued block operations",
-        ChatColor.BLUE + " Jobs [page]" + ChatColor.WHITE + " - displays your operations",
-        ChatColor.BLUE + " Jobs <u:playerName> [page]" + ChatColor.WHITE + " - displays other player operations",
-        ChatColor.BLUE + " Jobs all [page]" + ChatColor.WHITE + " - displays all queued operations",};
-    private final static String[] HelpCancel = new String[]{
-        ChatColor.YELLOW + "Cancel " + ChatColor.WHITE + " - cancel queued job",
-        ChatColor.BLUE + " Cancel #id" + ChatColor.WHITE + " - cancel your job",
-        ChatColor.BLUE + " Cancel <u:playerName> #id" + ChatColor.WHITE + " - cancel other player job",};
-    private final static String[] HelpReload = new String[]{
-        ChatColor.YELLOW + "Reload" + ChatColor.WHITE + " - Reload AWE configuration file",
-        ChatColor.BLUE + " Reload All" + ChatColor.WHITE + " - reload configuration entries and update groups",
-        ChatColor.BLUE + " Reload Config" + ChatColor.WHITE + " - reload only the configuration ",
-        ChatColor.BLUE + " Reload Groups" + ChatColor.WHITE + " - update only the player groups", };
-
     public static boolean ShowHelp(PlayerEntry player, String command) {
-        String[] help = HelpGlobal;
+        MessageType helpMessage = MessageType.CMD_HELP_GLOBAL;
 
         if (command != null) {
             if (command.equalsIgnoreCase(Commands.COMMAND_PURGE)) {
-                help = HelpPurge;
+                helpMessage = MessageType.CMD_HELP_PURGE;
             } else if (command.equalsIgnoreCase(Commands.COMMAND_JOBS)) {
-                help = HelpJobs;
+                helpMessage = MessageType.CMD_HELP_JOBS;
             } else if (command.equalsIgnoreCase(Commands.COMMAND_TOGGLE)) {
-                help = HelpToggle;
+                helpMessage = MessageType.CMD_HELP_TOGGLE;
             } else if (command.equalsIgnoreCase(Commands.COMMAND_RELOAD)) {
-                help = HelpReload;
+                helpMessage = MessageType.CMD_HELP_RELOAD;
             } else if (command.equalsIgnoreCase(Commands.COMMAND_CANCEL)) {
-                help = HelpCancel;
+                helpMessage = MessageType.CMD_HELP_CANCEL;
             }
         }
 
+        String[] help = helpMessage.format().split("\n");
+        
         for (String string : help) {
             player.say(string);
         }

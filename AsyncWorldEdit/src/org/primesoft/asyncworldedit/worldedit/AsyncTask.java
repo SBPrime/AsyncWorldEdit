@@ -45,6 +45,7 @@ import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
@@ -65,7 +66,7 @@ public abstract class AsyncTask extends BaseTask {
     @Override
     protected void doPostRun(Object result) {
         if (m_group.isTalkative()) {
-            m_player.say(ChatColor.LIGHT_PURPLE + "Blocks processed: " + ChatColor.WHITE + (Integer)result);
+            m_player.say(MessageType.BLOCK_PLACER_DONE.format((Integer)result));
         }
     }
 

@@ -40,9 +40,9 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
-import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.*;
 import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
@@ -62,11 +62,11 @@ public class ToggleCommand {
 
         if (args.length == 1) {
             if (!player.isInGame()) {
-                player.say(ChatColor.RED + "Command available ingame.");
+                player.say(MessageType.INGAME.format());
                 return;
             }
             if (!player.isAllowed(Permission.MODE_CHANGE)) {
-                player.say(ChatColor.RED + "You have no permissions to do that.");
+                player.say(MessageType.NO_PERMS.format());
                 return;
             }
 
@@ -76,14 +76,14 @@ public class ToggleCommand {
             String arg = args[1];
             if (arg.startsWith("u:")) {
                 if (!player.isAllowed(Permission.MODE_CHANGE_OTHER)) {
-                    player.say(ChatColor.RED + "You have no permissions to do that.");
+                    player.say(MessageType.NO_PERMS.format());
                     return;
                 }
 
                 String name = arg.substring(2);
                 wrapper = sender.getPlayerManager().getPlayer(name);
                 if (!wrapper.isPlayer()) {
-                    player.say(ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
+                    player.say(MessageType.PLAYER_NOT_FOUND.format());
                     return;
                 }
 
@@ -102,11 +102,11 @@ public class ToggleCommand {
                 }
             } else {
                 if (!player.isInGame()) {
-                    player.say(ChatColor.RED + "Command available ingame.");
+                    player.say(MessageType.INGAME.format());
                     return;
                 }
                 if (!player.isAllowed(Permission.MODE_CHANGE)) {
-                    player.say(ChatColor.RED + "You have no permissions to do that.");
+                    player.say(MessageType.NO_PERMS.format());
                     return;
                 }
                 if (arg.equalsIgnoreCase("on")) {
@@ -122,6 +122,7 @@ public class ToggleCommand {
         }
 
         wrapper.setMode(mode);
-        player.say(ChatColor.YELLOW + "AsyncWorldEdit is now set to " + ChatColor.WHITE + (wrapper.getMode() ? "on" : "off"));
+        player.say(MessageType.CMD_TOGGLE_MODE_DONE.format(wrapper.getMode() ? 
+                MessageType.CMD_TOGGLE_MODE_ON.format() : MessageType.CMD_TOGGLE_MODE_OFF.format()));
     }
 }

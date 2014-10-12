@@ -43,10 +43,10 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
@@ -86,7 +86,7 @@ public abstract class ClipboardAsyncTask extends BaseTask {
     @Override
     protected void doPostRun(Object result) {
         if (m_group.isTalkative()) {
-            m_player.say(ChatColor.LIGHT_PURPLE + "Clipboard operation done.");
+            m_player.say(MessageType.BLOCK_PLACER_DONE_CLIP.format());
         }
     }
 

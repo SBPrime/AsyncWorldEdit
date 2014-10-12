@@ -48,6 +48,7 @@ import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 
 /**
@@ -129,8 +130,7 @@ public abstract class BaseTask extends BukkitRunnable {
 
         m_job.setStatus(JobEntry.JobStatus.Preparing);
         if (m_group.isTalkative()) {
-            m_player.say(ChatColor.LIGHT_PURPLE + "Running " + ChatColor.WHITE
-                    + m_command + ChatColor.LIGHT_PURPLE + " in full async mode.");
+            m_player.say(MessageType.BLOCK_PLACER_RUN.format(m_command));
         }
         m_blockPlacer.addTasks(m_player, m_job);
 
@@ -154,10 +154,10 @@ public abstract class BaseTask extends BukkitRunnable {
             m_blockPlacer.addTasks(m_player, m_job);
             doPostRun(result);
         } catch (MaxChangedBlocksException ex) {
-            m_player.say(ChatColor.RED + "Maximum block change limit.");
+            m_player.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
         } catch (IllegalArgumentException ex) {
             if (ex.getCause() instanceof SessionCanceled) {
-                m_player.say(ChatColor.LIGHT_PURPLE + "Job canceled.");
+                m_player.say(MessageType.BLOCK_PLACER_CANCELED.format());
             }
         }
         postProcess();

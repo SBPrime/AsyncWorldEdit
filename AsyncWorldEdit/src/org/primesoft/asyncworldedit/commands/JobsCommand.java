@@ -50,6 +50,7 @@ import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerPlayer;
 import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
@@ -140,11 +141,11 @@ public class JobsCommand {
             return;
         }
         if (onlyInGame && !player.isInGame()) {
-            player.say(ChatColor.RED + "Command available ingame.");
+            player.say(MessageType.INGAME.format());
             return;
         }
         if (!player.isAllowed(perm)) {
-            player.say(ChatColor.RED + "You have no permissions to do that.");
+            player.say(MessageType.NO_PERMS.format());
             return;
         }
 
@@ -154,11 +155,10 @@ public class JobsCommand {
 
             switch (perm) {
                 case JOBS_SELF:
-                    lines.add(ChatColor.YELLOW + "You have " + bPlacer.getPlayerMessage(playerEntry));
+                    lines.add(MessageType.CMD_JOBS_YOU.format(bPlacer.getPlayerMessage(playerEntry)));
                     break;
                 case JOBS_OTHER:
-                    lines.add(ChatColor.YELLOW + "Player " + ChatColor.WHITE
-                            + playerName + ChatColor.YELLOW + " has " + bPlacer.getPlayerMessage(playerEntry));
+                    lines.add(MessageType.CMD_JOBS_OTHER.format(playerName, bPlacer.getPlayerMessage(playerEntry)));
                     break;
             }
             BlockPlacerPlayer entry = bPlacer.getPlayerEvents(playerEntry);
@@ -168,15 +168,13 @@ public class JobsCommand {
         } else {
             PlayerEntry[] users = bPlacer.getAllPlayers();
             if (users.length == 0) {
-                lines.add(ChatColor.YELLOW + "No operations queued.");
+                lines.add(MessageType.CMD_JOBS_NONE.format());
             } else {
                 for (PlayerEntry pw : users) {
                     BlockPlacerPlayer entry = bPlacer.getPlayerEvents(pw);
                     int cnt = entry != null ? entry.getQueue().size() : 0;                    
                     String name = pw.getName();
-                    lines.add(ChatColor.YELLOW + "Player " + ChatColor.WHITE
-                            + name + ChatColor.YELLOW + " has " + ChatColor.WHITE + cnt
-                            + ChatColor.YELLOW + " block operations queued.");
+                    lines.add(MessageType.CMD_JOBS_OTHER_SHORT.format(name, cnt));
                     if (entry != null) {
                         entry.printJobs(lines);
                     }
@@ -194,8 +192,7 @@ public class JobsCommand {
 
             int maxPages = l.length / MAX_LINES + 1;
             say(player, l, (page - 1) * MAX_LINES, page * MAX_LINES);
-            player.say(ChatColor.YELLOW + "page " + ChatColor.WHITE + page + 
-                    ChatColor.YELLOW +  " of " + ChatColor.WHITE + maxPages);
+            player.say(MessageType.CMD_JOBS_PAGE.format(page, maxPages));
         }
     }
 

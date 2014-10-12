@@ -50,6 +50,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
@@ -84,15 +85,14 @@ public class EventListener implements Listener {
             public void run() {
                 if (ConfigProvider.getCheckUpdate()) {
                     PluginDescriptionFile desc = m_parent.getDescription();
-                    entry.say(ChatColor.BLUE + AsyncWorldEditMain.getPrefix()
-                        + VersionChecker.CheckVersion(desc.getVersion()));
+                    entry.say(MessageType.CHECK_VERSION_FORMAT.format(
+                            AsyncWorldEditMain.getPrefix(), VersionChecker.CheckVersion(desc.getVersion())));
                 }
             }
         }).start();
 
         if (!ConfigProvider.isConfigUpdated()) {
-            entry.say(ChatColor.BLUE + AsyncWorldEditMain.getPrefix()
-                    + "Please update your config file!");
+            entry.say(MessageType.CHECK_VERSION_CONFIG.format(AsyncWorldEditMain.getPrefix()));
         }
     }    
 }

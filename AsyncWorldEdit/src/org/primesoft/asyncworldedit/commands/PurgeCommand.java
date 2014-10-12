@@ -45,6 +45,7 @@ import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
@@ -60,22 +61,21 @@ public class PurgeCommand {
 
         if (args.length == 1) {
             if (!player.isInGame()) {
-                player.say(ChatColor.RED + "Command available ingame.");
+                player.say(MessageType.INGAME.format());
                 return;
             }
             if (!player.isAllowed(Permission.PURGE_SELF)) {
-                player.say(ChatColor.RED + "You have no permissions to do that.");
+                player.say(MessageType.NO_PERMS.format());
                 return;
             }
 
             int size = sender.getBlockPlacer().purge(player);
-            player.say(ChatColor.WHITE + Integer.toString(size) + 
-                    ChatColor.YELLOW + " queue entries removed.");
+            player.say(MessageType.CMD_PURGE_REMOVED.format(Integer.toString(size)));
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
                 if (!player.isAllowed(Permission.PURGE_OTHER)) {
-                    player.say(ChatColor.RED + "You have no permissions to do that.");
+                    player.say(MessageType.NO_PERMS.format());
                     return;
                 }
 
@@ -83,12 +83,11 @@ public class PurgeCommand {
                 String name = arg.substring(2);
                 PlayerEntry playerEntry = sender.getPlayerManager().getPlayer(name);
                 if (!playerEntry.isPlayer()) {
-                    player.say(ChatColor.RED + "Player " + ChatColor.WHITE + name + ChatColor.RED + " not found.");
+                    player.say(MessageType.PLAYER_NOT_FOUND.format());
                     return;
                 }
                 int size = sender.getBlockPlacer().purge(playerEntry);
-                player.say(ChatColor.WHITE + Integer.toString(size) + 
-                        ChatColor.YELLOW + " queue entries removed.");
+                player.say(MessageType.CMD_PURGE_REMOVED.format(Integer.toString(size)));
             } else {
                 if (!arg.equalsIgnoreCase("all")) {
                     Help.ShowHelp(player, Commands.COMMAND_PURGE);
@@ -96,13 +95,12 @@ public class PurgeCommand {
                 }
 
                 if (!player.isAllowed(Permission.PURGE_ALL)) {
-                    player.say(ChatColor.RED + "You have no permissions to do that.");
+                    player.say(MessageType.NO_PERMS.format());
                     return;
                 }
 
                 int size = sender.getBlockPlacer().purgeAll();
-                player.say(ChatColor.WHITE + Integer.toString(size) + 
-                        ChatColor.YELLOW + " queue entries removed.");
+                player.say(MessageType.CMD_PURGE_REMOVED.format(Integer.toString(size)));
             }
         }
     }

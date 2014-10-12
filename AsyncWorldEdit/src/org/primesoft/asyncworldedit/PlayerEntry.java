@@ -41,11 +41,11 @@
 package org.primesoft.asyncworldedit;
 
 import java.util.UUID;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
@@ -81,6 +81,9 @@ public class PlayerEntry {
     }
 
     public void say(String msg) {
+        if (msg == null) {
+            return;
+        }
         if (m_player != null) {
             if (m_player.isOnline()) {
                 m_player.sendRawMessage(msg);
@@ -110,16 +113,15 @@ public class PlayerEntry {
     }
 
     public void setMode(boolean mode) {
-        if (mode == m_mode)
-        {
+        if (mode == m_mode) {
             return;
         }
-        
+
         m_mode = mode;
-        
-        say(ChatColor.YELLOW + "Your " + ChatColor.BLUE + "AsyncWorldEdit " +
-            ChatColor.YELLOW + "is now set to " + ChatColor.WHITE + (mode ? "On" : "Off"));
-        
+
+        say(MessageType.CMD_TOGGLE_MODE_CHANGED.format(mode ? 
+                MessageType.CMD_TOGGLE_MODE_ON.format() : MessageType.CMD_TOGGLE_MODE_OFF.format()));
+
     }
 
     public boolean isAllowed(Permission permission) {
@@ -163,7 +165,7 @@ public class PlayerEntry {
             return false;
         }
         final PlayerEntry other = (PlayerEntry) obj;
-        
+
         if (this.m_uuid != other.m_uuid && (this.m_uuid == null || !this.m_uuid.equals(other.m_uuid))) {
             return false;
         }
@@ -174,11 +176,11 @@ public class PlayerEntry {
         return m_group;
     }
 
-    
     /**
      * Update the player after relogin
+     *
      * @param player
-     * @param permissionGroup 
+     * @param permissionGroup
      */
     public void update(Player player, PermissionGroup permissionGroup) {
         m_player = player;

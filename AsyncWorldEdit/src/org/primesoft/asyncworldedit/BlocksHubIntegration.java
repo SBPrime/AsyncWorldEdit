@@ -58,7 +58,6 @@ public class BlocksHubIntegration {
 
     private final boolean m_isInitialized;
     private final IBlocksHubApi m_blocksApi;
-    private final PlayerManager m_playerManager;
 
     /**
      * Get instance of the core blocks hub plugin
@@ -81,7 +80,6 @@ public class BlocksHubIntegration {
     }    
 
     public BlocksHubIntegration(AsyncWorldEditMain plugin) {
-        m_playerManager = plugin.getPlayerManager();
         BlocksHub bh = getBlocksHub(plugin);
         m_blocksApi = bh != null ? bh.getApi() : null;
         m_isInitialized = m_blocksApi != null && m_blocksApi.getVersion() >= 1.0;

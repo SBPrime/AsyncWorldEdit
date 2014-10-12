@@ -46,8 +46,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
-import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  * Operation queue player entry
@@ -260,10 +260,9 @@ public class BlockPlacerPlayer {
             if (m_jobs.isEmpty()) {
                 return;
             }
-            lines.add(ChatColor.YELLOW + "Jobs: ");
+            lines.add(MessageType.CMD_JOBS_HEADER.format());
             for (JobEntry job : m_jobs.values()) {
-                lines.add(ChatColor.YELLOW + " * " + job.toString()
-                        + ChatColor.YELLOW + " - " + job.getStatusString());
+                lines.add(MessageType.CMD_JOBS_LINE.format(job.toString(), job.getStatusString()));
             }
         }
     }

@@ -46,6 +46,7 @@ import java.net.URL;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  * Version checker class
@@ -96,7 +97,7 @@ public class VersionChecker {
         String content = downloadPage(s_versionUrl);
 
         if (content == null || content.isEmpty()) {
-            return "Unable to check latest plugin version.";
+            return MessageType.CHECK_VERSION_ERROR.format();
         }
 
         String eVersion = null;
@@ -125,15 +126,14 @@ public class VersionChecker {
                 }
                 if (eVersion != null && eVersion.length() > 0 && version.equalsIgnoreCase(eVersion)) {
                     if (i != latestId) {
-                        return "You have an old version of the plugin. Your version: " + version
-                                + ", available version: " + vLatest;
+                        return MessageType.CHECK_VERSION_OLD.format(version, vLatest);
                     } else {
-                        return "You have the latest version of the plugin.";
+                        return MessageType.CHECK_VERSION_LATEST.format();
                     }
                 }
             }
         }
 
-        return "Your version of the plugin was not found on the plugin page. Your version: " + version;
+        return MessageType.CHECK_VERSION_UNKNOWN.format(version);
     }
 }

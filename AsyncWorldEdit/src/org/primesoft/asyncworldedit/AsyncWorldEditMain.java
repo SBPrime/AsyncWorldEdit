@@ -61,6 +61,7 @@ import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.injector.InjectorMain;
 import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
+import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
 /**
@@ -258,7 +259,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     private void doReloadConfig(PlayerEntry player, String arg) {
         if (!player.isAllowed(Permission.RELOAD_CONFIG)) {
-            player.say(ChatColor.RED + "You have no permissions to do that.");
+            player.say(MessageType.NO_PERMS.format());
             return;
         }
 
@@ -289,7 +290,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
             m_isInitialized = false;
 
             if (!ConfigProvider.load(this)) {
-                player.say(ChatColor.RED + "Error loading config");
+                player.say(MessageType.CMD_RELOAD_ERROR.format());
                 return;
             }
         }
@@ -308,12 +309,12 @@ public class AsyncWorldEditMain extends JavaPlugin {
         }
 
         m_isInitialized = true;
-        player.say(ChatColor.GREEN + "Reload done");
+        player.say(MessageType.CMD_RELOAD_DONE.format());
     }
 
     private void doToggle(PlayerEntry player, String[] args) {
         if (!m_isInitialized) {
-            player.say(ChatColor.RED + "Module not initialized, contact administrator.");
+            player.say(MessageType.NOT_INITIALIZED.format());
             return;
         }
 
@@ -322,7 +323,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     private void doPurge(PlayerEntry player, String[] args) {
         if (!m_isInitialized) {
-            player.say(ChatColor.RED + "Module not initialized, contact administrator.");
+            player.say(MessageType.NOT_INITIALIZED.format());
             return;
         }
 
@@ -331,7 +332,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     private void doJobs(PlayerEntry player, String[] args) {
         if (!m_isInitialized) {
-            player.say(ChatColor.RED + "Module not initialized, contact administrator.");
+            player.say(MessageType.NOT_INITIALIZED.format());
             return;
         }
 
@@ -340,7 +341,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     private void doCancel(PlayerEntry player, String[] args) {
         if (!m_isInitialized) {
-            player.say(ChatColor.RED + "Module not initialized, contact administrator.");
+            player.say(MessageType.NOT_INITIALIZED.format());
             return;
         }
 
@@ -360,6 +361,11 @@ public class AsyncWorldEditMain extends JavaPlugin {
             return null;
         }
 
+        PluginDescriptionFile pd = wPlugin.getDescription();
+        if (!pd.getVersion().startsWith("6.")) {
+            log("Unsupported version of WorldEdit, found: " + pd.getVersion() + " required: 6.x");
+            return null;
+        }
         return (WorldEditPlugin) wPlugin;
     }
 
