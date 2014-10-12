@@ -61,6 +61,7 @@ import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.injector.InjectorMain;
 import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
+import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
@@ -161,6 +162,10 @@ public class AsyncWorldEditMain extends JavaPlugin {
         if (!ConfigProvider.load(this)) {
             log("Error loading config");
             return;
+        }
+
+        if (!MessageProvider.loadFile(ConfigProvider.getStringsFile())) {
+            log("Error loading strings file, using internal fallback.");
         }
 
         try {
@@ -292,6 +297,10 @@ public class AsyncWorldEditMain extends JavaPlugin {
             if (!ConfigProvider.load(this)) {
                 player.say(MessageType.CMD_RELOAD_ERROR.format());
                 return;
+            }
+
+            if (!MessageProvider.loadFile(ConfigProvider.getStringsFile())) {
+                log("Error loading strings file, using internal fallback.");
             }
         }
 

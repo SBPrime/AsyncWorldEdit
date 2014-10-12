@@ -14,7 +14,9 @@ awe:
   physicsFreez: true
   #Enable PlotMe Global Mask Fix
   plotMeFixEnabled: true
-  #Blocks hub plugin options
+  #File containing all the messages
+  strings: "english.yml"
+  #Blocks hub plugin options  
   blocksHub:
     #Enable block chang loggin
     logBlocks: true

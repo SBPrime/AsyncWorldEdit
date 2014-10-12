@@ -90,6 +90,8 @@ public class ConfigProvider {
     private static boolean m_plotMeFixEnabled;
     
     private static File m_pluginFolder; 
+    
+    private static String m_stringsFile;
 
     /**
      * The default permissions group
@@ -191,6 +193,10 @@ public class ConfigProvider {
         return m_physicsFreez;
     }
 
+    public static String getStringsFile() {
+        return m_stringsFile;
+    }
+    
     /**
      * Is PlotMe Fix enabled?
      *
@@ -225,6 +231,7 @@ public class ConfigProvider {
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
         m_plotMeFixEnabled = mainSection.getBoolean("plotMeFixEnabled", true);
+        m_stringsFile = mainSection.getString("strings", "");
 
         parseGroupsSection(mainSection.getConfigurationSection("permissionGroups"));
         parseRenderSection(mainSection);
