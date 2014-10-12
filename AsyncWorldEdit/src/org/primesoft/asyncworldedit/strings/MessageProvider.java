@@ -112,8 +112,8 @@ public class MessageProvider {
         Matcher m = PATTERN_COLLOR.matcher(t);
         Stack<Pair<Integer, Integer>> entries = new Stack<Pair<Integer, Integer>>();
         while (m.find()) {
-            int start = m.start();
-            if (start > 0 && t.charAt(start - 1) != '\\') {
+            int start = m.start();            
+            if (start == 0 || t.charAt(start - 1) != '\\') {                
                 entries.push(new Pair<Integer, Integer>(start, m.end()));
             }
         }
@@ -142,8 +142,12 @@ public class MessageProvider {
      * @return 
      */
     private static String getColor(String s) {
+        if (s == null || s.length() < 2)
+        {
+            return "";
+        }
         try {
-            return ChatColor.valueOf(s).toString();
+            return ChatColor.valueOf(s.substring(1, s.length() - 1)).toString();
         } catch (IllegalArgumentException ex) {
             return "";
         }
