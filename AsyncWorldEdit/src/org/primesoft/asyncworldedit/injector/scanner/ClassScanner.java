@@ -42,6 +42,8 @@ package org.primesoft.asyncworldedit.injector.scanner;
 
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
@@ -54,6 +56,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 
 /**
  * The class scanner
@@ -68,7 +73,12 @@ public class ClassScanner {
         Region.class,
         BlockVector.class,
         World.class,
-        Change.class
+        Change.class,
+        Vector.class,
+        BaseBlock.class,
+        BaseBlockWrapper.class,
+        PermissionGroup.class,
+        PlayerEntry.class
     };
 
     /**
@@ -87,7 +97,7 @@ public class ClassScanner {
 
         Queue<ScannerQueueEntry> toScan = new ArrayDeque<ScannerQueueEntry>();
         HashSet<Object> scanned = new HashSet<Object>();
-        
+
         toScan.add(new ScannerQueueEntry(o, null, null));
 
         while (!toScan.isEmpty()) {
@@ -135,15 +145,18 @@ public class ClassScanner {
      * @return
      */
     private static Iterable<ScannerQueueEntry> unpack(Class<?> oClass, Object o) {
-        HashSet<ScannerQueueEntry> result = new HashSet<ScannerQueueEntry>();        
+        HashSet<ScannerQueueEntry> result = new HashSet<ScannerQueueEntry>();
 
         if (isPrimitive(oClass) || isBlackList(oClass)) {
             return result;
         }
-
+        
         if (oClass.isArray()) {
-            for (Object t : (Object[]) o) {
-                result.add(new ScannerQueueEntry(t, o, null));
+            Class<?> componenClass = oClass.getComponentType();
+            if (!componenClass.isPrimitive()) {
+                for (Object t : (Object[]) o) {
+                    result.add(new ScannerQueueEntry(t, o, null));
+                }
             }
         }
 
