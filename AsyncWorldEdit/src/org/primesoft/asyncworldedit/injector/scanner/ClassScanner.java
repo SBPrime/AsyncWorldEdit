@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
@@ -111,11 +112,23 @@ public class ClassScanner {
                 result.add(new ClassScannerResult<T>((T) cObject, entry.getParent(), entry.getField()));
             }
             if (!scanned.contains(cObject)) {
-                for (ScannerQueueEntry f : unpack(cClass, cObject)) {
-                    Object t = f.getValue();
-                    if (t != null) {
-                        toScan.add(f);
+                try {
+                    for (ScannerQueueEntry f : unpack(cClass, cObject)) {
+                        Object t = f.getValue();
+                        if (t != null) {
+                            toScan.add(f);
+                        }
                     }
+                } catch (Exception ex) {
+                    AsyncWorldEditMain.log("-----------------------------------------------------------------------");
+                    AsyncWorldEditMain.log("Warning: Class scanner encountered an error while scanning class");
+                    AsyncWorldEditMain.log("Exception: " + ex.getMessage());
+                    ex.printStackTrace();
+                    AsyncWorldEditMain.log("Class: " + cClass);
+                    AsyncWorldEditMain.log("Object: " + cObject);
+                    AsyncWorldEditMain.log("Send this message to the author of the plugin!");
+                    AsyncWorldEditMain.log("https://github.com/SBPrime/AsyncWorldEdit/issues");
+                    AsyncWorldEditMain.log("-----------------------------------------------------------------------");
                 }
                 scanned.add(cObject);
             }
@@ -125,7 +138,7 @@ public class ClassScanner {
     }
 
     /**
-     * Chaecks if the class is a primitive (number or string)
+     * Checks if the class is a primitive (number or string)
      *
      * @param oClass
      * @return
@@ -150,7 +163,7 @@ public class ClassScanner {
         if (isPrimitive(oClass) || isBlackList(oClass)) {
             return result;
         }
-        
+
         if (oClass.isArray()) {
             Class<?> componenClass = oClass.getComponentType();
             if (!componenClass.isPrimitive()) {
