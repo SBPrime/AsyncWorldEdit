@@ -15,7 +15,7 @@ BLOCK_PLACER_JOBS_LIMIT: "[RED]You have too many jobs queued, operation canceled
 BLOCK_PLACER_GLOBAL_QUEUE_FULL: "[RED]Out of space on AWE block queue."
 BLOCK_PLACER_QUEUE_FULL: "[RED]Your block queue is full. Wait for items to finish drawing."
 BLOCK_PLACER_QUEUE_UNLOCKED: "[GREEN]Your block queue is unlocked. You can use WorldEdit."
-BLOCK_PLACER_CANCEL_UNDO: "[RED]Warning: Undo jobs shuld not by canceled, ingoring!"
+BLOCK_PLACER_CANCEL_UNDO: "[RED]Warning: Undo jobs should not by canceled, ignoring!"
 BLOCK_PLACER_RUN: "[LIGHT_PURPLE]Running [WHITE]%1$s[LIGHT_PURPLE] in full async mode."
 BLOCK_PLACER_MAX_CHANGED: "[RED]Maximum block change limit."
 BLOCK_PLACER_CANCELED: "[LIGHT_PURPLE]Job canceled."
