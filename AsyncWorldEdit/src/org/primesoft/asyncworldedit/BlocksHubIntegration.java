@@ -44,7 +44,7 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import org.PrimeSoft.blocksHub.BlocksHub;
-import org.PrimeSoft.blocksHub.IBlocksHubApi;
+import org.PrimeSoft.blocksHub.api.IBlocksHubApi;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;

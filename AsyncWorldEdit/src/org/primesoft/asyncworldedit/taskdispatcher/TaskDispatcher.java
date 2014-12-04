@@ -43,8 +43,8 @@ package org.primesoft.asyncworldedit.taskdispatcher;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.Region;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.Set;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -68,6 +68,11 @@ public class TaskDispatcher implements Runnable {
      * retries for dequeuing operations.
      */
     private final int MAX_RETRIES = 200;
+
+    /**
+     * Allow the task dispatcher to use up to 20ms
+     */
+    private final int MAX_USAGE = 20;
 
     /**
      * MTA mutex
@@ -102,12 +107,22 @@ public class TaskDispatcher implements Runnable {
     /**
      * List of fast tasks (high priority)
      */
-    private final List<IDispatcherEntry> m_fastTasks = new ArrayList<IDispatcherEntry>();
+    private final Queue<IDispatcherEntry> m_fastTasks = new ArrayDeque<IDispatcherEntry>();
 
     /**
      * The main thread
      */
     private Thread m_mainThread;
+
+    /**
+     * Last enter time
+     */
+    private long m_lastEnter = -1;
+
+    /**
+     * Dispatcher main thread usage
+     */
+    private double m_usage = 0;
 
     /**
      * Initialize new instance of the block placer
@@ -118,6 +133,8 @@ public class TaskDispatcher implements Runnable {
         m_scheduler = plugin.getServer().getScheduler();
         m_plugin = plugin;
         m_chunkWatch = m_plugin.getChunkWatch();
+
+        m_lastEnter = System.currentTimeMillis();
         startFastTask();
     }
 
@@ -139,31 +156,41 @@ public class TaskDispatcher implements Runnable {
      */
     @Override
     public void run() {
+        long enter = System.currentTimeMillis();
+        long runDelta = enter - m_lastEnter;
+        long runTime;
+
+        if (runDelta < 1) {
+            runDelta = 0;
+        }
+        m_lastEnter = enter;
+
+        double usage = m_usage;
+
         m_mainThread = Thread.currentThread();
-        boolean run = true;
 
         boolean processed = false;
-        for (int i = 0; i < MAX_RETRIES && run; i++) {
-            run = false;
-
-            final IDispatcherEntry[] tasks;
+        for (int i = 0; i < MAX_RETRIES && (m_usage * 3 + usage) / 4 < MAX_USAGE; i++) {
+            IDispatcherEntry task = null;
             synchronized (m_fastTasks) {
-                tasks = m_fastTasks.toArray(new IDispatcherEntry[0]);
-                m_fastTasks.clear();
+                if (!m_fastTasks.isEmpty()) {
+                    task = m_fastTasks.poll();
+                }
             }
 
-            for (IDispatcherEntry t : tasks) {
-                t.Process();
-            }
-            if (tasks.length > 0) {
+            if (task != null) {
+                task.Process();
                 processed = true;
-                run = true;
+            } else {
                 try {
-                    //Force thread release!
+                    //Force thread change
                     Thread.sleep(1);
                 } catch (InterruptedException ex) {
                 }
             }
+
+            runTime = System.currentTimeMillis() - enter;
+            usage = 1000.0 * runTime / (runTime + runDelta);
         }
 
         if (!processed) {
@@ -175,6 +202,10 @@ public class TaskDispatcher implements Runnable {
                 }
             }
         }
+
+        runTime = System.currentTimeMillis() - enter;
+        usage = 1000.0 * runTime / (runTime + runDelta);
+        m_usage = (m_usage * 3 + usage) / 4;
     }
 
     /**
@@ -401,7 +432,6 @@ public class TaskDispatcher implements Runnable {
                 m_chunkWatch.remove(cx, cz, worldName);
             }
         }
-
         return queueFastOperation(action);
     }
 
