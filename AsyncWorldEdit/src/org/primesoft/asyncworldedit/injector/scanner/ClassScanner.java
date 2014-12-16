@@ -44,10 +44,15 @@ import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.function.pattern.BlockPattern;
+import com.sk89q.worldedit.function.pattern.ClipboardPattern;
+import com.sk89q.worldedit.function.pattern.RandomPattern;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.BlockRegistry;
 import java.lang.reflect.Field;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -79,7 +84,12 @@ public class ClassScanner {
         BaseBlock.class,
         BaseBlockWrapper.class,
         PermissionGroup.class,
-        PlayerEntry.class
+        PlayerEntry.class,
+        Clipboard.class,
+        BlockRegistry.class,
+        RandomPattern.class,
+        ClipboardPattern.class,
+        BlockPattern.class        
     };
 
     /**
@@ -144,7 +154,8 @@ public class ClassScanner {
      * @return
      */
     private static boolean isPrimitive(Class<?> oClass) {
-        return (Number.class.isAssignableFrom(oClass))
+        return oClass.isPrimitive()
+                || (Number.class.isAssignableFrom(oClass))
                 || (Boolean.class.isAssignableFrom(oClass))
                 || (String.class.isAssignableFrom(oClass))
                 || (UUID.class.isAssignableFrom(oClass));
@@ -158,30 +169,46 @@ public class ClassScanner {
      * @return
      */
     private static Iterable<ScannerQueueEntry> unpack(Class<?> oClass, Object o) {
+        /*
+         * System.out.println("--------------");
+         * System.out.println(oClass.getCanonicalName());
+         * System.out.println("--------------");
+         */
         HashSet<ScannerQueueEntry> result = new HashSet<ScannerQueueEntry>();
 
         if (isPrimitive(oClass) || isBlackList(oClass)) {
+            //System.out.println("** SKIP **");
             return result;
-        }
+        }               
 
-        if (oClass.isArray()) {
-            Class<?> componenClass = oClass.getComponentType();
-            if (!componenClass.isPrimitive()) {
+        if (oClass.isArray()) {            
+            Class<?> componenClass = oClass;
+            while (componenClass.isArray())
+            {
+                componenClass = componenClass.getComponentType();
+            }
+            //System.out.println("IsArray " + componenClass.getCanonicalName());
+            if (!isPrimitive(componenClass) && !isBlackList(componenClass)) {
                 for (Object t : (Object[]) o) {
-                    result.add(new ScannerQueueEntry(t, o, null));
+                    if (t != null) {
+                        result.add(new ScannerQueueEntry(t, o, null));
+                    }
                 }
             }
+            /*
+             * else {
+             *   System.out.println("** SKIP **");
+             * }
+             */
         }
 
-        if (Object[].class.isAssignableFrom(oClass)) {
-            for (Object t : (Object[]) o) {
-                result.add(new ScannerQueueEntry(t, o, null));
-            }
-        }
 
         if (Iterable.class.isAssignableFrom(oClass)) {
+            //System.out.println("Iterable");
             for (Object t : (Iterable<Object>) o) {
-                result.add(new ScannerQueueEntry(t, o, null));
+                if (t != null) {
+                    result.add(new ScannerQueueEntry(t, o, null));
+                }
             }
         }
 
@@ -191,7 +218,10 @@ public class ClassScanner {
                 f.setAccessible(true);
             }
             try {
-                result.add(new ScannerQueueEntry(f.get(o), o, f));
+                Object t = f.get(o);
+                if (t != null) {
+                    result.add(new ScannerQueueEntry(t, o, f));
+                }
             } catch (IllegalArgumentException ex) {
             } catch (IllegalAccessException ex) {
             }

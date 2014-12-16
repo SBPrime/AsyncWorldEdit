@@ -53,6 +53,15 @@ public class ScannerQueueEntry {
     private final Field m_field;
 
     public ScannerQueueEntry(Object value, Object parent, Field field) {
+        /*
+         * String sParent = parent == null ? 
+         *        "null:null" : (parent.hashCode() + ":" + parent.getClass().getCanonicalName());
+         * String sValue = value == null ?
+         *        "null:null" : (value.hashCode() + ":" + value.getClass().getCanonicalName());
+         * String sField = field != null ? field.getName() : "";
+         * 
+         * System.out.println(sParent + "\t-->\t" + sValue + "\t" + sField);
+         */        
         m_parent = parent;
         m_value = value;
         m_field = field;
