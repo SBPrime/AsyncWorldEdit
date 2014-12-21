@@ -40,37 +40,87 @@
  */
 package org.primesoft.asyncworldedit.injector.async;
 
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.entity.Player;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.injector.BaseClassFactory;
+import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.PlayerManager;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.injector.IJob;
 import org.primesoft.asyncworldedit.injector.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.IOperationProcessor;
+import org.primesoft.asyncworldedit.worldedit.AsyncTask;
+import org.primesoft.asyncworldedit.worldedit.BaseTask;
+import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncClassFactory extends BaseClassFactory {
+class AsyncJobProcessor implements IJobProcessor {
 
     /**
-     * The operation processor
+     * The parent plugin
      */
-    private final AsyncOperationProcessor m_operationProcessor;
-    
-    private final AsyncJobProcessor m_jobProcessor;
+    private final AsyncWorldEditMain m_plugin;
 
-    public AsyncClassFactory(AsyncWorldEditMain plugin)
-    {        
-        m_operationProcessor = new AsyncOperationProcessor(plugin);
-        m_jobProcessor = new AsyncJobProcessor(plugin);
-    }
-    
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
+    /**
+     * Bukkit schedule
+     */
+    private final BukkitScheduler m_schedule;
+
+    /**
+     * Async block placer
+     */
+    protected final BlockPlacer m_blockPlacer;
+
+    /**
+     * The layer manager
+     */
+    private final PlayerManager m_playerManager;
+
+    AsyncJobProcessor(AsyncWorldEditMain plugin) {
+        m_plugin = plugin;
+        m_schedule = m_plugin.getServer().getScheduler();
+        m_blockPlacer = m_plugin.getBlockPlacer();
+        m_playerManager = m_plugin.getPlayerManager();
     }
 
     @Override
-    public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
-    }       
+    public void executeJob(Player player, final IJob job) {
+        if (job == null) {
+            return;
+        }
+
+        final PlayerEntry playerEntry = m_playerManager.getPlayer(player.getUniqueId());
+        final int jobId = m_blockPlacer.getJobId(playerEntry);
+        final String name = job.getName();
+        final JobEntry jobEntry = new JobEntry(playerEntry, jobId, name);
+
+        m_blockPlacer.addJob(playerEntry, jobEntry);
+        m_schedule.runTaskAsynchronously(m_plugin, new BaseTask(null, playerEntry,
+                name, m_blockPlacer, jobEntry) {
+                    @Override
+                    protected Object doRun() throws MaxChangedBlocksException {
+                        try {
+                            job.execute();
+
+                            return 0;
+                        } catch (Exception ex) {
+                            if (ex instanceof MaxChangedBlocksException) {
+                                throw (MaxChangedBlocksException) ex;
+                            }
+
+                            //Silently discard other errors :(
+                            return 0;
+                        }
+                    }
+
+                    @Override
+                    protected void doPostRun(Object result) {
+                    }
+                });
+    }
+
 }
