@@ -47,4 +47,6 @@ package org.primesoft.asyncworldedit.injector;
  */
 public interface IClassFactory {
     IOperationProcessor getOperationProcessor();
+    
+    IJobProcessor getJobProcessor();
 }

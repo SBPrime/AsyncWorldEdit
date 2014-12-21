@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit.injector;
 
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.command.SchematicCommands;
 import com.sk89q.worldedit.function.operation.Operations;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -116,6 +117,7 @@ public class InjectorMain extends JavaPlugin {
 
         EditSession.ForceClassLoad();        
         Operations.ForceClassLoad();
+        SchematicCommands.ForceClassLoad();
 
         s_instance = this;
         

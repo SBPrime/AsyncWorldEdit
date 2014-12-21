@@ -40,21 +40,12 @@
  */
 package org.primesoft.asyncworldedit.injector;
 
+import com.sk89q.worldedit.entity.Player;
+
 /**
  *
  * @author SBPrime
  */
-public class BaseClassFactory implements IClassFactory {
-    private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();    
-    private final IJobProcessor m_jobProcessor = new BaseJobProcessor();
-
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
-    }
-    
-    @Override
-    public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
-    }
+public interface IJobProcessor {
+    void executeJob(Player player, IJob job);
 }
