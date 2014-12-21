@@ -1,6 +1,6 @@
 awe:
   #Do not change
-  version: 2
+  version: 3
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
     interval: 15
@@ -8,6 +8,14 @@ awe:
     talk-interval: 10
     #maximum size of the blocks queue
     queue-max-size: 10000000
+  dispatcher:
+    #maximum number of jobs performed in one runn
+    max-jobs: 2000
+    #maximum number of idle runs befor disabling dispatcher
+    max-idle-runs: 200
+    #maximum number of miliseconds the dispatcher can use
+    #This value should by lover then 50% o 1tick (25ms)
+    max-time: 20
   #check for updates
   checkVersion: true
   #Disable or enable blocks physics freeze when placing blocks
@@ -66,8 +74,8 @@ awe:
       #You can omit entries with that are same value as in the default group
       #defaultMode: on
       renderer:
-        blocks: 2000
-        time: 20
+        blocks: 20000
+        time: 60
   #AWE will make the following WorldEdit actions async
   enabledOperations:
     - undo

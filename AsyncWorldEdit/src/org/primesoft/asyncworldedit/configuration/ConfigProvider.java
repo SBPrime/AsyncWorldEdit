@@ -65,7 +65,7 @@ public class ConfigProvider {
     /**
      * The config file version
      */
-    private static final int CONFIG_VERSION = 2;
+    private static final int CONFIG_VERSION = 3;
 
     private static boolean m_checkUpdate = false;
 
@@ -102,6 +102,21 @@ public class ConfigProvider {
      * Permissions group
      */
     private static PermissionGroup[] m_groups;
+    
+    /**
+     * Maximum number of dispatcher idle runs
+     */
+    private static int m_dispatcherMaxIdle;
+    
+    /**
+     * Maximum number of jobs performed in one run
+     */
+    private static int m_dispatcherMaxJobs;
+    
+    /**
+     * Maximum dime spend in one run
+     */
+    private static int m_dispatcherMaxTime;
 
     public static PermissionGroup getDefaultGroup() {
         return m_defaultGroup;
@@ -110,6 +125,19 @@ public class ConfigProvider {
 
     public static PermissionGroup[] getGroups() {
         return m_groups;
+    }
+    
+    
+    public static int getDispatcherMaxIdle() {
+        return m_dispatcherMaxIdle;
+    }
+
+    public static int getDispatcherMaxJobs() {
+        return m_dispatcherMaxJobs;
+    }
+
+    public static int getDispatcherMaxTime() {
+        return m_dispatcherMaxTime;
     }
     
     /**
@@ -236,6 +264,7 @@ public class ConfigProvider {
         parseGroupsSection(mainSection.getConfigurationSection("permissionGroups"));
         parseRenderSection(mainSection);
         parseBlocksHubSection(mainSection.getConfigurationSection("blocksHub"));
+        parseDispatcherSection(mainSection.getConfigurationSection("dispatcher"));
 
         m_allowedOperations = parseOperationsSection(mainSection);
 
@@ -305,6 +334,22 @@ public class ConfigProvider {
         return result;
     }
 
+    /**
+     * Initialize the dispatcher configuration
+     * @param dSection 
+     */
+    private static void parseDispatcherSection(ConfigurationSection dSection) {
+        if (dSection == null) {
+            m_dispatcherMaxIdle = 200;
+            m_dispatcherMaxJobs = 2000;
+            m_dispatcherMaxTime = 20;
+        } else {
+            m_dispatcherMaxIdle = dSection.getInt("max-idle-runs", 200);
+            m_dispatcherMaxJobs = dSection.getInt("max-jobs", 2000);
+            m_dispatcherMaxTime = dSection.getInt("max-time", 20);
+        }
+    }
+    
     /**
      * Initialize blocks hub configuration
      *

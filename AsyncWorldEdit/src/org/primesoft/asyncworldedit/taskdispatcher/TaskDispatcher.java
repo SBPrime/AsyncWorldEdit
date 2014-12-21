@@ -51,6 +51,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.ChunkWatch;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
 
@@ -61,19 +62,6 @@ import org.primesoft.asyncworldedit.utils.Func;
  * @author SBPrime
  */
 public class TaskDispatcher implements Runnable {
-
-    /**
-     * Maximum number of retries for fast task. If no block get is exeuted for X
-     * the get task stops. If a block get is executed, this is the number of
-     * retries for dequeuing operations.
-     */
-    private final int MAX_RETRIES = 200;
-
-    /**
-     * Allow the task dispatcher to use up to 20ms
-     */
-    private final int MAX_USAGE = 20;
-
     /**
      * MTA mutex
      */
@@ -143,7 +131,7 @@ public class TaskDispatcher implements Runnable {
      */
     private void startFastTask() {
         synchronized (m_mutex) {
-            m_fastTaskRunsRemaining = MAX_RETRIES;
+            m_fastTaskRunsRemaining = ConfigProvider.getDispatcherMaxIdle();
             if (m_fastTask != null) {
                 return;
             }
@@ -159,6 +147,8 @@ public class TaskDispatcher implements Runnable {
         long enter = System.currentTimeMillis();
         long runDelta = enter - m_lastEnter;
         long runTime;
+        int jobsCount = ConfigProvider.getDispatcherMaxJobs();
+        int maxTime = ConfigProvider.getDispatcherMaxTime();
 
         if (runDelta < 1) {
             runDelta = 0;
@@ -170,7 +160,7 @@ public class TaskDispatcher implements Runnable {
         m_mainThread = Thread.currentThread();
 
         boolean processed = false;
-        for (int i = 0; i < MAX_RETRIES && (m_usage * 3 + usage) / 4 < MAX_USAGE; i++) {
+        for (int i = 0; i < jobsCount && (m_usage * 3 + usage) / 4 < maxTime; i++) {
             IDispatcherEntry task = null;
             synchronized (m_fastTasks) {
                 if (!m_fastTasks.isEmpty()) {
