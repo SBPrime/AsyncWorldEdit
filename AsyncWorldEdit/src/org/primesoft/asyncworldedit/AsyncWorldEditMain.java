@@ -58,8 +58,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.commands.*;
-import org.primesoft.asyncworldedit.injector.InjectorMain;
+import org.primesoft.asyncworldedit.injector.InjectorBukkit;
 import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
+import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.strings.MessageType;
@@ -88,7 +89,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
     private PlotMeFix m_plotMeFix;
     private final PlayerManager m_playerManager = new PlayerManager(this);
     private BarAPIntegrator m_barApi;
-    private InjectorMain m_aweInjector;
+    private InjectorCore m_aweInjector;
 
     public PlayerManager getPlayerManager() {
         return m_playerManager;
@@ -243,7 +244,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
             doReloadConfig(player, args != null && args.length > 1 ? args[1] : "");
             return true;
         } else if (name.equalsIgnoreCase(Commands.COMMAND_HELP)) {
-            String arg = args.length > 1 ? args[1] : null;
+            String arg = args != null && args.length > 1 ? args[1] : null;
             return Help.ShowHelp(player, arg);
         } else if (name.equalsIgnoreCase(Commands.COMMAND_PURGE)) {
             doPurge(player, args);
@@ -384,13 +385,19 @@ public class AsyncWorldEditMain extends JavaPlugin {
      * @param plugin
      * @return
      */
-    public static InjectorMain getAWEInjector(JavaPlugin plugin) {
+    public static InjectorCore getAWEInjector(JavaPlugin plugin) {
         final Plugin wPlugin = plugin.getServer().getPluginManager().getPlugin("AsyncWorldEditInjector");
 
-        if ((wPlugin == null) || (!(wPlugin instanceof InjectorMain))) {
-            return null;
+        if ((wPlugin == null) || (!(wPlugin instanceof InjectorBukkit))) {
+            log("AsyncWorldEditInjector plugin not found, trying to initialize using static instances...");
+            try {
+                return InjectorCore.getInstance();
+            } catch (Error ex) {
+                log("AsyncWorldEditInjector not found.");
+                return null;
+            }            
         }
 
-        return (InjectorMain) wPlugin;
+        return ((InjectorBukkit) wPlugin).getCore();
     }
 }

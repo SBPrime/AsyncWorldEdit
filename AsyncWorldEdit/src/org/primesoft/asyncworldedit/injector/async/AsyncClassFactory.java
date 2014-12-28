@@ -41,9 +41,9 @@
 package org.primesoft.asyncworldedit.injector.async;
 
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.injector.BaseClassFactory;
-import org.primesoft.asyncworldedit.injector.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.IOperationProcessor;
+import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
+import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
+import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 
 /**
  *

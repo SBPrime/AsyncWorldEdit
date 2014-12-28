@@ -48,11 +48,9 @@ import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.PlayerManager;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
-import org.primesoft.asyncworldedit.injector.IJob;
-import org.primesoft.asyncworldedit.injector.IJobProcessor;
-import org.primesoft.asyncworldedit.worldedit.AsyncTask;
+import org.primesoft.asyncworldedit.injector.classfactory.IJob;
+import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.worldedit.BaseTask;
-import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
  *
