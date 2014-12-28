@@ -42,8 +42,6 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import org.bukkit.ChatColor;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
@@ -55,7 +53,7 @@ import org.primesoft.asyncworldedit.utils.SessionCanceled;
  *
  * @author SBPrime
  */
-public abstract class BaseTask extends BukkitRunnable {
+public abstract class BaseTask implements Runnable {
 
     /**
      * Command name

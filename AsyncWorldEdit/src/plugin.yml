@@ -5,7 +5,7 @@ website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin attaches into WorldEdit and makes it asynchronous.
 authors: [SBPrime]
-depend: [WorldEdit, AsyncWorldEditInjector]
+depend: [WorldEdit]
 softdepend: [BlocksHub, PlotMe, BarAPI]
 commands:
   awe:
