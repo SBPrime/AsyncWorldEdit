@@ -1,0 +1,20 @@
+{
+  "modListVersion": 2,
+  "modList": [{
+    "modid": "mod_AsyncWorldEdit_Injector",
+    "name": "AsyncWorldEdit Injector",
+    "description": "This plugin attaches into WorldEdit and makes it asynchronous.",
+    "version": "2.1.0",
+    "mcversion": "1.7.10",
+    "url": "https://github.com/SBPrime/AsyncWorldEdit/wiki",
+    "updateUrl": "",
+    "authorList": [ "SBPrime" ],
+    "logoFile": "",
+    "screenshots": [],
+    "parent": "mod_BuildCraftCore",
+    "requiredMods": [ "Forge" ],
+    "dependencies": [ "Forge" ],
+    "dependants": [ "WorldEdit" ],
+    "useDependencyInformation": true
+  }]
+}

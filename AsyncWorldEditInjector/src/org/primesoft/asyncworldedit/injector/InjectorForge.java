@@ -40,10 +40,14 @@
  */
 package org.primesoft.asyncworldedit.injector;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import org.apache.logging.log4j.Logger;
 import org.primesoft.asyncworldedit.injector.core.IInjectorPlatform;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
@@ -51,15 +55,43 @@ import org.primesoft.asyncworldedit.injector.core.InjectorCore;
  *
  * @author SBPrime
  */
-public class InjectorBukkit extends JavaPlugin implements IInjectorPlatform {
-    private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
+@Mod(modid = InjectorForge.MOD_ID, name = "AsyncWorldEdit Injector",
+        version = "2.1.0", acceptableRemoteVersions = "*")
+public class InjectorForge implements IInjectorPlatform {
+
+    public static final String MOD_ID = "mod_AsyncWorldEdit_Injector";
+    private static Logger s_log;
     private String m_prefix = null;
     private final String m_logFormat = "%s %s";
-    private InjectorCore m_core;
+
+    @Instance(MOD_ID)
+    public static InjectorForge inst;
+
+    @SidedProxy(serverSide = "org.primesoft.asyncworldedit.injector.BaseProxy",
+            clientSide = "org.primesoft.asyncworldedit.injector.BaseProxy")
+    public static BaseProxy proxy;
+
+    @EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+        s_log = event.getModLog();
+        m_prefix = "[AsyncWorldEditInjector]";
+        
+        InjectorCore core = InjectorCore.getInstance();
+        core.initialize(this);
+    }
+
+    @EventHandler
+    public void init(FMLInitializationEvent event) {
+    }
+
+    @EventHandler
+    public void postInit(FMLPostInitializationEvent event) {
+        log("Loaded");
+    }
 
     @Override
     public String getPlatformName() {
-        return "InjectorBukkit";
+        return "InjectorForge";
     }
 
     @Override
@@ -68,30 +100,7 @@ public class InjectorBukkit extends JavaPlugin implements IInjectorPlatform {
             return;
         }
 
-        s_log.log(Level.INFO, String.format(m_logFormat, m_prefix, msg));
+        s_log.info(String.format(m_logFormat, m_prefix, msg));
     }
 
-    /**
-     * The injector core
-     * @return 
-     */
-    public InjectorCore getCore() {
-        return m_core;
-    }
-
-    @Override
-    public void onEnable() {
-        PluginDescriptionFile desc = getDescription();
-        m_prefix = String.format("[%s]", desc.getName());
-
-        m_core = InjectorCore.getInstance();
-        m_core.initialize(this);
-
-        log("Enabled");
-    }
-
-    @Override
-    public void onDisable() {
-        log("Disabled");
-    }
 }
