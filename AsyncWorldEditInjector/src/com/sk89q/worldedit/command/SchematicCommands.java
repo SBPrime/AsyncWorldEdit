@@ -56,8 +56,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import org.primesoft.asyncworldedit.injector.IJob;
-import org.primesoft.asyncworldedit.injector.InjectorMain;
+import org.primesoft.asyncworldedit.injector.classfactory.IJob;
+import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
 /**
  * Commands that work with schematic files.
@@ -101,7 +101,7 @@ public class SchematicCommands {
             return;
         }
 
-        InjectorMain.getInstance().getClassFactory().getJobProcessor().executeJob(player, new IJob() {
+        InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, new IJob() {
             @Override
             public String getName() {
                 return "Load schematic from " + filename;

@@ -38,97 +38,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector;
+package org.primesoft.asyncworldedit.injector.utils;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.command.SchematicCommands;
-import com.sk89q.worldedit.function.operation.Operations;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extension.platform.AbstractPlayerActor;
+import java.util.UUID;
 
 /**
  *
  * @author SBPrime
  */
-public class InjectorMain extends JavaPlugin {
+public class PlayerUtils {
 
-    private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
-    private static String s_prefix = null;
-    private static final String s_logFormat = "%s %s";
-
-    /**
-     * The WorldEdit class factory
-     */
-    private IClassFactory m_classFactory = new BaseClassFactory();
-
-    /**
-     * Instance of the main class
-     */
-    private static InjectorMain s_instance;
-
-    /**
-     * Get plugin instance
-     *
-     * @return
-     */
-    public static InjectorMain getInstance() {
-        return s_instance;
-    }
-
-    public static void log(String msg) {
-        if (s_log == null || msg == null || s_prefix == null) {
-            return;
+    public static UUID getUUID(Player player) {
+        if (!(player instanceof AbstractPlayerActor)) {
+                    return new UUID(0, 0);
         }
-
-        s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
-    }
-
-    /**
-     * Set new class factory
-     *
-     * @param factory
-     */
-    public void setClassFactory(IClassFactory factory) {
-        if (factory == null) {
-            factory = new BaseClassFactory();
-            log("New class factory set to default factory.");
-        } else {
-            log("New class factory set to: " + factory.getClass().getName());
-        }
-
-        m_classFactory = factory;
-    }
-
-    /**
-     * Get the class factory
-     *
-     * @return
-     */
-    public IClassFactory getClassFactory() {
-        return m_classFactory;
-    }
-
-    @Override
-    public void onEnable() {
-        PluginDescriptionFile desc = getDescription();
-        s_prefix = String.format("[%s]", desc.getName());
-
-        EditSession.ForceClassLoad();        
-        Operations.ForceClassLoad();
-        SchematicCommands.ForceClassLoad();
-
-        s_instance = this;
         
-        log("Enabled");
-    }
-
-    @Override
-    public void onDisable() {
-
-        s_instance = null;
-
-        log("Disabled");
+        return ((AbstractPlayerActor)player).getUniqueId();
     }
 }

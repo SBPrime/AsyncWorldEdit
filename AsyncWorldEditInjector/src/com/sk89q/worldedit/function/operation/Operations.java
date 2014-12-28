@@ -21,9 +21,9 @@ package com.sk89q.worldedit.function.operation;
 
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.WorldEditException;
-import org.primesoft.asyncworldedit.injector.ExceptionOperationAction;
-import org.primesoft.asyncworldedit.injector.InjectorMain;
-import org.primesoft.asyncworldedit.injector.OperationAction;
+import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
+import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import org.primesoft.asyncworldedit.injector.utils.OperationAction;
 
 /**
  * Operation helper methods.
@@ -40,7 +40,7 @@ public final class Operations {
      * @throws WorldEditException WorldEdit exception
      */
     public static void complete(Operation op) throws WorldEditException {
-        InjectorMain.getInstance().getClassFactory().getOperationProcessor().process(op,
+        InjectorCore.getInstance().getClassFactory().getOperationProcessor().process(op,
                 new ExceptionOperationAction<WorldEditException>() {
                     @Override
                     public void Execute(Operation op) throws WorldEditException {
@@ -60,7 +60,7 @@ public final class Operations {
      * changed
      */
     public static void completeLegacy(Operation op) throws MaxChangedBlocksException {
-        InjectorMain.getInstance().getClassFactory().getOperationProcessor().process(op,
+        InjectorCore.getInstance().getClassFactory().getOperationProcessor().process(op,
                 new ExceptionOperationAction<MaxChangedBlocksException>() {
 
                     @Override
@@ -86,7 +86,7 @@ public final class Operations {
      * @param op operation to execute
      */
     public static void completeBlindly(Operation op) {
-        InjectorMain.getInstance().getClassFactory().getOperationProcessor().process(op,
+        InjectorCore.getInstance().getClassFactory().getOperationProcessor().process(op,
                 new OperationAction() {
                     @Override
                     public void Execute(Operation op) {

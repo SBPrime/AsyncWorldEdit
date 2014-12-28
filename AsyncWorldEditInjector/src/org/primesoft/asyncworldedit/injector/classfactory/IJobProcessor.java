@@ -38,17 +38,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector;
+package org.primesoft.asyncworldedit.injector.classfactory;
 
-import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.entity.Player;
 
 /**
  *
  * @author SBPrime
  */
-public interface IOperationProcessor {
-
-    <TException extends Exception> void process(Operation op, ExceptionOperationAction<TException> action) throws TException;
-
-    void process(Operation op, OperationAction action);
+public interface IJobProcessor {
+    void executeJob(Player player, IJob job);
 }

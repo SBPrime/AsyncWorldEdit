@@ -38,24 +38,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.injector.classfactory.base;
 
-package org.primesoft.asyncworldedit.injector;
-
-import com.sk89q.worldedit.function.operation.Operation;
+import org.primesoft.asyncworldedit.injector.classfactory.IJob;
+import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
+import com.sk89q.worldedit.entity.Player;
 
 /**
  *
  * @author SBPrime
  */
-public class BaseOperationProcessor implements IOperationProcessor {
+public class BaseJobProcessor implements IJobProcessor {
 
     @Override
-    public <TException extends Exception> void process(Operation op, ExceptionOperationAction<TException> action) throws TException {
-        action.Execute(op);
+    public void executeJob(Player player, IJob job) {
+        if (job != null) {
+            job.execute();
+        }
     }
-
-    @Override
-    public void process(Operation op, OperationAction action) {
-        action.Execute(op);
-    }
+    
 }

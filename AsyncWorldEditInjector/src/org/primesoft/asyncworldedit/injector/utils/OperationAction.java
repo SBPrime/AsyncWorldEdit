@@ -38,23 +38,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector;
+package org.primesoft.asyncworldedit.injector.utils;
 
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.extension.platform.AbstractPlayerActor;
-import java.util.UUID;
+import com.sk89q.worldedit.function.operation.Operation;
 
 /**
  *
  * @author SBPrime
  */
-public class PlayerUtils {
+public interface OperationAction {
 
-    public static UUID getUUID(Player player) {
-        if (!(player instanceof AbstractPlayerActor)) {
-                    return new UUID(0, 0);
-        }
-        
-        return ((AbstractPlayerActor)player).getUniqueId();
-    }
+    void Execute(Operation op);
 }

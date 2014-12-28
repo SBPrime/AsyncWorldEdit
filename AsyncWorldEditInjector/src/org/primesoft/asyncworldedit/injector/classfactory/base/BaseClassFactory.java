@@ -38,14 +38,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector;
+package org.primesoft.asyncworldedit.injector.classfactory.base;
+
+import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
+import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
+import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
 
 /**
  *
  * @author SBPrime
  */
-public interface IJob {
-    String getName();
+public class BaseClassFactory implements IClassFactory {
+    private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();    
+    private final IJobProcessor m_jobProcessor = new BaseJobProcessor();
+
+    @Override
+    public IOperationProcessor getOperationProcessor() {
+        return m_operationProcessor;
+    }
     
-    void execute();
+    @Override
+    public IJobProcessor getJobProcessor() {
+        return m_jobProcessor;
+    }
 }

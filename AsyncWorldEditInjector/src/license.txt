@@ -45,9 +45,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 II. Modified WorldEdit code license.
 This plugin contains modified WorldEdit code. That is released under GNU Lesser 
-General Public License. Therefore the "com.sk89q.worldedit.EditSession" and 
-"com.sk89q.worldedit.function.operation.Operations" classes do not fall under the
-terms of license from par. I.
+General Public License. Therefore the classes:
+* com.sk89q.worldedit.EditSession,
+* com.sk89q.worldedit.command.SchematicCommands,
+* com.sk89q.worldedit.function.operation.Operations,
+
+do not fall under the terms of license from par. I.
 
 License for mentioned classes:
 

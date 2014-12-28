@@ -38,21 +38,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector;
 
-import com.sk89q.worldedit.entity.Player;
+package org.primesoft.asyncworldedit.injector.classfactory;
 
 /**
- *
+ * Interface for injected WorldEdit classes factory
  * @author SBPrime
  */
-public class BaseJobProcessor implements IJobProcessor {
-
-    @Override
-    public void executeJob(Player player, IJob job) {
-        if (job != null) {
-            job.execute();
-        }
-    }
+public interface IClassFactory {
+    IOperationProcessor getOperationProcessor();
     
+    IJobProcessor getJobProcessor();
 }
