@@ -42,6 +42,8 @@ package org.primesoft.asyncworldedit.injector.validators;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 
 /**
@@ -57,6 +59,7 @@ public class StackValidator {
     private static final StackValidatorEntry[] s_data = new StackValidatorEntry[]{
         new StackValidatorEntry(".*sk89q.*EditSession", "", ".*"),
         new StackValidatorEntry(".*sk89q.*ClipboardCommands", new String[]{"copy", "paste", "cut"}, ""),
+        new StackValidatorEntry(".*sk89q.*SchematicCommands", "", ".*"),
         new StackValidatorEntry(".*sk89q.*RegionCommands", new String[]{"forest", "flora"}, ""),
         new StackValidatorEntry(".*sk89q.*BiomeCommands", new String[]{"setBiome"}, ""),
         new StackValidatorEntry(".*primesoft.*ThreadSafeEditSession", "", ".*"),
@@ -72,36 +75,66 @@ public class StackValidator {
      * @return
      */
     public static boolean isVaild(InOutParam<String> methodName) {
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-
-        for (int i = stackTrace.length - 1; i >= 0; i--) {
-            StackTraceElement element = stackTrace[i];
-
-            for (StackValidatorEntry entry : s_data) {
-                Matcher m = entry.getClassPattern().matcher(element.getClassName());
-                if (!m.matches()) {
-                    //No class match
-                    continue;
+        boolean debugOn = ConfigProvider.isDebugOn();
+        if (debugOn) {
+            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("* Validating stack trace");
+            AsyncWorldEditMain.log("********************************");
+        }
+        try {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            for (int i = stackTrace.length - 1; i >= 0; i--) {
+                StackTraceElement element = stackTrace[i];
+                if (debugOn) {
+                    AsyncWorldEditMain.log("* " + element.toString());
                 }
 
-                String name = element.getMethodName();
-                for (Pattern pattern : entry.getMethodBlackList()) {
-                    m = pattern.matcher(name);
-                    if (m.matches()) {
-                        return false;
+                for (StackValidatorEntry entry : s_data) {
+                    Matcher m = entry.getClassPattern().matcher(element.getClassName());
+                    if (!m.matches()) {
+                        //No class match
+                        continue;
                     }
-                }
 
-                for (Pattern pattern : entry.getMethodWhiteList()) {
-                    m = pattern.matcher(name);
-                    if (m.matches()) {
-                        methodName.setValue(name);
-                        return true;
+                    String name = element.getMethodName();
+                    for (Pattern pattern : entry.getMethodBlackList()) {
+                        m = pattern.matcher(name);
+                        if (m.matches()) {
+                            if (debugOn) {
+                                AsyncWorldEditMain.log("* Found on blacklist");
+                                AsyncWorldEditMain.log("* Class:\t" + element.getClassName());
+                                AsyncWorldEditMain.log("* Method:\t" + name);
+                                AsyncWorldEditMain.log("* Class pattern:\t" + entry.getClassPattern().pattern());
+                                AsyncWorldEditMain.log("* Method pattern:\t" + pattern.pattern());
+                            }
+                            return false;
+                        }
+                    }
+
+                    for (Pattern pattern : entry.getMethodWhiteList()) {
+                        m = pattern.matcher(name);
+                        if (m.matches()) {
+                            methodName.setValue(name);
+                            if (debugOn) {
+                                AsyncWorldEditMain.log("* Found on whitelist");
+                                AsyncWorldEditMain.log("* Class:\t" + element.getClassName());
+                                AsyncWorldEditMain.log("* Method:\t" + name);
+                                AsyncWorldEditMain.log("* Class pattern:\t" + entry.getClassPattern().pattern());
+                                AsyncWorldEditMain.log("* Method pattern:\t" + pattern.pattern());
+                            }
+                            return true;
+                        }
                     }
                 }
             }
+            if (debugOn) {
+                AsyncWorldEditMain.log("* No match found");
+            }
+            return false;
+        } finally {
+            if (debugOn) {
+                AsyncWorldEditMain.log("********************************");
+            }
         }
-
-        return false;
     }
 }

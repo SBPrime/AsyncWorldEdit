@@ -63,6 +63,7 @@ import java.util.Queue;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
@@ -90,7 +91,7 @@ public class ClassScanner {
         BlockRegistry.class,
         RandomPattern.class,
         ClipboardPattern.class,
-        BlockPattern.class        
+        BlockPattern.class
     };
 
     /**
@@ -111,6 +112,12 @@ public class ClassScanner {
         HashSet<Object> scanned = new HashSet<Object>();
 
         toScan.add(new ScannerQueueEntry(o, null, null));
+        boolean debugOn = ConfigProvider.isDebugOn();
+        if (debugOn) {
+            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("* Scanning classes");
+            AsyncWorldEditMain.log("********************************");
+        }
 
         while (!toScan.isEmpty()) {
             ScannerQueueEntry entry = toScan.poll();
@@ -118,7 +125,14 @@ public class ClassScanner {
 
             Class<?> cClass = cObject.getClass();
 
+            if (debugOn) {
+                AsyncWorldEditMain.log("* Scanning:\t" + cClass.getCanonicalName());
+            }
+
             if (type.isAssignableFrom(cClass)) {
+                if (debugOn) {
+                    AsyncWorldEditMain.log("* Found EditSession.");
+                }
                 //Should duplicates by ignored?
                 result.add(new ClassScannerResult<T>((T) cObject, entry.getParent(), entry.getField()));
             }
@@ -180,12 +194,11 @@ public class ClassScanner {
         if (isPrimitive(oClass) || isBlackList(oClass)) {
             //System.out.println("** SKIP **");
             return result;
-        }               
+        }
 
-        if (oClass.isArray()) {            
+        if (oClass.isArray()) {
             Class<?> componenClass = oClass;
-            while (componenClass.isArray())
-            {
+            while (componenClass.isArray()) {
                 componenClass = componenClass.getComponentType();
             }
             //System.out.println("IsArray " + componenClass.getCanonicalName());
@@ -202,7 +215,6 @@ public class ClassScanner {
              * }
              */
         }
-
 
         if (Iterable.class.isAssignableFrom(oClass)) {
             //System.out.println("Iterable");

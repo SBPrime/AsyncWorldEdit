@@ -89,6 +89,8 @@ public class ConfigProvider {
 
     private static boolean m_plotMeFixEnabled;
     
+    private static boolean m_debugMode;    
+    
     private static File m_pluginFolder; 
     
     private static String m_stringsFile;
@@ -127,6 +129,10 @@ public class ConfigProvider {
         return m_groups;
     }
     
+    
+    public static boolean isDebugOn() {
+        return m_debugMode;
+    }
     
     public static int getDispatcherMaxIdle() {
         return m_dispatcherMaxIdle;
@@ -260,6 +266,7 @@ public class ConfigProvider {
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
         m_plotMeFixEnabled = mainSection.getBoolean("plotMeFixEnabled", true);
         m_stringsFile = mainSection.getString("strings", "");
+        m_debugMode = mainSection.getBoolean("debug", false);
 
         parseGroupsSection(mainSection.getConfigurationSection("permissionGroups"));
         parseRenderSection(mainSection);

@@ -42,6 +42,8 @@ package org.primesoft.asyncworldedit.injector.validators;
 
 import com.sk89q.worldedit.function.operation.Operation;
 import java.util.regex.Pattern;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 
 /**
  * Validate if operation should by asynced
@@ -76,21 +78,46 @@ public class OperationValidator {
      * @return
      */
     public static boolean isValid(Operation op) {
+        boolean debugOn = ConfigProvider.isDebugOn();
         Class c = op.getClass();
         String className = c.getCanonicalName();
 
-        for (Pattern p : s_blackList) {
-            if (p.matcher(className).matches()) {
-                return false;
+        if (debugOn) {
+            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("* Validating operation");
+            AsyncWorldEditMain.log("********************************");
+        }
+        try {
+            for (Pattern p : s_blackList) {
+                if (p.matcher(className).matches()) {
+                    if (debugOn) {
+                        AsyncWorldEditMain.log("* Found on blacklist");
+                        AsyncWorldEditMain.log("* Opeation:\t" + className);
+                        AsyncWorldEditMain.log("* Pattern:\t" + p.pattern());
+                    }
+                    return false;
+                }
+            }
+
+            for (Pattern p : s_whiteList) {
+                if (p.matcher(className).matches()) {
+                    if (debugOn) {
+                        AsyncWorldEditMain.log("* Found on whitelist");
+                        AsyncWorldEditMain.log("* Opeation:\t" + className);
+                        AsyncWorldEditMain.log("* Pattern:\t" + p.pattern());
+                    }
+                    return true;
+                }
+            }
+
+            if (debugOn) {
+                AsyncWorldEditMain.log("* No match found");
+            }
+            return false;
+        } finally {
+            if (debugOn) {
+                AsyncWorldEditMain.log("********************************");
             }
         }
-
-        for (Pattern p : s_whiteList) {
-            if (p.matcher(className).matches()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

@@ -24,6 +24,8 @@ awe:
   plotMeFixEnabled: true
   #File containing all the messages
   strings: "english.yml"
+  #Show debug messages
+  debug: false
   #Blocks hub plugin options  
   blocksHub:
     #Enable block chang loggin
@@ -53,7 +55,7 @@ awe:
         #if you experience lag lower this and the next number, use -1 for no limit
         blocks: 10000
         #Maximum number of miliseconds spend on placing blocks, use -1 for no limit
-        time: 40
+        time: 75
       queue:
         #maximum size of the player block queue
         limit-hard: 500000
@@ -66,16 +68,17 @@ awe:
         progress-chat: true
         #is async world edit talkative 
         talkative: true
-    vip:
-      #you can remove this, the isDefault is by default set to false
-      isDefault: false 
-      maxJobs: -1
-      cleanOnLogout: false
-      #You can omit entries with that are same value as in the default group
-      #defaultMode: on
-      renderer:
-        blocks: 20000
-        time: 60
+#Example of additional vip group:
+#    vip:
+#      #you can remove this, the isDefault is by default set to false
+#      isDefault: false 
+#      maxJobs: -1
+#      cleanOnLogout: false
+#      #You can omit entries with that are same value as in the default group
+#      #defaultMode: on
+#      renderer:
+#        blocks: 20000
+#        time: -1
   #AWE will make the following WorldEdit actions async
   enabledOperations:
     - undo
@@ -116,3 +119,5 @@ awe:
     - forest
     - flora
     - setBiome
+    - loadSchematic
+    - saveSchematic

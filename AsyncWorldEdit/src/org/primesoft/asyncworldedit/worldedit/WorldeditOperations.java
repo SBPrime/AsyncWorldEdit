@@ -83,5 +83,7 @@ public enum WorldeditOperations
     makeBiomeShape,
     forest,
     flora,
-    setBiome
+    setBiome,
+    loadSchematic,
+    saveSchematic
 }

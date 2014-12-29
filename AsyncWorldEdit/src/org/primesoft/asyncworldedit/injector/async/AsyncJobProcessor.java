@@ -48,10 +48,12 @@ import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.PlayerManager;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.BaseTask;
+import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
 
 /**
  *
@@ -86,6 +88,30 @@ class AsyncJobProcessor implements IJobProcessor {
         m_playerManager = m_plugin.getPlayerManager();
     }
 
+    /**
+     * This function checks if async mode is enabled for specific command
+     *
+     * @param operation
+     * @return
+     */
+    public boolean checkAsync(PlayerEntry player, WorldeditOperations operation) {
+        return ConfigProvider.isAsyncAllowed(operation) && player.getMode();
+    }
+    
+    /**
+     * This function checks if async mode is enabled for specific command
+     *
+     * @param operationName
+     * @return
+     */
+    public boolean checkAsync(PlayerEntry player, String operationName) {
+        try {
+            return checkAsync(player, WorldeditOperations.valueOf(operationName));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     @Override
     public void executeJob(Player player, final IJob job) {
         if (job == null) {
@@ -93,10 +119,17 @@ class AsyncJobProcessor implements IJobProcessor {
         }
 
         final PlayerEntry playerEntry = m_playerManager.getPlayer(player.getUniqueId());
-        final int jobId = m_blockPlacer.getJobId(playerEntry);
-        final String name = job.getName();
+        final String name = job.getName();        
+        boolean async = checkAsync(playerEntry, name);
+        
+        if (!async) {
+            job.execute();
+            return;
+        }
+        
+        
+        final int jobId = m_blockPlacer.getJobId(playerEntry);        
         final JobEntry jobEntry = new JobEntry(playerEntry, jobId, name);
-
         m_blockPlacer.addJob(playerEntry, jobEntry);
         m_schedule.runTaskAsynchronously(m_plugin, new BaseTask(null, playerEntry,
                 name, m_blockPlacer, jobEntry) {

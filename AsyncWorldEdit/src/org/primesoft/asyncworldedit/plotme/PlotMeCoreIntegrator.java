@@ -81,7 +81,6 @@ public class PlotMeCoreIntegrator implements IPlotMeIntegrator {
             return;
         }
         
-                
         if (m_manager.isPlayerIgnoringWELimit(uuid)) {
             m_worldEdit.removeMask(iPlayer);
         } else {
