@@ -38,78 +38,67 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.plotme;
 
-import me.confuser.barapi.BarAPI;
+import com.worldcretornica.plotme.PlotManager;
+import com.worldcretornica.plotme.PlotMe;
+import com.worldcretornica.plotme_core.PlotMe_Core;
+import com.worldcretornica.plotme_core.PlotWorldEdit;
+import com.worldcretornica.plotme_core.api.IPlayer;
+import com.worldcretornica.plotme_core.api.IServerBridge;
+import com.worldcretornica.plotme_core.bukkit.BukkitServerBridge;
+import com.worldcretornica.plotme_core.bukkit.PlotMe_CorePlugin;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
  * @author SBPrime
  */
-public class BarAPIntegrator {
-
-    private final boolean m_isInitialized;
-
-    /**
-     * Get instance of the core blocks hub plugin
-     *
-     * @param plugin
-     * @return
-     */
-    public static BarAPI getBarAPI(JavaPlugin plugin) {
-        try {
-            Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BarAPI");
-
-            if ((cPlugin == null) || (!(cPlugin instanceof BarAPI))) {
-                AsyncWorldEditMain.log("BarAPI not found.");
-                return null;
-            }
-
-            return (BarAPI) cPlugin;
-        } catch (NoClassDefFoundError ex) {
-            ExceptionHelper.printException(ex, "Error initializing BarAPI.");
-            return null;
-        }
-    }
-
-    public BarAPIntegrator(JavaPlugin plugin) {
-        BarAPI ba = getBarAPI(plugin);
-        m_isInitialized = ba != null;
-    }
-
-    public void setMessage(PlayerEntry player, String message, double percent) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
+public class PlotMeCoreIntegrator implements IPlotMeIntegrator {
+    
+    private boolean m_isEnabled;
+    private PlotMe_CorePlugin m_plotMeCore;
+    private PlotMe_Core m_core;
+    private IServerBridge m_bridge;
+    private PlotWorldEdit m_worldEdit;
+    
+    @Override
+    public void updateMask(Player player) {
+        if (!m_isEnabled || player == null) {
             return;
-        }
-
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
-            return;
-        }
-
-        if (message == null) {
-            message = "";
-        }
-        if (percent < 0) {
-            percent = 0;
-        } else if (percent > 100) {
-            percent = 100;
         }
         
-        BarAPI.setMessage(player.getPlayer(), message, (float)percent);
+        if (!PlotManager.isPlotWorld(player)) {
+            return;
+        }
+        
+        IPlayer iPlayer = m_bridge.getPlayer(player.getUniqueId());
+        if (iPlayer == null) {
+            return;
+        }
+        if (PlotMe.isIgnoringWELimit(player)) {
+            m_worldEdit.removeMask(iPlayer);
+        } else {
+            m_worldEdit.setMask(iPlayer);
+        }
     }
-
-    public void disableMessage(PlayerEntry player) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
-            return;
+    
+    @Override
+    public boolean initialize(Plugin instance) {
+        m_isEnabled = false;
+        try {
+            m_plotMeCore = (PlotMe_CorePlugin) instance;
+            m_core = m_plotMeCore.getAPI();
+            m_bridge = m_core.getServerBridge();
+            m_worldEdit = m_bridge.getPlotWorldEdit();
+            
+            m_isEnabled = true;
+        } catch (Throwable ex) {
+            ExceptionHelper.printException(ex, "Error initializing PlotMe-Core integrator");
         }
-
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
-            return;
-        }
-
-        BarAPI.removeBar(player.getPlayer());
+        
+        return m_isEnabled;
     }
 }

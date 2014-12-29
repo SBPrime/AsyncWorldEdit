@@ -49,6 +49,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
@@ -70,11 +71,13 @@ public class BlocksHubIntegration {
             Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BlocksHub");
 
             if ((cPlugin == null) || (!(cPlugin instanceof BlocksHub))) {
+                AsyncWorldEditMain.log("BlocksHub plugin not found.");
                 return null;
             }
 
             return (BlocksHub) cPlugin;
         } catch (NoClassDefFoundError ex) {
+            ExceptionHelper.printException(ex, "Error initializing BlocksHub.");
             return null;
         }
     }    
@@ -112,11 +115,13 @@ public class BlocksHubIntegration {
         
         try {
             return m_blocksApi.canPlace(player, world, location);
-        } catch (Exception ex) {
+        } catch (Exception ex) {            
             AsyncWorldEditMain.log("Error checking block place perms: " + ex.toString());
             AsyncWorldEditMain.log("Player: " + player);
             AsyncWorldEditMain.log("World: " + world);
             AsyncWorldEditMain.log("Location: " + location);
+            ExceptionHelper.printException(ex, "Block checking error.");
+            
             return true;
         }
     }
@@ -142,6 +147,8 @@ public class BlocksHubIntegration {
             AsyncWorldEditMain.log("Player: " + name);
             AsyncWorldEditMain.log("World: " + world);
             AsyncWorldEditMain.log("Location: " + l);
+            
+            ExceptionHelper.printException(ex, "Block checking error.");
             return true;
         }
     }
@@ -173,6 +180,8 @@ public class BlocksHubIntegration {
             AsyncWorldEditMain.log("Location: " + l);
             AsyncWorldEditMain.log("Old: " + oldBlock);
             AsyncWorldEditMain.log("New: " + newBlock);
+            
+            ExceptionHelper.printException(ex, "Error logging block.");
         }
     }
 }

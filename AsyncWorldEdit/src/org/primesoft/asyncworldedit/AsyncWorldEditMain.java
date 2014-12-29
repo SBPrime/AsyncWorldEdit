@@ -40,6 +40,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.plotme.PlotMeFix;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -64,6 +65,7 @@ import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.strings.MessageType;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 
 /**
@@ -176,7 +178,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
                 m_metrics.start();
             }
         } catch (IOException e) {
-            log("Error initializing MCStats: " + e.getMessage());
+            ExceptionHelper.printException(e, "Error initializing MCStats");            
         }
 
         s_console = getServer().getConsoleSender();
@@ -393,7 +395,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
             try {
                 return InjectorCore.getInstance();
             } catch (Error ex) {
-                log("AsyncWorldEditInjector not found.");
+                ExceptionHelper.printException(ex, "AsyncWorldEditInjector not found.");
                 return null;
             }            
         }

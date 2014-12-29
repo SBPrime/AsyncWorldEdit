@@ -56,6 +56,7 @@ import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
 import org.primesoft.asyncworldedit.injector.scanner.ClassScannerResult;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.OperationAction;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.WaitFor;
@@ -138,6 +139,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                                 throw (MaxChangedBlocksException) ex;
                             }
 
+                            ExceptionHelper.printException(ex, "Error while processing async operation " + name);
                             //Silently discard other errors :(
                             return 0;
                         }

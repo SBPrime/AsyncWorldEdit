@@ -38,19 +38,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.plotme;
 
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import com.worldcretornica.plotme.PlotManager;
-import com.worldcretornica.plotme.PlotMe;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  * This class is used to fix PlotMe Mask seting errors
@@ -65,12 +64,9 @@ public class PlotMeFix {
     private boolean m_isEnabled;
 
     /**
-     * The PlotMe instance
+     * The plotMe integrator
      */
-    private PlotMe m_instance;
-    private Field m_plotWorldEditField;
-    private Method m_setMaskMethod;
-    private Method m_removeMaskMethod;
+    private IPlotMeIntegrator m_integrator;
 
     /**
      * New instance of PlotMe plugin
@@ -79,20 +75,19 @@ public class PlotMeFix {
      */
     public PlotMeFix(JavaPlugin plugin) {
         m_isEnabled = false;
+        Plugin cPlugin = null;
         if (ConfigProvider.isPlotMeFixEnabled()) {
             try {
-                Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("PlotMe");
-
-                if ((cPlugin != null) && (cPlugin instanceof PlotMe)) {
+                cPlugin = plugin.getServer().getPluginManager().getPlugin("PlotMe");
+                if (cPlugin != null) {
                     m_isEnabled = true;
-
-                    m_instance = (PlotMe) cPlugin;
                 }
             } catch (NoClassDefFoundError ex) {
+                ExceptionHelper.printException(ex, "Error initializing PlotMe fix.");
             }
 
             if (m_isEnabled) {
-                if (Initialize()) {
+                if (Initialize(cPlugin)) {
                     AsyncWorldEditMain.log("PlotMe fix enabled.");
                 } else {
                     AsyncWorldEditMain.log("Error initializing PlotMe fix, unsupported version?.");
@@ -102,71 +97,33 @@ public class PlotMeFix {
     }
 
     public void setMask(PlayerEntry entry) {
-        if (!m_isEnabled || entry == null || entry.getPlayer() == null) {
+        if (!m_isEnabled || entry == null || entry.getPlayer() == null
+                || m_integrator == null) {
             return;
         }
 
         Player player = entry.getPlayer();
-        if (PlotManager.isPlotWorld(player)) {
-            setMask(!PlotMe.isIgnoringWELimit(player), player);
-        }
+        m_integrator.updateMask(player);
     }
 
-    private boolean Initialize() {
-        Class<?> plotMeClass = m_instance.getClass();
-        Class<?> plotWorldEditClass;
+    private boolean Initialize(Plugin instance) {
+        String cls = instance.getClass().getCanonicalName();
 
-        try {
-            m_plotWorldEditField = plotMeClass.getField("plotworldedit");
-        } catch (NoSuchFieldException ex) {
-            m_plotWorldEditField = null;
-        } catch (SecurityException ex) {
-            m_plotWorldEditField = null;
-        }
-        
-        try {
-            plotWorldEditClass = Class.forName("com.worldcretornica.plotme.worldedit.PlotWorldEdit");
-        } catch (ClassNotFoundException ex) {
-            try {
-                plotWorldEditClass = Class.forName("com.worldcretornica.plotme.PlotWorldEdit");
-            } catch (ClassNotFoundException ex1) {
-                return false;
-            }
-        }
-        
-        try {
-            m_setMaskMethod = plotWorldEditClass.getMethod("setMask", Player.class);
-            m_removeMaskMethod = plotWorldEditClass.getMethod("removeMask", Player.class);
-        } catch (NoSuchMethodException ex) {
-            m_setMaskMethod = null;
-            m_removeMaskMethod = null;
-
-            return false;
-        } catch (SecurityException ex) {
-            m_setMaskMethod = null;
-            m_removeMaskMethod = null;
-
+        IPlotMeIntegrator integrator = null;
+        if (cls.equalsIgnoreCase("com.worldcretornica.plotme_core.bukkit.PlotMe_CorePlugin")) {
+            integrator = new PlotMeCoreIntegrator();
+        } else if (cls.equalsIgnoreCase("com.worldcretornica.plotme.PlotMe")) {
+            integrator = new PlotMeIntegrator();            
+        } else {
             return false;
         }
 
+        if (!integrator.initialize(instance)) {
+            return false;
+        }
+
+        m_integrator = integrator;
         return true;
-    }
-
-    private void setMask(boolean enable, Player p) {
-        try {
-            Object plotWorldEdit = m_plotWorldEditField != null ? m_plotWorldEditField.get(null) : null;
-            if (enable && m_setMaskMethod != null) {
-                m_setMaskMethod.invoke(plotWorldEdit, p);
-            } else if (!enable && m_removeMaskMethod != null) {
-                m_removeMaskMethod.invoke(plotWorldEdit, p);
-            }
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(PlotMeFix.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(PlotMeFix.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
-            Logger.getLogger(PlotMeFix.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
     }
 }

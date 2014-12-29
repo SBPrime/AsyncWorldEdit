@@ -42,6 +42,7 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
@@ -70,6 +71,7 @@ public class WorldExtentFuncEntryEx<T, TException extends Exception>
         try {
             funcResult = m_function.Execute();
         } catch (Exception ex) {
+            ExceptionHelper.printException(ex, "Error while processing extent function.");
             return false;
         }
         finally

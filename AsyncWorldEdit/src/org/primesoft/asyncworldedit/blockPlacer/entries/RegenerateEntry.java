@@ -44,6 +44,7 @@ import com.sk89q.worldedit.Vector2D;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  * Regenerate chunk entry
@@ -73,7 +74,7 @@ public class RegenerateEntry extends BlockPlacerEntry {
             return true;
             
         } catch (Throwable t) {
-            t.printStackTrace();
+            ExceptionHelper.printException(t, "Error while regenerating chunk.");
             
             return false;
         }

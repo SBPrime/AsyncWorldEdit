@@ -64,6 +64,7 @@ import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 
 /**
@@ -133,7 +134,7 @@ public class ClassScanner {
                     AsyncWorldEditMain.log("-----------------------------------------------------------------------");
                     AsyncWorldEditMain.log("Warning: Class scanner encountered an error while scanning class");
                     AsyncWorldEditMain.log("Exception: " + ex.getMessage());
-                    ex.printStackTrace();
+                    ExceptionHelper.printStack(ex, "");
                     AsyncWorldEditMain.log("Class: " + cClass);
                     AsyncWorldEditMain.log("Object: " + cObject);
                     AsyncWorldEditMain.log("Send this message to the author of the plugin!");

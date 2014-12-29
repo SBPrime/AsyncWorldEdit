@@ -804,8 +804,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                         m_wait.checkAndWait(null);
                         try {
                             return session.makeShape(region, zero, unit, pattern, expressionString, hollow);
-                        } catch (ExpressionException ex) {
-                            Logger.getLogger(AsyncEditSession.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (ExpressionException ex) {                            
                             return 0;
                         }
                     }
@@ -848,7 +847,6 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                         try {
                             return session.deformRegion(region, zero, unit, expressionString);
                         } catch (ExpressionException ex) {
-                            Logger.getLogger(AsyncEditSession.class.getName()).log(Level.SEVERE, null, ex);
                             return 0;
                         }
                     }

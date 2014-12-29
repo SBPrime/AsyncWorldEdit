@@ -50,6 +50,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.BaseTask;
 
 /**
@@ -111,6 +112,7 @@ class AsyncJobProcessor implements IJobProcessor {
                             }
 
                             //Silently discard other errors :(
+                            ExceptionHelper.printException(ex, "Error while processing async job " + name);
                             return 0;
                         }
                     }
