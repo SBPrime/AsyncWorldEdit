@@ -40,14 +40,13 @@
  */
 package org.primesoft.asyncworldedit.plotme;
 
-import com.worldcretornica.plotme.PlotManager;
-import com.worldcretornica.plotme.PlotMe;
+import com.worldcretornica.plotme_core.PlotMeCoreManager;
 import com.worldcretornica.plotme_core.PlotMe_Core;
 import com.worldcretornica.plotme_core.PlotWorldEdit;
 import com.worldcretornica.plotme_core.api.IPlayer;
 import com.worldcretornica.plotme_core.api.IServerBridge;
-import com.worldcretornica.plotme_core.bukkit.BukkitServerBridge;
 import com.worldcretornica.plotme_core.bukkit.PlotMe_CorePlugin;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -60,6 +59,7 @@ public class PlotMeCoreIntegrator implements IPlotMeIntegrator {
     
     private boolean m_isEnabled;
     private PlotMe_CorePlugin m_plotMeCore;
+    private PlotMeCoreManager m_manager;
     private PlotMe_Core m_core;
     private IServerBridge m_bridge;
     private PlotWorldEdit m_worldEdit;
@@ -70,15 +70,19 @@ public class PlotMeCoreIntegrator implements IPlotMeIntegrator {
             return;
         }
         
-        if (!PlotManager.isPlotWorld(player)) {
-            return;
-        }
-        
-        IPlayer iPlayer = m_bridge.getPlayer(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        IPlayer iPlayer = m_bridge.getPlayer(uuid);
         if (iPlayer == null) {
             return;
         }
-        if (PlotMe.isIgnoringWELimit(player)) {
+        
+        
+        if (!m_manager.isPlotWorld(iPlayer)) {
+            return;
+        }
+        
+                
+        if (m_manager.isPlayerIgnoringWELimit(uuid)) {
             m_worldEdit.removeMask(iPlayer);
         } else {
             m_worldEdit.setMask(iPlayer);
@@ -93,6 +97,7 @@ public class PlotMeCoreIntegrator implements IPlotMeIntegrator {
             m_core = m_plotMeCore.getAPI();
             m_bridge = m_core.getServerBridge();
             m_worldEdit = m_bridge.getPlotWorldEdit();
+            m_manager = m_core.getPlotMeCoreManager();
             
             m_isEnabled = true;
         } catch (Throwable ex) {
