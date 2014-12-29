@@ -135,13 +135,15 @@ public class InjectorCore {
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");
             log("****************************");
-            log("AsyncWorldEdit won't work properly.");
-            log("Error message: " +ex.getLocalizedMessage());
-            log("Stack:");
+            log("* AsyncWorldEdit won't work properly.");
+            log("* Exception: " + ex.getClass().getCanonicalName());
+            log("* Error message: " +ex.getLocalizedMessage());
+            log("* Stack:");
             for (StackTraceElement element : ex.getStackTrace())
             {
-                log(element.toString());
+                log("* " + element.toString());
             }
+            log("****************************");
         }
     }
 
