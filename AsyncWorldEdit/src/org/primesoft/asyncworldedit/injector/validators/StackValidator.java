@@ -77,9 +77,9 @@ public class StackValidator {
     public static boolean isVaild(InOutParam<String> methodName) {
         boolean debugOn = ConfigProvider.isDebugOn();
         if (debugOn) {
-            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("****************************************************************");
             AsyncWorldEditMain.log("* Validating stack trace");
-            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("****************************************************************");
         }
         try {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
@@ -101,9 +101,10 @@ public class StackValidator {
                         m = pattern.matcher(name);
                         if (m.matches()) {
                             if (debugOn) {
+                                AsyncWorldEditMain.log("*");
                                 AsyncWorldEditMain.log("* Found on blacklist");
-                                AsyncWorldEditMain.log("* Class:\t" + element.getClassName());
-                                AsyncWorldEditMain.log("* Method:\t" + name);
+                                AsyncWorldEditMain.log("* Class:\t\t" + element.getClassName());
+                                AsyncWorldEditMain.log("* Method:\t\t" + name);
                                 AsyncWorldEditMain.log("* Class pattern:\t" + entry.getClassPattern().pattern());
                                 AsyncWorldEditMain.log("* Method pattern:\t" + pattern.pattern());
                             }
@@ -116,9 +117,10 @@ public class StackValidator {
                         if (m.matches()) {
                             methodName.setValue(name);
                             if (debugOn) {
+                                AsyncWorldEditMain.log("*");
                                 AsyncWorldEditMain.log("* Found on whitelist");
-                                AsyncWorldEditMain.log("* Class:\t" + element.getClassName());
-                                AsyncWorldEditMain.log("* Method:\t" + name);
+                                AsyncWorldEditMain.log("* Class:\t\t" + element.getClassName());
+                                AsyncWorldEditMain.log("* Method:\t\t" + name);
                                 AsyncWorldEditMain.log("* Class pattern:\t" + entry.getClassPattern().pattern());
                                 AsyncWorldEditMain.log("* Method pattern:\t" + pattern.pattern());
                             }
@@ -128,12 +130,13 @@ public class StackValidator {
                 }
             }
             if (debugOn) {
+                AsyncWorldEditMain.log("*");
                 AsyncWorldEditMain.log("* No match found");
             }
             return false;
         } finally {
             if (debugOn) {
-                AsyncWorldEditMain.log("********************************");
+                AsyncWorldEditMain.log("****************************************************************");
             }
         }
     }

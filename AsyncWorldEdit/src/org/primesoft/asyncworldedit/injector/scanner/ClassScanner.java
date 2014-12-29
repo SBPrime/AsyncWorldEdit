@@ -114,9 +114,9 @@ public class ClassScanner {
         toScan.add(new ScannerQueueEntry(o, null, null));
         boolean debugOn = ConfigProvider.isDebugOn();
         if (debugOn) {
-            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("****************************************************************");
             AsyncWorldEditMain.log("* Scanning classes");
-            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("****************************************************************");
         }
 
         while (!toScan.isEmpty()) {
@@ -125,10 +125,6 @@ public class ClassScanner {
 
             Class<?> cClass = cObject.getClass();
 
-            if (debugOn) {
-                AsyncWorldEditMain.log("* Scanning:\t" + cClass.getCanonicalName());
-            }
-
             if (type.isAssignableFrom(cClass)) {
                 if (debugOn) {
                     AsyncWorldEditMain.log("* Found EditSession.");
@@ -136,12 +132,22 @@ public class ClassScanner {
                 //Should duplicates by ignored?
                 result.add(new ClassScannerResult<T>((T) cObject, entry.getParent(), entry.getField()));
             }
-            if (!scanned.contains(cObject)) {
+
+            if (scanned.contains(cObject)) {
+                if (debugOn) {
+                    AsyncWorldEditMain.log("* Skip:\t" + cClass.getCanonicalName() + ", already scanned.");
+                }
+            } else {
+                int added = 0;
+                if (debugOn) {
+                    AsyncWorldEditMain.log("* Scanning:\t" + cClass.getCanonicalName());
+                }
                 try {
                     for (ScannerQueueEntry f : unpack(cClass, cObject)) {
                         Object t = f.getValue();
                         if (t != null) {
                             toScan.add(f);
+                            added++;
                         }
                     }
                 } catch (Exception ex) {
@@ -156,9 +162,15 @@ public class ClassScanner {
                     AsyncWorldEditMain.log("-----------------------------------------------------------------------");
                 }
                 scanned.add(cObject);
+                if (debugOn) {
+                    AsyncWorldEditMain.log("* Added objects:\t" + added + " objects.");
+                }
             }
         }
 
+        if (debugOn) {
+            AsyncWorldEditMain.log("****************************************************************");
+        }
         return result;
     }
 

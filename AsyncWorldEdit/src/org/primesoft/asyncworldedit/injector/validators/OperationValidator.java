@@ -83,14 +83,15 @@ public class OperationValidator {
         String className = c.getCanonicalName();
 
         if (debugOn) {
-            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("****************************************************************");
             AsyncWorldEditMain.log("* Validating operation");
-            AsyncWorldEditMain.log("********************************");
+            AsyncWorldEditMain.log("****************************************************************");
         }
         try {
             for (Pattern p : s_blackList) {
                 if (p.matcher(className).matches()) {
                     if (debugOn) {
+                        AsyncWorldEditMain.log("*");
                         AsyncWorldEditMain.log("* Found on blacklist");
                         AsyncWorldEditMain.log("* Opeation:\t" + className);
                         AsyncWorldEditMain.log("* Pattern:\t" + p.pattern());
@@ -102,6 +103,7 @@ public class OperationValidator {
             for (Pattern p : s_whiteList) {
                 if (p.matcher(className).matches()) {
                     if (debugOn) {
+                        AsyncWorldEditMain.log("*");
                         AsyncWorldEditMain.log("* Found on whitelist");
                         AsyncWorldEditMain.log("* Opeation:\t" + className);
                         AsyncWorldEditMain.log("* Pattern:\t" + p.pattern());
@@ -111,12 +113,13 @@ public class OperationValidator {
             }
 
             if (debugOn) {
+                AsyncWorldEditMain.log("*");
                 AsyncWorldEditMain.log("* No match found");
             }
             return false;
         } finally {
             if (debugOn) {
-                AsyncWorldEditMain.log("********************************");
+                AsyncWorldEditMain.log("****************************************************************");
             }
         }
     }
