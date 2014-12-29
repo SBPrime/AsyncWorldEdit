@@ -104,7 +104,7 @@ public class SchematicCommands {
         InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, new IJob() {
             @Override
             public String getName() {
-                return "Load schematic from " + filename;
+                return "loadSchematic";
             }
 
             @Override
@@ -150,22 +150,22 @@ public class SchematicCommands {
     )
     @Deprecated
     @CommandPermissions({"worldedit.clipboard.save", "worldedit.schematic.save"})
-    public void save(Player player, LocalSession session, @Optional("schematic") String formatName, String filename) throws CommandException, WorldEditException {
+    public void save(final Player player, LocalSession session, @Optional("schematic") String formatName, final String filename) throws CommandException, WorldEditException {
         LocalConfiguration config = worldEdit.getConfiguration();
 
         File dir = worldEdit.getWorkingDirectoryFile(config.saveDir);
-        File f = worldEdit.getSafeSaveFile(player, dir, filename, "schematic", "schematic");
+        final File f = worldEdit.getSafeSaveFile(player, dir, filename, "schematic", "schematic");
 
-        ClipboardFormat format = ClipboardFormat.findByAlias(formatName);
+        final ClipboardFormat format = ClipboardFormat.findByAlias(formatName);
         if (format == null) {
             player.printError("Unknown schematic format: " + formatName);
             return;
         }
 
-        ClipboardHolder holder = session.getClipboard();
+        final ClipboardHolder holder = session.getClipboard();
         Clipboard clipboard = holder.getClipboard();
         Transform transform = holder.getTransform();
-        Clipboard target;
+        final Clipboard target;
 
         // If we have a transform, bake it into the copy
         if (!transform.isIdentity()) {
@@ -177,31 +177,42 @@ public class SchematicCommands {
             target = clipboard;
         }
 
-        Closer closer = Closer.create();
-        try {
-            // Create parent directories
-            File parent = f.getParentFile();
-            if (parent != null && !parent.exists()) {
-                if (!parent.mkdirs()) {
-                    throw new CommandException("Could not create folder for schematics!");
-                }
+        InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, new IJob() {
+            @Override
+            public String getName() {
+                return "saveSchematic";
             }
 
-            FileOutputStream fos = closer.register(new FileOutputStream(f));
-            BufferedOutputStream bos = closer.register(new BufferedOutputStream(fos));
-            ClipboardWriter writer = closer.register(format.getWriter(bos));
-            writer.write(target, holder.getWorldData());
-            log.info(player.getName() + " saved " + f.getCanonicalPath());
-            player.print(filename + " saved.");
-        } catch (IOException e) {
-            player.printError("Schematic could not written: " + e.getMessage());
-            log.log(Level.WARNING, "Failed to write a saved clipboard", e);
-        } finally {
-            try {
-                closer.close();
-            } catch (IOException ignored) {
+            @Override
+            public void execute() {
+                Closer closer = Closer.create();
+                try {
+                    // Create parent directories
+                    File parent = f.getParentFile();
+                    if (parent != null && !parent.exists()) {
+                        if (!parent.mkdirs()) {
+                            log.info("Could not create folder for schematics!");
+                            return;
+                        }
+                    }
+
+                    FileOutputStream fos = closer.register(new FileOutputStream(f));
+                    BufferedOutputStream bos = closer.register(new BufferedOutputStream(fos));
+                    ClipboardWriter writer = closer.register(format.getWriter(bos));
+                    writer.write(target, holder.getWorldData());
+                    log.info(player.getName() + " saved " + f.getCanonicalPath());
+                    player.print(filename + " saved.");
+                } catch (IOException e) {
+                    player.printError("Schematic could not written: " + e.getMessage());
+                    log.log(Level.WARNING, "Failed to write a saved clipboard", e);
+                } finally {
+                    try {
+                        closer.close();
+                    } catch (IOException ignored) {
+                    }
+                }
             }
-        }
+        });
     }
 
     @Command(
