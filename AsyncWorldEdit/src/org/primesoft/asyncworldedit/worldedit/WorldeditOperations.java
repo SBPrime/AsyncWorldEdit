@@ -85,5 +85,6 @@ public enum WorldeditOperations
     flora,
     setBiome,
     loadSchematic,
-    saveSchematic
+    saveSchematic,
+    craftScript
 }

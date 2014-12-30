@@ -121,3 +121,4 @@ awe:
     - setBiome
     - loadSchematic
     - saveSchematic
+    - craftScript
