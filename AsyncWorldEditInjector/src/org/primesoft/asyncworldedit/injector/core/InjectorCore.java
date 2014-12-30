@@ -42,6 +42,7 @@ package org.primesoft.asyncworldedit.injector.core;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.command.SchematicCommands;
+import com.sk89q.worldedit.command.ScriptingCommands;
 import com.sk89q.worldedit.function.operation.Operations;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
@@ -131,6 +132,7 @@ public class InjectorCore {
             log("Class " + EditSession.ForceClassLoad().getCanonicalName() + " injected.");
             log("Class " + Operations.ForceClassLoad().getCanonicalName() + " injected.");
             log("Class " + SchematicCommands.ForceClassLoad().getCanonicalName() + " injected.");
+            log("Class " + ScriptingCommands.ForceClassLoad().getCanonicalName() + " injected.");
         } catch (Error ex) {
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");
