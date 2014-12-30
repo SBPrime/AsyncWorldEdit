@@ -51,11 +51,12 @@ import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -68,6 +69,7 @@ import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
  * @author SBPrime
  */
 public class CancelabeEditSession extends EditSessionStub {
+
     /**
      * Maximum queued blocks
      */
@@ -99,7 +101,7 @@ public class CancelabeEditSession extends EditSessionStub {
 
         injectChangeSet();
         setMask(mask);
-        
+
         setChangeSet(parent.getChangeSet());
     }
 
@@ -160,7 +162,7 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.getBlockData(pt);
     }
 
@@ -179,7 +181,7 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.getBlockType(pt);
     }
 
@@ -190,7 +192,7 @@ public class CancelabeEditSession extends EditSessionStub {
 
     @Override
     public int getHighestTerrainBlock(int x, int z, int minY, int maxY,
-                                      boolean naturalOnly) {
+            boolean naturalOnly) {
         return m_parent.getHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
     }
 
@@ -204,7 +206,7 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.rawGetBlock(pt);
     }
 
@@ -213,28 +215,28 @@ public class CancelabeEditSession extends EditSessionStub {
             throws WorldEditException {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
-        }        
+        }
         forceFlush();
-        return super.setBlock(VectorWrapper.wrap(position, m_jobId, true, m_player), 
+        return super.setBlock(VectorWrapper.wrap(position, m_jobId, true, m_player),
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player), stage);
     }
 
     @Override
     public boolean setBlock(Vector pt, BaseBlock block)
             throws MaxChangedBlocksException {
-        
+
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
-        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player), 
+
+        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player),
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override
     public boolean setBlock(Vector pt, Pattern pat)
             throws MaxChangedBlocksException {
-                
+
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -248,8 +250,8 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-                
-        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, true, m_player), 
+
+        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, true, m_player),
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
@@ -259,7 +261,7 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return super.setChanceBlockIfAir(VectorWrapper.wrap(pos, m_jobId, true, m_player), 
+        return super.setChanceBlockIfAir(VectorWrapper.wrap(pos, m_jobId, true, m_player),
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player), c);
     }
 
@@ -276,38 +278,63 @@ public class CancelabeEditSession extends EditSessionStub {
         sess.setMask(getMask());
 
         final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
-        final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> placedBlocks = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
+        final HashMap<Double, HashMap<Double, HashMap<Double, List<BaseBlock>>>> placedBlocks
+                = new HashMap<Double, HashMap<Double, HashMap<Double, List<BaseBlock>>>>();
+        final Stack<Vector> posStack = new Stack<Vector>();
 
-        for (int i = blocks.length - 1; i >= 0; i--) {
-            Map.Entry<Vector, BaseBlock> entry = blocks[i];
+        for (Map.Entry<Vector, BaseBlock> entry : blocks) {
             Vector pos = entry.getKey();
             BaseBlock block = entry.getValue();
 
-            int x = pos.getBlockX();
-            int y = pos.getBlockY();
-            int z = pos.getBlockZ();
-            boolean ignore = false;
+            Double x = pos.getX();
+            Double y = pos.getY();
+            Double z = pos.getZ();
 
-            HashMap<Integer, HashSet<Integer>> mapX = placedBlocks.get(x);
+            HashMap<Double, HashMap<Double, List<BaseBlock>>> mapX = placedBlocks.get(x);
             if (mapX == null) {
-                mapX = new HashMap<Integer, HashSet<Integer>>();
+                mapX = new HashMap<Double, HashMap<Double, List<BaseBlock>>>();
                 placedBlocks.put(x, mapX);
             }
 
-            HashSet<Integer> mapY = mapX.get(y);
+            HashMap<Double, List<BaseBlock>> mapY = mapX.get(y);
             if (mapY == null) {
-                mapY = new HashSet<Integer>();
+                mapY = new HashMap<Double, List<BaseBlock>>();
                 mapX.put(y, mapY);
             }
-            if (mapY.contains(z)) {
-                ignore = true;
-            } else {
-                mapY.add(z);
+
+            List<BaseBlock> list = mapY.get(z);
+            if (list == null) {
+                list = new ArrayList<BaseBlock>();
+                mapY.put(z, list);                
             }
 
-            if (!ignore) {
+            posStack.push(pos);
+            list.add(block);
+        }
+
+        while (!posStack.empty()) {
+            Vector pos = posStack.pop();
+            Double x = pos.getX();
+            Double y = pos.getY();
+            Double z = pos.getZ();
+
+            HashMap<Double, HashMap<Double, List<BaseBlock>>> mapX = placedBlocks.get(x);
+            if (mapX == null) {
+                continue;
+            }
+            HashMap<Double, List<BaseBlock>> mapY = mapX.get(y);
+            if (mapY == null) {
+                continue;
+            }
+            List<BaseBlock> list = mapY.get(z);
+            if (list == null) {
+                continue;
+            }
+            
+            for (BaseBlock block : list) {
                 sess.smartSetBlock(pos, block);
             }
+            list.clear();
         }
 
         sess.flushQueue();
@@ -332,7 +359,7 @@ public class CancelabeEditSession extends EditSessionStub {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return super.smartSetBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player), 
+        return super.smartSetBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player),
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
@@ -348,7 +375,7 @@ public class CancelabeEditSession extends EditSessionStub {
     public void flushQueue() {
         m_blocksQueued = 0;
         super.flushQueue();
-    }    
+    }
 
     /**
      * Force block flush when to many has been queued
@@ -364,17 +391,16 @@ public class CancelabeEditSession extends EditSessionStub {
     }
 
     private void setChangeSet(ChangeSet changeSet) {
-        Reflection.set(EditSession.class, this, "changeSet", changeSet, 
+        Reflection.set(EditSession.class, this, "changeSet", changeSet,
                 "Unable to inject changeset");
         ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
                 this, "changeSetExtent", "Unable to get the changeset");
-        
-        if (changesetExtent == null) 
-        {
+
+        if (changesetExtent == null) {
             return;
         }
-        
-        Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", changeSet, 
+
+        Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", changeSet,
                 "Unable to inject changeset to extent");
     }
 }
