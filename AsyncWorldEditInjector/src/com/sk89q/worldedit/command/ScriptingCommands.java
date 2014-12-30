@@ -33,8 +33,6 @@ import java.io.File;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sk89q.minecraft.util.commands.Logging.LogMode.ALL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
