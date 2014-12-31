@@ -38,32 +38,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.utils;
 
-package org.primesoft.asyncworldedit.worldedit.extent;
-
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.extent.NullExtent;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
  * @author SBPrime
  */
-public class QueueExtent extends NullExtent {
-
-    private final List<Map.Entry<Vector, BaseBlock>> m_undoQueue;
-
-    public QueueExtent(final List<Map.Entry<Vector, BaseBlock>> undoQueue) {
-        m_undoQueue = undoQueue;
-    }
-
-    @Override
-    public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
-        m_undoQueue.add(new AbstractMap.SimpleEntry<Vector, BaseBlock>(position, block));
-        return true;
+public class InjectionException extends WorldEditException {
+    public InjectionException(String message) {
+        super(message);
     }
 }

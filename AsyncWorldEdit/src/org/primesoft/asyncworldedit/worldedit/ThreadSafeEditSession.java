@@ -55,6 +55,7 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
@@ -63,6 +64,7 @@ import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -504,48 +506,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
         
         cancelJobs(jobId);
 
-        UndoSession undoSession = doUndo();
-
-        Mask oldMask = sess.getMask();
-        sess.setMask(getMask());
-
-        final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
-        final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> placedBlocks = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
-
-        for (int i = blocks.length - 1; i >= 0; i--) {
-            Map.Entry<Vector, BaseBlock> entry = blocks[i];
-            Vector pos = entry.getKey();
-            BaseBlock block = entry.getValue();
-
-            int x = pos.getBlockX();
-            int y = pos.getBlockY();
-            int z = pos.getBlockZ();
-            boolean ignore = false;
-
-            HashMap<Integer, HashSet<Integer>> mapX = placedBlocks.get(x);
-            if (mapX == null) {
-                mapX = new HashMap<Integer, HashSet<Integer>>();
-                placedBlocks.put(x, mapX);
-            }
-
-            HashSet<Integer> mapY = mapX.get(y);
-            if (mapY == null) {
-                mapY = new HashSet<Integer>();
-                mapX.put(y, mapY);
-            }
-            if (mapY.contains(z)) {
-                ignore = true;
-            } else {
-                mapY.add(z);
-            }
-
-            if (!ignore) {
-                sess.smartSetBlock(pos, block);
-            }
-        }
-
-        sess.flushQueue();
-        sess.setMask(oldMask);
+        UndoProcessor.processUndo(this, this, sess);
     }
 
     @Override
@@ -754,10 +715,8 @@ public class ThreadSafeEditSession extends EditSessionStub {
         return super.getMinimumPoint();
     }
 
-    public UndoSession doUndo() {
-        UndoSession result = new UndoSession(m_eventBus);
-        super.undo(result);
-        return result;
+    public Iterator<Change> doUndo() {
+        return getChangeSet().backwardIterator();
     }
 
     public void doRedo(EditSession session) {

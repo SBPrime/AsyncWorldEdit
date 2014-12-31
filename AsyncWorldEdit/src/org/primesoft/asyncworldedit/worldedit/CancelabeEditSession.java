@@ -51,12 +51,9 @@ import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -271,74 +268,7 @@ public class CancelabeEditSession extends EditSessionStub {
     }
 
     public void doUndo(EditSession sess) {
-        //checkAsync(WorldeditOperations.undo);
-        UndoSession undoSession = m_parent.doUndo();
-
-        Mask oldMask = sess.getMask();
-        sess.setMask(getMask());
-
-        final Map.Entry<Vector, BaseBlock>[] blocks = undoSession.getEntries();
-        final HashMap<Double, HashMap<Double, HashMap<Double, List<BaseBlock>>>> placedBlocks
-                = new HashMap<Double, HashMap<Double, HashMap<Double, List<BaseBlock>>>>();
-        final Stack<Vector> posStack = new Stack<Vector>();
-
-        for (Map.Entry<Vector, BaseBlock> entry : blocks) {
-            Vector pos = entry.getKey();
-            BaseBlock block = entry.getValue();
-
-            Double x = pos.getX();
-            Double y = pos.getY();
-            Double z = pos.getZ();
-
-            HashMap<Double, HashMap<Double, List<BaseBlock>>> mapX = placedBlocks.get(x);
-            if (mapX == null) {
-                mapX = new HashMap<Double, HashMap<Double, List<BaseBlock>>>();
-                placedBlocks.put(x, mapX);
-            }
-
-            HashMap<Double, List<BaseBlock>> mapY = mapX.get(y);
-            if (mapY == null) {
-                mapY = new HashMap<Double, List<BaseBlock>>();
-                mapX.put(y, mapY);
-            }
-
-            List<BaseBlock> list = mapY.get(z);
-            if (list == null) {
-                list = new ArrayList<BaseBlock>();
-                mapY.put(z, list);                
-            }
-
-            posStack.push(pos);
-            list.add(block);
-        }
-
-        while (!posStack.empty()) {
-            Vector pos = posStack.pop();
-            Double x = pos.getX();
-            Double y = pos.getY();
-            Double z = pos.getZ();
-
-            HashMap<Double, HashMap<Double, List<BaseBlock>>> mapX = placedBlocks.get(x);
-            if (mapX == null) {
-                continue;
-            }
-            HashMap<Double, List<BaseBlock>> mapY = mapX.get(y);
-            if (mapY == null) {
-                continue;
-            }
-            List<BaseBlock> list = mapY.get(z);
-            if (list == null) {
-                continue;
-            }
-            
-            for (BaseBlock block : list) {
-                sess.smartSetBlock(pos, block);
-            }
-            list.clear();
-        }
-
-        sess.flushQueue();
-        sess.setMask(oldMask);
+        UndoProcessor.processUndo(m_parent, this, sess);
     }
 
     @Override
@@ -350,7 +280,6 @@ public class CancelabeEditSession extends EditSessionStub {
         Mask mask = sess.getMask();
         sess.setMask(getMask());
         m_parent.doRedo(sess);
-        //super.redo(sess);
         sess.setMask(mask);
     }
 
