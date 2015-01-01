@@ -86,5 +86,11 @@ public enum WorldeditOperations
     setBiome,
     loadSchematic,
     saveSchematic,
-    craftScript
+    craftScript,
+    makeFaces,
+    makeWalls,
+    overlayBlocks,
+    naturalizeBlocks,
+    stackRegion,
+    moveRegion,
 }

@@ -122,3 +122,9 @@ awe:
     - loadSchematic
     - saveSchematic
     - craftScript
+    - makeFaces
+    - makeWalls
+    - overlayBlocks
+    - naturalizeBlocks
+    - stackRegion
+    - moveRegion
