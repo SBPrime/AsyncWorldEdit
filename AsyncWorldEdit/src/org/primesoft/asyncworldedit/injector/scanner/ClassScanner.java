@@ -45,6 +45,8 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.world.FastModeExtent;
+import com.sk89q.worldedit.function.operation.BlockMapEntryPlacer;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.ClipboardPattern;
 import com.sk89q.worldedit.function.pattern.RandomPattern;
@@ -75,23 +77,26 @@ import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
  */
 public class ClassScanner {
 
-    private final static Class<?>[] s_blackList = new Class<?>[]{
-        ChangeSet.class,
-        EditSession.class,
-        Region.class,
-        BlockVector.class,
-        World.class,
-        Change.class,
-        Vector.class,
-        BaseBlock.class,
-        BaseBlockWrapper.class,
-        PermissionGroup.class,
-        PlayerEntry.class,
-        Clipboard.class,
-        BlockRegistry.class,
-        RandomPattern.class,
-        ClipboardPattern.class,
-        BlockPattern.class
+    private final static ClassScannerEntry[] s_blackList = new ClassScannerEntry[]{
+        new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
+        new ClassScannerEntry(BlockMapEntryPlacer.class, "iterator"),
+        new ClassScannerEntry(ChangeSet.class),
+        new ClassScannerEntry(EditSession.class),
+        new ClassScannerEntry(Region.class),
+        new ClassScannerEntry(BlockVector.class),
+        new ClassScannerEntry(World.class),
+        new ClassScannerEntry(FastModeExtent.class),
+        new ClassScannerEntry(Change.class),
+        new ClassScannerEntry(Vector.class),
+        new ClassScannerEntry(BaseBlock.class),
+        new ClassScannerEntry(BaseBlockWrapper.class),
+        new ClassScannerEntry(PermissionGroup.class),
+        new ClassScannerEntry(PlayerEntry.class),
+        new ClassScannerEntry(Clipboard.class),
+        new ClassScannerEntry(BlockRegistry.class),
+        new ClassScannerEntry(RandomPattern.class),
+        new ClassScannerEntry(ClipboardPattern.class),
+        new ClassScannerEntry(BlockPattern.class)
     };
 
     /**
@@ -169,7 +174,7 @@ public class ClassScanner {
                                 //Should duplicates by ignored?
                                 result.add(new ClassScannerResult<T>((T) t, f.getParent(), f.getField()));
                             }
-                            if (!isPrimitive(ct) && !isBlackList(ct)) {
+                            if (!isPrimitive(ct) && !isBlackList(ct) && !isBlackList(ct, f.getField())) {
                                 toScan.add(f);
                                 added++;
 
@@ -228,15 +233,9 @@ public class ClassScanner {
      * @return
      */
     private static Iterable<ScannerQueueEntry> unpack(Class<?> oClass, Object o) {
-        /*
-         * System.out.println("--------------");
-         * System.out.println(oClass.getCanonicalName());
-         * System.out.println("--------------");
-         */
         HashSet<ScannerQueueEntry> result = new HashSet<ScannerQueueEntry>();
 
         if (isPrimitive(oClass) || isBlackList(oClass)) {
-            //System.out.println("** SKIP **");
             return result;
         }
 
@@ -245,7 +244,6 @@ public class ClassScanner {
             while (componenClass.isArray()) {
                 componenClass = componenClass.getComponentType();
             }
-            //System.out.println("IsArray " + componenClass.getCanonicalName());
             if (!isPrimitive(componenClass) && !isBlackList(componenClass)) {
                 for (Object t : (Object[]) o) {
                     if (t != null) {
@@ -253,15 +251,9 @@ public class ClassScanner {
                     }
                 }
             }
-            /*
-             * else {
-             *   System.out.println("** SKIP **");
-             * }
-             */
         }
 
         if (Iterable.class.isAssignableFrom(oClass)) {
-            //System.out.println("Iterable");
             for (Object t : (Iterable<Object>) o) {
                 if (t != null) {
                     result.add(new ScannerQueueEntry(t, o, null));
@@ -291,8 +283,12 @@ public class ClassScanner {
     }
 
     private static boolean isBlackList(Class<?> oClass) {
-        for (Class<?> c : s_blackList) {
-            if (c.isAssignableFrom(oClass)) {
+        return isBlackList(oClass, null);
+    }
+
+    private static boolean isBlackList(Class<?> oClass, Field f) {
+        for (ClassScannerEntry c : s_blackList) {
+            if (c.isMatch(oClass, f)) {
                 return true;
             }
         }
