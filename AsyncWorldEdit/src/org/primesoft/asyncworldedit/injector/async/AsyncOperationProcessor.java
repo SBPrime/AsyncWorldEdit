@@ -101,6 +101,9 @@ public class AsyncOperationProcessor implements IOperationProcessor {
             return;
         }
 
+        /**
+         * What to do if scanner finds multiple different edit sessions?
+         */
         List<ClassScannerResult<AsyncEditSession>> sessions = ClassScanner.scan(AsyncEditSession.class, op);
         if (!validate(sessions)) {
             action.Execute(op);
@@ -156,6 +159,9 @@ public class AsyncOperationProcessor implements IOperationProcessor {
             return;
         }
 
+        /**
+         * What to do if scanner finds multiple different edit sessions?
+         */
         List<ClassScannerResult<AsyncEditSession>> sessions = ClassScanner.scan(AsyncEditSession.class, op);
         if (!validate(sessions)) {
             action.Execute(op);

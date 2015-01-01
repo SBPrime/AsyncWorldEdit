@@ -97,7 +97,7 @@ public class ClassScannerEntry {
     public boolean isMatch(Class<?> c) {
         return isMatch(c, null);
     }
-    
+
     public boolean isMatch(Class<?> c, Field f) {
         if (c == null || m_cls == null) {
             return false;
@@ -107,12 +107,16 @@ public class ClassScannerEntry {
             return false;
         }
 
-        if (f == null || m_fields == null || m_fields.length == 0) {
-            return true;
+        if (f == null) {
+            if (m_fields == null || m_fields.length == 0) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         String fName = f.getName();
-        for (Pattern p : m_fields) {
+        for (Pattern p : m_fields) {            
             if (p.matcher(fName).matches()) {
                 return true;
             }

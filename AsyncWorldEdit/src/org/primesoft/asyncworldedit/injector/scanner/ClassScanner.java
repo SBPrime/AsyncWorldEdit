@@ -171,10 +171,11 @@ public class ClassScanner {
                                     AsyncWorldEditMain.log("* F " + classMsg);
                                 }
 
-                                //Should duplicates by ignored?
                                 result.add(new ClassScannerResult<T>((T) t, f.getParent(), f.getField()));
                             }
-                            if (!isPrimitive(ct) && !isBlackList(ct) && !isBlackList(ct, f.getField())) {
+                                                        
+                            if (!isPrimitive(ct) && !isBlackList(ct) && 
+                                    !isBlackList(cClass, f.getField())) {
                                 toScan.add(f);
                                 added++;
 
