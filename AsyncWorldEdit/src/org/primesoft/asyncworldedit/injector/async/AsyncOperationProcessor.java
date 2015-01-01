@@ -108,7 +108,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         }
 
         final AsyncEditSession asyncSession = sessions.get(0).getValue();
-        final String name = operationName.getValue();
+        final String name = operationName.getValue();        
         if (!asyncSession.checkAsync(name))
         {
             action.Execute(op);

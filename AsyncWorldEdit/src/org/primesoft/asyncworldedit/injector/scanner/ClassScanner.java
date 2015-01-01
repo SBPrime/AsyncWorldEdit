@@ -111,43 +111,75 @@ public class ClassScanner {
         Queue<ScannerQueueEntry> toScan = new ArrayDeque<ScannerQueueEntry>();
         HashSet<Object> scanned = new HashSet<Object>();
 
-        toScan.add(new ScannerQueueEntry(o, null, null));
         boolean debugOn = ConfigProvider.isDebugOn();
+        toScan.add(new ScannerQueueEntry(o, null, null));
+
         if (debugOn) {
             AsyncWorldEditMain.log("****************************************************************");
             AsyncWorldEditMain.log("* Scanning classes");
             AsyncWorldEditMain.log("****************************************************************");
         }
 
+        /**
+         * We do not need to check if first object (o) is of type "type" because
+         * it will by imposible to inject it anyways.
+         */
         while (!toScan.isEmpty()) {
             ScannerQueueEntry entry = toScan.poll();
             Object cObject = entry.getValue();
+            Class<?> cClass = entry.getValueClass();
+            if (cObject == null || cClass == null) {
+                continue;
+            }
 
-            Class<?> cClass = cObject.getClass();
-
-            if (type.isAssignableFrom(cClass)) {
-                if (debugOn) {
-                    AsyncWorldEditMain.log("* Found EditSession.");
-                }
-                //Should duplicates by ignored?
-                result.add(new ClassScannerResult<T>((T) cObject, entry.getParent(), entry.getField()));
+            String sParent;
+            if (debugOn) {
+                sParent = Integer.toHexString(cObject.hashCode()) + ":" + cObject.getClass().getCanonicalName();
+            } else {
+                sParent = null;
             }
 
             if (scanned.contains(cObject)) {
                 if (debugOn) {
-                    AsyncWorldEditMain.log("* Skip:\t" + cClass.getCanonicalName() + ", already scanned.");
+                    AsyncWorldEditMain.log("* Skip:\t" + sParent);
                 }
             } else {
                 int added = 0;
                 if (debugOn) {
-                    AsyncWorldEditMain.log("* Scanning:\t" + cClass.getCanonicalName());
+                    AsyncWorldEditMain.log("* Scanning:\t" + sParent);
                 }
                 try {
                     for (ScannerQueueEntry f : unpack(cClass, cObject)) {
                         Object t = f.getValue();
-                        if (t != null) {
-                            toScan.add(f);
-                            added++;
+                        Class<?> ct = f.getValueClass();
+                        if (t != null && ct != null) {
+                            String classMsg = null;
+                            if (debugOn) {
+                                final Field field = f.getField();
+                                final String sValue = Integer.toHexString(f.getValue().hashCode()) + ":" + f.getValueClass().getCanonicalName();
+                                final String sField = field != null ? field.getName() : "?";
+
+                                classMsg = String.format("%s = %s", sField, sValue);
+                            }
+                            if (type.isAssignableFrom(ct)) {
+                                if (debugOn) {
+                                    AsyncWorldEditMain.log("* F " + classMsg);
+                                }
+
+                                //Should duplicates by ignored?
+                                result.add(new ClassScannerResult<T>((T) t, f.getParent(), f.getField()));
+                            }
+                            if (!isPrimitive(ct) && !isBlackList(ct)) {
+                                toScan.add(f);
+                                added++;
+
+                                if (debugOn) {
+                                    AsyncWorldEditMain.log("* + " + classMsg);
+                                }
+                            } else if (debugOn) {
+                                AsyncWorldEditMain.log("* - " + classMsg);
+                            }
+
                         }
                     }
                 } catch (Exception ex) {
@@ -163,7 +195,7 @@ public class ClassScanner {
                 }
                 scanned.add(cObject);
                 if (debugOn) {
-                    AsyncWorldEditMain.log("* Added objects:\t" + added + " objects.");
+                    AsyncWorldEditMain.log("* Added:\t" + added + " objects.");
                 }
             }
         }

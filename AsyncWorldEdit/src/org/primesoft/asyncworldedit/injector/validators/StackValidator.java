@@ -69,21 +69,55 @@ public class StackValidator {
     };
 
     /**
+     * Elements that should
+     */
+    private static final Pattern[] s_countPatterns = new Pattern[]{
+        Pattern.compile(".*asyncworldedit.*AsyncOperationProcessor.*")
+    };
+
+    /**
      * Does the stack trace allow asyncing
      *
      * @param methodName
      * @return
      */
     public static boolean isVaild(InOutParam<String> methodName) {
-        boolean debugOn = ConfigProvider.isDebugOn();
-        if (debugOn) {
-            AsyncWorldEditMain.log("****************************************************************");
-            AsyncWorldEditMain.log("* Validating stack trace");
-            AsyncWorldEditMain.log("****************************************************************");
-        }
+        final boolean debugOn = ConfigProvider.isDebugOn();
         try {
-            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            for (int i = stackTrace.length - 1; i >= 0; i--) {
+            if (debugOn) {
+                AsyncWorldEditMain.log("****************************************************************");
+                AsyncWorldEditMain.log("* Validating stack trace");
+                AsyncWorldEditMain.log("****************************************************************");
+            }
+
+            if (!validateStack(methodName)) {
+                return false;
+            }
+            if (!validateCount()) {
+                return false;
+            }
+
+            return true;
+        } finally {
+            if (debugOn) {
+                AsyncWorldEditMain.log("****************************************************************");
+
+            }
+        }
+    }
+
+    /**
+     * Validate the stack trace possition
+     *
+     * @param methodName
+     * @return
+     */
+    private static boolean validateStack(InOutParam<String> methodName) {
+        final boolean debugOn = ConfigProvider.isDebugOn();
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        int i = stackTrace.length - 1;
+        try {
+            for (; i >= 0; i--) {
                 StackTraceElement element = stackTrace[i];
                 if (debugOn) {
                     AsyncWorldEditMain.log("* " + element.toString());
@@ -129,6 +163,7 @@ public class StackValidator {
                     }
                 }
             }
+
             if (debugOn) {
                 AsyncWorldEditMain.log("*");
                 AsyncWorldEditMain.log("* No match found");
@@ -136,8 +171,44 @@ public class StackValidator {
             return false;
         } finally {
             if (debugOn) {
-                AsyncWorldEditMain.log("****************************************************************");
+                AsyncWorldEditMain.log("*");
+                i--;
+                for (; i >= 0; i--) {
+                    StackTraceElement element = stackTrace[i];
+                    AsyncWorldEditMain.log("* " + element.toString());
+                }
+                AsyncWorldEditMain.log("*");
             }
         }
+    }
+
+    /**
+     * Validate stack entry count
+     *
+     * @return
+     */
+    private static boolean validateCount() {
+        final boolean debugOn = ConfigProvider.isDebugOn();
+        final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+        boolean result = true;
+
+        for (Pattern p : s_countPatterns) {
+            int cnt = 0;
+            for (StackTraceElement stack : stackTrace) {
+                if (p.matcher(stack.toString()).matches()) {
+                    cnt++;
+                }
+            }
+
+            result &= cnt < 2;
+            if (debugOn) {
+                AsyncWorldEditMain.log("* " + p.pattern() + " --> " + cnt);
+            } else if (!result) {
+                return false;
+            }
+        }
+
+        return result;
     }
 }

@@ -50,6 +50,7 @@ public class ScannerQueueEntry {
 
     private final Object m_parent;
     private final Object m_value;
+    private final Class<?> m_valueClass;
     private final Field m_field;
 
     public ScannerQueueEntry(Object value, Object parent, Field field) {
@@ -64,6 +65,7 @@ public class ScannerQueueEntry {
          */        
         m_parent = parent;
         m_value = value;
+        m_valueClass = value != null ? value.getClass() : null;
         m_field = field;
     }
 
@@ -71,6 +73,10 @@ public class ScannerQueueEntry {
         return m_parent;
     }
 
+    public Class<?> getValueClass() {
+        return m_valueClass;
+    }
+    
     public Object getValue() {
         return m_value;
     }
