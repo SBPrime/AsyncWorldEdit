@@ -456,11 +456,11 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final BaseEntity entity = paramEntity.getData();
         final PlayerEntry player = getPlayer(paramLocation, paramEntity);
 
-        if (!m_blocksHub.canPlace(player, m_bukkitWorld, location.toVector())) {
-            return null;
-        }
-
         final EntityLazyWrapper entityWrapper = new EntityLazyWrapper(location, this);
+        if (!m_blocksHub.canPlace(player, m_bukkitWorld, location.toVector())) {
+            return entityWrapper; //Return the entity erapper so WorldEdit does not complain
+        }
+        
         Func<Entity> func = new Func<Entity>() {
             @Override
             public Entity Execute() {
@@ -476,7 +476,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         if (paramEntity.isAsync() || paramLocation.isAsync() || !m_dispatcher.isMainTask()) {
             if (!m_blockPlacer.addTasks(player,
                     new WorldExtentFuncEntry(this, paramLocation.getJobId(), location.toVector(), func))) {
-                return null;
+                return entityWrapper; //Return the entity erapper so WorldEdit does not complain
             }
             return entityWrapper;
         }
