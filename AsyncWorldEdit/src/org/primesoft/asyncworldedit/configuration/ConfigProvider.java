@@ -353,7 +353,21 @@ public class ConfigProvider {
         } else {
             m_dispatcherMaxIdle = dSection.getInt("max-idle-runs", 200);
             m_dispatcherMaxJobs = dSection.getInt("max-jobs", 2000);
-            m_dispatcherMaxTime = dSection.getInt("max-time", 20);
+            m_dispatcherMaxTime = dSection.getInt("max-time", 20);                        
+        }
+        
+        if (m_dispatcherMaxTime < 1) {
+            m_dispatcherMaxTime = 10;
+            AsyncWorldEditMain.log("Warning: Dispatcher time is set to lower then 1ms, changing to 10ms.");
+        }
+        if (m_dispatcherMaxJobs< 1) {
+            m_dispatcherMaxJobs = 100;
+            AsyncWorldEditMain.log("Warning: Dispatcher max jobs is lower then 1, changing to 100");
+        }
+        
+        if (m_dispatcherMaxIdle < 1) {
+            m_dispatcherMaxIdle = 10;
+            AsyncWorldEditMain.log("Warning: Dispatcher max idle is lower then 1, changing to 10");
         }
     }
     
