@@ -16,6 +16,9 @@ awe:
     #maximum number of miliseconds the dispatcher can use
     #This value should by lover then 50% o 1tick (25ms)
     max-time: 20
+  #Maximum number of blocks in queue mode before AWE forces block placing.
+  #Use -1 to disable force flush.
+  forceFlushBlocks: 10000
   #check for updates
   checkVersion: true
   #Disable or enable blocks physics freeze when placing blocks

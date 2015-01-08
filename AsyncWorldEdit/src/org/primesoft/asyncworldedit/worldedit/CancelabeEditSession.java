@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
@@ -70,12 +71,6 @@ import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
  * @author SBPrime
  */
 public class CancelabeEditSession extends EditSessionStub {
-
-    /**
-     * Maximum queued blocks
-     */
-    private final int MAX_QUEUED = 10000;
-
     private final ThreadSafeEditSession m_parent;
 
     private final CancelableWorld m_cWorld;
@@ -324,9 +319,11 @@ public class CancelabeEditSession extends EditSessionStub {
      * Force block flush when to many has been queued
      */
     private void forceFlush() {
-        if (isQueueEnabled()) {
+        int maxBlocks = ConfigProvider.getForceFlushBlocks();
+                
+        if (isQueueEnabled() && (maxBlocks != -1)) {
             m_blocksQueued++;
-            if (m_blocksQueued > MAX_QUEUED) {
+            if (m_blocksQueued > maxBlocks) {
                 m_blocksQueued = 0;
                 super.flushQueue();
             }

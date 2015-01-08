@@ -88,12 +88,14 @@ public class ConfigProvider {
     private static boolean m_logBlocks;
 
     private static boolean m_plotMeFixEnabled;
-    
-    private static boolean m_debugMode;    
-    
-    private static File m_pluginFolder; 
-    
+
+    private static boolean m_debugMode;
+
+    private static File m_pluginFolder;
+
     private static String m_stringsFile;
+
+    private static int m_forceFlushBlockCount;
 
     /**
      * The default permissions group
@@ -104,36 +106,38 @@ public class ConfigProvider {
      * Permissions group
      */
     private static PermissionGroup[] m_groups;
-    
+
     /**
      * Maximum number of dispatcher idle runs
      */
     private static int m_dispatcherMaxIdle;
-    
+
     /**
      * Maximum number of jobs performed in one run
      */
     private static int m_dispatcherMaxJobs;
-    
+
     /**
      * Maximum dime spend in one run
      */
     private static int m_dispatcherMaxTime;
 
+    public static int getForceFlushBlocks() {
+        return m_forceFlushBlockCount;
+    }
+
     public static PermissionGroup getDefaultGroup() {
         return m_defaultGroup;
     }
-    
 
     public static PermissionGroup[] getGroups() {
         return m_groups;
     }
-    
-    
+
     public static boolean isDebugOn() {
         return m_debugMode;
     }
-    
+
     public static int getDispatcherMaxIdle() {
         return m_dispatcherMaxIdle;
     }
@@ -145,7 +149,7 @@ public class ConfigProvider {
     public static int getDispatcherMaxTime() {
         return m_dispatcherMaxTime;
     }
-    
+
     /**
      * Plugin root folder
      *
@@ -154,7 +158,6 @@ public class ConfigProvider {
     public static File getPluginFolder() {
         return m_pluginFolder;
     }
-    
 
     /**
      * Get the config version
@@ -230,7 +233,7 @@ public class ConfigProvider {
     public static String getStringsFile() {
         return m_stringsFile;
     }
-    
+
     /**
      * Is PlotMe Fix enabled?
      *
@@ -267,6 +270,7 @@ public class ConfigProvider {
         m_plotMeFixEnabled = mainSection.getBoolean("plotMeFixEnabled", true);
         m_stringsFile = mainSection.getString("strings", "");
         m_debugMode = mainSection.getBoolean("debug", false);
+        m_forceFlushBlockCount = mainSection.getInt("forceFlushBlocks", 1000);
 
         parseGroupsSection(mainSection.getConfigurationSection("permissionGroups"));
         parseRenderSection(mainSection);
@@ -343,7 +347,8 @@ public class ConfigProvider {
 
     /**
      * Initialize the dispatcher configuration
-     * @param dSection 
+     *
+     * @param dSection
      */
     private static void parseDispatcherSection(ConfigurationSection dSection) {
         if (dSection == null) {
@@ -353,24 +358,24 @@ public class ConfigProvider {
         } else {
             m_dispatcherMaxIdle = dSection.getInt("max-idle-runs", 200);
             m_dispatcherMaxJobs = dSection.getInt("max-jobs", 2000);
-            m_dispatcherMaxTime = dSection.getInt("max-time", 20);                        
+            m_dispatcherMaxTime = dSection.getInt("max-time", 20);
         }
-        
+
         if (m_dispatcherMaxTime < 1) {
             m_dispatcherMaxTime = 10;
             AsyncWorldEditMain.log("Warning: Dispatcher time is set to lower then 1ms, changing to 10ms.");
         }
-        if (m_dispatcherMaxJobs< 1) {
+        if (m_dispatcherMaxJobs < 1) {
             m_dispatcherMaxJobs = 100;
             AsyncWorldEditMain.log("Warning: Dispatcher max jobs is lower then 1, changing to 100");
         }
-        
+
         if (m_dispatcherMaxIdle < 1) {
             m_dispatcherMaxIdle = 10;
             AsyncWorldEditMain.log("Warning: Dispatcher max idle is lower then 1, changing to 10");
         }
     }
-    
+
     /**
      * Initialize blocks hub configuration
      *

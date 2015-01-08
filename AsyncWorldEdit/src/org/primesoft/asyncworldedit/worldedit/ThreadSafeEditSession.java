@@ -82,12 +82,6 @@ import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
  * @author SBPrime
  */
 public class ThreadSafeEditSession extends EditSessionStub {
-
-    /**
-     * Maximum queued blocks
-     */
-    private final int MAX_QUEUED = 10000;
-
     /**
      * Plugin instance
      */
@@ -531,10 +525,12 @@ public class ThreadSafeEditSession extends EditSessionStub {
     /**
      * Force block flush when to many has been queued
      */
-    protected void forceFlush() {
-        if (isQueueEnabled()) {
+    protected void forceFlush() {        
+        int maxBlocks = ConfigProvider.getForceFlushBlocks();
+        
+        if (isQueueEnabled() && (maxBlocks != -1)) {
             m_blocksQueued++;
-            if (m_blocksQueued > MAX_QUEUED) {
+            if (m_blocksQueued > maxBlocks) {
                 m_blocksQueued = 0;
                 super.flushQueue();
             }
