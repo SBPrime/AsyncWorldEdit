@@ -132,32 +132,33 @@ public abstract class BaseTask implements Runnable {
         }
         m_blockPlacer.addTasks(m_player, m_job);
 
-        try {
-            if ((m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled())
-                    && (m_job.getStatus() != JobEntry.JobStatus.Canceled)) {
+        if ((m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled())
+                && (m_job.getStatus() != JobEntry.JobStatus.Canceled)) {
+            try {
                 result = doRun();
-            }
-
-            if (m_editSession != null) {
-                if (m_editSession.isQueueEnabled()) {
-                    m_editSession.flushQueue();
-                } else if (m_cancelableEditSession != null) {
-                    m_cancelableEditSession.resetAsync();
-                } else if (m_safeEditSession != null) {
-                    m_safeEditSession.resetAsync();
+            } catch (MaxChangedBlocksException ex) {
+                m_player.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
+            } catch (IllegalArgumentException ex) {
+                if (ex.getCause() instanceof SessionCanceled) {
+                    m_player.say(MessageType.BLOCK_PLACER_CANCELED.format());
                 }
             }
+        }
 
-            m_job.setStatus(JobEntry.JobStatus.Waiting);
-            m_blockPlacer.addTasks(m_player, m_job);
-            doPostRun(result);
-        } catch (MaxChangedBlocksException ex) {
-            m_player.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
-        } catch (IllegalArgumentException ex) {
-            if (ex.getCause() instanceof SessionCanceled) {
-                m_player.say(MessageType.BLOCK_PLACER_CANCELED.format());
+        if (m_editSession != null) {
+            if (m_editSession.isQueueEnabled()) {
+                m_editSession.flushQueue();
+            } else if (m_cancelableEditSession != null) {
+                m_cancelableEditSession.resetAsync();
+            } else if (m_safeEditSession != null) {
+                m_safeEditSession.resetAsync();
             }
         }
+
+        m_job.setStatus(JobEntry.JobStatus.Waiting);
+        m_blockPlacer.addTasks(m_player, m_job);
+        doPostRun(result);
+
         postProcess();
 
         m_job.taskDone();
