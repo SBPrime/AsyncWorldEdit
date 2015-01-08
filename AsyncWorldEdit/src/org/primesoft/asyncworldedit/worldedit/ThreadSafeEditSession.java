@@ -74,6 +74,7 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
@@ -308,7 +309,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public Entity createEntity(Location location, BaseEntity entity) {
         boolean isAsync = isAsyncEnabled();
         return super.createEntity(LocationWrapper.wrap(location, m_jobId, isAsync, m_player),
-                entity);
+                BaseEntityWrapper.wrap(entity, m_jobId, isAsync, m_player));
     }
 
 

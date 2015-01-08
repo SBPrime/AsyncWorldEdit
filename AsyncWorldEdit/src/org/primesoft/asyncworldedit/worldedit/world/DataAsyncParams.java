@@ -73,6 +73,7 @@ public class DataAsyncParams<T> extends BaseAsyncParams {
         return new DataAsyncParams(data, isAsync, jobId, empty, player);
     }
     
+    
     private final T m_data;
 
     private DataAsyncParams(T data, boolean isAsync, int jobId, boolean isEmpty, PlayerEntry player) {

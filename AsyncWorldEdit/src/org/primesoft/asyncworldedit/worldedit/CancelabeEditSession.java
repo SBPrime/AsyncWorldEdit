@@ -43,6 +43,8 @@ package org.primesoft.asyncworldedit.worldedit;
 import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.entity.BaseEntity;
+import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
@@ -58,8 +60,10 @@ import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
+import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.world.CancelableWorld;
 import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
+import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
 
 /**
  *
@@ -239,6 +243,16 @@ public class CancelabeEditSession extends EditSessionStub {
         }
 
         return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player), pat);
+    }
+
+    @Override
+    public Entity createEntity(com.sk89q.worldedit.util.Location location, BaseEntity entity) {
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return super.createEntity(LocationWrapper.wrap(location, m_jobId, true, m_player),
+                BaseEntityWrapper.wrap(entity, m_jobId, true, m_player));
     }
 
     @Override

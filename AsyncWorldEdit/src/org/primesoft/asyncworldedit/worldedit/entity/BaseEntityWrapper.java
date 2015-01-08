@@ -50,7 +50,7 @@ import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
  * @author SBPrime
  */
 public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
-    public static BaseEntityWrapper wrap(BaseEntityWrapper entity, int jobId,
+    public static BaseEntityWrapper wrap(BaseEntity entity, int jobId,
                                         boolean isAsync, PlayerEntry player) {
         BaseEntityWrapper result;
         if (entity instanceof BaseEntityWrapper) {
@@ -115,31 +115,50 @@ public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
         if (o instanceof BaseEntityWrapper) {
             o = ((BaseEntityWrapper) o).getParent();
         }
+        
+        if (m_parent == null) {
+            return false;
+        }
         return m_parent.equals(o);
     }
 
     @Override
     public CompoundTag getNbtData() {
+        if (m_parent == null) {
+            return null;
+        }
         return m_parent.getNbtData(); 
     }
 
     @Override
     public String getTypeId() {
+        if (m_parent == null) {
+            return null;
+        }
         return m_parent.getTypeId(); 
     }
 
     @Override
     public boolean hasNbtData() {
+        if (m_parent == null) {
+            return false;
+        }
         return m_parent.hasNbtData(); 
     }
 
     @Override
     public void setNbtData(CompoundTag ct) {
+        if (m_parent == null) {
+            return;
+        }
         m_parent.setNbtData(ct); 
     }
 
     @Override
     public void setTypeId(String id) {
+        if (m_parent == null) {
+            return;
+        }
         m_parent.setTypeId(id); 
     }
 }

@@ -68,6 +68,8 @@ import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 import org.primesoft.asyncworldedit.worldedit.BlockVector2DWrapper;
 import org.primesoft.asyncworldedit.worldedit.Vector2DWrapper;
 import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
+import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
+import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
 
 /**
  *
@@ -142,7 +144,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         }
         return m_parent.getBlockData(vector);
     }
-
+    
     @Override
     public boolean setBlock(Vector vector, BaseBlock bb, boolean bln) throws WorldEditException {
         if (m_isCanceled) {
@@ -373,7 +375,8 @@ public class CancelableWorld extends AbstractWorldWrapper {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.createEntity(lctn, be);
+        return m_parent.createEntity(LocationWrapper.wrap(lctn, m_jobId, true, m_player),
+                BaseEntityWrapper.wrap(be, m_jobId, true, m_player));
     }
 
     @Override

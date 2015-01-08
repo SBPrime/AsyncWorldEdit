@@ -144,7 +144,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     public AsyncWorld(World world, PlayerEntry player) {
         super(world);
-        
+
         m_plugin = AsyncWorldEditMain.getInstance();
         m_player = player;
         m_schedule = m_plugin.getServer().getScheduler();
@@ -999,7 +999,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         }
 
         return func.Execute();
-    }        
+    }
 
     @Override
     public Operation commit() {
