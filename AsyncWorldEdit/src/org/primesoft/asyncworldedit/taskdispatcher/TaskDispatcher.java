@@ -62,6 +62,7 @@ import org.primesoft.asyncworldedit.utils.Func;
  * @author SBPrime
  */
 public class TaskDispatcher implements Runnable {
+
     /**
      * MTA mutex
      */
@@ -155,6 +156,10 @@ public class TaskDispatcher implements Runnable {
         }
         m_lastEnter = enter;
 
+        if (Double.isNaN(m_usage)) {
+            m_usage = 0;
+        }
+
         double usage = m_usage;
 
         m_mainThread = Thread.currentThread();
@@ -180,7 +185,11 @@ public class TaskDispatcher implements Runnable {
             }
 
             runTime = System.currentTimeMillis() - enter;
-            usage = 1000.0 * runTime / (runTime + runDelta);
+            if (runTime + runDelta > 0) {
+                usage = 1000.0 * runTime / (runTime + runDelta);
+            } else {
+                usage = 0;
+            }
         }
 
         if (!processed) {
@@ -194,7 +203,11 @@ public class TaskDispatcher implements Runnable {
         }
 
         runTime = System.currentTimeMillis() - enter;
-        usage = 1000.0 * runTime / (runTime + runDelta);
+        if (runTime + runDelta > 0) {
+            usage = 1000.0 * runTime / (runTime + runDelta);
+        } else {
+            usage = 0;
+        }
         m_usage = (m_usage * 3 + usage) / 4;
     }
 
