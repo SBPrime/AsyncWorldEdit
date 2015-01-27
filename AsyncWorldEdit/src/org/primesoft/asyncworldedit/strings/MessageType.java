@@ -83,7 +83,7 @@ public enum MessageType {
             + ChatColor.BLUE + "Purge" + ChatColor.WHITE + " - remove all queued block operations\n"
             + ChatColor.BLUE + "Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off\n"
             + ChatColor.BLUE + "Reload" + ChatColor.WHITE + " - reload configuration\n"
-            + ChatColor.YELLOW + "To display help on command use: " + ChatColor.BLUE + "/Help <command>\n"),
+            + ChatColor.YELLOW + "To display help on command use: " + ChatColor.BLUE + "/awe help <command>\n"),
     CMD_HELP_TOGGLE("CMD_HELP_TOGGLE", ChatColor.YELLOW + "Toggle " + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off\n"
             + ChatColor.BLUE + " Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit\n"
             + ChatColor.BLUE + " Toggle on" + ChatColor.WHITE + " - toggle AsyncWorldEdit on\n"
