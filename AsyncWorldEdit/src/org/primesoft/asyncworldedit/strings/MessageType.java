@@ -77,7 +77,7 @@ public enum MessageType {
     CMD_RELOAD_DONE("CMD_RELOAD_DONE", ChatColor.GREEN + "Reload done"),
     //The help command
     CMD_HELP_GLOBAL("CMD_HELP_GLOBAL", ChatColor.YELLOW + "Async WorldEdit help:\n"
-            + ChatColor.BLUE + "Help" + ChatColor.WHITE + " - diaplay help screen\n"
+            + ChatColor.BLUE + "Help" + ChatColor.WHITE + " - display help screen\n"
             + ChatColor.BLUE + "Jobs" + ChatColor.WHITE + " - display queued block operations\n"
             + ChatColor.BLUE + "Cancel" + ChatColor.WHITE + " - cancel queued job\n"
             + ChatColor.BLUE + "Purge" + ChatColor.WHITE + " - remove all queued block operations\n"
