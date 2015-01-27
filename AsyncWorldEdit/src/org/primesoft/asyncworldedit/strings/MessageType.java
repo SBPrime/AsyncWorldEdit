@@ -77,13 +77,13 @@ public enum MessageType {
     CMD_RELOAD_DONE("CMD_RELOAD_DONE", ChatColor.GREEN + "Reload done"),
     //The help command
     CMD_HELP_GLOBAL("CMD_HELP_GLOBAL", ChatColor.YELLOW + "Async WorldEdit help:\n"
-            + ChatColor.BLUE + "Help" + ChatColor.WHITE + " - diaplay help screen\n"
+            + ChatColor.BLUE + "Help" + ChatColor.WHITE + " - display help screen\n"
             + ChatColor.BLUE + "Jobs" + ChatColor.WHITE + " - display queued block operations\n"
             + ChatColor.BLUE + "Cancel" + ChatColor.WHITE + " - cancel queued job\n"
             + ChatColor.BLUE + "Purge" + ChatColor.WHITE + " - remove all queued block operations\n"
             + ChatColor.BLUE + "Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off\n"
             + ChatColor.BLUE + "Reload" + ChatColor.WHITE + " - reload configuration\n"
-            + ChatColor.YELLOW + "To display help on command use: " + ChatColor.BLUE + "/Help <command>\n"),
+            + ChatColor.YELLOW + "To display help on command use: " + ChatColor.BLUE + "/awe help <command>\n"),
     CMD_HELP_TOGGLE("CMD_HELP_TOGGLE", ChatColor.YELLOW + "Toggle " + ChatColor.WHITE + " - toggle AsyncWorldEdit on/off\n"
             + ChatColor.BLUE + " Toggle" + ChatColor.WHITE + " - toggle AsyncWorldEdit\n"
             + ChatColor.BLUE + " Toggle on" + ChatColor.WHITE + " - toggle AsyncWorldEdit on\n"
