@@ -48,7 +48,6 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
-import com.sk89q.worldedit.history.changeset.ArrayListHistory;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
@@ -63,7 +62,6 @@ import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.world.CancelableWorld;
-import org.primesoft.asyncworldedit.worldedit.history.InjectedArrayListHistory;
 import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
 
 /**
@@ -95,30 +93,24 @@ public class CancelabeEditSession extends EditSessionStub {
         m_player = m_parent.getPlayer();
         m_cWorld = (CancelableWorld) getWorld();
 
-        injectChangeSet();
+        injectChangeSet(parent.getChangeSet());
         setMask(mask);
-
-        setChangeSet(parent.getChangeSet());
     }
 
-    /**
-     * Injects an ArrayListHistory to allow fast and easy acces to changed
-     * blocks. The BlockOptimizedHistory (default) requires processing to allow
-     * history copy to the parent.
-     */
-    private void injectChangeSet() {
-        ArrayListHistory newChangeSet = new InjectedArrayListHistory();
-        ChangeSetExtent changeExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
-                this, "changeSetExtent", "Unable to get the ChangeSet");
-        if (changeExtent == null) {
+    
+    private void injectChangeSet(ChangeSet changeSet) {        
+        ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
+                this, "changeSetExtent", "Unable to get the changeset");
+
+        if (changesetExtent == null) {
             AsyncWorldEditMain.log("Unable to get the changeSet from EditSession, undo and redo broken.");
             return;
         }
 
-        Reflection.set(changeExtent, "changeSet", newChangeSet,
+        Reflection.set(EditSession.class, this, "changeSet", changeSet,
                 "Unable to inject ChangeSet, undo and redo broken.");
-        Reflection.set(EditSession.class, this, "changeSet", newChangeSet,
-                "Unable to inject ChangeSet, undo and redo broken.");
+        Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", changeSet,
+                "Unable to inject changeset to extent, undo and redo broken.");
     }
 
     public boolean isCanceled() {
@@ -328,19 +320,5 @@ public class CancelabeEditSession extends EditSessionStub {
                 super.flushQueue();
             }
         }
-    }
-
-    private void setChangeSet(ChangeSet changeSet) {
-        Reflection.set(EditSession.class, this, "changeSet", changeSet,
-                "Unable to inject changeset");
-        ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
-                this, "changeSetExtent", "Unable to get the changeset");
-
-        if (changesetExtent == null) {
-            return;
-        }
-
-        Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", changeSet,
-                "Unable to inject changeset to extent");
     }
 }

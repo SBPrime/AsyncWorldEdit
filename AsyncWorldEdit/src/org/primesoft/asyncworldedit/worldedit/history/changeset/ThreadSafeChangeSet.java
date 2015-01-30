@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,15 +38,75 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.worldedit.history.changeset;
 
-package org.primesoft.asyncworldedit.worldedit.history;
-
-import com.sk89q.worldedit.history.changeset.ArrayListHistory;
+import com.sk89q.worldedit.history.change.Change;
+import com.sk89q.worldedit.history.changeset.ChangeSet;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- * Simple place holder class to determine if inject was successful
+ *
  * @author SBPrime
  */
-public class InjectedArrayListHistory extends ArrayListHistory {
-    
+public class ThreadSafeChangeSet implements ChangeSet {
+
+    /**
+     * The parent change set
+     */
+    private final ChangeSet m_parent;
+
+    /**
+     * The MTA mutex
+     */
+    private final Object m_mutex;
+
+    public ThreadSafeChangeSet(ChangeSet changeSet) {
+        if (changeSet == null) {
+            throw new IllegalArgumentException("Change set is null");
+        }
+
+        m_parent = changeSet;
+
+        m_mutex = new Object();
+    }
+
+    @Override
+    public void add(Change change) {
+        synchronized (m_mutex) {
+            m_parent.add(change);
+        }
+    }
+
+    @Override
+    public Iterator<Change> backwardIterator() {
+        List<Change> list = new ArrayList<Change>();
+        synchronized (m_mutex) {
+            for (Iterator iterator = m_parent.backwardIterator(); iterator.hasNext();) {
+                list.add((Change) iterator.next());
+            }
+        }
+        
+        return list.iterator();
+    }
+
+    @Override
+    public Iterator<Change> forwardIterator() {
+        List<Change> list = new ArrayList<Change>();
+        synchronized (m_mutex) {
+            for (Iterator iterator = m_parent.forwardIterator(); iterator.hasNext();) {
+                list.add((Change) iterator.next());
+            }
+        }
+        
+        return list.iterator();
+    }
+
+    @Override
+    public int size() {
+        synchronized (m_mutex) {
+            return m_parent.size();
+        }
+    }
 }

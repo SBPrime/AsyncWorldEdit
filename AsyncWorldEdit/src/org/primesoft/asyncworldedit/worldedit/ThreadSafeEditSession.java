@@ -53,8 +53,10 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.history.change.Change;
+import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
@@ -74,7 +76,9 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
+import org.primesoft.asyncworldedit.worldedit.history.changeset.ThreadSafeChangeSet;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
@@ -198,6 +202,27 @@ public class ThreadSafeEditSession extends EditSessionStub {
         m_asyncDisabled = false;
         m_jobId = -1;
     }
+    
+    
+
+    private void injectChangeSet() {        
+        ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
+                this, "changeSetExtent", "Unable to get the changeset");
+        ChangeSet changeSet = getChangeSet();
+
+        if (changesetExtent == null || changeSet == null) {
+            AsyncWorldEditMain.log("Unable to get the changeSet from EditSession, undo and redo broken.");
+            return;
+        }
+
+        ChangeSet newChangeSet = new ThreadSafeChangeSet(changeSet);
+        
+        Reflection.set(EditSession.class, this, "changeSet", newChangeSet,
+                "Unable to inject ChangeSet, undo and redo broken.");
+        Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", newChangeSet,
+                "Unable to inject changeset to extent, undo and redo broken.");
+    }
+
 
     @Override
     public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException {
