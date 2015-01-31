@@ -47,8 +47,10 @@ import com.worldcretornica.plotme_core.api.IPlayer;
 import com.worldcretornica.plotme_core.api.IServerBridge;
 import com.worldcretornica.plotme_core.bukkit.PlotMe_CorePlugin;
 import java.util.UUID;
+import static org.bukkit.Bukkit.getServer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -92,13 +94,17 @@ public class PlotMeCoreIntegrator implements IPlotMeIntegrator {
     public boolean initialize(Plugin instance) {
         m_isEnabled = false;
         try {
-            m_plotMeCore = (PlotMe_CorePlugin) instance;
-            m_core = m_plotMeCore.getAPI();
-            m_bridge = m_core.getServerBridge();
-            m_worldEdit = m_bridge.getPlotWorldEdit();
-            m_manager = m_core.getPlotMeCoreManager();
-            
-            m_isEnabled = true;
+            PluginManager pm = getServer().getPluginManager();
+            if (pm.getPlugin("PlotMe") != null) {
+                m_plotMeCore = (PlotMe_CorePlugin) pm.getPlugin("PlotMe");
+                
+                m_core = m_plotMeCore.getAPI();
+                m_bridge = m_core.getServerBridge();
+                m_worldEdit = m_bridge.getPlotWorldEdit();
+                m_manager = m_core.getPlotMeCoreManager();
+
+                m_isEnabled = true;
+            }
         } catch (Throwable ex) {
             ExceptionHelper.printException(ex, "Error initializing PlotMe-Core integrator");
         }
