@@ -42,13 +42,15 @@ package org.primesoft.asyncworldedit.plotme;
 
 import com.worldcretornica.plotme_core.PlotMeCoreManager;
 import com.worldcretornica.plotme_core.PlotMe_Core;
-import com.worldcretornica.plotme_core.PlotWorldEdit;
 import com.worldcretornica.plotme_core.api.IPlayer;
 import com.worldcretornica.plotme_core.api.IServerBridge;
 import com.worldcretornica.plotme_core.bukkit.PlotMe_CorePlugin;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -56,38 +58,54 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
  * @author SBPrime
  */
 public class PlotMeCoreIntegrator implements IPlotMeIntegrator {
-    
+
     private boolean m_isEnabled;
     private PlotMe_CorePlugin m_plotMeCore;
     private PlotMeCoreManager m_manager;
     private PlotMe_Core m_core;
     private IServerBridge m_bridge;
-    private PlotWorldEdit m_worldEdit;
-    
+
+    private Object m_plotWorldEdit;
+    private Method m_setMaskMethod;
+    private Method m_removeMaskMethod;
+
     @Override
     public void updateMask(Player player) {
         if (!m_isEnabled || player == null) {
             return;
         }
-        
+
         UUID uuid = player.getUniqueId();
         IPlayer iPlayer = m_bridge.getPlayer(uuid);
         if (iPlayer == null) {
             return;
         }
-        
-        
+
         if (!m_manager.isPlotWorld(iPlayer)) {
             return;
         }
+
+        Exception e;
         
-        if (m_manager.isPlayerIgnoringWELimit(uuid)) {
-            m_worldEdit.removeMask(iPlayer);
-        } else {
-            m_worldEdit.setMask(iPlayer);
+        try {
+            if (m_manager.isPlayerIgnoringWELimit(uuid)) {
+                m_setMaskMethod.invoke(m_plotWorldEdit, iPlayer);
+            } else if (m_removeMaskMethod != null) {
+                m_removeMaskMethod.invoke(m_plotWorldEdit, iPlayer);
+            }
+            
+            return;
+        } catch (IllegalAccessException ex) {
+            e = ex;
+        } catch (IllegalArgumentException ex) {
+            e = ex;
+        } catch (InvocationTargetException ex) {
+            e = ex;
         }
+        
+        ExceptionHelper.printException(e, "Unable to update mask.");
     }
-    
+
     @Override
     public boolean initialize(Plugin instance) {
         m_isEnabled = false;
@@ -95,14 +113,41 @@ public class PlotMeCoreIntegrator implements IPlotMeIntegrator {
             m_plotMeCore = (PlotMe_CorePlugin) instance;
             m_core = m_plotMeCore.getAPI();
             m_bridge = m_core.getServerBridge();
-            m_worldEdit = m_bridge.getPlotWorldEdit();
             m_manager = m_core.getPlotMeCoreManager();
-            
+
+            m_plotWorldEdit = getPlotWorldEdit(m_bridge);
+
+            if (m_plotWorldEdit == null) {
+                AsyncWorldEditMain.log("WorldEdit method not found in IServerBridge.");
+                return false;
+            }
+
+            Class<?> plotWorldEditClass = m_plotWorldEdit.getClass();
+
+            m_setMaskMethod = plotWorldEditClass.getMethod("setMask", IPlayer.class);
+            m_removeMaskMethod = plotWorldEditClass.getMethod("removeMask", IPlayer.class);
+
             m_isEnabled = true;
         } catch (Throwable ex) {
             ExceptionHelper.printException(ex, "Error initializing PlotMe-Core integrator");
         }
-        
+
         return m_isEnabled;
+    }
+
+    /**
+     * Try to find the plotworldedit field
+     *
+     * @return
+     */
+    private Object getPlotWorldEdit(IServerBridge bridge) throws Exception {
+        Class<?> bridgeClass = bridge.getClass();
+        Method method = bridgeClass.getMethod("getPlotWorldEdit");
+
+        if (method == null) {
+            return null;
+        }                
+
+        return method.invoke(bridge, null);
     }
 }
