@@ -76,6 +76,7 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntryEx;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.FuncEx;
+import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.WorldAsyncTask;
@@ -161,7 +162,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public String getName() {
-        return m_dispatcher.performSafe(new Func<String>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<String>() {
             @Override
             public String Execute() {
                 return m_parent.getName();
@@ -171,7 +172,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public int getMaxY() {
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return m_parent.getMaxY();
@@ -181,7 +182,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public boolean isValidBlockType(final int i) {
-        return m_dispatcher.performSafe(new Func<Boolean>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Boolean>() {
             @Override
             public Boolean Execute() {
                 return m_parent.isValidBlockType(i);
@@ -191,7 +192,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public boolean usesBlockData(final int i) {
-        return m_dispatcher.performSafe(new Func<Boolean>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Boolean>() {
             @Override
             public Boolean Execute() {
                 return m_parent.usesBlockData(i);
@@ -201,7 +202,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public Mask createLiquidMask() {
-        return m_dispatcher.performSafe(new Func<Mask>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Mask>() {
             @Override
             public Mask Execute() {
                 return m_parent.createLiquidMask();
@@ -211,7 +212,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public int getBlockType(final Vector vector) {
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return m_parent.getBlockType(vector);
@@ -221,7 +222,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public int getBlockData(final Vector vector) {
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
 
             @Override
             public Integer Execute() {
@@ -395,7 +396,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public int getBlockLightLevel(final Vector vector) {
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return m_parent.getBlockLightLevel(vector);
@@ -430,7 +431,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BaseBiome getBiome(final Vector2D vd) {
-        return m_dispatcher.performSafe(new Func<BaseBiome>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBiome>() {
             @Override
             public BaseBiome Execute() {
                 return m_parent.getBiome(vd);
@@ -440,7 +441,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public WorldData getWorldData() {
-        return m_dispatcher.performSafe(new Func<WorldData>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<WorldData>() {
             @Override
             public WorldData Execute() {
                 return m_parent.getWorldData();
@@ -460,7 +461,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, location.toVector())) {
             return entityWrapper; //Return the entity erapper so WorldEdit does not complain
         }
-        
+
         Func<Entity> func = new Func<Entity>() {
             @Override
             public Entity Execute() {
@@ -592,7 +593,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public List<? extends Entity> getEntities(final Region region) {
-        return m_dispatcher.performSafe(new Func<List<? extends Entity>>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
             @Override
             public List<? extends Entity> Execute() {
                 return m_parent.getEntities(region);
@@ -602,7 +603,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public List<? extends Entity> getEntities() {
-        return m_dispatcher.performSafe(new Func<List<? extends Entity>>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
             @Override
             public List<? extends Entity> Execute() {
                 return m_parent.getEntities();
@@ -843,7 +844,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public void checkLoadedChunk(final Vector vector) {
-        m_dispatcher.performSafe(new Action() {
+        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
             @Override
             public void Execute() {
                 m_parent.checkLoadedChunk(vector);
@@ -853,7 +854,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public void fixAfterFastMode(final Iterable<BlockVector2D> itrbl) {
-        m_dispatcher.performSafe(new Action() {
+        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
             @Override
             public void Execute() {
                 m_parent.fixAfterFastMode(itrbl);
@@ -863,7 +864,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public void fixLighting(final Iterable<BlockVector2D> itrbl) {
-        m_dispatcher.performSafe(new Action() {
+        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
             @Override
             public void Execute() {
                 m_parent.fixLighting(itrbl);
@@ -923,7 +924,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public Vector getMinimumPoint() {
-        return m_dispatcher.performSafe(new Func<Vector>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
             @Override
             public Vector Execute() {
                 return m_parent.getMinimumPoint();
@@ -933,7 +934,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public Vector getMaximumPoint() {
-        return m_dispatcher.performSafe(new Func<Vector>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
             @Override
             public Vector Execute() {
                 return m_parent.getMaximumPoint();
@@ -943,7 +944,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BaseBlock getBlock(final Vector vector) {
-        return m_dispatcher.performSafe(new Func<BaseBlock>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBlock>() {
             @Override
             public BaseBlock Execute() {
                 return m_parent.getBlock(vector);
@@ -953,7 +954,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BaseBlock getLazyBlock(final Vector vector) {
-        return m_dispatcher.performSafe(new Func<BaseBlock>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBlock>() {
             @Override
             public BaseBlock Execute() {
                 return m_parent.getLazyBlock(vector);
@@ -1003,7 +1004,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public Operation commit() {
-        return m_dispatcher.performSafe(new Func<Operation>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Operation>() {
             @Override
             public Operation Execute() {
                 return m_parent.commit();

@@ -318,32 +318,33 @@ public class TaskDispatcher implements Runnable {
      * @param world
      * @param pos
      */
-    public void performSafe(Action action, World world, Vector pos) {
-        int cx = pos.getBlockX() >> 4;
-        int cz = pos.getBlockZ() >> 4;
-        String worldName = world != null ? world.getName() : null;
+    public void performSafe(Object mutex, Action action, World world, Vector pos) {
+        synchronized (mutex) {
+            int cx = pos.getBlockX() >> 4;
+            int cz = pos.getBlockZ() >> 4;
+            String worldName = world != null ? world.getName() : null;
 
-        try {
-            m_chunkWatch.add(cx, cz, worldName);
-            if (canPerform(world, cx, cz)) {
-                try {
-                    action.Execute();
-                    return;
-                } catch (Exception ex) {
-                    /*
-                     * Exception here indicates that async block get is not
-                     * available. Therefore use the queue fallback.
-                     */
-                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                            + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
-                            + ", inUse: " + world.isChunkInUse(cx, cz) + ". Error: "
-                            + ex.toString());
+            try {
+                m_chunkWatch.add(cx, cz, worldName);
+                if (canPerform(world, cx, cz)) {
+                    try {
+                        action.Execute();
+                        return;
+                    } catch (Exception ex) {
+                        /*
+                         * Exception here indicates that async block get is not
+                         * available. Therefore use the queue fallback.
+                         */
+                        AsyncWorldEditMain.log("Error performing safe operation for " + worldName
+                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
+                                + ", inUse: " + world.isChunkInUse(cx, cz) + ". Error: "
+                                + ex.toString());
+                    }
                 }
+            } finally {
+                m_chunkWatch.remove(cx, cz, worldName);
             }
-        } finally {
-            m_chunkWatch.remove(cx, cz, worldName);
         }
-
         queueFastOperation(action);
     }
 
@@ -351,41 +352,44 @@ public class TaskDispatcher implements Runnable {
      * Perform operation using a safe wrapper. If the basic operation fails
      * queue it on dispatcher
      *
+     * @param mutex
      * @param action
      * @param world
      * @param region
      */
-    public void performSafe(Action action, World world, Region region) {
-        Set<Vector2D> chunks = region.getChunks();
-        String worldName = world != null ? world.getName() : null;
+    public void performSafe(Object mutex, Action action, World world, Region region) {
+        synchronized (mutex) {
+            Set<Vector2D> chunks = region.getChunks();
+            String worldName = world != null ? world.getName() : null;
 
-        try {
-            boolean canPerform = true;
-            for (Vector2D vector : chunks) {
-                int cx = vector.getBlockX();
-                int cz = vector.getBlockZ();
-                m_chunkWatch.add(cx, cz, worldName);
-                canPerform &= canPerform(world, cx, cz);
-            }
-            if (canPerform) {
-                try {
-                    action.Execute();
-                    return;
-                } catch (Exception ex) {
-                    /*
-                     * Exception here indicates that async block get is not
-                     * available. Therefore use the queue fallback.
-                     */
-                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                            + " for region " + region.toString() + ". Error: "
-                            + ex.toString());
+            try {
+                boolean canPerform = true;
+                for (Vector2D vector : chunks) {
+                    int cx = vector.getBlockX();
+                    int cz = vector.getBlockZ();
+                    m_chunkWatch.add(cx, cz, worldName);
+                    canPerform &= canPerform(world, cx, cz);
                 }
-            }
-        } finally {
-            for (Vector2D vector : chunks) {
-                int cx = vector.getBlockX();
-                int cz = vector.getBlockZ();
-                m_chunkWatch.remove(cx, cz, worldName);
+                if (canPerform) {
+                    try {
+                        action.Execute();
+                        return;
+                    } catch (Exception ex) {
+                        /*
+                         * Exception here indicates that async block get is not
+                         * available. Therefore use the queue fallback.
+                         */
+                        AsyncWorldEditMain.log("Error performing safe operation for " + worldName
+                                + " for region " + region.toString() + ". Error: "
+                                + ex.toString());
+                    }
+                }
+            } finally {
+                for (Vector2D vector : chunks) {
+                    int cx = vector.getBlockX();
+                    int cz = vector.getBlockZ();
+                    m_chunkWatch.remove(cx, cz, worldName);
+                }
             }
         }
 
@@ -397,42 +401,45 @@ public class TaskDispatcher implements Runnable {
      * queue it on dispatcher
      *
      * @param <T>
+     * @param mutex
      * @param action
      * @param world
      * @param region
      * @return
      */
-    public <T> T performSafe(Func<T> action, World world, Region region) {
-        Set<Vector2D> chunks = region.getChunks();
-        String worldName = world != null ? world.getName() : null;
+    public <T> T performSafe(Object mutex, Func<T> action, World world, Region region) {
+        synchronized (mutex) {
+            Set<Vector2D> chunks = region.getChunks();
+            String worldName = world != null ? world.getName() : null;
 
-        try {
-            boolean canPerform = true;
-            for (Vector2D vector : chunks) {
-                int cx = vector.getBlockX();
-                int cz = vector.getBlockZ();
-                m_chunkWatch.add(cx, cz, worldName);
-                canPerform &= canPerform(world, cx, cz);
-            }
-            if (canPerform) {
-                try {
-                    T result = action.Execute();
-                    return result;
-                } catch (Exception ex) {
-                    /*
-                     * Exception here indicates that async block get is not
-                     * available. Therefore use the queue fallback.
-                     */
-                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                            + " for region " + region.toString() + ". Error: "
-                            + ex.toString());
+            try {
+                boolean canPerform = true;
+                for (Vector2D vector : chunks) {
+                    int cx = vector.getBlockX();
+                    int cz = vector.getBlockZ();
+                    m_chunkWatch.add(cx, cz, worldName);
+                    canPerform &= canPerform(world, cx, cz);
                 }
-            }
-        } finally {
-            for (Vector2D vector : chunks) {
-                int cx = vector.getBlockX();
-                int cz = vector.getBlockZ();
-                m_chunkWatch.remove(cx, cz, worldName);
+                if (canPerform) {
+                    try {
+                        T result = action.Execute();
+                        return result;
+                    } catch (Exception ex) {
+                        /*
+                         * Exception here indicates that async block get is not
+                         * available. Therefore use the queue fallback.
+                         */
+                        AsyncWorldEditMain.log("Error performing safe operation for " + worldName
+                                + " for region " + region.toString() + ". Error: "
+                                + ex.toString());
+                    }
+                }
+            } finally {
+                for (Vector2D vector : chunks) {
+                    int cx = vector.getBlockX();
+                    int cz = vector.getBlockZ();
+                    m_chunkWatch.remove(cx, cz, worldName);
+                }
             }
         }
         return queueFastOperation(action);
@@ -443,37 +450,38 @@ public class TaskDispatcher implements Runnable {
      * queue it on dispatcher
      *
      * @param <T>
+     * @param mutex
      * @param action
      * @param world
      * @param pos
      * @return
      */
-    public <T> T performSafe(Func<T> action, World world, Vector pos) {
-        int cx = pos.getBlockX() >> 4;
-        int cz = pos.getBlockZ() >> 4;
-        String worldName = world != null ? world.getName() : null;
-
-        try {
-            m_chunkWatch.add(cx, cz, worldName);
-            if (canPerform(world, cx, cz)) {
-                try {
-                    T result = action.Execute();
-                    return result;
-                } catch (Exception ex) {
-                    /*
-                     * Exception here indicates that async block get is not
-                     * available. Therefore use the queue fallback.
-                     */
-                    AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                            + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
-                            + ", inUse: " + world.isChunkInUse(cx, cz) + ". Error: "
-                            + ex.toString());
+    public <T> T performSafe(Object mutex, Func<T> action, World world, Vector pos) {
+        synchronized (mutex) {
+            int cx = pos.getBlockX() >> 4;
+            int cz = pos.getBlockZ() >> 4;
+            String worldName = world != null ? world.getName() : null;
+            try {
+                m_chunkWatch.add(cx, cz, worldName);
+                if (canPerform(world, cx, cz)) {
+                    try {
+                        T result = action.Execute();
+                        return result;
+                    } catch (Exception ex) {
+                        /*
+                         * Exception here indicates that async block get is not
+                         * available. Therefore use the queue fallback.
+                         */
+                        AsyncWorldEditMain.log("Error performing safe operation for " + worldName
+                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
+                                + ", inUse: " + world.isChunkInUse(cx, cz) + ". Error: "
+                                + ex.toString());
+                    }
                 }
+            } finally {
+                m_chunkWatch.remove(cx, cz, worldName);
             }
-        } finally {
-            m_chunkWatch.remove(cx, cz, worldName);
         }
-
         return queueFastOperation(action);
     }
 
@@ -481,19 +489,22 @@ public class TaskDispatcher implements Runnable {
      * Perform operation using a safe wrapper. If the basic operation fails
      * queue it on dispatcher
      *
+     * @param mutex
      * @param action
      */
-    public void performSafe(Action action) {
-        try {
-            action.Execute();
-            return;
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
-            AsyncWorldEditMain.log("Error performing safe operation. Error: "
-                    + ex.toString());
+    public void performSafe(Object mutex, Action action) {
+        synchronized (mutex) {
+            try {
+                action.Execute();
+                return;
+            } catch (Exception ex) {
+                /*
+                 * Exception here indicates that async block get is not
+                 * available. Therefore use the queue fallback.
+                 */
+                AsyncWorldEditMain.log("Error performing safe operation. Error: "
+                        + ex.toString());
+            }
         }
         queueFastOperation(action);
     }
@@ -503,20 +514,23 @@ public class TaskDispatcher implements Runnable {
      * queue it on dispatcher
      *
      * @param <T>
+     * @param mutex
      * @param action
      * @return
      */
-    public <T> T performSafe(Func<T> action) {
-        try {
-            T result = action.Execute();
-            return result;
-        } catch (Exception ex) {
-            /*
-             * Exception here indicates that async block get is not
-             * available. Therefore use the queue fallback.
-             */
-            AsyncWorldEditMain.log("Error performing safe operation. Error: "
-                    + ex.toString());
+    public <T> T performSafe(Object mutex, Func<T> action) {
+        synchronized (mutex) {
+            try {
+                T result = action.Execute();
+                return result;
+            } catch (Exception ex) {
+                /*
+                 * Exception here indicates that async block get is not
+                 * available. Therefore use the queue fallback.
+                 */
+                AsyncWorldEditMain.log("Error performing safe operation. Error: "
+                        + ex.toString());
+            }
         }
         return queueFastOperation(action);
     }

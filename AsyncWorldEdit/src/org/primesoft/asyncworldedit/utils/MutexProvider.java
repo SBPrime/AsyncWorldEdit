@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,39 +38,32 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.world;
+package org.primesoft.asyncworldedit.utils;
 
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.world.World;
+import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
+import org.primesoft.asyncworldedit.worldedit.world.AbstractWorldWrapper;
 
 /**
  *
- * @author prime
+ * @author SBPrime
  */
-public abstract class AbstractWorldWrapper implements World {
-    /**
-     * The parrent world
-     */
-    protected final World m_parent;
-    
-    public World getWorld() {
-        return m_parent;
+public class MutexProvider {
+    public static Object getMutex(ThreadSafeEditSession es) {
+        return es.getMutex();
     }
     
-    
-    protected AbstractWorldWrapper(World parent)
-    {
-        m_parent = parent;
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        World parent = m_parent;
-        
-        if (obj instanceof AbstractWorldWrapper)
-        {
-            obj = ((AbstractWorldWrapper)obj).m_parent;
+    public static Object getMutex(World world) {
+        if (world instanceof AbstractWorldWrapper) {
+            AbstractWorldWrapper aWorld = (AbstractWorldWrapper)world;
+            world = aWorld.getWorld();
+        }
+        if (world instanceof BukkitWorld) {
+            return ((BukkitWorld)world).getWorld();
         }
         
-        return parent.equals(obj);
+        return world;
     }
 }

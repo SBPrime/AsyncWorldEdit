@@ -76,6 +76,7 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.ThreadSafeChangeSet;
@@ -86,6 +87,7 @@ import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
  * @author SBPrime
  */
 public class ThreadSafeEditSession extends EditSessionStub {
+
     /**
      * Plugin instance
      */
@@ -148,9 +150,18 @@ public class ThreadSafeEditSession extends EditSessionStub {
     private final EditSessionEvent m_editSessionEvent;
 
     /**
+     * The mutex
+     */
+    private final Object m_mutex = new Object();
+
+    /**
      * The parent world
      */
     private final com.sk89q.worldedit.world.World m_world;
+
+    public Object getMutex() {
+        return m_mutex;
+    }
 
     public BlockPlacer getBlockPlacer() {
         return m_blockPlacer;
@@ -202,10 +213,8 @@ public class ThreadSafeEditSession extends EditSessionStub {
         m_asyncDisabled = false;
         m_jobId = -1;
     }
-    
-    
 
-    private void injectChangeSet() {        
+    private void injectChangeSet() {
         ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
                 this, "changeSetExtent", "Unable to get the changeset");
         ChangeSet changeSet = getChangeSet();
@@ -216,13 +225,12 @@ public class ThreadSafeEditSession extends EditSessionStub {
         }
 
         ChangeSet newChangeSet = new ThreadSafeChangeSet(changeSet);
-        
+
         Reflection.set(EditSession.class, this, "changeSet", newChangeSet,
                 "Unable to inject ChangeSet, undo and redo broken.");
         Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", newChangeSet,
                 "Unable to inject changeset to extent, undo and redo broken.");
     }
-
 
     @Override
     public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException {
@@ -245,7 +253,6 @@ public class ThreadSafeEditSession extends EditSessionStub {
         return r;
     }
 
-    
     public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
@@ -259,8 +266,6 @@ public class ThreadSafeEditSession extends EditSessionStub {
         return super.setBlockIfAir(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
                 BaseBlockWrapper.wrap(block, m_jobId, isAsync, m_player));
     }
-    
-    
 
     public boolean setBlock(Vector pt, Pattern pat, int jobId)
             throws MaxChangedBlocksException {
@@ -283,7 +288,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
             forceFlush();
         }
         return r;
-    }        
+    }
 
     @Override
     public boolean setBiome(Vector2D position, BaseBiome biome) {
@@ -315,15 +320,14 @@ public class ThreadSafeEditSession extends EditSessionStub {
         if (r) {
             forceFlush();
         }
-        return r;        
-    }    
+        return r;
+    }
 
     @Override
     public boolean smartSetBlock(Vector pt, BaseBlock block) {
         return super.smartSetBlock(pt, block);
     }
-    
-    
+
     @Override
     public Entity createEntity(Location location, BaseEntity entity) {
         boolean isAsync = isAsyncEnabled();
@@ -331,12 +335,11 @@ public class ThreadSafeEditSession extends EditSessionStub {
                 BaseEntityWrapper.wrap(entity, m_jobId, isAsync, m_player));
     }
 
-
     @Override
     public BaseBlock getBlock(final Vector position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<BaseBlock>() {
+        return m_dispatcher.performSafe(getWorld(), new Func<BaseBlock>() {
             @Override
             public BaseBlock Execute() {
                 return es.doGetBlock(position);
@@ -348,7 +351,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public int getBlockData(final Vector position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return es.doGetBlockData(position);
@@ -360,7 +363,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public int getBlockType(final Vector position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return es.doGetBlockType(position);
@@ -372,7 +375,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public BaseBlock getLazyBlock(final Vector position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<BaseBlock>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBlock>() {
             @Override
             public BaseBlock Execute() {
                 return es.doGetLazyBlock(position);
@@ -384,7 +387,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public BaseBiome getBiome(final Vector2D position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<BaseBiome>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBiome>() {
             @Override
             public BaseBiome Execute() {
                 return es.doGetBiome(position);
@@ -396,7 +399,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public int getBlockChangeCount() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(this), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return es.doGetBlockChangeCount();
@@ -408,7 +411,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public int getBlockChangeLimit() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(this), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return es.doGetBlockChangeLimit();
@@ -420,7 +423,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public List<Countable<Integer>> getBlockDistribution(final Region region) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<List<Countable<Integer>>>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<Countable<Integer>>>() {
             @Override
             public List<Countable<Integer>> Execute() {
                 return es.doGetBlockDistribution(region);
@@ -432,7 +435,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public List<Countable<BaseBlock>> getBlockDistributionWithData(final Region region) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<List<Countable<BaseBlock>>>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<Countable<BaseBlock>>>() {
             @Override
             public List<Countable<BaseBlock>> Execute() {
                 return es.doGetBlockDistributionWithData(region);
@@ -444,7 +447,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public List<? extends Entity> getEntities() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<List<? extends Entity>>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
             @Override
             public List<? extends Entity> Execute() {
                 return es.doGetEntities();
@@ -456,7 +459,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public List<? extends Entity> getEntities(final Region region) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<List<? extends Entity>>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
             @Override
             public List<? extends Entity> Execute() {
                 return es.doGetEntities(region);
@@ -468,20 +471,20 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public int getHighestTerrainBlock(final int x, final int z, final int minY, final int maxY) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return es.doGetHighestTerrainBlock(x, z, minY, maxY);
             }
         }, m_bukkitWorld, new Vector(x, minY, z));
     }
-        
+
     @Override
-    public int getHighestTerrainBlock(final int x, final int z, 
+    public int getHighestTerrainBlock(final int x, final int z,
             final int minY, final int maxY, final boolean naturalOnly) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
             public Integer Execute() {
                 return es.doGetHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
@@ -493,7 +496,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public Vector getMaximumPoint() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<Vector>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
             @Override
             public Vector Execute() {
                 return es.doGetMaximumPoint();
@@ -505,7 +508,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
     public Vector getMinimumPoint() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(new Func<Vector>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
             @Override
             public Vector Execute() {
                 return es.doGetMinimumPoint();
@@ -515,12 +518,13 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
     /**
      * Do not change! Requires special processing
-     * @param sess 
+     *
+     * @param sess
      */
     @Override
     public void undo(final EditSession sess) {
         final int jobId = getJobId();
-        
+
         cancelJobs(jobId);
 
         UndoProcessor.processUndo(this, this, sess);
@@ -550,9 +554,9 @@ public class ThreadSafeEditSession extends EditSessionStub {
     /**
      * Force block flush when to many has been queued
      */
-    protected void forceFlush() {        
+    protected void forceFlush() {
         int maxBlocks = ConfigProvider.getForceFlushBlocks();
-        
+
         if (isQueueEnabled() && (maxBlocks != -1)) {
             m_blocksQueued++;
             if (m_blocksQueued > maxBlocks) {
@@ -618,7 +622,8 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
     /**
      * Cancel a job
-     * @param jobId 
+     *
+     * @param jobId
      */
     protected void cancelJobs(final int jobId) {
         int minId = jobId;
