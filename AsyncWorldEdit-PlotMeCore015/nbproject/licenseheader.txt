@@ -1,0 +1,44 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
+${licensePrefix}Copyright (c) ${date?date?string("yyyy")}, SBPrime <https://github.com/SBPrime/>
+${licensePrefix}Copyright (c) AsyncWorldEdit contributors
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}All rights reserved.
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}Redistribution and use in source and binary forms, with or without
+${licensePrefix}modification, are permitted free of charge provided that the following 
+${licensePrefix}conditions are met:
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}1. Redistributions of source code must retain the above copyright notice, this
+${licensePrefix}   list of conditions and the following disclaimer. 
+${licensePrefix}2. Redistributions in binary form must reproduce the above copyright notice,
+${licensePrefix}   this list of conditions and the following disclaimer in the documentation
+${licensePrefix}   and/or other materials provided with the distribution,
+${licensePrefix}3. Redistributions of source code, with or without modification, in any form 
+${licensePrefix}   other then free of charge is not allowed,
+${licensePrefix}4. Redistributions in binary form in any form other then free of charge is 
+${licensePrefix}   not allowed.
+${licensePrefix}5. Any derived work based on or containing parts of this software must reproduce 
+${licensePrefix}   the above copyright notice, this list of conditions and the following 
+${licensePrefix}   disclaimer in the documentation and/or other materials provided with the 
+${licensePrefix}   derived work.
+${licensePrefix}6. The original author of the software is allowed to change the license 
+${licensePrefix}   terms or the entire license of the software as he sees fit.
+${licensePrefix}7. The original author of the software is allowed to sublicense the software 
+${licensePrefix}   or its parts using any license terms he sees fit.
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+${licensePrefix}ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+${licensePrefix}WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+${licensePrefix}DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+${licensePrefix}ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+${licensePrefix}(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+${licensePrefix}LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+${licensePrefix}ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+${licensePrefix}(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+${licensePrefix}SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+<#if licenseLast??>
+${licenseLast}
+</#if>
