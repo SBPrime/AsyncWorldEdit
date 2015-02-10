@@ -38,7 +38,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.primesoft.asyncworldedit.injector.scanner;
 
 import java.lang.reflect.Field;
@@ -47,32 +46,36 @@ import java.lang.reflect.Field;
  *
  * @author SBPrime
  */
-public class ClassScannerResult<T> {
-    private final T m_value;
-    
+public class ClassScannerResult {
+
     private final Object m_owner;
-    
+
     private final Field m_field;
+
+    private final Object m_value;
     
-    public  ClassScannerResult(T value, Object o, Field field)
-    {
+    private final Class<?> m_type;
+
+    public ClassScannerResult(Object value, Class<?> type, Object owner, Field field) {
+        m_owner = owner;
+        m_field = field;
         m_value = value;
-        m_owner = o;
-        m_field = field;        
+        m_type = type;
     }
-    
-    public T getValue()
-    {
+
+    public Object getOwner() {
+        return m_owner;
+    }
+
+    public Field getField() {
+        return m_field;
+    }
+
+    public Object getValue() {
         return m_value;
     }
     
-    public Object getOwner()
-    {
-        return m_owner;
-    }
-    
-    public Field getField()
-    {
-        return m_field;
+    public Class<?> getType() {
+        return m_type;
     }
 }

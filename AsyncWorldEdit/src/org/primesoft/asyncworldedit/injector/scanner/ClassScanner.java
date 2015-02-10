@@ -102,13 +102,12 @@ public class ClassScanner {
     /**
      * Scan object (and all fields) for T
      *
-     * @param <T> The type of class to find
-     * @param type The type of class to find
+     * @param types The types of classes to find
      * @param o Object to find
      * @return
      */
-    public static <T> List<ClassScannerResult<T>> scan(Class<T> type, Object o) {
-        List<ClassScannerResult<T>> result = new ArrayList<ClassScannerResult<T>>();
+    public static List<ClassScannerResult> scan(Class<?> types[], Object o) {
+        List<ClassScannerResult> result = new ArrayList<ClassScannerResult>();
         if (o == null) {
             return result;
         }
@@ -127,7 +126,7 @@ public class ClassScanner {
 
         /**
          * We do not need to check if first object (o) is of type "type" because
-         * it will by imposible to inject it anyways.
+         * it will by impossible to inject it anyways.
          */
         while (!toScan.isEmpty()) {
             ScannerQueueEntry entry = toScan.poll();
@@ -166,16 +165,20 @@ public class ClassScanner {
 
                                 classMsg = String.format("%s = %s", sField, sValue);
                             }
-                            if (type.isAssignableFrom(ct)) {
-                                if (debugOn) {
-                                    AsyncWorldEditMain.log("* F " + classMsg);
-                                }
 
-                                result.add(new ClassScannerResult<T>((T) t, f.getParent(), f.getField()));
+                            for (Class<?> type : types) {
+                                if (type.isAssignableFrom(ct)) {
+                                    if (debugOn) {
+                                        AsyncWorldEditMain.log("* F " + classMsg);
+                                    }
+
+                                    result.add(new ClassScannerResult(t, t.getClass(), f.getParent(), f.getField()));                                    
+                                    break;
+                                }
                             }
-                                                        
-                            if (!isPrimitive(ct) && !isBlackList(ct) && 
-                                    !isBlackList(cClass, f.getField())) {
+
+                            if (!isPrimitive(ct) && !isBlackList(ct)
+                                    && !isBlackList(cClass, f.getField())) {
                                 toScan.add(f);
                                 added++;
 

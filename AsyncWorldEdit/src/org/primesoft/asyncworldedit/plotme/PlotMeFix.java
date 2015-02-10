@@ -41,11 +41,8 @@
 package org.primesoft.asyncworldedit.plotme;
 
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import com.worldcretornica.plotme.PlotManager;
-import java.lang.reflect.Field;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.PlayerEntry;
