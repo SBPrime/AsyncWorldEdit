@@ -47,6 +47,6 @@ package org.primesoft.asyncworldedit.utils;
  * @param <T> Function result type
  */
 public interface Func<T> {
-    T Execute();
+    T execute();
 }
 

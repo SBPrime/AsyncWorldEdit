@@ -38,13 +38,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.playerManager;
 
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
 import java.util.HashMap;
 import java.util.UUID;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 
 /**
  *

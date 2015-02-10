@@ -62,7 +62,7 @@ public class WorldExtentFuncEntry<T>
 
     @Override
     public boolean Process(BlockPlacer bp) {        
-        T result = m_function.Execute();
+        T result = m_function.execute();
 
         if (m_worldName != null) {
             bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);

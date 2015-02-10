@@ -87,8 +87,6 @@ public class ConfigProvider {
 
     private static boolean m_logBlocks;
 
-    private static boolean m_plotMeFixEnabled;
-
     private static boolean m_debugMode;
 
     private static File m_pluginFolder;
@@ -234,14 +232,6 @@ public class ConfigProvider {
         return m_stringsFile;
     }
 
-    /**
-     * Is PlotMe Fix enabled?
-     *
-     * @return
-     */
-    public static boolean isPlotMeFixEnabled() {
-        return m_plotMeFixEnabled;
-    }
 
     /**
      * Load configuration
@@ -267,7 +257,6 @@ public class ConfigProvider {
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
         m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
-        m_plotMeFixEnabled = mainSection.getBoolean("plotMeFixEnabled", true);
         m_stringsFile = mainSection.getString("strings", "");
         m_debugMode = mainSection.getBoolean("debug", false);
         m_forceFlushBlockCount = mainSection.getInt("forceFlushBlocks", 1000);

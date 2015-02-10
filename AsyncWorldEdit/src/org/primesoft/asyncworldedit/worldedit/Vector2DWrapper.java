@@ -43,7 +43,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *

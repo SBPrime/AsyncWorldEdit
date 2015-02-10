@@ -44,7 +44,7 @@ import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.regions.Region;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;

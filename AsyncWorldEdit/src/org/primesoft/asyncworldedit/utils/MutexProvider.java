@@ -40,7 +40,6 @@
  */
 package org.primesoft.asyncworldedit.utils;
 
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.world.World;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;

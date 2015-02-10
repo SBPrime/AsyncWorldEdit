@@ -38,10 +38,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.playerManager;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
@@ -70,6 +71,10 @@ public class PlayerEntry {
         this(player, name, player.getUniqueId(), group, true);
     }
 
+    public PlayerEntry(String name, UUID uuid) {
+        this(null, name, uuid, PermissionGroup.getDefaultGroup(), false);
+    }
+    
     private PlayerEntry(Player player, String name, UUID uuid,
             PermissionGroup group, boolean canTalk) {
         m_canTalk = canTalk;

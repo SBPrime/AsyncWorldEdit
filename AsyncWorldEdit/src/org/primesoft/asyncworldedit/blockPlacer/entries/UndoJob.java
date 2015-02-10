@@ -41,7 +41,7 @@
 
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**

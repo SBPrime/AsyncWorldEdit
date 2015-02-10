@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -41,13 +41,13 @@
 package org.primesoft.asyncworldedit.plotme;
 
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 /**
  *
  * @author SBPrime
  */
-public interface IPlotMeIntegrator {
-    boolean initialize(Plugin plotMe);
-    void updateMask(Player player);
+public interface IPlotMeFix {
+    public String getName();
+    
+    public void setMask(Player entry);
 }

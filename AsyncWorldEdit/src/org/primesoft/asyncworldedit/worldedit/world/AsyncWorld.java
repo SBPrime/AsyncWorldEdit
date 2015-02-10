@@ -65,7 +65,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RegenerateEntry;
@@ -164,7 +164,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public String getName() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<String>() {
             @Override
-            public String Execute() {
+            public String execute() {
                 return m_parent.getName();
             }
         });
@@ -174,7 +174,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public int getMaxY() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return m_parent.getMaxY();
             }
         });
@@ -184,7 +184,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean isValidBlockType(final int i) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 return m_parent.isValidBlockType(i);
             }
         });
@@ -194,7 +194,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean usesBlockData(final int i) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 return m_parent.usesBlockData(i);
             }
         });
@@ -204,7 +204,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public Mask createLiquidMask() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Mask>() {
             @Override
-            public Mask Execute() {
+            public Mask execute() {
                 return m_parent.createLiquidMask();
             }
         });
@@ -214,7 +214,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public int getBlockType(final Vector vector) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return m_parent.getBlockType(vector);
             }
         }, m_bukkitWorld, vector);
@@ -225,7 +225,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
 
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return m_parent.getBlockData(vector);
             }
         }, m_bukkitWorld, vector);
@@ -267,7 +267,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         FuncEx<Boolean, WorldEditException> func = new FuncEx<Boolean, WorldEditException>() {
 
             @Override
-            public Boolean Execute() throws WorldEditException {
+            public Boolean execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
 
                 if (oldBlock.equals(newBlock)) {
@@ -288,7 +288,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -303,7 +303,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
                 if (oldBlock.getType() == i) {
                     return false;
@@ -323,7 +323,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -338,7 +338,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
                 if (oldBlock.getData() == i) {
                     return false;
@@ -355,7 +355,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             return;
         }
 
-        func.Execute();
+        func.execute();
     }
 
     @Override
@@ -370,7 +370,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
 
                 if (oldBlock.getType() == i && oldBlock.getData() == i1) {
@@ -391,14 +391,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
     public int getBlockLightLevel(final Vector vector) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return m_parent.getBlockLightLevel(vector);
             }
         }, m_bukkitWorld, vector);
@@ -416,7 +416,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 return m_parent.clearContainerBlockContents(vector);
             }
         };
@@ -426,14 +426,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
     public BaseBiome getBiome(final Vector2D vd) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBiome>() {
             @Override
-            public BaseBiome Execute() {
+            public BaseBiome execute() {
                 return m_parent.getBiome(vd);
             }
         }, m_bukkitWorld, new Vector(vd.getX(), 0, vd.getZ()));
@@ -443,7 +443,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public WorldData getWorldData() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<WorldData>() {
             @Override
-            public WorldData Execute() {
+            public WorldData execute() {
                 return m_parent.getWorldData();
             }
         });
@@ -464,7 +464,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Func<Entity> func = new Func<Entity>() {
             @Override
-            public Entity Execute() {
+            public Entity execute() {
                 Entity result = m_parent.createEntity(location, entity);
 
                 if (result != null) {
@@ -482,7 +482,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             return entityWrapper;
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -500,7 +500,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 return m_parent.setBiome(v, biome);
             }
         };
@@ -510,7 +510,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntry(this, paramBiome.getJobId(), tmpV, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -525,7 +525,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Action func = new Action() {
             @Override
-            public void Execute() {
+            public void execute() {
                 m_parent.dropItem(v, bis, i);
             }
         };
@@ -536,7 +536,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             return;
         }
 
-        func.Execute();
+        func.execute();
     }
 
     @Override
@@ -551,7 +551,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Action func = new Action() {
             @Override
-            public void Execute() {
+            public void execute() {
                 m_parent.dropItem(v, bis);
             }
         };
@@ -562,7 +562,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             return;
         }
 
-        func.Execute();
+        func.execute();
     }
 
     @Override
@@ -577,7 +577,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Action func = new Action() {
             @Override
-            public void Execute() {
+            public void execute() {
                 m_parent.simulateBlockMine(v);
             }
         };
@@ -588,14 +588,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
             return;
         }
 
-        func.Execute();
+        func.execute();
     }
 
     @Override
     public List<? extends Entity> getEntities(final Region region) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
             @Override
-            public List<? extends Entity> Execute() {
+            public List<? extends Entity> execute() {
                 return m_parent.getEntities(region);
             }
         });
@@ -605,7 +605,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public List<? extends Entity> getEntities() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
             @Override
-            public List<? extends Entity> Execute() {
+            public List<? extends Entity> execute() {
                 return m_parent.getEntities();
             }
         });
@@ -704,7 +704,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() throws MaxChangedBlocksException {
+            public Boolean execute() throws MaxChangedBlocksException {
                 return m_parent.generateTree(tt, es, v);
             }
         };
@@ -714,7 +714,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -729,7 +729,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() throws MaxChangedBlocksException {
+            public Boolean execute() throws MaxChangedBlocksException {
                 return m_parent.generateTree(es, v);
             }
         };
@@ -739,7 +739,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -754,7 +754,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() throws MaxChangedBlocksException {
+            public Boolean execute() throws MaxChangedBlocksException {
                 return m_parent.generateBigTree(es, v);
             }
         };
@@ -764,7 +764,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -779,7 +779,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() throws MaxChangedBlocksException {
+            public Boolean execute() throws MaxChangedBlocksException {
                 return m_parent.generateBirchTree(es, v);
             }
         };
@@ -789,7 +789,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -804,7 +804,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() throws MaxChangedBlocksException {
+            public Boolean execute() throws MaxChangedBlocksException {
                 return m_parent.generateRedwoodTree(es, v);
             }
         };
@@ -814,7 +814,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -829,7 +829,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         FuncEx<Boolean, MaxChangedBlocksException> func = new FuncEx<Boolean, MaxChangedBlocksException>() {
             @Override
-            public Boolean Execute() throws MaxChangedBlocksException {
+            public Boolean execute() throws MaxChangedBlocksException {
                 return m_parent.generateTallRedwoodTree(es, v);
             }
         };
@@ -839,14 +839,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
     public void checkLoadedChunk(final Vector vector) {
         m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
             @Override
-            public void Execute() {
+            public void execute() {
                 m_parent.checkLoadedChunk(vector);
             }
         }, m_bukkitWorld, vector);
@@ -856,7 +856,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public void fixAfterFastMode(final Iterable<BlockVector2D> itrbl) {
         m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
             @Override
-            public void Execute() {
+            public void execute() {
                 m_parent.fixAfterFastMode(itrbl);
             }
         });
@@ -866,7 +866,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public void fixLighting(final Iterable<BlockVector2D> itrbl) {
         m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
             @Override
-            public void Execute() {
+            public void execute() {
                 m_parent.fixLighting(itrbl);
             }
         });
@@ -884,7 +884,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 return m_parent.playEffect(v, i, i1);
             }
         };
@@ -894,7 +894,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
@@ -909,7 +909,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         Func<Boolean> func = new Func<Boolean>() {
             @Override
-            public Boolean Execute() {
+            public Boolean execute() {
                 return m_parent.queueBlockBreakEffect(pltform, v, i, d);
             }
         };
@@ -919,14 +919,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntry(this, param.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
     public Vector getMinimumPoint() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
             @Override
-            public Vector Execute() {
+            public Vector execute() {
                 return m_parent.getMinimumPoint();
             }
         });
@@ -936,7 +936,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public Vector getMaximumPoint() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
             @Override
-            public Vector Execute() {
+            public Vector execute() {
                 return m_parent.getMaximumPoint();
             }
         });
@@ -946,7 +946,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public BaseBlock getBlock(final Vector vector) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBlock>() {
             @Override
-            public BaseBlock Execute() {
+            public BaseBlock execute() {
                 return m_parent.getBlock(vector);
             }
         }, m_bukkitWorld, vector);
@@ -956,7 +956,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public BaseBlock getLazyBlock(final Vector vector) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBlock>() {
             @Override
-            public BaseBlock Execute() {
+            public BaseBlock execute() {
                 return m_parent.getLazyBlock(vector);
             }
         }, m_bukkitWorld, vector);
@@ -978,7 +978,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         FuncEx<Boolean, WorldEditException> func = new FuncEx<Boolean, WorldEditException>() {
 
             @Override
-            public Boolean Execute() throws WorldEditException {
+            public Boolean execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(vector);
 
                 if (oldBlock.equals(newBlock)) {
@@ -999,14 +999,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
                     new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));
         }
 
-        return func.Execute();
+        return func.execute();
     }
 
     @Override
     public Operation commit() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Operation>() {
             @Override
-            public Operation Execute() {
+            public Operation execute() {
                 return m_parent.commit();
             }
         });

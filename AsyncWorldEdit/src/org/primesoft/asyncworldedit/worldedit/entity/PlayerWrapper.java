@@ -60,8 +60,8 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.PlayerEntry;
-import org.primesoft.asyncworldedit.PlayerManager;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.utils.Pair;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 

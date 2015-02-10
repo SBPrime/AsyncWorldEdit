@@ -43,7 +43,7 @@ package org.primesoft.asyncworldedit.commands;
 import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.strings.MessageType;
 

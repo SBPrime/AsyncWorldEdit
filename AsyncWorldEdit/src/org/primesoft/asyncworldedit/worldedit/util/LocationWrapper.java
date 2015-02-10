@@ -44,7 +44,7 @@ package org.primesoft.asyncworldedit.worldedit.util;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.util.Location;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
 

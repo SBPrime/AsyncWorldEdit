@@ -42,7 +42,7 @@
 package org.primesoft.asyncworldedit.worldedit.world.biome;
 
 import com.sk89q.worldedit.world.biome.BaseBiome;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**

@@ -41,7 +41,7 @@
 
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *

@@ -95,7 +95,7 @@ public class WorldeditIntegrator {
         m_oldEditSessionFactory = m_worldEdit.getEditSessionFactory();
         m_oldSessions = m_worldEdit.getSessionManager();
 
-        Reflection.set(m_worldEdit, "editSessionFactory", new AsyncEditSessionFactory(m_parent, m_worldEdit.getEventBus()),
+        Reflection.set(m_worldEdit, "editSessionFactory", new AsyncEditSessionFactory(worldEditPlugin, m_parent, m_worldEdit.getEventBus()),
                 "Unable to inject edit session factory");
 
         m_platformManager = m_worldEdit.getPlatformManager();

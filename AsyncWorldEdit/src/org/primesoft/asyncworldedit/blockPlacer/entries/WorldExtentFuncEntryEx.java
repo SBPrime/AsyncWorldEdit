@@ -69,7 +69,7 @@ public class WorldExtentFuncEntryEx<T, TException extends Exception>
         T funcResult;
 
         try {
-            funcResult = m_function.Execute();
+            funcResult = m_function.execute();
         } catch (Exception ex) {
             ExceptionHelper.printException(ex, "Error while processing extent function.");
             return false;

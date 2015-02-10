@@ -40,6 +40,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import me.confuser.barapi.BarAPI;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;

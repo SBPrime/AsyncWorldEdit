@@ -70,7 +70,7 @@ import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.*;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
@@ -341,7 +341,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(getWorld(), new Func<BaseBlock>() {
             @Override
-            public BaseBlock Execute() {
+            public BaseBlock execute() {
                 return es.doGetBlock(position);
             }
         }, m_bukkitWorld, position);
@@ -353,7 +353,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return es.doGetBlockData(position);
             }
         }, m_bukkitWorld, position);
@@ -365,7 +365,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return es.doGetBlockType(position);
             }
         }, m_bukkitWorld, position);
@@ -377,7 +377,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBlock>() {
             @Override
-            public BaseBlock Execute() {
+            public BaseBlock execute() {
                 return es.doGetLazyBlock(position);
             }
         }, m_bukkitWorld, position);
@@ -389,7 +389,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBiome>() {
             @Override
-            public BaseBiome Execute() {
+            public BaseBiome execute() {
                 return es.doGetBiome(position);
             }
         }, m_bukkitWorld, new Vector(position.getX(), 0, position.getZ()));
@@ -401,7 +401,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(this), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return es.doGetBlockChangeCount();
             }
         });
@@ -413,7 +413,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(this), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return es.doGetBlockChangeLimit();
             }
         });
@@ -425,7 +425,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<Countable<Integer>>>() {
             @Override
-            public List<Countable<Integer>> Execute() {
+            public List<Countable<Integer>> execute() {
                 return es.doGetBlockDistribution(region);
             }
         }, m_bukkitWorld, region);
@@ -437,7 +437,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<Countable<BaseBlock>>>() {
             @Override
-            public List<Countable<BaseBlock>> Execute() {
+            public List<Countable<BaseBlock>> execute() {
                 return es.doGetBlockDistributionWithData(region);
             }
         }, m_bukkitWorld, region);
@@ -449,7 +449,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
             @Override
-            public List<? extends Entity> Execute() {
+            public List<? extends Entity> execute() {
                 return es.doGetEntities();
             }
         });
@@ -461,7 +461,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
             @Override
-            public List<? extends Entity> Execute() {
+            public List<? extends Entity> execute() {
                 return es.doGetEntities(region);
             }
         }, m_bukkitWorld, region);
@@ -473,7 +473,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return es.doGetHighestTerrainBlock(x, z, minY, maxY);
             }
         }, m_bukkitWorld, new Vector(x, minY, z));
@@ -486,7 +486,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
             @Override
-            public Integer Execute() {
+            public Integer execute() {
                 return es.doGetHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
             }
         }, m_bukkitWorld, new Vector(x, minY, z));
@@ -498,7 +498,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
             @Override
-            public Vector Execute() {
+            public Vector execute() {
                 return es.doGetMaximumPoint();
             }
         });
@@ -510,7 +510,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
             @Override
-            public Vector Execute() {
+            public Vector execute() {
                 return es.doGetMinimumPoint();
             }
         });

@@ -49,7 +49,7 @@ import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.strings.MessageType;
@@ -937,7 +937,7 @@ public class BlockPlacer {
      * @param jobName
      * @param action
      */
-    public void PerformAsAsyncJob(final ThreadSafeEditSession editSession,
+    public void performAsAsyncJob(final ThreadSafeEditSession editSession,
             final PlayerEntry player, final String jobName,
             final FuncParamEx<Integer, CancelabeEditSession, MaxChangedBlocksException> action) {
         final int jobId = getJobId(player);
@@ -949,7 +949,7 @@ public class BlockPlacer {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        return action.Execute(session);
+                        return action.execute(session);
                     }
                 });
     }

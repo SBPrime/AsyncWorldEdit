@@ -42,7 +42,7 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import java.util.UUID;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *

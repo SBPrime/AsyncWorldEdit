@@ -40,6 +40,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.commands.Commands;
 import org.primesoft.asyncworldedit.strings.MessageType;
 

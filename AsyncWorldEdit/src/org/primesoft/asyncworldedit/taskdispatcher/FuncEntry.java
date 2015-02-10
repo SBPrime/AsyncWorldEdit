@@ -66,6 +66,6 @@ public class FuncEntry<T> extends BaseDispatcherEntry {
 
     @Override
     public void Execute() {
-        m_result = m_action.Execute();
+        m_result = m_action.execute();
     }
 }

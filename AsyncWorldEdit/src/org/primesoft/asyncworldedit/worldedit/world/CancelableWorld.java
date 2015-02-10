@@ -62,7 +62,7 @@ import com.sk89q.worldedit.world.registry.WorldData;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 import org.primesoft.asyncworldedit.worldedit.BlockVector2DWrapper;

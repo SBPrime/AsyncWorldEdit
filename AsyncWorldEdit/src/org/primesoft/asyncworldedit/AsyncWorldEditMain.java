@@ -40,7 +40,8 @@
  */
 package org.primesoft.asyncworldedit;
 
-import org.primesoft.asyncworldedit.plotme.PlotMeFix;
+import org.primesoft.asyncworldedit.playerManager.PlayerManager;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -62,6 +63,8 @@ import org.primesoft.asyncworldedit.injector.InjectorBukkit;
 import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
+import org.primesoft.asyncworldedit.plotme.IPlotMeFix;
+import org.primesoft.asyncworldedit.plotme.NullFix;
 import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -87,7 +90,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
     private BlockPlacer m_blockPlacer;
     private TaskDispatcher m_dispatcher;
     private WorldeditIntegrator m_weIntegrator;
-    private PlotMeFix m_plotMeFix;
+    private IPlotMeFix m_plotMeFix;
     private final PlayerManager m_playerManager = new PlayerManager(this);
     private BarAPIntegrator m_barApi;
     private InjectorCore m_aweInjector;
@@ -104,8 +107,18 @@ public class AsyncWorldEditMain extends JavaPlugin {
         return m_chunkWatch;
     }
 
-    public PlotMeFix getPlotMeFix() {
+    public IPlotMeFix getPlotMeFix() {
         return m_plotMeFix;
+    }
+    
+    public void setPlotMeFix(IPlotMeFix plotMeFix) {
+        if (plotMeFix == null){
+            plotMeFix = new NullFix();
+        }
+        
+        
+        log("PlotMeFix set to " + plotMeFix.getClass());
+        m_plotMeFix = plotMeFix;
     }
 
     public BlockPlacer getBlockPlacer() {
@@ -191,7 +204,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
         m_dispatcher = new TaskDispatcher(this);
-        m_plotMeFix = new PlotMeFix(this);
+        setPlotMeFix(new NullFix());
 
         m_aweInjector = getAWEInjector(this);
         m_aweInjector.setClassFactory(new AsyncClassFactory(this));

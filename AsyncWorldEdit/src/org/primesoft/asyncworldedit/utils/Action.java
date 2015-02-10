@@ -46,5 +46,5 @@ package org.primesoft.asyncworldedit.utils;
  * @author SBPrime
  */
 public interface Action {
-    void Execute();
+    void execute();
 }

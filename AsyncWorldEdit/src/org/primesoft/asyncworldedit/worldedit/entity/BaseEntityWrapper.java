@@ -42,7 +42,7 @@ package org.primesoft.asyncworldedit.worldedit.entity;
 
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.entity.BaseEntity;
-import org.primesoft.asyncworldedit.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**

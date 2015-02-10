@@ -44,7 +44,17 @@ package org.primesoft.asyncworldedit.utils;
 /**
  *
  * @author SBPrime
+ * @param <TResult>
+ * @param <TParam>
+ * @param <TException>
  */
 public interface FuncParamEx<TResult, TParam, TException extends Exception> {
-    TResult Execute(TParam param) throws TException;
+
+    /**
+     *
+     * @param param
+     * @return
+     * @throws TException
+     */
+    TResult execute(TParam param) throws TException;
 }

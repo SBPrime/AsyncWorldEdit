@@ -268,7 +268,7 @@ public class TaskDispatcher implements Runnable {
     private <T> T queueFastOperation(Func<T> action) {
         FuncEntry<T> getBlock = new FuncEntry<T>(action);
         if (isMainTask()) {
-            return action.Execute();
+            return action.execute();
         }
 
         final Object mutex = getBlock.getMutex();
@@ -293,7 +293,7 @@ public class TaskDispatcher implements Runnable {
     private void queueFastOperation(Action action) {
         ActionEntry actionEntry = new ActionEntry(action);
         if (isMainTask()) {
-            action.Execute();
+            action.execute();
             return;
         }
 
@@ -328,7 +328,7 @@ public class TaskDispatcher implements Runnable {
                 m_chunkWatch.add(cx, cz, worldName);
                 if (canPerform(world, cx, cz)) {
                     try {
-                        action.Execute();
+                        action.execute();
                         return;
                     } catch (Exception ex) {
                         /*
@@ -372,7 +372,7 @@ public class TaskDispatcher implements Runnable {
                 }
                 if (canPerform) {
                     try {
-                        action.Execute();
+                        action.execute();
                         return;
                     } catch (Exception ex) {
                         /*
@@ -422,7 +422,7 @@ public class TaskDispatcher implements Runnable {
                 }
                 if (canPerform) {
                     try {
-                        T result = action.Execute();
+                        T result = action.execute();
                         return result;
                     } catch (Exception ex) {
                         /*
@@ -465,7 +465,7 @@ public class TaskDispatcher implements Runnable {
                 m_chunkWatch.add(cx, cz, worldName);
                 if (canPerform(world, cx, cz)) {
                     try {
-                        T result = action.Execute();
+                        T result = action.execute();
                         return result;
                     } catch (Exception ex) {
                         /*
@@ -495,7 +495,7 @@ public class TaskDispatcher implements Runnable {
     public void performSafe(Object mutex, Action action) {
         synchronized (mutex) {
             try {
-                action.Execute();
+                action.execute();
                 return;
             } catch (Exception ex) {
                 /*
@@ -521,7 +521,7 @@ public class TaskDispatcher implements Runnable {
     public <T> T performSafe(Object mutex, Func<T> action) {
         synchronized (mutex) {
             try {
-                T result = action.Execute();
+                T result = action.execute();
                 return result;
             } catch (Exception ex) {
                 /*
