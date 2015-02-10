@@ -23,8 +23,6 @@ awe:
   checkVersion: true
   #Disable or enable blocks physics freeze when placing blocks
   physicsFreez: true
-  #Enable PlotMe Global Mask Fix
-  plotMeFixEnabled: true
   #File containing all the messages
   strings: "english.yml"
   #Show debug messages
