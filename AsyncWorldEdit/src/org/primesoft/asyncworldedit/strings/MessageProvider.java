@@ -41,6 +41,11 @@
 package org.primesoft.asyncworldedit.strings;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.Stack;
@@ -49,7 +54,9 @@ import java.util.regex.Pattern;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.Pair;
 
 /**
@@ -69,30 +76,155 @@ public class MessageProvider {
     public final static HashMap<String, String> s_messages = new HashMap<String, String>();
 
     /**
+     * The loaded default texts
+     */
+    public final static HashMap<String, String> s_default = new HashMap<String, String>();
+
+    /**
+     * Save english.yml to plugins folder
+     *
+     * @param plugin
+     * @return
+     */
+    public static boolean saveDefault(JavaPlugin plugin) {
+        File pluginFolder = ConfigProvider.getPluginFolder();
+
+        if (!pluginFolder.canRead()) {
+            return false;
+        }
+
+        File english = new File(pluginFolder, "english.yml");
+
+        if (english.exists()) {
+            return true;
+        }
+
+        if (!pluginFolder.canWrite()) {
+            return false;
+        }
+
+        InputStream input = null;
+        FileOutputStream output = null;
+
+        try {
+            if (!english.createNewFile()) {
+                return false;
+            }
+
+            input = plugin.getClass().getResourceAsStream("/english.yml");
+            if (input == null) {
+                return false;
+            }
+
+            output = new FileOutputStream(english.getAbsoluteFile());
+
+            byte[] buf = new byte[4096];
+            int readBytes = 0;
+
+            while ((readBytes = input.read(buf)) > 0) {
+                output.write(buf, 0, readBytes);
+            }
+        } catch (IOException ex) {
+            ExceptionHelper.printException(ex, "Unable to extract default strings file.");
+            return false;
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException ex) {
+                    //Ignore close error
+                }
+            }
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException ex) {
+                    //Ignore close error
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Initialise the default strings
+     *
+     * @return
+     */
+    public static boolean loadDefault(JavaPlugin plugin) {
+        InputStream is = null;
+        try {
+            is = plugin.getClass().getResourceAsStream("/english.yml");
+            if (is == null) {
+                return false;
+            }
+            return loadFile(is, s_default);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    //Ignore close error
+                }
+            }
+        }
+    }
+
+    /**
      * Load the message file
      *
      * @param file
      * @return
      */
     public static boolean loadFile(String file) {
-        s_messages.clear();
         if (file == null || file.length() == 0) {
             return false;
         }
-
         File f = new File(ConfigProvider.getPluginFolder(), file);
         if (!f.exists() || !f.canRead()) {
             return false;
         }
+
+        InputStream is = null;
+        try {
+            is = new FileInputStream(f);
+
+            return loadFile(is, s_messages);
+        } catch (IOException ex) {
+            ExceptionHelper.printException(ex, "Unable to load strings file.");
+            return false;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    //Ignore close error
+                }
+            }
+        }
+    }
+
+    /**
+     * Load the message file
+     *
+     * @param file
+     * @param messages
+     * @return
+     */
+    private static boolean loadFile(InputStream f, HashMap<String, String> messages) {
+        if (f == null || messages == null) {
+            return false;
+        }
+        messages.clear();
 
         Configuration strings = YamlConfiguration.loadConfiguration(f);
         if (strings == null) {
             return false;
         }
 
-        synchronized (s_messages) {
+        synchronized (messages) {
             for (String s : strings.getKeys(false)) {
-                s_messages.put(s.toLowerCase(), format(strings.get(s).toString()));
+                messages.put(s.toLowerCase(), format(strings.get(s).toString()));
             }
         }
         return true;
@@ -112,8 +244,8 @@ public class MessageProvider {
         Matcher m = PATTERN_COLLOR.matcher(t);
         Stack<Pair<Integer, Integer>> entries = new Stack<Pair<Integer, Integer>>();
         while (m.find()) {
-            int start = m.start();            
-            if (start == 0 || t.charAt(start - 1) != '\\') {                
+            int start = m.start();
+            if (start == 0 || t.charAt(start - 1) != '\\') {
                 entries.push(new Pair<Integer, Integer>(start, m.end()));
             }
         }
@@ -138,12 +270,12 @@ public class MessageProvider {
 
     /**
      * Get chat color code from string
+     *
      * @param s
-     * @return 
+     * @return
      */
     private static String getColor(String s) {
-        if (s == null || s.length() < 2)
-        {
+        if (s == null || s.length() < 2) {
             return "";
         }
         try {
@@ -171,11 +303,13 @@ public class MessageProvider {
             message = s_messages.get(key);
         }
         if (message == null) {
-            message = messageType.getDefault();
+            synchronized (s_default) {
+                message = s_default.get(key);
+            }
         }
-
+        
         if (message == null) {
-            return "";
+            return key;
         }
 
         try {
