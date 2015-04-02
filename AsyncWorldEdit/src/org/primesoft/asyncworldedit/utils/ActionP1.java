@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,29 +38,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sk89q.worldedit;
 
-import com.sk89q.worldedit.event.extent.EditSessionEvent;
-import com.sk89q.worldedit.extent.inventory.BlockBag;
-import com.sk89q.worldedit.history.change.Change;
-import com.sk89q.worldedit.util.eventbus.EventBus;
-import com.sk89q.worldedit.world.World;
-import javax.annotation.Nullable;
+package org.primesoft.asyncworldedit.utils;
 
 /**
- * Stub class to allow access to package visible constructor
  *
  * @author SBPrime
+ * @param <T>
  */
-public abstract class EditSessionStub extends EditSession {
-    public EditSessionStub(EventBus eventBus, World world, int maxBlocks,
-            @Nullable BlockBag blockBag, EditSessionEvent event) {
-        super(eventBus, world, maxBlocks, blockBag, event);
-    }
-    
-    /**
-     * Perform a custom action
-     * @param change
-     */
-    public abstract void doCustomAction(Change change) throws WorldEditException;
+public interface ActionP1<T> {
+    void execute(T param);
 }

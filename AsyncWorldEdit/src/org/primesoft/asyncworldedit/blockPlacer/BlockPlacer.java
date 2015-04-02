@@ -280,7 +280,7 @@ public class BlockPlacer {
     }
 
     /**
-     * Process queued blocks
+     * process queued blocks
      *
      * @param playerUUID players to process
      * @param maxTime maximum time spend placing blocks
@@ -307,7 +307,7 @@ public class BlockPlacer {
             }
 
             if (entry != null) {
-                entry.Process(this);
+                entry.process(this);
                 blocks++;
 
                 process = !entry.isDemanding(); //Allow only one demanding task

@@ -68,7 +68,7 @@ public class RegenerateEntry extends BlockPlacerEntry {
     }
 
     @Override
-    public boolean Process(BlockPlacer bp) {
+    public boolean process(BlockPlacer bp) {
         try {
             m_world.regenerateChunk(m_chunk.getBlockX(), m_chunk.getBlockZ());
             return true;

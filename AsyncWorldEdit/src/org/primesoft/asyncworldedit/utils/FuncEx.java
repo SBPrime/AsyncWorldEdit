@@ -44,6 +44,8 @@ package org.primesoft.asyncworldedit.utils;
 /**
  *
  * @author SBPrime
+ * @param <T> The function result type
+ * @param <TException> The function exception
  */
 
 public interface FuncEx<T, TException extends Exception> {

@@ -58,7 +58,8 @@ public abstract class AsyncTask extends BaseTask {
     }
 
     @Override
-    protected Object doRun() throws MaxChangedBlocksException {
+    protected Object doRun() throws MaxChangedBlocksException, IllegalArgumentException
+    {
         return task(m_cancelableEditSession);
     }
 

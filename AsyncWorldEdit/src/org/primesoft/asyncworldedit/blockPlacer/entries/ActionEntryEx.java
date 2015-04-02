@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,29 +38,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sk89q.worldedit;
+package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import com.sk89q.worldedit.event.extent.EditSessionEvent;
-import com.sk89q.worldedit.extent.inventory.BlockBag;
-import com.sk89q.worldedit.history.change.Change;
-import com.sk89q.worldedit.util.eventbus.EventBus;
-import com.sk89q.worldedit.world.World;
-import javax.annotation.Nullable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.utils.Action;
+import org.primesoft.asyncworldedit.utils.ActionEx;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
- * Stub class to allow access to package visible constructor
  *
  * @author SBPrime
+ * @param <TException>
  */
-public abstract class EditSessionStub extends EditSession {
-    public EditSessionStub(EventBus eventBus, World world, int maxBlocks,
-            @Nullable BlockBag blockBag, EditSessionEvent event) {
-        super(eventBus, world, maxBlocks, blockBag, event);
-    }
-    
+public class ActionEntryEx<TException extends Exception> extends BlockPlacerEntry {
+
     /**
-     * Perform a custom action
-     * @param change
+     * The action
      */
-    public abstract void doCustomAction(Change change) throws WorldEditException;
+    private final ActionEx<TException> m_action;
+
+    public ActionEntryEx(int jobId, ActionEx<TException> action) {
+        super(jobId);
+
+        m_action = action;
+    }
+
+    @Override
+    public boolean isDemanding() {
+        return true;
+    }
+
+    @Override
+    public boolean process(BlockPlacer bp) {
+        try {
+            m_action.execute();
+
+            return true;
+        } catch (Exception ex) {
+            ExceptionHelper.printException(ex, "Error while processing extent function.");
+            return false;
+        }
+    }
+
 }

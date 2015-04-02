@@ -61,7 +61,7 @@ public class WorldExtentActionEntry
     }
 
     @Override
-    public boolean Process(BlockPlacer bp) {
+    public boolean process(BlockPlacer bp) {
         m_function.execute();
 
         if (m_worldName != null) {

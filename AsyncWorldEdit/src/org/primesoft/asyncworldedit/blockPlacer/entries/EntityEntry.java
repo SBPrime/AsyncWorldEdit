@@ -87,7 +87,7 @@ public class EntityEntry extends BlockPlacerEntry {
     }
 
     @Override
-    public boolean Process(BlockPlacer bp) {
+    public boolean process(BlockPlacer bp) {
         synchronized (m_clipboard) {
             Object old = CuboidClipboardWrapper.getEntities(m_clipboard);
             CuboidClipboardWrapper.setEntities(m_clipboard, m_data);

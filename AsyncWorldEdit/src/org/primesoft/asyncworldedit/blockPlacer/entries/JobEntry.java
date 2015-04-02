@@ -292,7 +292,7 @@ public class JobEntry extends BlockPlacerEntry {
     }
 
     @Override
-    public boolean Process(BlockPlacer bp) {
+    public boolean process(BlockPlacer bp) {
         final PlayerEntry player = m_player;
 
         switch (m_status) {

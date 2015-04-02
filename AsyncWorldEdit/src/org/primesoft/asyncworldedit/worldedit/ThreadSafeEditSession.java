@@ -55,6 +55,7 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.patterns.Pattern;
@@ -66,15 +67,21 @@ import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.*;
+import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
+import org.primesoft.asyncworldedit.utils.Action;
+import org.primesoft.asyncworldedit.utils.ActionEx;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -301,7 +308,40 @@ public class ThreadSafeEditSession extends EditSessionStub {
         return r;
     }
 
+    /**
+     * Perform a custom action
+     *     
+     * @throws com.sk89q.worldedit.WorldEditException
+     */
     @Override
+    public void doCustomAction(final Change change) throws WorldEditException
+    {
+        final boolean isAsync = isAsyncEnabled();
+        final ChangeSet cs = getChangeSet();               
+        final UndoContext undoContext = new UndoContext();
+        undoContext.setExtent(this);
+                
+        final ActionEx<WorldEditException> action = new ActionEx<WorldEditException>() {
+            @Override
+            public void execute() throws WorldEditException {
+                cs.add(change);
+                change.redo(undoContext);
+            }
+        };
+
+        if (!isAsync) {
+            action.execute();
+
+            return;
+        }
+
+        BlockPlacerEntry entry = new ActionEntryEx(m_jobId, action);
+
+        m_blockPlacer.addTasks(m_player, entry);
+    }
+
+    @Override
+
     public boolean setBlock(Vector position, BaseBlock block) throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
         boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),

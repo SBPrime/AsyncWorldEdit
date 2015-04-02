@@ -65,7 +65,7 @@ public class WorldExtentFuncEntryEx<T, TException extends Exception>
     }
 
     @Override
-    public boolean Process(BlockPlacer bp) {
+    public boolean process(BlockPlacer bp) {
         T funcResult;
 
         try {

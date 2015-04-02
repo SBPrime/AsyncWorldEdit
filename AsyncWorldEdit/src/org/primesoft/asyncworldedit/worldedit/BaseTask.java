@@ -170,7 +170,7 @@ public abstract class BaseTask implements Runnable {
         }
     }
 
-    protected abstract Object doRun() throws MaxChangedBlocksException;
+    protected abstract Object doRun() throws MaxChangedBlocksException, IllegalArgumentException;
 
     protected abstract void doPostRun(Object result);
 

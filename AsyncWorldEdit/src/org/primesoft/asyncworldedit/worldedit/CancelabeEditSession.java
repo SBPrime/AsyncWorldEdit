@@ -48,6 +48,8 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.history.UndoContext;
+import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
@@ -56,8 +58,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.utils.ActionEx;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
@@ -69,6 +74,7 @@ import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
  * @author SBPrime
  */
 public class CancelabeEditSession extends EditSessionStub {
+
     private final ThreadSafeEditSession m_parent;
 
     private final CancelableWorld m_cWorld;
@@ -81,8 +87,7 @@ public class CancelabeEditSession extends EditSessionStub {
      * Number of queued blocks
      */
     private int m_blocksQueued;
-    
-    
+
     public CancelabeEditSession(ThreadSafeEditSession parent, Mask mask, int jobId) {
         super(parent.getEventBus(),
                 new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
@@ -98,8 +103,7 @@ public class CancelabeEditSession extends EditSessionStub {
         setMask(mask);
     }
 
-    
-    private void injectChangeSet(ChangeSet changeSet) {        
+    private void injectChangeSet(ChangeSet changeSet) {
         ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
                 this, "changeSetExtent", "Unable to get the changeset");
 
@@ -197,6 +201,37 @@ public class CancelabeEditSession extends EditSessionStub {
         }
 
         return m_parent.rawGetBlock(pt);
+    }
+
+    
+    /**
+     * Perform a custom action
+     *
+     * @throws com.sk89q.worldedit.WorldEditException
+     */
+    @Override
+    public void doCustomAction(final Change change) throws WorldEditException
+    {
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        
+        final ChangeSet cs = getChangeSet();        
+        final UndoContext undoContext = new UndoContext();
+        undoContext.setExtent(this);
+        
+        
+        final ActionEx<WorldEditException> action = new ActionEx<WorldEditException>() {
+            @Override
+            public void execute() throws WorldEditException {
+                cs.add(change);
+                change.redo(undoContext);
+            }
+        };
+
+        BlockPlacerEntry entry = new ActionEntryEx(m_jobId, action);
+
+        m_parent.getBlockPlacer().addTasks(m_player, entry);
     }
 
     @Override
@@ -313,7 +348,7 @@ public class CancelabeEditSession extends EditSessionStub {
      */
     private void forceFlush() {
         int maxBlocks = ConfigProvider.getForceFlushBlocks();
-                
+
         if (isQueueEnabled() && (maxBlocks != -1)) {
             m_blocksQueued++;
             if (m_blocksQueued > maxBlocks) {

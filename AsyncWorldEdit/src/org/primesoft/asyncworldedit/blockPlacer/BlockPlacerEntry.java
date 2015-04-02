@@ -75,9 +75,9 @@ public abstract class BlockPlacerEntry {
     
     
     /**
-     * Process the entry
+     * process the entry
      * @param bp
      * @return true if operation was successful
      */
-    public abstract boolean Process(BlockPlacer bp);
+    public abstract boolean process(BlockPlacer bp);
 }
