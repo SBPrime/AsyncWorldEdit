@@ -53,6 +53,7 @@ import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.ChunkWatch;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.Action;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.Func;
 
 /**
@@ -335,10 +336,10 @@ public class TaskDispatcher implements Runnable {
                          * Exception here indicates that async block get is not
                          * available. Therefore use the queue fallback.
                          */
-                        AsyncWorldEditMain.log("Error performing safe operation for " + worldName
+                        ExceptionHelper.printException(ex, 
+                                "Error performing safe operation for " + worldName
                                 + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
-                                + ", inUse: " + world.isChunkInUse(cx, cz) + ". Error: "
-                                + ex.toString());
+                                + ", inUse: " + world.isChunkInUse(cx, cz));
                     }
                 }
             } finally {
@@ -379,9 +380,9 @@ public class TaskDispatcher implements Runnable {
                          * Exception here indicates that async block get is not
                          * available. Therefore use the queue fallback.
                          */
-                        AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                                + " for region " + region.toString() + ". Error: "
-                                + ex.toString());
+                        ExceptionHelper.printException(ex, 
+                                "Error performing safe operation for " + worldName
+                                + " for region " + region.toString());
                     }
                 }
             } finally {
@@ -429,9 +430,9 @@ public class TaskDispatcher implements Runnable {
                          * Exception here indicates that async block get is not
                          * available. Therefore use the queue fallback.
                          */
-                        AsyncWorldEditMain.log("Error performing safe operation for " + worldName
-                                + " for region " + region.toString() + ". Error: "
-                                + ex.toString());
+                        ExceptionHelper.printException(ex, 
+                                "Error performing safe operation for " + worldName
+                                + " for region " + region.toString());
                     }
                 }
             } finally {
@@ -472,10 +473,10 @@ public class TaskDispatcher implements Runnable {
                          * Exception here indicates that async block get is not
                          * available. Therefore use the queue fallback.
                          */
-                        AsyncWorldEditMain.log("Error performing safe operation for " + worldName
+                        ExceptionHelper.printException(ex, 
+                                "Error performing safe operation for " + worldName
                                 + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
-                                + ", inUse: " + world.isChunkInUse(cx, cz) + ". Error: "
-                                + ex.toString());
+                                + ", inUse: " + world.isChunkInUse(cx, cz));
                     }
                 }
             } finally {
@@ -502,8 +503,7 @@ public class TaskDispatcher implements Runnable {
                  * Exception here indicates that async block get is not
                  * available. Therefore use the queue fallback.
                  */
-                AsyncWorldEditMain.log("Error performing safe operation. Error: "
-                        + ex.toString());
+                ExceptionHelper.printException(ex, "Error performing safe operation.");
             }
         }
         queueFastOperation(action);
@@ -528,8 +528,7 @@ public class TaskDispatcher implements Runnable {
                  * Exception here indicates that async block get is not
                  * available. Therefore use the queue fallback.
                  */
-                AsyncWorldEditMain.log("Error performing safe operation. Error: "
-                        + ex.toString());
+                ExceptionHelper.printException(ex, "Error performing safe operation.");
             }
         }
         return queueFastOperation(action);
