@@ -178,10 +178,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
             log("Error loading config");
             return;
         }
-
-        if (!MessageProvider.loadFile(ConfigProvider.getStringsFile())) {
-            log("Error loading strings file, using internal fallback.");
-        }
+        
+        initialiseStrings();
 
         try {
             MetricsLite metrics = new MetricsLite(this);
@@ -233,6 +231,23 @@ public class AsyncWorldEditMain extends JavaPlugin {
         m_playerManager.initalize();
 
         log("Enabled");
+    }
+
+    
+    /**
+     * Initialise the strings
+     */
+    private void initialiseStrings() {
+        if (!MessageProvider.saveDefault(this)) {
+            log("Unable to save english.yml to plugin folder.");
+        }
+        
+        if (!MessageProvider.loadDefault(this)) {
+            log("Error loading default strings file, no internal fallback available!.");
+        }
+        if (!MessageProvider.loadFile(ConfigProvider.getStringsFile())) {
+            log("Error loading strings file, using internal fallback.");
+        }
     }
 
     @Override
