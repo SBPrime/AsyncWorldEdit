@@ -56,8 +56,7 @@ public final class Operations {
      * errors that is not {@link MaxChangedBlocksException} for legacy reasons.
      *
      * @param op operation to execute
-     * @throws MaxChangedBlocksException thrown when too many blocks have been
-     * changed
+     * @throws MaxChangedBlocksException thrown when too many blocks have been changed
      */
     public static void completeLegacy(Operation op) throws MaxChangedBlocksException {
         InjectorCore.getInstance().getClassFactory().getOperationProcessor().process(op,

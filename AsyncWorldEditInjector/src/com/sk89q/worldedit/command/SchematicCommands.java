@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package com.sk89q.worldedit.command;
 
 import com.sk89q.minecraft.util.commands.Command;
@@ -78,12 +79,12 @@ public class SchematicCommands {
     }
 
     @Command(
-            aliases = {"load"},
+            aliases = { "load" },
             usage = "[<format>] <filename>",
             desc = "Load a schematic into your clipboard"
     )
     @Deprecated
-    @CommandPermissions({"worldedit.clipboard.load", "worldedit.schematic.load"})
+    @CommandPermissions({ "worldedit.clipboard.load", "worldedit.schematic.load" })
     public void load(final Player player, final LocalSession session, @Optional("schematic") String formatName, final String filename) throws FilenameException {
         LocalConfiguration config = worldEdit.getConfiguration();
 
@@ -143,12 +144,12 @@ public class SchematicCommands {
     }
 
     @Command(
-            aliases = {"save"},
+            aliases = { "save" },
             usage = "[<format>] <filename>",
             desc = "Save a schematic into your clipboard"
     )
     @Deprecated
-    @CommandPermissions({"worldedit.clipboard.save", "worldedit.schematic.save"})
+    @CommandPermissions({ "worldedit.clipboard.save", "worldedit.schematic.save" })
     public void save(final Player player, LocalSession session, @Optional("schematic") String formatName, final String filename) throws CommandException, WorldEditException {
         LocalConfiguration config = worldEdit.getConfiguration();
 
@@ -215,7 +216,7 @@ public class SchematicCommands {
     }
 
     @Command(
-            aliases = {"delete", "d"},
+            aliases = { "delete", "d" },
             usage = "<filename>",
             desc = "Delete a saved schematic",
             help = "Delete a schematic from the schematic list",
@@ -274,14 +275,14 @@ public class SchematicCommands {
             desc = "List saved schematics",
             max = 0,
             flags = "dn",
-            help = "List all schematics in the schematics directory\n"
-            + " -d sorts by date, oldest first\n"
-            + " -n sorts by date, newest first\n"
+            help = "List all schematics in the schematics directory\n" +
+                    " -d sorts by date, oldest first\n" +
+                    " -n sorts by date, newest first\n"
     )
     @CommandPermissions("worldedit.schematic.list")
     public void list(Actor actor, CommandContext args) throws WorldEditException {
         File dir = worldEdit.getWorkingDirectoryFile(worldEdit.getConfiguration().saveDir);
-        File[] files = dir.listFiles(new FileFilter() {
+        File[] files = dir.listFiles(new FileFilter(){
             @Override
             public boolean accept(File file) {
                 // sort out directories from the schematic list
@@ -296,21 +297,17 @@ public class SchematicCommands {
 
         final int sortType = args.hasFlag('d') ? -1 : args.hasFlag('n') ? 1 : 0;
         // cleanup file list
-        Arrays.sort(files, new Comparator<File>() {
+        Arrays.sort(files, new Comparator<File>(){
             @Override
             public int compare(File f1, File f2) {
                 // this should no longer happen, as directory-ness is checked before
                 // however, if a directory slips through, this will break the contract
                 // of comparator transitivity
-                if (!f1.isFile() || !f2.isFile()) {
-                    return -1;
-                }
+                if (!f1.isFile() || !f2.isFile()) return -1;
                 // http://stackoverflow.com/questions/203030/best-way-to-list-files-in-java-sorted-by-date-modified
                 int result = sortType == 0 ? f1.getName().compareToIgnoreCase(f2.getName()) : // use name by default
-                        Long.valueOf(f1.lastModified()).compareTo(f2.lastModified()); // use date if there is a flag
-                if (sortType == 1) {
-                    result = -result; // flip date for newest first instead of oldest first
-                }
+                    Long.valueOf(f1.lastModified()).compareTo(f2.lastModified()); // use date if there is a flag
+                if (sortType == 1) result = -result; // flip date for newest first instead of oldest first
                 return result;
             }
         });

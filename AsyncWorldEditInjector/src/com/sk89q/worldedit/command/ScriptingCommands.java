@@ -122,7 +122,7 @@ public class ScriptingCommands {
         File dir = worldEdit.getWorkingDirectoryFile(worldEdit.getConfiguration().scriptsDir);
         final File f = worldEdit.getSafeOpenFile(player, dir, lastScript, "js", "js");
 
-                InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, new IJob() {
+        InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, new IJob() {
             @Override
             public String getName() {
                 return "craftScript";
@@ -133,13 +133,12 @@ public class ScriptingCommands {
                 try {
                     worldEdit.runScript(player, f, scriptArgs);
                 } catch (WorldEditException ex) {
-                    player.printError("Error while executing CraftScript.");                    
+                    player.printError("Error while executing CraftScript.");
                 }
             }
         });
     }
-    
-    
+
     public static Class<?> ForceClassLoad() {
         return ScriptingCommands.class;
     }
