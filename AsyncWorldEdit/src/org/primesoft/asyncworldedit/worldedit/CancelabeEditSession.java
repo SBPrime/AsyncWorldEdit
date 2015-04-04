@@ -210,7 +210,7 @@ public class CancelabeEditSession extends EditSessionStub {
      * @throws com.sk89q.worldedit.WorldEditException
      */
     @Override
-    public void doCustomAction(final Change change) throws WorldEditException
+    public void doCustomAction(final Change change, final boolean isDemanding) throws WorldEditException
     {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
@@ -229,7 +229,7 @@ public class CancelabeEditSession extends EditSessionStub {
             }
         };
 
-        BlockPlacerEntry entry = new ActionEntryEx(m_jobId, action);
+        BlockPlacerEntry entry = new ActionEntryEx(m_jobId, action, isDemanding);
 
         m_parent.getBlockPlacer().addTasks(m_player, entry);
     }

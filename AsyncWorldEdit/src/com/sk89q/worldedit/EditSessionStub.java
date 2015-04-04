@@ -61,6 +61,8 @@ public abstract class EditSessionStub extends EditSession {
     /**
      * Perform a custom action
      * @param change
+     * @param isDemanding
+     * @throws com.sk89q.worldedit.WorldEditException
      */
-    public abstract void doCustomAction(Change change) throws WorldEditException;
+    public abstract void doCustomAction(Change change, boolean isDemanding) throws WorldEditException;
 }

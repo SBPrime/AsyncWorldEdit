@@ -49,12 +49,20 @@ public abstract class BlockPlacerEntry {
      * THe job ID
      */
     private final int m_jobId;
+    
+    
+    /**
+     * Is this a demanding task
+     */
+    private final boolean m_isDemanding;
 
     /**
      * Is this task demanding, only one demanding task is allowed
      * @return 
      */
-    public abstract boolean isDemanding();
+    public boolean isDemanding() {
+        return m_isDemanding;
+    }
     
     /**
      * The job ID
@@ -68,9 +76,11 @@ public abstract class BlockPlacerEntry {
     /**
      * New instance of block placer entry
      * @param jobId THe job id
+     * @param isDemanding
      */
-    public BlockPlacerEntry(int jobId) {
+    public BlockPlacerEntry(int jobId, boolean isDemanding) {
         m_jobId = jobId;
+        m_isDemanding = isDemanding;
     }
     
     

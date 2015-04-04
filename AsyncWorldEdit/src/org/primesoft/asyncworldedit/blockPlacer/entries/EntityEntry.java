@@ -74,16 +74,11 @@ public class EntityEntry extends BlockPlacerEntry {
      * @param clipboard 
      */
     public EntityEntry(int jobId, Object data, Vector location, CuboidClipboard clipboard) {
-        super(jobId);
+        super(jobId, true);
 
         m_data = data;
         m_location = location;
         m_clipboard = clipboard;
-    }
-    
-    @Override
-    public boolean isDemanding() {
-        return true;
     }
 
     @Override

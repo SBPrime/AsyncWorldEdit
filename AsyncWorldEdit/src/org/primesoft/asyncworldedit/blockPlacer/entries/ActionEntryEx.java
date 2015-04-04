@@ -60,15 +60,10 @@ public class ActionEntryEx<TException extends Exception> extends BlockPlacerEntr
      */
     private final ActionEx<TException> m_action;
 
-    public ActionEntryEx(int jobId, ActionEx<TException> action) {
-        super(jobId);
+    public ActionEntryEx(int jobId, ActionEx<TException> action, boolean isDemanding) {
+        super(jobId, isDemanding);
 
         m_action = action;
-    }
-
-    @Override
-    public boolean isDemanding() {
-        return true;
     }
 
     @Override

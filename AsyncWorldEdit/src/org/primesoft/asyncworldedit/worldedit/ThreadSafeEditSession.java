@@ -314,7 +314,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
      * @throws com.sk89q.worldedit.WorldEditException
      */
     @Override
-    public void doCustomAction(final Change change) throws WorldEditException
+    public void doCustomAction(final Change change, boolean isDemanding) throws WorldEditException
     {
         final boolean isAsync = isAsyncEnabled();
         final ChangeSet cs = getChangeSet();               
@@ -335,7 +335,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
             return;
         }
 
-        BlockPlacerEntry entry = new ActionEntryEx(m_jobId, action);
+        BlockPlacerEntry entry = new ActionEntryEx(m_jobId, action, isDemanding);
 
         m_blockPlacer.addTasks(m_player, entry);
     }

@@ -56,7 +56,7 @@ public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements 
 
     public WorldExtentBlockEntry(AsyncWorld worldExtent,
             int jobId, Vector location) {
-        super(jobId);
+        super(jobId, false);
         
         m_location = location;
         m_worldName = worldExtent.getName();
@@ -71,9 +71,4 @@ public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements 
     public Vector getLocation() {
         return m_location;
     }
-
-    @Override
-    public boolean isDemanding() {
-        return false;
-    }   
 }

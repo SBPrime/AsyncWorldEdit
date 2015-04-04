@@ -56,15 +56,10 @@ public class RegenerateEntry extends BlockPlacerEntry {
     private final Vector2D m_chunk;
 
     public RegenerateEntry(int jobId, World world, Vector2D chunk) {
-        super(jobId);
+        super(jobId, true);
 
         m_chunk = chunk;
         m_world = world;
-    }
-    
-    @Override
-    public boolean isDemanding() {
-        return true;
     }
 
     @Override

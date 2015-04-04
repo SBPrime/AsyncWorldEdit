@@ -52,18 +52,13 @@ public class ActionEntry  extends BlockPlacerEntry {
     /**
      * The action
      */
-    private final Action m_action;
+    private final Action m_action;        
     
     
-    public ActionEntry(int jobId, Action action) {
-        super(jobId);
+    public ActionEntry(int jobId, Action action, boolean isDemanding) {
+        super(jobId, isDemanding);
         
         m_action = action;
-    }
-    
-    @Override
-    public boolean isDemanding() {
-        return true;
     }
 
     @Override

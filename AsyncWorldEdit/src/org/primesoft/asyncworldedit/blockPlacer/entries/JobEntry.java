@@ -113,11 +113,6 @@ public class JobEntry extends BlockPlacerEntry {
      */
     private final List<IJobEntryListener> m_jobStateChanged;
 
-    @Override
-    public boolean isDemanding() {
-        return false;
-    }
-
     /**
      * Get the player UUID
      *
@@ -135,7 +130,7 @@ public class JobEntry extends BlockPlacerEntry {
      * @param name operation name
      */
     public JobEntry(PlayerEntry player, int jobId, String name) {
-        super(jobId);
+        super(jobId, false);
         m_player = player;
         m_name = name;
         m_status = JobStatus.Initializing;
@@ -154,7 +149,7 @@ public class JobEntry extends BlockPlacerEntry {
     public JobEntry(PlayerEntry player,
             CancelabeEditSession cEditSession,
             int jobId, String name) {
-        super(jobId);
+        super(jobId, false);
 
         m_player = player;
         m_name = name;
