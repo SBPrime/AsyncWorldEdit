@@ -129,7 +129,30 @@ public class BlockPlacer {
      * Parent plugin main
      */
     private final AsyncWorldEditMain m_plugin;
+    
+    /**
+     * Indicates that the blocks placer is paused
+     */
+    private boolean m_isPaused;
 
+    
+    /**
+     * Is the blocks placer paused
+     * @return 
+     */
+    public boolean isPaused() {
+        return m_isPaused;
+    }
+    
+    
+    /**
+     * Set pause on blocks placer
+     * @param pause 
+     */
+    public void setPause(boolean pause) {
+        m_isPaused = pause;
+    }
+    
     /**
      * Get the physics watcher
      *
@@ -219,6 +242,11 @@ public class BlockPlacer {
         long enterFunctionTime = System.currentTimeMillis();
         final long timeDelte = enterFunctionTime - m_lastRunTime;
 
+        if (!isPaused()) {
+            m_lastRunTime = enterFunctionTime;
+            return;
+        }
+        
         boolean talk = false;
         final List<JobEntry> jobsToCancel = new ArrayList<JobEntry>();
         //Number of blocks placed for player
@@ -443,7 +471,7 @@ public class BlockPlacer {
      *
      * @param player player UUID
      * @param job the job
-     * @return 
+     * @return
      */
     public boolean addJob(PlayerEntry player, JobEntry job) {
         boolean result;

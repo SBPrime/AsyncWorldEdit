@@ -115,6 +115,29 @@ public class TaskDispatcher implements Runnable {
     private double m_usage = 0;
 
     /**
+     * Indicates that the task dispatcher is paused
+     */
+    private boolean m_isPaused;
+
+    /**
+     * Is the task dispatcher paused
+     *
+     * @return
+     */
+    public boolean isPaused() {
+        return m_isPaused;
+    }
+
+    /**
+     * Set pause on task dispatcher placer
+     *
+     * @param pause
+     */
+    public void setPause(boolean pause) {
+        m_isPaused = pause;
+    }
+
+    /**
      * Initialize new instance of the block placer
      *
      * @param plugin parent
@@ -163,46 +186,48 @@ public class TaskDispatcher implements Runnable {
 
         double usage = m_usage;
 
-        m_mainThread = Thread.currentThread();
+        if (!isPaused()) {
+            m_mainThread = Thread.currentThread();
 
-        boolean processed = false;
-        for (int i = 0; i < jobsCount && (m_usage * 3 + usage) / 4 < maxTime; i++) {
-            IDispatcherEntry task = null;
-            synchronized (m_fastTasks) {
-                if (!m_fastTasks.isEmpty()) {
-                    task = m_fastTasks.poll();
+            boolean processed = false;
+            for (int i = 0; i < jobsCount && (m_usage * 3 + usage) / 4 < maxTime; i++) {
+                IDispatcherEntry task = null;
+                synchronized (m_fastTasks) {
+                    if (!m_fastTasks.isEmpty()) {
+                        task = m_fastTasks.poll();
+                    }
+                }
+
+                if (task != null) {
+                    task.Process();
+                    processed = true;
+                } else {
+                    try {
+                        //Force thread change
+                        Thread.sleep(1);
+                    } catch (InterruptedException ex) {
+                    }
+                }
+
+                runTime = System.currentTimeMillis() - enter;
+                if (runTime + runDelta > 0) {
+                    usage = 1000.0 * runTime / (runTime + runDelta);
+                } else {
+                    usage = 0;
                 }
             }
 
-            if (task != null) {
-                task.Process();
-                processed = true;
-            } else {
-                try {
-                    //Force thread change
-                    Thread.sleep(1);
-                } catch (InterruptedException ex) {
+            if (!processed) {
+                synchronized (m_mutex) {
+                    m_fastTaskRunsRemaining--;
+                    if (m_fastTaskRunsRemaining <= 0 && m_fastTask != null) {
+                        m_fastTask.cancel();
+                        m_fastTask = null;
+                    }
                 }
-            }
-
-            runTime = System.currentTimeMillis() - enter;
-            if (runTime + runDelta > 0) {
-                usage = 1000.0 * runTime / (runTime + runDelta);
-            } else {
-                usage = 0;
             }
         }
-
-        if (!processed) {
-            synchronized (m_mutex) {
-                m_fastTaskRunsRemaining--;
-                if (m_fastTaskRunsRemaining <= 0 && m_fastTask != null) {
-                    m_fastTask.cancel();
-                    m_fastTask = null;
-                }
-            }
-        }
-
+        
         runTime = System.currentTimeMillis() - enter;
         if (runTime + runDelta > 0) {
             usage = 1000.0 * runTime / (runTime + runDelta);
@@ -336,7 +361,7 @@ public class TaskDispatcher implements Runnable {
                          * Exception here indicates that async block get is not
                          * available. Therefore use the queue fallback.
                          */
-                        ExceptionHelper.printException(ex, 
+                        ExceptionHelper.printException(ex,
                                 "Error performing safe operation for " + worldName
                                 + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
                                 + ", inUse: " + world.isChunkInUse(cx, cz));
@@ -380,7 +405,7 @@ public class TaskDispatcher implements Runnable {
                          * Exception here indicates that async block get is not
                          * available. Therefore use the queue fallback.
                          */
-                        ExceptionHelper.printException(ex, 
+                        ExceptionHelper.printException(ex,
                                 "Error performing safe operation for " + worldName
                                 + " for region " + region.toString());
                     }
@@ -430,7 +455,7 @@ public class TaskDispatcher implements Runnable {
                          * Exception here indicates that async block get is not
                          * available. Therefore use the queue fallback.
                          */
-                        ExceptionHelper.printException(ex, 
+                        ExceptionHelper.printException(ex,
                                 "Error performing safe operation for " + worldName
                                 + " for region " + region.toString());
                     }
@@ -473,7 +498,7 @@ public class TaskDispatcher implements Runnable {
                          * Exception here indicates that async block get is not
                          * available. Therefore use the queue fallback.
                          */
-                        ExceptionHelper.printException(ex, 
+                        ExceptionHelper.printException(ex,
                                 "Error performing safe operation for " + worldName
                                 + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
                                 + ", inUse: " + world.isChunkInUse(cx, cz));
