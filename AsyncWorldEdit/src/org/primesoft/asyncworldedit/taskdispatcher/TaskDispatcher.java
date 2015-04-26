@@ -117,7 +117,7 @@ public class TaskDispatcher implements Runnable {
     /**
      * Indicates that the task dispatcher is paused
      */
-    private boolean m_isPaused;
+    private boolean m_isPaused = false;
 
     /**
      * Is the task dispatcher paused
@@ -186,7 +186,7 @@ public class TaskDispatcher implements Runnable {
 
         double usage = m_usage;
 
-        if (!isPaused()) {
+        if (isPaused()) {
             m_mainThread = Thread.currentThread();
 
             boolean processed = false;

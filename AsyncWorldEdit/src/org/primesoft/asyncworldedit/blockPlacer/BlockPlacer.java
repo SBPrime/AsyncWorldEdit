@@ -133,7 +133,7 @@ public class BlockPlacer {
     /**
      * Indicates that the blocks placer is paused
      */
-    private boolean m_isPaused;
+    private boolean m_isPaused = false;
 
     
     /**
@@ -242,7 +242,7 @@ public class BlockPlacer {
         long enterFunctionTime = System.currentTimeMillis();
         final long timeDelte = enterFunctionTime - m_lastRunTime;
 
-        if (!isPaused()) {
+        if (isPaused()) {
             m_lastRunTime = enterFunctionTime;
             return;
         }
