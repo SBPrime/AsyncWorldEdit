@@ -41,23 +41,25 @@
 package org.primesoft.asyncworldedit.blockPlacer;
 
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.BarAPIntegrator;
+import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
-import java.util.*;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.PhysicsWatch;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.FuncParamEx;
 import org.primesoft.asyncworldedit.utils.InOutParam;
+import org.primesoft.asyncworldedit.worldedit.ActionBarAPIntegrator;
 import org.primesoft.asyncworldedit.worldedit.AsyncTask;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
+
+import java.util.*;
 
 /**
  *
@@ -121,6 +123,11 @@ public class BlockPlacer {
     private final BarAPIntegrator m_barAPI;
 
     /**
+     * Title API
+     */
+    private final ActionBarAPIntegrator m_actionbarAPI;
+
+    /**
      * List of all job added listeners
      */
     private final List<IBlockPlacerListener> m_jobAddedListeners;
@@ -175,6 +182,7 @@ public class BlockPlacer {
         m_lockedQueues = new HashSet<PlayerEntry>();
         m_scheduler = plugin.getServer().getScheduler();
         m_barAPI = plugin.getBarAPI();
+        m_actionbarAPI = plugin.getActionBarAPI();
 
         m_plugin = plugin;
         m_physicsWatcher = plugin.getPhysicsWatcher();
@@ -311,8 +319,7 @@ public class BlockPlacer {
      * process queued blocks
      *
      * @param playerUUID players to process
-     * @param maxTime maximum time spend placing blocks
-     * @param maxBlocksCount maximum blocks placed
+     * @param permissionGroup
      * @param blocksPlaced number of blocksplaced for players
      * @param jobsToCancel canceled blocks
      */
@@ -852,7 +859,8 @@ public class BlockPlacer {
     /**
      * Hide the progress bar
      *
-     * @param p
+     * @param player
+     * @param entry
      */
     private void hideProgressBar(PlayerEntry player, BlockPlacerPlayer entry) {
         if (entry != null) {
@@ -860,6 +868,7 @@ public class BlockPlacer {
         }
 
         m_barAPI.disableMessage(player);
+        m_actionbarAPI.disableMessage(player);
     }
 
     /**
@@ -897,6 +906,7 @@ public class BlockPlacer {
 
         String message = MessageType.CMD_JOBS_PROGRESS_BAR.format(jobs, speed, time);
         m_barAPI.setMessage(player, message, percentage);
+        m_actionbarAPI.setMessage(player, message, percentage);
     }
 
     /**
