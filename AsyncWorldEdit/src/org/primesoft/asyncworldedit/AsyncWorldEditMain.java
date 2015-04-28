@@ -40,14 +40,7 @@
  */
 package org.primesoft.asyncworldedit;
 
-import org.primesoft.asyncworldedit.playerManager.PlayerManager;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.permissions.Permission;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -57,18 +50,27 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.commands.*;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.InjectorBukkit;
 import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
+import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.plotme.IPlotMeFix;
 import org.primesoft.asyncworldedit.plotme.NullFix;
 import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.strings.MessageType;
+import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.worldedit.ActionBarAPIntegrator;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -93,6 +95,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
     private IPlotMeFix m_plotMeFix;
     private final PlayerManager m_playerManager = new PlayerManager(this);
     private BarAPIntegrator m_barApi;
+    private ActionBarAPIntegrator m_actionBarApi;
     private InjectorCore m_aweInjector;
 
     public PlayerManager getPlayerManager() {
@@ -131,6 +134,10 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     public BarAPIntegrator getBarAPI() {
         return m_barApi;
+    }
+
+    public ActionBarAPIntegrator getActionBarAPI() {
+        return m_actionBarApi;
     }
 
     public static String getPrefix() {
@@ -199,6 +206,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
         }
 
         m_barApi = new BarAPIntegrator(this);
+        m_actionBarApi = new ActionBarAPIntegrator(this);
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
         m_dispatcher = new TaskDispatcher(this);

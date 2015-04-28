@@ -40,12 +40,13 @@
  */
 package org.primesoft.asyncworldedit.playerManager;
 
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
-import java.util.HashMap;
-import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.permissions.PermissionManager;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 /**
  *
@@ -74,9 +75,8 @@ public class PlayerManager {
      * Initialize the player manager
      */
     public void initalize() {
-        Player[] players = m_parrent.getServer().getOnlinePlayers();
-        for (Player player : players) {
-            addPlayer(player);
+        for (Player p : m_parrent.getServer().getOnlinePlayers()) {
+            addPlayer(p);
         }
     }
     
