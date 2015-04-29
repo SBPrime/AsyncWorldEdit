@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,94 +38,59 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit;
+package org.primesoft.asyncworldedit.progressDisplay;
 
-import com.connorlinfoot.actionbarapi.ActionBarAPI;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
+ * This class controls all progress display integrator
  *
  * @author SBPrime
  */
-public class ActionBarAPIntegrator
-{
+public class ProgressDisplay implements IProgressDisplay {
 
-    private final boolean m_isInitialized;
-    private static final String light = "░";
-    private static final String dark = "█";
-    private static int barAmount = 20;
+    private final IProgressDisplay[] m_progressDiaplay;
 
-    /**
-     * Get instance of the core blocks hub plugin
-     *
-     * @param plugin
-     * @return
-     */
-    public static ActionBarAPI getABAPI(JavaPlugin plugin) {
-        try {
-            Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("ActionBarAPI");
-
-            if ((cPlugin == null) || (!(cPlugin instanceof ActionBarAPI))) {
-                AsyncWorldEditMain.log("ActionBarAPI not found.");
-                return null;
-            }
-
-            return (ActionBarAPI) cPlugin;
-        } catch (NoClassDefFoundError ex) {
-            ExceptionHelper.printException(ex, "Error initializing BarAPI.");
-            return null;
-        }
+    public ProgressDisplay(AsyncWorldEditMain main) {
+        m_progressDiaplay = new IProgressDisplay[]{
+            new BarAPIntegrator(main),
+            new ActionBarAPIntegrator(main)
+        };
     }
 
-    public ActionBarAPIntegrator(JavaPlugin plugin) {
-        ActionBarAPI ba = getABAPI(plugin);
-        m_isInitialized = ba != null;
-    }
-
-    public void setMessage(PlayerEntry player, String message, double percent) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
-            return;
-        }
-
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
-            return;
-        }
-
-        if (message == null) {
-            message = "";
-        }
-        if (percent < 0) {
-            percent = 0;
-        } else if (percent > 100) {
-            percent = 100;
-        }
-
-        int increment = 100/barAmount;
-        int darkAmount = (int) percent/increment;
-        int lightAmount = barAmount-darkAmount;
-
-        String bars = "";
-        for(int i = 0; i < darkAmount; i++)
-            bars+=dark;
-        for(int i = 0; i < lightAmount; i++)
-            bars+=light;
-
-        message += " : "+bars+" "+(int) percent+"%";
-        ActionBarAPI.sendActionBar(player.getPlayer(), message);
-    }
-
+    @Override
     public void disableMessage(PlayerEntry player) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
+        if (player == null) {
             return;
         }
 
         if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
             return;
         }
-        ActionBarAPI.sendActionBar(player.getPlayer(), "");
+        
+        
+        for (IProgressDisplay pd : m_progressDiaplay)
+        {
+            pd.disableMessage(player);
+        }
     }
+
+    @Override
+    public void setMessage(PlayerEntry player, String message, double percent) {
+        if (player == null) {
+            return;
+        }
+        
+        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
+            return;
+        }
+        
+        
+        for (IProgressDisplay pd : m_progressDiaplay)
+        {
+            pd.setMessage(player, message, percent);
+        }
+    }
+
 }

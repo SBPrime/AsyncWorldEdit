@@ -65,12 +65,16 @@ import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
-import org.primesoft.asyncworldedit.worldedit.ActionBarAPIntegrator;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
+import org.primesoft.asyncworldedit.progressDisplay.ActionBarAPIntegrator;
+import org.primesoft.asyncworldedit.progressDisplay.BarAPIntegrator;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.progressDisplay.IProgressDisplay;
+import org.primesoft.asyncworldedit.progressDisplay.ProgressDisplay;
+
 
 /**
  *
@@ -94,8 +98,7 @@ public class AsyncWorldEditMain extends JavaPlugin {
     private WorldeditIntegrator m_weIntegrator;
     private IPlotMeFix m_plotMeFix;
     private final PlayerManager m_playerManager = new PlayerManager(this);
-    private BarAPIntegrator m_barApi;
-    private ActionBarAPIntegrator m_actionBarApi;
+    private IProgressDisplay m_progressDisplay;
     private InjectorCore m_aweInjector;
 
     public PlayerManager getPlayerManager() {
@@ -132,12 +135,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
         return m_dispatcher;
     }
 
-    public BarAPIntegrator getBarAPI() {
-        return m_barApi;
-    }
-
-    public ActionBarAPIntegrator getActionBarAPI() {
-        return m_actionBarApi;
+    public IProgressDisplay getProgressDisplay() {
+        return m_progressDisplay;
     }
 
     public static String getPrefix() {
@@ -205,8 +204,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
             return;
         }
 
-        m_barApi = new BarAPIntegrator(this);
-        m_actionBarApi = new ActionBarAPIntegrator(this);
+        m_progressDisplay = new ProgressDisplay(this);
+        
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
         m_dispatcher = new TaskDispatcher(this);

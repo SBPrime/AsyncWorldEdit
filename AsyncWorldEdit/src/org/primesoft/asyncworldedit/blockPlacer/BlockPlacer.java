@@ -43,7 +43,6 @@ package org.primesoft.asyncworldedit.blockPlacer;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.BarAPIntegrator;
 import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
@@ -54,12 +53,12 @@ import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.FuncParamEx;
 import org.primesoft.asyncworldedit.utils.InOutParam;
-import org.primesoft.asyncworldedit.worldedit.ActionBarAPIntegrator;
 import org.primesoft.asyncworldedit.worldedit.AsyncTask;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
 import java.util.*;
+import org.primesoft.asyncworldedit.progressDisplay.IProgressDisplay;
 
 /**
  *
@@ -118,14 +117,9 @@ public class BlockPlacer {
     private long m_lastRunTime;
 
     /**
-     * The bar API
+     * The progress display integrator
      */
-    private final BarAPIntegrator m_barAPI;
-
-    /**
-     * Title API
-     */
-    private final ActionBarAPIntegrator m_actionbarAPI;
+    private final IProgressDisplay m_progressDisplay;
 
     /**
      * List of all job added listeners
@@ -181,8 +175,7 @@ public class BlockPlacer {
         m_blocks = new HashMap<PlayerEntry, BlockPlacerPlayer>();
         m_lockedQueues = new HashSet<PlayerEntry>();
         m_scheduler = plugin.getServer().getScheduler();
-        m_barAPI = plugin.getBarAPI();
-        m_actionbarAPI = plugin.getActionBarAPI();
+        m_progressDisplay = plugin.getProgressDisplay();
 
         m_plugin = plugin;
         m_physicsWatcher = plugin.getPhysicsWatcher();
@@ -867,8 +860,7 @@ public class BlockPlacer {
             entry.setMaxQueueBlocks(0);
         }
 
-        m_barAPI.disableMessage(player);
-        m_actionbarAPI.disableMessage(player);
+        m_progressDisplay.disableMessage(player);
     }
 
     /**
@@ -905,8 +897,7 @@ public class BlockPlacer {
         }
 
         String message = MessageType.CMD_JOBS_PROGRESS_BAR.format(jobs, speed, time);
-        m_barAPI.setMessage(player, message, percentage);
-        m_actionbarAPI.setMessage(player, message, percentage);
+        m_progressDisplay.setMessage(player, message, percentage);
     }
 
     /**
