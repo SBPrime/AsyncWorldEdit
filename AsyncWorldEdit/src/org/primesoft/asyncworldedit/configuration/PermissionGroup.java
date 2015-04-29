@@ -115,6 +115,8 @@ public class PermissionGroup {
      */
     private final boolean m_useBarApi;
 
+    private final String m_status;
+
     /**
      * Use chat to display progress
      */
@@ -215,6 +217,9 @@ public class PermissionGroup {
         return m_useBarApi;
     }
 
+    public String getStatusAPI() {
+        return m_status;
+    }
     /**
      * Use chat to display progress
      *
@@ -247,6 +252,7 @@ public class PermissionGroup {
         m_rendererBlocks = 10000;
         m_rendererTime = 40;
         m_useBarApi = true;
+        m_status = "auto";
         m_useChat = true;
         m_name = "default-values";
     }
@@ -310,6 +316,9 @@ public class PermissionGroup {
                 ? defaults.isChatProgressEnabled() : messagesSection.getBoolean("progress-chat", defaults.isChatProgressEnabled());
         m_isTalkative = messagesSection == null
                 ? defaults.isTalkative() : messagesSection.getBoolean("talkative", defaults.isTalkative());
+
+        m_status = messagesSection == null
+                ? defaults.getStatusAPI() : messagesSection.getString("status-api", defaults.getStatusAPI());
     }
 
     /**
