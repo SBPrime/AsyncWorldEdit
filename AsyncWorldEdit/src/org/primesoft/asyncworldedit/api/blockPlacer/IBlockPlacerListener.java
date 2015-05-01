@@ -38,82 +38,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.progressDisplay;
+package org.primesoft.asyncworldedit.api.blockPlacer;
 
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import me.confuser.barapi.BarAPI;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
 /**
  *
  * @author SBPrime
  */
-public class BarAPIntegrator implements IProgressDisplay {
-
-    private final boolean m_isInitialized;
-
-    /**
-     * Get instance of the core blocks hub plugin
-     *
-     * @param plugin
-     * @return
-     */
-    public static BarAPI getBarAPI(JavaPlugin plugin) {
-        try {
-            Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BarAPI");
-
-            if ((cPlugin == null) || (!(cPlugin instanceof BarAPI))) {
-                AsyncWorldEditMain.log("BarAPI not found.");
-                return null;
-            }
-
-            return (BarAPI) cPlugin;
-        } catch (NoClassDefFoundError ex) {
-            ExceptionHelper.printException(ex, "Error initializing BarAPI.");
-            return null;
-        }
-    }
-
-    public BarAPIntegrator(JavaPlugin plugin) {
-        BarAPI ba = getBarAPI(plugin);
-        m_isInitialized = ba != null;
-    }
-
-    @Override
-    public void setMessage(PlayerEntry player, String message, double percent) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
-            return;
-        }
-
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
-            return;
-        }
-
-        if (message == null) {
-            message = "";
-        }
-        if (percent < 0) {
-            percent = 0;
-        } else if (percent > 100) {
-            percent = 100;
-        }
-        
-        BarAPI.setMessage(player.getPlayer(), message, (float)percent);
-    }
-
-    @Override
-    public void disableMessage(PlayerEntry player) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
-            return;
-        }
-
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
-            return;
-        }
-
-        BarAPI.removeBar(player.getPlayer());
-    }
+public interface IBlockPlacerListener {
+    void jobAdded(JobEntry job);
+    void jobRemoved(JobEntry job);
 }

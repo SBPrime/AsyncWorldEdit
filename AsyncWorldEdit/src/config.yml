@@ -63,10 +63,8 @@ awe:
         #number of blocks on the player queue when to stop placing blocks
         limit-soft: 250000
       messages:
-        #Which status API to use ('false' to disable, 'auto' to autodetect)
-        #Available options : ActionBarAPI, BarAPI, TitleManager, WelcomeTitle, BountifulAPI, ActionMessager
-        #A full server restart after a change of this setting is recommended.
-        status-api: auto
+        #Whether or not to show progress using BarAPI
+        progress-bar: true
         #Whether or not to show progress using the chat messages
         progress-chat: true
         #is async world edit talkative 

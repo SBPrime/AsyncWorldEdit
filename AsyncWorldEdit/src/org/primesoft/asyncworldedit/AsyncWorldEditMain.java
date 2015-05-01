@@ -55,7 +55,6 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.InjectorBukkit;
 import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
-import org.primesoft.asyncworldedit.livestatus.LiveStatus;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
@@ -67,23 +66,21 @@ import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
-import org.primesoft.asyncworldedit.progressDisplay.ActionBarAPIntegrator;
-import org.primesoft.asyncworldedit.progressDisplay.BarAPIntegrator;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.primesoft.asyncworldedit.progressDisplay.IProgressDisplay;
-import org.primesoft.asyncworldedit.progressDisplay.ProgressDisplay;
+import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
+import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
+import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
+import org.primesoft.asyncworldedit.progressDisplay.ProgressDisplayManager;
 
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncWorldEditMain extends JavaPlugin {
+public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
 
     private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
     private static ConsoleCommandSender s_console;
@@ -101,10 +98,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
     private WorldeditIntegrator m_weIntegrator;
     private IPlotMeFix m_plotMeFix;
     private final PlayerManager m_playerManager = new PlayerManager(this);
-    private IProgressDisplay m_progressDisplay;
+    private IProgressDisplayManager m_progressDisplay;
     private InjectorCore m_aweInjector;
-    private final static List<LiveStatus> m_preloadStatusAPIs = new ArrayList<LiveStatus>();
-    private final static List<LiveStatus> m_availableStatusAPIs = new ArrayList<LiveStatus>();
 
     public PlayerManager getPlayerManager() {
         return m_playerManager;
@@ -136,12 +131,12 @@ public class AsyncWorldEditMain extends JavaPlugin {
         return m_blockPlacer;
     }
 
-    public static List<LiveStatus> getAvailableStatusAPIs() { return m_availableStatusAPIs; }
     public TaskDispatcher getTaskDispatcher() {
         return m_dispatcher;
     }
 
-    public IProgressDisplay getProgressDisplay() {
+    @Override
+    public IProgressDisplayManager getProgressDisplayManager() {
         return m_progressDisplay;
     }
 
@@ -151,6 +146,10 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
     public static AsyncWorldEditMain getInstance() {
         return s_instance;
+    }
+    
+    public IAsyncWorldEdit getAPI() {
+        return this;
     }
 
     /**
@@ -184,6 +183,8 @@ public class AsyncWorldEditMain extends JavaPlugin {
         s_instance = this;
         PluginDescriptionFile desc = getDescription();
         s_prefix = String.format("[%s]", desc.getName());
+        s_console = getServer().getConsoleSender();
+        
         m_isInitialized = false;
 
         if (!ConfigProvider.load(this)) {
@@ -202,15 +203,14 @@ public class AsyncWorldEditMain extends JavaPlugin {
         } catch (IOException e) {
             ExceptionHelper.printException(e, "Error initializing MCStats");            
         }
-
-        s_console = getServer().getConsoleSender();
+        
         WorldEditPlugin worldEdit = getWorldEdit(this);
         if (worldEdit == null) {
             log("World edit not found.");
             return;
         }
 
-        m_progressDisplay = new ProgressDisplay(this);
+        m_progressDisplay = new ProgressDisplayManager();
         
         m_blocksHub = new BlocksHubIntegration(this);
         m_blockPlacer = new BlockPlacer(this);
@@ -242,45 +242,6 @@ public class AsyncWorldEditMain extends JavaPlugin {
 
         m_isInitialized = true;
         m_playerManager.initalize();
-
-
-        /*
-         * Start of the two-part loading of message APIs
-         *
-         * This prevents from having to manually add all plugin names inside the plugin.yml's softdepend,
-         * and does everything automagically, making a new API implementation really REALLY easy.
-         *
-         * 1. Load all the status APIs present in "livestatus" package.
-         */
-        for(LiveStatus ls : LiveStatus.LiveStatusSelector.loadStatusAPIs(this, this.getClassLoader()))
-            m_preloadStatusAPIs.add(ls);
-
-        /*
-         * 2. Runs task when all plugin are loaded to check which .jars of the apis up here
-         * are loaded inside Bukkit.
-         *
-         * This runs in a scheduler so we're assured that it only does the job after all plugins are 100% loaded.
-         * Problem is, after a /reload, this MIGHT not be working properly.
-         */
-
-        getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                for(LiveStatus ls : LiveStatus.LiveStatusSelector.checkJars(getInstance(), m_preloadStatusAPIs))
-                    m_availableStatusAPIs.add(ls);
-
-                String message = "Loaded "+m_availableStatusAPIs.size()+" compatible Status APIs : ";
-                for(LiveStatus ls : m_availableStatusAPIs)
-                {
-                    message+= ls.getClass().getSimpleName().replace("Integrator","")+", ";
-                }
-                message=message.substring(0, message.length()-2);
-
-                log(message);
-            }
-        });
 
         log("Enabled");
     }

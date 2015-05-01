@@ -38,7 +38,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.api.blockPlacer;
 
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 
@@ -46,7 +46,6 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
  *
  * @author SBPrime
  */
-public interface IBlockPlacerListener {
-    void jobAdded(JobEntry job);
-    void jobRemoved(JobEntry job);
+public interface IJobEntryListener {
+    void jobStateChanged(JobEntry job);
 }

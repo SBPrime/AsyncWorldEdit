@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,14 +38,41 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.api.progressDisplay;
 
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *
  * @author SBPrime
  */
-public interface IJobEntryListener {
-    void jobStateChanged(JobEntry job);
+public interface IProgressDisplay {
+    /**
+     * Get the progress display name
+     * @return 
+     */
+    String getName();
+
+    /**
+     * Disable (hide) the player message
+     * @param player 
+     */
+    void disableMessage(PlayerEntry player);
+
+    
+    /**
+     * Show player message
+     * @param player
+     * @param jobsCount Number of queued jobs
+     * @param queuedBlocks Current number of queued blocks
+     * @param maxQueuedBlocks Current maximum number of queued blocks
+     * @param timeLeft
+     * @param placingSpeed Current block placing sped (blocks per second)
+     * @param percentage Blocks placing done percentage
+     */
+    void setMessage(PlayerEntry player, 
+            int jobsCount, 
+            int queuedBlocks, int maxQueuedBlocks,
+            double timeLeft, double placingSpeed, double percentage);
+    
 }

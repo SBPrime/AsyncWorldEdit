@@ -38,29 +38,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.progressDisplay;
-
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+package org.primesoft.asyncworldedit.api.progressDisplay;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplay {
-
+public interface IProgressDisplayManager extends IProgressDisplay {
     /**
-     * Disable (hide) the player message
-     * @param player 
+     * Register new progress display backend
+     * @param backend
+     * @return 
      */
-    void disableMessage(PlayerEntry player);
-
+    public boolean registerProgressDisplay(IProgressDisplay backend);
     
     /**
-     * Show player message
-     * @param player
-     * @param message The message to show
-     * @param percent The percentage
+     * Unregister progress display backend
+     * @param backend
+     * @return 
      */
-    void setMessage(PlayerEntry player, String message, double percent);
-    
+    public boolean unregisterProgressDisplay(IProgressDisplay backend);
 }

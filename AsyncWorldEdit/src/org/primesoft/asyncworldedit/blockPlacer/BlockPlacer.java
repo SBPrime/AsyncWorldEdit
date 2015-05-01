@@ -40,6 +40,7 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerListener;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
@@ -48,7 +49,6 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
-import org.primesoft.asyncworldedit.livestatus.LiveStatus;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
@@ -59,7 +59,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
 import java.util.*;
-import org.primesoft.asyncworldedit.progressDisplay.IProgressDisplay;
+import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 
 /**
  *
@@ -116,8 +116,7 @@ public class BlockPlacer {
      * Last run time
      */
     private long m_lastRunTime;
-
-    private LiveStatus m_status;
+    
     /**
      * The progress display integrator
      */
@@ -177,7 +176,7 @@ public class BlockPlacer {
         m_blocks = new HashMap<PlayerEntry, BlockPlacerPlayer>();
         m_lockedQueues = new HashSet<PlayerEntry>();
         m_scheduler = plugin.getServer().getScheduler();
-        m_progressDisplay = plugin.getProgressDisplay();
+        m_progressDisplay = plugin.getProgressDisplayManager();
 
         m_plugin = plugin;
         m_physicsWatcher = plugin.getPhysicsWatcher();
@@ -898,8 +897,7 @@ public class BlockPlacer {
             entry.setMaxQueueBlocks(newMax);
         }
 
-        String message = MessageType.CMD_JOBS_PROGRESS_BAR.format(jobs, speed, time);
-        m_progressDisplay.setMessage(player, message, percentage);
+        m_progressDisplay.setMessage(player, jobs, blocks, newMax, time, speed, percentage);
     }
 
     /**

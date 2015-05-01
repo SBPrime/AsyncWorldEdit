@@ -38,59 +38,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.progressDisplay;
+package org.primesoft.asyncworldedit.api;
 
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
 
 /**
- * This class controls all progress display integrator
  *
  * @author SBPrime
  */
-public class ProgressDisplay implements IProgressDisplay {
-
-    private final IProgressDisplay[] m_progressDiaplay;
-
-    public ProgressDisplay(AsyncWorldEditMain main) {
-        m_progressDiaplay = new IProgressDisplay[]{
-            new BarAPIntegrator(main),
-            new ActionBarAPIntegrator(main)
-        };
-    }
-
-    @Override
-    public void disableMessage(PlayerEntry player) {
-        if (player == null) {
-            return;
-        }
-
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
-            return;
-        }
-        
-        
-        for (IProgressDisplay pd : m_progressDiaplay)
-        {
-            pd.disableMessage(player);
-        }
-    }
-
-    @Override
-    public void setMessage(PlayerEntry player, String message, double percent) {
-        if (player == null) {
-            return;
-        }
-        
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
-            return;
-        }
-        
-        
-        for (IProgressDisplay pd : m_progressDiaplay)
-        {
-            pd.setMessage(player, message, percent);
-        }
-    }
-
+public interface IAsyncWorldEdit {    
+    /**
+     * Get the progress display manager
+     * @return 
+     */
+    public IProgressDisplayManager getProgressDisplayManager();
 }
