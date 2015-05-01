@@ -1,6 +1,6 @@
 name: AsyncWorldEdit-PlotMeCore015
 main: org.primesoft.asyncworldedit.plotme.PlotMeCoreFix_015
-version: 2.1.6
+version: 2.2.0
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin implements PlotMeFix for PlotMeCore 0.15
