@@ -9,3 +9,4 @@
 *.ipr
 *.iws
 .idea/
+/AsyncWorldEdit-ActionBarAPI/AsyncWorldEdit-ActionBarAPI/nbproject/private/
