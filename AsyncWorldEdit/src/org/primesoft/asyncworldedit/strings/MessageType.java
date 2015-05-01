@@ -40,8 +40,6 @@
  */
 package org.primesoft.asyncworldedit.strings;
 
-import org.bukkit.ChatColor;
-
 /**
  *
  * @author SBPrime

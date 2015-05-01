@@ -48,6 +48,7 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.livestatus.LiveStatus;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
@@ -116,6 +117,7 @@ public class BlockPlacer {
      */
     private long m_lastRunTime;
 
+    private LiveStatus m_status;
     /**
      * The progress display integrator
      */
