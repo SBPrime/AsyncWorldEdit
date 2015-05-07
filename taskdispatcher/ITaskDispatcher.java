@@ -38,49 +38,114 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api;
+package org.primesoft.asyncworldedit.api.taskdispatcher;
 
-import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
-import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.Region;
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.utils.Action;
+import org.primesoft.asyncworldedit.utils.Func;
 
 /**
  *
  * @author SBPrime
  */
-public interface IAsyncWorldEdit {    
-    /**
-     * Get the progress display manager
-     * @return 
-     */
-    IProgressDisplayManager getProgressDisplayManager();
-    
-    
-    /**
-     * Get the task dispatcher
-     * @return 
-     */
-    ITaskDispatcher getTaskDispatcher();
-    
-    
-    /**
-     * Get the block placer
-     * @return 
-     */
-    IBlockPlacer getBlockPlacer();
-    
-    
-    /**
-     * Get the physics watcher
-     * @return 
-     */
-    IPhysicsWatch getPhysicsWatcher();
-    
+public interface ITaskDispatcher {
 
     /**
-     * The player manager
-     * @return 
+     * Add new fast/simple task (high priority tasks!)
+     *
+     * @param entry
      */
-    IPlayerManager getPlayerManager();
+    void addFastTask(IDispatcherEntry entry);
+
+    /**
+     * Is this thread the main bukkit thread
+     *
+     * @return
+     */
+    boolean isMainTask();
+
+    /**
+     * Is the task dispatcher paused
+     *
+     * @return
+     */
+    boolean isPaused();
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     * @param world
+     * @param pos
+     */
+    void performSafe(Object mutex, Action action, World world, Vector pos);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     * @param world
+     * @param region
+     */
+    void performSafe(Object mutex, Action action, World world, Region region);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @param world
+     * @param region
+     * @return
+     */
+    <T> T performSafe(Object mutex, Func<T> action, World world, Region region);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @param world
+     * @param pos
+     * @return
+     */
+    <T> T performSafe(Object mutex, Func<T> action, World world, Vector pos);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     */
+    void performSafe(Object mutex, Action action);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @return
+     */
+    <T> T performSafe(Object mutex, Func<T> action);
+
+    /**
+     * Set pause on task dispatcher placer
+     *
+     * @param pause
+     */
+    void setPause(boolean pause);
+    
 }

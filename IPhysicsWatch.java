@@ -40,47 +40,16 @@
  */
 package org.primesoft.asyncworldedit.api;
 
-import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
-import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
+import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author SBPrime
  */
-public interface IAsyncWorldEdit {    
-    /**
-     * Get the progress display manager
-     * @return 
-     */
-    IProgressDisplayManager getProgressDisplayManager();
-    
-    
-    /**
-     * Get the task dispatcher
-     * @return 
-     */
-    ITaskDispatcher getTaskDispatcher();
-    
-    
-    /**
-     * Get the block placer
-     * @return 
-     */
-    IBlockPlacer getBlockPlacer();
-    
-    
-    /**
-     * Get the physics watcher
-     * @return 
-     */
-    IPhysicsWatch getPhysicsWatcher();
-    
+public interface IPhysicsWatch {
 
-    /**
-     * The player manager
-     * @return 
-     */
-    IPlayerManager getPlayerManager();
+    void addLocation(String worldName, Vector location);
+
+    void removeLocation(String worldName, Vector location);
+    
 }

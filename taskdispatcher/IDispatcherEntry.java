@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,49 +38,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api;
-
-import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
-import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
+package org.primesoft.asyncworldedit.api.taskdispatcher;
 
 /**
  *
  * @author SBPrime
  */
-public interface IAsyncWorldEdit {    
+public interface IDispatcherEntry {
     /**
-     * Get the progress display manager
-     * @return 
+     * MTA mutex
+     *
+     * @return
      */
-    IProgressDisplayManager getProgressDisplayManager();
-    
-    
-    /**
-     * Get the task dispatcher
-     * @return 
-     */
-    ITaskDispatcher getTaskDispatcher();
-    
-    
-    /**
-     * Get the block placer
-     * @return 
-     */
-    IBlockPlacer getBlockPlacer();
-    
-    
-    /**
-     * Get the physics watcher
-     * @return 
-     */
-    IPhysicsWatch getPhysicsWatcher();
-    
+    Object getMutex();
 
     /**
-     * The player manager
+     * Process the entry
      * @return 
      */
-    IPlayerManager getPlayerManager();
+    boolean Process();
 }

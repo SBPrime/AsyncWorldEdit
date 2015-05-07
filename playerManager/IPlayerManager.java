@@ -38,49 +38,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api;
+package org.primesoft.asyncworldedit.api.playerManager;
 
-import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
-import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
+import java.util.UUID;
+import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *
- * @author SBPrime
+ * @author prime
  */
-public interface IAsyncWorldEdit {    
-    /**
-     * Get the progress display manager
-     * @return 
-     */
-    IProgressDisplayManager getProgressDisplayManager();
-    
-    
-    /**
-     * Get the task dispatcher
-     * @return 
-     */
-    ITaskDispatcher getTaskDispatcher();
-    
-    
-    /**
-     * Get the block placer
-     * @return 
-     */
-    IBlockPlacer getBlockPlacer();
-    
-    
-    /**
-     * Get the physics watcher
-     * @return 
-     */
-    IPhysicsWatch getPhysicsWatcher();
-    
+public interface IPlayerManager {
 
     /**
-     * The player manager
-     * @return 
+     * Get the player wrapper based on bukkit player class (null = console)
+     *
+     * @param player
+     * @return
      */
-    IPlayerManager getPlayerManager();
+    PlayerEntry getPlayer(Player player);
+
+    /**
+     * Get the player wrapper based on UUID
+     *
+     * @param playerUuid
+     * @return NEver returns null
+     */
+    PlayerEntry getPlayer(UUID playerUuid);
+
+    /**
+     * Gets player wrapper from player name
+     *
+     * @param playerName
+     * @return never returns null
+     */
+    PlayerEntry getPlayer(String playerName);
+    
 }
