@@ -60,8 +60,8 @@ import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.utils.Pair;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
@@ -93,7 +93,7 @@ public class PlayerWrapper implements Player {
         if (m_entry == null) {
             synchronized (m_mutex) {
                 if (m_entry == null) {
-                    PlayerManager pm = AsyncWorldEditMain.getInstance().getPlayerManager();
+                    IPlayerManager pm = AsyncWorldEditMain.getInstance().getPlayerManager();
                     m_entry = pm.getPlayer(m_parent.getName());
                 }
             }
@@ -112,7 +112,7 @@ public class PlayerWrapper implements Player {
                     if (m_parent instanceof BukkitPlayer) {
                         m_uuid = ((BukkitPlayer) m_parent).getPlayer().getUniqueId();
                     } else {
-                        PlayerManager pm = AsyncWorldEditMain.getInstance().getPlayerManager();
+                        IPlayerManager pm = AsyncWorldEditMain.getInstance().getPlayerManager();
                         PlayerEntry entry = pm.getPlayer(m_parent.getName());
                         return entry.getUUID();
                     }

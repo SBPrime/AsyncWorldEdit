@@ -64,12 +64,12 @@ import java.util.List;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RegenerateEntry;
-import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentActionEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntryEx;
@@ -131,12 +131,12 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * The block placer
      */
-    private final BlockPlacer m_blockPlacer;
+    private final IBlockPlacer m_blockPlacer;
 
     /**
      * The dispather
      */
-    private final TaskDispatcher m_dispatcher;
+    private final ITaskDispatcher m_dispatcher;
 
     /**
      * The blocks hub

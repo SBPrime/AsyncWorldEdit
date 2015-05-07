@@ -40,11 +40,8 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
-import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.ActionEx;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
@@ -67,7 +64,7 @@ public class ActionEntryEx<TException extends Exception> extends BlockPlacerEntr
     }
 
     @Override
-    public boolean process(BlockPlacer bp) {
+    public boolean process(IBlockPlacer bp) {
         try {
             m_action.execute();
 

@@ -40,6 +40,8 @@
  */
 package org.primesoft.asyncworldedit.taskdispatcher;
 
+import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
+import org.primesoft.asyncworldedit.api.taskdispatcher.IDispatcherEntry;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.Region;
@@ -62,7 +64,7 @@ import org.primesoft.asyncworldedit.utils.Func;
  *
  * @author SBPrime
  */
-public class TaskDispatcher implements Runnable {
+public class TaskDispatcher implements Runnable, ITaskDispatcher {
 
     /**
      * MTA mutex
@@ -124,6 +126,7 @@ public class TaskDispatcher implements Runnable {
      *
      * @return
      */
+    @Override
     public boolean isPaused() {
         return m_isPaused;
     }
@@ -133,6 +136,7 @@ public class TaskDispatcher implements Runnable {
      *
      * @param pause
      */
+    @Override
     public void setPause(boolean pause) {
         m_isPaused = pause;
     }
@@ -255,6 +259,7 @@ public class TaskDispatcher implements Runnable {
      *
      * @param entry
      */
+    @Override
     public void addFastTask(IDispatcherEntry entry) {
         synchronized (m_fastTasks) {
             m_fastTasks.add(entry);
@@ -268,6 +273,7 @@ public class TaskDispatcher implements Runnable {
      *
      * @return
      */
+    @Override
     public boolean isMainTask() {
         return m_mainThread == Thread.currentThread();
     }
@@ -340,10 +346,12 @@ public class TaskDispatcher implements Runnable {
      * Perform operation using a safe wrapper. If the basic operation fails
      * queue it on dispatcher
      *
+     * @param mutex
      * @param action
      * @param world
      * @param pos
      */
+    @Override
     public void performSafe(Object mutex, Action action, World world, Vector pos) {
         synchronized (mutex) {
             int cx = pos.getBlockX() >> 4;
@@ -383,6 +391,7 @@ public class TaskDispatcher implements Runnable {
      * @param world
      * @param region
      */
+    @Override
     public void performSafe(Object mutex, Action action, World world, Region region) {
         synchronized (mutex) {
             Set<Vector2D> chunks = region.getChunks();
@@ -433,6 +442,7 @@ public class TaskDispatcher implements Runnable {
      * @param region
      * @return
      */
+    @Override
     public <T> T performSafe(Object mutex, Func<T> action, World world, Region region) {
         synchronized (mutex) {
             Set<Vector2D> chunks = region.getChunks();
@@ -482,6 +492,7 @@ public class TaskDispatcher implements Runnable {
      * @param pos
      * @return
      */
+    @Override
     public <T> T performSafe(Object mutex, Func<T> action, World world, Vector pos) {
         synchronized (mutex) {
             int cx = pos.getBlockX() >> 4;
@@ -518,6 +529,7 @@ public class TaskDispatcher implements Runnable {
      * @param mutex
      * @param action
      */
+    @Override
     public void performSafe(Object mutex, Action action) {
         synchronized (mutex) {
             try {
@@ -543,6 +555,7 @@ public class TaskDispatcher implements Runnable {
      * @param action
      * @return
      */
+    @Override
     public <T> T performSafe(Object mutex, Func<T> action) {
         synchronized (mutex) {
             try {

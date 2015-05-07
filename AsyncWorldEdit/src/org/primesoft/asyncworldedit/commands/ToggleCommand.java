@@ -40,9 +40,9 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
-import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.*;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
@@ -58,7 +58,7 @@ public class ToggleCommand {
             return;
         }
 
-        PlayerManager manager = sender.getPlayerManager();
+        IPlayerManager manager = sender.getPlayerManager();
         PlayerEntry wrapper;
         boolean mode;
 

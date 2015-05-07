@@ -41,13 +41,15 @@
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
  */
 public class WorldExtentActionEntry
         extends WorldExtentBlockEntry {
@@ -61,11 +63,11 @@ public class WorldExtentActionEntry
     }
 
     @Override
-    public boolean process(BlockPlacer bp) {
+    public boolean process(IBlockPlacer bp) {
         m_function.execute();
 
         if (m_worldName != null) {
-            bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
+            ((BlockPlacer)bp).getPhysicsWatcher().removeLocation(m_worldName, m_location);
         }
         
         return true;

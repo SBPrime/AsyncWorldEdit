@@ -40,19 +40,20 @@
  */
 package org.primesoft.asyncworldedit.playerManager;
 
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 import java.util.HashMap;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 
 /**
  *
  * @author SBPrime
  */
-public class PlayerManager {
+public class PlayerManager implements IPlayerManager {
 
     private final AsyncWorldEditMain m_parrent;
 
@@ -150,6 +151,7 @@ public class PlayerManager {
      * @param player
      * @return
      */
+    @Override
     public PlayerEntry getPlayer(Player player) {
         return getPlayer(player != null ? player.getUniqueId() : PlayerEntry.UUID_CONSOLE);
     }
@@ -160,6 +162,7 @@ public class PlayerManager {
      * @param playerUuid
      * @return NEver returns null
      */
+    @Override
     public PlayerEntry getPlayer(UUID playerUuid) {
         if (playerUuid == null) {
             return PlayerEntry.CONSOLE;
@@ -186,6 +189,7 @@ public class PlayerManager {
      * @param playerName
      * @return never returns null
      */
+    @Override
     public PlayerEntry getPlayer(String playerName) {
         if (playerName == null || playerName.length() == 0) {
             return PlayerEntry.CONSOLE;
@@ -223,7 +227,7 @@ public class PlayerManager {
             return PlayerEntry.UNKNOWN;
         }
 
-        BlockPlacer bp = m_parrent.getBlockPlacer();
+        IBlockPlacer bp = m_parrent.getBlockPlacer();
         PlayerEntry[] queuedEntries = bp.getAllPlayers();
         if (queuedEntries == null) {
             return PlayerEntry.UNKNOWN;

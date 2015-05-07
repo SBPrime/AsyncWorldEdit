@@ -40,6 +40,8 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+
 /**
  *
  * @author SBPrime
@@ -89,5 +91,5 @@ public abstract class BlockPlacerEntry {
      * @param bp
      * @return true if operation was successful
      */
-    public abstract boolean process(BlockPlacer bp);
+    public abstract boolean process(IBlockPlacer bp);
 }

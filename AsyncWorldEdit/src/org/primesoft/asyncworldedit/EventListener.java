@@ -51,6 +51,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
@@ -62,19 +63,19 @@ public class EventListener implements Listener {
     private final AsyncWorldEditMain m_parent;
 
     public EventListener(AsyncWorldEditMain parent) {
-        m_parent = parent;
+        m_parent = parent;        
     }
     
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        m_parent.getPlayerManager().removePlayer(event.getPlayer());
+        ((PlayerManager)m_parent.getPlayerManager()).removePlayer(event.getPlayer());
     }
     
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
 
-        final PlayerEntry entry = m_parent.getPlayerManager().addPlayer(player);
+        final PlayerEntry entry = ((PlayerManager)m_parent.getPlayerManager()).addPlayer(player);
 
         if (!PermissionManager.isAllowed(player, Permission.ANNOUNCE_VERSION)) {
             return;

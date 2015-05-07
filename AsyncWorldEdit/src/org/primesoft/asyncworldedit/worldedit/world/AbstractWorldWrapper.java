@@ -44,7 +44,7 @@ import com.sk89q.worldedit.world.World;
 
 /**
  *
- * @author prime
+ * @author SBPrime
  */
 public abstract class AbstractWorldWrapper implements World {
     /**

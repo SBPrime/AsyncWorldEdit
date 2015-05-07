@@ -46,7 +46,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 
@@ -67,7 +67,7 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
     /**
      * The blocks placer
      */
-    private final BlockPlacer m_blockPlacer;
+    private final IBlockPlacer m_blockPlacer;
 
     /**
      * Parent clipboard

@@ -41,13 +41,15 @@
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
+ * @param <T>
  */
 public class WorldExtentFuncEntry<T>
         extends WorldExtentBlockEntry {
@@ -61,11 +63,11 @@ public class WorldExtentFuncEntry<T>
     }
 
     @Override
-    public boolean process(BlockPlacer bp) {        
+    public boolean process(IBlockPlacer bp) {        
         T result = m_function.execute();
 
         if (m_worldName != null) {
-            bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
+            ((BlockPlacer)bp).getPhysicsWatcher().removeLocation(m_worldName, m_location);
         }
         
         if (result instanceof Boolean) {

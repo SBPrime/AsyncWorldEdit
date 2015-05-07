@@ -40,11 +40,11 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerListener;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.PhysicsWatch;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -59,13 +59,14 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 
 import java.util.*;
+import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 
 /**
  *
  * @author SBPrime
  */
-public class BlockPlacer {
+public class BlockPlacer implements IBlockPlacer {
 
     /**
      * Bukkit scheduler
@@ -80,7 +81,7 @@ public class BlockPlacer {
     /**
      * The physics watcher
      */
-    private final PhysicsWatch m_physicsWatcher;
+    private final IPhysicsWatch m_physicsWatcher;
 
     /**
      * Current scheduler task
@@ -142,6 +143,7 @@ public class BlockPlacer {
      * Is the blocks placer paused
      * @return 
      */
+    @Override
     public boolean isPaused() {
         return m_isPaused;
     }
@@ -151,6 +153,7 @@ public class BlockPlacer {
      * Set pause on blocks placer
      * @param pause 
      */
+    @Override
     public void setPause(boolean pause) {
         m_isPaused = pause;
     }
@@ -160,7 +163,7 @@ public class BlockPlacer {
      *
      * @return
      */
-    public PhysicsWatch getPhysicsWatcher() {
+    public IPhysicsWatch getPhysicsWatcher() {
         return m_physicsWatcher;
     }
 
@@ -210,6 +213,7 @@ public class BlockPlacer {
      *
      * @param listener
      */
+    @Override
     public void addListener(IBlockPlacerListener listener) {
         if (listener == null) {
             return;
@@ -226,6 +230,7 @@ public class BlockPlacer {
      *
      * @param listener
      */
+    @Override
     public void removeListener(IBlockPlacerListener listener) {
         if (listener == null) {
             return;
@@ -436,6 +441,7 @@ public class BlockPlacer {
      * @param player
      * @return
      */
+    @Override
     public int getJobId(PlayerEntry player) {
         BlockPlacerPlayer playerEntry;
         synchronized (m_mutex) {
@@ -457,6 +463,7 @@ public class BlockPlacer {
      * @param jobId job ID
      * @return
      */
+    @Override
     public JobEntry getJob(PlayerEntry player, int jobId) {
         synchronized (m_mutex) {
             if (!m_blocks.containsKey(player)) {
@@ -474,6 +481,7 @@ public class BlockPlacer {
      * @param job the job
      * @return
      */
+    @Override
     public boolean addJob(PlayerEntry player, JobEntry job) {
         boolean result;
 
@@ -510,6 +518,7 @@ public class BlockPlacer {
      * @param entry
      * @return
      */
+    @Override
     public boolean addTasks(PlayerEntry player, BlockPlacerEntry entry) {
         if (player == null) {
             return false;
@@ -624,6 +633,7 @@ public class BlockPlacer {
      * @param jobId
      * @return
      */
+    @Override
     public int cancelJob(PlayerEntry player, int jobId) {
         int newSize, result;
         BlockPlacerPlayer playerEntry;
@@ -704,6 +714,7 @@ public class BlockPlacer {
      * @param player
      * @return
      */
+    @Override
     public int purge(PlayerEntry player) {
         int result = 0;
         synchronized (m_mutex) {
@@ -749,6 +760,7 @@ public class BlockPlacer {
      *
      * @return Number of purged job entries
      */
+    @Override
     public int purgeAll() {
         int result = 0;
         synchronized (m_mutex) {
@@ -765,6 +777,7 @@ public class BlockPlacer {
      *
      * @return players list
      */
+    @Override
     public PlayerEntry[] getAllPlayers() {
         synchronized (m_mutex) {
             return m_blocks.keySet().toArray(new PlayerEntry[0]);
@@ -777,6 +790,7 @@ public class BlockPlacer {
      * @param player player login
      * @return number of stored events
      */
+    @Override
     public BlockPlacerPlayer getPlayerEvents(PlayerEntry player) {
         synchronized (m_mutex) {
             if (m_blocks.containsKey(player)) {
@@ -838,6 +852,7 @@ public class BlockPlacer {
      * @param player
      * @param jobEntry
      */
+    @Override
     public void removeJob(final PlayerEntry player, JobEntry jobEntry) {
         BlockPlacerPlayer playerEntry;
         synchronized (m_mutex) {
@@ -966,6 +981,7 @@ public class BlockPlacer {
      * @param jobName
      * @param action
      */
+    @Override
     public void performAsAsyncJob(final ThreadSafeEditSession editSession,
             final PlayerEntry player, final String jobName,
             final FuncParamEx<Integer, CancelabeEditSession, MaxChangedBlocksException> action) {

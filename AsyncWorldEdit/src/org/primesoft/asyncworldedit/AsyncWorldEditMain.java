@@ -59,7 +59,7 @@ import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerManager;
-import org.primesoft.asyncworldedit.plotme.IPlotMeFix;
+import org.primesoft.asyncworldedit.api.IPlotMeFix;
 import org.primesoft.asyncworldedit.plotme.NullFix;
 import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.strings.MessageType;
@@ -71,8 +71,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
+import org.primesoft.asyncworldedit.api.IPhysicsWatch;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
+import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.progressDisplay.ProgressDisplayManager;
 
 
@@ -101,11 +104,12 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
     private IProgressDisplayManager m_progressDisplay;
     private InjectorCore m_aweInjector;
 
-    public PlayerManager getPlayerManager() {
+    public IPlayerManager getPlayerManager() {
         return m_playerManager;
     }
 
-    public PhysicsWatch getPhysicsWatcher() {
+    @Override
+    public IPhysicsWatch getPhysicsWatcher() {
         return m_physicsWatcher;
     }
 
@@ -127,11 +131,12 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
         m_plotMeFix = plotMeFix;
     }
 
-    public BlockPlacer getBlockPlacer() {
+    public IBlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
 
-    public TaskDispatcher getTaskDispatcher() {
+    @Override
+    public ITaskDispatcher getTaskDispatcher() {
         return m_dispatcher;
     }
 

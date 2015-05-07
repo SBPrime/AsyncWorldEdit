@@ -42,12 +42,11 @@ package org.primesoft.asyncworldedit.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.ChatColor;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerPlayer;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.strings.MessageType;
@@ -67,7 +66,7 @@ public class JobsCommand {
             return;
         }
 
-        BlockPlacer bPlacer = sender.getBlockPlacer();
+        BlockPlacer bPlacer = (BlockPlacer)sender.getBlockPlacer();
         String playerName = null;
         Permission perm = Permission.JOBS_ALL;
         boolean onlyInGame = false;
@@ -149,7 +148,7 @@ public class JobsCommand {
             return;
         }
 
-        final PlayerManager pm = sender.getPlayerManager();
+        final IPlayerManager pm = sender.getPlayerManager();
         if (!all) {
             PlayerEntry playerEntry = pm.getPlayer(playerName);
 

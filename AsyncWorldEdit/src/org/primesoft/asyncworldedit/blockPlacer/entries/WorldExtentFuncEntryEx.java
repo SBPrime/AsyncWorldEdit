@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.FuncEx;
@@ -48,7 +49,7 @@ import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
  * @param <T> Func result type
  * @param <TException> Exception type
  */
@@ -65,7 +66,7 @@ public class WorldExtentFuncEntryEx<T, TException extends Exception>
     }
 
     @Override
-    public boolean process(BlockPlacer bp) {
+    public boolean process(IBlockPlacer bp) {
         T funcResult;
 
         try {
@@ -77,7 +78,7 @@ public class WorldExtentFuncEntryEx<T, TException extends Exception>
         finally
         {
             if (m_worldName != null) {
-                bp.getPhysicsWatcher().removeLocation(m_worldName, m_location);
+                ((BlockPlacer)bp).getPhysicsWatcher().removeLocation(m_worldName, m_location);
             }
         }
 

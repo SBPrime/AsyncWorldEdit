@@ -38,16 +38,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.plotme;
+package org.primesoft.asyncworldedit.api;
 
-import org.bukkit.entity.Player;
+import com.sk89q.worldedit.Vector;
 
 /**
  *
  * @author SBPrime
  */
-public interface IPlotMeFix {
-    public String getName();
+public interface IPhysicsWatch {
+
+    void addLocation(String worldName, Vector location);
+
+    void removeLocation(String worldName, Vector location);
     
-    public void setMask(Player entry);
 }

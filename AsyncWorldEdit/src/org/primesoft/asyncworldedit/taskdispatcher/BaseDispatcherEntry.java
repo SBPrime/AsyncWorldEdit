@@ -41,6 +41,8 @@
 
 package org.primesoft.asyncworldedit.taskdispatcher;
 
+import org.primesoft.asyncworldedit.api.taskdispatcher.IDispatcherEntry;
+
 /**
  *
  * @author SBPrime

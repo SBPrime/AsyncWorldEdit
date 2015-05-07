@@ -42,8 +42,8 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
@@ -287,7 +287,7 @@ public class JobEntry extends BlockPlacerEntry {
     }
 
     @Override
-    public boolean process(BlockPlacer bp) {
+    public boolean process(IBlockPlacer bp) {
         final PlayerEntry player = m_player;
 
         switch (m_status) {

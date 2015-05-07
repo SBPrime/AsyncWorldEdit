@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,54 +38,114 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.taskdispatcher;
+package org.primesoft.asyncworldedit.api.taskdispatcher;
 
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.Region;
+import org.bukkit.World;
 import org.primesoft.asyncworldedit.utils.Action;
+import org.primesoft.asyncworldedit.utils.Func;
 
 /**
  *
  * @author SBPrime
  */
-public class ActionEntry extends BaseDispatcherEntry {
+public interface ITaskDispatcher {
+
     /**
-     * Action to perform
+     * Add new fast/simple task (high priority tasks!)
+     *
+     * @param entry
      */
-    private final Action m_action;
-        
+    void addFastTask(IDispatcherEntry entry);
+
+    /**
+     * Is this thread the main bukkit thread
+     *
+     * @return
+     */
+    boolean isMainTask();
+
+    /**
+     * Is the task dispatcher paused
+     *
+     * @return
+     */
+    boolean isPaused();
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     * @param world
+     * @param pos
+     */
+    void performSafe(Object mutex, Action action, World world, Vector pos);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     * @param world
+     * @param region
+     */
+    void performSafe(Object mutex, Action action, World world, Region region);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @param world
+     * @param region
+     * @return
+     */
+    <T> T performSafe(Object mutex, Func<T> action, World world, Region region);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @param world
+     * @param pos
+     * @return
+     */
+    <T> T performSafe(Object mutex, Func<T> action, World world, Vector pos);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     */
+    void performSafe(Object mutex, Action action);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @return
+     */
+    <T> T performSafe(Object mutex, Func<T> action);
+
+    /**
+     * Set pause on task dispatcher placer
+     *
+     * @param pause
+     */
+    void setPause(boolean pause);
     
-    /**
-     * Is the task done
-     */
-    private boolean m_isDone = false;
-
-    
-    /**
-     * The action
-     * @return 
-     */
-    public Action getAction() {
-        return m_action;
-    }
-
-    /**
-     * Is the operation done
-     * @return 
-     */
-    public boolean isDone() {
-        return m_isDone;
-    }
-
-    /**
-     * Create new instance of class
-     * @param action action to perform
-     */
-    public ActionEntry(Action action) {
-        m_action = action;
-    }
-
-    @Override
-    public void Execute() {
-        m_action.execute();
-        m_isDone = true;
-    }        
 }

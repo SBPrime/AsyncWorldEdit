@@ -44,7 +44,7 @@ import org.primesoft.asyncworldedit.utils.Func;
 
 /**
  *
- * @author Prime
+ * @author SBPrime
  * @param <T>
  */
 public class FuncEntry<T> extends BaseDispatcherEntry {

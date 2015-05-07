@@ -51,8 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
@@ -88,7 +88,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
     /**
      * Async block placer
      */
-    protected final BlockPlacer m_blockPlacer;
+    protected final IBlockPlacer m_blockPlacer;
 
     public AsyncOperationProcessor(AsyncWorldEditMain plugin) {
         m_plugin = plugin;

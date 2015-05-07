@@ -67,20 +67,17 @@ import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.*;
-import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
-import org.primesoft.asyncworldedit.taskdispatcher.TaskDispatcher;
-import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.ActionEx;
 import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
@@ -103,12 +100,12 @@ public class ThreadSafeEditSession extends EditSessionStub {
     /**
      * Async block placer
      */
-    protected final BlockPlacer m_blockPlacer;
+    protected final IBlockPlacer m_blockPlacer;
 
     /**
      * The dispatcher class
      */
-    private final TaskDispatcher m_dispatcher;
+    private final ITaskDispatcher m_dispatcher;
 
     /**
      * Indicates that the async mode has been disabled (inner state)
@@ -170,7 +167,7 @@ public class ThreadSafeEditSession extends EditSessionStub {
         return m_mutex;
     }
 
-    public BlockPlacer getBlockPlacer() {
+    public IBlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
 

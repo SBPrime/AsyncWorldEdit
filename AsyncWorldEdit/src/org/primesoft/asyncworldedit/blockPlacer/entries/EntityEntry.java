@@ -42,7 +42,7 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.Vector;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.worldedit.CuboidClipboardWrapper;
 
@@ -82,7 +82,7 @@ public class EntityEntry extends BlockPlacerEntry {
     }
 
     @Override
-    public boolean process(BlockPlacer bp) {
+    public boolean process(IBlockPlacer bp) {
         synchronized (m_clipboard) {
             Object old = CuboidClipboardWrapper.getEntities(m_clipboard);
             CuboidClipboardWrapper.setEntities(m_clipboard, m_data);

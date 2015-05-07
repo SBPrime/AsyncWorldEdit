@@ -40,6 +40,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import com.sk89q.worldedit.Vector;
 import java.util.HashMap;
 import org.bukkit.Location;
@@ -53,7 +54,7 @@ import org.bukkit.event.block.*;
  *
  * @author SBPrime
  */
-public class PhysicsWatch implements Listener {
+public class PhysicsWatch implements Listener, IPhysicsWatch {
 
     /**
      * Is physics watch enabled
@@ -91,6 +92,7 @@ public class PhysicsWatch implements Listener {
     }
     
 
+    @Override
     public void addLocation(String name, Vector location) {        
         int x = location.getBlockX();
         int y = location.getBlockY();
@@ -134,6 +136,7 @@ public class PhysicsWatch implements Listener {
         }
     }
 
+    @Override
     public void removeLocation(String name, Vector location) {
         int x = location.getBlockX();
         int y = location.getBlockY();

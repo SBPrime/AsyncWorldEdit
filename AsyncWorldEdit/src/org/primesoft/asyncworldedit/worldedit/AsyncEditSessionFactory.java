@@ -50,8 +50,8 @@ import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 
 /**
  *
@@ -61,7 +61,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory {
 
     private final AsyncWorldEditMain m_parent;
     private final EventBus m_eventBus;
-    private final PlayerManager m_playerManager;
+    private final IPlayerManager m_playerManager;
     private final WorldEditPlugin m_worldEdit;
 
     /**

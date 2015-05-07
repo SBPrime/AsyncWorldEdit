@@ -42,8 +42,8 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.strings.MessageType;
@@ -83,7 +83,7 @@ public abstract class BaseTask implements Runnable {
     /**
      * The blocks placer
      */
-    protected final BlockPlacer m_blockPlacer;
+    protected final IBlockPlacer m_blockPlacer;
 
     /**
      * Job instance
@@ -96,7 +96,7 @@ public abstract class BaseTask implements Runnable {
     protected final PermissionGroup m_group;
 
     public BaseTask(final EditSession editSession, final PlayerEntry player,
-            final String commandName, BlockPlacer blocksPlacer, JobEntry job) {
+            final String commandName, IBlockPlacer blocksPlacer, JobEntry job) {
 
         m_editSession = editSession;
         m_cancelableEditSession = (editSession instanceof CancelabeEditSession) ? (CancelabeEditSession) editSession : null;

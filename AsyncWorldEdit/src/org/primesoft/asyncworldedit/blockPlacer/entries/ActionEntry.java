@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.utils.Action;
 
@@ -62,7 +62,7 @@ public class ActionEntry  extends BlockPlacerEntry {
     }
 
     @Override
-    public boolean process(BlockPlacer bp) {
+    public boolean process(IBlockPlacer bp) {
         m_action.execute();
         
         return true;

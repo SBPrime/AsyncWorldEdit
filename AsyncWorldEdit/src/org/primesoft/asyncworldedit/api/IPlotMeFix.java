@@ -38,24 +38,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.plotme;
+package org.primesoft.asyncworldedit.api;
 
-import org.primesoft.asyncworldedit.api.IPlotMeFix;
 import org.bukkit.entity.Player;
 
 /**
  *
  * @author SBPrime
  */
-public class NullFix implements IPlotMeFix {
-    @Override
-    public String getName(){
-        return "Null";
-    }
+public interface IPlotMeFix {
+    public String getName();
     
-    @Override
-    public void setMask(Player entry) {
-       
-    }
-    
+    public void setMask(Player entry);
 }

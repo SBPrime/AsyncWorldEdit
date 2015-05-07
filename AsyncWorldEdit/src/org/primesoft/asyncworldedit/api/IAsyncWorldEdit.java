@@ -40,7 +40,10 @@
  */
 package org.primesoft.asyncworldedit.api;
 
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
+import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 
 /**
  *
@@ -51,5 +54,33 @@ public interface IAsyncWorldEdit {
      * Get the progress display manager
      * @return 
      */
-    public IProgressDisplayManager getProgressDisplayManager();
+    IProgressDisplayManager getProgressDisplayManager();
+    
+    
+    /**
+     * Get the task dispatcher
+     * @return 
+     */
+    ITaskDispatcher getTaskDispatcher();
+    
+    
+    /**
+     * Get the block placer
+     * @return 
+     */
+    IBlockPlacer getBlockPlacer();
+    
+    
+    /**
+     * Get the physics watcher
+     * @return 
+     */
+    IPhysicsWatch getPhysicsWatcher();
+    
+
+    /**
+     * The player manager
+     * @return 
+     */
+    IPlayerManager getPlayerManager();
 }

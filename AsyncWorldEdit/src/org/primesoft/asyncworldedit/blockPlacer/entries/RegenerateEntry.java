@@ -42,13 +42,13 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector2D;
 import org.bukkit.World;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  * Regenerate chunk entry
- * @author Prime
+ * @author SBPrime
  */
 public class RegenerateEntry extends BlockPlacerEntry {
 
@@ -63,7 +63,7 @@ public class RegenerateEntry extends BlockPlacerEntry {
     }
 
     @Override
-    public boolean process(BlockPlacer bp) {
+    public boolean process(IBlockPlacer bp) {
         try {
             m_world.regenerateChunk(m_chunk.getBlockX(), m_chunk.getBlockZ());
             return true;

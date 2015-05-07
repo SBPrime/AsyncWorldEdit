@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,23 +38,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.taskdispatcher;
+package org.primesoft.asyncworldedit.api.playerManager;
+
+import java.util.UUID;
+import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 
 /**
  *
- * @author SBPrime
+ * @author prime
  */
-public interface IDispatcherEntry {
-    /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
+public interface IPlayerManager {
 
     /**
-     * Process the entry
-     * @return 
+     * Get the player wrapper based on bukkit player class (null = console)
+     *
+     * @param player
+     * @return
      */
-    boolean Process();
+    PlayerEntry getPlayer(Player player);
+
+    /**
+     * Get the player wrapper based on UUID
+     *
+     * @param playerUuid
+     * @return NEver returns null
+     */
+    PlayerEntry getPlayer(UUID playerUuid);
+
+    /**
+     * Gets player wrapper from player name
+     *
+     * @param playerName
+     * @return never returns null
+     */
+    PlayerEntry getPlayer(String playerName);
+    
 }

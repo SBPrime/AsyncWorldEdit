@@ -40,11 +40,10 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
-import org.bukkit.ChatColor;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
@@ -60,7 +59,7 @@ public class CancelCommand {
             return;
         }
 
-        BlockPlacer bPlacer = sender.getBlockPlacer();
+        IBlockPlacer bPlacer = sender.getBlockPlacer();
         int id;
         PlayerEntry entry;
         
