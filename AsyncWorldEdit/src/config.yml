@@ -9,17 +9,17 @@ awe:
     #maximum size of the blocks queue
     queue-max-size: 10000000
   dispatcher:
-    #maximum number of jobs performed in one runn
+    #maximum number of jobs performed in one run
     max-jobs: 2000
-    #maximum number of idle runs befor disabling dispatcher
+    #maximum number of idle runs before disabling the dispatcher
     max-idle-runs: 200
     #maximum number of miliseconds the dispatcher can use
-    #This value should by lover then 50% o 1tick (25ms)
+    #This value should be lower than 50% of 1 tick (25ms)
     max-time: 20
-  #Maximum number of blocks in queue mode before AWE forces block placing.
+  #Maximum number of blocks in que mode before AWE forces block placing.
   #Use -1 to disable force flush.
   forceFlushBlocks: 10000
-  #check for updates
+  #Check for updates
   checkVersion: true
   #Disable or enable blocks physics freeze when placing blocks
   physicsFreez: true
@@ -37,15 +37,15 @@ awe:
   #Permission node: AWE.Groups.<group name>  
   permissionGroups:
     #The group entry (at least one group is required!)
-    #If a player has multiple groups, the las one defined in the config
-    #is assigned.
+    #If a player has multiple groups, the last one defined in the config
+    #is assigned. (Lower the group the lower the 'weight' if you can compare it to PEX)
     default:
-      #Indicates that the group is default.
-      #Only one group can by default, if multiple groups are set to default
-      #the first one is used asdefault. The default group is used for players
-      #that do not have any other permission groups.
+      #Indicates that the group is called default.
+      #Only one group can be default, if multiple groups are set to default
+      #the first one is used as default. The default group is used for players
+      #that do not have any other permission groups assigned to them.
       isDefault: true
-      #Maximum number of jobs a player can have. -1 --> no job limit
+      #Maximum number of jobs a player can have. -1 = no job limit
       maxJobs: 1
       #Enable or disable auto job cancelation on player quit
       cleanOnLogout: true
@@ -53,7 +53,7 @@ awe:
       defaultMode: on
       renderer:
         #blocks to place (per-interval), this determines the max speed of block placing
-        #if you experience lag lower this and the next number, use -1 for no limit
+        #if you experience lag lower this and the next number (time), use -1 for no limit
         blocks: 10000
         #Maximum number of miliseconds spend on placing blocks, use -1 for no limit
         time: 75
