@@ -190,8 +190,8 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
 
         double usage = m_usage;
 
-        if (isPaused()) {
-            m_mainThread = Thread.currentThread();
+        m_mainThread = Thread.currentThread();
+        if (!isPaused()) {            
 
             boolean processed = false;
             for (int i = 0; i < jobsCount && (m_usage * 3 + usage) / 4 < maxTime; i++) {
