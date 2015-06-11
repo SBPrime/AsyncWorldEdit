@@ -47,6 +47,7 @@ II. Modified WorldEdit code license.
 This plugin contains modified WorldEdit code. That is released under GNU Lesser 
 General Public License. Therefore the classes:
 * com.sk89q.worldedit.EditSession,
+* com.sk89q.worldedit.command.FlattenedClipboardTransform,
 * com.sk89q.worldedit.command.ScriptingCommands,
 * com.sk89q.worldedit.command.SchematicCommands,
 * com.sk89q.worldedit.function.operation.Operations,
