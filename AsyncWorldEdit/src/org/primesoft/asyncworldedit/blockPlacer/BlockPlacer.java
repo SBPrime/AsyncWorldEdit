@@ -548,6 +548,8 @@ public class BlockPlacer implements IBlockPlacer {
             }
 
             bypass |= entry instanceof JobEntry;
+            
+            //TODO: Add wait for queue here!
             if (m_queueMaxSize > 0 && size > m_queueMaxSize && !bypass) {
                 if (!playerEntry.isInformed()) {
                     playerEntry.setInformed(true);
@@ -573,6 +575,8 @@ public class BlockPlacer implements IBlockPlacer {
                 if (entry instanceof JobEntry) {
                     playerEntry.addJob((JobEntry) entry, true);
                 }
+                
+                //TODO: Add wait for queue here!
                 if (queue.size() >= group.getQueueHardLimit() && bypass) {
                     m_lockedQueues.add(player);
                     player.say(MessageType.BLOCK_PLACER_QUEUE_FULL.format());
