@@ -1,5 +1,8 @@
 AsyncWorldEdit
 ==============
+The developement of this project has been moved to private premium version
+of AsyncWorldEdit. For details please go to: [AsyncWorldEdit - Premium](https://github.com/SBPrime/AsyncWorldEdit-Premium)
+
 
 Async WorldEdit - Edit millions of blocks without lag!
 
