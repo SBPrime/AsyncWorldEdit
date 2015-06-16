@@ -185,6 +185,10 @@ public class CancelableWorld extends AbstractWorldWrapper {
 
     @Override
     public boolean clearContainerBlockContents(Vector vector) {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
         return m_parent.clearContainerBlockContents(VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 

@@ -270,7 +270,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             public Boolean execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
 
-                if (oldBlock.equals(newBlock)) {
+                if (oldBlock.equals(newBlock) && !oldBlock.hasNbtData() && !newBlock.hasNbtData()) {
                     return false;
                 }
 
@@ -981,7 +981,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             public Boolean execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(vector);
 
-                if (oldBlock.equals(newBlock)) {
+                if (oldBlock.equals(newBlock) && !oldBlock.hasNbtData() && !newBlock.hasNbtData()) {
                     return false;
                 }
 
