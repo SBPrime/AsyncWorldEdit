@@ -535,7 +535,7 @@ public class BlockPlacer implements IBlockPlacer {
             }
             Queue<BlockPlacerEntry> queue = playerEntry.getQueue();
 
-            if (m_lockedQueues.contains(player)) {
+            if (m_lockedQueues.contains(player) && !(entry instanceof JobEntry)) {
                 return false;
             }
 

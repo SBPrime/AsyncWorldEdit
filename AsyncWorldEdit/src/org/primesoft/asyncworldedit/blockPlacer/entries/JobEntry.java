@@ -262,7 +262,7 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @return
      */
-    public String getStatusString() {
+    public String getStatusString() {                
         switch (m_status) {
             case Done:
                 return MessageType.CMD_JOBS_STATUS_DONE.format();
