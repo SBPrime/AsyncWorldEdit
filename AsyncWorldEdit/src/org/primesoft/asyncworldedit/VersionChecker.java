@@ -42,98 +42,101 @@ package org.primesoft.asyncworldedit;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.primesoft.asyncworldedit.strings.MessageType;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.utils.InOutParam;
+import org.primesoft.asyncworldedit.utils.IntUtils;
 
 /**
- * Version checker class
+ * Version checker class (Spigot)
  *
  * @author SBPrime
  */
 public class VersionChecker {
-    // Keys for extracting file information from JSON response
 
-    private static final String API_NAME_VALUE = "name";
-    /**
-     * Version url
-     */
-    private final static String s_versionUrl = "https://api.github.com/repos/SBPrime/AsyncWorldEdit/releases";
+    private static final String API_KEY = "98BE0FE67F88AB82B4C197FAF1DC3B69206EFDCC4D3B80FC83A00037510B99B4";
 
-    /**
-     * Download version page from the www
-     *
-     * @param url Version file http page
-     * @return Version page content
-     */
-    private static String downloadPage(String url) {
+    private static final int PLUGIN_ID = 327;
+
+    private static final String URL = "http://www.spigotmc.org/api/general.php";
+
+    private static final String DATA = "key=%s&resource=%s";
+
+    private static String getVersion() {
         try {
-            InputStreamReader is = new InputStreamReader(new URL(url).openStream());
-            BufferedReader br = new BufferedReader(is);
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            br.close();
-
-            return sb.toString();
-        } catch (Exception e) {
-            AsyncWorldEditMain.log("Error downloading file: " + e.getMessage());
-            return null;
+            HttpURLConnection con = (HttpURLConnection) new URL(URL).openConnection();
+            con.setDoOutput(true);
+            con.setRequestMethod("POST");
+            con.getOutputStream().write(String.format(DATA, API_KEY, PLUGIN_ID).getBytes("UTF-8"));
+            return new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
+        } catch (Exception ex) {
+            ExceptionHelper.printException(ex, "Unable to check AWE version");
         }
+
+        return null;
     }
 
     /**
      * Check if the version is up to date
      *
-     * @param version Current plugin version
+     * @param localVersion Current plugin version
      * @return Version comperation answer
      */
-    public static String CheckVersion(String version) {
-        String content = downloadPage(s_versionUrl);
+    public static String CheckVersion(String localVersion) {
+        String remoteVersion = getVersion();
 
-        if (content == null || content.isEmpty()) {
+        if (remoteVersion == null || remoteVersion.isEmpty()) {
             return MessageType.CHECK_VERSION_ERROR.format();
         }
 
-        String eVersion = null;
-        String vLatest = null;
-        
-        JSONArray array = (JSONArray) JSONValue.parse(content);
-        if (array.size() > 0) {
-            final int latestId = 0;
-            for (int i = 0; i < array.size(); i++) {
-                JSONObject jObject = (JSONObject) array.get(i);
-                String versionName = (String) jObject.get(API_NAME_VALUE);
-                String[] parts = versionName.split("[ \t-]");
+        Integer[] iLocalVersion = parseVersion(localVersion);
+        Integer[] iRemoteVersion = parseVersion(remoteVersion);
 
-                StringBuilder sb = new StringBuilder();
-                for (int j = 1;j<parts.length;j++)
-                {
-                    if (j > 1)
-                    {
-                        sb.append("-");
-                    }
-                    sb.append(parts[j]);
-                }
-                eVersion = sb.toString();
-                if (vLatest == null) {
-                    vLatest = eVersion;
-                }
-                if (eVersion != null && eVersion.length() > 0 && version.equalsIgnoreCase(eVersion)) {
-                    if (i != latestId) {
-                        return MessageType.CHECK_VERSION_OLD.format(version, vLatest);
-                    } else {
-                        return MessageType.CHECK_VERSION_LATEST.format();
-                    }
-                }
+        int local, remote;
+        for (int i = 0; i < Math.max(iLocalVersion.length, iRemoteVersion.length); i++) {
+            local = i < iLocalVersion.length ? iLocalVersion[i] : -1;
+            remote = i < iRemoteVersion.length ? iRemoteVersion[i] : -1;
+
+            if (local < remote) {
+                return MessageType.CHECK_VERSION_OLD.format(localVersion, remoteVersion);
+            } else if (local > remote) {
+                return MessageType.CHECK_VERSION_UNKNOWN.format(localVersion);
             }
         }
 
-        return MessageType.CHECK_VERSION_UNKNOWN.format(version);
+        return MessageType.CHECK_VERSION_LATEST.format();
+    }
+
+    private static Integer[] parseVersion(String localVersion) {
+        if (localVersion == null || localVersion.isEmpty()) {
+            return new Integer[0];
+        }
+
+        final Pattern pattern = Pattern.compile("([0-9.]+)");
+        Matcher m = pattern.matcher(localVersion);
+
+        if (!m.find()) {
+            return new Integer[0];
+        }
+
+        String[] parts = m.group(0).split("\\.");
+        List<Integer> result = new ArrayList<Integer>();
+        
+        for (String p : parts) {
+            InOutParam<Integer> out = InOutParam.Out();
+            if (!IntUtils.TryParseInteger(p, out)) {
+                break;
+            }
+            
+            result.add(out.getValue());
+        }
+        
+        return result.toArray(new Integer[0]);
     }
 }
