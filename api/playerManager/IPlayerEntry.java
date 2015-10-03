@@ -37,8 +37,8 @@ package org.primesoft.asyncworldedit.api.playerManager;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.configuration.PermissionGroup;
-import org.primesoft.asyncworldedit.permissions.Permission;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.permissions.IPermission;
 
 /**
  *
@@ -65,9 +65,9 @@ public interface IPlayerEntry {
 
     /**
      * Get the permission group
-     * @return 
+     * @return
      */
-    PermissionGroup getPermissionGroup();
+    IPermissionGroup getPermissionGroup();
 
     /**
      * Get the wrapped player
@@ -91,9 +91,9 @@ public interface IPlayerEntry {
     /**
      * Get the 
      * @param permission
-     * @return 
+     * @return is the player allowed this permission
      */
-    boolean isAllowed(Permission permission);
+    boolean isAllowed(IPermission permission);
 
     /**
      * Is this the console
@@ -145,6 +145,6 @@ public interface IPlayerEntry {
      * @param player
      * @param permissionGroup
      */
-    void update(Player player, PermissionGroup permissionGroup);
+    void update(Player player, IPermissionGroup permissionGroup);
     
 }

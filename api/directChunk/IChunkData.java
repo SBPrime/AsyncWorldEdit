@@ -35,7 +35,7 @@
  */
 package org.primesoft.asyncworldedit.api.directChunk;
 
-import org.primesoft.asyncworldedit.utils.InOutParam;
+import org.primesoft.asyncworldedit.api.utils.IInOutParam;
 
 /**
  * The direct chunk data
@@ -154,7 +154,7 @@ public interface IChunkData extends IBaseChunkData {
      * @param y
      * @param z
      * @param tileEntity The TileEntity
-     * @return 
+     * @return
      */
-    char getBlock(int x, int y, int z, InOutParam<ISerializedTileEntity> tileEntity);
+    char getBlock(int x, int y, int z, IInOutParam<ISerializedTileEntity> tileEntity);
 }

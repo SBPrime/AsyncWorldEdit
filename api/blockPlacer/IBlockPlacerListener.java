@@ -35,7 +35,8 @@
  */
 package org.primesoft.asyncworldedit.api.blockPlacer;
 
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
+
 
 /**
  * Listener that receives events from BlockPlacer about job added/removed
@@ -46,11 +47,11 @@ public interface IBlockPlacerListener {
      * Job added event
      * @param job 
      */
-    void jobAdded(JobEntry job);
+    void jobAdded(IJobEntry job);
     
     /**
      * Job removed event
      * @param job 
      */
-    void jobRemoved(JobEntry job);
+    void jobRemoved(IJobEntry job);
 }

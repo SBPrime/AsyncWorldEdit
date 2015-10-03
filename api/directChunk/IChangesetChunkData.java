@@ -35,8 +35,6 @@
  */
 package org.primesoft.asyncworldedit.api.directChunk;
 
-import org.primesoft.asyncworldedit.directChunk.BlockEntry;
-
 /**
  *
  * @author SBPrime
@@ -59,7 +57,7 @@ public interface IChangesetChunkData extends IBaseChunkData {
     
     /**
      * Get the stored blocks
-     * @return 
+     * @return
      */
-    BlockEntry[] getChangedBlocks();
+    IBlockEntry[] getChangedBlocks();
 }

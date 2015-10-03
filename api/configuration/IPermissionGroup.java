@@ -33,76 +33,96 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.directChunk;
-
-import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.utils.IInOutParam;
+package org.primesoft.asyncworldedit.api.configuration;
 
 /**
- * The direct chunk API class
+ *
  * @author SBPrime
  */
-public interface IDirectChunkAPI {
+public interface IPermissionGroup {
+
     /**
-     * Wrap bukkit chunk into direct chunk api
-     * @param chunk
-     * @param player
-     * @return 
-     */
-    IWrappedChunk wrapChunk(Chunk chunk, IPlayerEntry player);
-    
-    
-    /**
-     * Create an empty chunk data
-     * @return 
-     */
-    IChunkData createChunkData();
-    
-    
-    /**
-     * Create an lazy chunk data
-     * @param chunk
-     * @return 
-     */
-    IChangesetChunkData createLazyChunkData(IWrappedChunk chunk);
-    
-    
-    /**
-     * Converts material and data to chunk section id
-     * @param m
-     * @param data
-     * @return 
-     */
-    char getCombinedId(Material m, int data);
-    
-    
-    /**
-     * Converts type and data to chunk section id
-     * @param type
-     * @param data
-     * @return 
-     */
-    char getCombinedId(int type, int data);
-    
-    
-    /**
-     * Get WorldEdit base blocks
-     * @param type
-     * @param nbt
-     * @return 
-     */
-    BaseBlock getBaseBlock(char type, CompoundTag nbt);
-    
-    
-    /**
-     * Convert combined ID to Material and data
-     * @param combinedId
-     * @param data
+     * Kill all player jobs on logout
+     *
      * @return
      */
-    Material convertId(char combinedId, IInOutParam<Integer> data);
+    boolean getCleanOnLogout();
+
+    /**
+     * Maximum number of concurrent jobs
+     *
+     * @return
+     */
+    int getMaxJobs();
+
+    /**
+     * The permission node
+     *
+     * @return
+     */
+    String getPermissionNode();
+
+    /**
+     * maximum size of the player block queue
+     *
+     * @return
+     */
+    int getQueueHardLimit();
+
+    /**
+     * number of blocks on the player queue when to stop placing blocks
+     *
+     * @return
+     */
+    int getQueueSoftLimit();
+
+    /**
+     * Number of blocks placed in each run
+     *
+     * @return
+     */
+    int getRendererBlocks();
+
+    /**
+     * Maximum number of miliseconds spend on placing blocks
+     *
+     * @return
+     */
+    int getRendererTime();
+
+    /**
+     * Use the bar api to display progress
+     *
+     * @return
+     */
+    boolean isBarApiProgressEnabled();
+
+    /**
+     * Use chat to display progress
+     *
+     * @return
+     */
+    boolean isChatProgressEnabled();
+
+    /**
+     * Is the group default
+     *
+     * @return
+     */
+    boolean isDefault();
+
+    /**
+     * The AWE mode when player logins
+     *
+     * @return
+     */
+    boolean isOnByDefault();
+
+    /**
+     * is async world edit talkative
+     *
+     * @return
+     */
+    boolean isTalkative();
+    
 }

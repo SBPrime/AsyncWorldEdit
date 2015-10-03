@@ -37,11 +37,12 @@ package org.primesoft.asyncworldedit.api.playerManager;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+
 
 /**
  *
- * @author prime
+ * @author SBPrime
  */
 public interface IPlayerManager {
     /**
@@ -75,9 +76,9 @@ public interface IPlayerManager {
      * @param player
      * @param name
      * @param group
-     * @return 
+     * @return
      */
-    IPlayerEntry createPlayer(Player player, String name, PermissionGroup group);
+    IPlayerEntry createPlayer(Player player, String name, IPermissionGroup group);
     
     /**
      * Create new player entry (do not add to the manager)

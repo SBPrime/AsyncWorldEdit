@@ -36,7 +36,6 @@
 package org.primesoft.asyncworldedit.api.directChunk;
 
 import java.util.UUID;
-import org.primesoft.asyncworldedit.directChunk.BlockEntry;
 
 /**
  *
@@ -48,5 +47,5 @@ public interface IChunkUndoData {
     
     public ISerializedEntity[] getRemovedEntitys();
 
-    public BlockEntry[] getBlocks();
+    public IBlockEntry[] getBlocks();
 }

@@ -33,76 +33,82 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.directChunk;
+package org.primesoft.asyncworldedit.api.blockPlacer.entries;
 
-import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.utils.IInOutParam;
 
 /**
- * The direct chunk API class
+ *
  * @author SBPrime
  */
-public interface IDirectChunkAPI {
+public interface IJobEntry extends IBlockPlacerEntry {
+
     /**
-     * Wrap bukkit chunk into direct chunk api
-     * @param chunk
-     * @param player
-     * @return 
+     * Add job state change listener
+     *
+     * @param listener
      */
-    IWrappedChunk wrapChunk(Chunk chunk, IPlayerEntry player);
-    
-    
+    void addStateChangedListener(IJobEntryListener listener);
+
     /**
-     * Create an empty chunk data
-     * @return 
+     * Cancel the job
      */
-    IChunkData createChunkData();
-    
-    
+    void cancel();
+
     /**
-     * Create an lazy chunk data
-     * @param chunk
-     * @return 
-     */
-    IChangesetChunkData createLazyChunkData(IWrappedChunk chunk);
-    
-    
-    /**
-     * Converts material and data to chunk section id
-     * @param m
-     * @param data
-     * @return 
-     */
-    char getCombinedId(Material m, int data);
-    
-    
-    /**
-     * Converts type and data to chunk section id
-     * @param type
-     * @param data
-     * @return 
-     */
-    char getCombinedId(int type, int data);
-    
-    
-    /**
-     * Get WorldEdit base blocks
-     * @param type
-     * @param nbt
-     * @return 
-     */
-    BaseBlock getBaseBlock(char type, CompoundTag nbt);
-    
-    
-    /**
-     * Convert combined ID to Material and data
-     * @param combinedId
-     * @param data
+     * Get the operation name
+     *
      * @return
      */
-    Material convertId(char combinedId, IInOutParam<Integer> data);
+    String getName();
+
+    /**
+     * Get the player UUID
+     *
+     * @return
+     */
+    IPlayerEntry getPlayer();
+
+    /**
+     * Is the job started
+     *
+     * @return
+     */
+    JobStatus getStatus();
+
+    /**
+     * Convert job status to string
+     *
+     * @return
+     */
+    String getStatusString();
+
+    /**
+     * Is the async task done
+     *
+     * @return
+     */
+    boolean isTaskDone();
+
+    /**
+     * Remove the change state listener
+     *
+     * @param listener
+     */
+    void removeStateChangedListener(IJobEntryListener listener);
+
+    /**
+     * Set the job state
+     *
+     * @param newStatus
+     */
+    void setStatus(JobStatus newStatus);
+
+    /**
+     * Async task has finished
+     */
+    void taskDone();
+    
 }

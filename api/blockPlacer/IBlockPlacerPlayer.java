@@ -33,76 +33,131 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.directChunk;
+package org.primesoft.asyncworldedit.api.blockPlacer;
 
-import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.utils.IInOutParam;
+import java.util.List;
+import java.util.Queue;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 
 /**
- * The direct chunk API class
+ *
  * @author SBPrime
  */
-public interface IDirectChunkAPI {
+public interface IBlockPlacerPlayer {
+
     /**
-     * Wrap bukkit chunk into direct chunk api
-     * @param chunk
-     * @param player
-     * @return 
-     */
-    IWrappedChunk wrapChunk(Chunk chunk, IPlayerEntry player);
-    
-    
-    /**
-     * Create an empty chunk data
-     * @return 
-     */
-    IChunkData createChunkData();
-    
-    
-    /**
-     * Create an lazy chunk data
-     * @param chunk
-     * @return 
-     */
-    IChangesetChunkData createLazyChunkData(IWrappedChunk chunk);
-    
-    
-    /**
-     * Converts material and data to chunk section id
-     * @param m
-     * @param data
-     * @return 
-     */
-    char getCombinedId(Material m, int data);
-    
-    
-    /**
-     * Converts type and data to chunk section id
-     * @param type
-     * @param data
-     * @return 
-     */
-    char getCombinedId(int type, int data);
-    
-    
-    /**
-     * Get WorldEdit base blocks
-     * @param type
-     * @param nbt
-     * @return 
-     */
-    BaseBlock getBaseBlock(char type, CompoundTag nbt);
-    
-    
-    /**
-     * Convert combined ID to Material and data
-     * @param combinedId
-     * @param data
+     * Add new job
+     *
+     * @param job
+     * @param force
      * @return
      */
-    Material convertId(char combinedId, IInOutParam<Integer> data);
+    boolean addJob(IJobEntry job, boolean force);
+
+    /**
+     * Get job ID
+     *
+     * @param jobId job ID
+     * @return
+     */
+    IJobEntry getJob(int jobId);
+
+    /**
+     * Get all jobs
+     *
+     * @return
+     */
+    IJobEntry[] getJobs();
+
+    /**
+     * Maximum number of blocks on queue
+     *
+     * @return
+     */
+    int getMaxQueueBlocks();
+
+    /**
+     * Get next job id
+     *
+     * @return
+     */
+    int getNextJobId();
+
+    /**
+     * Get block entries queue
+     *
+     * @return
+     */
+    Queue<IBlockPlacerEntry> getQueue();
+
+    /**
+     * Get block placing speed (blocks per second)
+     *
+     * @return
+     */
+    double getSpeed();
+
+    /**
+     * Has any job entries
+     *
+     * @return
+     */
+    boolean hasJobs();
+
+    /**
+     * Is the player informed about queue overload
+     *
+     * @return
+     */
+    boolean isInformed();
+
+    /**
+     * Print jobs message
+     *
+     * @param lines
+     */
+    void printJobs(List<String> lines);
+
+    /**
+     * Remove job
+     *
+     * @param job
+     */
+    void removeJob(IJobEntry job);
+
+    /**
+     * Remove job
+     *
+     * @param jobId
+     */
+    void removeJob(int jobId);
+
+    /**
+     * Set isInformed state
+     *
+     * @param state
+     */
+    void setInformed(boolean state);
+
+    /**
+     * Set the maximum number of blocks on queue
+     * @param val
+     */
+    void setMaxQueueBlocks(int val);
+
+    /**
+     * Change current queue to new queue
+     *
+     * @param newQueue
+     */
+    void updateQueue(Queue<IBlockPlacerEntry> newQueue);
+
+    /**
+     * Update block placing speed
+     *
+     * @param blocks number of blocks
+     * @param timeDelta time spend
+     */
+    void updateSpeed(double blocks, long timeDelta);
+    
 }

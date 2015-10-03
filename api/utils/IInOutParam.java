@@ -33,76 +33,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.directChunk;
-
-import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.utils.IInOutParam;
+package org.primesoft.asyncworldedit.api.utils;
 
 /**
- * The direct chunk API class
+ * This is a helper class that allows you to add output (and input) parameters
+ * to java functions
  * @author SBPrime
+ * @param <T>
  */
-public interface IDirectChunkAPI {
+public interface IInOutParam<T> {
+
     /**
-     * Wrap bukkit chunk into direct chunk api
-     * @param chunk
-     * @param player
-     * @return 
-     */
-    IWrappedChunk wrapChunk(Chunk chunk, IPlayerEntry player);
-    
-    
-    /**
-     * Create an empty chunk data
-     * @return 
-     */
-    IChunkData createChunkData();
-    
-    
-    /**
-     * Create an lazy chunk data
-     * @param chunk
-     * @return 
-     */
-    IChangesetChunkData createLazyChunkData(IWrappedChunk chunk);
-    
-    
-    /**
-     * Converts material and data to chunk section id
-     * @param m
-     * @param data
-     * @return 
-     */
-    char getCombinedId(Material m, int data);
-    
-    
-    /**
-     * Converts type and data to chunk section id
-     * @param type
-     * @param data
-     * @return 
-     */
-    char getCombinedId(int type, int data);
-    
-    
-    /**
-     * Get WorldEdit base blocks
-     * @param type
-     * @param nbt
-     * @return 
-     */
-    BaseBlock getBaseBlock(char type, CompoundTag nbt);
-    
-    
-    /**
-     * Convert combined ID to Material and data
-     * @param combinedId
-     * @param data
+     * Get the parameter value
+     *
      * @return
      */
-    Material convertId(char combinedId, IInOutParam<Integer> data);
+    T getValue();
+
+    /**
+     * Is the value set
+     *
+     * @return
+     */
+    boolean isSet();
+
+    /**
+     * Set the parameter value
+     *
+     * @param value
+     */
+    void setValue(T value);
+    
 }
