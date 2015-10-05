@@ -35,126 +35,74 @@
  */
 package org.primesoft.asyncworldedit.api.directChunk;
 
-import org.primesoft.asyncworldedit.utils.InOutParam;
+import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import org.bukkit.Chunk;
+import org.bukkit.Material;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.api.utils.IInOutParam;
 
 /**
- * The direct chunk data
+ * The direct chunk API class
  * @author SBPrime
  */
-public interface IChunkData extends IBaseChunkData {
+public interface IDirectChunkAPI {
     /**
-     * Get the biome data
+     * Wrap bukkit chunk into direct chunk api
+     * @param chunk
+     * @param player
      * @return 
      */
-    byte[] getBiomeData();
-
-    /**
-     * Set the biome data
-     * @param data 
-     */
-    void setBiomeData(byte[] data);
-
-    /**
-     * Get maximum block height
-     * @return 
-     */
-    int[] getMaxHeight();
-
-    /**
-     * Set the maximum height data
-     * @param data 
-     */
-    void setMaxHeight(int[] data);
-
-    /**
-     * Get the chunk height map
-     * @return 
-     */
-    int[] getHeightMap();
-
-    /**
-     * Set the chunk height map
-     * @param data 
-     */
-    void setHeightMap(int[] data);
-
-    /**
-     * Is the chunk done
-     * @return 
-     */
-    boolean isDone();
-
-    /**
-     * Set the chunk done flag
-     * @param done 
-     */
-    void setDone(boolean done);
-
-    /**
-     * Is the chunk lit
-     * @return 
-     */
-    boolean isLit();
-
-    /**
-     * Set the chunk lit flag
-     * @param lit 
-     */
-    void setLit(boolean lit);
-
-    /**
-     * Set chunk tile entities
-     * @param entities 
-     */
-    void setTileEntity(ISerializedTileEntity[] entities);
-
-    /**
-     * Get the chunk tile entities
-     * @return 
-     */
-    ISerializedTileEntity[] getTileEntity();
-
-    /**
-     * Set the chunk entities
-     * @param data 
-     */
-    void setEntity(ISerializedEntity[] data);
-
-
-    /**
-     * Set chunk section data
-     * @param y
-     * @param section 
-     */
-    void setChunkSection(int y, IChunkSection section);
-
-    /**
-     * Get the chunk section data
-     * @param y
-     * @return 
-     */
-    IChunkSection getChunkSection(int y);
-
-    /**
-     * Get the chunk gaps
-     * @return 
-     */
-    boolean[] getGaps();
-
-    /**
-     * Set the chunk gaps
-     * @param data 
-     */
-    void setGaps(boolean[] data);
+    IWrappedChunk wrapChunk(Chunk chunk, IPlayerEntry player);
     
     
     /**
-     * Get block from chunk data
-     * @param x
-     * @param y
-     * @param z
-     * @param tileEntity The TileEntity
+     * Create an empty chunk data
      * @return 
      */
-    char getBlock(int x, int y, int z, InOutParam<ISerializedTileEntity> tileEntity);
+    IChunkData createChunkData();
+    
+    
+    /**
+     * Create an lazy chunk data
+     * @param chunk
+     * @return 
+     */
+    IChangesetChunkData createLazyChunkData(IWrappedChunk chunk);
+    
+    
+    /**
+     * Converts material and data to chunk section id
+     * @param m
+     * @param data
+     * @return 
+     */
+    char getCombinedId(Material m, int data);
+    
+    
+    /**
+     * Converts type and data to chunk section id
+     * @param type
+     * @param data
+     * @return 
+     */
+    char getCombinedId(int type, int data);
+    
+    
+    /**
+     * Get WorldEdit base blocks
+     * @param type
+     * @param nbt
+     * @return 
+     */
+    BaseBlock getBaseBlock(char type, CompoundTag nbt);
+    
+    
+    /**
+     * Convert combined ID to Material and data
+     * @param combinedId
+     * @param data
+     * @return
+     */
+    Material convertId(char combinedId, IInOutParam<Integer> data);
 }

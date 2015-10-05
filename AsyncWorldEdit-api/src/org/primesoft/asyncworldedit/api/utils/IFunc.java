@@ -33,20 +33,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.directChunk;
 
-import java.util.UUID;
-import org.primesoft.asyncworldedit.directChunk.BlockEntry;
+package org.primesoft.asyncworldedit.api.utils;
 
 /**
  *
  * @author SBPrime
+ * @param <T> Function result type
  */
-public interface IChunkUndoData {
-
-    public UUID[] getAddedEntitys();
-    
-    public ISerializedEntity[] getRemovedEntitys();
-
-    public BlockEntry[] getBlocks();
+public interface IFunc<T> {
+    T execute();
 }
+

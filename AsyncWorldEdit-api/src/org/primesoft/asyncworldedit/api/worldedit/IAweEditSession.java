@@ -33,24 +33,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.blockPlacer;
+package org.primesoft.asyncworldedit.api.worldedit;
 
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.history.change.Change;
 
 /**
- * Listener that receives events from BlockPlacer about job added/removed
+ *
  * @author SBPrime
  */
-public interface IBlockPlacerListener {
+public interface IAweEditSession extends IEditSession {
+
     /**
-     * Job added event
-     * @param job 
+     * Perform a custom action
+     * @param change
+     * @param isDemanding
+     * @throws com.sk89q.worldedit.WorldEditException
      */
-    void jobAdded(JobEntry job);
-    
-    /**
-     * Job removed event
-     * @param job 
-     */
-    void jobRemoved(JobEntry job);
+    void doCustomAction(Change change, boolean isDemanding) throws WorldEditException;
 }

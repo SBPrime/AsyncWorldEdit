@@ -35,7 +35,8 @@
  */
 package org.primesoft.asyncworldedit.api.blockPlacer;
 
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
+
 
 /**
  * Listener for job state change
@@ -46,5 +47,5 @@ public interface IJobEntryListener {
      * Job state changed
      * @param job 
      */
-    void jobStateChanged(JobEntry job);
+    void jobStateChanged(IJobEntry job);
 }

@@ -33,83 +33,96 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.playerManager;
-
-import java.util.UUID;
-import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+package org.primesoft.asyncworldedit.api.configuration;
 
 /**
  *
- * @author prime
+ * @author SBPrime
  */
-public interface IPlayerManager {
+public interface IPermissionGroup {
+
     /**
-     * The console player UUID
-     * @return 
-     */
-    UUID getUuidConsole();
-    
-    /**
-     * The unknown player UUID
-     * @return 
-     */
-    UUID getUuidUnknown();
-    
-    
-    /**
-     * Get the console player entry
-     * @return 
-     */
-    IPlayerEntry getConsolePlayer();
-    
-    /**
-     * Get the unknown player entry
-     * @return 
-     */
-    IPlayerEntry getUnknownPlayer();
-    
-    
-    /**
-     * Create a new player entry (do not add to the manager)
-     * @param player
-     * @param name
-     * @param group
-     * @return 
-     */
-    IPlayerEntry createPlayer(Player player, String name, PermissionGroup group);
-    
-    /**
-     * Create new player entry (do not add to the manager)
-     * @param name
-     * @param uuid
-     * @return 
-     */
-    IPlayerEntry createPlayer(String name, UUID uuid);
-    
-    
-    /**
-     * Get the player wrapper based on bukkit player class (null = console)
+     * Kill all player jobs on logout
      *
-     * @param player
      * @return
      */
-    IPlayerEntry getPlayer(Player player);
+    boolean getCleanOnLogout();
 
     /**
-     * Get the player wrapper based on UUID
+     * Maximum number of concurrent jobs
      *
-     * @param playerUuid
-     * @return NEver returns null
+     * @return
      */
-    IPlayerEntry getPlayer(UUID playerUuid);
+    int getMaxJobs();
 
     /**
-     * Gets player wrapper from player name
+     * The permission node
      *
-     * @param playerName
-     * @return never returns null
+     * @return
      */
-    IPlayerEntry getPlayer(String playerName);
+    String getPermissionNode();
+
+    /**
+     * maximum size of the player block queue
+     *
+     * @return
+     */
+    int getQueueHardLimit();
+
+    /**
+     * number of blocks on the player queue when to stop placing blocks
+     *
+     * @return
+     */
+    int getQueueSoftLimit();
+
+    /**
+     * Number of blocks placed in each run
+     *
+     * @return
+     */
+    int getRendererBlocks();
+
+    /**
+     * Maximum number of miliseconds spend on placing blocks
+     *
+     * @return
+     */
+    int getRendererTime();
+
+    /**
+     * Use the bar api to display progress
+     *
+     * @return
+     */
+    boolean isBarApiProgressEnabled();
+
+    /**
+     * Use chat to display progress
+     *
+     * @return
+     */
+    boolean isChatProgressEnabled();
+
+    /**
+     * Is the group default
+     *
+     * @return
+     */
+    boolean isDefault();
+
+    /**
+     * The AWE mode when player logins
+     *
+     * @return
+     */
+    boolean isOnByDefault();
+
+    /**
+     * is async world edit talkative
+     *
+     * @return
+     */
+    boolean isTalkative();
     
 }
