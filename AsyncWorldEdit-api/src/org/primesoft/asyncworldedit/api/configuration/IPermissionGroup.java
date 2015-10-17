@@ -96,6 +96,12 @@ public interface IPermissionGroup {
      * @return
      */
     boolean isBarApiProgressEnabled();
+    
+    /**
+     * Is the undo disabled
+     * @return 
+     */
+    boolean isUndoDisabled();
 
     /**
      * Use chat to display progress
