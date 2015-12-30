@@ -33,110 +33,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.configuration;
+package org.primesoft.asyncworldedit.api;
 
 /**
  *
  * @author SBPrime
  */
-public interface IPermissionGroup {
+public enum MessageSystem {
 
-    /**
-     * Kill all player jobs on logout
-     *
-     * @return
-     */
-    boolean getCleanOnLogout();
+    TALKATIVE("Talkative"),
+    BAR("Bar"),
+    CHAT("Chat");
 
-    /**
-     * Maximum number of concurrent jobs
-     *
-     * @return
-     */
-    int getMaxJobs();
+    private final String m_name;
 
-    /**
-     * The permission node
-     *
-     * @return
-     */
-    String getPermissionNode();
+    public String getName() {
+        return m_name;
+    }
 
-    /**
-     * maximum size of the player block queue
-     *
-     * @return
-     */
-    int getQueueHardLimit();
-
-    /**
-     * number of blocks on the player queue when to stop placing blocks
-     *
-     * @return
-     */
-    int getQueueSoftLimit();
-
-    /**
-     * Number of blocks placed in each run
-     *
-     * @return
-     */
-    int getRendererBlocks();
-
-    /**
-     * Maximum number of miliseconds spend on placing blocks
-     *
-     * @return
-     */
-    int getRendererTime();
-
-    /**
-     * The minimum number of blocks to show the progress bar
-     *
-     * @return
-     */
-    int getBarApiProgresMinBlocks();
-
-    /**
-     * Use the bar api to display progress
-     *
-     * @return
-     */
-    boolean isBarApiProgressEnabled();
-
-    /**
-     * Is the undo disabled
-     *
-     * @return
-     */
-    boolean isUndoDisabled();
-
-    /**
-     * Use chat to display progress
-     *
-     * @return
-     */
-    boolean isChatProgressEnabled();
-
-    /**
-     * Is the group default
-     *
-     * @return
-     */
-    boolean isDefault();
-
-    /**
-     * The AWE mode when player logins
-     *
-     * @return
-     */
-    boolean isOnByDefault();
-
-    /**
-     * is async world edit talkative
-     *
-     * @return
-     */
-    boolean isTalkative();
-
+    private MessageSystem(String name) {
+        m_name = name;
+    }
 }

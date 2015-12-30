@@ -37,6 +37,7 @@ package org.primesoft.asyncworldedit.api.playerManager;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.permissions.IPermission;
 
@@ -87,7 +88,7 @@ public interface IPlayerEntry {
      * @return
      */
     Object getWaitMutex();
-
+    
     /**
      * Get the 
      * @param permission
@@ -147,4 +148,29 @@ public interface IPlayerEntry {
      */
     void update(Player player, IPermissionGroup permissionGroup);
     
+    /**
+     * Update the messaging system
+     * @param system
+     * @param state 
+     */
+    void setMessaging(MessageSystem system, boolean state);
+    
+    /**
+     * Get the messaging system status
+     * @param system
+     * @return 
+     */
+    boolean getMessaging(MessageSystem system);
+
+    /**
+     * Get the number of blocks rendered each run
+     * @return 
+     */
+    int getRenderBlocks();
+    
+    /**
+     * Set the number of rendered blocks
+     * @param b The new speed (null for default)
+     */
+    void setRenderBlocks(Integer b);
 }
