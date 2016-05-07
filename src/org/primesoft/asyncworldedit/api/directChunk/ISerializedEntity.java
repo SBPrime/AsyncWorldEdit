@@ -38,24 +38,84 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.worldedit.Vector;
+import java.util.UUID;
 
 /**
+ * Setialized entity
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface ISerializedEntity {
     /**
-     * Register new progress display backend
-     * @param backend
+     * Get the entity UUID
      * @return 
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    UUID getUuid();
+    
+
+    /**
+     * Get the entity Yaw
+     * @return 
+     */
+    float getYaw();
+
+    /**
+     * Set the enity Yaw
+     * @param angle 
+     */
+    void setYaw(float angle);
+
+    /**
+     * Get the entity pitch
+     * @return 
+     */
+    float getPitch();
+
+    /**
+     * Set the entity pitch
+     * @param angle 
+     */
+    void setPitch(float angle);
+
+    /**
+     * The entity in chunk position (in range 0-15, 0-255, 0-15)
+     *
+     * @return
+     */
+    Vector getPosition();
+
+    /**
+     * Set the entity in chunk position (in range 0-15, 0-255, 0-15)
+     *
+     * @param p
+     */
+    void setPosition(Vector p);
+
+    /**
+     * Get the raw NBT data
+     *
+     * @param cx Destination chunk X
+     * @param cz Destionation chunk Z
+     * @param newUuid New uuid to assign to the entity
+     * @return
+     */
+    CompoundTag getRawData(int cx, int cz, UUID newUuid);
+        
     
     /**
-     * Unregister progress display backend
-     * @param backend
+     * Get the vehicle entity
      * @return 
      */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    ISerializedEntity getVehicle();
+    
+    
+    /**
+     * Get the vehicle entity
+     * @param vehicle
+     */
+    void setVehicle(ISerializedEntity vehicle);
 }

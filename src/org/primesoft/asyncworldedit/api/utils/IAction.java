@@ -38,24 +38,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+
+package org.primesoft.asyncworldedit.api.utils;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
-    /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
-    
-    /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+public interface IAction {
+    void execute();
 }

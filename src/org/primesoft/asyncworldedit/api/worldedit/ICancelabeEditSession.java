@@ -38,24 +38,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.worldedit;
+
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
-    /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
-    
-    /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+public interface ICancelabeEditSession extends IAweEditSession {
+
+    void cancel();
+
+    int getJobId();
+
+    IThreadSafeEditSession getParent();
+
+    IPlayerEntry getPlayer();
+
+    boolean isCanceled();
+
+    void resetAsync();    
 }

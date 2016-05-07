@@ -38,24 +38,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.worldedit.BlockVector;
 
 /**
- *
+ * Serialized tile entity
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface ISerializedTileEntity {
     /**
-     * Register new progress display backend
-     * @param backend
+     * Get the in chunk position
      * @return 
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    BlockVector getPosition();
     
     /**
-     * Unregister progress display backend
-     * @param backend
+     * Set the in chunk position (0-16, 0-255, 0-16)
+     * @param p 
+     */
+    void setPosition(BlockVector p);
+    
+    /**
+     * Get the raw NBT data
+     * @param cx Destination chunk X
+     * @param cz Destionation chunk Z
      * @return 
      */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    CompoundTag getRawData(int cx, int cz);
 }

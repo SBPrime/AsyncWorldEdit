@@ -38,24 +38,96 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.configuration;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IPermissionGroup {
+
     /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
+     * Kill all player jobs on logout
+     *
+     * @return
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    boolean getCleanOnLogout();
+
+    /**
+     * Maximum number of concurrent jobs
+     *
+     * @return
+     */
+    int getMaxJobs();
+
+    /**
+     * The permission node
+     *
+     * @return
+     */
+    String getPermissionNode();
+
+    /**
+     * maximum size of the player block queue
+     *
+     * @return
+     */
+    int getQueueHardLimit();
+
+    /**
+     * number of blocks on the player queue when to stop placing blocks
+     *
+     * @return
+     */
+    int getQueueSoftLimit();
+
+    /**
+     * Number of blocks placed in each run
+     *
+     * @return
+     */
+    int getRendererBlocks();
+
+    /**
+     * Maximum number of miliseconds spend on placing blocks
+     *
+     * @return
+     */
+    int getRendererTime();
+
+    /**
+     * Use the bar api to display progress
+     *
+     * @return
+     */
+    boolean isBarApiProgressEnabled();
+
+    /**
+     * Use chat to display progress
+     *
+     * @return
+     */
+    boolean isChatProgressEnabled();
+
+    /**
+     * Is the group default
+     *
+     * @return
+     */
+    boolean isDefault();
+
+    /**
+     * The AWE mode when player logins
+     *
+     * @return
+     */
+    boolean isOnByDefault();
+
+    /**
+     * is async world edit talkative
+     *
+     * @return
+     */
+    boolean isTalkative();
     
-    /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
 }

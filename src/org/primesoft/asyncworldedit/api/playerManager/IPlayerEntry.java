@@ -38,24 +38,118 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.playerManager;
+
+import java.util.UUID;
+import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.permissions.IPermission;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IPlayerEntry {
+
     /**
-     * Register new progress display backend
-     * @param backend
+     * DIspose the player entry
+     */
+    void dispose();
+
+    /**
+     * Is AWE enabled
      * @return 
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    boolean getAweMode();
+
+    /**
+     * Get the player name
+     * @return 
+     */
+    String getName();
+
+    /**
+     * Get the permission group
+     * @return
+     */
+    IPermissionGroup getPermissionGroup();
+
+    /**
+     * Get the wrapped player
+     * @return 
+     */
+    Player getPlayer();
+
+    /**
+     * Get the player UUID
+     * @return 
+     */
+    UUID getUUID();
+
+    /**
+     * Get the wait mutex
+     *
+     * @return
+     */
+    Object getWaitMutex();
+
+    /**
+     * Get the 
+     * @param permission
+     * @return is the player allowed this permission
+     */
+    boolean isAllowed(IPermission permission);
+
+    /**
+     * Is this the console
+     *
+     * @return
+     */
+    boolean isConsole();
+
+    /**
+     * Is the entry disposed
+     *
+     * @return
+     */
+    boolean isDisposed();
+
+    /**
+     * Is the player in game
+     * @return 
+     */
+    boolean isInGame();
+
+    /**
+     * Is this a player
+     * @return 
+     */
+    boolean isPlayer();
+
+    /**
+     * Is this unknown
+     * @return 
+     */
+    boolean isUnknown();
+
+    /**
+     * Sand message to the player chat
+     * @param msg 
+     */
+    void say(String msg);
+
+    /**
+     * Set player AWE mode
+     * @param mode 
+     */
+    void setAweMode(boolean mode);
+
+    /**
+     * Update the player after relogin
+     *
+     * @param player
+     * @param permissionGroup
+     */
+    void update(Player player, IPermissionGroup permissionGroup);
     
-    /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
 }

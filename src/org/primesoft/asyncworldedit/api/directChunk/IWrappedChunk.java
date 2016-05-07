@@ -38,24 +38,80 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import org.bukkit.World;
 
 /**
- *
+ * Chunk manipulation class
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IWrappedChunk {
     /**
-     * Register new progress display backend
-     * @param backend
+     * Get the bukkit world
      * @return 
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    public World getWorld();
     
     /**
-     * Unregister progress display backend
-     * @param backend
+     * Get the chunk X coordinate
      * @return 
      */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    public int getX();
+    
+    /**
+     * Get the chunk Y coordinate
+     * @return 
+     */
+    public int getZ();
+    
+    
+    /**
+     * Get the chunk data
+     * @return 
+     */
+    public IChunkData getData();
+    
+    /**
+     * Set the chunk data
+     * @param data
+     * @return 
+     */
+    public boolean setData(IChunkData data);
+    
+    /**
+     * Set the chunk undo data
+     * @param data
+     * @return 
+     */
+    public boolean setData(IChunkUndoData data);
+    
+    
+    /**
+     * Set the chunk data
+     * @param data
+     * @return 
+     */
+    public IChunkUndoData setData(IChangesetChunkData data);
+
+
+    /**
+     * Flush stored data to the server     
+     */
+    public void flush();
+    
+    
+    /**
+     * Initialise the lighting
+     */
+    public void initLighting();
+    
+    
+    /**
+     * Update the light for provided position
+     * @param x
+     * @param y
+     * @param z 
+     */
+    public void updateLight(int x, int y, int z);
 }

@@ -38,24 +38,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+
+package org.primesoft.asyncworldedit.api.utils;
 
 /**
  *
  * @author SBPrime
+ * @param <TResult>
+ * @param <TParam>
+ * @param <TException>
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IFuncParamEx<TResult, TParam, TException extends Exception> {
+
     /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
+     *
+     * @param param
+     * @return
+     * @throws TException
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
-    
-    /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    TResult execute(TParam param) throws TException;
 }

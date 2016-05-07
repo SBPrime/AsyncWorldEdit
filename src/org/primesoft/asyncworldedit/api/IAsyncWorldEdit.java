@@ -41,12 +41,14 @@
 package org.primesoft.asyncworldedit.api;
 
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
+import org.primesoft.asyncworldedit.api.map.IMapUtils;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 
 /**
- *
+ * The main AsyncWorldEdit API class
  * @author SBPrime
  */
 public interface IAsyncWorldEdit {    
@@ -83,4 +85,30 @@ public interface IAsyncWorldEdit {
      * @return 
      */
     IPlayerManager getPlayerManager();
+    
+    
+    /**
+     * Get the direct chunk API
+     * @return 
+     */
+    IDirectChunkAPI getDirectChunkAPI();
+    
+    
+    /**
+     * Get the native API adapter
+     * @return 
+     */
+    IAdapter getAdapter();
+    
+    /**
+     * Get the current version of the API
+     * @return 
+     */
+    double getAPIVersion();
+    
+    /**
+     * Get the map manipulation utils
+     * @return 
+     */
+    IMapUtils getMapUtils();
 }

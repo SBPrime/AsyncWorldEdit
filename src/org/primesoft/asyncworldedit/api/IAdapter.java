@@ -38,24 +38,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api;
+
+import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
 
 /**
- *
+ * The native minecraft API provider
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IAdapter {
     /**
-     * Register new progress display backend
-     * @param backend
+     * Get the adapter version
      * @return 
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    String getVersion(); 
     
     /**
-     * Unregister progress display backend
-     * @param backend
+     * Get the direct chunk API
      * @return 
      */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    IDirectChunkAPI getDirectChunkAPI();
 }

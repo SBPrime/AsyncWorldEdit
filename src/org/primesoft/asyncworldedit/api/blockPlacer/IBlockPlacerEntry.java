@@ -38,24 +38,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.blockPlacer;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IBlockPlacerEntry {
+
     /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
+     * The job ID
+     * @return
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    int getJobId();
+
+    /**
+     * Is this task demanding, only one demanding task is allowed
+     * @return
+     */
+    boolean isDemanding();
+
+    /**
+     * process the entry
+     * @param bp
+     * @return true if operation was successful
+     */
+    boolean process(IBlockPlacer bp);
     
-    /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
 }

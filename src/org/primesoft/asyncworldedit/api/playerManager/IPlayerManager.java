@@ -1,5 +1,5 @@
 /*
- * AsyncWorldEdit API.
+ * AsyncWorldEdit API
  * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit API contributors
  *
@@ -42,21 +42,65 @@ package org.primesoft.asyncworldedit.api.playerManager;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+
 
 /**
  *
- * @author prime
+ * @author SBPrime
  */
 public interface IPlayerManager {
-
+    /**
+     * The console player UUID
+     * @return 
+     */
+    UUID getUuidConsole();
+    
+    /**
+     * The unknown player UUID
+     * @return 
+     */
+    UUID getUuidUnknown();
+    
+    
+    /**
+     * Get the console player entry
+     * @return 
+     */
+    IPlayerEntry getConsolePlayer();
+    
+    /**
+     * Get the unknown player entry
+     * @return 
+     */
+    IPlayerEntry getUnknownPlayer();
+    
+    
+    /**
+     * Create a new player entry (do not add to the manager)
+     * @param player
+     * @param name
+     * @param group
+     * @return
+     */
+    IPlayerEntry createPlayer(Player player, String name, IPermissionGroup group);
+    
+    /**
+     * Create new player entry (do not add to the manager)
+     * @param name
+     * @param uuid
+     * @return 
+     */
+    IPlayerEntry createPlayer(String name, UUID uuid);
+    
+    
     /**
      * Get the player wrapper based on bukkit player class (null = console)
      *
      * @param player
      * @return
      */
-    PlayerEntry getPlayer(Player player);
+    IPlayerEntry getPlayer(Player player);
 
     /**
      * Get the player wrapper based on UUID
@@ -64,7 +108,7 @@ public interface IPlayerManager {
      * @param playerUuid
      * @return NEver returns null
      */
-    PlayerEntry getPlayer(UUID playerUuid);
+    IPlayerEntry getPlayer(UUID playerUuid);
 
     /**
      * Gets player wrapper from player name
@@ -72,6 +116,6 @@ public interface IPlayerManager {
      * @param playerName
      * @return never returns null
      */
-    PlayerEntry getPlayer(String playerName);
+    IPlayerEntry getPlayer(String playerName);
     
 }

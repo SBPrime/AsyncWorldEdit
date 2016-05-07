@@ -38,24 +38,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.directChunk;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IChangesetChunkData extends IBaseChunkData {
     /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
+     * Get the list of added entities
+     *
+     * @return
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    ISerializedEntity[] getAddedEntities();
     
     /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
+     * Get the list of removed entities
+     *
+     * @return
      */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    ISerializedEntity[] getRemovedEntities();
+    
+    
+    /**
+     * Get the stored blocks
+     * @return
+     */
+    IBlockEntry[] getChangedBlocks();
 }

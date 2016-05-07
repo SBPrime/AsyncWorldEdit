@@ -38,24 +38,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.utils;
 
 /**
- *
+ * This is a helper class that allows you to add output (and input) parameters
+ * to java functions
  * @author SBPrime
+ * @param <T>
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IInOutParam<T> {
+
     /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
+     * Get the parameter value
+     *
+     * @return
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    T getValue();
+
+    /**
+     * Is the value set
+     *
+     * @return
+     */
+    boolean isSet();
+
+    /**
+     * Set the parameter value
+     *
+     * @param value
+     */
+    void setValue(T value);
     
-    /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
 }

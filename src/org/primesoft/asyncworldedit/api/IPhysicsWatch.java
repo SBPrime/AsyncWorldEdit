@@ -43,13 +43,26 @@ package org.primesoft.asyncworldedit.api;
 import com.sk89q.worldedit.Vector;
 
 /**
+ * This class is responsible for freezing all physics in edited regions
  *
  * @author SBPrime
  */
 public interface IPhysicsWatch {
 
+    /**
+     * Add new watched location
+     *
+     * @param worldName The world name
+     * @param location The block location
+     */
     void addLocation(String worldName, Vector location);
 
+    /**
+     * Remove watched location
+     *
+     * @param worldName the world name
+     * @param location the location
+     */
     void removeLocation(String worldName, Vector location);
-    
+
 }

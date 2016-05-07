@@ -38,24 +38,104 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.entity.Entity;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IBaseChunkData {
+
     /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
+     * Get the chunk coords
+     *
+     * @return
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    BlockVector2D getChunkCoords();
+
+    /**
+     * Set the chunk coords
+     *
+     * @param coords
+     */
+    void setChunkCoords(BlockVector2D coords);
+
+    /**
+     * Set chunk block
+     *
+     * @param x X coordinate inside chunk (0-15)
+     * @param y Y coordinate inside chunk (0-15)
+     * @param z Z coordinate inside chunk (0-15)
+     * @param b WorldEdit block
+     */
+    void setBlock(int x, int y, int z, BaseBlock b);
+
+    /**
+     * Set chunk block
+     *
+     * @param x X coordinate inside chunk (0-15)
+     * @param y Y coordinate inside chunk (0-15)
+     * @param z Z coordinate inside chunk (0-15)
+     * @param id Material ID
+     */
+    void setBlock(int x, int y, int z, char id);
+
+    /**
+     * Set chunk tile eneity
+     *
+     * @param x X coordinate inside chunk (0-15)
+     * @param y Y coordinate inside chunk (0-15)
+     * @param z Z coordinate inside chunk (0-15)
+     * @param id Material ID of the tile entitiy
+     * @param ct Tile entity NBT data
+     */
+    void setTileEntity(int x, int y, int z, char id, CompoundTag ct);
+
+    /**
+     * Remove entity from chunk
+     *
+     * @param entity
+     * @return
+     */
+    boolean removeEntity(ISerializedEntity entity);
+
+    /**
+     * Add entity to chunk
+     *
+     * @param entity
+     */
+    void addEntity(ISerializedEntity entity);
+
+    /**
+     * Add entity to chunk
+     *
+     * @param pos
+     * @param entity
+     * @return serialized entity
+     */
+    ISerializedEntity addEntity(Vector pos, Entity entity);
+
     
     /**
-     * Unregister progress display backend
-     * @param backend
+     * Get block from chunk data
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
+    BaseBlock getBlock(int x, int y, int z);
+        
+    
+    /**
+     * Get the chunk entities
      * @return 
      */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    ISerializedEntity[] getEntity();
 }

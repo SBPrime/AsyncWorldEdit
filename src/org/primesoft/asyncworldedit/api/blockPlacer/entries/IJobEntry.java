@@ -38,24 +38,82 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.blockPlacer.entries;
+
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public interface IJobEntry extends IBlockPlacerEntry {
+
     /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
+     * Add job state change listener
+     *
+     * @param listener
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
+    void addStateChangedListener(IJobEntryListener listener);
+
+    /**
+     * Cancel the job
+     */
+    void cancel();
+
+    /**
+     * Get the operation name
+     *
+     * @return
+     */
+    String getName();
+
+    /**
+     * Get the player UUID
+     *
+     * @return
+     */
+    IPlayerEntry getPlayer();
+
+    /**
+     * Is the job started
+     *
+     * @return
+     */
+    JobStatus getStatus();
+
+    /**
+     * Convert job status to string
+     *
+     * @return
+     */
+    String getStatusString();
+
+    /**
+     * Is the async task done
+     *
+     * @return
+     */
+    boolean isTaskDone();
+
+    /**
+     * Remove the change state listener
+     *
+     * @param listener
+     */
+    void removeStateChangedListener(IJobEntryListener listener);
+
+    /**
+     * Set the job state
+     *
+     * @param newStatus
+     */
+    void setStatus(JobStatus newStatus);
+
+    /**
+     * Async task has finished
+     */
+    void taskDone();
     
-    /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
-     */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
 }

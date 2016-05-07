@@ -38,23 +38,93 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.worldedit;
+
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.history.change.Change;
+import com.sk89q.worldedit.patterns.Pattern;
+import com.sk89q.worldedit.util.eventbus.EventBus;
+import java.util.Iterator;
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
- * Sipme operation to perform using the dispatcher
- * @author SBPrime
+ *
+ * @author SBPprime
  */
-public interface IDispatcherEntry {
+public interface IThreadSafeEditSession extends IAweEditSession {
+
     /**
-     * MTA mutex
+     * Add async job
+     *
+     * @param job
+     */
+    void addAsync(IJobEntry job);
+
+    /**
+     * This function checks if async mode is enabled for specific command
+     *
+     * @param operationName
+     * @return
+     */
+    boolean checkAsync(String operationName);
+
+
+    IBlockPlacer getBlockPlacer();
+
+    World getCBWorld();
+
+    EditSessionEvent getEditSessionEvent();
+
+    EventBus getEventBus();
+
+    Object getMutex();
+
+    IPlayerEntry getPlayer();
+
+    /**
+     * Check if async mode is forced
      *
      * @return
      */
-    Object getMutex();
+    boolean isAsyncForced();
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * Remov async job (done or canceled)
+     *
+     * @param job
      */
-    boolean Process();
+    void removeAsync(IJobEntry job);
+
+    /**
+     * Reset async disabled inner state (enable async mode)
+     */
+    void resetAsync();
+
+    /**
+     * Enables or disables the async mode configuration bypass this function
+     * should by used only by other plugins
+     *
+     * @param value true to enable async mode force
+     */
+    void setAsyncForced(boolean value);
+
+    boolean setBlock(int jobId, Vector position, BaseBlock block, EditSession.Stage stage) throws WorldEditException;
+
+    boolean setBlock(Vector pt, Pattern pat, int jobId) throws MaxChangedBlocksException;
+
+    boolean setBlock(Vector pt, BaseBlock block, int jobId) throws MaxChangedBlocksException;
+
+    boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId) throws MaxChangedBlocksException;    
+    
+    Iterator<Change> doUndo();
+
+    Iterator<Change> doRedo();
 }

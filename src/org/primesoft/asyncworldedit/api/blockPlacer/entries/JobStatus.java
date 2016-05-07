@@ -38,24 +38,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.progressDisplay;
+package org.primesoft.asyncworldedit.api.blockPlacer.entries;
 
 /**
  *
  * @author SBPrime
  */
-public interface IProgressDisplayManager extends IProgressDisplay {
+public enum JobStatus {
+
+    Initializing(0),
+    Preparing(1),
+    Waiting(2),
+    PlacingBlocks(3),
+    Done(4),
+    Canceled(5);
+
     /**
-     * Register new progress display backend
-     * @param backend
-     * @return 
+     * The sequence number
      */
-    public boolean registerProgressDisplay(IProgressDisplay backend);
-    
+    private final int m_seqNumber;
+
+    JobStatus(int seqNumber) {
+        m_seqNumber = seqNumber;
+    }
+
     /**
-     * Unregister progress display backend
-     * @param backend
-     * @return 
+     * Get the job state sequence number
+     *
+     * @return
      */
-    public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    public int getSeqNumber() {
+        return m_seqNumber;
+    }
 }
