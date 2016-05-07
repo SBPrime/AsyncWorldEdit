@@ -8,5 +8,6 @@
 *.iml
 *.ipr
 *.iws
+*.jar
 .idea/
 /build/
