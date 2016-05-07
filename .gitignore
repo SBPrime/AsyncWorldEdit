@@ -11,3 +11,4 @@
 *.jar
 .idea/
 /build/
+/dist/

@@ -2,8 +2,6 @@ package org.primesoft.asyncworldedit.playerManager;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.configuration.PermissionGroup;
-import org.primesoft.asyncworldedit.permissions.Permission;
 
 /**
  * Stub for the API to compile
@@ -16,14 +14,6 @@ public class PlayerEntry {
 
     public final static PlayerEntry CONSOLE = null;
     public final static PlayerEntry UNKNOWN = null;
-
-    public PlayerEntry(Player player, String name, PermissionGroup group) {
-        throw new UnsupportedOperationException("Not supported yet. This is only a STUB");
-    }
-
-    public PlayerEntry(String name, UUID uuid) {
-        throw new UnsupportedOperationException("Not supported yet. This is only a STUB");
-    }
 
     public void say(String msg) {
         throw new UnsupportedOperationException("Not supported yet. This is only a STUB");
@@ -49,10 +39,6 @@ public class PlayerEntry {
         throw new UnsupportedOperationException("Not supported yet. This is only a STUB");
     }
 
-    public boolean isAllowed(Permission permission) {
-        throw new UnsupportedOperationException("Not supported yet. This is only a STUB");
-    }
-
     /**
      * Is this player the console
      *
@@ -71,20 +57,6 @@ public class PlayerEntry {
     }
 
     public boolean isInGame() {
-        throw new UnsupportedOperationException("Not supported yet. This is only a STUB");
-    }
-
-    public PermissionGroup getPermissionGroup() {
-        throw new UnsupportedOperationException("Not supported yet. This is only a STUB");
-    }
-
-    /**
-     * Update the player after relogin
-     *
-     * @param player
-     * @param permissionGroup
-     */
-    public void update(Player player, PermissionGroup permissionGroup) {
         throw new UnsupportedOperationException("Not supported yet. This is only a STUB");
     }
 }
