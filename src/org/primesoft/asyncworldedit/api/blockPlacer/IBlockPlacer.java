@@ -41,7 +41,6 @@
 package org.primesoft.asyncworldedit.api.blockPlacer;
 
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerPlayer;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
