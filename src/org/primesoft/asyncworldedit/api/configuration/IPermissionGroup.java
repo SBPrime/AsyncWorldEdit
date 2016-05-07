@@ -96,15 +96,23 @@ public interface IPermissionGroup {
     int getRendererTime();
 
     /**
+     * The minimum number of blocks to show the progress bar
+     *
+     * @return
+     */
+    int getBarApiProgresMinBlocks();
+
+    /**
      * Use the bar api to display progress
      *
      * @return
      */
     boolean isBarApiProgressEnabled();
-    
+
     /**
      * Is the undo disabled
-     * @return 
+     *
+     * @return
      */
     boolean isUndoDisabled();
 
@@ -135,5 +143,5 @@ public interface IPermissionGroup {
      * @return
      */
     boolean isTalkative();
-    
+
 }
