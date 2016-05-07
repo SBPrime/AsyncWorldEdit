@@ -106,6 +106,14 @@ public interface IAsyncWorldEdit {
      */
     double getAPIVersion();
     
+    
+    /**
+     * Get the current version of the API
+     * detailed in format x.y.z
+     * @return 
+     */
+    byte[] getDetailAPIVersion();
+    
     /**
      * Get the map manipulation utils
      * @return 
