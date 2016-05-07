@@ -1,7 +1,7 @@
 /*
- * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
+ * AsyncWorldEdit API.
  * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
- * Copyright (c) AsyncWorldEdit contributors
+ * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
  *

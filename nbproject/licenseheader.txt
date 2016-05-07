@@ -1,9 +1,9 @@
 <#if licenseFirst??>
 ${licenseFirst}
 </#if>
-${licensePrefix}AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
+${licensePrefix}AsyncWorldEdit API
 ${licensePrefix}Copyright (c) ${date?date?string("yyyy")}, SBPrime <https://github.com/SBPrime/>
-${licensePrefix}Copyright (c) AsyncWorldEdit contributors
+${licensePrefix}Copyright (c) AsyncWorldEdit API contributors
 ${licensePrefix?replace(" +$", "", "r")}
 ${licensePrefix}All rights reserved.
 ${licensePrefix?replace(" +$", "", "r")}
