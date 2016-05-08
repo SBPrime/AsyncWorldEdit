@@ -38,23 +38,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import com.sk89q.jnbt.CompoundTag;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IBlockEntry {
+
     /**
-     * MTA mutex
+     * Get the block ID
      *
      * @return
      */
-    Object getMutex();
+    char getId();
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * Get the NBT data
+     *
+     * @return
      */
-    boolean Process();
+    CompoundTag getNbt();
+
+    int getX();
+
+    int getY();
+
+    int getZ();
+    
 }

@@ -38,23 +38,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.worldedit;
+
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.world.World;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
-    /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
+public interface IAsyncEditSessionFactory {
 
-    /**
-     * Process the entry, the operation to perform
-     * @return 
-     */
-    boolean Process();
+    EditSession getEditSession(World world, int maxBlocks);
+
+    EditSession getEditSession(World world, int maxBlocks, Player player);
+
+    EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag);
+
+    EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, Player player);
+
+    EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, IPlayerEntry playerEntry);
+
+    IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks);
+
+    IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, Player player);
+
+    IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, BlockBag blockBag);
+
+    IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, BlockBag blockBag, Player player);
+
+    IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, BlockBag blockBag, IPlayerEntry playerEntry);    
 }

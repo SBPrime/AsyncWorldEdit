@@ -38,23 +38,91 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.worldedit.Vector;
+import java.util.UUID;
 
 /**
- * Sipme operation to perform using the dispatcher
+ * Setialized entity
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface ISerializedEntity {
     /**
-     * MTA mutex
+     * Get the entity UUID
+     * @return 
+     */
+    UUID getUuid();
+    
+
+    /**
+     * Get the entity Yaw
+     * @return 
+     */
+    float getYaw();
+
+    /**
+     * Set the enity Yaw
+     * @param angle 
+     */
+    void setYaw(float angle);
+
+    /**
+     * Get the entity pitch
+     * @return 
+     */
+    float getPitch();
+
+    /**
+     * Set the entity pitch
+     * @param angle 
+     */
+    void setPitch(float angle);
+
+    /**
+     * The entity in chunk position (in range 0-15, 0-255, 0-15)
      *
      * @return
      */
-    Object getMutex();
+    Vector getPosition();
 
     /**
-     * Process the entry, the operation to perform
+     * Set the entity in chunk position (in range 0-15, 0-255, 0-15)
+     *
+     * @param p
+     */
+    void setPosition(Vector p);
+
+    /**
+     * Get the raw NBT data
+     *
+     * @param cx Destination chunk X
+     * @param cz Destionation chunk Z
+     * @param newUuid New uuid to assign to the entity
+     * @return
+     */
+    CompoundTag getRawData(int cx, int cz, UUID newUuid);
+    
+    
+    /**
+     * Get the serialized NBT
      * @return 
      */
-    boolean Process();
+    byte[] getNBT();
+        
+    
+    /**
+     * Get the vehicle entity
+     * @return 
+     */
+    ISerializedEntity getVehicle();
+    
+    
+    /**
+     * Get the vehicle entity
+     * @param vehicle
+     */
+    void setVehicle(ISerializedEntity vehicle);
 }

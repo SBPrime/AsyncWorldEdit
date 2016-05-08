@@ -38,23 +38,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.utils;
 
 /**
- * Sipme operation to perform using the dispatcher
+ * This is a helper class that allows you to add output (and input) parameters
+ * to java functions
  * @author SBPrime
+ * @param <T>
  */
-public interface IDispatcherEntry {
+public interface IInOutParam<T> {
+
     /**
-     * MTA mutex
+     * Get the parameter value
      *
      * @return
      */
-    Object getMutex();
+    T getValue();
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * Is the value set
+     *
+     * @return
      */
-    boolean Process();
+    boolean isSet();
+
+    /**
+     * Set the parameter value
+     *
+     * @param value
+     */
+    void setValue(T value);
+    
 }

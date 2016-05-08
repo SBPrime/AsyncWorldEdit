@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit API
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
@@ -38,138 +38,125 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.blockPlacer;
+package org.primesoft.asyncworldedit.api.changesetSerializer;
 
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
+import com.sk89q.worldedit.history.change.Change;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.List;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.utils.IFuncParamEx;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
-import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 
 /**
  *
  * @author SBPrime
  */
-public interface IBlockPlacer {
+public interface ISerializerManager {
 
     /**
-     * Add new job for player
+     * Register new serializer
      *
-     * @param player player UUID
-     * @param job the job
-     * @return
+     * @param serializer
      */
-    boolean addJob(IPlayerEntry player, IJobEntry job);
+    void addSerializer(IChangesetSerializer serializer);
 
     /**
-     * Add event listener
+     * Unregister serializer
      *
-     * @param listener
+     * @param serializer
      */
-    void addListener(IBlockPlacerListener listener);
+    void removeSerializer(IChangesetSerializer serializer);
 
     /**
-     * Add task to perform in async mode
+     * Initialize the undo storage file
      *
      * @param player
+     * @param id
+     * @return
+     */
+    File open(IPlayerEntry player, int id);
+
+    /**
+     * Close undo storage file
+     *
+     * @param storageFile
+     */
+    void close(File storageFile);
+
+    /**
+     * Save changes to file
+     *
+     * @param storageFile
+     * @param data
+     */
+    void save(File storageFile, List<Change> data);
+
+    /**
+     * Load changes from file
+     *
+     * @param storageFile
+     * @param entries Number of entries to load
+     * @param player
+     * @param cancelable
+     * @return
+     */
+    List<Change> load(File storageFile, int entries, IPlayerEntry player, ICancelabeEditSession cancelable);
+
+    /**
+     * Deserialize the undo entry
+     *
      * @param entry
+     * @param storage
      * @return
      */
-    boolean addTasks(IPlayerEntry player, IBlockPlacerEntry entry);
+    Change deserialize(IUndoEntry entry, IMemoryStorage storage);
 
     /**
-     * Cancel job
+     * Serialize the change to UndoEntry
      *
-     * @param player
-     * @param jobId
+     * @param change
+     * @param storage
      * @return
      */
-    int cancelJob(IPlayerEntry player, int jobId);
+    IUndoEntry serialize(Change change, IMemoryStorage storage);
 
     /**
-     * Get all players in log
+     * Load the undo data from stream
      *
-     * @return players list
-     */
-    IPlayerEntry[] getAllPlayers();
-
-    /**
-     * Get the player job
-     *
-     * @param player player uuid
-     * @param jobId job ID
+     * @param stream
      * @return
+     * @throws IOException
      */
-    IJobEntry getJob(IPlayerEntry player, int jobId);
+    IUndoEntry load(RandomAccessFile stream) throws IOException;
 
     /**
-     * Get next job id for player
+     * Load the undo data from stream
      *
-     * @param player
+     * @param stream
      * @return
+     * @throws IOException
      */
-    int getJobId(IPlayerEntry player);
-
-    /**
-     * Gets the number of events for a player
-     *
-     * @param player player login
-     * @return number of stored events
-     */
-    IBlockPlacerPlayer getPlayerEvents(IPlayerEntry player);
-
-    /**
-     * Is the blocks placer paused
-     * @return
-     */
-    boolean isPaused();
-
-    /**
-     * Wrap action into AsyncWorldEdit job and perform it asynchronicly
-     *
-     * @param editSession
-     * @param player
-     * @param jobName
-     * @param action
-     */
-    void performAsAsyncJob(final IThreadSafeEditSession editSession, final IPlayerEntry player, final String jobName, 
-            final IFuncParamEx<Integer, ICancelabeEditSession, MaxChangedBlocksException> action);
-
-    /**
-     * Remove all entries for player
-     *
-     * @param player
-     * @return
-     */
-    int purge(IPlayerEntry player);
-
-    /**
-     * Remove all entries
-     *
-     * @return Number of purged job entries
-     */
-    int purgeAll();
-
-    /**
-     * Remove the player job
-     *
-     * @param player
-     * @param jobEntry
-     */
-    void removeJob(final IPlayerEntry player, IJobEntry jobEntry);
-
-    /**
-     * Remove event listener
-     *
-     * @param listener
-     */
-    void removeListener(IBlockPlacerListener listener);
-
-    /**
-     * Set pause on blocks placer
-     * @param pause
-     */
-    void setPause(boolean pause);
+    IUndoEntry load(DataInputStream stream) throws IOException;
     
+    
+    /**
+     * Save the undo data to stream
+     *
+     * @param stream
+     * @param undoEntry
+     * @throws IOException
+     */
+    void save(RandomAccessFile stream, IUndoEntry undoEntry) throws IOException;
+    
+    /**
+     * Save the undo data to stream
+     *
+     * @param stream
+     * @param undoEntry
+     * @throws IOException
+     */
+    void save(DataOutputStream stream, IUndoEntry undoEntry) throws IOException;
 }

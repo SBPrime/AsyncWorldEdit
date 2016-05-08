@@ -38,23 +38,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
-    /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
+public enum MessageSystem {
 
-    /**
-     * Process the entry, the operation to perform
-     * @return 
-     */
-    boolean Process();
+    TALKATIVE("Talkative"),
+    BAR("Bar"),
+    CHAT("Chat");
+
+    private final String m_name;
+
+    public String getName() {
+        return m_name;
+    }
+
+    private MessageSystem(String name) {
+        m_name = name;
+    }
 }

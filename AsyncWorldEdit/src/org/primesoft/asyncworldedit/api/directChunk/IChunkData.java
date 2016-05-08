@@ -38,23 +38,128 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import org.primesoft.asyncworldedit.api.utils.IInOutParam;
 
 /**
- * Sipme operation to perform using the dispatcher
+ * The direct chunk data
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IChunkData extends IBaseChunkData {
     /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
-
-    /**
-     * Process the entry, the operation to perform
+     * Get the biome data
      * @return 
      */
-    boolean Process();
+    byte[] getBiomeData();
+
+    /**
+     * Set the biome data
+     * @param data 
+     */
+    void setBiomeData(byte[] data);
+
+    /**
+     * Get maximum block height
+     * @return 
+     */
+    int[] getMaxHeight();
+
+    /**
+     * Set the maximum height data
+     * @param data 
+     */
+    void setMaxHeight(int[] data);
+
+    /**
+     * Get the chunk height map
+     * @return 
+     */
+    int[] getHeightMap();
+
+    /**
+     * Set the chunk height map
+     * @param data 
+     */
+    void setHeightMap(int[] data);
+
+    /**
+     * Is the chunk done
+     * @return 
+     */
+    boolean isDone();
+
+    /**
+     * Set the chunk done flag
+     * @param done 
+     */
+    void setDone(boolean done);
+
+    /**
+     * Is the chunk lit
+     * @return 
+     */
+    boolean isLit();
+
+    /**
+     * Set the chunk lit flag
+     * @param lit 
+     */
+    void setLit(boolean lit);
+
+    /**
+     * Set chunk tile entities
+     * @param entities 
+     */
+    void setTileEntity(ISerializedTileEntity[] entities);
+
+    /**
+     * Get the chunk tile entities
+     * @return 
+     */
+    ISerializedTileEntity[] getTileEntity();
+
+    /**
+     * Set the chunk entities
+     * @param data 
+     */
+    void setEntity(ISerializedEntity[] data);
+
+
+    /**
+     * Set chunk section data
+     * @param y
+     * @param section 
+     */
+    void setChunkSection(int y, IChunkSection section);
+
+    /**
+     * Get the chunk section data
+     * @param y
+     * @return 
+     */
+    IChunkSection getChunkSection(int y);
+
+    /**
+     * Get the chunk gaps
+     * @return 
+     */
+    boolean[] getGaps();
+
+    /**
+     * Set the chunk gaps
+     * @param data 
+     */
+    void setGaps(boolean[] data);
+    
+    
+    /**
+     * Get block from chunk data
+     * @param x
+     * @param y
+     * @param z
+     * @param tileEntity The TileEntity
+     * @return
+     */
+    char getBlock(int x, int y, int z, IInOutParam<ISerializedTileEntity> tileEntity);
 }

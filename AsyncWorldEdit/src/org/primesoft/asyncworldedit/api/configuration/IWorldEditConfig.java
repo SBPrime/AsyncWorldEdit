@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit API
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
@@ -38,23 +38,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.configuration;
+
+import java.util.Set;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IWorldEditConfig {
     /**
-     * MTA mutex
+     * Get the maximum number of blocks that can be changed in an edit session.
      *
-     * @return
+     * @return block change limit
      */
-    Object getMutex();
-
+    int getBlockChangeLimit();
+    
     /**
-     * Process the entry, the operation to perform
+     * Get the list of disallowed blocks
      * @return 
      */
-    boolean Process();
+    Set<Integer> getDisallowedBlocks();
 }

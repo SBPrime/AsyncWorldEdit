@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit API
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
@@ -38,23 +38,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.directChunk;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IChangesetData {
     /**
-     * MTA mutex
+     * Get the list of added entities
      *
      * @return
      */
-    Object getMutex();
-
+    ISerializedEntity[] getAddedEntities();
+    
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * Get the list of removed entities
+     *
+     * @return
      */
-    boolean Process();
+    ISerializedEntity[] getRemovedEntities();
+    
+    
+    /**
+     * Get the stored blocks
+     * @return
+     */
+    IBlockEntry[] getChangedBlocks();
 }

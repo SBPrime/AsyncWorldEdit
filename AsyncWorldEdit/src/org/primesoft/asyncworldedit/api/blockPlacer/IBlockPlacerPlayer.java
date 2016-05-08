@@ -38,23 +38,131 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.blockPlacer;
+
+import java.util.List;
+import java.util.Queue;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IBlockPlacerPlayer {
+
     /**
-     * MTA mutex
+     * Add new job
+     *
+     * @param job
+     * @param force
+     * @return
+     */
+    boolean addJob(IJobEntry job, boolean force);
+
+    /**
+     * Get job ID
+     *
+     * @param jobId job ID
+     * @return
+     */
+    IJobEntry getJob(int jobId);
+
+    /**
+     * Get all jobs
      *
      * @return
      */
-    Object getMutex();
+    IJobEntry[] getJobs();
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * Maximum number of blocks on queue
+     *
+     * @return
      */
-    boolean Process();
+    int getMaxQueueBlocks();
+
+    /**
+     * Get next job id
+     *
+     * @return
+     */
+    int getNextJobId();
+
+    /**
+     * Get block entries queue
+     *
+     * @return
+     */
+    Queue<IBlockPlacerEntry> getQueue();
+
+    /**
+     * Get block placing speed (blocks per second)
+     *
+     * @return
+     */
+    double getSpeed();
+
+    /**
+     * Has any job entries
+     *
+     * @return
+     */
+    boolean hasJobs();
+
+    /**
+     * Is the player informed about queue overload
+     *
+     * @return
+     */
+    boolean isInformed();
+
+    /**
+     * Print jobs message
+     *
+     * @param lines
+     */
+    void printJobs(List<String> lines);
+
+    /**
+     * Remove job
+     *
+     * @param job
+     */
+    void removeJob(IJobEntry job);
+
+    /**
+     * Remove job
+     *
+     * @param jobId
+     */
+    void removeJob(int jobId);
+
+    /**
+     * Set isInformed state
+     *
+     * @param state
+     */
+    void setInformed(boolean state);
+
+    /**
+     * Set the maximum number of blocks on queue
+     * @param val
+     */
+    void setMaxQueueBlocks(int val);
+
+    /**
+     * Change current queue to new queue
+     *
+     * @param newQueue
+     */
+    void updateQueue(Queue<IBlockPlacerEntry> newQueue);
+
+    /**
+     * Update block placing speed
+     *
+     * @param blocks number of blocks
+     * @param timeDelta time spend
+     */
+    void updateSpeed(double blocks, long timeDelta);
+    
 }

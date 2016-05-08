@@ -38,23 +38,87 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
- * Sipme operation to perform using the dispatcher
+ * Chunk manipulation class
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IWrappedChunk {
     /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
-
-    /**
-     * Process the entry, the operation to perform
+     * Get the bukkit world
      * @return 
      */
-    boolean Process();
+    public World getWorld();
+    
+    /**
+     * Get the chunk X coordinate
+     * @return 
+     */
+    public int getX();
+    
+    /**
+     * Get the chunk Y coordinate
+     * @return 
+     */
+    public int getZ();
+    
+
+    /**
+     * Get the player that wrapped the chunk
+     * @return 
+     */
+    public IPlayerEntry getPlayer();
+    
+    /**
+     * Get the chunk data
+     * @return 
+     */
+    public IChunkData getData();
+    
+    /**
+     * Set the chunk data
+     * @param data
+     * @return 
+     */
+    public boolean setData(IChunkData data);
+    
+    /**
+     * Set the chunk undo data
+     * @param data
+     * @return 
+     */
+    public boolean setData(IChunkUndoData data);
+    
+    
+    /**
+     * Set the chunk data
+     * @param data
+     * @return 
+     */
+    public IChunkUndoData setData(IChangesetData data);
+
+
+    /**
+     * Flush stored data to the server     
+     */
+    public void flush();
+    
+    
+    /**
+     * Initialise the lighting
+     */
+    public void initLighting();
+    
+    
+    /**
+     * Update the light for provided position
+     * @param x
+     * @param y
+     * @param z 
+     */
+    public void updateLight(int x, int y, int z);
 }

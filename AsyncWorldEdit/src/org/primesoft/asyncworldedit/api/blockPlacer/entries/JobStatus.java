@@ -38,23 +38,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.blockPlacer.entries;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public enum JobStatus {
+
+    Initializing(0),
+    Preparing(1),
+    Waiting(2),
+    PlacingBlocks(3),
+    Done(4),
+    Canceled(5);
+
     /**
-     * MTA mutex
+     * The sequence number
+     */
+    private final int m_seqNumber;
+
+    JobStatus(int seqNumber) {
+        m_seqNumber = seqNumber;
+    }
+
+    /**
+     * Get the job state sequence number
      *
      * @return
      */
-    Object getMutex();
-
-    /**
-     * Process the entry, the operation to perform
-     * @return 
-     */
-    boolean Process();
+    public int getSeqNumber() {
+        return m_seqNumber;
+    }
 }

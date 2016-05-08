@@ -38,23 +38,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api;
+
+import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
 
 /**
- * Sipme operation to perform using the dispatcher
+ * The native minecraft API provider
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IAdapter {
     /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
-
-    /**
-     * Process the entry, the operation to perform
+     * Get the adapter version
      * @return 
      */
-    boolean Process();
+    String getVersion(); 
+    
+    /**
+     * Get the direct chunk API
+     * @return 
+     */
+    IDirectChunkAPI getDirectChunkAPI();
 }

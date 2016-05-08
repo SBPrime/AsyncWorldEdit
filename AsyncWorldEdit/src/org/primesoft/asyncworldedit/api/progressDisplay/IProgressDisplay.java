@@ -1,7 +1,7 @@
 /*
- * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
+ * AsyncWorldEdit API
  * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
- * Copyright (c) AsyncWorldEdit contributors
+ * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
  *
@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.api.progressDisplay;
 
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
@@ -57,7 +57,7 @@ public interface IProgressDisplay {
      * Disable (hide) the player message
      * @param player 
      */
-    void disableMessage(PlayerEntry player);
+    void disableMessage(IPlayerEntry player);
 
     
     /**
@@ -70,7 +70,7 @@ public interface IProgressDisplay {
      * @param placingSpeed Current block placing sped (blocks per second)
      * @param percentage Blocks placing done percentage
      */
-    void setMessage(PlayerEntry player, 
+    void setMessage(IPlayerEntry player, 
             int jobsCount, 
             int queuedBlocks, int maxQueuedBlocks,
             double timeLeft, double placingSpeed, double percentage);

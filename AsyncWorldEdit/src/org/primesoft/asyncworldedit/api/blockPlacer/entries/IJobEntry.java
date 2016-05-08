@@ -38,23 +38,82 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.blockPlacer.entries;
+
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IJobEntry extends IBlockPlacerEntry {
+
     /**
-     * MTA mutex
+     * Add job state change listener
+     *
+     * @param listener
+     */
+    void addStateChangedListener(IJobEntryListener listener);
+
+    /**
+     * Cancel the job
+     */
+    void cancel();
+
+    /**
+     * Get the operation name
      *
      * @return
      */
-    Object getMutex();
+    String getName();
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * Get the player UUID
+     *
+     * @return
      */
-    boolean Process();
+    IPlayerEntry getPlayer();
+
+    /**
+     * Is the job started
+     *
+     * @return
+     */
+    JobStatus getStatus();
+
+    /**
+     * Convert job status to string
+     *
+     * @return
+     */
+    String getStatusString();
+
+    /**
+     * Is the async task done
+     *
+     * @return
+     */
+    boolean isTaskDone();
+
+    /**
+     * Remove the change state listener
+     *
+     * @param listener
+     */
+    void removeStateChangedListener(IJobEntryListener listener);
+
+    /**
+     * Set the job state
+     *
+     * @param newStatus
+     */
+    void setStatus(JobStatus newStatus);
+
+    /**
+     * Async task has finished
+     */
+    void taskDone();
+    
 }

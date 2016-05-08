@@ -38,23 +38,115 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.configuration;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IPermissionGroup {
+
     /**
-     * MTA mutex
+     * Kill all player jobs on logout
      *
      * @return
      */
-    Object getMutex();
+    boolean getCleanOnLogout();
 
     /**
-     * Process the entry, the operation to perform
+     * Maximum number of concurrent jobs
+     *
+     * @return
+     */
+    int getMaxJobs();
+
+    /**
+     * The permission node
+     *
+     * @return
+     */
+    String getPermissionNode();
+
+    /**
+     * maximum size of the player block queue
+     *
+     * @return
+     */
+    int getQueueHardLimit();
+
+    /**
+     * number of blocks on the player queue when to stop placing blocks
+     *
+     * @return
+     */
+    int getQueueSoftLimit();
+
+    /**
+     * Number of blocks placed in each run
+     *
+     * @return
+     */
+    int getRendererBlocks();
+
+    /**
+     * Maximum number of miliseconds spend on placing blocks
+     *
+     * @return
+     */
+    int getRendererTime();
+
+    /**
+     * The minimum number of blocks to show the progress bar
+     *
+     * @return
+     */
+    int getBarApiProgresMinBlocks();
+
+    /**
+     * Use the bar api to display progress
+     *
+     * @return
+     */
+    boolean isBarApiProgressEnabled();
+
+    /**
+     * Is the undo disabled
+     *
+     * @return
+     */
+    boolean isUndoDisabled();
+
+    /**
+     * Use chat to display progress
+     *
+     * @return
+     */
+    boolean isChatProgressEnabled();
+
+    /**
+     * Is the group default
+     *
+     * @return
+     */
+    boolean isDefault();
+
+    /**
+     * The AWE mode when player logins
+     *
+     * @return
+     */
+    boolean isOnByDefault();
+
+    /**
+     * is async world edit talkative
+     *
+     * @return
+     */
+    boolean isTalkative();
+    
+    /**
+     * The WorldEdit config
      * @return 
      */
-    boolean Process();
+    IWorldEditConfig getWorldEditConfig();
 }

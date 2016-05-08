@@ -38,23 +38,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.map;
+
+import com.sk89q.worldedit.BlockVector2D;
+import java.io.File;
+import org.bukkit.World;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IMapUtils {
     /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
-
-    /**
-     * Process the entry, the operation to perform
+     * Get teh map folder
+     * @param w
      * @return 
      */
-    boolean Process();
+    public File getMapFolder(World w);
+    
+    
+    /**
+     * Get the map region folder
+     * @param w
+     * @return 
+     */
+    public File getMapRegion(World w);
+        
+    /**
+     * Get the map region files
+     * @param w
+     * @return 
+     */
+    public File[] getMapFiles(World w);
+    
+    /**
+     * Get the available chunks
+     * @param w
+     * @return 
+     */
+    public BlockVector2D[] getAllWorldChunks(World w);
 }

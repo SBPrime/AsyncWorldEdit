@@ -38,23 +38,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.directChunk;
 
 /**
- * Sipme operation to perform using the dispatcher
+ * The chunk section
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IChunkSection {
     /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
-
-    /**
-     * Process the entry, the operation to perform
+     * Get the chunk section materials
      * @return 
      */
-    boolean Process();
+    char[] getBlockIds();
+
+    /**
+     * Get the blocks emmited light
+     * @return 
+     */
+    byte[] getEmittedLight();
+
+    /**
+     * Get the block skylight
+     * @return 
+     */
+    byte[] getSkyLight();
+
+    /**
+     * Get the section Y possition
+     * @return 
+     */
+    int getY();
+    
 }

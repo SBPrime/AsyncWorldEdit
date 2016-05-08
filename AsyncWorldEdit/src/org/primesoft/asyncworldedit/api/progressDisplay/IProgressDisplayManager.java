@@ -1,7 +1,7 @@
 /*
- * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
+ * AsyncWorldEdit API
  * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
- * Copyright (c) AsyncWorldEdit contributors
+ * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
  *
@@ -58,4 +58,14 @@ public interface IProgressDisplayManager extends IProgressDisplay {
      * @return 
      */
     public boolean unregisterProgressDisplay(IProgressDisplay backend);
+    
+    
+    /**
+     * Format default progress message
+     * @param jobsCount
+     * @param speed
+     * @param timeLeft
+     * @return 
+     */
+    public String formatMessage(int jobsCount, double speed, double timeLeft);
 }

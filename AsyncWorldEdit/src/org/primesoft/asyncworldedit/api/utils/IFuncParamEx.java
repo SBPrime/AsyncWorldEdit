@@ -38,23 +38,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+
+package org.primesoft.asyncworldedit.api.utils;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
+ * @param <TResult>
+ * @param <TParam>
+ * @param <TException>
  */
-public interface IDispatcherEntry {
-    /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
+public interface IFuncParamEx<TResult, TParam, TException extends Exception> {
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     *
+     * @param param
+     * @return
+     * @throws TException
      */
-    boolean Process();
+    TResult execute(TParam param) throws TException;
 }

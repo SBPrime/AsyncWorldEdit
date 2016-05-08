@@ -38,23 +38,104 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.directChunk;
+
+import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.entity.Entity;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
+public interface IBaseChunkData {
+
     /**
-     * MTA mutex
+     * Get the chunk coords
      *
      * @return
      */
-    Object getMutex();
+    BlockVector2D getChunkCoords();
 
     /**
-     * Process the entry, the operation to perform
+     * Set the chunk coords
+     *
+     * @param coords
+     */
+    void setChunkCoords(BlockVector2D coords);
+
+    /**
+     * Set chunk block
+     *
+     * @param x X coordinate inside chunk (0-15)
+     * @param y Y coordinate inside chunk (0-15)
+     * @param z Z coordinate inside chunk (0-15)
+     * @param b WorldEdit block
+     */
+    void setBlock(int x, int y, int z, BaseBlock b);
+
+    /**
+     * Set chunk block
+     *
+     * @param x X coordinate inside chunk (0-15)
+     * @param y Y coordinate inside chunk (0-15)
+     * @param z Z coordinate inside chunk (0-15)
+     * @param id Material ID
+     */
+    void setBlock(int x, int y, int z, char id);
+
+    /**
+     * Set chunk tile eneity
+     *
+     * @param x X coordinate inside chunk (0-15)
+     * @param y Y coordinate inside chunk (0-15)
+     * @param z Z coordinate inside chunk (0-15)
+     * @param id Material ID of the tile entitiy
+     * @param ct Tile entity NBT data
+     */
+    void setTileEntity(int x, int y, int z, char id, CompoundTag ct);
+
+    /**
+     * Remove entity from chunk
+     *
+     * @param entity
+     * @return
+     */
+    boolean removeEntity(ISerializedEntity entity);
+
+    /**
+     * Add entity to chunk
+     *
+     * @param entity
+     */
+    void addEntity(ISerializedEntity entity);
+
+    /**
+     * Add entity to chunk
+     *
+     * @param pos
+     * @param entity
+     * @return serialized entity
+     */
+    ISerializedEntity addEntity(Vector pos, Entity entity);
+
+    
+    /**
+     * Get block from chunk data
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
+    BaseBlock getBlock(int x, int y, int z);
+        
+    
+    /**
+     * Get the chunk entities
      * @return 
      */
-    boolean Process();
+    ISerializedEntity[] getEntity();
 }

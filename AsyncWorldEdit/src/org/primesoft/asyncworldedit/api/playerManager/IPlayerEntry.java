@@ -42,80 +42,152 @@ package org.primesoft.asyncworldedit.api.playerManager;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
-
+import org.primesoft.asyncworldedit.api.permissions.IPermission;
 
 /**
  *
  * @author SBPrime
  */
-public interface IPlayerManager {
-    /**
-     * The console player UUID
-     * @return 
-     */
-    UUID getUuidConsole();
-    
-    /**
-     * The unknown player UUID
-     * @return 
-     */
-    UUID getUuidUnknown();
-    
-    
-    /**
-     * Get the console player entry
-     * @return 
-     */
-    IPlayerEntry getConsolePlayer();
-    
-    /**
-     * Get the unknown player entry
-     * @return 
-     */
-    IPlayerEntry getUnknownPlayer();
-    
-    
-    /**
-     * Create a new player entry (do not add to the manager)
-     * @param player
-     * @param name
-     * @param group
-     * @return
-     */
-    IPlayerEntry createPlayer(Player player, String name, IPermissionGroup group);
-    
-    /**
-     * Create new player entry (do not add to the manager)
-     * @param name
-     * @param uuid
-     * @return 
-     */
-    IPlayerEntry createPlayer(String name, UUID uuid);
-    
-    
-    /**
-     * Get the player wrapper based on bukkit player class (null = console)
-     *
-     * @param player
-     * @return
-     */
-    IPlayerEntry getPlayer(Player player);
+public interface IPlayerEntry {
 
     /**
-     * Get the player wrapper based on UUID
-     *
-     * @param playerUuid
-     * @return NEver returns null
+     * DIspose the player entry
      */
-    IPlayerEntry getPlayer(UUID playerUuid);
+    void dispose();
 
     /**
-     * Gets player wrapper from player name
-     *
-     * @param playerName
-     * @return never returns null
+     * Is AWE enabled
+     * @return 
      */
-    IPlayerEntry getPlayer(String playerName);
+    boolean getAweMode();
     
+    /**
+     * Is undo disabled
+     * @return 
+     */
+    boolean isUndoOff();
+
+    /**
+     * Get the player name
+     * @return 
+     */
+    String getName();
+
+    /**
+     * Get the permission group
+     * @return
+     */
+    IPermissionGroup getPermissionGroup();
+
+    /**
+     * Get the wrapped player
+     * @return 
+     */
+    Player getPlayer();
+
+    /**
+     * Get the player UUID
+     * @return 
+     */
+    UUID getUUID();
+
+    /**
+     * Get the wait mutex
+     *
+     * @return
+     */
+    Object getWaitMutex();
+    
+    /**
+     * Get the 
+     * @param permission
+     * @return is the player allowed this permission
+     */
+    boolean isAllowed(IPermission permission);
+
+    /**
+     * Is this the console
+     *
+     * @return
+     */
+    boolean isConsole();
+
+    /**
+     * Is the entry disposed
+     *
+     * @return
+     */
+    boolean isDisposed();
+
+    /**
+     * Is the player in game
+     * @return 
+     */
+    boolean isInGame();
+
+    /**
+     * Is this a player
+     * @return 
+     */
+    boolean isPlayer();
+
+    /**
+     * Is this unknown
+     * @return 
+     */
+    boolean isUnknown();
+
+    /**
+     * Sand message to the player chat
+     * @param msg 
+     */
+    void say(String msg);
+
+    /**
+     * Set player AWE mode
+     * @param mode 
+     */
+    void setAweMode(boolean mode);
+    
+    /**
+     * Set player Undo mode
+     * @param mode 
+     */
+    void setUndoMode(boolean mode);
+
+    /**
+     * Update the player after relogin
+     *
+     * @param player
+     * @param permissionGroup
+     */
+    void update(Player player, IPermissionGroup permissionGroup);
+    
+    /**
+     * Update the messaging system
+     * @param system
+     * @param state 
+     */
+    void setMessaging(MessageSystem system, boolean state);
+    
+    /**
+     * Get the messaging system status
+     * @param system
+     * @return 
+     */
+    boolean getMessaging(MessageSystem system);
+
+    /**
+     * Get the number of blocks rendered each run
+     * @return 
+     */
+    int getRenderBlocks();
+    
+    /**
+     * Set the number of rendered blocks
+     * @param b The new speed (null for default)
+     */
+    void setRenderBlocks(Integer b);
 }

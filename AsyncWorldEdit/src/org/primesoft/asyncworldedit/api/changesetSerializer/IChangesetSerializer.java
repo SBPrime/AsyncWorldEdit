@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit API
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
@@ -38,23 +38,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.changesetSerializer;
+
+import com.sk89q.worldedit.history.change.Change;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
-    /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
+public interface IChangesetSerializer {
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * Check if the serializer can handle the change set
+     *
+     * @param changeType type
+     * @return
      */
-    boolean Process();
+    boolean canSerialize(String changeType);
+
+    /**
+     * Serialize the changeset
+     *
+     * @param change
+     * @param storage
+     * @return
+     */
+    byte[] serialize(Change change, IMemoryStorage storage);
+
+    /**
+     * Deserialize change
+     *
+     * @param data
+     * @param storage
+     * @return
+     */
+    Change deserialize(byte[] data, IMemoryStorage storage);
 }

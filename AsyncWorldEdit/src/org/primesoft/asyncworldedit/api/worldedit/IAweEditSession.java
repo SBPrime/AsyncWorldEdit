@@ -38,23 +38,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.worldedit;
+
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.history.change.Change;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
-    /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
+public interface IAweEditSession extends IEditSession {
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * Perform a custom action
+     * @param change
+     * @param isDemanding
+     * @throws com.sk89q.worldedit.WorldEditException
      */
-    boolean Process();
+    void doCustomAction(Change change, boolean isDemanding) throws WorldEditException;
 }

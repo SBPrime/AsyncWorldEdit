@@ -1,7 +1,7 @@
 /*
- * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
+ * AsyncWorldEdit API
  * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
- * Copyright (c) AsyncWorldEdit contributors
+ * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
  *
@@ -41,10 +41,11 @@
 package org.primesoft.asyncworldedit.api.taskdispatcher;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.Region;
 import org.bukkit.World;
-import org.primesoft.asyncworldedit.utils.Action;
-import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.api.utils.IAction;
+import org.primesoft.asyncworldedit.api.utils.IFunc;
 
 /**
  *
@@ -82,31 +83,7 @@ public interface ITaskDispatcher {
      * @param world
      * @param pos
      */
-    void performSafe(Object mutex, Action action, World world, Vector pos);
-
-    /**
-     * Perform operation using a safe wrapper. If the basic operation fails
-     * queue it on dispatcher
-     *
-     * @param mutex
-     * @param action
-     * @param world
-     * @param region
-     */
-    void performSafe(Object mutex, Action action, World world, Region region);
-
-    /**
-     * Perform operation using a safe wrapper. If the basic operation fails
-     * queue it on dispatcher
-     *
-     * @param <T>
-     * @param mutex
-     * @param action
-     * @param world
-     * @param region
-     * @return
-     */
-    <T> T performSafe(Object mutex, Func<T> action, World world, Region region);
+    void performSafeChunk(Object mutex, IAction action, World world, Vector2D pos);
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -119,7 +96,55 @@ public interface ITaskDispatcher {
      * @param pos
      * @return
      */
-    <T> T performSafe(Object mutex, Func<T> action, World world, Vector pos);
+    <T> T performSafeChunk(Object mutex, IFunc<T> action, World world, Vector2D pos);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     * @param world
+     * @param pos
+     */
+    void performSafe(Object mutex, IAction action, World world, Vector pos);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     * @param world
+     * @param region
+     */
+    void performSafe(Object mutex, IAction action, World world, Region region);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @param world
+     * @param region
+     * @return
+     */
+    <T> T performSafe(Object mutex, IFunc<T> action, World world, Region region);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @param world
+     * @param pos
+     * @return
+     */
+    <T> T performSafe(Object mutex, IFunc<T> action, World world, Vector pos);
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -128,7 +153,7 @@ public interface ITaskDispatcher {
      * @param mutex
      * @param action
      */
-    void performSafe(Object mutex, Action action);
+    void performSafe(Object mutex, IAction action);
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -139,7 +164,7 @@ public interface ITaskDispatcher {
      * @param action
      * @return
      */
-    <T> T performSafe(Object mutex, Func<T> action);
+    <T> T performSafe(Object mutex, IFunc<T> action);
 
     /**
      * Set pause on task dispatcher placer
@@ -147,5 +172,5 @@ public interface ITaskDispatcher {
      * @param pause
      */
     void setPause(boolean pause);
-    
+
 }

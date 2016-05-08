@@ -1,7 +1,7 @@
 /*
- * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
- * Copyright (c) AsyncWorldEdit contributors
+ * AsyncWorldEdit API
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
  *
@@ -40,12 +40,17 @@
  */
 package org.primesoft.asyncworldedit.api.blockPlacer;
 
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
+
 
 /**
- *
+ * Listener for job state change
  * @author SBPrime
  */
 public interface IJobEntryListener {
-    void jobStateChanged(JobEntry job);
+    /**
+     * Job state changed
+     * @param job 
+     */
+    void jobStateChanged(IJobEntry job);
 }

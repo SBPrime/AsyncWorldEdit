@@ -38,23 +38,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.blockPlacer;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
-    /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
+public interface IBlockPlacerEntry {
 
     /**
-     * Process the entry, the operation to perform
-     * @return 
+     * The job ID
+     * @return
      */
-    boolean Process();
+    int getJobId();
+
+    /**
+     * Is this task demanding, only one demanding task is allowed
+     * @return
+     */
+    boolean isDemanding();
+
+    /**
+     * process the entry
+     * @param bp
+     * @return true if operation was successful
+     */
+    boolean process(IBlockPlacer bp);
+    
 }

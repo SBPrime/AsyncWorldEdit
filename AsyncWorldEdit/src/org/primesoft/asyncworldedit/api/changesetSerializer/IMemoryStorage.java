@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit API
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
@@ -38,23 +38,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.taskdispatcher;
+package org.primesoft.asyncworldedit.api.changesetSerializer;
+
+import com.sk89q.worldedit.history.change.Change;
+import java.util.UUID;
 
 /**
- * Sipme operation to perform using the dispatcher
+ *
  * @author SBPrime
  */
-public interface IDispatcherEntry {
-    /**
-     * MTA mutex
-     *
-     * @return
-     */
-    Object getMutex();
+public interface IMemoryStorage {
 
     /**
-     * Process the entry, the operation to perform
+     * Get the change from memory
+     * @param uuid
+     * @return
+     */
+    Change getFromMemory(UUID uuid);
+
+    /**
+     * Store the change in memory
+     * @param change
      * @return 
      */
-    boolean Process();
+    UUID storeInMemory(Change change);   
+    
+    
+    /**
+     * Remove the memory entry
+     * @param uuid 
+     */
+    void removeFromMemory(UUID uuid);
 }

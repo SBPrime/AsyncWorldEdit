@@ -38,84 +38,100 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.playerManager;
+package org.primesoft.asyncworldedit.api.worldedit;
 
-import java.util.UUID;
-import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
-
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.history.change.Change;
+import com.sk89q.worldedit.history.changeset.ChangeSet;
+import com.sk89q.worldedit.patterns.Pattern;
+import com.sk89q.worldedit.util.eventbus.EventBus;
+import java.util.Iterator;
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
- * @author SBPrime
+ * @author SBPprime
  */
-public interface IPlayerManager {
-    /**
-     * The console player UUID
-     * @return 
-     */
-    UUID getUuidConsole();
-    
-    /**
-     * The unknown player UUID
-     * @return 
-     */
-    UUID getUuidUnknown();
-    
-    
-    /**
-     * Get the console player entry
-     * @return 
-     */
-    IPlayerEntry getConsolePlayer();
-    
-    /**
-     * Get the unknown player entry
-     * @return 
-     */
-    IPlayerEntry getUnknownPlayer();
-    
-    
-    /**
-     * Create a new player entry (do not add to the manager)
-     * @param player
-     * @param name
-     * @param group
-     * @return
-     */
-    IPlayerEntry createPlayer(Player player, String name, IPermissionGroup group);
-    
-    /**
-     * Create new player entry (do not add to the manager)
-     * @param name
-     * @param uuid
-     * @return 
-     */
-    IPlayerEntry createPlayer(String name, UUID uuid);
-    
-    
-    /**
-     * Get the player wrapper based on bukkit player class (null = console)
-     *
-     * @param player
-     * @return
-     */
-    IPlayerEntry getPlayer(Player player);
+public interface IThreadSafeEditSession extends IAweEditSession {
 
     /**
-     * Get the player wrapper based on UUID
+     * Add async job
      *
-     * @param playerUuid
-     * @return NEver returns null
+     * @param job
      */
-    IPlayerEntry getPlayer(UUID playerUuid);
+    void addAsync(IJobEntry job);
 
     /**
-     * Gets player wrapper from player name
+     * This function checks if async mode is enabled for specific command
      *
-     * @param playerName
-     * @return never returns null
+     * @param operationName
+     * @return
      */
-    IPlayerEntry getPlayer(String playerName);
+    boolean checkAsync(String operationName);
+
+
+    IBlockPlacer getBlockPlacer();
+
+    World getCBWorld();
+
+    EditSessionEvent getEditSessionEvent();
+
+    EventBus getEventBus();
+
+    Object getMutex();
+
+    IPlayerEntry getPlayer();
     
+    /**
+     * Get the root changeset entry
+     * @return 
+     */
+    ChangeSet getRootChangeSet();
+
+    /**
+     * Check if async mode is forced
+     *
+     * @return
+     */
+    boolean isAsyncForced();
+
+    /**
+     * Remov async job (done or canceled)
+     *
+     * @param job
+     */
+    void removeAsync(IJobEntry job);
+
+    /**
+     * Reset async disabled inner state (enable async mode)
+     */
+    void resetAsync();
+
+    /**
+     * Enables or disables the async mode configuration bypass this function
+     * should by used only by other plugins
+     *
+     * @param value true to enable async mode force
+     */
+    void setAsyncForced(boolean value);
+
+    boolean setBlock(int jobId, Vector position, BaseBlock block, EditSession.Stage stage) throws WorldEditException;
+
+    boolean setBlock(Vector pt, Pattern pat, int jobId) throws MaxChangedBlocksException;
+
+    boolean setBlock(Vector pt, BaseBlock block, int jobId) throws MaxChangedBlocksException;
+
+    boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId) throws MaxChangedBlocksException;    
+    
+    Iterator<Change> doUndo();
+
+    Iterator<Change> doRedo();
 }
