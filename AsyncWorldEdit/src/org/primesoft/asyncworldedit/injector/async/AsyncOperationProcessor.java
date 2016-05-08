@@ -52,6 +52,7 @@ import java.util.List;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -123,7 +124,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         }
 
         final WaitFor wait = asyncSession.getWait();
-        final PlayerEntry playerEntry = asyncSession.getPlayer();
+        final IPlayerEntry playerEntry = asyncSession.getPlayer();
         final int jobId = m_blockPlacer.getJobId(playerEntry);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
         final JobEntry job = new JobEntry(playerEntry, cancelableSession, jobId, name);
@@ -181,7 +182,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         }
 
         final WaitFor wait = asyncSession.getWait();
-        final PlayerEntry playerEntry = asyncSession.getPlayer();
+        final IPlayerEntry playerEntry = asyncSession.getPlayer();
         final int jobId = m_blockPlacer.getJobId(playerEntry);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
         final JobEntry job = new JobEntry(playerEntry, cancelableSession, jobId, name);

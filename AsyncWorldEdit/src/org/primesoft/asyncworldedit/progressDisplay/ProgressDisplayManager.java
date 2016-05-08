@@ -43,8 +43,9 @@ package org.primesoft.asyncworldedit.progressDisplay;
 import java.util.HashMap;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 import static org.primesoft.asyncworldedit.AsyncWorldEditMain.log;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -60,7 +61,7 @@ public class ProgressDisplayManager implements IProgressDisplay, IProgressDispla
     private final HashMap<Class<?>, IProgressDisplay> m_registeredProgressBackends = new HashMap<Class<?>, IProgressDisplay>();
 
     @Override
-    public void disableMessage(PlayerEntry player) {
+    public void disableMessage(IPlayerEntry player) {
         if (player == null) {
             return;
         }
@@ -81,7 +82,7 @@ public class ProgressDisplayManager implements IProgressDisplay, IProgressDispla
     }
 
     @Override
-    public void setMessage(PlayerEntry player, int jobsCount, 
+    public void setMessage(IPlayerEntry player, int jobsCount, 
             int queuedBlocks, int maxQueuedBlocks, double timeLeft, double placingSpeed, double percentage) {
         if (player == null) {
             return;
@@ -144,6 +145,11 @@ public class ProgressDisplayManager implements IProgressDisplay, IProgressDispla
         }
 
         return true;
+    }
+
+    @Override
+    public String formatMessage(int jobsCount, double speed, double timeLeft) {
+        return MessageType.CMD_JOBS_PROGRESS_BAR.format(jobsCount, speed, timeLeft);
     }
 
 }

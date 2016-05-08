@@ -44,6 +44,7 @@ package org.primesoft.asyncworldedit.worldedit.util;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.util.Location;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
@@ -56,7 +57,7 @@ import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
 public class LocationWrapper extends Location implements IAsyncWrapper
 {
     public static LocationWrapper wrap(Location location, int jobId,
-                                        boolean isAsync, PlayerEntry player) {
+                                        boolean isAsync, IPlayerEntry player) {
         LocationWrapper result;
         if (location instanceof LocationWrapper) {
             result = (LocationWrapper) location;
@@ -75,7 +76,7 @@ public class LocationWrapper extends Location implements IAsyncWrapper
 
     private boolean m_isAsync;
 
-    private PlayerEntry m_player;
+    private IPlayerEntry m_player;
     
     @Override
     public int getJobId() {
@@ -96,17 +97,17 @@ public class LocationWrapper extends Location implements IAsyncWrapper
         m_isAsync = async;
     }
 
-    public void setPlayer(PlayerEntry player) {
+    public void setPlayer(IPlayerEntry player) {
         m_player = player;
     }
 
     @Override
-    public PlayerEntry getPlayer() {
+    public IPlayerEntry getPlayer() {
         return m_player;
     }
     
     private LocationWrapper(Location parent, int jobId, boolean isAsync,
-                             PlayerEntry player) {
+                             IPlayerEntry player) {
         super(parent.getExtent());
 
         m_jobId = jobId;

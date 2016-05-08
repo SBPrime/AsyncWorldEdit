@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
+import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.utils.InjectionException;
 import org.primesoft.asyncworldedit.utils.Reflection;
 
@@ -68,7 +69,7 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  */
 public class UndoProcessor implements Operation {
 
-    public static void processUndo(ThreadSafeEditSession parent,
+    public static void processUndo(IThreadSafeEditSession parent,
             EditSession sender,
             EditSession session) {
 

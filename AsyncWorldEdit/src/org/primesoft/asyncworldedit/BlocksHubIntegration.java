@@ -50,6 +50,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -89,7 +90,7 @@ public class BlocksHubIntegration {
         m_isInitialized = m_blocksApi != null && m_blocksApi.getVersion() >= 1.0;
     }
 
-    public void logBlock(PlayerEntry playerEntry, World world, Location location,
+    public void logBlock(IPlayerEntry playerEntry, World world, Location location,
             int oldBlockType, byte oldBlockData,
             int newBlockType, byte newBlockData) {
         if (!m_isInitialized || !ConfigProvider.getLogBlocks()) {
@@ -104,7 +105,7 @@ public class BlocksHubIntegration {
         m_blocksApi.logBlock(player, world, location, oldBlockType, oldBlockData, newBlockType, newBlockData);
     }
 
-    public boolean canPlace(PlayerEntry playerEntry, World world, Location location) {
+    public boolean canPlace(IPlayerEntry playerEntry, World world, Location location) {
         if (!m_isInitialized || !ConfigProvider.getCheckAccess()) {
             return true;
         }
@@ -127,7 +128,7 @@ public class BlocksHubIntegration {
         }
     }
 
-    public boolean canPlace(PlayerEntry playerEntry, World world, Vector location) {
+    public boolean canPlace(IPlayerEntry playerEntry, World world, Vector location) {
         if (location == null) {
             return false;
         }
@@ -154,7 +155,7 @@ public class BlocksHubIntegration {
         }
     }
 
-    public void logBlock(PlayerEntry playerEntry, World world, Vector location, 
+    public void logBlock(IPlayerEntry playerEntry, World world, Vector location, 
             BaseBlock oldBlock, BaseBlock newBlock) {
         if (location == null || !ConfigProvider.getLogBlocks()) {
             return;

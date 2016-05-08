@@ -46,6 +46,6 @@ package org.primesoft.asyncworldedit.utils;
  * @author SBPrime
  * @param <TException> The action exception
  */
-public interface ActionEx<TException extends Exception> {
+public interface ActionEx<TException extends Exception>  {
     void execute() throws TException;
 }

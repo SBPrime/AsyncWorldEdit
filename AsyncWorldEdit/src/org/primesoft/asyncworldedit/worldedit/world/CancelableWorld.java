@@ -62,7 +62,7 @@ import com.sk89q.worldedit.world.registry.WorldData;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 import org.primesoft.asyncworldedit.worldedit.BlockVector2DWrapper;
@@ -77,10 +77,10 @@ import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
  */
 public class CancelableWorld extends AbstractWorldWrapper {
     private final int m_jobId;
-    private final PlayerEntry m_player;
+    private final IPlayerEntry m_player;
     private boolean m_isCanceled;
 
-    public CancelableWorld(World parent, int jobId, PlayerEntry player) {
+    public CancelableWorld(World parent, int jobId, IPlayerEntry player) {
         super(parent);
         
         m_isCanceled = false;

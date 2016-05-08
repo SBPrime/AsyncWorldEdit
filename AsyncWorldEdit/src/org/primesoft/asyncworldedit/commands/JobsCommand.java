@@ -45,9 +45,10 @@ import java.util.List;
 import org.primesoft.asyncworldedit.Help;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerPlayer;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerPlayer;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
@@ -59,7 +60,7 @@ public class JobsCommand {
 
     private final static int MAX_LINES = 6;
 
-    public static void Execte(AsyncWorldEditMain sender, PlayerEntry player, String[] args) {
+    public static void Execte(AsyncWorldEditMain sender, IPlayerEntry player, String[] args) {
         final List<String> lines = new ArrayList<String>();
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_JOBS);
@@ -150,7 +151,7 @@ public class JobsCommand {
 
         final IPlayerManager pm = sender.getPlayerManager();
         if (!all) {
-            PlayerEntry playerEntry = pm.getPlayer(playerName);
+            IPlayerEntry playerEntry = pm.getPlayer(playerName);
 
             switch (perm) {
                 case JOBS_SELF:
@@ -160,17 +161,17 @@ public class JobsCommand {
                     lines.add(MessageType.CMD_JOBS_OTHER.format(playerName, bPlacer.getPlayerMessage(playerEntry)));
                     break;
             }
-            BlockPlacerPlayer entry = bPlacer.getPlayerEvents(playerEntry);
+            IBlockPlacerPlayer entry = bPlacer.getPlayerEvents(playerEntry);
             if (entry != null) {
                 entry.printJobs(lines);
             }
         } else {
-            PlayerEntry[] users = bPlacer.getAllPlayers();
+            IPlayerEntry[] users = bPlacer.getAllPlayers();
             if (users.length == 0) {
                 lines.add(MessageType.CMD_JOBS_NONE.format());
             } else {
-                for (PlayerEntry pw : users) {
-                    BlockPlacerPlayer entry = bPlacer.getPlayerEvents(pw);
+                for (IPlayerEntry pw : users) {
+                    IBlockPlacerPlayer entry = bPlacer.getPlayerEvents(pw);
                     int cnt = entry != null ? entry.getQueue().size() : 0;                    
                     String name = pw.getName();
                     lines.add(MessageType.CMD_JOBS_OTHER_SHORT.format(name, cnt));
@@ -195,7 +196,7 @@ public class JobsCommand {
         }
     }
 
-    private static void say(PlayerEntry player, String[] lines, int from, int to) {
+    private static void say(IPlayerEntry player, String[] lines, int from, int to) {
         from = Math.max(from, 0);
         to = Math.min(to, lines.length);
         for (int i = from; i < to; i++) {

@@ -41,8 +41,8 @@
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.utils.IAction;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
-import org.primesoft.asyncworldedit.utils.Action;
 
 /**
  *
@@ -52,10 +52,10 @@ public class ActionEntry  extends BlockPlacerEntry {
     /**
      * The action
      */
-    private final Action m_action;        
+    private final IAction m_action;        
     
     
-    public ActionEntry(int jobId, Action action, boolean isDemanding) {
+    public ActionEntry(int jobId, IAction action, boolean isDemanding) {
         super(jobId, isDemanding);
         
         m_action = action;

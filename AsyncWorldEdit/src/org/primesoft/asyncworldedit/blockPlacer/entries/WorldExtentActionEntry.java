@@ -41,10 +41,9 @@
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.utils.IAction;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
@@ -54,10 +53,10 @@ import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 public class WorldExtentActionEntry
         extends WorldExtentBlockEntry {
 
-    private final Action m_function;
+    private final IAction m_function;
 
     public WorldExtentActionEntry(AsyncWorld worldExtent,
-            int jobId, Vector location, Action function) {
+            int jobId, Vector location, IAction function) {
         super(worldExtent, jobId, location);
         m_function = function;
     }

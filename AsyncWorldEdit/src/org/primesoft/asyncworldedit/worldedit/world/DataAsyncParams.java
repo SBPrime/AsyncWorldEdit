@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**
@@ -59,7 +59,7 @@ public class DataAsyncParams<T> extends BaseAsyncParams {
         int jobId = -1;
         boolean isAsync = false;
         boolean empty = true;
-        PlayerEntry player = null;
+        IPlayerEntry player = null;
 
         if (data instanceof IAsyncWrapper) {
             IAsyncWrapper wrapper = (IAsyncWrapper) data;
@@ -76,7 +76,7 @@ public class DataAsyncParams<T> extends BaseAsyncParams {
     
     private final T m_data;
 
-    private DataAsyncParams(T data, boolean isAsync, int jobId, boolean isEmpty, PlayerEntry player) {
+    private DataAsyncParams(T data, boolean isAsync, int jobId, boolean isEmpty, IPlayerEntry player) {
         super(isAsync, jobId, isEmpty, player);
         m_data = data;        
     }

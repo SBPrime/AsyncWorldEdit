@@ -42,6 +42,8 @@ package org.primesoft.asyncworldedit.permissions;
 
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.permissions.IPermission;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 
 public class PermissionManager {
@@ -58,7 +60,7 @@ public class PermissionManager {
      * @param permission
      * @return True if permission present
      */
-    public static boolean isAllowed(Player player, Permission permission) {
+    public static boolean isAllowed(Player player, IPermission permission) {
         if (player == null || player.isOp()) {
             return true;
         }
@@ -71,7 +73,7 @@ public class PermissionManager {
      * @param player
      * @return
      */
-    public static PermissionGroup getPermissionGroup(Player player) {
+    public static IPermissionGroup getPermissionGroup(Player player) {
         PermissionGroup defaultGroup = ConfigProvider.getDefaultGroup();
         PermissionGroup[] groups = ConfigProvider.getGroups();
 

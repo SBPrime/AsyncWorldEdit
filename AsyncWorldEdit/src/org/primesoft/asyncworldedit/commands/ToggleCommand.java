@@ -40,8 +40,8 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.*;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.strings.MessageType;
@@ -52,14 +52,14 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  */
 public class ToggleCommand {
 
-    public static void Execte(AsyncWorldEditMain sender, PlayerEntry player, String[] args) {
+    public static void Execte(AsyncWorldEditMain sender, IPlayerEntry player, String[] args) {
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
             return;
         }
 
         IPlayerManager manager = sender.getPlayerManager();
-        PlayerEntry wrapper;
+        IPlayerEntry wrapper;
         boolean mode;
 
         if (args.length == 1) {
@@ -73,7 +73,7 @@ public class ToggleCommand {
             }
 
             wrapper = player;
-            mode = !wrapper.getMode();
+            mode = !wrapper.getAweMode();
         } else {
             String arg = args[1];
             if (arg.startsWith("u:")) {
@@ -100,7 +100,7 @@ public class ToggleCommand {
                         return;
                     }
                 } else {
-                    mode = !wrapper.getMode();
+                    mode = !wrapper.getAweMode();
                 }
             } else {
                 if (!player.isInGame()) {
@@ -123,8 +123,8 @@ public class ToggleCommand {
             }
         }
 
-        wrapper.setMode(mode);
-        player.say(MessageType.CMD_TOGGLE_MODE_DONE.format(wrapper.getMode() ? 
+        wrapper.setAweMode(mode);
+        player.say(MessageType.CMD_TOGGLE_MODE_DONE.format(wrapper.getAweMode() ? 
                 MessageType.CMD_TOGGLE_MODE_ON.format() : MessageType.CMD_TOGGLE_MODE_OFF.format()));
     }
 }

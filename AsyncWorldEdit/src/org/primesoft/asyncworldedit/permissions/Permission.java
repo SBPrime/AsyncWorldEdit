@@ -40,10 +40,12 @@
  */
 package org.primesoft.asyncworldedit.permissions;
 
+import org.primesoft.asyncworldedit.api.permissions.IPermission;
+
 /**
  * List of all permissions
  */
-public enum Permission {
+public enum Permission implements IPermission {
 
     /**
      * Allows the use of the Reload command
@@ -124,6 +126,7 @@ public enum Permission {
      *
      * @return Entire permission node including base
      */
+    @Override
     public String getNode() {        
         return PermissionManager.AWE_PREFIX + permission;
     }

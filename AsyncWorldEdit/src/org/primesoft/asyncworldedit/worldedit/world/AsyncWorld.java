@@ -65,16 +65,16 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
+import org.primesoft.asyncworldedit.api.utils.IAction;
+import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RegenerateEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentActionEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntryEx;
-import org.primesoft.asyncworldedit.utils.Action;
-import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -96,7 +96,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
      * @param player
      * @return
      */
-    public static AsyncWorld wrap(World world, PlayerEntry player) {
+    public static AsyncWorld wrap(World world, IPlayerEntry player) {
         if (world == null) {
             return null;
         }
@@ -121,7 +121,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * The player
      */
-    private final PlayerEntry m_player;
+    private final IPlayerEntry m_player;
 
     /**
      * The bukkit world
@@ -143,7 +143,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
      */
     private final BlocksHubIntegration m_blocksHub;
 
-    public AsyncWorld(World world, PlayerEntry player) {
+    public AsyncWorld(World world, IPlayerEntry player) {
         super(world);
 
         m_plugin = AsyncWorldEditMain.getInstance();
@@ -162,7 +162,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public String getName() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<String>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<String>() {
             @Override
             public String execute() {
                 return m_parent.getName();
@@ -172,7 +172,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public int getMaxY() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Integer>() {
             @Override
             public Integer execute() {
                 return m_parent.getMaxY();
@@ -182,7 +182,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public boolean isValidBlockType(final int i) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Boolean>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 return m_parent.isValidBlockType(i);
@@ -192,7 +192,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public boolean usesBlockData(final int i) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Boolean>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 return m_parent.usesBlockData(i);
@@ -202,7 +202,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public Mask createLiquidMask() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Mask>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Mask>() {
             @Override
             public Mask execute() {
                 return m_parent.createLiquidMask();
@@ -212,7 +212,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public int getBlockType(final Vector vector) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Integer>() {
             @Override
             public Integer execute() {
                 return m_parent.getBlockType(vector);
@@ -222,7 +222,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public int getBlockData(final Vector vector) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Integer>() {
 
             @Override
             public Integer execute() {
@@ -237,12 +237,12 @@ public class AsyncWorld extends AbstractWorldWrapper {
      * @param asyncParams
      * @return
      */
-    private PlayerEntry getPlayer(BaseAsyncParams... asyncParams) {
-        PlayerEntry result = m_player;
+    private IPlayerEntry getPlayer(BaseAsyncParams... asyncParams) {
+        IPlayerEntry result = m_player;
 
         for (BaseAsyncParams param : asyncParams) {
             if (!param.isEmpty()) {
-                PlayerEntry player = param.getPlayer();
+                IPlayerEntry player = param.getPlayer();
                 if (player != null && player.isPlayer()) {
                     result = player;
                 }
@@ -258,7 +258,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         final BaseBlock newBlock = paramBlock.getData();
         final Vector v = paramVector.getData();
-        final PlayerEntry player = getPlayer(paramBlock, paramVector);
+        final IPlayerEntry player = getPlayer(paramBlock, paramVector);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
@@ -295,13 +295,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean setBlockType(Vector vector, final int i) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
         }
 
-        Func<Boolean> func = new Func<Boolean>() {
+        IFunc<Boolean> func = new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
@@ -330,13 +330,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public void setBlockData(Vector vector, final int i) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return;
         }
 
-        Func<Boolean> func = new Func<Boolean>() {
+        IFunc<Boolean> func = new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
@@ -362,13 +362,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean setTypeIdAndData(Vector vector, final int i, final int i1) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
         }
 
-        Func<Boolean> func = new Func<Boolean>() {
+        IFunc<Boolean> func = new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
@@ -396,7 +396,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public int getBlockLightLevel(final Vector vector) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Integer>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Integer>() {
             @Override
             public Integer execute() {
                 return m_parent.getBlockLightLevel(vector);
@@ -408,13 +408,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean clearContainerBlockContents(final Vector vector) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
         }
 
-        Func<Boolean> func = new Func<Boolean>() {
+        IFunc<Boolean> func = new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 return m_parent.clearContainerBlockContents(vector);
@@ -431,7 +431,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BaseBiome getBiome(final Vector2D vd) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBiome>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<BaseBiome>() {
             @Override
             public BaseBiome execute() {
                 return m_parent.getBiome(vd);
@@ -441,7 +441,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public WorldData getWorldData() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<WorldData>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<WorldData>() {
             @Override
             public WorldData execute() {
                 return m_parent.getWorldData();
@@ -455,14 +455,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final DataAsyncParams<BaseEntity> paramEntity = DataAsyncParams.extract(be);
         final Location location = paramLocation.getData();
         final BaseEntity entity = paramEntity.getData();
-        final PlayerEntry player = getPlayer(paramLocation, paramEntity);
+        final IPlayerEntry player = getPlayer(paramLocation, paramEntity);
 
         final EntityLazyWrapper entityWrapper = new EntityLazyWrapper(location, this);
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, location.toVector())) {
             return entityWrapper; //Return the entity erapper so WorldEdit does not complain
         }
 
-        Func<Entity> func = new Func<Entity>() {
+        IFunc<Entity> func = new IFunc<Entity>() {
             @Override
             public Entity execute() {
                 Entity result = m_parent.createEntity(location, entity);
@@ -491,14 +491,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final DataAsyncParams<BaseBiome> paramBiome = DataAsyncParams.extract(bb);
         final Vector2D v = paramVector.getData();
         final BaseBiome biome = paramBiome.getData();
-        final PlayerEntry player = getPlayer(paramBiome, paramVector);
+        final IPlayerEntry player = getPlayer(paramBiome, paramVector);
         final Vector tmpV = new Vector(v.getX(), 0, v.getZ());
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, tmpV)) {
             return false;
         }
 
-        Func<Boolean> func = new Func<Boolean>() {
+        IFunc<Boolean> func = new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 return m_parent.setBiome(v, biome);
@@ -517,13 +517,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public void dropItem(Vector vector, final BaseItemStack bis, final int i) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return;
         }
 
-        Action func = new Action() {
+        IAction func = new IAction() {
             @Override
             public void execute() {
                 m_parent.dropItem(v, bis, i);
@@ -543,13 +543,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public void dropItem(final Vector vector, final BaseItemStack bis) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return;
         }
 
-        Action func = new Action() {
+        IAction func = new IAction() {
             @Override
             public void execute() {
                 m_parent.dropItem(v, bis);
@@ -569,13 +569,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public void simulateBlockMine(Vector vector) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return;
         }
 
-        Action func = new Action() {
+        IAction func = new IAction() {
             @Override
             public void execute() {
                 m_parent.simulateBlockMine(v);
@@ -593,7 +593,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public List<? extends Entity> getEntities(final Region region) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<List<? extends Entity>>() {
             @Override
             public List<? extends Entity> execute() {
                 return m_parent.getEntities(region);
@@ -603,7 +603,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public List<? extends Entity> getEntities() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<List<? extends Entity>>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<List<? extends Entity>>() {
             @Override
             public List<? extends Entity> execute() {
                 return m_parent.getEntities();
@@ -696,7 +696,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean generateTree(final TreeGenerator.TreeType tt, final EditSession es, Vector vector) throws MaxChangedBlocksException {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
@@ -721,7 +721,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean generateTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
@@ -746,7 +746,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean generateBigTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
@@ -771,7 +771,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean generateBirchTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
@@ -796,7 +796,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean generateRedwoodTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
@@ -821,7 +821,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean generateTallRedwoodTree(final EditSession es, Vector vector) throws MaxChangedBlocksException {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
@@ -844,7 +844,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public void checkLoadedChunk(final Vector vector) {
-        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
+        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IAction() {
             @Override
             public void execute() {
                 m_parent.checkLoadedChunk(vector);
@@ -854,7 +854,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public void fixAfterFastMode(final Iterable<BlockVector2D> itrbl) {
-        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
+        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IAction() {
             @Override
             public void execute() {
                 m_parent.fixAfterFastMode(itrbl);
@@ -864,7 +864,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public void fixLighting(final Iterable<BlockVector2D> itrbl) {
-        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Action() {
+        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IAction() {
             @Override
             public void execute() {
                 m_parent.fixLighting(itrbl);
@@ -876,13 +876,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean playEffect(Vector vector, final int i, final int i1) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
         }
 
-        Func<Boolean> func = new Func<Boolean>() {
+        IFunc<Boolean> func = new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 return m_parent.playEffect(v, i, i1);
@@ -901,13 +901,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean queueBlockBreakEffect(final Platform pltform, Vector vector, final int i, final double d) {
         final DataAsyncParams<Vector> param = DataAsyncParams.extract(vector);
         final Vector v = param.getData();
-        final PlayerEntry player = getPlayer(param);
+        final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
         }
 
-        Func<Boolean> func = new Func<Boolean>() {
+        IFunc<Boolean> func = new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
                 return m_parent.queueBlockBreakEffect(pltform, v, i, d);
@@ -924,7 +924,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public Vector getMinimumPoint() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Vector>() {
             @Override
             public Vector execute() {
                 return m_parent.getMinimumPoint();
@@ -934,7 +934,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public Vector getMaximumPoint() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Vector>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Vector>() {
             @Override
             public Vector execute() {
                 return m_parent.getMaximumPoint();
@@ -944,7 +944,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BaseBlock getBlock(final Vector vector) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBlock>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<BaseBlock>() {
             @Override
             public BaseBlock execute() {
                 return m_parent.getBlock(vector);
@@ -954,7 +954,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BaseBlock getLazyBlock(final Vector vector) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<BaseBlock>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<BaseBlock>() {
             @Override
             public BaseBlock execute() {
                 return m_parent.getLazyBlock(vector);
@@ -969,7 +969,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         final BaseBlock newBlock = paramBlock.getData();
         final Vector v = paramVector.getData();
-        final PlayerEntry player = getPlayer(paramBlock, paramVector);
+        final IPlayerEntry player = getPlayer(paramBlock, paramVector);
 
         if (!m_blocksHub.canPlace(player, m_bukkitWorld, v)) {
             return false;
@@ -1004,7 +1004,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public Operation commit() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new Func<Operation>() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Operation>() {
             @Override
             public Operation execute() {
                 return m_parent.commit();
@@ -1015,7 +1015,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * Log placed block using blocks hub
      */
-    private void logBlock(Vector location, PlayerEntry player, BaseBlock oldBlock, BaseBlock newBlock) {
+    private void logBlock(Vector location, IPlayerEntry player, BaseBlock oldBlock, BaseBlock newBlock) {
         m_blocksHub.logBlock(player, m_bukkitWorld, location, oldBlock, newBlock);
     }
 
@@ -1025,7 +1025,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
      * @param operation
      */
     private boolean checkAsync(WorldeditOperations operation) {
-        return ConfigProvider.isAsyncAllowed(operation) && m_player.getMode();
+        return ConfigProvider.isAsyncAllowed(operation) && m_player.getAweMode();
     }
 
     /**

@@ -42,8 +42,8 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
-import org.primesoft.asyncworldedit.utils.Func;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
@@ -54,10 +54,10 @@ import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 public class WorldExtentFuncEntry<T>
         extends WorldExtentBlockEntry {
 
-    private final Func<T> m_function;
+    private final IFunc<T> m_function;
 
     public WorldExtentFuncEntry(AsyncWorld worldExtent,
-            int jobId, Vector location, Func<T> function) {
+            int jobId, Vector location, IFunc<T> function) {
         super(worldExtent, jobId, location);
         m_function = function;
     }

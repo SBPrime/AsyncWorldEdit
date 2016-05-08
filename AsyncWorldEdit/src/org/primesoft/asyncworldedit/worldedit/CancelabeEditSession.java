@@ -58,9 +58,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
+import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.ActionEx;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -73,22 +75,22 @@ import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
  *
  * @author SBPrime
  */
-public class CancelabeEditSession extends EditSessionStub {
+public class CancelabeEditSession extends EditSessionStub implements ICancelabeEditSession {
 
-    private final ThreadSafeEditSession m_parent;
+    private final IThreadSafeEditSession m_parent;
 
     private final CancelableWorld m_cWorld;
 
     private final int m_jobId;
 
-    private final PlayerEntry m_player;
+    private final IPlayerEntry m_player;
 
     /**
      * Number of queued blocks
      */
     private int m_blocksQueued;
 
-    public CancelabeEditSession(ThreadSafeEditSession parent, Mask mask, int jobId) {
+    public CancelabeEditSession(IThreadSafeEditSession parent, Mask mask, int jobId) {
         super(parent.getEventBus(),
                 new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
                 parent.getBlockChangeLimit(), parent.getBlockBag(),
@@ -118,10 +120,12 @@ public class CancelabeEditSession extends EditSessionStub {
                 "Unable to inject changeset to extent, undo and redo broken.");
     }
 
+    @Override
     public boolean isCanceled() {
         return m_cWorld.isCanceled();
     }
 
+    @Override
     public void cancel() {
         m_cWorld.cancel();
     }
@@ -316,7 +320,7 @@ public class CancelabeEditSession extends EditSessionStub {
     public void doRedo(EditSession sess) {
         Mask mask = sess.getMask();
         sess.setMask(getMask());
-        m_parent.doRedo(sess);
+        ((ThreadSafeEditSession)m_parent).doRedo(sess);
         sess.setMask(mask);
     }
 
@@ -329,11 +333,13 @@ public class CancelabeEditSession extends EditSessionStub {
                 BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
     }
 
+    @Override
     public void resetAsync() {
         m_parent.resetAsync();
     }
 
-    public ThreadSafeEditSession getParent() {
+    @Override
+    public IThreadSafeEditSession getParent() {
         return m_parent;
     }
 
@@ -356,5 +362,15 @@ public class CancelabeEditSession extends EditSessionStub {
                 super.flushQueue();
             }
         }
+    }
+
+    @Override
+    public int getJobId() {
+        return m_jobId;
+    }
+
+    @Override
+    public IPlayerEntry getPlayer() {
+        return m_player;
     }
 }

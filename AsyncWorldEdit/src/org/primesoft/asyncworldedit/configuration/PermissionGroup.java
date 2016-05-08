@@ -42,6 +42,8 @@ package org.primesoft.asyncworldedit.configuration;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 /**
@@ -49,7 +51,7 @@ import org.primesoft.asyncworldedit.permissions.PermissionManager;
  *
  * @author SBPrime
  */
-public class PermissionGroup {
+public class PermissionGroup implements IPermissionGroup {
 
     /**
      * The default values permission group
@@ -130,6 +132,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public boolean isDefault() {
         return m_isDefault;
     }
@@ -139,6 +142,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public int getMaxJobs() {
         return m_maxJobs;
     }
@@ -148,6 +152,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public boolean getCleanOnLogout() {
         return m_cleanOnLogout;
     }
@@ -157,6 +162,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public boolean isOnByDefault() {
         return m_isOnByDefault;
     }
@@ -166,6 +172,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public int getRendererBlocks() {
         return m_rendererBlocks;
     }
@@ -175,6 +182,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public int getRendererTime() {
         return m_rendererTime;
     }
@@ -184,6 +192,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public int getQueueHardLimit() {
         return m_queueHardLimit;
     }
@@ -193,6 +202,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public int getQueueSoftLimit() {
         return m_queueSoftLimit;
     }
@@ -202,6 +212,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public boolean isTalkative() {
         return m_isTalkative;
     }
@@ -211,6 +222,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public boolean isBarApiProgressEnabled() {
         return m_useBarApi;
     }
@@ -220,6 +232,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public boolean isChatProgressEnabled() {
         return m_useChat;
     }
@@ -229,6 +242,7 @@ public class PermissionGroup {
      *
      * @return
      */
+    @Override
     public String getPermissionNode() {
         return PermissionManager.AWE_PREFIX + "Groups." + m_name;
     }
@@ -321,5 +335,20 @@ public class PermissionGroup {
         }
 
         return (value < 1) ? defaultValue : value;
+    }
+
+    @Override
+    public int getBarApiProgresMinBlocks() {
+        throw new UnsupportedOperationException("Not supported in this version of the plugin.");
+    }
+
+    @Override
+    public boolean isUndoDisabled() {
+        throw new UnsupportedOperationException("Not supported in this version of the plugin.");
+    }
+
+    @Override
+    public IWorldEditConfig getWorldEditConfig() {
+        throw new UnsupportedOperationException("Not supported in this version of the plugin.");
     }
 }

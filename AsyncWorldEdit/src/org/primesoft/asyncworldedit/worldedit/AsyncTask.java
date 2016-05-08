@@ -42,7 +42,7 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
@@ -52,7 +52,7 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  */
 public abstract class AsyncTask extends BaseTask {
 
-    public AsyncTask(final CancelabeEditSession session, final PlayerEntry player,
+    public AsyncTask(final CancelabeEditSession session, final IPlayerEntry player,
             final String commandName, IBlockPlacer blocksPlacer, JobEntry job) {
         super(session, player, commandName, blocksPlacer, job);
     }

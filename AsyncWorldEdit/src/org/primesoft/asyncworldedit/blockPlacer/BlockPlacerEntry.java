@@ -41,14 +41,15 @@
 package org.primesoft.asyncworldedit.blockPlacer;
 
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerEntry;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class BlockPlacerEntry {
+public abstract class BlockPlacerEntry implements IBlockPlacerEntry {
     /**
-     * THe job ID
+     * The job ID
      */
     private final int m_jobId;
     
@@ -62,6 +63,7 @@ public abstract class BlockPlacerEntry {
      * Is this task demanding, only one demanding task is allowed
      * @return 
      */
+    @Override
     public boolean isDemanding() {
         return m_isDemanding;
     }
@@ -70,6 +72,7 @@ public abstract class BlockPlacerEntry {
      * The job ID
      * @return 
      */
+    @Override
     public int getJobId(){
         return m_jobId;
     }
@@ -91,5 +94,6 @@ public abstract class BlockPlacerEntry {
      * @param bp
      * @return true if operation was successful
      */
+    @Override
     public abstract boolean process(IBlockPlacer bp);
 }

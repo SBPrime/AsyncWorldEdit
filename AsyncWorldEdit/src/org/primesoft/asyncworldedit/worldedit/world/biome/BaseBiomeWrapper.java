@@ -42,6 +42,7 @@
 package org.primesoft.asyncworldedit.worldedit.world.biome;
 
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
@@ -52,7 +53,7 @@ import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 public class BaseBiomeWrapper extends BaseBiome implements IAsyncWrapper
 {
     public static BaseBiomeWrapper wrap(BaseBiome biome, int jobId,
-                                        boolean isAsync, PlayerEntry player) {
+                                        boolean isAsync, IPlayerEntry player) {
         BaseBiomeWrapper result;
         if (biome instanceof BaseBiomeWrapper) {
             result = (BaseBiomeWrapper) biome;
@@ -71,7 +72,7 @@ public class BaseBiomeWrapper extends BaseBiome implements IAsyncWrapper
 
     private boolean m_isAsync;
 
-    private PlayerEntry m_player;
+    private IPlayerEntry m_player;
     
     @Override
     public int getJobId() {
@@ -92,17 +93,17 @@ public class BaseBiomeWrapper extends BaseBiome implements IAsyncWrapper
         m_isAsync = async;
     }
 
-    public void setPlayer(PlayerEntry player) {
+    public void setPlayer(IPlayerEntry player) {
         m_player = player;
     }
 
     @Override
-    public PlayerEntry getPlayer() {
+    public IPlayerEntry getPlayer() {
         return m_player;
     }
     
     private BaseBiomeWrapper(BaseBiome parent, int jobId, boolean isAsync,
-                             PlayerEntry player) {
+                             IPlayerEntry player) {
         super(0);
 
         m_jobId = jobId;

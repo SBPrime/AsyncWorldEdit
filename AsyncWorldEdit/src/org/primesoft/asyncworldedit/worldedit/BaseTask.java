@@ -43,9 +43,11 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.JobStatus;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
-import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 
@@ -63,7 +65,7 @@ public abstract class BaseTask implements Runnable {
     /**
      * The player
      */
-    protected final PlayerEntry m_player;
+    protected final IPlayerEntry m_player;
 
     /**
      * Cancelable edit session
@@ -73,7 +75,7 @@ public abstract class BaseTask implements Runnable {
     /**
      * Thread safe edit session
      */
-    protected final ThreadSafeEditSession m_safeEditSession;
+    protected final IThreadSafeEditSession m_safeEditSession;
 
     /**
      * The edit session
@@ -93,9 +95,9 @@ public abstract class BaseTask implements Runnable {
     /**
      * The permission group
      */
-    protected final PermissionGroup m_group;
+    protected final IPermissionGroup m_group;
 
-    public BaseTask(final EditSession editSession, final PlayerEntry player,
+    public BaseTask(final EditSession editSession, final IPlayerEntry player,
             final String commandName, IBlockPlacer blocksPlacer, JobEntry job) {
 
         m_editSession = editSession;
@@ -122,18 +124,18 @@ public abstract class BaseTask implements Runnable {
     public void run() {
         Object result = null;
 
-        if (m_job.getStatus() == JobEntry.JobStatus.Canceled) {
+        if (m_job.getStatus() == JobStatus.Canceled) {
             return;
         }
 
-        m_job.setStatus(JobEntry.JobStatus.Preparing);
+        m_job.setStatus(JobStatus.Preparing);
         if (m_group.isTalkative()) {
             m_player.say(MessageType.BLOCK_PLACER_RUN.format(m_command));
         }
         m_blockPlacer.addTasks(m_player, m_job);
 
         if ((m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled())
-                && (m_job.getStatus() != JobEntry.JobStatus.Canceled)) {
+                && (m_job.getStatus() != JobStatus.Canceled)) {
             try {
                 result = doRun();
             } catch (MaxChangedBlocksException ex) {
@@ -155,7 +157,7 @@ public abstract class BaseTask implements Runnable {
             }
         }
 
-        m_job.setStatus(JobEntry.JobStatus.Waiting);
+        m_job.setStatus(JobStatus.Waiting);
         m_blockPlacer.addTasks(m_player, m_job);
         doPostRun(result);
 
@@ -163,7 +165,7 @@ public abstract class BaseTask implements Runnable {
 
         m_job.taskDone();
         if (m_cancelableEditSession != null) {
-            ThreadSafeEditSession parent = m_cancelableEditSession.getParent();
+            IThreadSafeEditSession parent = m_cancelableEditSession.getParent();
             parent.removeAsync(m_job);
         } else if (m_safeEditSession != null) {
             m_safeEditSession.removeAsync(m_job);

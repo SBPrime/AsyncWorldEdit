@@ -43,14 +43,14 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
  * @author SBPrime
  */
 public class Vector2DWrapper extends Vector2D implements IAsyncWrapper {
-    public static Vector2D wrap(Vector2D v, int jobId, boolean isAsync, PlayerEntry player) {
+    public static Vector2D wrap(Vector2D v, int jobId, boolean isAsync, IPlayerEntry player) {
         if (v instanceof BlockVector2D) {
             return BlockVector2DWrapper.wrap((BlockVector2D)v, jobId, isAsync, player);
         }
@@ -74,7 +74,7 @@ public class Vector2DWrapper extends Vector2D implements IAsyncWrapper {
 
     private boolean m_isAsync;
 
-    private PlayerEntry m_player;
+    private IPlayerEntry m_player;
 
     @Override
     public int getJobId() {
@@ -95,16 +95,16 @@ public class Vector2DWrapper extends Vector2D implements IAsyncWrapper {
         m_isAsync = async;
     }
 
-    public void setPlayer(PlayerEntry player) {
+    public void setPlayer(IPlayerEntry player) {
         m_player = player;
     }
 
     @Override
-    public PlayerEntry getPlayer() {
+    public IPlayerEntry getPlayer() {
         return m_player;
     }
 
-    private Vector2DWrapper(Vector2D parent, int jobId, boolean isAsync, PlayerEntry player) {
+    private Vector2DWrapper(Vector2D parent, int jobId, boolean isAsync, IPlayerEntry player) {
         super();
 
         m_jobId = jobId;

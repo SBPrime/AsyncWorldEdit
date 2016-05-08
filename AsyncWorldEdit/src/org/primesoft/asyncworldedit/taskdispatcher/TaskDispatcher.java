@@ -53,10 +53,10 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.ChunkWatch;
+import org.primesoft.asyncworldedit.api.utils.IAction;
+import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.utils.Action;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
-import org.primesoft.asyncworldedit.utils.Func;
 
 /**
  * This class is used to perform tasks that need to by performed as fast as
@@ -297,7 +297,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param action
      * @return
      */
-    private <T> T queueFastOperation(Func<T> action) {
+    private <T> T queueFastOperation(IFunc<T> action) {
         FuncEntry<T> getBlock = new FuncEntry<T>(action);
         if (isMainTask()) {
             return action.execute();
@@ -322,7 +322,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param action
      * @return
      */
-    private void queueFastOperation(Action action) {
+    private void queueFastOperation(IAction action) {
         ActionEntry actionEntry = new ActionEntry(action);
         if (isMainTask()) {
             action.execute();
@@ -352,7 +352,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param pos
      */
     @Override
-    public void performSafe(Object mutex, Action action, World world, Vector pos) {
+    public void performSafe(Object mutex, IAction action, World world, Vector pos) {
         synchronized (mutex) {
             int cx = pos.getBlockX() >> 4;
             int cz = pos.getBlockZ() >> 4;
@@ -392,7 +392,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param region
      */
     @Override
-    public void performSafe(Object mutex, Action action, World world, Region region) {
+    public void performSafe(Object mutex, IAction action, World world, Region region) {
         synchronized (mutex) {
             Set<Vector2D> chunks = region.getChunks();
             String worldName = world != null ? world.getName() : null;
@@ -443,7 +443,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @return
      */
     @Override
-    public <T> T performSafe(Object mutex, Func<T> action, World world, Region region) {
+    public <T> T performSafe(Object mutex, IFunc<T> action, World world, Region region) {
         synchronized (mutex) {
             Set<Vector2D> chunks = region.getChunks();
             String worldName = world != null ? world.getName() : null;
@@ -493,7 +493,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @return
      */
     @Override
-    public <T> T performSafe(Object mutex, Func<T> action, World world, Vector pos) {
+    public <T> T performSafe(Object mutex, IFunc<T> action, World world, Vector pos) {
         synchronized (mutex) {
             int cx = pos.getBlockX() >> 4;
             int cz = pos.getBlockZ() >> 4;
@@ -530,7 +530,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param action
      */
     @Override
-    public void performSafe(Object mutex, Action action) {
+    public void performSafe(Object mutex, IAction action) {
         synchronized (mutex) {
             try {
                 action.execute();
@@ -556,7 +556,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @return
      */
     @Override
-    public <T> T performSafe(Object mutex, Func<T> action) {
+    public <T> T performSafe(Object mutex, IFunc<T> action) {
         synchronized (mutex) {
             try {
                 T result = action.execute();
@@ -567,6 +567,67 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                  * available. Therefore use the queue fallback.
                  */
                 ExceptionHelper.printException(ex, "Error performing safe operation.");
+            }
+        }
+        return queueFastOperation(action);
+    }
+
+    @Override
+    public void performSafeChunk(Object mutex, IAction action, World world, Vector2D pos) {
+        synchronized (mutex) {
+            int cx = pos.getBlockX();
+            int cz = pos.getBlockZ();
+            String worldName = world != null ? world.getName() : null;
+
+            try {
+                m_chunkWatch.add(cx, cz, worldName);
+                if (canPerform(world, cx, cz)) {
+                    try {
+                        action.execute();
+                        return;
+                    } catch (Exception ex) {
+                        /*
+                         * Exception here indicates that async block get is not
+                         * available. Therefore use the queue fallback.
+                         */
+                        ExceptionHelper.printException(ex,
+                                "Error performing safe operation for " + worldName
+                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
+                                + ", inUse: " + world.isChunkInUse(cx, cz));
+                    }
+                }
+            } finally {
+                m_chunkWatch.remove(cx, cz, worldName);
+            }
+        }
+        queueFastOperation(action);
+    }
+
+    @Override
+    public <T> T performSafeChunk(Object mutex, IFunc<T> action, World world, Vector2D pos) {
+        synchronized (mutex) {
+            int cx = pos.getBlockX();
+            int cz = pos.getBlockZ();
+            String worldName = world != null ? world.getName() : null;
+            try {
+                m_chunkWatch.add(cx, cz, worldName);
+                if (canPerform(world, cx, cz)) {
+                    try {
+                        T result = action.execute();
+                        return result;
+                    } catch (Exception ex) {
+                        /*
+                         * Exception here indicates that async block get is not
+                         * available. Therefore use the queue fallback.
+                         */
+                        ExceptionHelper.printException(ex,
+                                "Error performing safe operation for " + worldName
+                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
+                                + ", inUse: " + world.isChunkInUse(cx, cz));
+                    }
+                }
+            } finally {
+                m_chunkWatch.remove(cx, cz, worldName);
             }
         }
         return queueFastOperation(action);

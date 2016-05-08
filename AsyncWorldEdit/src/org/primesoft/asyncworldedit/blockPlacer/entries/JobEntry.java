@@ -43,10 +43,12 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 import java.util.ArrayList;
 import java.util.List;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.api.blockPlacer.IJobEntryListener;
-import org.primesoft.asyncworldedit.configuration.PermissionGroup;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.entries.JobStatus;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
@@ -55,34 +57,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
  *
  * @author SBPrime
  */
-public class JobEntry extends BlockPlacerEntry {
-
-    /**
-     * Job status
-     */
-    public enum JobStatus {
-
-        Initializing(0),
-        Preparing(1),
-        Waiting(2),
-        PlacingBlocks(3),
-        Done(4),
-        Canceled(5);
-
-        /**
-         * The sequence number
-         */
-        private final int m_seqNumber;
-
-        JobStatus(int seqNumber) {
-            m_seqNumber = seqNumber;
-        }
-
-        public int getSeqNumber() {
-            return m_seqNumber;
-        }
-    }
-
+public class JobEntry extends BlockPlacerEntry implements IJobEntry {
     /**
      * Job name
      */
@@ -101,7 +76,7 @@ public class JobEntry extends BlockPlacerEntry {
     /**
      * The player name
      */
-    private final PlayerEntry m_player;
+    private final IPlayerEntry m_player;
 
     /**
      * Is the async task done
@@ -118,7 +93,8 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @return
      */
-    public PlayerEntry getPlayer() {
+    @Override
+    public IPlayerEntry getPlayer() {
         return m_player;
     }
 
@@ -129,7 +105,7 @@ public class JobEntry extends BlockPlacerEntry {
      * @param jobId job id
      * @param name operation name
      */
-    public JobEntry(PlayerEntry player, int jobId, String name) {
+    public JobEntry(IPlayerEntry player, int jobId, String name) {
         super(jobId, false);
         m_player = player;
         m_name = name;
@@ -146,7 +122,7 @@ public class JobEntry extends BlockPlacerEntry {
      * @param name operation name
      * @param cEditSession the cancelable edit session
      */
-    public JobEntry(PlayerEntry player,
+    public JobEntry(IPlayerEntry player,
             CancelabeEditSession cEditSession,
             int jobId, String name) {
         super(jobId, false);
@@ -163,6 +139,7 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @param listener
      */
+    @Override
     public void addStateChangedListener(IJobEntryListener listener) {
         if (listener == null) {
             return;
@@ -180,6 +157,7 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @param listener
      */
+    @Override
     public void removeStateChangedListener(IJobEntryListener listener) {
         if (listener == null) {
             return;
@@ -197,6 +175,7 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @return
      */
+    @Override
     public boolean isTaskDone() {
         return m_taskDone;
     }
@@ -204,6 +183,7 @@ public class JobEntry extends BlockPlacerEntry {
     /**
      * Async task has finished
      */
+    @Override
     public void taskDone() {
         m_taskDone = true;
 
@@ -215,6 +195,7 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @return
      */
+    @Override
     public JobStatus getStatus() {
         return m_status;
     }
@@ -224,6 +205,7 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @return
      */
+    @Override
     public String getName() {
         return m_name;
     }
@@ -233,6 +215,7 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @param newStatus
      */
+    @Override
     public void setStatus(JobStatus newStatus) {
         int newS = newStatus.getSeqNumber();
         int oldS = m_status.getSeqNumber();
@@ -247,6 +230,7 @@ public class JobEntry extends BlockPlacerEntry {
     /**
      * Cancel the job
      */
+    @Override
     public void cancel() {
         JobStatus status = getStatus();
         if (status != JobStatus.Done && !m_taskDone) {
@@ -262,6 +246,7 @@ public class JobEntry extends BlockPlacerEntry {
      *
      * @return
      */
+    @Override
     public String getStatusString() {                
         switch (m_status) {
             case Done:
@@ -288,7 +273,7 @@ public class JobEntry extends BlockPlacerEntry {
 
     @Override
     public boolean process(IBlockPlacer bp) {
-        final PlayerEntry player = m_player;
+        final IPlayerEntry player = m_player;
 
         switch (m_status) {
             case Canceled:
@@ -296,17 +281,17 @@ public class JobEntry extends BlockPlacerEntry {
                 bp.removeJob(player, this);
                 return true;
             case PlacingBlocks:
-                setStatus(JobEntry.JobStatus.Done);
+                setStatus(JobStatus.Done);
                 bp.removeJob(player, this);
                 break;
             case Initializing:
             case Preparing:
             case Waiting:
-                setStatus(JobEntry.JobStatus.PlacingBlocks);
+                setStatus(JobStatus.PlacingBlocks);
                 break;
         }
 
-        PermissionGroup group = player.getPermissionGroup();
+        IPermissionGroup group = player.getPermissionGroup();
         if (group.isTalkative()) {
             player.say(MessageType.CMD_JOBS_STATUS.format(toString(), getStatusString()));
         }

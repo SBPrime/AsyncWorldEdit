@@ -45,8 +45,8 @@ import com.sk89q.worldedit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
@@ -94,8 +94,8 @@ class AsyncJobProcessor implements IJobProcessor {
      * @param operation
      * @return
      */
-    public boolean checkAsync(PlayerEntry player, WorldeditOperations operation) {
-        return ConfigProvider.isAsyncAllowed(operation) && player.getMode();
+    public boolean checkAsync(IPlayerEntry player, WorldeditOperations operation) {
+        return ConfigProvider.isAsyncAllowed(operation) && player.getAweMode();
     }
     
     /**
@@ -104,7 +104,7 @@ class AsyncJobProcessor implements IJobProcessor {
      * @param operationName
      * @return
      */
-    public boolean checkAsync(PlayerEntry player, String operationName) {
+    public boolean checkAsync(IPlayerEntry player, String operationName) {
         try {
             return checkAsync(player, WorldeditOperations.valueOf(operationName));
         } catch (Exception e) {
@@ -118,7 +118,7 @@ class AsyncJobProcessor implements IJobProcessor {
             return;
         }
 
-        final PlayerEntry playerEntry = m_playerManager.getPlayer(player.getUniqueId());
+        final IPlayerEntry playerEntry = m_playerManager.getPlayer(player.getUniqueId());
         final String name = job.getName();        
         boolean async = checkAsync(playerEntry, name);
         

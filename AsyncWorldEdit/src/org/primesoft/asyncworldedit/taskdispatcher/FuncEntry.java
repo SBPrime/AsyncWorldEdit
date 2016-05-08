@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.taskdispatcher;
 
-import org.primesoft.asyncworldedit.utils.Func;
+import org.primesoft.asyncworldedit.api.utils.IFunc;
 
 /**
  *
@@ -49,10 +49,10 @@ import org.primesoft.asyncworldedit.utils.Func;
  */
 public class FuncEntry<T> extends BaseDispatcherEntry {
 
-    private final Func<T> m_action;
+    private final IFunc<T> m_action;
     private T m_result = null;
 
-    public Func<T> getAction() {
+    public IFunc<T> getAction() {
         return m_action;
     }
 
@@ -60,7 +60,7 @@ public class FuncEntry<T> extends BaseDispatcherEntry {
         return m_result;
     }
 
-    public FuncEntry(Func action) {
+    public FuncEntry(IFunc action) {
         m_action = action;
     }
 

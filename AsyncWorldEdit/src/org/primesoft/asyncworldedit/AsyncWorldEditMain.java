@@ -57,7 +57,6 @@ import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.permissions.Permission;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.api.IPlotMeFix;
 import org.primesoft.asyncworldedit.plotme.NullFix;
@@ -70,9 +69,14 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.api.IAdapter;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.changesetSerializer.ISerializerManager;
+import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
+import org.primesoft.asyncworldedit.api.map.IMapUtils;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
@@ -279,7 +283,7 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        PlayerEntry player = m_playerManager.getPlayer((sender instanceof Player) ? (Player) sender : null);
+        IPlayerEntry player = m_playerManager.getPlayer((sender instanceof Player) ? (Player) sender : null);
 
         if (!command.getName().equalsIgnoreCase(Commands.COMMAND_MAIN)) {
             return false;
@@ -310,7 +314,7 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
         return Help.ShowHelp(player, null);
     }
 
-    private void doReloadConfig(PlayerEntry player, String arg) {
+    private void doReloadConfig(IPlayerEntry player, String arg) {
         if (!player.isAllowed(Permission.RELOAD_CONFIG)) {
             player.say(MessageType.NO_PERMS.format());
             return;
@@ -369,7 +373,7 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
         player.say(MessageType.CMD_RELOAD_DONE.format());
     }
 
-    private void doToggle(PlayerEntry player, String[] args) {
+    private void doToggle(IPlayerEntry player, String[] args) {
         if (!m_isInitialized) {
             player.say(MessageType.NOT_INITIALIZED.format());
             return;
@@ -378,7 +382,7 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
         ToggleCommand.Execte(this, player, args);
     }
 
-    private void doPurge(PlayerEntry player, String[] args) {
+    private void doPurge(IPlayerEntry player, String[] args) {
         if (!m_isInitialized) {
             player.say(MessageType.NOT_INITIALIZED.format());
             return;
@@ -387,7 +391,7 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
         PurgeCommand.Execte(this, player, args);
     }
 
-    private void doJobs(PlayerEntry player, String[] args) {
+    private void doJobs(IPlayerEntry player, String[] args) {
         if (!m_isInitialized) {
             player.say(MessageType.NOT_INITIALIZED.format());
             return;
@@ -396,7 +400,7 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
         JobsCommand.Execte(this, player, args);
     }
 
-    private void doCancel(PlayerEntry player, String[] args) {
+    private void doCancel(IPlayerEntry player, String[] args) {
         if (!m_isInitialized) {
             player.say(MessageType.NOT_INITIALIZED.format());
             return;
@@ -446,5 +450,67 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
         }
 
         return ((InjectorBukkit) wPlugin).getCore();
+    }
+
+    @Override
+    public IDirectChunkAPI getDirectChunkAPI() {
+        log("******************************************************************************");
+        log("******************************************************************************");
+        log("**                                                                          **");
+        log("** DirecChunkAPI is not available for this version of the plugin            **");
+        log("**                                                                          **");
+        log("******************************************************************************");
+        log("******************************************************************************");
+        
+        return null;
+    }
+
+    @Override
+    public IAdapter getAdapter() {
+        log("******************************************************************************");
+        log("******************************************************************************");
+        log("**                                                                          **");
+        log("** Native API adapter is not available for this version of the plugin       **");
+        log("**                                                                          **");
+        log("******************************************************************************");
+        log("******************************************************************************");
+        
+        return null;
+    }
+
+    @Override
+    public double getAPIVersion() {
+        return 3.001002000;
+    }
+
+    @Override
+    public byte[] getDetailAPIVersion() {
+        return new byte[]{1, 2, 0};
+    }
+
+    @Override
+    public IMapUtils getMapUtils() {
+        log("******************************************************************************");
+        log("******************************************************************************");
+        log("**                                                                          **");
+        log("** MapUtils are not available for this version of the plugin                **");
+        log("**                                                                          **");
+        log("******************************************************************************");
+        log("******************************************************************************");
+        
+        return null;
+    }
+
+    @Override
+    public ISerializerManager getChangesetSerializer() {
+        log("******************************************************************************");
+        log("******************************************************************************");
+        log("**                                                                          **");
+        log("** Undo serializer manager is not available for this version of the plugin  **");
+        log("**                                                                          **");
+        log("******************************************************************************");
+        log("******************************************************************************");
+        
+        return null;
     }
 }

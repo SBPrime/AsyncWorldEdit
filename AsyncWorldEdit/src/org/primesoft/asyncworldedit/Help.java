@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit;
 
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.commands.Commands;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
@@ -49,7 +49,7 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  * @author SBPrime
  */
 public final class Help {
-    public static boolean ShowHelp(PlayerEntry player, String command) {
+    public static boolean ShowHelp(IPlayerEntry player, String command) {
         MessageType helpMessage = MessageType.CMD_HELP_GLOBAL;
 
         if (command != null) {

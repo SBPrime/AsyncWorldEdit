@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.taskdispatcher;
 
-import org.primesoft.asyncworldedit.utils.Action;
+import org.primesoft.asyncworldedit.api.utils.IAction;
 
 /**
  *
@@ -50,7 +50,7 @@ public class ActionEntry extends BaseDispatcherEntry {
     /**
      * Action to perform
      */
-    private final Action m_action;
+    private final IAction m_action;
         
     
     /**
@@ -63,7 +63,7 @@ public class ActionEntry extends BaseDispatcherEntry {
      * The action
      * @return 
      */
-    public Action getAction() {
+    public IAction getAction() {
         return m_action;
     }
 
@@ -79,7 +79,7 @@ public class ActionEntry extends BaseDispatcherEntry {
      * Create new instance of class
      * @param action action to perform
      */
-    public ActionEntry(Action action) {
+    public ActionEntry(IAction action) {
         m_action = action;
     }
 

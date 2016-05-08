@@ -40,17 +40,16 @@
  */
 package org.primesoft.asyncworldedit;
 
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
@@ -75,7 +74,7 @@ public class EventListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
 
-        final PlayerEntry entry = ((PlayerManager)m_parent.getPlayerManager()).addPlayer(player);
+        final IPlayerEntry entry = ((PlayerManager)m_parent.getPlayerManager()).addPlayer(player);
 
         if (!PermissionManager.isAllowed(player, Permission.ANNOUNCE_VERSION)) {
             return;
