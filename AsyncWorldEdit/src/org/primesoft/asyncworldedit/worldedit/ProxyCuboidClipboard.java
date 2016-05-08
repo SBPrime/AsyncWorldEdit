@@ -52,7 +52,7 @@ import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  * This class is only a wrapper proxy Note: Do not use any operations from this
- * class, always use th parrent!
+ * class, always use the parrent!
  *
  * @author SBPrime
  */

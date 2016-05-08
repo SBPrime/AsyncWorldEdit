@@ -51,12 +51,12 @@ import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
  * @author SBPrime
  * @param <T>
  */
-public class WorldExtentFuncEntry<T>
-        extends WorldExtentBlockEntry {
+public class WorldFuncEntry<T>
+        extends WorldBlockEntry {
 
     private final IFunc<T> m_function;
 
-    public WorldExtentFuncEntry(AsyncWorld worldExtent,
+    public WorldFuncEntry(AsyncWorld worldExtent,
             int jobId, Vector location, IFunc<T> function) {
         super(worldExtent, jobId, location);
         m_function = function;

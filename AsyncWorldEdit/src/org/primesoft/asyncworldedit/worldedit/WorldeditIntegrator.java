@@ -49,7 +49,7 @@ import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.util.command.Dispatcher;
 import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.utils.Reflection;
-import org.primesoft.asyncworldedit.worldedit.utils.command.DispatcherWrapper;
+import org.primesoft.asyncworldedit.worldedit.util.command.DispatcherWrapper;
 
 /**
  *

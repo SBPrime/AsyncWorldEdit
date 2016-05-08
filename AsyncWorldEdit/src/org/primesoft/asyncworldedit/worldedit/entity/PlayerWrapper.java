@@ -296,6 +296,14 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o instanceof PlayerWrapper) {
+            o = ((PlayerWrapper) o).m_parent;
+        }
+        return m_parent.equals(o);
+    }
+
+    @Override
     public boolean isHoldingPickAxe() {
         return m_parent.isHoldingPickAxe();
     }

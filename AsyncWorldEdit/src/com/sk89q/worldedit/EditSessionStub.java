@@ -46,13 +46,14 @@ import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import javax.annotation.Nullable;
+import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 
 /**
  * Stub class to allow access to package visible constructor
  *
  * @author SBPrime
  */
-public abstract class EditSessionStub extends EditSession {
+public abstract class EditSessionStub extends EditSession implements IAweEditSession {
     public EditSessionStub(EventBus eventBus, World world, int maxBlocks,
             @Nullable BlockBag blockBag, EditSessionEvent event) {
         super(eventBus, world, maxBlocks, blockBag, event);

@@ -58,11 +58,11 @@ import org.primesoft.asyncworldedit.configuration.PermissionGroup;
  */
 public class PlayerManager implements IPlayerManager {
 
-    public final static UUID UUID_CONSOLE = UUID.randomUUID();
-    public final static UUID UUID_UNKNOWN = UUID.randomUUID();
+    final static UUID UUID_CONSOLE = UUID.randomUUID();
+    final static UUID UUID_UNKNOWN = UUID.randomUUID();
 
-    public final static IPlayerEntry CONSOLE = new PlayerEntry(null, "<Console>", UUID_CONSOLE, PermissionGroup.getDefaultGroup(), true);
-    public final static IPlayerEntry UNKNOWN = new PlayerEntry(null, "<Unknown>", UUID_UNKNOWN, PermissionGroup.getDefaultGroup(), false);
+    final static IPlayerEntry CONSOLE = new PlayerEntry(null, "<Console>", UUID_CONSOLE, PermissionGroup.getDefaultGroup(), true);
+    final static IPlayerEntry UNKNOWN = new PlayerEntry(null, "<Unknown>", UUID_UNKNOWN, PermissionGroup.getDefaultGroup(), false);
 
     
     

@@ -121,6 +121,11 @@ public class BaseBiomeWrapper extends BaseBiome implements IAsyncWrapper
     }
 
     @Override
+    public int hashCode() {
+        return m_parent.hashCode();
+    }
+
+    @Override
     public int getId() {
         return m_parent.getId();
     }

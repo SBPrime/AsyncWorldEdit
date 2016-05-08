@@ -50,11 +50,11 @@ import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
  *
  * @author SBPrime
  */
-public abstract class WorldExtentBlockEntry extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
+public abstract class WorldBlockEntry extends BlockPlacerEntry implements IBlockPlacerLocationEntry {
     protected final Vector m_location;
     protected final String m_worldName;
 
-    public WorldExtentBlockEntry(AsyncWorld worldExtent,
+    public WorldBlockEntry(AsyncWorld worldExtent,
             int jobId, Vector location) {
         super(jobId, false);
         

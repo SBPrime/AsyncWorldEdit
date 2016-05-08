@@ -77,7 +77,6 @@ import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.*;
 import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
@@ -255,6 +254,7 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
         return r;
     }
 
+    @Override
     public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
         boolean isAsync = isAsyncEnabled();
         boolean r = super.setBlock(VectorWrapper.wrap(position, jobId, isAsync, m_player),
@@ -293,6 +293,7 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
         return r;
     }
 
+    @Override
     public boolean setBlock(Vector pt, BaseBlock block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();

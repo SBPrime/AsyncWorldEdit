@@ -50,12 +50,12 @@ public enum Permission implements IPermission {
     /**
      * Allows the use of the Reload command
      */
-    RELOAD_CONFIG("admin.version"),
+    RELOAD_CONFIG("admin.reload"),
 
     /**
      * Informs the user on login if the plugin is updated or not
      */
-    ANNOUNCE_VERSION("admin.reload"),
+    ANNOUNCE_VERSION("admin.version"),
 
     /**
      * Bypass the maximum queue limit

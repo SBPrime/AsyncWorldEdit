@@ -125,6 +125,12 @@ public class LocationWrapper extends Location implements IAsyncWrapper
     }
 
     @Override
+    public int hashCode() {
+        return m_parent.hashCode();
+    }
+        
+
+    @Override
     public int getBlockX() {
         return m_parent.getBlockX();
     }

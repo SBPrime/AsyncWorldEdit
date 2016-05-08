@@ -123,6 +123,11 @@ public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
     }
 
     @Override
+    public int hashCode() {
+        return m_parent.hashCode();
+    }
+
+    @Override
     public CompoundTag getNbtData() {
         if (m_parent == null) {
             return null;

@@ -40,12 +40,15 @@
  */
 package org.primesoft.asyncworldedit.utils;
 
+import org.primesoft.asyncworldedit.api.utils.IInOutParam;
+
 /**
  * This is a helper class that allows you to add output (and input) 
  * parameters to java functions
  * @author SBPrime
  */
-public class InOutParam<T> {       
+public class InOutParam<T> implements IInOutParam<T> {
+
     /**
      * Initialize reference parame (in and out value)
      * @param <T>
@@ -99,6 +102,7 @@ public class InOutParam<T> {
      * Get the parameter value
      * @return 
      */
+    @Override
     public T getValue()
     {        
         if (m_isSet) {
@@ -109,9 +113,15 @@ public class InOutParam<T> {
     }
     
     
+    @Override
     public void setValue(T value)
     {
         m_isSet = true;
         m_value = value;
+    }
+
+    @Override
+    public boolean isSet() {
+        return m_isSet;
     }
 }

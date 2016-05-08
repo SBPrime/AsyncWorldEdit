@@ -49,8 +49,8 @@ import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.JobStatus;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import org.primesoft.asyncworldedit.strings.MessageType;
-import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
  * Job description empty
@@ -71,7 +71,7 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
     /**
      * Cancelable edit session
      */
-    private final CancelabeEditSession m_cEditSession;
+    private final ICancelabeEditSession m_cEditSession;
 
     /**
      * The player name
@@ -123,7 +123,7 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
      * @param cEditSession the cancelable edit session
      */
     public JobEntry(IPlayerEntry player,
-            CancelabeEditSession cEditSession,
+            ICancelabeEditSession cEditSession,
             int jobId, String name) {
         super(jobId, false);
 
@@ -247,7 +247,7 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
      * @return
      */
     @Override
-    public String getStatusString() {                
+    public String getStatusString() {
         switch (m_status) {
             case Done:
                 return MessageType.CMD_JOBS_STATUS_DONE.format();

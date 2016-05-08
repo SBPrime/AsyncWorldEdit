@@ -42,33 +42,50 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.utils.IAction;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
  *
  * @author SBPrime
+ * @param <T> Func result type
+ * @param <TException> Exception type
  */
-public class WorldExtentActionEntry
-        extends WorldExtentBlockEntry {
+public class WorldFuncEntryEx<T, TException extends Exception>
+        extends WorldBlockEntry {
 
-    private final IAction m_function;
+    private final FuncEx<T, TException> m_function;
 
-    public WorldExtentActionEntry(AsyncWorld worldExtent,
-            int jobId, Vector location, IAction function) {
+    public WorldFuncEntryEx(AsyncWorld worldExtent,
+            int jobId, Vector location, FuncEx<T, TException> function) {
         super(worldExtent, jobId, location);
+
         m_function = function;
     }
 
     @Override
     public boolean process(IBlockPlacer bp) {
-        m_function.execute();
+        T funcResult;
 
-        if (m_worldName != null) {
-            ((BlockPlacer)bp).getPhysicsWatcher().removeLocation(m_worldName, m_location);
+        try {
+            funcResult = m_function.execute();
+        } catch (Exception ex) {
+            ExceptionHelper.printException(ex, "Error while processing extent function.");
+            return false;
         }
-        
-        return true;
+        finally
+        {
+            if (m_worldName != null) {
+                ((BlockPlacer)bp).getPhysicsWatcher().removeLocation(m_worldName, m_location);
+            }
+        }
+
+        if (funcResult instanceof Boolean) {
+            return (Boolean) funcResult;
+        } else {
+            return true;
+        }
     }
 }

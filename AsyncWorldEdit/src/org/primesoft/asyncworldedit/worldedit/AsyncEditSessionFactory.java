@@ -173,6 +173,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
                 new EditSessionEvent(world, null, maxBlocks, null));
     }
 
+    @Override
     public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
             BlockBag blockBag, Player player) {
         IPlayerEntry entry = getPlayerEntry(player);
@@ -184,6 +185,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
         return result;
     }
 
+    @Override
     public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
             BlockBag blockBag, IPlayerEntry playerEntry) {
         

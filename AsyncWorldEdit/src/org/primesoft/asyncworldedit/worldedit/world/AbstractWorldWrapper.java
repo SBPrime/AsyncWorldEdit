@@ -73,4 +73,9 @@ public abstract class AbstractWorldWrapper implements World {
         
         return parent.equals(obj);
     }
+
+    @Override
+    public int hashCode() {
+        return m_parent.hashCode();
+    }
 }

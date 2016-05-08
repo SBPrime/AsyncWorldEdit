@@ -72,9 +72,9 @@ import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RegenerateEntry;
-import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentActionEntry;
-import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntry;
-import org.primesoft.asyncworldedit.blockPlacer.entries.WorldExtentFuncEntryEx;
+import org.primesoft.asyncworldedit.blockPlacer.entries.WorldActionEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.WorldFuncEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.WorldFuncEntryEx;
 import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -285,7 +285,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (paramBlock.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));
+                    new WorldFuncEntryEx(this, paramBlock.getJobId(), v, func));
         }
 
         return func.execute();
@@ -320,7 +320,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+                    new WorldFuncEntry(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -351,7 +351,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+                    new WorldFuncEntry(this, param.getJobId(), v, func));
             return;
         }
 
@@ -388,7 +388,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+                    new WorldFuncEntry(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -423,7 +423,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+                    new WorldFuncEntry(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -476,7 +476,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (paramEntity.isAsync() || paramLocation.isAsync() || !m_dispatcher.isMainTask()) {
             if (!m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, paramLocation.getJobId(), location.toVector(), func))) {
+                    new WorldFuncEntry(this, paramLocation.getJobId(), location.toVector(), func))) {
                 return entityWrapper; //Return the entity erapper so WorldEdit does not complain
             }
             return entityWrapper;
@@ -507,7 +507,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (paramBiome.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, paramBiome.getJobId(), tmpV, func));
+                    new WorldFuncEntry(this, paramBiome.getJobId(), tmpV, func));
         }
 
         return func.execute();
@@ -532,7 +532,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             m_blockPlacer.addTasks(player,
-                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+                    new WorldActionEntry(this, param.getJobId(), v, func));
             return;
         }
 
@@ -558,7 +558,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             m_blockPlacer.addTasks(player,
-                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+                    new WorldActionEntry(this, param.getJobId(), v, func));
             return;
         }
 
@@ -584,7 +584,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             m_blockPlacer.addTasks(player,
-                    new WorldExtentActionEntry(this, param.getJobId(), v, func));
+                    new WorldActionEntry(this, param.getJobId(), v, func));
             return;
         }
 
@@ -711,7 +711,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+                    new WorldFuncEntryEx(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -736,7 +736,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+                    new WorldFuncEntryEx(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -761,7 +761,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+                    new WorldFuncEntryEx(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -786,7 +786,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+                    new WorldFuncEntryEx(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -811,7 +811,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+                    new WorldFuncEntryEx(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -836,7 +836,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, param.getJobId(), v, func));
+                    new WorldFuncEntryEx(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -891,7 +891,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+                    new WorldFuncEntry(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -916,7 +916,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntry(this, param.getJobId(), v, func));
+                    new WorldFuncEntry(this, param.getJobId(), v, func));
         }
 
         return func.execute();
@@ -996,7 +996,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         if (paramBlock.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
-                    new WorldExtentFuncEntryEx(this, paramBlock.getJobId(), v, func));
+                    new WorldFuncEntryEx(this, paramBlock.getJobId(), v, func));
         }
 
         return func.execute();
