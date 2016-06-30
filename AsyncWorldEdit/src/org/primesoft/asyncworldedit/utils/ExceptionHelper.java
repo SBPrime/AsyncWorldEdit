@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.utils;
 
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 
 /**
  *
@@ -49,7 +49,7 @@ import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 public class ExceptionHelper {
 
     private static void log(String m) {
-        AsyncWorldEditMain.log(m);
+        AsyncWorldEditBukkit.log(m);
     }
 
     public static void printException(Throwable ex, String message) {

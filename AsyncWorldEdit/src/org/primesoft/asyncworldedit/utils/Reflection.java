@@ -42,7 +42,7 @@ package org.primesoft.asyncworldedit.utils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 
 /**
  * Reflection GET and SET operations.
@@ -82,16 +82,16 @@ public class Reflection {
                 }
             }
         } catch (IllegalArgumentException ex) {
-            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version.");
+            log(message + ": unsupported WorldEdit version.");
         } catch (IllegalAccessException ex) {
-            AsyncWorldEditMain.log(message + ": security exception.");
+            log(message + ": security exception.");
         } catch (NoSuchFieldException ex) {
-            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version, field " + fieldName
+            log(message + ": unsupported WorldEdit version, field " + fieldName
                     + " not found.");
         } catch (SecurityException ex) {
-            AsyncWorldEditMain.log(message + ": security exception.");
+            log(message + ": security exception.");
         } catch (ClassCastException ex) {
-            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version, unable to cast result.");
+            log(message + ": unsupported WorldEdit version, unable to cast result.");
         }
 
         return null;
@@ -138,14 +138,14 @@ public class Reflection {
                 }
             }
         } catch (IllegalArgumentException ex) {
-            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version.");
+            log(message + ": unsupported WorldEdit version.");
         } catch (IllegalAccessException ex) {
-            AsyncWorldEditMain.log(message + ": security exception.");
+            log(message + ": security exception.");
         } catch (NoSuchFieldException ex) {
-            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version, field " + fieldName
+            log(message + ": unsupported WorldEdit version, field " + fieldName
                     + " not found.");
         } catch (SecurityException ex) {
-            AsyncWorldEditMain.log(message + ": security exception.");
+            log(message + ": security exception.");
         }
     }
     
@@ -179,13 +179,13 @@ public class Reflection {
                 }
             }
         } catch (IllegalArgumentException ex) {
-            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version.");
+            log(message + ": unsupported WorldEdit version.");
         } catch (IllegalAccessException ex) {
-            AsyncWorldEditMain.log(message + ": security exception.");
+            log(message + ": security exception.");
         } catch (NoSuchFieldException ex) {
-            AsyncWorldEditMain.log(message + ": unsupported WorldEdit version, field modifiers not found.");
+            log(message + ": unsupported WorldEdit version, field modifiers not found.");
         } catch (SecurityException ex) {
-            AsyncWorldEditMain.log(message + ": security exception.");
+            log(message + ": security exception.");
         }
     }
 }

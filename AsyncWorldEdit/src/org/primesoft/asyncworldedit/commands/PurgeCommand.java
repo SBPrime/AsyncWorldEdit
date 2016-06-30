@@ -40,10 +40,9 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
@@ -53,7 +52,7 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  */
 public class PurgeCommand {
 
-    public static void Execte(AsyncWorldEditMain sender, IPlayerEntry player, String[] args) {
+    public static void Execte(AsyncWorldEditBukkit sender, IPlayerEntry player, String[] args) {
         if (args.length < 1 || args.length > 2) {
             Help.ShowHelp(player, Commands.COMMAND_PURGE);
             return;

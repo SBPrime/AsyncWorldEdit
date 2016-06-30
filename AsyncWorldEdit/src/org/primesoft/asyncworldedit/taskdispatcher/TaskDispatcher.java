@@ -51,8 +51,9 @@ import java.util.Set;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.ChunkWatch;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.utils.IAction;
 import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -94,7 +95,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     /**
      * Parent plugin main
      */
-    private final AsyncWorldEditMain m_plugin;
+    private final AsyncWorldEditBukkit m_plugin;
 
     /**
      * List of fast tasks (high priority)
@@ -146,7 +147,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      *
      * @param plugin parent
      */
-    public TaskDispatcher(AsyncWorldEditMain plugin) {
+    public TaskDispatcher(AsyncWorldEditBukkit plugin) {
         m_scheduler = plugin.getServer().getScheduler();
         m_plugin = plugin;
         m_chunkWatch = m_plugin.getChunkWatch();
@@ -286,7 +287,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param cz
      * @return
      */
-    private boolean canPerform(World world, int cx, int cz) {
+    private boolean canPerform(IWorld world, int cx, int cz) {
         return isMainTask() || world.isChunkLoaded(cx, cz);
     }
 
@@ -352,7 +353,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param pos
      */
     @Override
-    public void performSafe(Object mutex, IAction action, World world, Vector pos) {
+    public void performSafe(Object mutex, IAction action, IWorld world, Vector pos) {
         synchronized (mutex) {
             int cx = pos.getBlockX() >> 4;
             int cz = pos.getBlockZ() >> 4;
@@ -371,8 +372,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                          */
                         ExceptionHelper.printException(ex,
                                 "Error performing safe operation for " + worldName
-                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
-                                + ", inUse: " + world.isChunkInUse(cx, cz));
+                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz));
                     }
                 }
             } finally {
@@ -392,7 +392,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param region
      */
     @Override
-    public void performSafe(Object mutex, IAction action, World world, Region region) {
+    public void performSafe(Object mutex, IAction action, IWorld world, Region region) {
         synchronized (mutex) {
             Set<Vector2D> chunks = region.getChunks();
             String worldName = world != null ? world.getName() : null;
@@ -443,7 +443,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @return
      */
     @Override
-    public <T> T performSafe(Object mutex, IFunc<T> action, World world, Region region) {
+    public <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Region region) {
         synchronized (mutex) {
             Set<Vector2D> chunks = region.getChunks();
             String worldName = world != null ? world.getName() : null;
@@ -493,7 +493,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @return
      */
     @Override
-    public <T> T performSafe(Object mutex, IFunc<T> action, World world, Vector pos) {
+    public <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Vector pos) {
         synchronized (mutex) {
             int cx = pos.getBlockX() >> 4;
             int cz = pos.getBlockZ() >> 4;
@@ -511,8 +511,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                          */
                         ExceptionHelper.printException(ex,
                                 "Error performing safe operation for " + worldName
-                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
-                                + ", inUse: " + world.isChunkInUse(cx, cz));
+                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz));
                     }
                 }
             } finally {
@@ -573,7 +572,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     }
 
     @Override
-    public void performSafeChunk(Object mutex, IAction action, World world, Vector2D pos) {
+    public void performSafeChunk(Object mutex, IAction action, IWorld world, Vector2D pos) {
         synchronized (mutex) {
             int cx = pos.getBlockX();
             int cz = pos.getBlockZ();
@@ -592,8 +591,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                          */
                         ExceptionHelper.printException(ex,
                                 "Error performing safe operation for " + worldName
-                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
-                                + ", inUse: " + world.isChunkInUse(cx, cz));
+                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz));
                     }
                 }
             } finally {
@@ -604,7 +602,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     }
 
     @Override
-    public <T> T performSafeChunk(Object mutex, IFunc<T> action, World world, Vector2D pos) {
+    public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Vector2D pos) {
         synchronized (mutex) {
             int cx = pos.getBlockX();
             int cz = pos.getBlockZ();
@@ -622,8 +620,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                          */
                         ExceptionHelper.printException(ex,
                                 "Error performing safe operation for " + worldName
-                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz)
-                                + ", inUse: " + world.isChunkInUse(cx, cz));
+                                + " cx:" + cx + " cy:" + cz + " Loaded: " + world.isChunkLoaded(cx, cz));
                     }
                 }
             } finally {

@@ -43,8 +43,8 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.regions.Region;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
@@ -82,12 +82,12 @@ public class AsyncCuboidClipboard extends ProxyCuboidClipboard {
     /**
      * The plugin
      */
-    private final AsyncWorldEditMain m_plugin;
+    private final AsyncWorldEditBukkit m_plugin;
 
     public AsyncCuboidClipboard(IPlayerEntry player, CuboidClipboard parrent) {
         super(new ProxyCuboidClipboard(parrent));
 
-        m_plugin = AsyncWorldEditMain.getInstance();
+        m_plugin = (AsyncWorldEditBukkit)AsyncWorldEditBukkit.getInstance();
         m_schedule = m_plugin.getServer().getScheduler();
         m_clipboard = parrent;
         m_blockPlacer = m_plugin.getBlockPlacer();

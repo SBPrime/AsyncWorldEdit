@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
@@ -90,7 +90,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
    
 
-    public AsyncEditSession(AsyncWorldEditMain plugin,
+    public AsyncEditSession(AsyncWorldEditBukkit plugin,
             IPlayerEntry player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 

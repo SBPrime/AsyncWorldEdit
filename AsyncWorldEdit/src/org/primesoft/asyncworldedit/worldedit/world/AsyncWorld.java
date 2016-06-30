@@ -62,8 +62,9 @@ import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.registry.WorldData;
 import java.util.List;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.BlocksHubIntegration;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
@@ -111,7 +112,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * The plugin
      */
-    private final AsyncWorldEditMain m_plugin;
+    private final AsyncWorldEditBukkit m_plugin;
 
     /**
      * Bukkit schedule
@@ -126,7 +127,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * The bukkit world
      */
-    private final org.bukkit.World m_bukkitWorld;
+    private final IWorld m_bukkitWorld;
 
     /**
      * The block placer
@@ -146,18 +147,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public AsyncWorld(World world, IPlayerEntry player) {
         super(world);
 
-        m_plugin = AsyncWorldEditMain.getInstance();
+        m_plugin = (AsyncWorldEditBukkit)AsyncWorldEditBukkit.getInstance();
         m_player = player;
         m_schedule = m_plugin.getServer().getScheduler();
         m_blockPlacer = m_plugin.getBlockPlacer();
         m_dispatcher = m_plugin.getTaskDispatcher();
         m_blocksHub = m_plugin.getBlocksHub();
 
-        if (world instanceof BukkitWorld) {
-            m_bukkitWorld = ((BukkitWorld) world).getWorld();
-        } else {
-            m_bukkitWorld = AsyncWorldEditMain.getInstance().getServer().getWorld(world.getName());
-        }
+        m_bukkitWorld = m_plugin.getWorld(world.getName());        
     }
 
     @Override
@@ -635,9 +632,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         final int maxY = getMaxY();
         m_schedule.runTaskAsynchronously(m_plugin, new WorldAsyncTask(m_bukkitWorld, session,
-                m_player, "regenerate", m_blockPlacer, job) {
+                m_player, "regenerate", m_blockPlacer, job) {                    
                     @Override
-                    public void task(EditSession editSession, org.bukkit.World world) throws MaxChangedBlocksException {
+                    public void task(EditSession editSession, IWorld world) throws MaxChangedBlocksException {
                         doRegen(editSession, region, maxY, world, jobId);
                     }
 
@@ -653,7 +650,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
      * @param region
      * @param world
      */
-    private void doRegen(EditSession eSession, Region region, int maxY, org.bukkit.World world, int jobId) {
+    private void doRegen(EditSession eSession, Region region, int maxY, IWorld world, int jobId) {
         BaseBlock[] history = new BaseBlock[16 * 16 * (maxY + 1)];
 
         for (Vector2D chunk : region.getChunks()) {

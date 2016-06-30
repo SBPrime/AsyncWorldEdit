@@ -50,10 +50,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
@@ -84,14 +84,14 @@ public class AsyncOperationProcessor implements IOperationProcessor {
     /**
      * The parent plugin
      */
-    private final AsyncWorldEditMain m_plugin;
+    private final AsyncWorldEditBukkit m_plugin;
 
     /**
      * Async block placer
      */
     protected final IBlockPlacer m_blockPlacer;
 
-    public AsyncOperationProcessor(AsyncWorldEditMain plugin) {
+    public AsyncOperationProcessor(AsyncWorldEditBukkit plugin) {
         m_plugin = plugin;
         m_schedule = m_plugin.getServer().getScheduler();
         m_blockPlacer = m_plugin.getBlockPlacer();
@@ -215,14 +215,14 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         AsyncEditSession session = null;
 
         if (debugOn) {
-            AsyncWorldEditMain.log("****************************************************************");
-            AsyncWorldEditMain.log("* Validating scann results");
-            AsyncWorldEditMain.log("****************************************************************");
+            log("****************************************************************");
+            log("* Validating scann results");
+            log("****************************************************************");
         }
 
         if (sessions.isEmpty()) {
             if (debugOn) {
-                AsyncWorldEditMain.log("* No entries");
+                log("* No entries");
             }
             return false;
         }
@@ -235,11 +235,11 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                 if (session == null) {
                     session = s;
                     if (debugOn) {
-                        AsyncWorldEditMain.log("* Found EditSession");
+                        log("* Found EditSession");
                     }
                 } else if (session != s) {
                     if (debugOn) {
-                        AsyncWorldEditMain.log("* Found EditSessions do not match");
+                        log("* Found EditSessions do not match");
                     }
                     //We support only single edit session at this moment
                     return false;
@@ -249,7 +249,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         if (debugOn) {
             if (session == null) {
-                AsyncWorldEditMain.log("* No EditSession found");
+                log("* No EditSession found");
             }
         }
         return session != null;
@@ -269,9 +269,9 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         boolean debugOn = ConfigProvider.isDebugOn();
         if (debugOn) {
-            AsyncWorldEditMain.log("****************************************************************");
-            AsyncWorldEditMain.log("* Injecting classes");
-            AsyncWorldEditMain.log("****************************************************************");
+            log("****************************************************************");
+            log("* Injecting classes");
+            log("****************************************************************");
         }
 
         for (ClassScannerResult entry : entries) {
@@ -285,13 +285,13 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
             if (type == aesClass) {
                 if (debugOn) {
-                    AsyncWorldEditMain.log("* Injecting EditSession to " + parent.getClass().getName() + " " + field.getName());
+                    log("* Injecting EditSession to " + parent.getClass().getName() + " " + field.getName());
                 }
                 
                 Reflection.set(parent, field, value, "edit session");                
             } else if (regionClass.isAssignableFrom(type)) {
                 if (debugOn) {
-                    AsyncWorldEditMain.log("* Stored region entry ");
+                    log("* Stored region entry ");
                 }
 
                 Region r = (Region) entry.getValue();
@@ -317,7 +317,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     continue;
                 }
                 if (debugOn) {
-                    AsyncWorldEditMain.log("* Injecting Region to " + parent.getClass().getName() + " " + field.getName());
+                    log("* Injecting Region to " + parent.getClass().getName() + " " + field.getName());
                 }
                 
                 Reflection.set(parent, field, region, "region");

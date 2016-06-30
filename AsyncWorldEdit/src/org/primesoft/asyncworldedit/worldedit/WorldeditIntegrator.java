@@ -47,7 +47,15 @@ import com.sk89q.worldedit.extension.platform.CommandManager;
 import com.sk89q.worldedit.extension.platform.PlatformManager;
 import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.util.command.Dispatcher;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import com.sk89q.worldedit.world.World;
+import org.bukkit.entity.Player;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
+import org.primesoft.asyncworldedit.api.IWorld;
+import org.primesoft.asyncworldedit.api.IWorldeditIntegrator;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.platform.bukkit.BukkitWorld;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.util.command.DispatcherWrapper;
 
@@ -55,7 +63,7 @@ import org.primesoft.asyncworldedit.worldedit.util.command.DispatcherWrapper;
  *
  * @author SBPrime
  */
-public class WorldeditIntegrator {
+public class WorldeditIntegrator implements IWorldeditIntegrator {
 
     /**
      * The original world edit
@@ -65,13 +73,14 @@ public class WorldeditIntegrator {
     /**
      * The parent plugin
      */
-    private final AsyncWorldEditMain m_parent;
+    private final AsyncWorldEditBukkit m_parent;
 
     private EditSessionFactory m_oldEditSessionFactory;
     private SessionManager m_oldSessions;
     private PlatformManager m_platformManager;
     private CommandManager m_commandManager;
     private Dispatcher m_oldDispatcher;
+    private WorldEditPlugin m_worldEditPlugin;
 
     /**
      * Create new instance of world edit integration checker and start it
@@ -79,23 +88,24 @@ public class WorldeditIntegrator {
      * @param plugin
      * @param worldEditPlugin
      */
-    public WorldeditIntegrator(AsyncWorldEditMain plugin, WorldEditPlugin worldEditPlugin) {
+    public WorldeditIntegrator(AsyncWorldEditBukkit plugin, WorldEditPlugin worldEditPlugin) {
         m_parent = plugin;
         if (m_parent == null) {
             return;
         }
 
         if (worldEditPlugin == null) {
-            AsyncWorldEditMain.log("Error initializeing Worldedit integrator");
+            log("Error initializeing Worldedit integrator");
             return;
         }
 
+        m_worldEditPlugin = worldEditPlugin;
         m_worldEdit = worldEditPlugin.getWorldEdit();
 
         m_oldEditSessionFactory = m_worldEdit.getEditSessionFactory();
         m_oldSessions = m_worldEdit.getSessionManager();
 
-        Reflection.set(m_worldEdit, "editSessionFactory", new AsyncEditSessionFactory(worldEditPlugin, m_parent, m_worldEdit.getEventBus()),
+        Reflection.set(m_worldEdit, "editSessionFactory", new AsyncEditSessionFactory(m_parent, m_worldEdit.getEventBus()),
                 "Unable to inject edit session factory");
 
         m_platformManager = m_worldEdit.getPlatformManager();
@@ -105,7 +115,7 @@ public class WorldeditIntegrator {
                 "dispatcher", "Unable to get the dispatcher");
         if (m_oldDispatcher != null) {
             Reflection.set(m_commandManager, "dispatcher", new DispatcherWrapper(m_oldDispatcher),
-                "Unable to inject new commands manager");
+                    "Unable to inject new commands manager");
         }
     }
 
@@ -118,5 +128,44 @@ public class WorldeditIntegrator {
 
         Reflection.set(m_worldEdit, "editSessionFactory", m_oldEditSessionFactory, "Unable to restore edit session factory");
         Reflection.set(m_worldEdit, "sessions", m_oldSessions, "Unable to restore sessions");
+    }
+
+    @Override
+    public com.sk89q.worldedit.entity.Player wrapPlayer(IPlayerEntry player) {
+        if (!(player instanceof PlayerEntry)) {
+            return null;
+        }
+
+        Player bPlayer = ((PlayerEntry) player).getPlayer();
+        if (bPlayer == null) {
+            return null;
+        }
+
+        return m_worldEditPlugin.wrapPlayer(bPlayer);
+
+    }
+
+    @Override
+    public World getWorld(IWorld world) {
+        if (!(world instanceof BukkitWorld)) {
+            return null;
+        }
+
+        return new com.sk89q.worldedit.bukkit.BukkitWorld(((BukkitWorld) world).getWorld());
+    }
+
+    @Override
+    public IWorld getWorld(World world) {
+        if (world == null) {
+            return null;
+        }
+
+        if (!(world instanceof com.sk89q.worldedit.bukkit.BukkitWorld)) {
+            return m_parent.getWorld(world.getName());
+        }
+
+        com.sk89q.worldedit.bukkit.BukkitWorld bWorld = (com.sk89q.worldedit.bukkit.BukkitWorld) world;
+
+        return new BukkitWorld(bWorld.getWorld());
     }
 }

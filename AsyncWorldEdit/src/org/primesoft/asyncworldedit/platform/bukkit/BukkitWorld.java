@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,39 +38,58 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.async;
+package org.primesoft.asyncworldedit.platform.bukkit;
 
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
-import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import java.util.UUID;
+import org.bukkit.Chunk;
+import org.bukkit.World;
+import org.primesoft.asyncworldedit.api.IChunk;
+import org.primesoft.asyncworldedit.api.IWorld;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncClassFactory extends BaseClassFactory {
+public class BukkitWorld implements IWorld {
+    private final World m_world;
 
-    /**
-     * The operation processor
-     */
-    private final AsyncOperationProcessor m_operationProcessor;
-    
-    private final AsyncJobProcessor m_jobProcessor;
-
-    public AsyncClassFactory(AsyncWorldEditBukkit plugin)
-    {        
-        m_operationProcessor = new AsyncOperationProcessor(plugin);
-        m_jobProcessor = new AsyncJobProcessor(plugin);
+    public BukkitWorld(World world) {
+        m_world = world;
     }
-    
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
+
+    public World getWorld() {
+        return m_world;
     }
 
     @Override
-    public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
-    }       
+    public UUID getUID() {
+        return m_world.getUID();
+    }
+
+    @Override
+    public String getName() {
+        return m_world.getName();
+    }
+
+    @Override
+    public void regenerateChunk(int cx, int cz) {
+        m_world.regenerateChunk(cx, cz);
+    }
+
+    @Override
+    public boolean isChunkLoaded(int cx, int cz) {
+        return m_world.isChunkLoaded(cx, cz);
+    }
+
+    @Override
+    public IChunk getChunkAt(int cx, int cz) {
+        Chunk chunk = m_world.getChunkAt(cx, cz);
+
+        if (chunk == null) {
+            return null;
+        }
+
+        return new BukkitChunk(chunk);
+    }
+
 }

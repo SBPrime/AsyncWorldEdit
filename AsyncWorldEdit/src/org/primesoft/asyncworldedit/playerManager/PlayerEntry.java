@@ -42,8 +42,8 @@ package org.primesoft.asyncworldedit.playerManager;
 
 import java.util.UUID;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import static org.primesoft.asyncworldedit.AsyncWorldEditMain.log;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.permissions.IPermission;
@@ -66,15 +66,15 @@ public class PlayerEntry implements IPlayerEntry {
     private final boolean m_canTalk;
     private boolean m_isDisposed;
 
-    public PlayerEntry(Player player, String name, IPermissionGroup group) {
+    public PlayerEntry(Player player) {
+        this(player, player.getName(), PermissionGroup.getDefaultGroup());
+    }
+    
+    PlayerEntry(Player player, String name, IPermissionGroup group) {
         this(player, name, player.getUniqueId(), group, true);
     }
 
-    public PlayerEntry(String name, UUID uuid) {
-        this(null, name, uuid, PermissionGroup.getDefaultGroup(), false);
-    }
-
-    PlayerEntry(Player player, String name, UUID uuid,
+    protected PlayerEntry(Player player, String name, UUID uuid,
             IPermissionGroup group, boolean canTalk) {
         m_canTalk = canTalk;
         m_group = group;
@@ -97,11 +97,10 @@ public class PlayerEntry implements IPlayerEntry {
         }
 
         if (m_canTalk) {
-            AsyncWorldEditMain.sayConsole(msg);
+            AsyncWorldEditBukkit.sayConsole(msg);
         }
     }
 
-    @Override
     public Player getPlayer() {
         return m_player;
     }
@@ -116,10 +115,12 @@ public class PlayerEntry implements IPlayerEntry {
         return m_name;
     }
 
+    @Override
     public boolean getAweMode() {
         return m_mode;
     }
 
+    @Override
     public void setAweMode(boolean mode) {
         if (mode == m_mode) {
             return;
@@ -190,16 +191,33 @@ public class PlayerEntry implements IPlayerEntry {
         return m_group;
     }
 
+        /**
+     * Set the permission group
+     * @param permissionGroup 
+     */
+    protected void setPermissionGroup(IPermissionGroup permissionGroup) {
+        m_group = permissionGroup;
+    }
+
+    
     /**
      * Update the player after relogin
      *
      * @param player
-     * @param permissionGroup
      */
     @Override
-    public void update(Player player, IPermissionGroup permissionGroup) {
-        m_player = player;
-        m_group = permissionGroup;
+    public void update(IPlayerEntry player) {
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
+
+        setPermissionGroup(player.getPermissionGroup());
+        m_player = ((PlayerEntry) player).getPlayer();
+    }
+
+    @Override
+    public void updatePermissionGroup() {
+        setPermissionGroup(PermissionManager.getPermissionGroup(m_player));
     }
 
     @Override
@@ -258,7 +276,7 @@ public class PlayerEntry implements IPlayerEntry {
         log("**                                                                          **");
         log("******************************************************************************");
         log("******************************************************************************");
-        
+
         return 0;
     }
 
@@ -271,5 +289,10 @@ public class PlayerEntry implements IPlayerEntry {
         log("**                                                                          **");
         log("******************************************************************************");
         log("******************************************************************************");
+    }
+
+    @Override
+    public boolean isFake() {
+        return false;
     }
 }

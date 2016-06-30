@@ -40,8 +40,8 @@
  */
 package org.primesoft.asyncworldedit.plotme;
 
+import java.util.UUID;
 import org.primesoft.asyncworldedit.api.IPlotMeFix;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -54,7 +54,7 @@ public class NullFix implements IPlotMeFix {
     }
     
     @Override
-    public void setMask(Player entry) {
+    public void setMask(UUID entry) {
        
     }
     

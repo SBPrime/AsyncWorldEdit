@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,39 +38,61 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.async;
+package org.primesoft.asyncworldedit.playerManager;
 
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
-import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import java.util.UUID;
+import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.permissions.IPermission;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncClassFactory extends BaseClassFactory {
+class FakePlayerEntry extends PlayerEntry {
 
-    /**
-     * The operation processor
-     */
-    private final AsyncOperationProcessor m_operationProcessor;
-    
-    private final AsyncJobProcessor m_jobProcessor;
-
-    public AsyncClassFactory(AsyncWorldEditBukkit plugin)
-    {        
-        m_operationProcessor = new AsyncOperationProcessor(plugin);
-        m_jobProcessor = new AsyncJobProcessor(plugin);
+    FakePlayerEntry(String name, UUID uuid) {
+        this(name, uuid, PermissionGroup.getDefaultGroup(), false);
     }
-    
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
+
+    FakePlayerEntry(String name, UUID uuid, boolean canTalk) {
+        this(name, uuid, PermissionGroup.getDefaultGroup(), canTalk);
+    }
+
+    FakePlayerEntry(String name, UUID uuid, IPermissionGroup group) {
+        this(name, uuid, group, false);
+    }
+
+    FakePlayerEntry(String name, UUID uuid, IPermissionGroup group, boolean canTalk) {
+        super(null, name, uuid, group, canTalk);
     }
 
     @Override
-    public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
-    }       
+    public boolean isFake() {
+        return true;
+    }
+
+    @Override
+    public boolean isAllowed(IPermission permission) {
+        return true;
+    }
+
+    @Override
+    public boolean isPlayer() {
+        return false;
+    }
+
+    @Override
+    public boolean isInGame() {
+        return false;
+    }
+
+    @Override
+    public void update(IPlayerEntry player) {
+    }
+
+    @Override
+    public void updatePermissionGroup() {
+    }
 }

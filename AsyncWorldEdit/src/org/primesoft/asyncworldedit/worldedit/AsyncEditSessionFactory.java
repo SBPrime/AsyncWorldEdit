@@ -42,14 +42,13 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSessionFactory;
-import com.sk89q.worldedit.bukkit.BukkitPlayer;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import org.primesoft.asyncworldedit.api.IWorldeditIntegrator;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.api.worldedit.IAsyncEditSessionFactory;
@@ -60,10 +59,9 @@ import org.primesoft.asyncworldedit.api.worldedit.IAsyncEditSessionFactory;
  */
 public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyncEditSessionFactory {
 
-    private final AsyncWorldEditMain m_parent;
+    private final AsyncWorldEditBukkit m_parent;
     private final EventBus m_eventBus;
     private final IPlayerManager m_playerManager;
-    private final WorldEditPlugin m_worldEdit;
 
     /**
      * Get the player UUID
@@ -75,26 +73,25 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
         return m_playerManager.getPlayer(player.getName());
     }
 
-    private BukkitPlayer getPlayer(IPlayerEntry playerEntry) {
+    private Player getPlayer(IPlayerEntry playerEntry) {
         if (playerEntry == null) {
             return null;
         }
 
-        org.bukkit.entity.Player player = playerEntry.getPlayer();
-
-        if (player == null) {
+        IWorldeditIntegrator weIntegrator = m_parent.getWorldEditIntegrator();
+        if (weIntegrator == null) {
             return null;
         }
 
-        return m_worldEdit.wrapPlayer(player);
+        return weIntegrator.wrapPlayer(playerEntry);
     }
 
-    public AsyncEditSessionFactory(WorldEditPlugin worldEdit, AsyncWorldEditMain parent, EventBus eventBus) {
-        m_worldEdit = worldEdit;
-        m_parent = parent;
+    public AsyncEditSessionFactory(AsyncWorldEditBukkit parrent, EventBus eventBus) {
+        m_parent = parrent;
         m_eventBus = eventBus;
-        m_playerManager = parent.getPlayerManager();
+        m_playerManager = parrent.getPlayerManager();
     }
+
 
     @Override
     public EditSession getEditSession(World world, int maxBlocks) {
@@ -110,7 +107,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, player, maxBlocks, null));
 
-        m_parent.getPlotMeFix().setMask(entry.getPlayer());
+        m_parent.getPlotMeFix().setMask(entry.getUUID());
 
         return result;
     }
@@ -130,7 +127,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, player, maxBlocks, null));
 
-        m_parent.getPlotMeFix().setMask(entry.getPlayer());
+        m_parent.getPlotMeFix().setMask(entry.getUUID());
 
         return result;
     }
@@ -141,7 +138,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, getPlayer(playerEntry), maxBlocks, null));
 
-        m_parent.getPlotMeFix().setMask(playerEntry.getPlayer());
+        m_parent.getPlotMeFix().setMask(playerEntry.getUUID());
 
         return result;
     }
@@ -160,7 +157,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
         ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, entry,
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, player, maxBlocks, null));
-        m_parent.getPlotMeFix().setMask(entry.getPlayer());
+        m_parent.getPlotMeFix().setMask(entry.getUUID());
 
         return result;
     }
@@ -180,7 +177,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
         ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, entry,
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, player, maxBlocks, null));
-        m_parent.getPlotMeFix().setMask(entry.getPlayer());
+        m_parent.getPlotMeFix().setMask(entry.getUUID());
 
         return result;
     }
@@ -193,7 +190,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, getPlayer(playerEntry), maxBlocks, null));
 
-        m_parent.getPlotMeFix().setMask(playerEntry.getPlayer());
+        m_parent.getPlotMeFix().setMask(playerEntry.getUUID());
 
         return result;
     }

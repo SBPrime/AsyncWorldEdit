@@ -49,7 +49,10 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.platform.bukkit.BukkitWorld;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -72,7 +75,7 @@ public class BlocksHubIntegration {
             Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BlocksHub");
 
             if ((cPlugin == null) || (!(cPlugin instanceof BlocksHub))) {
-                AsyncWorldEditMain.log("BlocksHub plugin not found.");
+                log("BlocksHub plugin not found.");
                 return null;
             }
 
@@ -83,7 +86,7 @@ public class BlocksHubIntegration {
         }
     }    
 
-    public BlocksHubIntegration(AsyncWorldEditMain plugin) {
+    public BlocksHubIntegration(AsyncWorldEditBukkit plugin) {
         BlocksHub bh = getBlocksHub(plugin);
         m_blocksApi = bh != null ? bh.getApi() : null;
         m_isInitialized = m_blocksApi != null && m_blocksApi.getVersion() >= 1.0;
@@ -117,16 +120,24 @@ public class BlocksHubIntegration {
         try {
             return m_blocksApi.canPlace(player, world, location);
         } catch (Exception ex) {            
-            AsyncWorldEditMain.log("Error checking block place perms: " + ex.toString());
-            AsyncWorldEditMain.log("Player: " + player);
-            AsyncWorldEditMain.log("World: " + world);
-            AsyncWorldEditMain.log("Location: " + location);
+            log("Error checking block place perms: " + ex.toString());
+            log("Player: " + player);
+            log("World: " + world);
+            log("Location: " + location);
             ExceptionHelper.printException(ex, "Block checking error.");
             
             return true;
         }
     }
 
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location) {
+        if (!(world instanceof BukkitWorld)) {
+            return false;
+        }
+        
+        return canPlace(playerEntry, ((BukkitWorld)world).getWorld(), location);
+    }
+    
     public boolean canPlace(IPlayerEntry playerEntry, World world, Vector location) {
         if (location == null) {
             return false;
@@ -144,16 +155,25 @@ public class BlocksHubIntegration {
         } catch (Exception ex) {            
             String name = playerEntry.getName();
 
-            AsyncWorldEditMain.log("Error checking block place perms: " + ex.toString());
-            AsyncWorldEditMain.log("Player: " + name);
-            AsyncWorldEditMain.log("World: " + world);
-            AsyncWorldEditMain.log("Location: " + l);
+            log("Error checking block place perms: " + ex.toString());
+            log("Player: " + name);
+            log("World: " + world);
+            log("Location: " + l);
             
             ExceptionHelper.printException(ex, "Block checking error.");
             return true;
         }
     }
 
+    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, 
+            BaseBlock oldBlock, BaseBlock newBlock) {
+        if (!(world instanceof BukkitWorld)) {
+            return;
+        }
+        
+        logBlock(playerEntry, ((BukkitWorld)world).getWorld(), location, oldBlock, newBlock);
+    }
+    
     public void logBlock(IPlayerEntry playerEntry, World world, Vector location, 
             BaseBlock oldBlock, BaseBlock newBlock) {
         if (location == null || !ConfigProvider.getLogBlocks()) {
@@ -175,12 +195,12 @@ public class BlocksHubIntegration {
         {            
             String name = playerEntry.getName();
             
-            AsyncWorldEditMain.log("Error logging block: " + ex.toString());
-            AsyncWorldEditMain.log("Player: " + name);
-            AsyncWorldEditMain.log("World: " + world);
-            AsyncWorldEditMain.log("Location: " + l);
-            AsyncWorldEditMain.log("Old: " + oldBlock);
-            AsyncWorldEditMain.log("New: " + newBlock);
+            log("Error logging block: " + ex.toString());
+            log("Player: " + name);
+            log("World: " + world);
+            log("Location: " + l);
+            log("Old: " + oldBlock);
+            log("New: " + newBlock);
             
             ExceptionHelper.printException(ex, "Error logging block.");
         }

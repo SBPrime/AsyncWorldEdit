@@ -44,7 +44,6 @@ import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerListener;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -55,6 +54,8 @@ import org.primesoft.asyncworldedit.worldedit.AsyncTask;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 import java.util.*;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerEntry;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerPlayer;
@@ -63,6 +64,7 @@ import org.primesoft.asyncworldedit.api.blockPlacer.entries.JobStatus;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
+import org.primesoft.asyncworldedit.api.utils.IAsyncCommand;
 import org.primesoft.asyncworldedit.api.utils.IFuncParamEx;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
@@ -136,7 +138,7 @@ public class BlockPlacer implements IBlockPlacer {
     /**
      * Parent plugin main
      */
-    private final AsyncWorldEditMain m_plugin;
+    private final AsyncWorldEditBukkit m_plugin;
     
     /**
      * Indicates that the blocks placer is paused
@@ -177,7 +179,7 @@ public class BlockPlacer implements IBlockPlacer {
      *
      * @param plugin parent
      */
-    public BlockPlacer(AsyncWorldEditMain plugin) {
+    public BlockPlacer(AsyncWorldEditBukkit plugin) {
         m_jobAddedListeners = new ArrayList<IBlockPlacerListener>();
         m_lastRunTime = System.currentTimeMillis();
         m_runNumber = 0;
@@ -601,7 +603,7 @@ public class BlockPlacer implements IBlockPlacer {
      */
     private void waitForJob(IJobEntry job) {
         if (job instanceof UndoJob) {
-            AsyncWorldEditMain.log("Warning: Undo jobs shuld not by canceled, ingoring!");
+            log("Warning: Undo jobs shuld not by canceled, ingoring!");
             return;
         }
 
@@ -625,11 +627,11 @@ public class BlockPlacer implements IBlockPlacer {
         if (status != JobStatus.Done
                 && status != JobStatus.Canceled
                 && !job.isTaskDone()) {
-            AsyncWorldEditMain.log("-----------------------------------------------------------------------");
-            AsyncWorldEditMain.log("Warning: timeout waiting for job to finish. Manual job cancel.");
-            AsyncWorldEditMain.log("Job Id: " + job.getJobId() + ", " + job.getName() + " Done:" + job.isTaskDone() + " Status: " + job.getStatus());
-            AsyncWorldEditMain.log("Send this message to the author of the plugin!");
-            AsyncWorldEditMain.log("-----------------------------------------------------------------------");
+            log("-----------------------------------------------------------------------");
+            log("Warning: timeout waiting for job to finish. Manual job cancel.");
+            log("Job Id: " + job.getJobId() + ", " + job.getName() + " Done:" + job.isTaskDone() + " Status: " + job.getStatus());
+            log("Send this message to the author of the plugin!");
+            log("-----------------------------------------------------------------------");
             job.cancel();
             job.setStatus(JobStatus.Done);
         }
@@ -1006,5 +1008,10 @@ public class BlockPlacer implements IBlockPlacer {
                         return action.execute(session);
                     }
                 });
+    }
+
+    @Override
+    public void performAsAsyncJob(IThreadSafeEditSession editSession, IAsyncCommand asyncCommand) {
+        performAsAsyncJob(editSession, asyncCommand.getPlayer(), asyncCommand.getName(), asyncCommand);
     }
 }

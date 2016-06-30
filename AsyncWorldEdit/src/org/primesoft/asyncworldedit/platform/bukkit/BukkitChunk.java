@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,39 +38,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.async;
+package org.primesoft.asyncworldedit.platform.bukkit;
 
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
-import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import org.bukkit.Chunk;
+import org.primesoft.asyncworldedit.api.IChunk;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncClassFactory extends BaseClassFactory {
+public class BukkitChunk extends IChunk {
 
-    /**
-     * The operation processor
-     */
-    private final AsyncOperationProcessor m_operationProcessor;
-    
-    private final AsyncJobProcessor m_jobProcessor;
+    private final Chunk m_chunk;
 
-    public AsyncClassFactory(AsyncWorldEditBukkit plugin)
-    {        
-        m_operationProcessor = new AsyncOperationProcessor(plugin);
-        m_jobProcessor = new AsyncJobProcessor(plugin);
-    }
-    
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
+    public BukkitChunk(Chunk chunk) {
+        m_chunk = chunk;
     }
 
-    @Override
-    public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
-    }       
+    public Chunk getChunk() {
+        return m_chunk;
+    }
+
 }

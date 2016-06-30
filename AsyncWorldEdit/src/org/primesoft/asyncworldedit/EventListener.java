@@ -50,6 +50,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerManager;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
@@ -59,9 +60,9 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  */
 public class EventListener implements Listener {
 
-    private final AsyncWorldEditMain m_parent;
+    private final AsyncWorldEditBukkit m_parent;
 
-    public EventListener(AsyncWorldEditMain parent) {
+    public EventListener(AsyncWorldEditBukkit parent) {
         m_parent = parent;        
     }
     
@@ -74,7 +75,7 @@ public class EventListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
 
-        final IPlayerEntry entry = ((PlayerManager)m_parent.getPlayerManager()).addPlayer(player);
+        final IPlayerEntry entry = ((PlayerManager)m_parent.getPlayerManager()).addPlayer(new PlayerEntry(player));
 
         if (!PermissionManager.isAllowed(player, Permission.ANNOUNCE_VERSION)) {
             return;
@@ -87,13 +88,13 @@ public class EventListener implements Listener {
                 if (ConfigProvider.getCheckUpdate()) {
                     PluginDescriptionFile desc = m_parent.getDescription();
                     entry.say(MessageType.CHECK_VERSION_FORMAT.format(
-                            AsyncWorldEditMain.getPrefix(), VersionChecker.CheckVersion(desc.getVersion())));
+                            AsyncWorldEditBukkit.getPrefix(), VersionChecker.CheckVersion(desc.getVersion())));
                 }
             }
         }).start();
 
         if (!ConfigProvider.isConfigUpdated()) {
-            entry.say(MessageType.CHECK_VERSION_CONFIG.format(AsyncWorldEditMain.getPrefix()));
+            entry.say(MessageType.CHECK_VERSION_CONFIG.format(AsyncWorldEditBukkit.getPrefix()));
         }
     }    
 }

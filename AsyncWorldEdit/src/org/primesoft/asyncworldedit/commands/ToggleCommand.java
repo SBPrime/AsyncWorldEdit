@@ -52,7 +52,7 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  */
 public class ToggleCommand {
 
-    public static void Execte(AsyncWorldEditMain sender, IPlayerEntry player, String[] args) {
+    public static void Execte(AsyncWorldEditBukkit sender, IPlayerEntry player, String[] args) {
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_TOGGLE);
             return;

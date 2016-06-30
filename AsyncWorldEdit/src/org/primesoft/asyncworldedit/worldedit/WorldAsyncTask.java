@@ -43,6 +43,7 @@ package org.primesoft.asyncworldedit.worldedit;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.bukkit.World;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
@@ -57,9 +58,9 @@ public abstract class WorldAsyncTask extends BaseTask {
     /**
      * The world
      */
-    private final World m_world;
+    private final IWorld m_world;
 
-    public WorldAsyncTask(final World world, final EditSession editSession, final IPlayerEntry player,
+    public WorldAsyncTask(final IWorld world, final EditSession editSession, final IPlayerEntry player,
             final String commandName, IBlockPlacer blocksPlacer, JobEntry job) {
         super(editSession, player, commandName, blocksPlacer, job);
 
@@ -80,6 +81,6 @@ public abstract class WorldAsyncTask extends BaseTask {
         }
     }
 
-    public abstract void task(EditSession editSession, World world)
+    public abstract void task(EditSession editSession, IWorld world)
             throws MaxChangedBlocksException;
 }

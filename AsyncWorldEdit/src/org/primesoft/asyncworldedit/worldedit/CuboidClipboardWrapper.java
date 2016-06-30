@@ -46,7 +46,7 @@ import com.sk89q.worldedit.LocalEntity;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.regions.Region;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.EntityEntry;
@@ -103,7 +103,7 @@ public class CuboidClipboardWrapper extends ProxyCuboidClipboard {
         super(parrent);
 
         m_jobId = jobId;
-        m_blocksPlacer = AsyncWorldEditMain.getInstance().getBlockPlacer();
+        m_blocksPlacer = AsyncWorldEditBukkit.getInstance().getBlockPlacer();
         m_player = player;
     }
 

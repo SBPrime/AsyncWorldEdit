@@ -76,13 +76,15 @@ public class PhysicsWatch implements Listener, IPhysicsWatch {
         m_locked = new HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
     }
     
-    public void Enable()
+    @Override
+    public void enable()
     {
         m_isEnabled = true;
     }
     
     
-    public void Disable()
+    @Override
+    public void disable()
     {
         m_isEnabled = false;
         synchronized (m_mutex)

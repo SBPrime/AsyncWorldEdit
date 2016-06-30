@@ -69,7 +69,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import org.bukkit.Server;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
@@ -133,9 +133,9 @@ public class ClassScanner {
         toScan.add(new ScannerQueueEntry(o, null, null));
 
         if (debugOn) {
-            AsyncWorldEditMain.log("****************************************************************");
-            AsyncWorldEditMain.log("* Scanning classes");
-            AsyncWorldEditMain.log("****************************************************************");
+            log("****************************************************************");
+            log("* Scanning classes");
+            log("****************************************************************");
         }
 
         /**
@@ -159,12 +159,12 @@ public class ClassScanner {
 
             if (scanned.contains(cObject)) {
                 if (debugOn) {
-                    AsyncWorldEditMain.log(String.format("* Skip:\t%1$s", sParent));
+                    log(String.format("* Skip:\t%1$s", sParent));
                 }
             } else {
                 int added = 0;
                 if (debugOn) {
-                    AsyncWorldEditMain.log(String.format("* Scanning:\t%1$s", sParent));
+                    log(String.format("* Scanning:\t%1$s", sParent));
                 }
                 try {
                     for (ScannerQueueEntry f : unpack(cClass, cObject)) {
@@ -183,7 +183,7 @@ public class ClassScanner {
                             for (Class<?> type : types) {
                                 if (type.isAssignableFrom(ct)) {
                                     if (debugOn) {
-                                        AsyncWorldEditMain.log(String.format("* F %1$s", classMsg));
+                                        log(String.format("* F %1$s", classMsg));
                                     }
 
                                     result.add(new ClassScannerResult(t, t.getClass(), f.getParent(), f.getField()));                                    
@@ -197,35 +197,35 @@ public class ClassScanner {
                                 added++;
 
                                 if (debugOn) {
-                                    AsyncWorldEditMain.log(String.format("* + %1$s", classMsg));
+                                    log(String.format("* + %1$s", classMsg));
                                 }
                             } else if (debugOn) {
-                                AsyncWorldEditMain.log(String.format("* - %1$s", classMsg));
+                                log(String.format("* - %1$s", classMsg));
                             }
 
                         }
                     }
                 } catch (Throwable ex) {
-                    AsyncWorldEditMain.log("-----------------------------------------------------------------------");
-                    AsyncWorldEditMain.log("Warning: Class scanner encountered an error while scanning class");
-                    AsyncWorldEditMain.log(String.format("Exception: %1$s, %2$s", ex.getClass().getCanonicalName(),
+                    log("-----------------------------------------------------------------------");
+                    log("Warning: Class scanner encountered an error while scanning class");
+                    log(String.format("Exception: %1$s, %2$s", ex.getClass().getCanonicalName(),
                             ex.getMessage()));
                     ExceptionHelper.printStack(ex, "");
-                    AsyncWorldEditMain.log(String.format("Class: %1$s", cClass));
-                    AsyncWorldEditMain.log(String.format("Object: %1$s", cObject));
-                    AsyncWorldEditMain.log("Send this message to the author of the plugin!");
-                    AsyncWorldEditMain.log("https://github.com/SBPrime/AsyncWorldEdit/issues");
-                    AsyncWorldEditMain.log("-----------------------------------------------------------------------");
+                    log(String.format("Class: %1$s", cClass));
+                    log(String.format("Object: %1$s", cObject));
+                    log("Send this message to the author of the plugin!");
+                    log("https://github.com/SBPrime/AsyncWorldEdit/issues");
+                    log("-----------------------------------------------------------------------");
                 }
                 scanned.add(cObject);
                 if (debugOn) {
-                    AsyncWorldEditMain.log(String.format("* Added:\t%1$s objects.", added));
+                    log(String.format("* Added:\t%1$s objects.", added));
                 }
             }
         }
 
         if (debugOn) {
-            AsyncWorldEditMain.log("****************************************************************");
+            log("****************************************************************");
         }
         return result;
     }

@@ -57,7 +57,7 @@ import com.sk89q.worldedit.util.Countable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
@@ -110,7 +110,7 @@ public class CancelabeEditSession extends EditSessionStub implements ICancelabeE
                 this, "changeSetExtent", "Unable to get the changeset");
 
         if (changesetExtent == null) {
-            AsyncWorldEditMain.log("Unable to get the changeSet from EditSession, undo and redo broken.");
+            log("Unable to get the changeSet from EditSession, undo and redo broken.");
             return;
         }
 

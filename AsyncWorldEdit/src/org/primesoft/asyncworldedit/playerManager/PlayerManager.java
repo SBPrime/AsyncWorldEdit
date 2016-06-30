@@ -42,15 +42,14 @@ package org.primesoft.asyncworldedit.playerManager;
 
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 import java.util.HashMap;
 import java.util.UUID;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 
 /**
  *
@@ -61,19 +60,19 @@ public class PlayerManager implements IPlayerManager {
     final static UUID UUID_CONSOLE = UUID.randomUUID();
     final static UUID UUID_UNKNOWN = UUID.randomUUID();
 
-    final static IPlayerEntry CONSOLE = new PlayerEntry(null, "<Console>", UUID_CONSOLE, PermissionGroup.getDefaultGroup(), true);
-    final static IPlayerEntry UNKNOWN = new PlayerEntry(null, "<Unknown>", UUID_UNKNOWN, PermissionGroup.getDefaultGroup(), false);
+    final static IPlayerEntry CONSOLE = new FakePlayerEntry("<Console>", UUID_CONSOLE, true);
+    final static IPlayerEntry UNKNOWN = new FakePlayerEntry("<Unknown>", UUID_UNKNOWN, false);
 
     
     
-    private final AsyncWorldEditMain m_parrent;
+    private final AsyncWorldEditBukkit m_parrent;
 
     /**
      * List of know players
      */
     private final HashMap<UUID, IPlayerEntry> m_playersUids;
 
-    public PlayerManager(AsyncWorldEditMain parent) {
+    public PlayerManager(AsyncWorldEditBukkit parent) {
         m_playersUids = new HashMap<UUID, IPlayerEntry>();
         m_parrent = parent;
 
@@ -88,7 +87,7 @@ public class PlayerManager implements IPlayerManager {
      */
     public void initalize() {
         for (Player p : m_parrent.getServer().getOnlinePlayers()) {
-            addPlayer(p);
+            addPlayer(new PlayerEntry(p));
         }
     }
     
@@ -102,8 +101,9 @@ public class PlayerManager implements IPlayerManager {
         {
             for (IPlayerEntry pe : m_playersUids.values())
             {
-                Player player = pe.getPlayer();
-                pe.update(player, PermissionManager.getPermissionGroup(player));
+                //Player player = pe.getPlayer();
+                //pe.update(player);//, PermissionManager.getPermissionGroup(player));
+                pe.updatePermissionGroup();
             }
         }
     }
@@ -114,23 +114,24 @@ public class PlayerManager implements IPlayerManager {
      * @param player
      * @return
      */
-    public IPlayerEntry addPlayer(Player player) {
+    public IPlayerEntry addPlayer(IPlayerEntry player) {
         if (player == null) {
             return CONSOLE;
         }
 
-        UUID uuid = player.getUniqueId();
+        UUID uuid = player.getUUID();
         String pName = player.getName();
         synchronized (m_playersUids) {
             IPlayerEntry wrapper = m_playersUids.get(uuid);
 
             if (wrapper != null) {
-                wrapper.update(player, PermissionManager.getPermissionGroup(player));
+                wrapper.update(player);
+                wrapper.updatePermissionGroup();
+                
                 return wrapper;
             }
 
-            wrapper = new PlayerEntry(player, pName, PermissionManager.getPermissionGroup(player));
-            m_playersUids.put(uuid, wrapper);
+            m_playersUids.put(uuid, player);
             return wrapper;
         }
     }
@@ -162,7 +163,6 @@ public class PlayerManager implements IPlayerManager {
      * @param player
      * @return
      */
-    @Override
     public IPlayerEntry getPlayer(Player player) {
         return getPlayer(player != null ? player.getUniqueId() : UUID_CONSOLE);
     }
@@ -273,14 +273,14 @@ public class PlayerManager implements IPlayerManager {
     public IPlayerEntry getUnknownPlayer() {
         return UNKNOWN;
     }
-
+    
     @Override
-    public IPlayerEntry createPlayer(Player player, String name, IPermissionGroup group) {
-        return new PlayerEntry(player, name, group);
+    public IPlayerEntry createFakePlayer(String name, UUID uuid, IPermissionGroup group) {
+        return new FakePlayerEntry(name, uuid, group);
     }
 
     @Override
-    public IPlayerEntry createPlayer(String name, UUID uuid) {
-        return new PlayerEntry(name, uuid);
+    public IPlayerEntry createFakePlayer(String name, UUID uuid) {
+        return new FakePlayerEntry(name, uuid);
     }
 }

@@ -40,8 +40,8 @@
  */
 package org.primesoft.asyncworldedit.configuration;
 
+import static org.PrimeSoft.blocksHub.BlocksHub.log;
 import org.bukkit.configuration.ConfigurationSection;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
@@ -303,7 +303,7 @@ public class PermissionGroup implements IPermissionGroup {
                 defaults.getRendererTime(), true);
 
         if (rendererBlocks == -1 && rendererTime == -1) {
-            AsyncWorldEditMain.log("Warning: Time and blocks are set to unlimited! For group " + m_name);
+            log("Warning: Time and blocks are set to unlimited! For group " + m_name);
             rendererBlocks = s_defaultValue.getRendererBlocks();
             rendererTime = s_defaultValue.getRendererTime();
         }

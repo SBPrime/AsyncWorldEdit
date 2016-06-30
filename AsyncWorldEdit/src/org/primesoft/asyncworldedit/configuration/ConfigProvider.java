@@ -47,8 +47,8 @@ import java.util.HashSet;
 import java.util.List;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
-import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
 
 /**
@@ -240,7 +240,7 @@ public class ConfigProvider {
      * @param plugin parent plugin
      * @return true if config loaded
      */
-    public static boolean load(AsyncWorldEditMain plugin) {
+    public static boolean load(AsyncWorldEditBukkit plugin) {
         if (plugin == null) {
             return false;
         }
@@ -300,7 +300,7 @@ public class ConfigProvider {
             m_queueMaxSize = renderSection.getInt("queue-max-size", 10000000);
 
             if (m_queueMaxSize <= 0) {
-                AsyncWorldEditMain.log("Warinig: Block queue is disabled!");
+                log("Warinig: Block queue is disabled!");
             }
         }
     }
@@ -319,17 +319,17 @@ public class ConfigProvider {
             try {
                 result.add(WorldeditOperations.valueOf(string));
             } catch (Exception e) {
-                AsyncWorldEditMain.log("* unknown operation name " + string);
+                log("* unknown operation name " + string);
             }
         }
         if (result.isEmpty()) {
             //Add all entries
-            AsyncWorldEditMain.log("Warning: No operations defined in config file. Enabling all.");
+            log("Warning: No operations defined in config file. Enabling all.");
             result.addAll(Arrays.asList(WorldeditOperations.values()));
         }
         //PluginMain.Log("World edit operations:");
         //for (WorldeditOperations op : WorldeditOperations.values()) {
-        //    AsyncWorldEditMain.Log("* " + op + "..." + (result.contains(op) ? "async" : "regular"));
+        //    Log("* " + op + "..." + (result.contains(op) ? "async" : "regular"));
         //}
 
         return result;
@@ -353,16 +353,16 @@ public class ConfigProvider {
 
         if (m_dispatcherMaxTime < 1) {
             m_dispatcherMaxTime = 10;
-            AsyncWorldEditMain.log("Warning: Dispatcher time is set to lower then 1ms, changing to 10ms.");
+            log("Warning: Dispatcher time is set to lower then 1ms, changing to 10ms.");
         }
         if (m_dispatcherMaxJobs < 1) {
             m_dispatcherMaxJobs = 100;
-            AsyncWorldEditMain.log("Warning: Dispatcher max jobs is lower then 1, changing to 100");
+            log("Warning: Dispatcher max jobs is lower then 1, changing to 100");
         }
 
         if (m_dispatcherMaxIdle < 1) {
             m_dispatcherMaxIdle = 10;
-            AsyncWorldEditMain.log("Warning: Dispatcher max idle is lower then 1, changing to 10");
+            log("Warning: Dispatcher max idle is lower then 1, changing to 10");
         }
     }
 

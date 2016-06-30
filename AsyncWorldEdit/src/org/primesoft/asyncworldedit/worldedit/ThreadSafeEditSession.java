@@ -69,7 +69,9 @@ import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.bukkit.World;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -96,7 +98,7 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
     /**
      * Plugin instance
      */
-    protected final AsyncWorldEditMain m_plugin;
+    protected final AsyncWorldEditBukkit m_plugin;
 
     /**
      * Async block placer
@@ -142,7 +144,7 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
     /**
      * Current craftbukkit world
      */
-    private final World m_bukkitWorld;
+    private final IWorld m_bukkitWorld;
 
     /**
      * The event bus
@@ -180,7 +182,7 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
     }
 
     @Override
-    public World getCBWorld() {
+    public IWorld getCBWorld() {
         return m_bukkitWorld;
     }
 
@@ -198,7 +200,7 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
         return m_asyncForced || (m_player.getAweMode() && !m_asyncDisabled);
     }
 
-    public ThreadSafeEditSession(AsyncWorldEditMain plugin,
+    public ThreadSafeEditSession(AsyncWorldEditBukkit plugin,
             IPlayerEntry player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
@@ -215,7 +217,7 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
         m_eventBus = eventBus;
 
         if (world != null) {
-            m_bukkitWorld = plugin.getServer().getWorld(world.getName());
+            m_bukkitWorld = plugin.getWorld(world.getName());
         } else {
             m_bukkitWorld = null;
         }
@@ -231,7 +233,7 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
         ChangeSet changeSet = getChangeSet();
 
         if (changesetExtent == null || changeSet == null) {
-            AsyncWorldEditMain.log("Unable to get the changeSet from EditSession, undo and redo broken.");
+            log("Unable to get the changeSet from EditSession, undo and redo broken.");
             return;
         }
 

@@ -43,7 +43,7 @@ package org.primesoft.asyncworldedit.injector.async;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
@@ -64,7 +64,7 @@ class AsyncJobProcessor implements IJobProcessor {
     /**
      * The parent plugin
      */
-    private final AsyncWorldEditMain m_plugin;
+    private final AsyncWorldEditBukkit m_plugin;
 
     /**
      * Bukkit schedule
@@ -81,7 +81,7 @@ class AsyncJobProcessor implements IJobProcessor {
      */
     private final IPlayerManager m_playerManager;
 
-    AsyncJobProcessor(AsyncWorldEditMain plugin) {
+    AsyncJobProcessor(AsyncWorldEditBukkit plugin) {
         m_plugin = plugin;
         m_schedule = m_plugin.getServer().getScheduler();
         m_blockPlacer = m_plugin.getBlockPlacer();

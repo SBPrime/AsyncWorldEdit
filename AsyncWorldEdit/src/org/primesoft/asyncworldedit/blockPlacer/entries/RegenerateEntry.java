@@ -42,6 +42,7 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.Vector2D;
 import org.bukkit.World;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -52,10 +53,10 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
  */
 public class RegenerateEntry extends BlockPlacerEntry {
 
-    private final World m_world;
+    private final IWorld m_world;
     private final Vector2D m_chunk;
 
-    public RegenerateEntry(int jobId, World world, Vector2D chunk) {
+    public RegenerateEntry(int jobId, IWorld world, Vector2D chunk) {
         super(jobId, true);
 
         m_chunk = chunk;

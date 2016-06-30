@@ -42,9 +42,8 @@ package org.primesoft.asyncworldedit.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.Help;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerPlayer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
@@ -60,7 +59,7 @@ public class JobsCommand {
 
     private final static int MAX_LINES = 6;
 
-    public static void Execte(AsyncWorldEditMain sender, IPlayerEntry player, String[] args) {
+    public static void Execte(AsyncWorldEditBukkit sender, IPlayerEntry player, String[] args) {
         final List<String> lines = new ArrayList<String>();
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_JOBS);

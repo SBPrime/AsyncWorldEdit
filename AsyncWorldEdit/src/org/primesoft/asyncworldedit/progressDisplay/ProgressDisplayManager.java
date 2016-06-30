@@ -42,7 +42,7 @@ package org.primesoft.asyncworldedit.progressDisplay;
 
 import java.util.HashMap;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
-import static org.primesoft.asyncworldedit.AsyncWorldEditMain.log;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
 import org.primesoft.asyncworldedit.strings.MessageType;
