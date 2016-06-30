@@ -44,7 +44,8 @@ import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 import com.connorlinfoot.actionbarapi.ActionBarAPI;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -72,7 +73,7 @@ public class ActionBarAPIIntegrator implements IProgressDisplay
             Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("ActionBarAPI");
 
             if ((cPlugin == null) || (!(cPlugin instanceof ActionBarAPI))) {
-                AsyncWorldEditMain.log("ActionBarAPI not found.");
+                AsyncWorldEditBukkit.log("ActionBarAPI not found.");
                 return null;
             }
 
@@ -89,9 +90,15 @@ public class ActionBarAPIIntegrator implements IProgressDisplay
     }
 
     @Override
-    public void setMessage(PlayerEntry player, int jobsCount, 
+    public void setMessage(IPlayerEntry player, int jobsCount, 
             int queuedBlocks, int maxQueuedBlocks, double timeLeft, double placingSpeed, double percentage) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
+
+        PlayerEntry pe = (PlayerEntry)player;
+        
+        if (!m_isInitialized || pe.getPlayer() == null) {
             return;
         }
 
@@ -117,19 +124,25 @@ public class ActionBarAPIIntegrator implements IProgressDisplay
             bars+=light;
 
         message += " : "+bars+" "+(int) percentage+"%";
-        ActionBarAPI.sendActionBar(player.getPlayer(), message);
+        ActionBarAPI.sendActionBar(pe.getPlayer(), message);
     }
 
     @Override
-    public void disableMessage(PlayerEntry player) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
+    public void disableMessage(IPlayerEntry player) {
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
+
+        PlayerEntry pe = (PlayerEntry)player;
+                
+        if (!m_isInitialized || pe.getPlayer() == null) {
             return;
         }
 
         if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
             return;
         }
-        ActionBarAPI.sendActionBar(player.getPlayer(), "");
+        ActionBarAPI.sendActionBar(pe.getPlayer(), "");
     }
 
     @Override

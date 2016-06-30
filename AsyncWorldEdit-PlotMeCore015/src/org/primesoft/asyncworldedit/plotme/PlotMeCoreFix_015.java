@@ -47,10 +47,9 @@ import com.worldcretornica.plotme_core.api.IPlayer;
 import com.worldcretornica.plotme_core.api.IServerBridge;
 import com.worldcretornica.plotme_core.bukkit.PlotMe_CorePlugin;
 import java.util.UUID;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.IPlotMeFix;
 
 /**
@@ -59,7 +58,7 @@ import org.primesoft.asyncworldedit.api.IPlotMeFix;
  */
 public class PlotMeCoreFix_015 extends JavaPlugin implements IPlotMeFix {
 
-    private AsyncWorldEditMain m_aweMain;
+    private AsyncWorldEditBukkit m_aweMain;
     private PlotMe_CorePlugin m_plotMeCore;
     private PlotMeCoreManager m_manager;
     private PlotMe_Core m_core;
@@ -68,7 +67,7 @@ public class PlotMeCoreFix_015 extends JavaPlugin implements IPlotMeFix {
 
     @Override
     public void onEnable() {
-        m_aweMain = getPlugin(AsyncWorldEditMain.class, "AsyncWorldEdit");
+        m_aweMain = getPlugin(AsyncWorldEditBukkit.class, "AsyncWorldEdit");
         m_plotMeCore = getPlugin(PlotMe_CorePlugin.class, "PlotMe");
 
         if (m_aweMain == null || m_plotMeCore == null) {
@@ -92,12 +91,7 @@ public class PlotMeCoreFix_015 extends JavaPlugin implements IPlotMeFix {
     }
 
     @Override
-    public void setMask(Player player) {
-        if (player == null) {
-            return;
-        }
-
-        UUID uuid = player.getUniqueId();
+    public void setMask(UUID uuid) {
         IPlayer iPlayer = m_bridge.getPlayer(uuid);
         if (iPlayer == null) {
             return;

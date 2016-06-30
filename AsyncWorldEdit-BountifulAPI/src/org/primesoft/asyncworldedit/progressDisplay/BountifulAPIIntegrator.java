@@ -46,6 +46,7 @@ import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
 import javax.annotation.Nonnull;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 
 /**
@@ -56,14 +57,21 @@ import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 public class BountifulAPIIntegrator implements IProgressDisplay
 {
     @Override
-    public void disableMessage(@Nonnull PlayerEntry player)
+    public void disableMessage(@Nonnull IPlayerEntry player)
     {
-        BountifulAPI.sendActionBar(player.getPlayer(), "");
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
+        BountifulAPI.sendActionBar(((PlayerEntry)player).getPlayer(), "");
     }
 
     @Override
-    public void setMessage(PlayerEntry player, int jobs, int blocks, int maxBlocks, double time, double speed, double percentage)
+    public void setMessage(IPlayerEntry player, int jobs, int blocks, int maxBlocks, double time, double speed, double percentage)
     {
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
+        
         String block_full =  "█";
         String block_half =  "░";
         int barAmount = 20;
@@ -86,7 +94,7 @@ public class BountifulAPIIntegrator implements IProgressDisplay
             bars+=block_half;
 
         message += " : "+bars+" "+(int) percentage+"%";
-        BountifulAPI.sendActionBar(player.getPlayer(), message);
+        BountifulAPI.sendActionBar(((PlayerEntry)player).getPlayer(), message);
     }
 
     @Override

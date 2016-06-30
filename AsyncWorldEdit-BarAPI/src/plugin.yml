@@ -1,6 +1,6 @@
 name: AsyncWorldEdit-BarAPI
 main: org.primesoft.asyncworldedit.progressDisplay.BarAPIBackend
-version: 2.2.2
+version: 2.3.0
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin provides BarAPI progress display backend for AsyncWorldEdit

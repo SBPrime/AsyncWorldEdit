@@ -1,6 +1,6 @@
 name: AsyncWorldEdit-ActionMessager
 main: org.primesoft.asyncworldedit.progressDisplay.ActionMessagerBackend
-version: 2.2.2
+version: 2.3.0
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin provides ActionMessager progress display backend for AsyncWorldEdit

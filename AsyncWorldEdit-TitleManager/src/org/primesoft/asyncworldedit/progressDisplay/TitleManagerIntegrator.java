@@ -38,8 +38,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-
 package org.primesoft.asyncworldedit.progressDisplay;
 
 import io.puharesource.mc.titlemanager.api.ActionbarTitleObject;
@@ -47,6 +45,7 @@ import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
 import javax.annotation.Nonnull;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 
 /**
@@ -54,42 +53,54 @@ import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
  * @version 1.0.0
  * @since 29/04/15
  */
-public class TitleManagerIntegrator implements IProgressDisplay
-{
+public class TitleManagerIntegrator implements IProgressDisplay {
+
     @Override
-    public void disableMessage(@Nonnull PlayerEntry player)
-    {
-        new ActionbarTitleObject("").send(player.getPlayer());
+    public void disableMessage(@Nonnull IPlayerEntry player) {
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
+
+        new ActionbarTitleObject("").send(((PlayerEntry) player).getPlayer());
     }
 
     @Override
-    public void setMessage(PlayerEntry player, int jobs, int blocks, int maxBlocks, double time, double speed, double percentage)    
-    {
+    public void setMessage(IPlayerEntry player, int jobs, int blocks, int maxBlocks, double time, double speed, double percentage) {
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
 
-        String block_full =  "█";
-        String block_half =  "░";
+        String block_full = "█";
+        String block_half = "░";
         int barAmount = 20;
 
         String message = MessageType.CMD_JOBS_PROGRESS_BAR.format(jobs, speed, time);
 
-        if(message==null)
-            message="";
-        if(percentage<0) percentage=0;
-        if(percentage>100) percentage=100;
+        if (message == null) {
+            message = "";
+        }
+        if (percentage < 0) {
+            percentage = 0;
+        }
+        if (percentage > 100) {
+            percentage = 100;
+        }
 
-        int increment = 100/barAmount;
-        int darkAmount = (int) percentage/increment;
-        int lightAmount = barAmount-darkAmount;
+        int increment = 100 / barAmount;
+        int darkAmount = (int) percentage / increment;
+        int lightAmount = barAmount - darkAmount;
 
         String bars = "";
-        for(int i = 0; i < darkAmount; i++)
-            bars+=block_full;
-        for(int i = 0; i < lightAmount; i++)
-            bars+=block_half;
+        for (int i = 0; i < darkAmount; i++) {
+            bars += block_full;
+        }
+        for (int i = 0; i < lightAmount; i++) {
+            bars += block_half;
+        }
 
-        message += " : "+bars+" "+(int) percentage+"%";
+        message += " : " + bars + " " + (int) percentage + "%";
 
-        new ActionbarTitleObject(message).send(player.getPlayer());
+        new ActionbarTitleObject(message).send(((PlayerEntry) player).getPlayer());
     }
 
     @Override

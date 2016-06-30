@@ -45,7 +45,8 @@ import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import me.confuser.barapi.BarAPI;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
@@ -68,7 +69,7 @@ public class BarAPIIntegrator implements IProgressDisplay {
             Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BarAPI");
 
             if ((cPlugin == null) || (!(cPlugin instanceof BarAPI))) {
-                AsyncWorldEditMain.log("BarAPI not found.");
+                AsyncWorldEditBukkit.log("BarAPI not found.");
                 return null;
             }
 
@@ -85,10 +86,14 @@ public class BarAPIIntegrator implements IProgressDisplay {
     }
 
     @Override
-    public void setMessage(PlayerEntry player, int jobsCount, 
+    public void setMessage(IPlayerEntry player, int jobsCount, 
             int queuedBlocks, int maxQueuedBlocks, double timeLeft, double placingSpeed, double percentage) {
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
+        PlayerEntry pe = (PlayerEntry)player;
         
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
+        if (!m_isInitialized || pe.getPlayer() == null) {
             return;
         }
 
@@ -103,12 +108,17 @@ public class BarAPIIntegrator implements IProgressDisplay {
             percentage = 100;
         }        
         
-        BarAPI.setMessage(player.getPlayer(), message, (float)percentage);
+        BarAPI.setMessage(pe.getPlayer(), message, (float)percentage);
     }
 
     @Override
-    public void disableMessage(PlayerEntry player) {
-        if (!m_isInitialized || player == null || player.getPlayer() == null) {
+    public void disableMessage(IPlayerEntry player) {
+        if (!(player instanceof PlayerEntry)) {
+            return;
+        }
+        PlayerEntry pe = (PlayerEntry)player;
+        
+        if (!m_isInitialized || pe.getPlayer() == null) {
             return;
         }
 
@@ -116,7 +126,7 @@ public class BarAPIIntegrator implements IProgressDisplay {
             return;
         }
 
-        BarAPI.removeBar(player.getPlayer());
+        BarAPI.removeBar(pe.getPlayer());
     }
 
     @Override

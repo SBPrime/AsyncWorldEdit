@@ -46,7 +46,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
@@ -85,12 +85,12 @@ public class TitleManagerBackend extends JavaPlugin {
         try {
             Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("AsyncWorldEdit");
 
-            if ((cPlugin == null) || (!(cPlugin instanceof AsyncWorldEditMain))) {
-                AsyncWorldEditMain.log("AsyncWorldEdit not found.");
+            if ((cPlugin == null) || (!(cPlugin instanceof AsyncWorldEditBukkit))) {
+                AsyncWorldEditBukkit.log("AsyncWorldEdit not found.");
                 return null;
             }
 
-            return ((AsyncWorldEditMain) cPlugin).getAPI();
+            return ((AsyncWorldEditBukkit) cPlugin).getAPI();
         } catch (NoClassDefFoundError ex) {
             ExceptionHelper.printException(ex, "Error initializing AsyncWorldEdit.");
             return null;

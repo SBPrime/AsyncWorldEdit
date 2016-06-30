@@ -43,10 +43,11 @@ package org.primesoft.asyncworldedit.plotme;
 import com.worldcretornica.plotme.PlotManager;
 import com.worldcretornica.plotme.PlotMe;
 import com.worldcretornica.plotme.worldedit.PlotWorldEdit;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.AsyncWorldEditMain;
+import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.IPlotMeFix;
 
 /**
@@ -55,11 +56,11 @@ import org.primesoft.asyncworldedit.api.IPlotMeFix;
  */
 public class PlotMeFix_013g extends JavaPlugin implements IPlotMeFix {
 
-    private AsyncWorldEditMain m_aweMain;
+    private AsyncWorldEditBukkit m_aweMain;
 
     @Override
     public void onEnable() {
-        m_aweMain = getPlugin(AsyncWorldEditMain.class, "AsyncWorldEdit");
+        m_aweMain = getPlugin(AsyncWorldEditBukkit.class, "AsyncWorldEdit");
 
         if (m_aweMain == null) {
             return;
@@ -76,7 +77,12 @@ public class PlotMeFix_013g extends JavaPlugin implements IPlotMeFix {
     }
 
     @Override
-    public void setMask(Player player) {
+    public void setMask(UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        
+        Player player = getServer().getPlayer(uuid);
         if (player == null) {
             return;
         }
