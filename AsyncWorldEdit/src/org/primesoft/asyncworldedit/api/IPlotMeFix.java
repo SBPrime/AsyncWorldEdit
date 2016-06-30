@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.api;
 
-import org.bukkit.entity.Player;
+import java.util.UUID;
 
 /**
  * Basic PlotMe fix class. Used to fix the GMask before all WorldEdit operations
@@ -57,5 +57,5 @@ public interface IPlotMeFix {
      * Set the GMask based on PlotMe data
      * @param entry 
      */
-    public void setMask(Player entry);
+    public void setMask(UUID entry);
 }

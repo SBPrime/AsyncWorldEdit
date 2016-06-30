@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit API
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
@@ -38,43 +38,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.map;
+package org.primesoft.asyncworldedit.api.utils;
 
-import com.sk89q.worldedit.BlockVector2D;
-import java.io.File;
-import org.primesoft.asyncworldedit.api.IWorld;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.WorldEditException;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
+import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 
 /**
- *
+ * 
  * @author SBPrime
  */
-public interface IMapUtils {
+public interface IAsyncCommand extends IFuncParamEx<Integer, ICancelabeEditSession, MaxChangedBlocksException> {
+
     /**
-     * Get teh map folder
-     * @param w
-     * @return 
+     * Get the command name
+     *
+     * @return
      */
-    public File getMapFolder(IWorld w);
-    
-    
+    String getName();
+
     /**
-     * Get the map region folder
-     * @param w
-     * @return 
+     * The player entry
+     *
+     * @return
      */
-    public File getMapRegion(IWorld w);
-        
+    IPlayerEntry getPlayer();
+
     /**
-     * Get the map region files
-     * @param w
-     * @return 
+     * The task
+     *
+     * @param editSesstion
+     * @return
+     * @throws MaxChangedBlocksException
      */
-    public File[] getMapFiles(IWorld w);
-    
-    /**
-     * Get the available chunks
-     * @param w
-     * @return 
-     */
-    public BlockVector2D[] getAllWorldChunks(IWorld w);
+    Integer task(IAweEditSession editSesstion) throws WorldEditException;
 }

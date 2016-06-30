@@ -44,8 +44,7 @@ import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.UUID;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
+import org.primesoft.asyncworldedit.api.IChunk;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.utils.IInOutParam;
 
@@ -60,7 +59,7 @@ public interface IDirectChunkAPI {
      * @param player
      * @return 
      */
-    IWrappedChunk wrapChunk(Chunk chunk, IPlayerEntry player);
+    IWrappedChunk wrapChunk(IChunk chunk, IPlayerEntry player);
     
     
     /**
@@ -84,7 +83,7 @@ public interface IDirectChunkAPI {
      * @param data
      * @return 
      */
-    char getCombinedId(Material m, int data);
+    char getCombinedId(BaseBlock m, int data);
     
     
     /**
@@ -111,7 +110,7 @@ public interface IDirectChunkAPI {
      * @param data
      * @return
      */
-    Material convertId(char combinedId, IInOutParam<Integer> data);
+    BaseBlock convertId(char combinedId, IInOutParam<Integer> data);
     
     
     /**

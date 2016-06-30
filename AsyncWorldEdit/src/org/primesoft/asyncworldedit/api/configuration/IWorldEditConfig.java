@@ -55,6 +55,12 @@ public interface IWorldEditConfig {
     int getBlockChangeLimit();
     
     /**
+     * Get maximum number of undo entries
+     * @return 
+     */
+    int getHistorySize();
+    
+    /**
      * Get the list of disallowed blocks
      * @return 
      */

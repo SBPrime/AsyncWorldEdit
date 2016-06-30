@@ -41,66 +41,60 @@
 package org.primesoft.asyncworldedit.api.playerManager;
 
 import java.util.UUID;
-import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
-
 
 /**
  *
  * @author SBPrime
  */
 public interface IPlayerManager {
+
     /**
      * The console player UUID
-     * @return 
+     *
+     * @return
      */
     UUID getUuidConsole();
-    
+
     /**
      * The unknown player UUID
-     * @return 
+     *
+     * @return
      */
     UUID getUuidUnknown();
-    
-    
+
     /**
      * Get the console player entry
-     * @return 
+     *
+     * @return
      */
     IPlayerEntry getConsolePlayer();
-    
+
     /**
      * Get the unknown player entry
-     * @return 
+     *
+     * @return
      */
     IPlayerEntry getUnknownPlayer();
-    
-    
+
     /**
-     * Create a new player entry (do not add to the manager)
-     * @param player
+     * Create a fake player entry (do not add to the manager)
+     *
+     * @param uuid
      * @param name
      * @param group
      * @return
      */
-    IPlayerEntry createPlayer(Player player, String name, IPermissionGroup group);
-    
+    IPlayerEntry createFakePlayer(String name, UUID uuid, IPermissionGroup group);
+
     /**
-     * Create new player entry (do not add to the manager)
+     * Create a fake player entry (do not add to the manager)
+     *
      * @param name
      * @param uuid
-     * @return 
-     */
-    IPlayerEntry createPlayer(String name, UUID uuid);
-    
-    
-    /**
-     * Get the player wrapper based on bukkit player class (null = console)
-     *
-     * @param player
      * @return
      */
-    IPlayerEntry getPlayer(Player player);
+    IPlayerEntry createFakePlayer(String name, UUID uuid);
 
     /**
      * Get the player wrapper based on UUID
@@ -117,5 +111,4 @@ public interface IPlayerManager {
      * @return never returns null
      */
     IPlayerEntry getPlayer(String playerName);
-    
 }

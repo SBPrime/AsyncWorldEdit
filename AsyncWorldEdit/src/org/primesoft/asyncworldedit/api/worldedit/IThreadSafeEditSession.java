@@ -51,7 +51,7 @@ import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import java.util.Iterator;
-import org.bukkit.World;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -80,7 +80,7 @@ public interface IThreadSafeEditSession extends IAweEditSession {
 
     IBlockPlacer getBlockPlacer();
 
-    World getCBWorld();
+    IWorld getCBWorld();
 
     EditSessionEvent getEditSessionEvent();
 

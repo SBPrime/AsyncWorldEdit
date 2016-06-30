@@ -43,6 +43,7 @@ package org.primesoft.asyncworldedit.api.blockPlacer;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.api.utils.IAsyncCommand;
 import org.primesoft.asyncworldedit.api.utils.IFuncParamEx;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
@@ -135,6 +136,15 @@ public interface IBlockPlacer {
      */
     void performAsAsyncJob(final IThreadSafeEditSession editSession, final IPlayerEntry player, final String jobName, 
             final IFuncParamEx<Integer, ICancelabeEditSession, MaxChangedBlocksException> action);
+    
+    /**
+     * Perform an async command asynchronicly
+     *
+     * @param editSession
+     * @param asyncCommand
+     */
+    void performAsAsyncJob(final IThreadSafeEditSession editSession, final IAsyncCommand asyncCommand);
+    
 
     /**
      * Remove all entries for player

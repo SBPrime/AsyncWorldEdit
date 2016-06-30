@@ -65,4 +65,15 @@ public interface IPhysicsWatch {
      */
     void removeLocation(String worldName, Vector location);
 
+    
+    /**
+     * Enable the physics watcher
+     */
+    void enable();
+
+    /**
+     * Disable the physics watcher
+     */
+    void disable();
+
 }

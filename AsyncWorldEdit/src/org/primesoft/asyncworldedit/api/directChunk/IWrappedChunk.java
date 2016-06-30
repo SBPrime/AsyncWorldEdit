@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.api.directChunk;
 
-import org.bukkit.World;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
@@ -52,7 +52,7 @@ public interface IWrappedChunk {
      * Get the bukkit world
      * @return 
      */
-    public World getWorld();
+    public IWorld getWorld();
     
     /**
      * Get the chunk X coordinate

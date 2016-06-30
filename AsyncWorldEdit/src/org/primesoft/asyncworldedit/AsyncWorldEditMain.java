@@ -480,12 +480,12 @@ public class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
 
     @Override
     public double getAPIVersion() {
-        return 3.001002000;
+        return 3.002000002;
     }
 
     @Override
     public byte[] getDetailAPIVersion() {
-        return new byte[]{1, 2, 0};
+        return new byte[]{2, 0, 2};
     }
 
     @Override

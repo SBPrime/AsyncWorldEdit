@@ -41,7 +41,6 @@
 package org.primesoft.asyncworldedit.api.playerManager;
 
 import java.util.UUID;
-import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.permissions.IPermission;
@@ -82,12 +81,6 @@ public interface IPlayerEntry {
     IPermissionGroup getPermissionGroup();
 
     /**
-     * Get the wrapped player
-     * @return 
-     */
-    Player getPlayer();
-
-    /**
      * Get the player UUID
      * @return 
      */
@@ -106,6 +99,7 @@ public interface IPlayerEntry {
      * @return is the player allowed this permission
      */
     boolean isAllowed(IPermission permission);
+    
 
     /**
      * Is this the console
@@ -157,13 +151,18 @@ public interface IPlayerEntry {
      */
     void setUndoMode(boolean mode);
 
+    
     /**
      * Update the player after relogin
-     *
-     * @param player
-     * @param permissionGroup
+     * @param player 
      */
-    void update(Player player, IPermissionGroup permissionGroup);
+    void update(IPlayerEntry player);
+    
+    /**
+     * Update the permission group
+     */
+    void updatePermissionGroup();
+    
     
     /**
      * Update the messaging system
@@ -190,4 +189,11 @@ public interface IPlayerEntry {
      * @param b The new speed (null for default)
      */
     void setRenderBlocks(Integer b);
+    
+    
+    /**
+     * Is this a fake player entry
+     * @return 
+     */
+    boolean isFake();    
 }
