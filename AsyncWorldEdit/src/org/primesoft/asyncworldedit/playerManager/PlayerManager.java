@@ -132,7 +132,7 @@ public class PlayerManager implements IPlayerManager {
             }
 
             m_playersUids.put(uuid, player);
-            return wrapper;
+            return player;
         }
     }
 
