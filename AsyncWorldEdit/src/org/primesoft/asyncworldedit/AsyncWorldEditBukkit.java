@@ -63,6 +63,7 @@ import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.IWorldeditIntegrator;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.changesetSerializer.ISerializerManager;
+import org.primesoft.asyncworldedit.api.classScanner.IClassScannerOptions;
 import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
 import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkCommands;
 import org.primesoft.asyncworldedit.api.map.IMapUtils;
@@ -80,6 +81,7 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.InjectorBukkit;
 import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
 import org.primesoft.asyncworldedit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.permissions.Permission;
 import org.primesoft.asyncworldedit.platform.bukkit.BukkitWorld;
@@ -117,6 +119,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
     private IProgressDisplayManager m_progressDisplay;
     private InjectorCore m_aweInjector;
     private Server m_server;
+    private ClassScanner m_classScanner;
 
     public static String getPrefix() {
         return s_prefix;
@@ -142,7 +145,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
      */
     public static void sayConsole(String msg) {
         s_console.sendRawMessage(msg);
-    }    
+    }        
 
     @Override
     public void onEnable() {
@@ -186,8 +189,9 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         m_dispatcher = new TaskDispatcher(this);
         setPlotMeFix(new NullFix());
 
+        m_classScanner = new ClassScanner();
         m_aweInjector = getAWEInjector(this);
-        m_aweInjector.setClassFactory(new AsyncClassFactory(this));
+        m_aweInjector.setClassFactory(new AsyncClassFactory(this, m_classScanner));
 
         if (ConfigProvider.getCheckUpdate()) {
             log(VersionChecker.CheckVersion(desc.getVersion()));
@@ -513,6 +517,13 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
     public IAweOperations getOperations() {
         return this;
     }
+
+    @Override
+    public IClassScannerOptions getClassScannerOptions() {
+        return m_classScanner;
+    }
+    
+    
     
     
     /**

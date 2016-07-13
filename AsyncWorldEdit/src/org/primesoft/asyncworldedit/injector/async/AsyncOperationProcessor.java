@@ -90,11 +90,17 @@ public class AsyncOperationProcessor implements IOperationProcessor {
      * Async block placer
      */
     protected final IBlockPlacer m_blockPlacer;
+    
+    /**
+     * The class scanner
+     */
+    private final ClassScanner m_classScanner;
 
-    public AsyncOperationProcessor(AsyncWorldEditBukkit plugin) {
+    public AsyncOperationProcessor(AsyncWorldEditBukkit plugin, ClassScanner classScanner) {
         m_plugin = plugin;
         m_schedule = m_plugin.getServer().getScheduler();
         m_blockPlacer = m_plugin.getBlockPlacer();
+        m_classScanner = classScanner;
     }
 
     @Override
@@ -110,7 +116,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         /**
          * What to do if scanner finds multiple different edit sessions?
          */
-        List<ClassScannerResult> sessions = ClassScanner.scan(new Class<?>[]{AsyncEditSession.class, Region.class}, op);
+        List<ClassScannerResult> sessions = m_classScanner.scan(new Class<?>[]{AsyncEditSession.class, Region.class}, op);
         if (!validate(sessions)) {
             action.Execute(op);
             return;
@@ -167,7 +173,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         /**
          * What to do if scanner finds multiple different edit sessions?
          */
-        List<ClassScannerResult> sessions = ClassScanner.scan(new Class<?>[]{AsyncEditSession.class, Region.class}, op);
+        List<ClassScannerResult> sessions = m_classScanner.scan(new Class<?>[]{AsyncEditSession.class, Region.class}, op);
         if (!validate(sessions)) {
             action.Execute(op);
             return;

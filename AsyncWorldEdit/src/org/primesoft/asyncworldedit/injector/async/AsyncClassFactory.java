@@ -44,6 +44,7 @@ import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
 
 /**
  *
@@ -58,9 +59,9 @@ public class AsyncClassFactory extends BaseClassFactory {
     
     private final AsyncJobProcessor m_jobProcessor;
 
-    public AsyncClassFactory(AsyncWorldEditBukkit plugin)
+    public AsyncClassFactory(AsyncWorldEditBukkit plugin, ClassScanner classScanner)
     {        
-        m_operationProcessor = new AsyncOperationProcessor(plugin);
+        m_operationProcessor = new AsyncOperationProcessor(plugin, classScanner);
         m_jobProcessor = new AsyncJobProcessor(plugin);
     }
     
