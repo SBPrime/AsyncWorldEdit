@@ -43,6 +43,7 @@ package org.primesoft.asyncworldedit.api;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.changesetSerializer.ISerializerManager;
+import org.primesoft.asyncworldedit.api.classScanner.IClassScannerOptions;
 import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
 import org.primesoft.asyncworldedit.api.map.IMapUtils;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
@@ -165,4 +166,11 @@ public interface IAsyncWorldEdit {
      * @return 
      */
     IAweOperations getOperations();
+    
+    
+    /**
+     * Get the class scanner options
+     * @return 
+     */
+    IClassScannerOptions getClassScannerOptions();
 }

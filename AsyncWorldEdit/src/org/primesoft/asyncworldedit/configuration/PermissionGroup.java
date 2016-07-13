@@ -40,8 +40,8 @@
  */
 package org.primesoft.asyncworldedit.configuration;
 
-import static org.PrimeSoft.blocksHub.BlocksHub.log;
 import org.bukkit.configuration.ConfigurationSection;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
