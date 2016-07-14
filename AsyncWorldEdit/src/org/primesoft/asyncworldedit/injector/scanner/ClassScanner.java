@@ -46,6 +46,8 @@ import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.entity.Entity;
+import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.world.FastModeExtent;
 import com.sk89q.worldedit.function.operation.BlockMapEntryPlacer;
@@ -73,7 +75,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.api.classScanner.IClassFilter;
 import org.primesoft.asyncworldedit.api.classScanner.IClassScannerOptions;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -93,31 +95,35 @@ public class ClassScanner implements IClassScannerOptions {
 
     private final ClassScannerEntry[] s_blackList = new ClassScannerEntry[]{
         new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
-        new ClassScannerEntry(BlockMapEntryPlacer.class, "iterator"),
-        new ClassScannerEntry(ChangeSet.class),
-        new ClassScannerEntry(EditSession.class),
-        new ClassScannerEntry(Region.class),
-        new ClassScannerEntry(BlockVector.class),
-        new ClassScannerEntry(World.class),
-        new ClassScannerEntry(FastModeExtent.class),
-        new ClassScannerEntry(Change.class),
-        new ClassScannerEntry(Vector.class),
-        new ClassScannerEntry(BaseBlock.class),
-        new ClassScannerEntry(BaseBlockWrapper.class),
-        new ClassScannerEntry(PermissionGroup.class),
-        new ClassScannerEntry(PlayerEntry.class),
-        new ClassScannerEntry(Clipboard.class),
-        new ClassScannerEntry(BlockRegistry.class),
-        new ClassScannerEntry(RandomPattern.class),
-        new ClassScannerEntry(ClipboardPattern.class),
-        new ClassScannerEntry(BlockPattern.class),
-        new ClassScannerEntry(YAMLNode.class),
-        new ClassScannerEntry(Field.class),
-        new ClassScannerEntry(Method.class),
-        new ClassScannerEntry(PermissionsResolver.class),
-        new ClassScannerEntry(Logger.class),
-        new ClassScannerEntry(Server.class),
-        new ClassScannerEntry(JavaPlugin.class)
+            new ClassScannerEntry(BlockMapEntryPlacer.class, "iterator"),
+            new ClassScannerEntry(ChangeSet.class),
+            new ClassScannerEntry(EditSession.class),
+            new ClassScannerEntry(Region.class),
+            new ClassScannerEntry(BlockVector.class),
+            new ClassScannerEntry(World.class),
+            new ClassScannerEntry(FastModeExtent.class),
+            new ClassScannerEntry(Change.class),
+            new ClassScannerEntry(Vector.class),
+            new ClassScannerEntry(BaseBlock.class),
+            new ClassScannerEntry(BaseBlockWrapper.class),
+            new ClassScannerEntry(PermissionGroup.class),
+            new ClassScannerEntry(IPlayerEntry.class),
+            new ClassScannerEntry(Clipboard.class),
+            new ClassScannerEntry(BlockRegistry.class),
+            new ClassScannerEntry(RandomPattern.class),
+            new ClassScannerEntry(ClipboardPattern.class),
+            new ClassScannerEntry(BlockPattern.class),
+            new ClassScannerEntry(YAMLNode.class),
+            new ClassScannerEntry(Field.class),
+            new ClassScannerEntry(Method.class),
+            new ClassScannerEntry(PermissionsResolver.class),
+            new ClassScannerEntry(Logger.class),
+            new ClassScannerEntry(Player.class),
+            new ClassScannerEntry(ChangeSet.class),
+            new ClassScannerEntry(Entity.class),
+            
+            new ClassScannerEntry(Server.class),
+            new ClassScannerEntry(JavaPlugin.class)
     };
 
     /**

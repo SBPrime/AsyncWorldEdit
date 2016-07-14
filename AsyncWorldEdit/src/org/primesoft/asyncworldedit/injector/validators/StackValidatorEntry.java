@@ -75,6 +75,10 @@ public class StackValidatorEntry {
     public Pattern getClassPattern() {
         return m_classRegexp;
     }
+    
+    public String getOperationName(String name) {
+        return name;
+    }
 
     public StackValidatorEntry(String classRegexp,
             String[] methodWhiteList, String[] methodBlackList) {

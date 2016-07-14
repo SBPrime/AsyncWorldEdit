@@ -162,7 +162,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                                 throw (MaxChangedBlocksException) ex;
                             }
 
-                            ExceptionHelper.printException(ex, "Error while processing async operation " + name);
+                            ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
                             //Silently discard other errors :(
                             return 0;
                         }

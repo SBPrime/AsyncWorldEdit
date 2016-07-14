@@ -62,7 +62,15 @@ public class StackValidator {
         new StackValidatorEntry(".*sk89q.*SchematicCommands", "", ".*"),
         new StackValidatorEntry(".*sk89q.*RegionCommands", new String[]{"forest", "flora"}, ""),
         new StackValidatorEntry(".*sk89q.*BiomeCommands", new String[]{"setBiome"}, ""),
+        new StackValidatorEntry(".*sk89q.*SelectionCommand", new String[]{"call"}, "") {
+            @Override
+            public String getOperationName(String name) {
+                return "setBlocks";
+            }
+        },
+        new StackValidatorEntry(".*primesoft.*excommands.RegionCommands", new String[]{"replaceBlocks"}, ""),
         new StackValidatorEntry(".*primesoft.*ThreadSafeEditSession", "", ".*"),
+        new StackValidatorEntry(".*primesoft.*AsyncEditSessionFactory.*", "", ".*"),
         new StackValidatorEntry(".*primesoft.*AsyncEditSession.*", ".*", new String[]{
             "undo", "redo", "task", "flushQueue"
         })
@@ -107,7 +115,7 @@ public class StackValidator {
     }
 
     /**
-     * Validate the stack trace possition
+     * Validate the stack trace position
      *
      * @param methodName
      * @return
@@ -120,7 +128,7 @@ public class StackValidator {
             for (; i >= 0; i--) {
                 StackTraceElement element = stackTrace[i];
                 if (debugOn) {
-                    log("* " + element.toString());
+                    log(String.format("* %1$s", element.toString()));
                 }
 
                 for (StackValidatorEntry entry : s_data) {
@@ -137,10 +145,10 @@ public class StackValidator {
                             if (debugOn) {
                                 log("*");
                                 log("* Found on blacklist");
-                                log("* Class:\t\t" + element.getClassName());
-                                log("* Method:\t\t" + name);
-                                log("* Class pattern:\t" + entry.getClassPattern().pattern());
-                                log("* Method pattern:\t" + pattern.pattern());
+                                log(String.format("* Class:\t\t%1$s", element.getClassName()));
+                                log(String.format("* Method:\t\t%1$s", name));
+                                log(String.format("* Class pattern:\t%1$s", entry.getClassPattern().pattern()));
+                                log(String.format("* Method pattern:\t%1$s", pattern.pattern()));
                             }
                             return false;
                         }
@@ -149,14 +157,14 @@ public class StackValidator {
                     for (Pattern pattern : entry.getMethodWhiteList()) {
                         m = pattern.matcher(name);
                         if (m.matches()) {
-                            methodName.setValue(name);
+                            methodName.setValue(entry.getOperationName(name));
                             if (debugOn) {
                                 log("*");
                                 log("* Found on whitelist");
-                                log("* Class:\t\t" + element.getClassName());
-                                log("* Method:\t\t" + name);
-                                log("* Class pattern:\t" + entry.getClassPattern().pattern());
-                                log("* Method pattern:\t" + pattern.pattern());
+                                log(String.format("* Class:\t\t%1$s", element.getClassName()));
+                                log(String.format("* Method:\t\t%1$s", name));
+                                log(String.format("* Class pattern:\t%1$s", entry.getClassPattern().pattern()));
+                                log(String.format("* Method pattern:\t%1$s", pattern.pattern()));
                             }
                             return true;
                         }
@@ -175,7 +183,7 @@ public class StackValidator {
                 i--;
                 for (; i >= 0; i--) {
                     StackTraceElement element = stackTrace[i];
-                    log("* " + element.toString());
+                    log(String.format("* %1$s", element.toString()));
                 }
                 log("*");
             }
@@ -203,7 +211,7 @@ public class StackValidator {
 
             result &= cnt < 2;
             if (debugOn) {
-                log("* " + p.pattern() + " --> " + cnt);
+                log(String.format("* %1$s --> %2$s", p.pattern(), cnt));
             } else if (!result) {
                 return false;
             }
