@@ -38,32 +38,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.classfactory.base;
+package org.primesoft.asyncworldedit.injector.classfactory;
 
 import com.sk89q.worldedit.EditSession;
-import org.primesoft.asyncworldedit.injector.classfactory.IJob;
-import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import com.sk89q.worldedit.entity.Player;
-import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 
 /**
  *
  * @author SBPrime
  */
-public class BaseJobProcessor implements IJobProcessor {
-
-    @Override
-    public void executeJob(Player player, IJob job) {
-        if (job != null) {
-            job.execute();
-        }
-    }
-
-    @Override
-    public void executeJob(Player player, EditSession editSession, IEditSessionJob job) {
-        if (job != null) {
-            job.execute(editSession);
-        }
-    }
+public interface IEditSessionJob {
+    String getName();
     
+    void execute(EditSession editSession);
 }

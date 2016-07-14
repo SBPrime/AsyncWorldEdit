@@ -40,6 +40,7 @@
  */
 package org.primesoft.asyncworldedit.injector.classfactory;
 
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.entity.Player;
 
 /**
@@ -48,4 +49,7 @@ import com.sk89q.worldedit.entity.Player;
  */
 public interface IJobProcessor {
     void executeJob(Player player, IJob job);
+    
+    
+    void executeJob(Player player, EditSession editSession, IEditSessionJob job);
 }

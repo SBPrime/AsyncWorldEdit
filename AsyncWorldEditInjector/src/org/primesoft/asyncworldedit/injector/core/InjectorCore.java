@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit.injector.core;
 
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.command.RegionCommands;
 import com.sk89q.worldedit.command.SchematicCommands;
 import com.sk89q.worldedit.command.ScriptingCommands;
 import com.sk89q.worldedit.function.operation.Operations;
@@ -122,7 +123,7 @@ public class InjectorCore {
                         + "Ignoring new platform " + platform.getPlatformName());
                 return;
             }
-
+            
             m_platform = platform;
             log("Injector platform set to: " + platform.getPlatformName());
         }
@@ -133,6 +134,7 @@ public class InjectorCore {
             log("Class " + Operations.ForceClassLoad().getCanonicalName() + " injected.");
             log("Class " + SchematicCommands.ForceClassLoad().getCanonicalName() + " injected.");
             log("Class " + ScriptingCommands.ForceClassLoad().getCanonicalName() + " injected.");
+            log("Class " + RegionCommands.ForceClassLoad().getCanonicalName() + " injected.");
         } catch (Error ex) {
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");
@@ -176,4 +178,12 @@ public class InjectorCore {
         return m_classFactory;
     }
 
+    
+    /**
+     * The injector version
+     * @return 
+     */
+    public double getVersion() {
+        return 1.0100;
+    }
 }
