@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,35 +38,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.blockshub;
 
-import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.api.IPlotMeFix;
-import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
+import org.primesoft.blockshub.IBlocksHubApi;
+import org.primesoft.blockshub.IBlocksHubApiProvider;
 
 /**
  *
  * @author SBPrime
  */
-@Deprecated
-public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
-    private static AsyncWorldEditMain s_instance;
-
-    public static AsyncWorldEditMain getInstance() {
-        return s_instance;
-    }
-
-    public abstract IAsyncWorldEdit getAPI();
-    
-    public abstract ChunkWatch getChunkWatch();
-
-    public abstract IPlotMeFix getPlotMeFix();
-    
-    public abstract void setPlotMeFix(IPlotMeFix plotMeFix);
+class BlocksHubV2Factory implements IBlocksHubFactory {
+    private static final String NAME = "BlocksHub v2.x";
 
     @Override
-    public void onEnable() {
-        s_instance = this;
+    public String getName() {
+        return NAME;
     }
+    
+    public BlocksHubV2Factory() {
+    }
+
+    @Override
+    public IBlocksHubIntegration create(Object blocksHub) {
+                if (blocksHub == null) {
+            return null;
+        }
+        
+        if (!(blocksHub instanceof IBlocksHubApiProvider)) {
+            log(String.format("%1$s: ...wrong plugin type", NAME));
+            return null;
+        }
+        
+        IBlocksHubApiProvider apiProvider = (IBlocksHubApiProvider)blocksHub;
+        IBlocksHubApi api = apiProvider.getApi();
+        
+        if (api == null) {
+            log(String.format("%1$s: ...API not available", NAME));
+            return null;
+        }
+        
+        double apiVersion = api.getVersion();
+        if (apiVersion < 2 || apiVersion >= 3) {
+            log(String.format("%1$s: ...unsupported API v%2$s, supported 2.x", NAME, apiVersion));
+            return null;
+        }
+        
+        return new BlocksHubIntegrationV2(api);
+    }
+    
 }

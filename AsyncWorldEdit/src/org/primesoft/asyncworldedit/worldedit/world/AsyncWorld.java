@@ -48,7 +48,6 @@ import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BaseItemStack;
-import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extension.platform.Platform;
@@ -63,9 +62,9 @@ import com.sk89q.worldedit.world.registry.WorldData;
 import java.util.List;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
-import org.primesoft.asyncworldedit.BlocksHubIntegration;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.blockshub.IBlocksHubIntegration;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.api.utils.IAction;
@@ -142,7 +141,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * The blocks hub
      */
-    private final BlocksHubIntegration m_blocksHub;
+    private final IBlocksHubIntegration m_blocksHub;
 
     public AsyncWorld(World world, IPlayerEntry player) {
         super(world);

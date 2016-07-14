@@ -72,6 +72,7 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
+import org.primesoft.asyncworldedit.blockshub.BlocksHubBridge;
 import org.primesoft.asyncworldedit.commands.CancelCommand;
 import org.primesoft.asyncworldedit.commands.Commands;
 import org.primesoft.asyncworldedit.commands.JobsCommand;
@@ -105,7 +106,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
     private static String s_prefix = null;
     private static final String s_logFormat = "%s %s";
 
-    private BlocksHubIntegration m_blocksHub;
+    private BlocksHubBridge m_blocksHub;
     private Boolean m_isInitialized = false;
     private MetricsLite m_metrics;
     private final EventListener m_listener = new EventListener(this);
@@ -184,7 +185,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
 
         m_progressDisplay = new ProgressDisplayManager();
         
-        m_blocksHub = new BlocksHubIntegration(this);
+        m_blocksHub = new BlocksHubBridge();
         m_blockPlacer = new BlockPlacer(this);
         m_dispatcher = new TaskDispatcher(this);
         setPlotMeFix(new NullFix());
@@ -216,7 +217,17 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         m_isInitialized = true;
         m_playerManager.initalize();
 
-        log("Enabled");
+        m_server.getScheduler().runTaskLater(this, new Runnable() {
+
+            @Override
+            public void run() {
+                PluginManager pm = m_server.getPluginManager();
+                
+                m_blocksHub.initialize(pm.getPlugin("BlocksHub"));
+            }
+        }, 1);
+        
+        log("Enabled");                
     }
 
     @Override
@@ -493,8 +504,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         m_plotMeFix = plotMeFix;
     }
        
-    @Override
-    public BlocksHubIntegration getBlocksHub() {
+    public BlocksHubBridge getBlocksHub() {
         return m_blocksHub;
     }
 
@@ -523,16 +533,13 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         return m_classScanner;
     }
     
-    
-    
-    
     /**
      * Get instance of the world edit plugin
      *
      * @param plugin
      * @return
      */
-    public static WorldEditPlugin getWorldEdit(JavaPlugin plugin) {
+    private static WorldEditPlugin getWorldEdit(JavaPlugin plugin) {
         final Plugin wPlugin = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
 
         if ((wPlugin == null) || (!(wPlugin instanceof WorldEditPlugin))) {

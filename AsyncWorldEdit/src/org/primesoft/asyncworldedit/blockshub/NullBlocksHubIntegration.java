@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,35 +38,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.blockshub;
 
-import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.api.IPlotMeFix;
-import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import org.primesoft.asyncworldedit.api.IWorld;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
  * @author SBPrime
  */
-@Deprecated
-public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
-    private static AsyncWorldEditMain s_instance;
-
-    public static AsyncWorldEditMain getInstance() {
-        return s_instance;
-    }
-
-    public abstract IAsyncWorldEdit getAPI();
-    
-    public abstract ChunkWatch getChunkWatch();
-
-    public abstract IPlotMeFix getPlotMeFix();
-    
-    public abstract void setPlotMeFix(IPlotMeFix plotMeFix);
+class NullBlocksHubIntegration implements IBlocksHubIntegration {
 
     @Override
-    public void onEnable() {
-        s_instance = this;
+    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, BaseBlock oldBlock, BaseBlock newBlock) {        
+    }
+
+    @Override
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, BaseBlock oldBlock, BaseBlock newBlock) {
+        return true;
+    }
+
+    @Override
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location) {
+        return true;
     }
 }

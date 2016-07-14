@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,35 +38,50 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.blockshub;
 
-import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.api.IPlotMeFix;
-import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-
+import org.PrimeSoft.blocksHub.BlocksHub;
+import org.PrimeSoft.blocksHub.IBlocksHubApi;
+import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 
 /**
  *
  * @author SBPrime
  */
-@Deprecated
-public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWorldEdit {
-    private static AsyncWorldEditMain s_instance;
-
-    public static AsyncWorldEditMain getInstance() {
-        return s_instance;
-    }
-
-    public abstract IAsyncWorldEdit getAPI();
-    
-    public abstract ChunkWatch getChunkWatch();
-
-    public abstract IPlotMeFix getPlotMeFix();
-    
-    public abstract void setPlotMeFix(IPlotMeFix plotMeFix);
+class BlocksHubV1Factory implements IBlocksHubFactory {
+    private static final String NAME = "BlocksHub v1.x";
 
     @Override
-    public void onEnable() {
-        s_instance = this;
+    public String getName() {
+        return NAME;
+    }
+    
+
+    @Override
+    public IBlocksHubIntegration create(Object blocksHub) {
+        if (blocksHub == null) {
+            return null;
+        }
+        
+        if (!(blocksHub instanceof BlocksHub)) {
+            log(String.format("%1$s: ...wrong plugin type", NAME));
+            return null;
+        }
+        
+        BlocksHub bh = (BlocksHub)blocksHub;
+        
+        IBlocksHubApi api = bh.getApi();
+        if (api == null) {
+            log(String.format("%1$s: ...API not available", NAME));
+            return null;
+        }
+        
+        double apiVersion = api.getVersion();
+        if (apiVersion < 1 || apiVersion >= 2) {
+            log(String.format("%1$s: ...unsupported API v%2$s, supported 1.x", NAME, apiVersion));
+            return null;
+        }
+        
+        return new BlocksHubIntegrationV1(api);
     }
 }

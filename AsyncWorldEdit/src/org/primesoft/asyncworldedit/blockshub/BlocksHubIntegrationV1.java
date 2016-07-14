@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,17 +38,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit;
+package org.primesoft.asyncworldedit.blockshub;
 
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import org.PrimeSoft.blocksHub.BlocksHub;
 import org.PrimeSoft.blocksHub.IBlocksHubApi;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -59,126 +55,139 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
  *
  * @author SBPrime
  */
-public class BlocksHubIntegration {
-
-    private final boolean m_isInitialized;
+class BlocksHubIntegrationV1 implements IBlocksHubIntegration {
     private final IBlocksHubApi m_blocksApi;
 
+
     /**
-     * Get instance of the core blocks hub plugin
+     * Create new instance of the class
+     * @param api
      *
-     * @param plugin
-     * @return
      */
-    public static BlocksHub getBlocksHub(JavaPlugin plugin) {
-        try {
-            Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BlocksHub");
-
-            if ((cPlugin == null) || (!(cPlugin instanceof BlocksHub))) {
-                log("BlocksHub plugin not found.");
-                return null;
-            }
-
-            return (BlocksHub) cPlugin;
-        } catch (NoClassDefFoundError ex) {
-            ExceptionHelper.printException(ex, "Error initializing BlocksHub.");
-            return null;
-        }
-    }    
-
-    public BlocksHubIntegration(AsyncWorldEditBukkit plugin) {
-        BlocksHub bh = getBlocksHub(plugin);
-        m_blocksApi = bh != null ? bh.getApi() : null;
-        m_isInitialized = m_blocksApi != null && m_blocksApi.getVersion() >= 1.0;
+    public BlocksHubIntegrationV1(IBlocksHubApi api) {
+        m_blocksApi = api;
     }
 
-    public void logBlock(IPlayerEntry playerEntry, World world, Location location,
+    /**
+     * Log block change using BlocksHub
+     *
+     * @param playerEntry
+     * @param world
+     * @param location
+     * @param oldBlockType
+     * @param oldBlockData
+     * @param newBlockType
+     * @param newBlockData
+     */
+    private void logBlock(IPlayerEntry playerEntry, IWorld world, Location location,
             int oldBlockType, byte oldBlockData,
             int newBlockType, byte newBlockData) {
-        if (!m_isInitialized || !ConfigProvider.getLogBlocks()) {
+        World bWorld = getWorld(world);
+        if (bWorld == null) {
             return;
         }
-        
-        if (playerEntry == null) {
-            return;
-        }
+
         String player = playerEntry.getName();
-        
-        m_blocksApi.logBlock(player, world, location, oldBlockType, oldBlockData, newBlockType, newBlockData);
+
+        m_blocksApi.logBlock(player, bWorld, location, oldBlockType, oldBlockData, newBlockType, newBlockData);
     }
 
-    public boolean canPlace(IPlayerEntry playerEntry, World world, Location location) {
-        if (!m_isInitialized || !ConfigProvider.getCheckAccess()) {
-            return true;
-        }
-        
-        if (playerEntry == null) {
-            return true;
-        }
-        String player = playerEntry.getName();
-        
-        try {
-            return m_blocksApi.canPlace(player, world, location);
-        } catch (Exception ex) {            
-            log("Error checking block place perms: " + ex.toString());
-            log("Player: " + player);
-            log("World: " + world);
-            log("Location: " + location);
-            ExceptionHelper.printException(ex, "Block checking error.");
-            
-            return true;
-        }
-    }
-
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location) {
-        if (!(world instanceof BukkitWorld)) {
+    /**
+     * Check if the block can be changed
+     *
+     * @param playerEntry
+     * @param world
+     * @param location
+     * @param dc
+     * @return
+     */    
+    private boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Location location) {
+        World bWorld = getWorld(world);
+        if (bWorld == null) {
             return false;
         }
         
-        return canPlace(playerEntry, ((BukkitWorld)world).getWorld(), location);
+        String player = playerEntry.getName();
+
+        try {
+            return m_blocksApi.canPlace(player, bWorld, location);
+        } catch (Exception ex) {
+            log(String.format("Error checking block place perms: %1$s", ex.toString()));
+            log(String.format("Player: %1$s", player));
+            log(String.format("World: %1$s", world));
+            log(String.format("Location: %1$s", location));
+            ExceptionHelper.printException(ex, "Block checking error.");
+
+            return true;
+        }
     }
+
     
-    public boolean canPlace(IPlayerEntry playerEntry, World world, Vector location) {
+    /**
+     * Check if the block can be changed
+     *
+     * @param playerEntry
+     * @param world
+     * @param location
+     * @return
+     */
+    @Override
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location,
+            BaseBlock oldBlock, BaseBlock newBlock) {
+        return hasAccess(playerEntry, world, location);
+    }
+
+
+    @Override
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location) {
         if (location == null) {
             return false;
         }
-        if (!ConfigProvider.getCheckAccess()) {
-            return true;
+        
+        World bWorld = getWorld(world);
+        if (bWorld == null) {
+            return false;
         }
         
-        
-        Location l = new Location(world, location.getX(), location.getY(), location.getZ());               
-        
-        try {
-            return canPlace(playerEntry, world, l);
+        Location l = new Location(bWorld, location.getX(), location.getY(), location.getZ());
 
-        } catch (Exception ex) {            
+        try {
+            return hasAccess(playerEntry, world, l);
+
+        } catch (Exception ex) {
             String name = playerEntry.getName();
 
-            log("Error checking block place perms: " + ex.toString());
-            log("Player: " + name);
-            log("World: " + world);
-            log("Location: " + l);
-            
+            log(String.format("Error checking block place perms: {0]", ex.toString()));
+            log(String.format("Player: %1$s", name));
+            log(String.format("World: %1$s", world));
+            log(String.format("Location: %1$s", l));
+
             ExceptionHelper.printException(ex, "Block checking error.");
             return true;
         }
     }
 
-    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, 
+    /**
+     * Log block change using BlocksHub
+     *
+     * @param playerEntry
+     * @param world
+     * @param location
+     * @param oldBlock
+     * @param newBlock
+     * @param dc
+     */
+    @Override
+    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location,
             BaseBlock oldBlock, BaseBlock newBlock) {
-        if (!(world instanceof BukkitWorld)) {
+        if (location == null) {
             return;
         }
         
-        logBlock(playerEntry, ((BukkitWorld)world).getWorld(), location, oldBlock, newBlock);
-    }
-    
-    public void logBlock(IPlayerEntry playerEntry, World world, Vector location, 
-            BaseBlock oldBlock, BaseBlock newBlock) {
-        if (location == null || !ConfigProvider.getLogBlocks()) {
+        World bWorld = getWorld(world);
+        if (bWorld == null) {
             return;
-        }
+        }        
 
         if (oldBlock == null) {
             oldBlock = new BaseBlock(0);
@@ -187,22 +196,30 @@ public class BlocksHubIntegration {
             newBlock = new BaseBlock(0);
         }
 
-        Location l = new Location(world, location.getX(), location.getY(), location.getZ());
+        Location l = new Location(bWorld, location.getX(), location.getY(), location.getZ());
         try {
             logBlock(playerEntry, world, l, oldBlock.getType(), (byte) oldBlock.getData(),
                     newBlock.getType(), (byte) newBlock.getData());
-        } catch (Exception ex)
-        {            
+        } catch (Exception ex) {
             String name = playerEntry.getName();
-            
-            log("Error logging block: " + ex.toString());
-            log("Player: " + name);
-            log("World: " + world);
-            log("Location: " + l);
-            log("Old: " + oldBlock);
-            log("New: " + newBlock);
-            
+
+            log(String.format("Error logging block: %1$s", ex.toString()));
+            log(String.format("Player: %1$s", name));
+            log(String.format("World: %1$s", world));
+            log(String.format("Location: %1$s", l));
+            log(String.format("Old: %1$s", oldBlock));
+            log(String.format("New: %1$s", newBlock));
+
             ExceptionHelper.printException(ex, "Error logging block.");
         }
+    }
+
+    private World getWorld(IWorld world) {
+        if (world == null || !(world instanceof BukkitWorld)) {
+            return null;
+        }
+        
+        
+        return ((BukkitWorld)world).getWorld();
     }
 }
