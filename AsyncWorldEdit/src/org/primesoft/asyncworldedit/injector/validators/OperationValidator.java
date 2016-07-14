@@ -80,7 +80,7 @@ public class OperationValidator {
     public static boolean isValid(Operation op) {
         boolean debugOn = ConfigProvider.isDebugOn();
         Class c = op.getClass();
-        String className = c.getCanonicalName();
+        String className = c.getName();
 
         if (debugOn) {
             log("****************************************************************");
@@ -93,8 +93,8 @@ public class OperationValidator {
                     if (debugOn) {
                         log("*");
                         log("* Found on blacklist");
-                        log("* Opeation:\t" + className);
-                        log("* Pattern:\t" + p.pattern());
+                        log(String.format("* Opeation:\t%1$s", className));
+                        log(String.format("* Pattern:\t%1$s", p.pattern()));
                     }
                     return false;
                 }
@@ -105,8 +105,8 @@ public class OperationValidator {
                     if (debugOn) {
                         log("*");
                         log("* Found on whitelist");
-                        log("* Opeation:\t" + className);
-                        log("* Pattern:\t" + p.pattern());
+                        log(String.format("* Opeation:\t%1$s", className));
+                        log(String.format("* Pattern:\t%1$s", p.pattern()));
                     }
                     return true;
                 }

@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,90 +38,82 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.scanner;
+package org.primesoft.asyncworldedit.worldedit;
 
-import java.lang.reflect.Field;
-import java.util.regex.Pattern;
-import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.function.operation.RunContext;
+import com.sk89q.worldedit.history.UndoContext;
+import com.sk89q.worldedit.history.change.Change;
+import java.util.Iterator;
+import java.util.List;
+import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
+import org.primesoft.asyncworldedit.utils.InjectionException;
+import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  *
  * @author SBPrime
  */
-public class ClassScannerEntry {
+public class RedoProcessor implements Operation {
 
-    private final Class<?> m_cls;
-    private final Pattern[] m_fields;
+    public static void processRedo(IThreadSafeEditSession parent,
+            EditSession sender,
+            EditSession session) {
 
-    private static Class<?> getClass(String name) {
+        Iterator<Change> changes = parent.doRedo();
+        Mask oldMask = session.getMask();
+        session.setMask(sender.getMask());
+
         try {
-            return Class.forName(name);
-        } catch (ClassNotFoundException ex) {
-            log(String.format("Warning: Unable to get class %1$s", name));
-            return null;
+            Operations.completeBlindly(new RedoProcessor(
+                    sender, session, changes));
+
+        } finally {
+            session.flushQueue();
+            session.setMask(oldMask);
         }
     }
 
-    public ClassScannerEntry(Class<?> cls, String[] fields) {
-        m_cls = cls;
-        if (fields == null) {
-            fields = new String[0];
+    private final EditSession m_session;
+    private final Iterator<Change> m_changes;    
+
+    private RedoProcessor(EditSession sender, EditSession session,
+            Iterator<Change> changes) {
+        m_session = session;
+        m_changes = changes;
+    }
+
+    @Override
+    public Operation resume(RunContext rc) throws WorldEditException {
+        UndoContext uc = new UndoContext();
+        
+        Extent bypassHistory = Reflection.get(EditSession.class, Extent.class, m_session, "bypassHistory",
+                "Unable to get history");
+
+        if (bypassHistory == null) {
+            throw new InjectionException("Unable to perform redo operation. Unable to get bypassHistory field");
+        }
+        uc.setExtent(bypassHistory);
+
+        for (; m_changes.hasNext();) {
+            Change change = m_changes.next();
+            change.redo(uc);
         }
 
-        m_fields = new Pattern[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            m_fields[i] = Pattern.compile(fields[i]);
-        }
+        return null;
     }
 
-    public ClassScannerEntry(Class<?> cls, String field) {
-        this(cls, new String[]{field});
+    @Override
+    public void cancel() {
     }
 
-    public ClassScannerEntry(Class<?> cls) {
-        this(cls, (String[]) null);
-    }
-
-    public ClassScannerEntry(String cls, String[] fields) {
-        this(getClass(cls), fields);
-    }
-
-    public ClassScannerEntry(String cls, String field) {
-        this(cls, new String[]{field});
-    }
-
-    public ClassScannerEntry(String cls) {
-        this(cls, (String[]) null);
-    }
-
-    public boolean isMatch(Class<?> c) {
-        return isMatch(c, null);
-    }
-
-    public boolean isMatch(Class<?> c, Field f) {
-        if (c == null || m_cls == null) {
-            return false;
-        }
-
-        if (!m_cls.isAssignableFrom(c)) {
-            return false;
-        }
-
-        if (f == null) {
-            if (m_fields == null || m_fields.length == 0) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        String fName = f.getName();
-        for (Pattern p : m_fields) {            
-            if (p.matcher(fName).matches()) {
-                return true;
-            }
-        }
-
-        return false;
+    @Override
+    public void addStatusMessages(List<String> list) {        
     }
 }
+

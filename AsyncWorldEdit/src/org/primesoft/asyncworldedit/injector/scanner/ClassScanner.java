@@ -159,7 +159,7 @@ public class ClassScanner implements IClassScannerOptions {
 
             String sParent;
             if (debugOn) {
-                sParent = String.format("%1$s:%2$s", Integer.toHexString(cObject.hashCode()), cObject.getClass().getCanonicalName());
+                sParent = String.format("%1$s:%2$s", Integer.toHexString(cObject.hashCode()), cObject.getClass().getName());
             } else {
                 sParent = null;
             }
@@ -181,7 +181,7 @@ public class ClassScanner implements IClassScannerOptions {
                             String classMsg = null;
                             if (debugOn) {
                                 final Field field = f.getField();
-                                final String sValue = String.format("%1$s:%2$s", Integer.toHexString(f.getValue().hashCode()), f.getValueClass().getCanonicalName());
+                                final String sValue = String.format("%1$s:%2$s", Integer.toHexString(f.getValue().hashCode()), f.getValueClass().getName());
                                 final String sField = field != null ? field.getName() : "?";
 
                                 classMsg = String.format("%s = %s", sField, sValue);
@@ -215,7 +215,7 @@ public class ClassScanner implements IClassScannerOptions {
                 } catch (Throwable ex) {
                     log("-----------------------------------------------------------------------");
                     log("Warning: Class scanner encountered an error while scanning class");
-                    log(String.format("Exception: %1$s, %2$s", ex.getClass().getCanonicalName(),
+                    log(String.format("Exception: %1$s, %2$s", ex.getClass().getName(),
                             ex.getMessage()));
                     ExceptionHelper.printStack(ex, "");
                     log(String.format("Class: %1$s", cClass));
@@ -243,7 +243,7 @@ public class ClassScanner implements IClassScannerOptions {
      * @param oClass
      * @return
      */
-    private boolean isPrimitive(Class<?> oClass) {
+    private static boolean isPrimitive(Class<?> oClass) {
         return oClass.isPrimitive()
                 || (Character.class.isAssignableFrom(oClass))
                 || (Number.class.isAssignableFrom(oClass))
@@ -327,7 +327,6 @@ public class ClassScanner implements IClassScannerOptions {
                 }
             }
         }
-
         return false;
     }
 
@@ -338,7 +337,7 @@ public class ClassScanner implements IClassScannerOptions {
      * @param fields
      * @return
      */
-    private List<Field> getAllFields(Class<?> oClass) {
+    private static List<Field> getAllFields(Class<?> oClass) {
         List<Field> result = new ArrayList<Field>();
 
         while (oClass != null) {
@@ -377,4 +376,5 @@ public class ClassScanner implements IClassScannerOptions {
             m_filters.remove(filter);
         }
     }
+    
 }

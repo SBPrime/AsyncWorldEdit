@@ -47,6 +47,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -54,6 +55,7 @@ import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
@@ -76,29 +78,30 @@ import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
  * @author SBPrime
  */
 public class CancelableWorld extends AbstractWorldWrapper {
+
     private final int m_jobId;
     private final IPlayerEntry m_player;
     private boolean m_isCanceled;
 
     public CancelableWorld(World parent, int jobId, IPlayerEntry player) {
         super(parent);
-        
+
         m_isCanceled = false;
         m_jobId = jobId;
         m_player = player;
     }
 
-    
     /**
      * Cancel all further operations
      */
     public void cancel() {
         m_isCanceled = true;
     }
-    
+
     /**
      * Is world operation canceled
-     * @return 
+     *
+     * @return
      */
     public boolean isCanceled() {
         return m_isCanceled;
@@ -144,13 +147,13 @@ public class CancelableWorld extends AbstractWorldWrapper {
         }
         return m_parent.getBlockData(vector);
     }
-    
+
     @Override
     public boolean setBlock(Vector vector, BaseBlock bb, boolean bln) throws WorldEditException {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlock(VectorWrapper.wrap(vector, m_jobId, true, m_player), 
+        return m_parent.setBlock(VectorWrapper.wrap(vector, m_jobId, true, m_player),
                 BaseBlockWrapper.wrap(bb, m_jobId, true, m_player), bln);
     }
 
@@ -221,21 +224,21 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public List<? extends Entity> getEntities() {        
+    public List<? extends Entity> getEntities() {
         return m_parent.getEntities();
     }
-    
+
     @Override
     public List<? extends Entity> getEntities(Region region) {
         return m_parent.getEntities(region);
     }
-    
+
     @Override
     public boolean regenerate(Region region, EditSession es) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.regenerate(region, es);
     }
 
@@ -244,7 +247,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.generateTree(tt, es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
@@ -253,7 +256,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.generateTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
@@ -262,7 +265,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.generateBigTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
@@ -271,7 +274,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.generateBirchTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
@@ -280,7 +283,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.generateRedwoodTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
@@ -289,7 +292,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.generateTallRedwoodTree(es, VectorWrapper.wrap(vector, m_jobId, true, m_player));
     }
 
@@ -302,7 +305,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     public void fixAfterFastMode(Iterable<BlockVector2D> itrbl) {
         List<BlockVector2D> tmp = new ArrayList<BlockVector2D>();
         for (Iterator<BlockVector2D> it = tmp.iterator(); it.hasNext();) {
-            tmp.add(BlockVector2DWrapper.wrap(it.next(), m_jobId, true, m_player));            
+            tmp.add(BlockVector2DWrapper.wrap(it.next(), m_jobId, true, m_player));
         }
         m_parent.fixAfterFastMode(tmp);
     }
@@ -311,7 +314,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     public void fixLighting(Iterable<BlockVector2D> itrbl) {
         List<BlockVector2D> tmp = new ArrayList<BlockVector2D>();
         for (Iterator<BlockVector2D> it = tmp.iterator(); it.hasNext();) {
-            tmp.add(BlockVector2DWrapper.wrap(it.next(), m_jobId, true, m_player));            
+            tmp.add(BlockVector2DWrapper.wrap(it.next(), m_jobId, true, m_player));
         }
         m_parent.fixLighting(tmp);
     }
@@ -322,7 +325,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean queueBlockBreakEffect(Platform pltform, Vector vector, int i, double d) {    
+    public boolean queueBlockBreakEffect(Platform pltform, Vector vector, int i, double d) {
         return m_parent.queueBlockBreakEffect(pltform, VectorWrapper.wrap(vector, m_jobId, true, m_player), i, d);
     }
 
@@ -341,7 +344,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.getBlock(vector);
     }
 
@@ -350,7 +353,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.getLazyBlock(vector);
     }
 
@@ -359,11 +362,10 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
-        return m_parent.setBlock(VectorWrapper.wrap(vector, m_jobId, true, m_player), 
+
+        return m_parent.setBlock(VectorWrapper.wrap(vector, m_jobId, true, m_player),
                 BaseBlockWrapper.wrap(bb, m_jobId, true, m_player));
     }
-        
 
     @Override
     public Operation commit() {
@@ -375,10 +377,10 @@ public class CancelableWorld extends AbstractWorldWrapper {
 
     @Override
     public Entity createEntity(Location lctn, BaseEntity be) {
-                if (m_isCanceled) {
+        if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.createEntity(LocationWrapper.wrap(lctn, m_jobId, true, m_player),
                 BaseEntityWrapper.wrap(be, m_jobId, true, m_player));
     }
@@ -388,7 +390,16 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        
+
         return m_parent.getWorldData();
+    }
+    
+    @Override
+    public boolean useItem(Vector vector, BaseItem bi, Direction drctn) {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return m_parent.useItem(vector, bi, drctn);
     }
 }

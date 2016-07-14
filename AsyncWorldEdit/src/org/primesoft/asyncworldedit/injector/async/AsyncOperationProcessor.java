@@ -181,7 +181,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         final AsyncEditSession asyncSession = getFirst(AsyncEditSession.class, sessions);
         final String name = operationName.getValue();
-
+        
         if (!asyncSession.checkAsync(name)) {
             action.Execute(op);
             return;
@@ -291,10 +291,10 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
             if (type == aesClass) {
                 if (debugOn) {
-                    log("* Injecting EditSession to " + parent.getClass().getName() + " " + field.getName());
+                    log(String.format("* Injecting EditSession to %1$s %2$s", parent.getClass().getName(), field.getName()));
                 }
-                
-                Reflection.set(parent, field, value, "edit session");                
+
+                Reflection.set(parent, field, value, "edit session");
             } else if (regionClass.isAssignableFrom(type)) {
                 if (debugOn) {
                     log("* Stored region entry ");
@@ -323,9 +323,9 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     continue;
                 }
                 if (debugOn) {
-                    log("* Injecting Region to " + parent.getClass().getName() + " " + field.getName());
+                    log(String.format("* Injecting Region to %1$s %2$s", parent.getClass().getName(), field.getName()));
                 }
-                
+
                 Reflection.set(parent, field, region, "region");
             }
         }

@@ -47,6 +47,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -54,11 +55,16 @@ import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.registry.WorldData;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
@@ -1013,8 +1019,31 @@ public class AsyncWorld extends AbstractWorldWrapper {
             if (!canPlace(player, m_bukkitWorld, vector, getBlock(v), newBlock)) {
                 return false;
             }
+
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntryEx(this, paramBlock.getJobId(), v, func));
+        }
+
+        return func.execute();
+    }
+
+    @Override
+    public boolean useItem(Vector vector, final BaseItem bi, final Direction drctn) {
+        final DataAsyncParams<Vector> paramVector = DataAsyncParams.extract(vector);
+        final Vector v = paramVector.getData();
+        final IPlayerEntry player = getPlayer(paramVector);
+
+        IFunc<Boolean> func = new IFunc<Boolean>() {
+
+            @Override
+            public Boolean execute() {
+                return m_parent.useItem(v, bi, drctn);
+            }
+        };
+
+        if (paramVector.isAsync() || !m_dispatcher.isMainTask()) {
+            return m_blockPlacer.addTasks(player, 
+                    new WorldFuncEntry(this, paramVector.getJobId(), v, func));
         }
 
         return func.execute();

@@ -40,6 +40,7 @@
  */
 package org.primesoft.asyncworldedit.injector.async;
 
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -47,8 +48,12 @@ import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
+import org.primesoft.asyncworldedit.api.utils.IFuncParamEx;
+import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
+import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -60,7 +65,7 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
  * @author SBPrime
  */
 class AsyncJobProcessor implements IJobProcessor {
-
+   
     /**
      * The parent plugin
      */
@@ -145,7 +150,7 @@ class AsyncJobProcessor implements IJobProcessor {
                             }
 
                             //Silently discard other errors :(
-                            ExceptionHelper.printException(ex, "Error while processing async job " + name);
+                            ExceptionHelper.printException(ex, String.format("Error while processing async job %1$s", name));
                             return 0;
                         }
                     }
@@ -154,6 +159,44 @@ class AsyncJobProcessor implements IJobProcessor {
                     protected void doPostRun(Object result) {
                     }
                 });
+    }
+
+    @Override
+    public void executeJob(Player player, EditSession es, final IEditSessionJob job) {
+        if (job == null) {
+            return;
+        }
+
+        final IPlayerEntry playerEntry = m_playerManager.getPlayer(player.getUniqueId());
+        final String name = job.getName();        
+        boolean async = checkAsync(playerEntry, name);
+        
+        if (!async) {
+            job.execute(es);
+            return;
+        }
+        
+        IThreadSafeEditSession itses = es instanceof IThreadSafeEditSession ? (IThreadSafeEditSession)es : null;
+        if (itses == null) {
+            ExceptionHelper.printException(new Exception("Expected " + IThreadSafeEditSession.class.getName()), "Unable to process async job");            
+            return;
+        }
+        
+        //m_blockPlacer.performAsAsyncJob(null, playerEntry, name, null);
+        m_blockPlacer.performAsAsyncJob(itses, playerEntry, name, new IFuncParamEx<Integer, ICancelabeEditSession, MaxChangedBlocksException>(){
+            @Override
+            public Integer execute(ICancelabeEditSession param) throws MaxChangedBlocksException {
+                if (!(param instanceof EditSession)) {
+                    ExceptionHelper.printException(new Exception("Expected " + EditSession.class.getName()), "Unable to process async job");
+                    return 0;
+                }
+                
+                job.execute((EditSession)param);
+                
+                return 0;
+            }
+            
+        });
     }
 
 }

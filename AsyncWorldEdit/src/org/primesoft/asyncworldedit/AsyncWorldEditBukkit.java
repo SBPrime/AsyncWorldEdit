@@ -101,6 +101,9 @@ import org.primesoft.asyncworldedit.worldedit.WorldeditIntegrator;
  */
 public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOperations {
 
+    private final static double INJECTOR_MIN = 1.01;
+    private final static double INJECTOR_MAX = 1.02;
+
     private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
     private static ConsoleCommandSender s_console;
     private static String s_prefix = null;
@@ -125,7 +128,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
     public static String getPrefix() {
         return s_prefix;
     }
-    
+
     /**
      * Send message to the log
      *
@@ -146,25 +149,25 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
      */
     public static void sayConsole(String msg) {
         s_console.sendRawMessage(msg);
-    }        
+    }
 
     @Override
     public void onEnable() {
         super.onEnable();
-        
+
         m_server = getServer();
-        
+
         PluginDescriptionFile desc = getDescription();
         s_prefix = String.format("[%s]", desc.getName());
         s_console = m_server.getConsoleSender();
-        
+
         m_isInitialized = false;
 
         if (!ConfigProvider.load(this)) {
             log("Error loading config");
             return;
         }
-        
+
         initialiseStrings();
 
         try {
@@ -174,9 +177,9 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
                 m_metrics.start();
             }
         } catch (IOException e) {
-            ExceptionHelper.printException(e, "Error initializing MCStats");            
+            ExceptionHelper.printException(e, "Error initializing MCStats");
         }
-        
+
         WorldEditPlugin worldEdit = getWorldEdit(this);
         if (worldEdit == null) {
             log("World edit not found.");
@@ -184,7 +187,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         }
 
         m_progressDisplay = new ProgressDisplayManager();
-        
+
         m_blocksHub = new BlocksHubBridge();
         m_blockPlacer = new BlockPlacer(this);
         m_dispatcher = new TaskDispatcher(this);
@@ -192,6 +195,10 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
 
         m_classScanner = new ClassScanner();
         m_aweInjector = getAWEInjector(this);
+        if (!checkInjector()) {
+            return;
+        }
+
         m_aweInjector.setClassFactory(new AsyncClassFactory(this, m_classScanner));
 
         if (ConfigProvider.getCheckUpdate()) {
@@ -222,12 +229,47 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
             @Override
             public void run() {
                 PluginManager pm = m_server.getPluginManager();
-                
+
                 m_blocksHub.initialize(pm.getPlugin("BlocksHub"));
             }
         }, 1);
-        
-        log("Enabled");                
+
+        log("Enabled");
+    }
+
+    protected double getInjectorVersion() {
+        try {
+            InjectorCore injector = m_aweInjector;
+
+            if (injector == null) {
+                return -1;
+            }
+
+            return injector.getVersion();
+        } catch (Error ex) {
+            return -1;
+        }
+    }
+
+    /**
+     * Check if the injector is installed
+     *
+     * @return
+     */
+    private boolean checkInjector() {
+        double version = getInjectorVersion();
+
+        if (version < 0) {
+            return false;
+        }
+
+        if (version < INJECTOR_MIN || version >= INJECTOR_MAX) {
+            log(String.format("Invalid injecotr version. Current version: %1$s. Valid version: <%2$s, %3$s).",
+                    version, INJECTOR_MIN, INJECTOR_MAX));
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -271,8 +313,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
 
         return Help.ShowHelp(player, null);
     }
-    
-        
+
     /**
      * Initialise the strings
      */
@@ -280,7 +321,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         if (!MessageProvider.saveDefault(this)) {
             log("Unable to save english.yml to plugin folder.");
         }
-        
+
         if (!MessageProvider.loadDefault(this)) {
             log("Error loading default strings file, no internal fallback available!.");
         }
@@ -288,7 +329,6 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
             log("Error loading strings file, using internal fallback.");
         }
     }
-
 
     private void doReloadConfig(IPlayerEntry player, String arg) {
         if (!player.isAllowed(Permission.RELOAD_CONFIG)) {
@@ -383,8 +423,8 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         }
 
         CancelCommand.Execte(this, player, args);
-    }    
-    
+    }
+
     @Override
     public IDirectChunkAPI getDirectChunkAPI() {
         log("******************************************************************************");
@@ -394,7 +434,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         log("**                                                                          **");
         log("******************************************************************************");
         log("******************************************************************************");
-        
+
         return null;
     }
 
@@ -407,7 +447,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         log("**                                                                          **");
         log("******************************************************************************");
         log("******************************************************************************");
-        
+
         return null;
     }
 
@@ -430,7 +470,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         log("**                                                                          **");
         log("******************************************************************************");
         log("******************************************************************************");
-        
+
         return null;
     }
 
@@ -443,11 +483,10 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         log("**                                                                          **");
         log("******************************************************************************");
         log("******************************************************************************");
-        
+
         return null;
     }
-    
-    
+
     @Override
     public ITaskDispatcher getTaskDispatcher() {
         return m_dispatcher;
@@ -457,32 +496,27 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
     public IProgressDisplayManager getProgressDisplayManager() {
         return m_progressDisplay;
     }
-    
-    
+
     @Override
     public IPhysicsWatch getPhysicsWatcher() {
         return m_physicsWatcher;
     }
-    
 
     @Override
     public IBlockPlacer getBlockPlacer() {
         return m_blockPlacer;
     }
-    
-        
+
     @Override
     public IPlayerManager getPlayerManager() {
         return m_playerManager;
     }
 
-
-    
     @Override
     public IAsyncWorldEdit getAPI() {
         return this;
     }
-    
+
     @Override
     public ChunkWatch getChunkWatch() {
         return m_chunkWatch;
@@ -492,18 +526,17 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
     public IPlotMeFix getPlotMeFix() {
         return m_plotMeFix;
     }
-    
+
     @Override
     public void setPlotMeFix(IPlotMeFix plotMeFix) {
-        if (plotMeFix == null){
+        if (plotMeFix == null) {
             plotMeFix = new NullFix();
         }
-        
-        
+
         log("PlotMeFix set to " + plotMeFix.getClass());
         m_plotMeFix = plotMeFix;
     }
-       
+
     public BlocksHubBridge getBlocksHub() {
         return m_blocksHub;
     }
@@ -532,7 +565,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
     public IClassScannerOptions getClassScannerOptions() {
         return m_classScanner;
     }
-    
+
     /**
      * Get instance of the world edit plugin
      *
@@ -570,7 +603,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
             } catch (Error ex) {
                 ExceptionHelper.printException(ex, "AsyncWorldEditInjector not found.");
                 return null;
-            }            
+            }
         }
 
         return ((InjectorBukkit) wPlugin).getCore();
@@ -585,7 +618,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         log("**                                                                          **");
         log("******************************************************************************");
         log("******************************************************************************");
-        
+
         return null;
     }
 }
