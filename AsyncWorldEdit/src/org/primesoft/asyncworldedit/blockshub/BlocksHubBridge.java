@@ -63,12 +63,10 @@ public class BlocksHubBridge implements IBlocksHubIntegration {
     /**
      * List of all factories
      */
-    private final List<IBlocksHubFactory> m_factories = new ArrayList<IBlocksHubFactory>();
-
-    public BlocksHubBridge() {
-        m_factories.add(new BlocksHubV1Factory());
-        m_factories.add(new BlocksHubV2Factory());
-    }
+    private final IBlocksHubFactory[] m_factories = new IBlocksHubFactory[]{
+        new BlocksHubV1Factory(),
+        new BlocksHubV2Factory()
+    };
 
     @Override
     public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, BaseBlock oldBlock, BaseBlock newBlock) {
@@ -125,12 +123,7 @@ public class BlocksHubBridge implements IBlocksHubIntegration {
 
         log(String.format("Initializing BlocksHub using %1$s...", blocksHubPlugin.getClass().getName()));
 
-        IBlocksHubFactory[] factories;
-        synchronized (m_factories) {
-            factories = m_factories.toArray(new IBlocksHubFactory[0]);
-        }
-
-        for (IBlocksHubFactory factory : factories) {
+        for (IBlocksHubFactory factory : m_factories) {
             IBlocksHubIntegration integrator = create(factory, blocksHubPlugin);
 
             if (integrator != null) {

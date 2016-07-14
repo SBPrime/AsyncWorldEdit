@@ -318,10 +318,7 @@ public class CancelabeEditSession extends EditSessionStub implements ICancelabeE
     }
 
     public void doRedo(EditSession sess) {
-        Mask mask = sess.getMask();
-        sess.setMask(getMask());
-        ((ThreadSafeEditSession)m_parent).doRedo(sess);
-        sess.setMask(mask);
+        RedoProcessor.processRedo(m_parent, this, sess);
     }
 
     @Override

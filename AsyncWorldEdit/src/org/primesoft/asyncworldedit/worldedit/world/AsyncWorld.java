@@ -83,6 +83,7 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.WorldFuncEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldFuncEntryEx;
 import org.primesoft.asyncworldedit.utils.FuncEx;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
+import org.primesoft.asyncworldedit.utils.PositionHelper;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.WorldAsyncTask;
@@ -620,12 +621,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
             public List<? extends Entity> execute() {
                 return m_parent.getEntities(region);
             }
-        });
+        }, m_bukkitWorld, region);
     }
 
     @Override
     public List<? extends Entity> getEntities() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<List<? extends Entity>>() {
+        //No position we better invoke this operation
+        return m_dispatcher.queueFastOperation(new IFunc<List<? extends Entity>>() {
             @Override
             public List<? extends Entity> execute() {
                 return m_parent.getEntities();
@@ -679,7 +681,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         BaseBlock[] history = new BaseBlock[16 * 16 * (maxY + 1)];
 
         for (Vector2D chunk : region.getChunks()) {
-            Vector min = new Vector(chunk.getBlockX() * 16, 0, chunk.getBlockZ() * 16);
+            Vector min = PositionHelper.chunkToPosition(chunk, 0);
 
             // First save all the blocks inside
             for (int x = 0; x < 16; ++x) {
@@ -866,32 +868,42 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public void checkLoadedChunk(final Vector vector) {
-        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IAction() {
+        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), new IAction() {
             @Override
             public void execute() {
                 m_parent.checkLoadedChunk(vector);
             }
-        }, m_bukkitWorld, vector);
+        }, m_bukkitWorld, PositionHelper.positionToChunk(vector));
     }
 
     @Override
     public void fixAfterFastMode(final Iterable<BlockVector2D> itrbl) {
-        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IAction() {
+        final Collection<BlockVector2D> tmp = new ArrayList<BlockVector2D>();
+        for (Iterator<BlockVector2D> iterator = itrbl.iterator(); iterator.hasNext();) {
+            tmp.add(iterator.next());
+        }         
+        
+        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), new IAction() {
             @Override
             public void execute() {
-                m_parent.fixAfterFastMode(itrbl);
+                m_parent.fixAfterFastMode(tmp);
             }
-        });
+        }, m_bukkitWorld, tmp);
     }
 
     @Override
     public void fixLighting(final Iterable<BlockVector2D> itrbl) {
-        m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IAction() {
+        final Collection<BlockVector2D> tmp = new ArrayList<BlockVector2D>();
+        for (Iterator<BlockVector2D> iterator = itrbl.iterator(); iterator.hasNext();) {
+            tmp.add(iterator.next());
+        }
+        
+        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), new IAction() {
             @Override
             public void execute() {
-                m_parent.fixLighting(itrbl);
+                m_parent.fixLighting(tmp);
             }
-        });
+        }, m_bukkitWorld, tmp);
     }
 
     @Override
@@ -980,12 +992,12 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BaseBlock getLazyBlock(final Vector vector) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<BaseBlock>() {
+        return m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), new IFunc<BaseBlock>() {
             @Override
             public BaseBlock execute() {
                 return m_parent.getLazyBlock(vector);
             }
-        }, m_bukkitWorld, vector);
+        }, m_bukkitWorld, PositionHelper.positionToChunk(vector));
     }
 
     @Override

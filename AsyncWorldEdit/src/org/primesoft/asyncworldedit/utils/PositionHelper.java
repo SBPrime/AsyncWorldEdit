@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -38,99 +38,69 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.utils;
 
-package org.primesoft.asyncworldedit.worldedit.world.biome;
-
-import com.sk89q.worldedit.world.biome.BaseBiome;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.Vector2D;
 
 /**
  *
  * @author SBPrime
  */
-public class BaseBiomeWrapper extends BaseBiome implements IAsyncWrapper
-{
-    public static BaseBiomeWrapper wrap(BaseBiome biome, int jobId,
-                                        boolean isAsync, IPlayerEntry player) {
-        BaseBiomeWrapper result;
-        if (biome instanceof BaseBiomeWrapper) {
-            result = (BaseBiomeWrapper) biome;
-            result.setAsync(isAsync);
-            result.setPlayer(player);
-        } else {
-            result = new BaseBiomeWrapper(biome, jobId, isAsync, player);
-        }
+public class PositionHelper {
 
-        return result;
-    }
-    
-    private final BaseBiome m_parent;
+    /**
+     * The size of a chunk un blocks
+     */
+    public final static int CHUNK_SIZE = 16;
 
-    private final int m_jobId;
-
-    private boolean m_isAsync;
-
-    private IPlayerEntry m_player;
-    
-    @Override
-    public int getJobId() {
-        return m_jobId;
+    /**
+     * Round the position to block position
+     *
+     * @param a
+     * @return
+     */
+    public static int positionToBlockPosition(double a) {
+        return (int) Math.round(a - 0.5);
     }
 
-    @Override
-    public BaseBiome getParent() {
-        return m_parent;
+    /**
+     * Round the position to block position
+     *
+     * @param v
+     * @return
+     */
+    public static BlockVector positionToBlockPosition(Vector v) {
+        return new BlockVector(PositionHelper.positionToBlockPosition(v.getX()), 
+                PositionHelper.positionToBlockPosition(v.getY()), 
+                PositionHelper.positionToBlockPosition(v.getZ()));
     }
 
-    @Override
-    public boolean isAsync() {
-        return m_isAsync;
-    }
-    
-    public void setAsync(boolean async) {
-        m_isAsync = async;
-    }
-
-    public void setPlayer(IPlayerEntry player) {
-        m_player = player;
-    }
-
-    @Override
-    public IPlayerEntry getPlayer() {
-        return m_player;
-    }
-    
-    private BaseBiomeWrapper(BaseBiome parent, int jobId, boolean isAsync,
-                             IPlayerEntry player) {
-        super(0);
-
-        m_jobId = jobId;
-        m_parent = parent;
-        m_isAsync = isAsync;
-        m_player = player;
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof BaseBiomeWrapper) {
-            o = ((BaseBiomeWrapper) o).getParent();
-        }
-        return m_parent.equals(o);
+    /**
+     * Convert the block position to chunk coords
+     *
+     * @param a
+     * @return
+     */
+    public static int positionToChunk(double a) {
+        final int floor = (int) a;
+        final int i = floor == a ? floor : floor - (int) (Double.doubleToRawLongBits(a) >>> 63);
+        return i >> 4;
+        //return (int) (a / CHUNK_SIZE) + (a % CHUNK_SIZE < 0 ? -1 : 0);
     }
 
-    @Override
-    public int hashCode() {
-        return m_parent.hashCode();
+
+    public static double chunkToPosition(int c) {
+        return (double) c * CHUNK_SIZE;
     }
 
-    @Override
-    public int getId() {
-        return m_parent.getId();
+    public static Vector chunkToPosition(Vector2D c, double y) {
+        return new Vector(chunkToPosition((int) c.getX()), y, chunkToPosition((int) c.getZ()));
     }
 
-    @Override
-    public void setId(int id) {
-        m_parent.setId(id);
-    }        
+    public static BlockVector2D positionToChunk(Vector v) {
+        return new BlockVector2D(positionToChunk((int) v.getX()), positionToChunk((int) v.getZ()));
+    }
 }

@@ -102,7 +102,7 @@ public class BlockVectorWrapper extends BlockVector implements IAsyncWrapper {
 
     private BlockVectorWrapper(BlockVector parent, int jobId, boolean isAsync,
                                IPlayerEntry player) {
-        super(0, 0, 0);
+        super(parent.getBlockX(), parent.getBlockY(), parent.getBlockZ());
 
         m_jobId = jobId;
         m_parent = parent;

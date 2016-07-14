@@ -351,7 +351,6 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
     }
 
     @Override
-
     public boolean setBlock(Vector position, BaseBlock block) throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
         boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
@@ -578,6 +577,11 @@ public class ThreadSafeEditSession extends EditSessionStub implements IThreadSaf
         cancelJobs(jobId);
 
         UndoProcessor.processUndo(this, this, sess);
+    }
+
+    @Override
+    public void redo(EditSession sess) {
+        RedoProcessor.processRedo(this, this, sess);
     }
 
     @Override

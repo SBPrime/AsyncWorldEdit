@@ -40,9 +40,11 @@
  */
 package org.primesoft.asyncworldedit.api.taskdispatcher;
 
+import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.Region;
+import java.util.Collection;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.utils.IAction;
 import org.primesoft.asyncworldedit.api.utils.IFunc;
@@ -97,6 +99,32 @@ public interface ITaskDispatcher {
      * @return
      */
     <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Vector2D pos);
+    
+    
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param mutex
+     * @param action
+     * @param world
+     * @param chunks
+     */
+    void performSafeChunk(Object mutex, IAction action, IWorld world, Collection<BlockVector2D> chunks);
+
+    /**
+     * Perform operation using a safe wrapper. If the basic operation fails
+     * queue it on dispatcher
+     *
+     * @param <T>
+     * @param mutex
+     * @param action
+     * @param world
+     * @param chunks
+     * @return
+     */
+    <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Collection<BlockVector2D> chunks);
+    
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -145,6 +173,19 @@ public interface ITaskDispatcher {
      * @return
      */
     <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Vector pos);
+    
+    /**
+     * Perform an action on the dispatcher
+     * @param action
+     */    
+    void queueFastOperation(IAction action);
+    
+    /**
+     * Perform an action on the dispatcher
+     * @param action
+     */    
+    <T> T queueFastOperation(IFunc<T> action);
+    
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails

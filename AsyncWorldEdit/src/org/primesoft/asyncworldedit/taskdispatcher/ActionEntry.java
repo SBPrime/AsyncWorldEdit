@@ -48,7 +48,7 @@ import org.primesoft.asyncworldedit.api.utils.IAction;
  */
 public class ActionEntry extends BaseDispatcherEntry {
     /**
-     * Action to perform
+     * IAction to perform
      */
     private final IAction m_action;
         

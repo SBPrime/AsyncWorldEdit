@@ -43,7 +43,6 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
-
 /**
  *
  * @author SBPrime

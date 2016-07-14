@@ -45,7 +45,6 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.util.Location;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
 
@@ -108,7 +107,9 @@ public class LocationWrapper extends Location implements IAsyncWrapper
     
     private LocationWrapper(Location parent, int jobId, boolean isAsync,
                              IPlayerEntry player) {
-        super(parent.getExtent());
+        super(parent.getExtent(), 
+                parent.getX(), parent.getY(), parent.getZ(),
+                parent.getYaw(), parent.getPitch());
 
         m_jobId = jobId;
         m_parent = parent;

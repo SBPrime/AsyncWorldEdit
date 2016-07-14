@@ -62,8 +62,8 @@ public class VectorWrapper extends Vector implements IAsyncWrapper {
             result.setPlayer(player);
         } else {
             result = new VectorWrapper(v, jobId, isAsync, player);
-        }
-
+        }        
+        
         return result;
     }
 
@@ -104,7 +104,7 @@ public class VectorWrapper extends Vector implements IAsyncWrapper {
     }
 
     private VectorWrapper(Vector parent, int jobId, boolean isAsync, IPlayerEntry player) {
-        super();
+        super(parent.getX(), parent.getY(), parent.getZ());
 
         m_jobId = jobId;
         m_parent = parent;

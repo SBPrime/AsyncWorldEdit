@@ -105,7 +105,7 @@ public class Vector2DWrapper extends Vector2D implements IAsyncWrapper {
     }
 
     private Vector2DWrapper(Vector2D parent, int jobId, boolean isAsync, IPlayerEntry player) {
-        super();
+        super(parent.getX(), parent.getZ());
 
         m_jobId = jobId;
         m_parent = parent;

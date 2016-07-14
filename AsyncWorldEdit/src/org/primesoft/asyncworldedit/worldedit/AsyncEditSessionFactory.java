@@ -52,6 +52,7 @@ import org.primesoft.asyncworldedit.api.IWorldeditIntegrator;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.api.worldedit.IAsyncEditSessionFactory;
+import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 
 /**
  *
@@ -144,14 +145,14 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
     }
 
     @Override
-    public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks) {
+    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks) {
         return new ThreadSafeEditSession(m_parent, m_playerManager.getUnknownPlayer(),
                 m_eventBus, world, maxBlocks, null,
                 new EditSessionEvent(world, null, maxBlocks, null));
     }
 
     @Override
-    public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
+    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
             Player player) {
         IPlayerEntry entry = getPlayerEntry(player);
         ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, entry,
@@ -163,7 +164,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
     }
 
     @Override
-    public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
+    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
             BlockBag blockBag) {
         return new ThreadSafeEditSession(m_parent, m_playerManager.getUnknownPlayer(),
                 m_eventBus, world, maxBlocks, blockBag,
@@ -171,7 +172,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
     }
 
     @Override
-    public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
+    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
             BlockBag blockBag, Player player) {
         IPlayerEntry entry = getPlayerEntry(player);
         ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, entry,
@@ -183,7 +184,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
     }
 
     @Override
-    public ThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
+    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
             BlockBag blockBag, IPlayerEntry playerEntry) {
         
         ThreadSafeEditSession result = new ThreadSafeEditSession(m_parent, playerEntry,

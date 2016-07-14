@@ -91,10 +91,6 @@ public class BlockVector2DWrapper extends BlockVector2D implements IAsyncWrapper
         m_isAsync = async;
     }
 
-    /**
-     *
-     * @param player
-     */
     public void setPlayer(IPlayerEntry player) {
         m_player = player;
     }
@@ -106,7 +102,7 @@ public class BlockVector2DWrapper extends BlockVector2D implements IAsyncWrapper
 
     private BlockVector2DWrapper(BlockVector2D parent, int jobId,
                                  boolean isAsync, IPlayerEntry player) {
-        super(0, 0);
+        super(parent.getBlockX(), parent.getBlockZ());
 
         m_jobId = jobId;
         m_parent = parent;

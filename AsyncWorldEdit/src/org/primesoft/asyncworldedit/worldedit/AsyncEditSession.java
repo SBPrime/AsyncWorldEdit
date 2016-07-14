@@ -41,8 +41,10 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
@@ -50,6 +52,7 @@ import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.internal.expression.ExpressionException;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BaseBiome;
@@ -60,7 +63,9 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.RedoJob;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
+import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 
 /**
@@ -107,7 +112,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     @Override
     public void undo(final EditSession sess) {
         final int jobId = getJobId();
-        
+
         cancelJobs(jobId);
 
         boolean isAsync = checkAsync(WorldeditOperations.undo);
@@ -119,10 +124,11 @@ public class AsyncEditSession extends ThreadSafeEditSession {
             return;
         }
 
+        final LocalSession ls = getLocalSession();
         final JobEntry job = new UndoJob(m_player, session, jobId, "undo");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "undo",
+        SchedulerUtils.runTaskAsynchronouslyInSequence(m_plugin, m_schedule, new AsyncTask(session, m_player, "undo",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -131,9 +137,21 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                         session.undo(sess);
                         return 0;
                     }
-                });
-    }   
-   
+                }, ls);
+    }
+
+    /**
+     * Get the local session for current player
+     *
+     * @return
+     */
+    private LocalSession getLocalSession() {
+        final WorldEdit we = WorldEdit.getInstance();
+        final SessionManager sm = we.getSessionManager();
+        final LocalSession ls = sm.findByName(m_player.getName());
+        return ls;
+    }
+
     public void flushQueue(int jobId) {
         boolean queued = isQueueEnabled();
         m_jobId = jobId;
@@ -161,10 +179,11 @@ public class AsyncEditSession extends ThreadSafeEditSession {
             return;
         }
 
-        final JobEntry job = new JobEntry(m_player, session, jobId, "redo");
+        final LocalSession ls = getLocalSession();
+        final JobEntry job = new RedoJob(m_player, session, jobId, "redo");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "redo",
+        SchedulerUtils.runTaskAsynchronouslyInSequence(m_plugin, m_schedule, new AsyncTask(session, m_player, "redo",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -173,7 +192,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                         session.redo(sess);
                         return 0;
                     }
-                });
+                }, ls);
     }
 
     

@@ -61,4 +61,24 @@ public class Pair<T1, T2> {
         m_x1 = x1;
         m_x2 = x2;
     }
+
+    @Override
+    public int hashCode() {
+        return (m_x1 != null ? m_x1.hashCode() : 0) ^
+                (m_x2 != null ? m_x2.hashCode() : 0);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Pair)) {
+            return false;
+        }
+        
+        Pair other = (Pair)obj;
+        Object x1 = other.getX1();
+        Object x2 = other.getX2();
+        
+        return ((x1 == null && m_x1 == null) || (x1 != null && x1.equals(m_x1))) &&
+            ((x2 == null && m_x2 == null) || (x2 != null && x2.equals(m_x2)));
+    }        
 }

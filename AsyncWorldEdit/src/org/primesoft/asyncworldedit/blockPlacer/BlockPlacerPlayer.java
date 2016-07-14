@@ -42,6 +42,7 @@ package org.primesoft.asyncworldedit.blockPlacer;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerEntry;
@@ -97,7 +98,7 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     public BlockPlacerPlayer(IPlayerEntry player) {
         m_player = player;
-        m_queue = new ArrayDeque();
+        m_queue = new LinkedList();
         m_speed = 0;
         m_jobs = new HashMap<Integer, IJobEntry>();
     }

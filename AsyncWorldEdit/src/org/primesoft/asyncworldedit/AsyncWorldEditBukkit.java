@@ -156,6 +156,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
         super.onEnable();
 
         m_server = getServer();
+        m_chunkWatch.initialize(m_server);
 
         PluginDescriptionFile desc = getDescription();
         s_prefix = String.format("[%s]", desc.getName());
