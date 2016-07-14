@@ -61,10 +61,12 @@ import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
 import org.primesoft.asyncworldedit.injector.scanner.ClassScannerResult;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.OperationAction;
+import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.Pair;
 import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.AsyncTask;
@@ -90,7 +92,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
      * Async block placer
      */
     protected final IBlockPlacer m_blockPlacer;
-    
+
     /**
      * The class scanner
      */
@@ -148,6 +150,13 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                             action.Execute(op);
 
                             return cancelableSession.getChangeSet().size();
+                        } catch (IllegalArgumentException ex) {
+                            if (ex.getCause() instanceof SessionCanceled) {
+                                m_player.say(MessageType.BLOCK_PLACER_CANCELED.format());
+                            } else {
+                                ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
+                            }
+                            return 0;
                         } catch (Exception ex) {
                             if (ex instanceof MaxChangedBlocksException) {
                                 throw (MaxChangedBlocksException) ex;
@@ -181,7 +190,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         final AsyncEditSession asyncSession = getFirst(AsyncEditSession.class, sessions);
         final String name = operationName.getValue();
-        
+
         if (!asyncSession.checkAsync(name)) {
             action.Execute(op);
             return;
