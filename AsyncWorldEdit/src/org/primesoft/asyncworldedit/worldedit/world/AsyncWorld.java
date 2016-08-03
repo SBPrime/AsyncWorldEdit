@@ -263,13 +263,21 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     private boolean canPlace(IPlayerEntry player, IWorld world, Vector location, BaseBlock oldBlock, BaseBlock newBlock) {
-        if (oldBlock.equals(newBlock) && !oldBlock.hasNbtData() && !newBlock.hasNbtData()) {
-            return false;
-        }
-
         return m_blocksHub.canPlace(player, world, location, oldBlock, newBlock);
     }
-
+    
+    private boolean isSameData(BaseBlock oldBlock, int newData) {
+        return isSame(oldBlock, new BaseBlock(oldBlock.getType(), newData));
+    }
+    
+    private boolean isSame(BaseBlock oldBlock, int newType) {
+        return isSame(oldBlock, new BaseBlock(newType, oldBlock.getData()));
+    }
+    
+    private boolean isSame(BaseBlock oldBlock, BaseBlock newBlock) {
+        return oldBlock.equals(newBlock) && !oldBlock.hasNbtData() && !newBlock.hasNbtData();
+    }
+    
     @Override
     public boolean setBlock(Vector vector, BaseBlock bb, final boolean bln) throws WorldEditException {
         final DataAsyncParams<BaseBlock> paramBlock = DataAsyncParams.extract(bb);
@@ -283,7 +291,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
             @Override
             public Boolean execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
-                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)) {
+                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
+                        || isSame(oldBlock, newBlock)) {
                     return false;
                 }
 
@@ -319,7 +328,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
             public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
                 final BaseBlock newBlock = new BaseBlock(i, oldBlock.getData());
-                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)) {
+                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
+                        || isSame(oldBlock, newBlock)) {
                     return false;
                 }
 
@@ -355,7 +365,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
             public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
                 final BaseBlock newBlock = new BaseBlock(oldBlock.getType(), i);
-                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)) {
+                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
+                        || isSame(oldBlock, newBlock)) {
                     return false;
                 }
 
@@ -389,7 +400,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
             @Override
             public Boolean execute() {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
-                if (!canPlace(player, m_bukkitWorld, v, getBlock(v), newBlock)) {
+                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
+                        || isSame(oldBlock, newBlock)) {
                     return false;
                 }
 
@@ -594,7 +606,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
         IAction func = new IAction() {
             @Override
             public void execute() {
-                if (!canPlace(player, m_bukkitWorld, v, m_parent.getBlock(v), new BaseBlock(0))) {
+                BaseBlock air = new BaseBlock(0);
+                BaseBlock oldBlock = m_parent.getBlock(v);
+                if (!canPlace(player, m_bukkitWorld, v, oldBlock, air) || isSame(oldBlock, air)) {
                     return;
                 }
                 m_parent.simulateBlockMine(v);
@@ -940,7 +954,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
         IFunc<Boolean> func = new IFunc<Boolean>() {
             @Override
             public Boolean execute() {
-                if (!canPlace(player, m_bukkitWorld, v, m_parent.getBlock(v), new BaseBlock(0))) {
+                BaseBlock air = new BaseBlock(0);
+                BaseBlock oldBlock = m_parent.getBlock(v);
+                if (!canPlace(player, m_bukkitWorld, v, oldBlock, air) || isSame(oldBlock, air)) {
                     return false;
                 }
 
@@ -1014,7 +1030,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
             @Override
             public Boolean execute() throws WorldEditException {
                 final BaseBlock oldBlock = m_parent.getBlock(v);
-                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)) {
+                if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
+                        || isSame(oldBlock, newBlock)) {
                     return false;
                 }
 
