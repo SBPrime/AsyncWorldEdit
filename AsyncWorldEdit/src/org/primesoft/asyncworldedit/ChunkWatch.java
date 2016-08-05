@@ -66,7 +66,7 @@ public class ChunkWatch implements Listener {
      */
     private final HashMap<String, HashMap<Integer, HashSet<Integer>>> m_loadedChunks = new HashMap<String, HashMap<Integer, HashSet<Integer>>>();
 
-    public void initialize(Server server) {        
+    public void initialize(Server server) {
         for (World w : server.getWorlds()) {
             for (Chunk c : w.getLoadedChunks()) {
                 chunkLoaded(w.getName(), c.getX(), c.getZ());
@@ -74,7 +74,7 @@ public class ChunkWatch implements Listener {
         }
 
     }
-    
+
     /**
      * Remove all chunk unload queues
      */
@@ -191,43 +191,43 @@ public class ChunkWatch implements Listener {
     public boolean chunkUnloading(String worldName, int cx, int cz) {
         boolean cancel = false;
         synchronized (m_watchedChunks) {
-            HashMap<Integer, HashMap<Integer, Integer>> worldEntry = m_watchedChunks.get(worldName);
-            if (worldEntry != null) {
-                HashMap<Integer, Integer> cxEntry = worldEntry.get(cx);
+            HashMap<Integer, HashMap<Integer, Integer>> watchedWorldEntry = m_watchedChunks.get(worldName);
+            if (watchedWorldEntry != null) {
+                HashMap<Integer, Integer> cxEntry = watchedWorldEntry.get(cx);
                 if (cxEntry != null) {
                     cancel = cxEntry.containsKey(cz) && cxEntry.get(cz) > 0;
                 }
             }
-        }
 
-        if (cancel) {
-            return true;
-        }
-
-        synchronized (m_loadedChunks) {
-            HashMap<Integer, HashSet<Integer>> worldEntry;
-
-            if (!m_loadedChunks.containsKey(worldName)) {
-                return false;
-            }
-            worldEntry = m_loadedChunks.get(worldName);
-
-            if (!worldEntry.containsKey(cx)) {
-                return false;
+            if (cancel) {
+                return true;
             }
 
-            HashSet<Integer> cxEntry = worldEntry.get(cx);
-            if (!cxEntry.contains(cz)) {
-                return false;
-            }
+            synchronized (m_loadedChunks) {
+                HashMap<Integer, HashSet<Integer>> worldEntry;
 
-            cxEntry.remove(cz);
+                if (!m_loadedChunks.containsKey(worldName)) {
+                    return false;
+                }
+                worldEntry = m_loadedChunks.get(worldName);
 
-            if (cxEntry.isEmpty()) {
-                worldEntry.remove(cx);
-            }
-            if (worldEntry.isEmpty()) {
-                m_loadedChunks.remove(worldName);
+                if (!worldEntry.containsKey(cx)) {
+                    return false;
+                }
+
+                HashSet<Integer> cxEntry = worldEntry.get(cx);
+                if (!cxEntry.contains(cz)) {
+                    return false;
+                }
+
+                cxEntry.remove(cz);
+
+                if (cxEntry.isEmpty()) {
+                    worldEntry.remove(cx);
+                }
+                if (worldEntry.isEmpty()) {
+                    m_loadedChunks.remove(worldName);
+                }
             }
         }
 
@@ -273,5 +273,5 @@ public class ChunkWatch implements Listener {
         if (cancel) {
             event.setCancelled(cancel);
         }
-    }   
+    }
 }
