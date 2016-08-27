@@ -126,13 +126,18 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         final AsyncEditSession asyncSession = getFirst(AsyncEditSession.class, sessions);
         final String name = operationName.getValue();
+        final IPlayerEntry playerEntry = asyncSession.getPlayer();
+        
         if (!asyncSession.checkAsync(name)) {
-            action.Execute(op);
+            try {
+                action.Execute(op);
+            } catch (Exception ex) {
+                ErrorHandler.handleError(playerEntry, name, null, ex);
+            }
             return;
         }
 
-        final WaitFor wait = asyncSession.getWait();
-        final IPlayerEntry playerEntry = asyncSession.getPlayer();
+        final WaitFor wait = asyncSession.getWait();        
         final int jobId = m_blockPlacer.getJobId(playerEntry);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
         final JobEntry job = new JobEntry(playerEntry, cancelableSession, jobId, name);
@@ -149,22 +154,9 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                             wait.checkAndWait(null);
                             action.Execute(op);
 
-                            return cancelableSession.getChangeSet().size();
-                        } catch (IllegalArgumentException ex) {
-                            if (ex.getCause() instanceof SessionCanceled) {
-                                m_player.say(MessageType.BLOCK_PLACER_CANCELED.format());
-                            } else {
-                                ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
-                            }
-                            return 0;
+                            return session.getChangeSet().size();
                         } catch (Exception ex) {
-                            if (ex instanceof MaxChangedBlocksException) {
-                                throw (MaxChangedBlocksException) ex;
-                            }
-
-                            ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
-                            //Silently discard other errors :(
-                            return 0;
+                            return ErrorHandler.handleError(playerEntry, name, session, ex);
                         }
                     }
                 });
@@ -190,14 +182,18 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         final AsyncEditSession asyncSession = getFirst(AsyncEditSession.class, sessions);
         final String name = operationName.getValue();
+        final IPlayerEntry playerEntry = asyncSession.getPlayer();
 
         if (!asyncSession.checkAsync(name)) {
-            action.Execute(op);
+            try {
+                action.Execute(op);
+            } catch (Exception ex) {
+                ErrorHandler.handleError(playerEntry, name, null, ex);
+            }
             return;
         }
 
-        final WaitFor wait = asyncSession.getWait();
-        final IPlayerEntry playerEntry = asyncSession.getPlayer();
+        final WaitFor wait = asyncSession.getWait();        
         final int jobId = m_blockPlacer.getJobId(playerEntry);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
         final JobEntry job = new JobEntry(playerEntry, cancelableSession, jobId, name);
@@ -210,10 +206,14 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        wait.checkAndWait(null);
-                        action.Execute(op);
+                        try {
+                            wait.checkAndWait(null);
+                            action.Execute(op);
 
-                        return cancelableSession.getChangeSet().size();
+                            return cancelableSession.getChangeSet().size();
+                        } catch (Exception ex) {
+                            return ErrorHandler.handleError(playerEntry, name, session, ex);
+                        }
                     }
                 });
     }

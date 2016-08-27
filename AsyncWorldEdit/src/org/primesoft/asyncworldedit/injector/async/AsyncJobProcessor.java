@@ -128,7 +128,11 @@ class AsyncJobProcessor implements IJobProcessor {
         boolean async = checkAsync(playerEntry, name);
         
         if (!async) {
-            job.execute();
+            try {
+                job.execute();
+            } catch (Exception ex) {
+                ErrorHandler.handleError(playerEntry, name, null, ex);
+            }
             return;
         }
         
@@ -145,12 +149,7 @@ class AsyncJobProcessor implements IJobProcessor {
 
                             return 0;
                         } catch (Exception ex) {
-                            if (ex instanceof MaxChangedBlocksException) {
-                                throw (MaxChangedBlocksException) ex;
-                            }
-
-                            //Silently discard other errors :(
-                            ExceptionHelper.printException(ex, String.format("Error while processing async job %1$s", name));
+                            ErrorHandler.handleError(playerEntry, name, m_cancelableEditSession, ex);
                             return 0;
                         }
                     }
@@ -172,7 +171,11 @@ class AsyncJobProcessor implements IJobProcessor {
         boolean async = checkAsync(playerEntry, name);
         
         if (!async) {
-            job.execute(es);
+            try {
+                job.execute(es);
+            } catch (Exception ex) {
+                ErrorHandler.handleError(playerEntry, name, null, ex);
+            }
             return;
         }
         
@@ -190,9 +193,12 @@ class AsyncJobProcessor implements IJobProcessor {
                     ExceptionHelper.printException(new Exception("Expected " + EditSession.class.getName()), "Unable to process async job");
                     return 0;
                 }
-                
-                job.execute((EditSession)param);
-                
+
+                try {
+                    job.execute((EditSession) param);
+                } catch (Exception ex) {
+                    ErrorHandler.handleError(playerEntry, name, null, ex);
+                }
                 return 0;
             }
             
