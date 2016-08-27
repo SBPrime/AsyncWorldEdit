@@ -454,12 +454,12 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements IAweOper
 
     @Override
     public double getAPIVersion() {
-        return 3.002000003;
+        return 3.002000004;
     }
 
     @Override
     public byte[] getDetailAPIVersion() {
-        return new byte[]{2, 0, 3};
+        return new byte[]{2, 0, 4};
     }
 
     @Override

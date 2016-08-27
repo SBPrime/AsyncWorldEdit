@@ -44,6 +44,6 @@ package org.primesoft.asyncworldedit.api;
  *
  * @author SBPrime
  */
-public class IChunk {
-    
+public interface IChunk {
+
 }

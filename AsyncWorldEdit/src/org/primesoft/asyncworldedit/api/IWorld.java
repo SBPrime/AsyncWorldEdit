@@ -51,7 +51,7 @@ public interface IWorld {
      * Get the world UUID
      * @return 
      */
-    UUID getUID();
+    UUID getUUID();
     
     
     /**

@@ -46,82 +46,148 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.api.IChunk;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.utils.IInOutParam;
 
 /**
  * The direct chunk API class
+ *
  * @author SBPrime
  */
 public interface IDirectChunkAPI {
+
     /**
      * Wrap bukkit chunk into direct chunk api
+     *
      * @param chunk
      * @param player
-     * @return 
+     * @return
      */
     IWrappedChunk wrapChunk(IChunk chunk, IPlayerEntry player);
     
-    
+    /**
+     * Wrap bukkit chunk into direct chunk api
+     *
+     * @param chunk
+     * @return
+     */
+    IWrappedChunk wrapChunk(IChunk chunk);
+
     /**
      * Create an empty chunk data
-     * @return 
+     *
+     * @return
      */
     IChunkData createChunkData();
-    
-    
+
     /**
      * Create an lazy chunk data
+     *
      * @param chunk
-     * @return 
+     * @return
      */
     IChangesetChunkData createLazyChunkData(IWrappedChunk chunk);
-    
-    
+
     /**
      * Converts material and data to chunk section id
+     *
      * @param m
-     * @param data
-     * @return 
-     */
-    char getCombinedId(BaseBlock m, int data);
-    
-    
-    /**
-     * Converts type and data to chunk section id
-     * @param type
-     * @param data
-     * @return 
-     */
-    char getCombinedId(int type, int data);
-    
-    
-    /**
-     * Get WorldEdit base blocks
-     * @param type
-     * @param nbt
-     * @return 
-     */
-    BaseBlock getBaseBlock(char type, CompoundTag nbt);
-    
-    
-    /**
-     * Convert combined ID to Material and data
-     * @param combinedId
      * @param data
      * @return
      */
-    BaseBlock convertId(char combinedId, IInOutParam<Integer> data);
-    
+    char getCombinedId(BaseBlock m, int data);
+
+    /**
+     * Converts type and data to chunk section id
+     *
+     * @param type
+     * @param data
+     * @return
+     */
+    char getCombinedId(int type, int data);
+
+    /**
+     * Get material
+     * @param type
+     * @return 
+     */
+    int getMaterial(char type);
     
     /**
+     * Get WorldEdit base blocks
+     *
+     * @param type
+     * @param nbt
+     * @return
+     */
+    BaseBlock getBaseBlock(char type, CompoundTag nbt);
+
+    /**
+     * Convert combined ID to Material and data
+     *
+     * @param combinedId
+     * @return
+     */
+    BaseBlock convertId(char combinedId);
+
+    /**
      * Create new instance of serialized entity
+     *
      * @param uuid
      * @param position
      * @param yaw
      * @param pitch
      * @param nbt
-     * @return 
+     * @return
      */
     ISerializedEntity createEntity(UUID uuid, Vector position,
             float yaw, float pitch, byte[] nbt);
+
+    /**
+     * Return the material light emission level
+     *
+     * @param type
+     * @param data
+     * @return
+     */
+    byte getLightEmissionLevel(int type, int data);
+
+    /**
+     * Return the material light emission level
+     *
+     * @param block
+     * @return
+     */
+    byte getLightEmissionLevel(BaseBlock block);
+
+    /**
+     * Return the material light emission level
+     *
+     * @param id
+     * @return
+     */
+    byte getLightEmissionLevel(char id);
+
+    /**
+     * Get the material opacity level (how much it obscures light)
+     *
+     * @param type
+     * @param data
+     * @return
+     */
+    short getOpacityLevel(int type, int data);
+
+    /**
+     * Get the material opacity level (how much it obscures light)
+     *
+     * @param block
+     * @return
+     */
+    short getOpacityLevel(BaseBlock block);
+
+    /**
+     * Get the material opacity level (how much it obscures light)
+     *
+     * @param id
+     * @return
+     */
+    short getOpacityLevel(char id);
 }

@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit API
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit API contributors
  *
  * All rights reserved.
@@ -38,105 +38,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.directChunk;
 
-import org.primesoft.asyncworldedit.api.IWorld;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+package org.primesoft.asyncworldedit.api.utils;
 
 /**
- * Chunk manipulation class
+ *
  * @author SBPrime
+ * @param <T> The function result type
+ * @param <TException> The function exception
  */
-public interface IWrappedChunk {    
-    /**
-     * Get the bukkit world
-     * @return 
-     */
-    public IWorld getWorld();
-    
-    /**
-     * Get the chunk X coordinate
-     * @return 
-     */
-    public int getX();
-    
-    /**
-     * Get the chunk Y coordinate
-     * @return 
-     */
-    public int getZ();
-    
 
-    /**
-     * Get the player that wrapped the chunk
-     * @return 
-     */
-    public IPlayerEntry getPlayer();
-    
-    /**
-     * Get the chunk data
-     * @return 
-     */
-    public IChunkData getData();
-    
-    /**
-     * Set the chunk data
-     * @param data
-     * @return 
-     */
-    public boolean setData(IChunkData data);
-    
-    /**
-     * Set the chunk undo data
-     * @param data
-     * @return 
-     */
-    public boolean setData(IChunkUndoData data);
-    
-    /**
-     * Get the direct data manipulator
-     * @return 
-     */
-    public IDirectChunkData getDirectDataManipulator();
-    
-    
-    /**
-     * Set the chunk data
-     * @param data
-     * @return 
-     */
-    public IChunkUndoData setData(IChangesetData data);
-
-
-    /**
-     * Flush stored data to the server     
-     */
-    public void flush();
-    
-    
-    /**
-     * Initialise the lighting
-     */
-    public void initLighting();
-    
-    
-    /**
-     * Update the light for provided position
-     * @param x
-     * @param y
-     * @param z 
-     */
-    public void updateLight(int x, int y, int z);
-    
-    
-    /**
-     * Send chunk updagte message to players
-     */
-    public void sendChunkUpdate();
-    
-    
-    /**
-     * Set the chunk data to dirty (requires save)
-     */
-    public void setDirty();
+public interface IFuncEx<T, TException extends Exception> {
+    T execute() throws TException;
 }

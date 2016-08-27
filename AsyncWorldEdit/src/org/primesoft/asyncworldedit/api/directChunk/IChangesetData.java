@@ -64,5 +64,11 @@ public interface IChangesetData {
      * Get the stored blocks
      * @return
      */
-    IBlockEntry[] getChangedBlocks();
+    IBlockEntry[] getChangedBlocks();    
+    
+    /**
+     * Get the stored biomes
+     * @return
+     */
+    IBiomeEntry[] getChangedBiomes();
 }

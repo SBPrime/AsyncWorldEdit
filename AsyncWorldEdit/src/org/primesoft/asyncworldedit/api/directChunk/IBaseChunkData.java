@@ -41,7 +41,6 @@
 package org.primesoft.asyncworldedit.api.directChunk;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.Entity;
@@ -50,22 +49,7 @@ import com.sk89q.worldedit.entity.Entity;
  *
  * @author SBPrime
  */
-public interface IBaseChunkData {
-
-    /**
-     * Get the chunk coords
-     *
-     * @return
-     */
-    BlockVector2D getChunkCoords();
-
-    /**
-     * Set the chunk coords
-     *
-     * @param coords
-     */
-    void setChunkCoords(BlockVector2D coords);
-
+public interface IBaseChunkData extends ISimpleChunkData {
     /**
      * Set chunk block
      *
@@ -76,15 +60,6 @@ public interface IBaseChunkData {
      */
     void setBlock(int x, int y, int z, BaseBlock b);
 
-    /**
-     * Set chunk block
-     *
-     * @param x X coordinate inside chunk (0-15)
-     * @param y Y coordinate inside chunk (0-15)
-     * @param z Z coordinate inside chunk (0-15)
-     * @param id Material ID
-     */
-    void setBlock(int x, int y, int z, char id);
 
     /**
      * Set chunk tile eneity
@@ -96,6 +71,32 @@ public interface IBaseChunkData {
      * @param ct Tile entity NBT data
      */
     void setTileEntity(int x, int y, int z, char id, CompoundTag ct);
+    
+    
+        /**
+     * Set chunk block
+     *
+     * @param x X coordinate inside chunk (0-15)
+     * @param y Y coordinate inside chunk (0-15)
+     * @param z Z coordinate inside chunk (0-15)
+     * @param b WorldEdit block
+     * @param emission The block emission level
+     */
+    void setBlockAndEmission(int x, int y, int z, BaseBlock b, byte emission);
+
+
+    /**
+     * Set chunk tile eneity
+     *
+     * @param x X coordinate inside chunk (0-15)
+     * @param y Y coordinate inside chunk (0-15)
+     * @param z Z coordinate inside chunk (0-15)
+     * @param id Material ID of the tile entitiy
+     * @param ct Tile entity NBT data
+     * @param emission The block emission level
+     */
+    void setTileEntityAndEmission(int x, int y, int z, char id, CompoundTag ct, byte emission);
+    
 
     /**
      * Remove entity from chunk
@@ -121,7 +122,6 @@ public interface IBaseChunkData {
      */
     ISerializedEntity addEntity(Vector pos, Entity entity);
 
-    
     /**
      * Get block from chunk data
      *
@@ -131,11 +131,11 @@ public interface IBaseChunkData {
      * @return
      */
     BaseBlock getBlock(int x, int y, int z);
-        
-    
+
     /**
      * Get the chunk entities
-     * @return 
+     *
+     * @return
      */
-    ISerializedEntity[] getEntity();
+    ISerializedEntity[] getEntity();   
 }

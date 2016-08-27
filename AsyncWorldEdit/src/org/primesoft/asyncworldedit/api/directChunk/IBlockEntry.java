@@ -46,8 +46,7 @@ import com.sk89q.jnbt.CompoundTag;
  *
  * @author SBPrime
  */
-public interface IBlockEntry {
-
+public interface IBlockEntry extends IVectorEntry {
     /**
      * Get the block ID
      *
@@ -61,11 +60,30 @@ public interface IBlockEntry {
      * @return
      */
     CompoundTag getNbt();
-
-    int getX();
-
-    int getY();
-
-    int getZ();
     
+    
+    /**
+     * Get the light emission level
+     * @return 
+     */
+    byte getEmission();
+    
+    /**
+     * Set the light emission level
+     * @param level
+     */
+    void setEmission(byte level);
+    
+    
+    /**
+     * Does the entry have light data
+     * @return 
+     */
+    boolean hasLight();
+    
+    /**
+     * Does the entry have block data
+     * @return 
+     */
+    boolean hasBlock();
 }

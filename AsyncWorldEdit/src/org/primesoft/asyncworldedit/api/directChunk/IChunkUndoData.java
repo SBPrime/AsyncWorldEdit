@@ -47,10 +47,30 @@ import java.util.UUID;
  * @author SBPrime
  */
 public interface IChunkUndoData {
-
-    public UUID[] getAddedEntitys();
+    /**
+     * Get the list of added entities
+     *
+     * @return
+     */
+    UUID[] getAddedEntitys();
     
-    public ISerializedEntity[] getRemovedEntitys();
+    /**
+     * Get the list of removed entities
+     *
+     * @return
+     */
+    ISerializedEntity[] getRemovedEntitys();
 
-    public IBlockEntry[] getBlocks();
+    
+    /**
+     * Get the changed blocks
+     * @return
+     */
+    IBlockEntry[] getBlocks();
+    
+    /**
+     * Get the changed biomes
+     * @return
+     */
+    IBiomeEntry[] getChangedBiomes();
 }

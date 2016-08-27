@@ -127,7 +127,7 @@ public interface IBlockPlacer {
     boolean isPaused();
 
     /**
-     * Wrap action into AsyncWorldEdit job and perform it asynchronicly
+     * Wrap action into AsyncWorldEdit job and perform it asynchronously
      *
      * @param editSession
      * @param player
@@ -138,7 +138,7 @@ public interface IBlockPlacer {
             final IFuncParamEx<Integer, ICancelabeEditSession, MaxChangedBlocksException> action);
     
     /**
-     * Perform an async command asynchronicly
+     * Perform an async command asynchronously
      *
      * @param editSession
      * @param asyncCommand
