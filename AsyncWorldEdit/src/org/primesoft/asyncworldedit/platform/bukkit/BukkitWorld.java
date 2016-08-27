@@ -62,7 +62,7 @@ public class BukkitWorld implements IWorld {
     }
 
     @Override
-    public UUID getUID() {
+    public UUID getUUID() {
         return m_world.getUID();
     }
 

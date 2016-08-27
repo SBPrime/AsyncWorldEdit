@@ -89,7 +89,7 @@ class BlocksHubIntegrationV2 implements IBlocksHubIntegration {
         BlockData newData = (newBlock == null) ? BlockData.AIR : new BlockData(newBlock.getType(), newBlock.getData());
 
         try {
-            return m_blocksApi.canPlace(playerEntry.getUUID(), world.getUID(), 
+            return m_blocksApi.canPlace(playerEntry.getUUID(), world.getUUID(), 
                     new org.primesoft.blockshub.api.Vector(location.getX(), location.getY(), location.getZ()), oldData, newData);
         } catch (Exception ex) {
             log(String.format("Error checking block place perms: {0]", ex.toString()));
@@ -130,7 +130,7 @@ class BlocksHubIntegrationV2 implements IBlocksHubIntegration {
 
         try {
             m_blocksApi.logBlock(new org.primesoft.blockshub.api.Vector(location.getX(), location.getY(), location.getZ()),
-                    playerEntry.getUUID(), world.getUID(),
+                    playerEntry.getUUID(), world.getUUID(),
                     oldData,
                     newData);
         } catch (Exception ex) {
@@ -158,7 +158,7 @@ class BlocksHubIntegrationV2 implements IBlocksHubIntegration {
         }
 
         try {
-            return m_blocksApi.hasAccess(playerEntry.getUUID(), world.getUID(), 
+            return m_blocksApi.hasAccess(playerEntry.getUUID(), world.getUUID(), 
                     new org.primesoft.blockshub.api.Vector(location.getX(), location.getY(), location.getZ()));
         } catch (Exception ex) {
             log(String.format("Error checking block place perms: {0]", ex.toString()));

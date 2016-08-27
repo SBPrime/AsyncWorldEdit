@@ -47,7 +47,7 @@ import org.primesoft.asyncworldedit.api.IChunk;
  *
  * @author SBPrime
  */
-public class BukkitChunk extends IChunk {
+public class BukkitChunk implements IChunk {
 
     private final Chunk m_chunk;
 
