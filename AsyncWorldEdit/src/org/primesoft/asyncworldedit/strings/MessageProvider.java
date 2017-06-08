@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit.strings;
 
 import java.io.File;
+import java.io.FileInputReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -217,7 +218,7 @@ public class MessageProvider {
         }
         messages.clear();
 
-        Configuration strings = YamlConfiguration.loadConfiguration(f);
+        Configuration strings = YamlConfiguration.loadConfiguration(new FileInputReader(f));
         if (strings == null) {
             return false;
         }
