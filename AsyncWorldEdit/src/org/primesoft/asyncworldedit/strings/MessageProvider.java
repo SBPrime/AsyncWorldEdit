@@ -41,24 +41,23 @@
 package org.primesoft.asyncworldedit.strings;
 
 import java.io.File;
-import java.io.FileInputReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
+import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.Pair;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  *
@@ -218,14 +217,23 @@ public class MessageProvider {
         }
         messages.clear();
 
-        Configuration strings = YamlConfiguration.loadConfiguration(new FileInputReader(f));
-        if (strings == null) {
+        Yaml yaml = new Yaml();
+        
+        Object o = yaml.load(f);
+        Map data = (Map)(o instanceof Map ? o : null);
+        if (data == null) {
             return false;
         }
 
         synchronized (messages) {
-            for (String s : strings.getKeys(false)) {
-                messages.put(s.toLowerCase(), format(strings.get(s).toString()));
+            for (Object key : data.keySet()) {
+                Object value = data.get(key);
+                
+                if (value instanceof Map || value == null) {
+                    continue;
+                }
+                
+                messages.put(key.toString().toLowerCase(), format(value.toString()));
             }
         }
         return true;
