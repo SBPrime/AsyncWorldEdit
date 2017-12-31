@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -41,38 +48,38 @@
 package org.primesoft.asyncworldedit.playerManager;
 
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
 
 import java.util.HashMap;
 import java.util.UUID;
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.inner.IWorldeditIntegratorInner;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.ConfigUndo;
+import org.primesoft.asyncworldedit.platform.api.IPlayerStorage;
 
 /**
  *
  * @author SBPrime
  */
-public class PlayerManager implements IPlayerManager {
+public class PlayerManager implements IPlayerManager, IPlayerStorage {
 
     final static UUID UUID_CONSOLE = UUID.randomUUID();
     final static UUID UUID_UNKNOWN = UUID.randomUUID();
 
-    final static IPlayerEntry CONSOLE = new FakePlayerEntry("<Console>", UUID_CONSOLE, true);
-    final static IPlayerEntry UNKNOWN = new FakePlayerEntry("<Unknown>", UUID_UNKNOWN, false);
+    final static IPlayerEntry CONSOLE = new NoPlatformPlayerEntry("<Console>", UUID_CONSOLE, true);
+    final static IPlayerEntry UNKNOWN = new NoPlatformPlayerEntry("<Unknown>", UUID_UNKNOWN, false);
 
-    
-    
-    private final AsyncWorldEditBukkit m_parrent;
+    private final IAsyncWorldEditCore m_parrent;
 
     /**
      * List of know players
      */
     private final HashMap<UUID, IPlayerEntry> m_playersUids;
 
-    public PlayerManager(AsyncWorldEditBukkit parent) {
+    public PlayerManager(IAsyncWorldEditCore parent) {
         m_playersUids = new HashMap<UUID, IPlayerEntry>();
         m_parrent = parent;
 
@@ -83,88 +90,132 @@ public class PlayerManager implements IPlayerManager {
     }
 
     /**
-     * Initialize the player manager
-     */
-    public void initalize() {
-        for (Player p : m_parrent.getServer().getOnlinePlayers()) {
-            addPlayer(new PlayerEntry(p));
-        }
-    }
-    
-    
-    /**
      * Update AWE permission groups
      */
-    public void updateGroups()
-    {
-        synchronized (m_playersUids)
-        {
-            for (IPlayerEntry pe : m_playersUids.values())
-            {
-                //Player player = pe.getPlayer();
-                //pe.update(player);//, PermissionManager.getPermissionGroup(player));
+    public void updateGroups() {
+        synchronized (m_playersUids) {
+            for (IPlayerEntry pe : m_playersUids.values()) {
                 pe.updatePermissionGroup();
             }
         }
     }
 
-    /**
-     * Wrap new player
-     *
-     * @param player
-     * @return
-     */
+    @Override
     public IPlayerEntry addPlayer(IPlayerEntry player) {
-        if (player == null) {
-            return CONSOLE;
-        }
-
         UUID uuid = player.getUUID();
-        String pName = player.getName();
+
         synchronized (m_playersUids) {
             IPlayerEntry wrapper = m_playersUids.get(uuid);
 
+            if (wrapper == null) {
+                IBlockPlacer bp = m_parrent.getBlockPlacer();
+                IPlayerEntry[] players = bp.getAllPlayers();
+                for (IPlayerEntry entry : players) {
+                    if (entry.getUUID().equals(uuid)) {
+                        wrapper = entry;
+                        break;
+                    }
+                }
+            }
+
             if (wrapper != null) {
                 wrapper.update(player);
-                wrapper.updatePermissionGroup();
-                
                 return wrapper;
             }
 
             m_playersUids.put(uuid, player);
+
             return player;
         }
     }
 
-    /**
-     * Remove player
-     *
-     * @param player
-     */
-    public void removePlayer(Player player) {
-        if (player == null) {
-            return;
-        }
-
-        UUID uuid = player.getUniqueId();
+    @Override
+    public void removePlayer(UUID uuid) {
         IPlayerEntry entry;
         synchronized (m_playersUids) {
             entry = m_playersUids.remove(uuid);
         }
 
-        if (entry != null && entry.getPermissionGroup().getCleanOnLogout()) {
-            m_parrent.getBlockPlacer().purge(entry);
+        if (entry != null) {
+            if (entry.getPermissionGroup().getCleanOnLogout()) {
+                m_parrent.getBlockPlacer().purge(entry);
+            }
+
+            entry.dispose();
+        }
+
+        ConfigUndo undoConfig = ConfigProvider.undo();
+        if (undoConfig != null && undoConfig.cleanOnLogout()) {
+            IWorldeditIntegratorInner integrator = m_parrent.getWorldEditIntegrator();
+            if (integrator != null) {
+                integrator.removeSession(entry);
+            }
         }
     }
 
     /**
-     * Get the player wrapper based on bukkit player class (null = console)
+     * The console player UUID
      *
-     * @param player
      * @return
      */
-    public IPlayerEntry getPlayer(Player player) {
-        return getPlayer(player != null ? player.getUniqueId() : UUID_CONSOLE);
+    @Override
+    public UUID getUuidConsole() {
+        return UUID_CONSOLE;
+    }
+
+    /**
+     * The unknown player UUID
+     *
+     * @return
+     */
+    @Override
+    public UUID getUuidUnknown() {
+        return UUID_UNKNOWN;
+    }
+
+    /**
+     * Get the console player entry
+     *
+     * @return
+     */
+    @Override
+    public IPlayerEntry getConsolePlayer() {
+        return CONSOLE;
+    }
+
+    /**
+     * Get the unknown player entry
+     *
+     * @return
+     */
+    @Override
+    public IPlayerEntry getUnknownPlayer() {
+        return UNKNOWN;
+    }
+
+    /**
+     * Create a fake player entry (do not add to the manager)
+     *
+     * @param uuid
+     * @param name
+     * @param group
+     * @return
+     */
+    @Override
+    public IPlayerEntry createFakePlayer(String name, UUID uuid, IPermissionGroup group) {
+        return new NoPlatformPlayerEntry(name, uuid, group, false);
+    }
+
+    /**
+     * Create a fake player entry (do not add to the manager)
+     *
+     * @param name
+     * @param uuid
+     * @return
+     */
+    @Override
+    public IPlayerEntry createFakePlayer(String name, UUID uuid) {
+        return new NoPlatformPlayerEntry(name, uuid, false);
     }
 
     /**
@@ -252,35 +303,5 @@ public class PlayerManager implements IPlayerManager {
         }
 
         return UNKNOWN;
-    }
-
-    @Override
-    public UUID getUuidConsole() {
-        return UUID_CONSOLE;
-    }
-
-    @Override
-    public UUID getUuidUnknown() {
-        return UUID_UNKNOWN;
-    }
-
-    @Override
-    public IPlayerEntry getConsolePlayer() {
-        return CONSOLE;
-    }
-
-    @Override
-    public IPlayerEntry getUnknownPlayer() {
-        return UNKNOWN;
-    }
-    
-    @Override
-    public IPlayerEntry createFakePlayer(String name, UUID uuid, IPermissionGroup group) {
-        return new FakePlayerEntry(name, uuid, group);
-    }
-
-    @Override
-    public IPlayerEntry createFakePlayer(String name, UUID uuid) {
-        return new FakePlayerEntry(name, uuid);
     }
 }

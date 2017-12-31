@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,48 +47,85 @@
  */
 package org.primesoft.asyncworldedit.playerManager;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import java.util.UUID;
-import org.bukkit.entity.Player;
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
-import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
+import static org.primesoft.asyncworldedit.LoggerProvider.sayConsole;
 import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.permissions.IPermission;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
-import org.primesoft.asyncworldedit.permissions.PermissionManager;
+import org.primesoft.asyncworldedit.core.AwePlatform;
+import org.primesoft.asyncworldedit.events.BlockRenderCountEvent;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
  *
  * @author SBPrime
  */
-public class PlayerEntry implements IPlayerEntry {
-
-    private Player m_player;
+public abstract class PlayerEntry implements IPlayerEntry {
     private String m_name;
     private final UUID m_uuid;
     private boolean m_mode;
+    private boolean m_undoDisabled;
+    private boolean m_isDisposed;
     private IPermissionGroup m_group;
     private final boolean m_canTalk;
-    private boolean m_isDisposed;
+    private long m_lastMessageTime = 0;
+    private String m_lastMessage = null;
+    private Integer m_rendererBlocks = null;
+    private final Map<MessageSystem, Boolean> m_messageSystemOverride = new HashMap<MessageSystem, Boolean>();
 
-    public PlayerEntry(Player player) {
-        this(player, player.getName(), PermissionGroup.getDefaultGroup());
+    /**
+     * The wait mutex
+     */
+    private final Object m_waitMutex = new Object();
+
+
+    protected PlayerEntry(String name, UUID uuid, IPermissionGroup group) {
+        this(name, uuid, group, false);
     }
     
-    PlayerEntry(Player player, String name, IPermissionGroup group) {
-        this(player, name, player.getUniqueId(), group, true);
+    protected PlayerEntry(String name, UUID uuid) {
+        this(name, uuid, PermissionGroup.getDefaultGroup(), false);
     }
 
-    protected PlayerEntry(Player player, String name, UUID uuid,
+    protected PlayerEntry(String name, UUID uuid,
             IPermissionGroup group, boolean canTalk) {
         m_canTalk = canTalk;
         m_group = group;
-        m_player = player;
         m_uuid = uuid;
         m_name = name;
         m_mode = group.isOnByDefault();
+        m_undoDisabled = group.isUndoDisabled();
+    }
+
+    /**
+     * Set the permission group
+     * @param permissionGroup 
+     */
+    protected void setPermissionGroup(IPermissionGroup permissionGroup) {
+        m_group = permissionGroup;
+    }
+    
+    /**
+     * Is the entry disposed
+     *
+     * @return
+     */
+    @Override
+    public boolean isDisposed() {
+        return m_isDisposed;
+    }
+
+    /**
+     * DIspose the player entry
+     */
+    @Override
+    public void dispose() {
+        m_isDisposed = true;
     }
 
     @Override
@@ -89,21 +133,33 @@ public class PlayerEntry implements IPlayerEntry {
         if (msg == null) {
             return;
         }
-        if (m_player != null) {
-            if (m_player.isOnline()) {
-                m_player.sendRawMessage(msg);
-            }
+
+        long now = System.currentTimeMillis();
+        if (now - m_lastMessageTime < ConfigProvider.renderer().getQueueTalkCooldown()
+                && msg.equals(m_lastMessage)) {
             return;
         }
 
+        m_lastMessage = msg;
+        m_lastMessageTime = now;
+
+        if (sendRawMessage(msg)) {
+            return;
+        }
+        
+
         if (m_canTalk) {
-            AsyncWorldEditBukkit.sayConsole(msg);
+            sayConsole(msg);
         }
     }
-
-    public Player getPlayer() {
-        return m_player;
-    }
+    
+    
+    /**
+     * Send raw message to player
+     * @param msg
+     * @return 
+     */
+    protected abstract boolean sendRawMessage(String msg);
 
     @Override
     public UUID getUUID() {
@@ -118,6 +174,12 @@ public class PlayerEntry implements IPlayerEntry {
     @Override
     public boolean getAweMode() {
         return m_mode;
+    }
+    
+    
+    @Override
+    public boolean isUndoOff() {
+        return m_undoDisabled;
     }
 
     @Override
@@ -134,9 +196,21 @@ public class PlayerEntry implements IPlayerEntry {
     }
 
     @Override
-    public boolean isAllowed(IPermission permission) {
-        return PermissionManager.isAllowed(m_player, permission);
+    public void setUndoMode(boolean mode) {
+        mode = !mode;
+        if (mode == m_undoDisabled) {
+            return;
+        }
+
+        m_undoDisabled = mode;
+
+        say(MessageType.CMD_UNDO_MODE_CHANGED.format(!mode
+                ? MessageType.CMD_UNDO_MODE_ON.format() : MessageType.CMD_UNDO_MODE_OFF.format()));
+
     }
+
+    @Override
+    public abstract boolean isAllowed(IPermission permission);
 
     /**
      * Is this player the console
@@ -154,16 +228,10 @@ public class PlayerEntry implements IPlayerEntry {
     }
 
     @Override
-    public boolean isPlayer() {
-        return m_player != null
-                && !PlayerManager.UUID_CONSOLE.equals(m_uuid)
-                && !PlayerManager.UUID_UNKNOWN.equals(m_uuid);
-    }
+    public abstract boolean isPlayer();
 
     @Override
-    public boolean isInGame() {
-        return isPlayer() && m_player.isOnline();
-    }
+    public abstract boolean isInGame();
 
     @Override
     public int hashCode() {
@@ -191,108 +259,75 @@ public class PlayerEntry implements IPlayerEntry {
         return m_group;
     }
 
-        /**
-     * Set the permission group
-     * @param permissionGroup 
-     */
-    protected void setPermissionGroup(IPermissionGroup permissionGroup) {
-        m_group = permissionGroup;
-    }
-
-    
     /**
      * Update the player after relogin
      *
      * @param player
      */
     @Override
-    public void update(IPlayerEntry player) {
-        if (!(player instanceof PlayerEntry)) {
-            return;
-        }
-
-        setPermissionGroup(player.getPermissionGroup());
-        m_player = ((PlayerEntry) player).getPlayer();
-    }
+    public abstract void update(IPlayerEntry player);
 
     @Override
-    public void updatePermissionGroup() {
-        setPermissionGroup(PermissionManager.getPermissionGroup(m_player));
-    }
+    public abstract void updatePermissionGroup();
+    
 
-    @Override
-    public void dispose() {
-        m_isDisposed = true;
-    }
-
-    @Override
-    public boolean isUndoOff() {
-        return false;
-    }
-
+    /**
+     * Get the wait mutex
+     *
+     * @return
+     */
     @Override
     public Object getWaitMutex() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isDisposed() {
-        return m_isDisposed;
-    }
-
-    @Override
-    public void setUndoMode(boolean mode) {
-        log("******************************************************************************");
-        log("******************************************************************************");
-        log("**                                                                          **");
-        log("** Undo disable is not available for this version of the plugin             **");
-        log("**                                                                          **");
-        log("******************************************************************************");
-        log("******************************************************************************");
+        return m_waitMutex;
     }
 
     @Override
     public void setMessaging(MessageSystem system, boolean state) {
-        log("******************************************************************************");
-        log("******************************************************************************");
-        log("**                                                                          **");
-        log("** Messagin system changes are not available for this version of the plugin **");
-        log("**                                                                          **");
-        log("******************************************************************************");
-        log("******************************************************************************");
+        m_messageSystemOverride.put(system, state);
     }
 
     @Override
     public boolean getMessaging(MessageSystem system) {
-        return true;
+        if (m_messageSystemOverride.containsKey(system)) {
+            return m_messageSystemOverride.get(system);
+        }
+
+        switch (system) {
+            default:
+                return false;
+            case BAR:
+                return m_group.isBarApiProgressEnabled();
+            case CHAT:
+                return m_group.isChatProgressEnabled();
+            case TALKATIVE:
+                return m_group.isTalkative();
+        }
     }
 
     @Override
     public int getRenderBlocks() {
-        log("******************************************************************************");
-        log("******************************************************************************");
-        log("**                                                                          **");
-        log("** Render block per player are not available for this version of the plugin **");
-        log("**                                                                          **");
-        log("******************************************************************************");
-        log("******************************************************************************");
+        Integer tmp = m_rendererBlocks;
+        if (tmp == null) {
+            return m_group.getRendererBlocks();
+        }
 
-        return 0;
+        return tmp;
     }
 
     @Override
     public void setRenderBlocks(Integer b) {
-        log("******************************************************************************");
-        log("******************************************************************************");
-        log("**                                                                          **");
-        log("** Render block per player are not available for this version of the plugin **");
-        log("**                                                                          **");
-        log("******************************************************************************");
-        log("******************************************************************************");
+        Integer old = m_rendererBlocks;
+        
+        if (b == null || b > m_group.getRendererBlocks()) {
+            m_rendererBlocks = null;
+        } else {
+            m_rendererBlocks = b;
+        }
+        
+        AwePlatform.getInstance().getCore().getEventBus().post(new BlockRenderCountEvent(this, old, b));
     }
 
     @Override
-    public boolean isFake() {
-        return false;
-    }
+    public abstract boolean isFake();    
+    
 }

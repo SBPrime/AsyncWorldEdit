@@ -69,10 +69,46 @@ public interface IDirectChunkCommands {
      * Create the relight chunk command
      * @param playerEntry The player entry
      * @param region Region to clear
+     * @param vanilla Use vanilla light calculation
+     * @return 
+     */
+    IAsyncCommand createRelight(IPlayerEntry playerEntry, Region region, boolean vanilla);
+    
+    /**
+     * Create the relight chunk command (uses the vanila relight)
+     * @param playerEntry The player entry
+     * @param region Region to clear
      * @return 
      */
     IAsyncCommand createRelight(IPlayerEntry playerEntry, Region region);
 
+    /**
+     * Create the copy to clipboard command
+     * @param playerEntry
+     * @param region
+     * @param mask
+     * @param copyBiome
+     * @param clipboard
+     * @return 
+     */
+    IAsyncCommand createCopy(IPlayerEntry playerEntry, Region region, Mask mask, Clipboard clipboard, boolean copyBiome);
+
+    /**
+     * Create the clipboard paste command
+     * @param playerEntry
+     * @param position
+     * @param world
+     * @param mask
+     * @param copyBiome
+     * @param clipboard
+     * @param ignoreAirBlocks
+     * @param relight
+     * @return 
+     */
+    IAsyncCommand createPaste(IPlayerEntry playerEntry, Location position, World world, Mask mask, ClipboardHolder clipboard, 
+            boolean ignoreAirBlocks, boolean relight, boolean copyBiome);
+    
+    
     /**
      * Create the copy to clipboard command
      * @param playerEntry

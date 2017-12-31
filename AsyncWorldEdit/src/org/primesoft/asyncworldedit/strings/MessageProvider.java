@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -51,9 +58,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.Pair;
@@ -63,8 +67,7 @@ import org.yaml.snakeyaml.Yaml;
  *
  * @author SBPrime
  */
-public class MessageProvider {
-
+public abstract class MessageProvider {
     /**
      * Color entry pattern
      */
@@ -73,20 +76,23 @@ public class MessageProvider {
     /**
      * The loaded texts
      */
-    public final static HashMap<String, String> s_messages = new HashMap<String, String>();
+    public final HashMap<String, String> m_messages = new HashMap<String, String>();
 
     /**
      * The loaded default texts
      */
-    public final static HashMap<String, String> s_default = new HashMap<String, String>();
+    public final HashMap<String, String> m_default = new HashMap<String, String>();
+
+    protected MessageProvider() {
+        MessageType.initializeMessageProvider(this);
+    }
 
     /**
      * Save english.yml to plugins folder
      *
-     * @param plugin
      * @return
      */
-    public static boolean saveDefault(JavaPlugin plugin) {
+    public static boolean saveDefault() {
         File pluginFolder = ConfigProvider.getPluginFolder();
 
         if (!pluginFolder.canRead()) {
@@ -111,7 +117,7 @@ public class MessageProvider {
                 return false;
             }
 
-            input = plugin.getClass().getResourceAsStream("/english.yml");
+            input = MessageProvider.class.getResourceAsStream("/english.yml");
             if (input == null) {
                 return false;
             }
@@ -151,14 +157,14 @@ public class MessageProvider {
      *
      * @return
      */
-    public static boolean loadDefault(JavaPlugin plugin) {
+    public boolean loadDefault() {
         InputStream is = null;
         try {
-            is = plugin.getClass().getResourceAsStream("/english.yml");
+            is = MessageProvider.class.getResourceAsStream("/english.yml");
             if (is == null) {
                 return false;
             }
-            return loadFile(is, s_default);
+            return loadFile(is, m_default);
         } finally {
             if (is != null) {
                 try {
@@ -176,7 +182,7 @@ public class MessageProvider {
      * @param file
      * @return
      */
-    public static boolean loadFile(String file) {
+    public boolean loadFile(String file) {
         if (file == null || file.length() == 0) {
             return false;
         }
@@ -189,7 +195,7 @@ public class MessageProvider {
         try {
             is = new FileInputStream(f);
 
-            return loadFile(is, s_messages);
+            return loadFile(is, m_messages);
         } catch (IOException ex) {
             ExceptionHelper.printException(ex, "Unable to load strings file.");
             return false;
@@ -211,31 +217,29 @@ public class MessageProvider {
      * @param messages
      * @return
      */
-    private static boolean loadFile(InputStream f, HashMap<String, String> messages) {
+    private boolean loadFile(InputStream f, HashMap<String, String> messages) {
         if (f == null || messages == null) {
             return false;
         }
         messages.clear();
 
         Yaml yaml = new Yaml();
-        
+
         Object o = yaml.load(f);
         Map data = (Map)(o instanceof Map ? o : null);
         if (data == null) {
             return false;
         }
-
-        synchronized (messages) {
-            for (Object key : data.keySet()) {
-                Object value = data.get(key);
-                
-                if (value instanceof Map || value == null) {
-                    continue;
-                }
-                
-                messages.put(key.toString().toLowerCase(), format(value.toString()));
+        for (Object key : data.keySet()) {
+            Object value = data.get(key);
+            
+            if (value instanceof Map || value == null) {
+                continue;
             }
+            
+            messages.put(key.toString().toLowerCase(), format(value.toString()));
         }
+        
         return true;
     }
 
@@ -245,7 +249,7 @@ public class MessageProvider {
      * @param t
      * @return
      */
-    private static String format(String t) {
+    private String format(String t) {
         if (t == null) {
             return "";
         }
@@ -283,16 +287,7 @@ public class MessageProvider {
      * @param s
      * @return
      */
-    private static String getColor(String s) {
-        if (s == null || s.length() < 2) {
-            return "";
-        }
-        try {
-            return ChatColor.valueOf(s.substring(1, s.length() - 1)).toString();
-        } catch (IllegalArgumentException ex) {
-            return "";
-        }
-    }
+    protected abstract String getColor(String s);
 
     /**
      * Format the message
@@ -301,22 +296,22 @@ public class MessageProvider {
      * @param params
      * @return
      */
-    public static String formatMessage(MessageType messageType, Object... params) {
+    public String formatMessage(MessageType messageType, Object... params) {
         if (messageType == null) {
             return "";
         }
 
         String key = messageType.getKey().toLowerCase();
         String message;
-        synchronized (s_messages) {
-            message = s_messages.get(key);
+        synchronized (m_messages) {
+            message = m_messages.get(key);
         }
         if (message == null) {
-            synchronized (s_default) {
-                message = s_default.get(key);
+            synchronized (m_default) {
+                message = m_default.get(key);
             }
         }
-        
+
         if (message == null) {
             return key;
         }
@@ -324,6 +319,7 @@ public class MessageProvider {
         try {
             return String.format(message, params);
         } catch (IllegalFormatException ex) {
+            ExceptionHelper.printException(ex, String.format("Unable to format message: %1$s", messageType.name()));
             return "";
         } catch (NullPointerException ex) {
             return "";

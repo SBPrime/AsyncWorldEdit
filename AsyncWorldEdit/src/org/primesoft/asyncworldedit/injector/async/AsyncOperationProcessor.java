@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -44,15 +51,15 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.primesoft.asyncworldedit.injector.validators.OperationValidator;
 import org.primesoft.asyncworldedit.injector.validators.StackValidator;
 import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
-import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -61,12 +68,11 @@ import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
 import org.primesoft.asyncworldedit.injector.scanner.ClassScannerResult;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.OperationAction;
-import org.primesoft.asyncworldedit.strings.MessageType;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.Pair;
 import org.primesoft.asyncworldedit.utils.Reflection;
-import org.primesoft.asyncworldedit.utils.SessionCanceled;
+import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.AsyncTask;
@@ -81,12 +87,12 @@ public class AsyncOperationProcessor implements IOperationProcessor {
     /**
      * Bukkit schedule
      */
-    private final BukkitScheduler m_schedule;
+    private final IScheduler m_schedule;
 
     /**
-     * The parent plugin
+     * The AWE core
      */
-    private final AsyncWorldEditBukkit m_plugin;
+    private final IAsyncWorldEditCore m_aweCore;
 
     /**
      * Async block placer
@@ -98,11 +104,11 @@ public class AsyncOperationProcessor implements IOperationProcessor {
      */
     private final ClassScanner m_classScanner;
 
-    public AsyncOperationProcessor(AsyncWorldEditBukkit plugin, ClassScanner classScanner) {
-        m_plugin = plugin;
-        m_schedule = m_plugin.getServer().getScheduler();
-        m_blockPlacer = m_plugin.getBlockPlacer();
-        m_classScanner = classScanner;
+    public AsyncOperationProcessor(IAsyncWorldEditCore aweCore) {
+        m_aweCore = aweCore;
+        m_schedule = aweCore.getPlatform().getScheduler();
+        m_blockPlacer = m_aweCore.getBlockPlacer();
+        m_classScanner = m_aweCore.getPlatform().getClasScanner();
     }
 
     @Override
@@ -145,7 +151,8 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         injectEditSession(sessions, cancelableSession);
 
         m_blockPlacer.addJob(playerEntry, job);
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(cancelableSession, playerEntry,
+
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(cancelableSession, playerEntry,
                 name, m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -169,12 +176,14 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         if (!StackValidator.isVaild(operationName) || !OperationValidator.isValid(op)) {
             action.Execute(op);
             return;
+
         }
 
         /**
          * What to do if scanner finds multiple different edit sessions?
          */
         List<ClassScannerResult> sessions = m_classScanner.scan(new Class<?>[]{AsyncEditSession.class, Region.class}, op);
+
         if (!validate(sessions)) {
             action.Execute(op);
             return;
@@ -201,8 +210,10 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         injectEditSession(sessions, cancelableSession);
 
         m_blockPlacer.addJob(playerEntry, job);
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(cancelableSession, playerEntry,
-                name, m_blockPlacer, job) {
+
+        SchedulerUtils.runTaskAsynchronously(m_schedule,
+                new AsyncTask(cancelableSession, playerEntry,
+                        name, m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
@@ -215,7 +226,8 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                             return ErrorHandler.handleError(playerEntry, name, session, ex);
                         }
                     }
-                });
+                }
+        );
     }
 
     /**
@@ -267,7 +279,8 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                 log("* No EditSession found");
             }
         }
-        return session != null;
+        return session
+                != null;
     }
 
     /**
@@ -322,7 +335,8 @@ public class AsyncOperationProcessor implements IOperationProcessor {
             }
         }
 
-        for (Pair<Region, List<ClassScannerResult>> rEntry : regions.values()) {
+        for (Pair<Region, List<ClassScannerResult>> rEntry
+                : regions.values()) {
             Region region = rEntry.getX1();
             for (ClassScannerResult entry : rEntry.getX2()) {
                 Class<?> type = entry.getType();

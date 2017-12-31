@@ -1,13 +1,28 @@
 awe:
   #Do not change
-  version: 3
+  version: 18
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
-    interval: 15
+    interval: 1
     #how often that a user will get an update on the current que (number of intervals)
     talk-interval: 10
+    #number of seconds before repeating a message
+    talk-cooldown: 5
     #maximum size of the blocks queue
-    queue-max-size: 10000000
+    queue-max-size-hard: 10000000
+    #maximum number of blocks on the global queue before unlocing it
+    queue-max-size-soft: 5000000
+  memory:
+    #minumum free memory (in kilobytes)
+    #When the server memory runs below this value all operations are going to cancel
+    #Use -1 for no limit
+    minimumHard: 400000
+    #the minimum free memory (In kulobytes) required to allow
+    #block queuing after the hard limit is reached (soft > hard)
+    minimumSoft: 600000
+    #Force GC to run each X miliseconds (-1 - disable) when memory is low
+    #Warning: if this is not handled correctly it can lead to TPS drop and timeouts!
+    gcTimeout: 10000
   dispatcher:
     #maximum number of jobs performed in one run
     max-jobs: 2000
@@ -29,10 +44,71 @@ awe:
   debug: false
   #Blocks hub plugin options  
   blocksHub:
-    #Enable block chang loggin
-    logBlocks: true
-    #Enable blocks access control
-    checkAccess: false
+    log:
+        #Enable block chang loggin
+        isEnabled: true
+        #Enable block change loggin for Direct Chunk API
+        isDcEnabled: false
+    #The block access control
+    access:
+        #Enable blocks access control
+        isEnabled: false
+        #Enable blocks access control for Direct Chunk API
+        isDcEnabled: false
+        #Allow NULL player to place blocks (used by some plugins)
+        allowNull: false
+        #Allow unknown player to place blocks
+        allowUnknown: true
+        #Allow console player to place blocks
+        allowConsole: true
+        #Allow offline player to place blocks
+        allowOffline: false
+  undo:
+    #What to do with the undo data when server is running low on memory and 
+    #the operation is running on the main thread
+    #Allowed values: 
+    # * off - memory is not checked while storing undo data (can lead to server crash)
+    # * drop - do not store the undo data
+    # * cancel - cancel current operation (throws max block changed)    
+    memoryLowMain: cancel
+    #What to do with the undo data when server is running low on memory and 
+    #the operation is not running on the main thread
+    #Allowed values: 
+    # * off - memory is not checked while storing undo data (can lead to server crash)
+    # * drop - do not store the undo data
+    # * cancel - cancel current operation (throws max block changed)    
+    # * wait - wait for GC to free up some memory
+    memoryLow: wait
+    #What to do with the undo data when server is running low on memory and 
+    #the operation is not running on the main thread
+    #Allowed values: 
+    # * off - memory is not checked while storing undo data (can lead to server crash)
+    # * drop - do not store the undo data
+    # * wait - wait for GC to free up some memory
+    memoryLowStorage: wait
+    #Store the undo data on disk (a bit slower but does not use so much RAM)
+    storeOnDisk: true
+    #Remove the WorldEdit session on player logout    
+    cleanOnLogout: true
+    #Should the undo be keept on disk when the undo is no logner used in WE
+    keepUndoFile: false
+  #The direct chunk options
+  directChunk:
+    #Do auto relight after each edit    
+    autoRelight: true
+    #New chunk light level (0-15)
+    newSectionLightLevel: 0
+    #Placed block light level (0-15), -1 for auto
+    blockLightLevel: -1
+  #Permissions options
+  permissions:
+    #If you are OP you will have all AWE permissions
+    #Warning this causes the negative permissions to not work.
+    opHasAll: true
+    #Disable the global queue bypass, the player queue bypass works like before
+    #If you do not want to run out of memory you hsould not set
+    #the disableQueueBypass to false and opHasAll to true
+    disableQueueBypass: true
   #Player permission groups.
   #Permission node: AWE.Groups.<group name>  
   permissionGroups:
@@ -51,6 +127,8 @@ awe:
       cleanOnLogout: true
       #Default AWE status for loging in players 
       defaultMode: on
+      #Disable the WorldEdit undo
+      disableUndo: false
       renderer:
         #blocks to place (per-interval), this determines the max speed of block placing
         #if you experience lag lower this and the next number (time), use -1 for no limit
@@ -65,67 +143,102 @@ awe:
       messages:
         #Whether or not to show progress using BarAPI
         progress-bar: true
+        #minimum number of blocks to display the progress bar
+        progress-bar-min: 100
         #Whether or not to show progress using the chat messages
         progress-chat: true
         #is async world edit talkative 
         talkative: true
-#Example of additional vip group:
-#    vip:
-#      #you can remove this, the isDefault is by default set to false
-#      isDefault: false 
-#      maxJobs: -1
-#      cleanOnLogout: false
-#      #You can omit entries with that are same value as in the default group
-#      #defaultMode: on
-#      renderer:
-#        blocks: 20000
-#        time: -1
-  #AWE will make the following WorldEdit actions async
-  enabledOperations:
-    - undo
-    - redo
-    - fillXZ
-    - removeAbove
-    - removeBelow
-    - removeNear
-    - setBlocks
-    - replaceBlocks
-    - makeCuboidFaces
-    - makeCuboidWalls
-    - overlayCuboidBlocks
-    - naturalizeCuboidBlocks
-    - stackCuboidRegion
-    - moveCuboidRegion
-    - drainArea
-    - fixLiquid
-    - makeCylinder
-    - makeSphere
-    - makePyramid
-    - thaw
-    - simulateSnow
-    - green
-    - makePumpkinPatches
-    - makeForest
-    - makeShape
-    - deformRegion
-    - hollowOutRegion
-    - paste
-    - copy
-    - cut
-    - regenerate
-    - center
-    - drawLine
-    - drawSpline
-    - makeBiomeShape
-    - forest
-    - flora
-    - setBiome
-    - loadSchematic
-    - saveSchematic
-    - craftScript
-    - makeFaces
-    - makeWalls
-    - overlayBlocks
-    - naturalizeBlocks
-    - stackRegion
-    - moveRegion
+      #The WorldEdit config override
+      worldedit:
+        #Maximum number of undoos
+        historySize: 15
+        #Maximum number of changed blocks
+        maxBlockChanged: -1
+        #List of dissallowed block ID
+        disallowedBlocks: [6, 7, 14, 15, 16, 26, 27, 28, 29, 39, 31, 32, 33, 34, 36, 37, 38, 39, 40, 46, 50, 51, 56, 59, 69, 73, 74, 75, 76, 77, 81, 83]
+        #The dissallowed black list handling
+        disallowedBlocksUsage:
+          #Use black list in patterns
+          patterns: true
+          #Block set (every block set operation)
+          blockSet: false
+    #Example of additional vip group:
+    #vip:
+    #  #you can remove this, the isDefault is by default set to false
+    #  isDefault: false 
+    #  maxJobs: -1
+    #    cleanOnLogout: false
+    #  #You can omit entries with that are same value as in the default group
+    #  #defaultMode: on
+    #  #Disable the WorldEdit undo
+    #  disableUndo: true
+    #  renderer:
+    #    blocks: 20000
+    #    time: -1
+  #List of WorldEdit operations that AWE won't run in async mode
+  disabledOperations: {}
+  #  - undo
+  #  - redo
+  #  - fillXZ
+  #  - fillXY
+  #  - fillZY
+  #  - fill3d
+  #  - removeAbove
+  #  - removeBelow
+  #  - removeNear
+  #  - setBlocks
+  #  - replaceBlocks
+  #  - makeCuboidFaces
+  #  - makeCuboidWalls
+  #  - overlayCuboidBlocks
+  #  - naturalizeCuboidBlocks
+  #  - stackCuboidRegion
+  #  - moveCuboidRegion
+  #  - drainArea
+  #  - fixLiquid
+  #  - makeCylinder
+  #  - makeSphere
+  #  - makePyramid
+  #  - thaw
+  #  - simulateSnow
+  #  - green
+  #  - makePumpkinPatches
+  #  - makeForest
+  #  - makeShape
+  #  - deformRegion
+  #  - hollowOutRegion
+  #  - paste
+  #  - copy
+  #  - cut
+  #  - regenerate
+  #  - center
+  #  - drawLine
+  #  - drawSpline
+  #  - makeBiomeShape
+  #  - forest
+  #  - flora
+  #  - setBiome
+  #  - loadSchematic
+  #  - saveSchematic
+  #  - craftScript
+  #  - makeFaces
+  #  - makeWalls
+  #  - overlayBlocks
+  #  - naturalizeBlocks
+  #  - stackRegion
+  #  - moveRegion
+  #  - schematicInfo
+  #  - placeSchematic
+  #  - chunkSet
+  #  - chunkClear
+  #  - chunkFill
+  #  - chunkClone
+  #  - chunkPaste
+  #  - chunkCopy
+  #  - chunkRelight
+  #  - brush
+  #  - smooth
+  #  - tool
+  #  - tree
+  #  - pickaxe

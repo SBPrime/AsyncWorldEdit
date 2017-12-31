@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -47,18 +54,21 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.regions.Region;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.scheduler.BukkitTask;
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
-import org.primesoft.asyncworldedit.ChunkWatch;
 import org.primesoft.asyncworldedit.api.IWorld;
-import org.primesoft.asyncworldedit.api.utils.IAction;
-import org.primesoft.asyncworldedit.api.utils.IFunc;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
+import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.api.utils.IAction;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.api.utils.IFunc;
+import org.primesoft.asyncworldedit.configuration.ConfigDispatcher;
+import org.primesoft.asyncworldedit.platform.api.IScheduler;
+import org.primesoft.asyncworldedit.platform.api.ITask;
 import org.primesoft.asyncworldedit.utils.PositionHelper;
 
 /**
@@ -70,6 +80,12 @@ import org.primesoft.asyncworldedit.utils.PositionHelper;
 public class TaskDispatcher implements Runnable, ITaskDispatcher {
 
     /**
+     * List of thred ID's used to detect if perform safe was already started on
+     * that thread
+     */
+    private final HashSet<Long> m_threadMarker = new LinkedHashSet<Long>();
+
+    /**
      * MTA mutex
      */
     private final Object m_mutex = new Object();
@@ -77,17 +93,17 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     /**
      * Bukkit scheduler
      */
-    private final BukkitScheduler m_scheduler;
+    private final IScheduler m_scheduler;
 
     /**
      * The chunk watcher
      */
-    private final ChunkWatch m_chunkWatch;
+    private final IChunkWatch m_chunkWatch;
 
     /**
      * Current scheduler fast task
      */
-    private BukkitTask m_fastTask;
+    private ITask m_fastTask;
 
     /**
      * Number of fast task empty runs remaining
@@ -97,7 +113,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     /**
      * Parent plugin main
      */
-    private final AsyncWorldEditBukkit m_plugin;
+    private final IAsyncWorldEditCore m_aweCore;
 
     /**
      * List of fast tasks (high priority) Use linked list to overcome memory
@@ -148,12 +164,12 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     /**
      * Initialize new instance of the block placer
      *
-     * @param plugin parent
+     * @param core parent
      */
-    public TaskDispatcher(AsyncWorldEditBukkit plugin) {
-        m_scheduler = plugin.getServer().getScheduler();
-        m_plugin = plugin;
-        m_chunkWatch = m_plugin.getChunkWatch();
+    public TaskDispatcher(IAsyncWorldEditCore core) {
+        m_scheduler = core.getPlatform().getScheduler();
+        m_aweCore = core;
+        m_chunkWatch = m_aweCore.getChunkWatch();
 
         m_lastEnter = System.currentTimeMillis();
         startFastTask();
@@ -164,11 +180,11 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     private void startFastTask() {
         synchronized (m_mutex) {
-            m_fastTaskRunsRemaining = ConfigProvider.getDispatcherMaxIdle();
+            m_fastTaskRunsRemaining = ConfigProvider.dispatcher().getMaxIdle();
             if (m_fastTask != null) {
                 return;
             }
-            m_fastTask = m_scheduler.runTaskTimer(m_plugin, this, 1, 1);
+            m_fastTask = m_scheduler.runTaskTimer(this, 1, 1);
         }
     }
 
@@ -180,8 +196,10 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
         long enter = System.currentTimeMillis();
         long runDelta = enter - m_lastEnter;
         long runTime;
-        int jobsCount = ConfigProvider.getDispatcherMaxJobs();
-        int maxTime = ConfigProvider.getDispatcherMaxTime();
+        ConfigDispatcher dConfig = ConfigProvider.dispatcher();
+
+        int jobsCount = dConfig.getMaxJobs();
+        int maxTime = dConfig.getMaxTime();
 
         if (runDelta < 1) {
             runDelta = 0;
@@ -363,6 +381,35 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     }
 
     /**
+     * Try to mark thread
+     *
+     * @param id The thread ID
+     * @return false if the thread was already marked, true if the thread was
+     * not yet marked.
+     */
+    private boolean markThread(long id) {
+        synchronized (m_threadMarker) {
+            if (m_threadMarker.contains(id)) {
+                return false;
+            } else {
+                m_threadMarker.add(id);
+                return true;
+            }
+        }
+    }
+
+    /**
+     * Unmark thread
+     *
+     * @param id The thread ID
+     */
+    private void unmarkThread(long id) {
+        synchronized (m_threadMarker) {
+            m_threadMarker.remove(id);
+        }
+    }
+
+    /**
      * Perform operation using a safe wrapper. If the basic operation fails
      * queue it on dispatcher
      *
@@ -373,32 +420,42 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     @Override
     public void performSafeChunk(Object mutex, IAction action, IWorld world, Vector2D pos) {
-        synchronized (mutex) {
-            int cx = pos.getBlockX();
-            int cz = pos.getBlockZ();
-            String worldName = world != null ? world.getName() : null;
-
-            try {
-                m_chunkWatch.add(cx, cz, worldName);
-                if (canPerform(world, cx, cz)) {
-                    try {
-                        action.execute();
-                        return;
-                    } catch (Exception ex) {
-                        /*
-                         * Exception here indicates that async block get is not
-                         * available. Therefore use the queue fallback.
-                         */
-                        ExceptionHelper.printException(ex,
-                                String.format("Error performing safe operation for %1$s cx: %2$s cz: %3$s Loaded: %4$s",
-                                        worldName, cx, cz, world.isChunkLoaded(cx, cz)));
-                    }
-                }
-            } finally {
-                m_chunkWatch.remove(cx, cz, worldName);
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                action.execute();
+                return;
             }
+
+            synchronized (mutex) {
+                int cx = pos.getBlockX();
+                int cz = pos.getBlockZ();
+                String worldName = world != null ? world.getName() : null;
+
+                try {
+                    m_chunkWatch.add(cx, cz, worldName);
+                    if (canPerform(world, cx, cz)) {
+                        try {
+                            action.execute();
+                            return;
+                        } catch (Exception ex) {
+                            /*
+                             * Exception here indicates that async block get is not
+                             * available. Therefore use the queue fallback.
+                             */
+                            ExceptionHelper.printException(ex,
+                                    String.format("Error performing safe operation for %1$s cx: %2$s cz: %3$s Loaded: %4$s",
+                                            worldName, cx, cz, world.isChunkLoaded(cx, cz)));
+                        }
+                    }
+                } finally {
+                    m_chunkWatch.remove(cx, cz, worldName);
+                }
+            }
+            queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
         }
-        queueFastOperation(action);
     }
 
     /**
@@ -412,32 +469,41 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     @Override
     public void performSafe(Object mutex, IAction action, IWorld world, Vector pos) {
-        synchronized (mutex) {
-            int cx = PositionHelper.positionToChunk(pos.getX());
-            int cz = PositionHelper.positionToChunk(pos.getZ());
-            String worldName = world != null ? world.getName() : null;
-
-            try {
-                m_chunkWatch.add(cx, cz, worldName);
-                if (canPerform(world, cx, cz)) {
-                    try {
-                        action.execute();
-                        return;
-                    } catch (Exception ex) {
-                        /*
-                         * Exception here indicates that async block get is not
-                         * available. Therefore use the queue fallback.
-                         */
-                        ExceptionHelper.printException(ex,
-                                String.format("Error performing safe operation for %1$s cx: %2$s cz: %3$s Loaded: %4$s",
-                                        worldName, cx, cz, world.isChunkLoaded(cx, cz)));
-                    }
-                }
-            } finally {
-                m_chunkWatch.remove(cx, cz, worldName);
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                action.execute();
+                return;
             }
+            synchronized (mutex) {
+                int cx = PositionHelper.positionToChunk(pos.getX());
+                int cz = PositionHelper.positionToChunk(pos.getZ());
+                String worldName = world != null ? world.getName() : null;
+
+                try {
+                    m_chunkWatch.add(cx, cz, worldName);
+                    if (canPerform(world, cx, cz)) {
+                        try {
+                            action.execute();
+                            return;
+                        } catch (Exception ex) {
+                            /*
+                             * Exception here indicates that async block get is not
+                             * available. Therefore use the queue fallback.
+                             */
+                            ExceptionHelper.printException(ex,
+                                    String.format("Error performing safe operation for %1$s cx: %2$s cz: %3$s Loaded: %4$s",
+                                            worldName, cx, cz, world.isChunkLoaded(cx, cz)));
+                        }
+                    }
+                } finally {
+                    m_chunkWatch.remove(cx, cz, worldName);
+                }
+            }
+            queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
         }
-        queueFastOperation(action);
     }
 
     /**
@@ -451,42 +517,51 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     @Override
     public void performSafe(Object mutex, IAction action, IWorld world, Region region) {
-        synchronized (mutex) {
-            Set<Vector2D> chunks = region.getChunks();
-            String worldName = world != null ? world.getName() : null;
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                action.execute();
+                return;
+            }
+            synchronized (mutex) {
+                Set<Vector2D> chunks = region.getChunks();
+                String worldName = world != null ? world.getName() : null;
 
-            try {
-                boolean canPerform = true;
-                for (Vector2D vector : chunks) {
-                    int cx = vector.getBlockX();
-                    int cz = vector.getBlockZ();
-                    m_chunkWatch.add(cx, cz, worldName);
-                    canPerform &= canPerform(world, cx, cz);
-                }
-                if (canPerform) {
-                    try {
-                        action.execute();
-                        return;
-                    } catch (Exception ex) {
-                        /*
-                         * Exception here indicates that async block get is not
-                         * available. Therefore use the queue fallback.
-                         */
-                        ExceptionHelper.printException(ex,
-                                String.format("Error performing safe operation for %1$s for region %2$s",
-                                        worldName, region.toString()));
+                try {
+                    boolean canPerform = true;
+                    for (Vector2D vector : chunks) {
+                        int cx = vector.getBlockX();
+                        int cz = vector.getBlockZ();
+                        m_chunkWatch.add(cx, cz, worldName);
+                        canPerform &= canPerform(world, cx, cz);
+                    }
+                    if (canPerform) {
+                        try {
+                            action.execute();
+                            return;
+                        } catch (Exception ex) {
+                            /*
+                             * Exception here indicates that async block get is not
+                             * available. Therefore use the queue fallback.
+                             */
+                            ExceptionHelper.printException(ex,
+                                    String.format("Error performing safe operation for %1$s for region %2$s",
+                                            worldName, region.toString()));
+                        }
+                    }
+                } finally {
+                    for (Vector2D vector : chunks) {
+                        int cx = vector.getBlockX();
+                        int cz = vector.getBlockZ();
+                        m_chunkWatch.remove(cx, cz, worldName);
                     }
                 }
-            } finally {
-                for (Vector2D vector : chunks) {
-                    int cx = vector.getBlockX();
-                    int cz = vector.getBlockZ();
-                    m_chunkWatch.remove(cx, cz, worldName);
-                }
             }
-        }
 
-        queueFastOperation(action);
+            queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
+        }
     }
 
     /**
@@ -502,41 +577,49 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     @Override
     public <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Region region) {
-        synchronized (mutex) {
-            Set<Vector2D> chunks = region.getChunks();
-            String worldName = world != null ? world.getName() : null;
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                return action.execute();
+            }
+            synchronized (mutex) {
+                Set<Vector2D> chunks = region.getChunks();
+                String worldName = world != null ? world.getName() : null;
 
-            try {
-                boolean canPerform = true;
-                for (Vector2D vector : chunks) {
-                    int cx = vector.getBlockX();
-                    int cz = vector.getBlockZ();
-                    m_chunkWatch.add(cx, cz, worldName);
-                    canPerform &= canPerform(world, cx, cz);
-                }
-                if (canPerform) {
-                    try {
-                        T result = action.execute();
-                        return result;
-                    } catch (Exception ex) {
-                        /*
-                         * Exception here indicates that async block get is not
-                         * available. Therefore use the queue fallback.
-                         */
-                        ExceptionHelper.printException(ex,
-                                String.format("Error performing safe operation for %1$s for region %2$s",
-                                        worldName, region.toString()));
+                try {
+                    boolean canPerform = true;
+                    for (Vector2D vector : chunks) {
+                        int cx = vector.getBlockX();
+                        int cz = vector.getBlockZ();
+                        m_chunkWatch.add(cx, cz, worldName);
+                        canPerform &= canPerform(world, cx, cz);
+                    }
+                    if (canPerform) {
+                        try {
+                            T result = action.execute();
+                            return result;
+                        } catch (Exception ex) {
+                            /*
+                             * Exception here indicates that async block get is not
+                             * available. Therefore use the queue fallback.
+                             */
+                            ExceptionHelper.printException(ex,
+                                    String.format("Error performing safe operation for %1$s for region %2$s",
+                                            worldName, region.toString()));
+                        }
+                    }
+                } finally {
+                    for (Vector2D vector : chunks) {
+                        int cx = vector.getBlockX();
+                        int cz = vector.getBlockZ();
+                        m_chunkWatch.remove(cx, cz, worldName);
                     }
                 }
-            } finally {
-                for (Vector2D vector : chunks) {
-                    int cx = vector.getBlockX();
-                    int cz = vector.getBlockZ();
-                    m_chunkWatch.remove(cx, cz, worldName);
-                }
             }
+            return queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
         }
-        return queueFastOperation(action);
     }
 
     /**
@@ -552,31 +635,39 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     @Override
     public <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Vector pos) {
-        synchronized (mutex) {
-            int cx = PositionHelper.positionToChunk(pos.getX());
-            int cz = PositionHelper.positionToChunk(pos.getZ());
-            String worldName = world != null ? world.getName() : null;
-            try {
-                m_chunkWatch.add(cx, cz, worldName);
-                if (canPerform(world, cx, cz)) {
-                    try {
-                        T result = action.execute();
-                        return result;
-                    } catch (Exception ex) {
-                        /*
-                         * Exception here indicates that async block get is not
-                         * available. Therefore use the queue fallback.
-                         */
-                        ExceptionHelper.printException(ex,
-                                String.format("Error performing safe operation for %1$s cx: %2$s cz: %3$s Loaded: %4$s",
-                                        worldName, cx, cz, world.isChunkLoaded(cx, cz)));
-                    }
-                }
-            } finally {
-                m_chunkWatch.remove(cx, cz, worldName);
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                return action.execute();
             }
+            synchronized (mutex) {
+                int cx = PositionHelper.positionToChunk(pos.getX());
+                int cz = PositionHelper.positionToChunk(pos.getZ());
+                String worldName = world != null ? world.getName() : null;
+                try {
+                    m_chunkWatch.add(cx, cz, worldName);
+                    if (canPerform(world, cx, cz)) {
+                        try {
+                            T result = action.execute();
+                            return result;
+                        } catch (Exception ex) {
+                            /*
+                             * Exception here indicates that async block get is not
+                             * available. Therefore use the queue fallback.
+                             */
+                            ExceptionHelper.printException(ex,
+                                    String.format("Error performing safe operation for %1$s cx: %2$s cz: %3$s Loaded: %4$s",
+                                            worldName, cx, cz, world.isChunkLoaded(cx, cz)));
+                        }
+                    }
+                } finally {
+                    m_chunkWatch.remove(cx, cz, worldName);
+                }
+            }
+            return queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
         }
-        return queueFastOperation(action);
     }
 
     /**
@@ -592,31 +683,39 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     @Override
     public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Vector2D pos) {
-        synchronized (mutex) {
-            int cx = pos.getBlockX();
-            int cz = pos.getBlockZ();
-            String worldName = world != null ? world.getName() : null;
-            try {
-                m_chunkWatch.add(cx, cz, worldName);
-                if (canPerform(world, cx, cz)) {
-                    try {
-                        T result = action.execute();
-                        return result;
-                    } catch (Exception ex) {
-                        /*
-                         * Exception here indicates that async block get is not
-                         * available. Therefore use the queue fallback.
-                         */
-                        ExceptionHelper.printException(ex,
-                                String.format("Error performing safe operation for %1$s cx: %2$s cz: %3$s Loaded: %4$s",
-                                        worldName, cx, cz, world.isChunkLoaded(cx, cz)));
-                    }
-                }
-            } finally {
-                m_chunkWatch.remove(cx, cz, worldName);
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                return action.execute();
             }
+            synchronized (mutex) {
+                int cx = pos.getBlockX();
+                int cz = pos.getBlockZ();
+                String worldName = world != null ? world.getName() : null;
+                try {
+                    m_chunkWatch.add(cx, cz, worldName);
+                    if (canPerform(world, cx, cz)) {
+                        try {
+                            T result = action.execute();
+                            return result;
+                        } catch (Exception ex) {
+                            /*
+                             * Exception here indicates that async block get is not
+                             * available. Therefore use the queue fallback.
+                             */
+                            ExceptionHelper.printException(ex,
+                                    String.format("Error performing safe operation for %1$s cx: %2$s cz: %3$s Loaded: %4$s",
+                                            worldName, cx, cz, world.isChunkLoaded(cx, cz)));
+                        }
+                    }
+                } finally {
+                    m_chunkWatch.remove(cx, cz, worldName);
+                }
+            }
+            return queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
         }
-        return queueFastOperation(action);
     }
 
     /**
@@ -628,19 +727,28 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     @Override
     public void performSafe(Object mutex, IAction action) {
-        synchronized (mutex) {
-            try {
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
                 action.execute();
                 return;
-            } catch (Exception ex) {
-                /*
-                 * Exception here indicates that async block get is not
-                 * available. Therefore use the queue fallback.
-                 */
-                ExceptionHelper.printException(ex, "Error performing safe operation.");
             }
+            synchronized (mutex) {
+                try {
+                    action.execute();
+                    return;
+                } catch (Exception ex) {
+                    /*
+                     * Exception here indicates that async block get is not
+                     * available. Therefore use the queue fallback.
+                     */
+                    ExceptionHelper.printException(ex, "Error performing safe operation.");
+                }
+            }
+            queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
         }
-        queueFastOperation(action);
     }
 
     /**
@@ -654,95 +762,121 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      */
     @Override
     public <T> T performSafe(Object mutex, IFunc<T> action) {
-        synchronized (mutex) {
-            try {
-                T result = action.execute();
-                return result;
-            } catch (Exception ex) {
-                /*
-                 * Exception here indicates that async block get is not
-                 * available. Therefore use the queue fallback.
-                 */
-                ExceptionHelper.printException(ex, "Error performing safe operation.");
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                return action.execute();
             }
+            synchronized (mutex) {
+                try {
+                    T result = action.execute();
+                    return result;
+                } catch (Exception ex) {
+                    /*
+                     * Exception here indicates that async block get is not
+                     * available. Therefore use the queue fallback.
+                     */
+                    ExceptionHelper.printException(ex, "Error performing safe operation.");
+                }
+            }
+            return queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
         }
-        return queueFastOperation(action);
     }
 
     @Override
     public void performSafeChunk(Object mutex, IAction action, IWorld world, Collection<BlockVector2D> chunks) {
-        synchronized (mutex) {            
-            String worldName = world != null ? world.getName() : null;
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                action.execute();
+                return;
+            }
+            synchronized (mutex) {
+                String worldName = world != null ? world.getName() : null;
 
-            try {
-                boolean canPerform = true;
-                for (Vector2D vector : chunks) {
-                    int cx = vector.getBlockX();
-                    int cz = vector.getBlockZ();
-                    m_chunkWatch.add(cx, cz, worldName);
-                    canPerform &= canPerform(world, cx, cz);
-                }
-                if (canPerform) {
-                    try {
-                        action.execute();
-                        return;
-                    } catch (Exception ex) {
-                        /*
-                         * Exception here indicates that async block get is not
-                         * available. Therefore use the queue fallback.
-                         */
-                        ExceptionHelper.printException(ex,
-                                String.format("Error performing safe operation for %1$s for chunk list",
-                                        worldName));
+                try {
+                    boolean canPerform = true;
+                    for (Vector2D vector : chunks) {
+                        int cx = vector.getBlockX();
+                        int cz = vector.getBlockZ();
+                        m_chunkWatch.add(cx, cz, worldName);
+                        canPerform &= canPerform(world, cx, cz);
+                    }
+                    if (canPerform) {
+                        try {
+                            action.execute();
+                            return;
+                        } catch (Exception ex) {
+                            /*
+                             * Exception here indicates that async block get is not
+                             * available. Therefore use the queue fallback.
+                             */
+                            ExceptionHelper.printException(ex,
+                                    String.format("Error performing safe operation for %1$s for chunk list",
+                                            worldName));
+                        }
+                    }
+                } finally {
+                    for (Vector2D vector : chunks) {
+                        int cx = vector.getBlockX();
+                        int cz = vector.getBlockZ();
+                        m_chunkWatch.remove(cx, cz, worldName);
                     }
                 }
-            } finally {
-                for (Vector2D vector : chunks) {
-                    int cx = vector.getBlockX();
-                    int cz = vector.getBlockZ();
-                    m_chunkWatch.remove(cx, cz, worldName);
-                }
             }
-        }
 
-        queueFastOperation(action);
+            queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
+        }
     }
 
     @Override
     public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Collection<BlockVector2D> chunks) {
-        synchronized (mutex) {            
-            String worldName = world != null ? world.getName() : null;
+        long id = Thread.currentThread().getId();
+        try {
+            if (!markThread(id)) {
+                return action.execute();
+            }
 
-            try {
-                boolean canPerform = true;
-                for (Vector2D vector : chunks) {
-                    int cx = vector.getBlockX();
-                    int cz = vector.getBlockZ();
-                    m_chunkWatch.add(cx, cz, worldName);
-                    canPerform &= canPerform(world, cx, cz);
-                }
-                if (canPerform) {
-                    try {
-                        T result = action.execute();
-                        return result;
-                    } catch (Exception ex) {
-                        /*
-                         * Exception here indicates that async block get is not
-                         * available. Therefore use the queue fallback.
-                         */
-                        ExceptionHelper.printException(ex,
-                                String.format("Error performing safe operation for %1$s for chunk list",
-                                        worldName));
+            synchronized (mutex) {
+                String worldName = world != null ? world.getName() : null;
+
+                try {
+                    boolean canPerform = true;
+                    for (Vector2D vector : chunks) {
+                        int cx = vector.getBlockX();
+                        int cz = vector.getBlockZ();
+                        m_chunkWatch.add(cx, cz, worldName);
+                        canPerform &= canPerform(world, cx, cz);
+                    }
+                    if (canPerform) {
+                        try {
+                            T result = action.execute();
+                            return result;
+                        } catch (Exception ex) {
+                            /*
+                             * Exception here indicates that async block get is not
+                             * available. Therefore use the queue fallback.
+                             */
+                            ExceptionHelper.printException(ex,
+                                    String.format("Error performing safe operation for %1$s for chunk list",
+                                            worldName));
+                        }
+                    }
+                } finally {
+                    for (Vector2D vector : chunks) {
+                        int cx = vector.getBlockX();
+                        int cz = vector.getBlockZ();
+                        m_chunkWatch.remove(cx, cz, worldName);
                     }
                 }
-            } finally {
-                for (Vector2D vector : chunks) {
-                    int cx = vector.getBlockX();
-                    int cz = vector.getBlockZ();
-                    m_chunkWatch.remove(cx, cz, worldName);
-                }
             }
+            return queueFastOperation(action);
+        } finally {
+            unmarkThread(id);
         }
-        return queueFastOperation(action);
     }
 }

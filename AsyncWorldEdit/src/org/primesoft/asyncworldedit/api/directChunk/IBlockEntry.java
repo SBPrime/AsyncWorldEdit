@@ -74,6 +74,25 @@ public interface IBlockEntry extends IVectorEntry {
      */
     void setEmission(byte level);
     
+    /**
+     * Get the sky light level
+     * @return 
+     */
+    byte getSky();
+    
+    /**
+     * Set the sky light level
+     * @param level
+     */
+    void setSky(byte level);
+    
+    
+    /**
+     * Does the entry have sky light data
+     * @return 
+     */
+    boolean hasSkyLight();
+    
     
     /**
      * Does the entry have light data

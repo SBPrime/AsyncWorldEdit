@@ -13,6 +13,7 @@ CHECK_VERSION_ERROR: "Unable to check latest plugin version."
 #Blocks placer
 BLOCK_PLACER_JOBS_LIMIT: "[RED]You have too many jobs queued, operation canceled."
 BLOCK_PLACER_GLOBAL_QUEUE_FULL: "[RED]Out of space on AWE block queue."
+BLOCK_PLACER_MEMORY_LOW: "[RED]Server is running low on memory. Queue locked."
 BLOCK_PLACER_QUEUE_FULL: "[RED]Your block queue is full. Wait for items to finish drawing."
 BLOCK_PLACER_QUEUE_UNLOCKED: "[GREEN]Your block queue is unlocked. You can use WorldEdit."
 BLOCK_PLACER_CANCEL_UNDO: "[RED]Warning: Undo jobs should not by canceled, ignoring!"
@@ -22,16 +23,40 @@ BLOCK_PLACER_CANCELED: "[LIGHT_PURPLE]Job canceled."
 BLOCK_PLACER_DONE: "[LIGHT_PURPLE]Blocks processed: [WHITE]%1$s"
 BLOCK_PLACER_DONE_WORLD: "[LIGHT_PURPLE]World operation done."
 BLOCK_PLACER_DONE_CLIP: "[LIGHT_PURPLE]Clipboard operation done."
+#Global text
+GLOBAL_YES: "YES"
+GLOBAL_NO: "NO"
+GLOBAL_ON: "ON"
+GLOBAL_OFF: "OFF"
+#Other texts
+LOADING_UNDO: "[GREEN]Loading undo data..."
+LOADING_REDO: "[GREEN]Loading redo data..."
 #The reload command
 CMD_RELOAD_ERROR: "[RED]Error loading config"
 CMD_RELOAD_DONE: "[GREEN]Reload done"
 #The help command
-CMD_HELP_GLOBAL: "[YELLOW]Async WorldEdit help:\n[BLUE]Help[WHITE] - display help screen\n[BLUE]Jobs[WHITE] - display queued block operations\n[BLUE]Cancel[WHITE] - cancel queued job\n[BLUE]Purge[WHITE] - remove all queued block operations\n[BLUE]Toggle[WHITE] - toggle AsyncWorldEdit on/off\n[BLUE]Reload[WHITE] - reload configuration\n[YELLOW]To display help on command use: [BLUE]/awe help <command>"
+CMD_HELP_GLOBAL: "[YELLOW]Async WorldEdit help:\n[BLUE]Help[WHITE] - display help screen\n[BLUE]Jobs[WHITE] - display queued block operations\n[BLUE]Cancel[WHITE] - cancel queued job\n[BLUE]Purge[WHITE] - remove all queued block operations\n[BLUE]Toggle[WHITE] - toggle AsyncWorldEdit on/off\n[BLUE]Undo[WHITE] - toggle Undo on/off\n[BLUE]Speed[WHITE] - change the block placing speed\n[BLUE]Messages[WHITE] - to configure AsyncWorldEdit messages\n[BLUE]Reload[WHITE] - reload configuration\n[YELLOW]To display help on command use: [BLUE]/awe help <command>"
+CMD_HELP_SPEED: "[YELLOW]Speed[WHITE] - change block placing speed\n[BLUE] Speed[WHITE] - Show current speed\n[BLUE] Speed <speed>[WHITE] - Change your block placing speed\n[BLUE] Speed <u:playerName>[WHITE] - Show speed for other player\n[BLUE] Speed <u:playerName> <speed>[WHITE] - change block placing speed for player\n[WHITE]  Use speedd [BLUE]<= 0[WHITE] for default"
 CMD_HELP_TOGGLE: "[YELLOW]Toggle[WHITE] - toggle AsyncWorldEdit on/off\n[BLUE] Toggle[WHITE] - toggle AsyncWorldEdit\n[BLUE] Toggle on[WHITE] - toggle AsyncWorldEdit on\n[BLUE] Toggle off[WHITE] - toggle AsyncWorldEdit off\n[BLUE] Toggle <u:playerName>[WHITE] - toggle AsyncWorldEdit\n[BLUE] Toggle <u:playerName> on[WHITE] - toggle AsyncWorldEdit on\n[BLUE] Toggle <u:playerName> off[WHITE] - toggle AsyncWorldEdit off"
+CMD_HELP_UNDO: "[YELLOW]Undo[WHITE] - toggle undo on/off\n[BLUE] Undo[WHITE] - toggle undo\n[BLUE] Undo on[WHITE] - toggle undo on\n[BLUE] Toggle off[WHITE] - toggle Undo off\n[BLUE] Undo <u:playerName>[WHITE] - toggle Undo\n[BLUE] Undo <u:playerName> on[WHITE] - toggle Undo on\n[BLUE] Undo <u:playerName> off[WHITE] - toggle Undo off"
 CMD_HELP_PURGE: "[YELLOW]Purge[WHITE] - remove all queued block operations\n[BLUE] Purge[WHITE] - purges your operations\n[BLUE] Purge <u:playerName>[WHITE] - purges other player operations\n[BLUE] Purge all[WHITE] - purges all operations"
+CMD_HELP_MESSAGE: "[YELLOW]Messages[WHITE] - configure the messaging system\n[BLUE] Messages <message> <on|off>[WHITE] - change your message status\n[BLUE] Messages <u:PlayerName> <message> <on|off>[WHITE] - change player message status\n[WHITE] Messages: [BLUE]TALKATIVE[WHITE], [BLUE]BAR[WHITE], [BLUE]CHAT"
 CMD_HELP_JOBS: "[YELLOW]Jobs[WHITE] - display queued block operations\n[BLUE] Jobs \\[page][WHITE] - displays your operations\n[BLUE] Jobs <u:playerName> \\[page][WHITE] - displays other player operations\n[BLUE] Jobs all [page][WHITE] - displays all queued operations"
 CMD_HELP_CANCEL: "[YELLOW]Cancel[WHITE] - cancel queued job\n[BLUE] Cancel #id[WHITE] - cancel your job\n[BLUE] Cancel <u:playerName> #id[WHITE] - cancel other player job"
 CMD_HELP_RELOAD: "[YELLOW]Reload[WHITE] - Reload AWE configuration file\n[BLUE] Reload All[WHITE] - reload configuration entries and update groups\n[BLUE] Reload Config[WHITE] - reload only the configuration\n[BLUE] Reload Groups[WHITE] - update only the player groups"
+#The message configuration
+CMD_MESSAGE_OK: "[YELLOW]Message [BLUE]%1$s[YELLOW] is now [BLUE]%2$s"
+CMD_MESSAGE_ON: "On"
+CMD_MESSAGE_OFF: "Off"
+CMD_MESSAGE_UNKNOWN: "[RED]Unknown message system: [YELLOW]%1$s"
+#The speed command
+CMD_SPEED: "[YELLOW]Block placing speed for [WHITE]%1$s [YELLOW] is [WHITE]%2$s blocks"
+CMD_SPEED_INVALID: "[RED]Invalid speed value [WHITE]%1$s"
+#The undo command and mode changed
+CMD_UNDO_MODE_CHANGED: "[YELLOW]Your [BLUE]Undo [YELLOW]is now set to [WHITE]%1$s"
+CMD_UNDO_MODE_DONE: "[YELLOW]Undo is now set to [WHITE]%1$s"
+CMD_UNDO_MODE_ON: "On"
+CMD_UNDO_MODE_OFF: "Off"
 #The toggle command and mode changed
 CMD_TOGGLE_MODE_CHANGED: "[YELLOW]Your [BLUE]AsyncWorldEdit [YELLOW]is now set to [WHITE]%1$s"
 CMD_TOGGLE_MODE_DONE: "[YELLOW]AsyncWorldEdit is now set to [WHITE]%1$s"
@@ -61,3 +86,16 @@ CMD_JOBS_STATUS_WAITING: "[YELLOW]waiting"
 CMD_CANCEL_REMOVED: "[WHITE]%1$s[YELLOW] queue entries removed."
 #The purge command
 CMD_PURGE_REMOVED: "[WHITE]%1$s[YELLOW] queue entries removed."
+#The extended commands global
+EX_CMD_BLOCKS_CHANGED: "[WHITE]%1$s [LIGHT_PURPLE]block(s) have been changed."
+#The extended commands - Schematics
+EX_CMD_SCHEMATIC_NOT_FOUND: "[RED]Schematic [WHITE]%1$s[YELLOW] not found."
+EX_CMD_SCHEMATIC_UNKNOWN_FORMAT: "[RED]Unknown schematic format."
+EX_CMD_SCHEMATIC_READ_ERROR: "[RED]Schematic could not be read: [WHITE]%1$s"
+EX_CMD_SCHEMATIC_INVALID_FORMAT: "[RED]Invalid schematic data."
+EX_CMD_SCHEMATIC_INFO: "[YELLOW]Schematic: [WHITE]%1$s\n[YELLOW] Size: [WHITE]%2$s[YELLOW]x[WHITE]%3$s[YELLOW]x[WHITE]%4$s\n[YELLOW] Blocks: [WHITE]%5$s [YELLOW](Extended: [WHITE]%6$s[YELLOW]), Data: [WHITE]%7$s\n[YELLOW] TileEntities: [WHITE]%8$s\n [YELLOW]Entities: [WHITE]%9$s"
+EX_CMD_SCHEMATIC_LOADED: "[YELLOW]Schematic loaded."
+EX_CMD_SCHEMATIC_NO_ORIGIN: "[YELLOW]No origin in schematic. Removing entities."
+#The extended commands - chunk replace
+EX_CMD_CHUNK_REPLACE_CHUNKS: "[YELLOW]Processing [WHITE]%1$s[YELLOW] chunks..."
+EX_CMD_CHUNK_REPLACE_PROGRESS: "[YELLOW]Processing chunk [WHITE]%1$s[YELLOW]/[WHITE]%2$s"

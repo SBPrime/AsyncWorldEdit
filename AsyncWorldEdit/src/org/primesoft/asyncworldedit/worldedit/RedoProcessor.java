@@ -1,31 +1,38 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -41,6 +48,7 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.AweEditSession;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.Mask;
@@ -51,9 +59,11 @@ import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
 import java.util.Iterator;
 import java.util.List;
+import org.primesoft.asyncworldedit.api.utils.IDisposable;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.utils.InjectionException;
 import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.worldedit.history.ExtendedUndoContext;
 
 /**
  *
@@ -62,7 +72,7 @@ import org.primesoft.asyncworldedit.utils.Reflection;
 public class RedoProcessor implements Operation {
 
     public static void processRedo(IThreadSafeEditSession parent,
-            EditSession sender,
+            AweEditSession sender,
             EditSession session) {
 
         Iterator<Change> changes = parent.doRedo();
@@ -79,19 +89,21 @@ public class RedoProcessor implements Operation {
         }
     }
 
+    private final EditSession m_sender;
     private final EditSession m_session;
-    private final Iterator<Change> m_changes;    
+    private final Iterator<Change> m_changes;
 
     private RedoProcessor(EditSession sender, EditSession session,
             Iterator<Change> changes) {
+        m_sender = sender;
         m_session = session;
         m_changes = changes;
     }
 
     @Override
     public Operation resume(RunContext rc) throws WorldEditException {
-        UndoContext uc = new UndoContext();
-        
+        UndoContext uc = new ExtendedUndoContext(m_sender);
+
         Extent bypassHistory = Reflection.get(EditSession.class, Extent.class, m_session, "bypassHistory",
                 "Unable to get history");
 
@@ -102,7 +114,13 @@ public class RedoProcessor implements Operation {
 
         for (; m_changes.hasNext();) {
             Change change = m_changes.next();
-            change.redo(uc);
+            if (change != null) {
+                change.redo(uc);
+            }
+        }
+
+        if (m_changes instanceof IDisposable) {
+            ((IDisposable) m_changes).dispose();
         }
 
         return null;
@@ -113,7 +131,6 @@ public class RedoProcessor implements Operation {
     }
 
     @Override
-    public void addStatusMessages(List<String> list) {        
+    public void addStatusMessages(List<String> list) {
     }
 }
-
