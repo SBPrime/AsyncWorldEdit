@@ -3,7 +3,7 @@
  * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
  * the WorldEdit plugin.
  *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  * Copyright (c) AsyncWorldEdit injector contributors
  *
@@ -49,61 +49,109 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.primesoft.asyncworldedit.injector.classfactory;
+package com.sk89q.worldedit.extent.clipboard;
 
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.math.transform.Transform;
+import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.entity.BaseEntity;
+import com.sk89q.worldedit.entity.Entity;
+import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.biome.BaseBiome;
+import java.util.List;
+import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
+public abstract class InjectableClipboard implements Clipboard {
     /**
-     * Get the operation processor
-     * @return 
+     * The injected clipboard
      */
-    IOperationProcessor getOperationProcessor();
+    private final Clipboard m_injected;
     
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
+    protected InjectableClipboard(Region region) {
+        m_injected = InjectorCore.getInstance().getClassFactory().createClipboard(region);
+    }
     
     
-    /**
-     * Get the clipboard format provider
-     * @param format
-     * @return 
-     */
-    IClipboardFormat getClipboardFormat(ClipboardFormat format);
-    
-    /**
-     * Create new instance of the clipboard
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Region region);
+    @Override
+    public Region getRegion() {
+        return m_injected.getRegion();
+    }
 
-    /**
-     * Add biome copy to region function
-     * @param blockCopy
-     * @param source
-     * @param from
-     * @param destination
-     * @param to
-     * @param currentTransform
-     * @param singleSet
-     * @return 
-     */
-    RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, Vector from, Extent destination, Vector to, 
-            Transform currentTransform, boolean singleSet);
+    @Override
+    public Vector getDimensions() {
+        return m_injected.getDimensions();
+    }
+
+    @Override
+    public Vector getOrigin() {
+        return m_injected.getOrigin();
+    }
+
+    @Override
+    public void setOrigin(Vector origin) {
+        m_injected.setOrigin(origin);
+    }
+
+    @Override
+    public Vector getMinimumPoint() {
+        return m_injected.getMinimumPoint();
+    }
+
+    @Override
+    public Vector getMaximumPoint() {
+        return m_injected.getMaximumPoint();
+    }
+
+    @Override
+    public List<? extends Entity> getEntities(Region region) {
+        return m_injected.getEntities(region);
+    }
+
+    @Override
+    public List<? extends Entity> getEntities() {
+        return m_injected.getEntities();
+    }
+
+    @Override
+    public Entity createEntity(Location location, BaseEntity entity) {
+        return m_injected.createEntity(location, entity);
+    }
+
+    @Override
+    public BaseBlock getBlock(Vector position) {
+        return m_injected.getBlock(position);
+    }
+
+    @Override
+    public BaseBlock getLazyBlock(Vector position) {
+        return m_injected.getLazyBlock(position);
+    }
+
+    @Override
+    public BaseBiome getBiome(Vector2D position) {
+        return m_injected.getBiome(position);
+    }
+
+    @Override
+    public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
+        return m_injected.setBlock(position, block);
+    }
+
+    @Override
+    public boolean setBiome(Vector2D position, BaseBiome biome) {
+        return m_injected.setBiome(position, biome);
+    }
+
+    @Override
+    public Operation commit() {
+        return m_injected.commit();
+    }
+    
 }

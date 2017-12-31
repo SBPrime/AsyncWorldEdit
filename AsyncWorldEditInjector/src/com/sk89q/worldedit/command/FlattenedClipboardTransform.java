@@ -140,4 +140,7 @@ public class FlattenedClipboardTransform {
         return new FlattenedClipboardTransform(original, transform, worldData);
     }
 
+    public static Class<?> ForceClassLoad() {
+        return FlattenedClipboardTransform.class;
+    }
 }

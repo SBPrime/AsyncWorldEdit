@@ -3,7 +3,7 @@
  * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
  * the WorldEdit plugin.
  *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  * Copyright (c) AsyncWorldEdit injector contributors
  *
@@ -49,61 +49,44 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.injector;
 
-package org.primesoft.asyncworldedit.injector.classfactory;
-
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.math.transform.Transform;
-import com.sk89q.worldedit.regions.Region;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.injector.core.IInjectorPlatform;
+import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
-    /**
-     * Get the operation processor
-     * @return 
-     */
-    IOperationProcessor getOperationProcessor();
-    
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
-    
-    
-    /**
-     * Get the clipboard format provider
-     * @param format
-     * @return 
-     */
-    IClipboardFormat getClipboardFormat(ClipboardFormat format);
-    
-    /**
-     * Create new instance of the clipboard
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Region region);
+public class InjectorManual implements IInjectorPlatform {
+    private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
+    private String m_prefix = null;
+    private final String m_logFormat = "%s %s";
+    private InjectorCore m_core;
 
-    /**
-     * Add biome copy to region function
-     * @param blockCopy
-     * @param source
-     * @param from
-     * @param destination
-     * @param to
-     * @param currentTransform
-     * @param singleSet
-     * @return 
-     */
-    RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, Vector from, Extent destination, Vector to, 
-            Transform currentTransform, boolean singleSet);
+    @Override
+    public void log(String msg) {
+        if (s_log == null || msg == null || m_prefix == null) {
+            return;
+        }
+
+        s_log.log(Level.INFO, String.format(m_logFormat, m_prefix, msg));
+    }
+
+    @Override
+    public String getPlatformName() {
+        return "Manual";
+    }
+
+    public void onEnable() {
+        m_prefix = "[AsyncWorldEditInjector]";
+
+        m_core = InjectorCore.getInstance();
+        m_core.initialize(this);
+
+        log("Enabled");
+    }
+
 }

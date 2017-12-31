@@ -3,7 +3,7 @@
  * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
  * the WorldEdit plugin.
  *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  * Copyright (c) AsyncWorldEdit injector contributors
  *
@@ -49,61 +49,47 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.primesoft.asyncworldedit.injector.classfactory;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.math.transform.Transform;
-import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
+public interface IClipboardFormat {
     /**
-     * Get the operation processor
+     * Get the format
      * @return 
      */
-    IOperationProcessor getOperationProcessor();
+    ClipboardFormat getFormat();
     
     /**
-     * Get the job processor
+     * Create a reader.
+     * @param inputStream
      * @return 
+     * @throws java.io.IOException 
      */
-    IJobProcessor getJobProcessor();
-    
-    
-    /**
-     * Get the clipboard format provider
-     * @param format
-     * @return 
-     */
-    IClipboardFormat getClipboardFormat(ClipboardFormat format);
+    ClipboardReader getReader(InputStream inputStream) throws IOException;
     
     /**
-     * Create new instance of the clipboard
-     * @param region
+     * Create a writer.
+     * @param outputStream
      * @return 
+     * @throws java.io.IOException 
      */
-    Clipboard createClipboard(Region region);
-
+    ClipboardWriter getWriter(OutputStream outputStream) throws IOException;
+    
     /**
-     * Add biome copy to region function
-     * @param blockCopy
-     * @param source
-     * @param from
-     * @param destination
-     * @param to
-     * @param currentTransform
-     * @param singleSet
+     * Return whether the given file is of this format.
+     * @param file
      * @return 
      */
-    RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, Vector from, Extent destination, Vector to, 
-            Transform currentTransform, boolean singleSet);
+    boolean isFormat(File file);
 }

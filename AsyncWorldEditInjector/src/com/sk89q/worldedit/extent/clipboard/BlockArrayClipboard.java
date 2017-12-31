@@ -3,7 +3,7 @@
  * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
  * the WorldEdit plugin.
  *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  * Copyright (c) AsyncWorldEdit injector contributors
  *
@@ -49,61 +49,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package com.sk89q.worldedit.extent.clipboard;
 
-package org.primesoft.asyncworldedit.injector.classfactory;
-
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
-    /**
-     * Get the operation processor
-     * @return 
-     */
-    IOperationProcessor getOperationProcessor();
-    
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
-    
-    
-    /**
-     * Get the clipboard format provider
-     * @param format
-     * @return 
-     */
-    IClipboardFormat getClipboardFormat(ClipboardFormat format);
-    
-    /**
-     * Create new instance of the clipboard
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Region region);
+public class BlockArrayClipboard extends InjectableClipboard implements Clipboard {
 
     /**
-     * Add biome copy to region function
-     * @param blockCopy
-     * @param source
-     * @param from
-     * @param destination
-     * @param to
-     * @param currentTransform
-     * @param singleSet
-     * @return 
+     * Create new instance of the clipboard
+     *
+     * @param region
      */
-    RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, Vector from, Extent destination, Vector to, 
-            Transform currentTransform, boolean singleSet);
+    public BlockArrayClipboard(Region region) {
+        super(region);
+    }
+
+    public static Class<?> ForceClassLoad() {
+        return BlockArrayClipboard.class;
+    }
 }
