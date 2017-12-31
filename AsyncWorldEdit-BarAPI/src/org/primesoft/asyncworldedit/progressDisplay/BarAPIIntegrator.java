@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,14 +47,15 @@
  */
 package org.primesoft.asyncworldedit.progressDisplay;
 
-import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import me.confuser.barapi.BarAPI;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.strings.MessageType;
+import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
+import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
+import static org.primesoft.asyncworldedit.progressDisplay.BarAPIBackend.log;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -56,6 +64,8 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
  */
 public class BarAPIIntegrator implements IProgressDisplay {
 
+    private final Server m_server;
+    private final IProgressDisplayManager m_progressManager;
     private final boolean m_isInitialized;
 
     /**
@@ -69,7 +79,7 @@ public class BarAPIIntegrator implements IProgressDisplay {
             Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BarAPI");
 
             if ((cPlugin == null) || (!(cPlugin instanceof BarAPI))) {
-                AsyncWorldEditBukkit.log("BarAPI not found.");
+                log("BarAPI not found.");
                 return null;
             }
 
@@ -80,53 +90,47 @@ public class BarAPIIntegrator implements IProgressDisplay {
         }
     }
 
-    public BarAPIIntegrator(JavaPlugin plugin) {
+    public BarAPIIntegrator(JavaPlugin plugin, IProgressDisplayManager progressDisplayManager) {
         BarAPI ba = getBarAPI(plugin);
         m_isInitialized = ba != null;
+        m_progressManager = progressDisplayManager;
+        m_server = plugin.getServer();
     }
 
     @Override
-    public void setMessage(IPlayerEntry player, int jobsCount, 
+    public void setMessage(IPlayerEntry player, int jobsCount,
             int queuedBlocks, int maxQueuedBlocks, double timeLeft, double placingSpeed, double percentage) {
-        if (!(player instanceof PlayerEntry)) {
-            return;
-        }
-        PlayerEntry pe = (PlayerEntry)player;
-        
-        if (!m_isInitialized || pe.getPlayer() == null) {
+
+        if (!m_isInitialized || player == null) {
             return;
         }
 
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
+        Player bPlayer = m_server.getPlayer(player.getUUID());
+        if (bPlayer == null) {
             return;
         }
 
-        String message = MessageType.CMD_JOBS_PROGRESS_BAR.format(jobsCount, placingSpeed, timeLeft);
+        String message = m_progressManager.formatMessage(jobsCount, placingSpeed, timeLeft);
         if (percentage < 0) {
             percentage = 0;
         } else if (percentage > 100) {
             percentage = 100;
-        }        
-        
-        BarAPI.setMessage(pe.getPlayer(), message, (float)percentage);
+        }
+
+        BarAPI.setMessage(bPlayer, message, (float) percentage);
     }
 
     @Override
     public void disableMessage(IPlayerEntry player) {
-        if (!(player instanceof PlayerEntry)) {
+        if (!m_isInitialized || player == null) {
             return;
         }
-        PlayerEntry pe = (PlayerEntry)player;
-        
-        if (!m_isInitialized || pe.getPlayer() == null) {
-            return;
-        }
-
-        if (!player.getPermissionGroup().isBarApiProgressEnabled()) {
+        Player bPlayer = m_server.getPlayer(player.getUUID());
+        if (bPlayer == null) {
             return;
         }
 
-        BarAPI.removeBar(pe.getPlayer());
+        BarAPI.removeBar(bPlayer);
     }
 
     @Override
