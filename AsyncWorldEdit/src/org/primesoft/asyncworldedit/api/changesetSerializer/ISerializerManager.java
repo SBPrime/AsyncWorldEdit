@@ -71,13 +71,25 @@ public interface ISerializerManager {
     void removeSerializer(IChangesetSerializer serializer);
 
     /**
-     * Initialize the undo storage file
+     * Initialize the undo storage file 
+     * (do not add the random seed)
      *
      * @param player
      * @param id
      * @return
      */
     File open(IPlayerEntry player, int id);
+    
+    /**
+     * Initialize the undo storage file
+     *
+     * @param player The Player
+     * @param id The undo ID (starting from 0)
+     * @param addRandomSeed should a random seed be added to the file name
+     * @return
+     */
+    File open(IPlayerEntry player, int id, boolean addRandomSeed);
+    
 
     /**
      * Close undo storage file
@@ -85,6 +97,13 @@ public interface ISerializerManager {
      * @param storageFile
      */
     void close(File storageFile);
+        
+    /**
+     * Get memory storage for file
+     * @param storageFile
+     * @return 
+     */
+    IMemoryStorage getMemoryStorage(File storageFile);
 
     /**
      * Save changes to file
@@ -148,8 +167,9 @@ public interface ISerializerManager {
      * @param stream
      * @param undoEntry
      * @throws IOException
+     * @return number of written bytes
      */
-    void save(RandomAccessFile stream, IUndoEntry undoEntry) throws IOException;
+    int save(RandomAccessFile stream, IUndoEntry undoEntry) throws IOException;
     
     /**
      * Save the undo data to stream
@@ -157,6 +177,7 @@ public interface ISerializerManager {
      * @param stream
      * @param undoEntry
      * @throws IOException
+     * @return number of written bytes
      */
-    void save(DataOutputStream stream, IUndoEntry undoEntry) throws IOException;
+    int save(DataOutputStream stream, IUndoEntry undoEntry) throws IOException;
 }

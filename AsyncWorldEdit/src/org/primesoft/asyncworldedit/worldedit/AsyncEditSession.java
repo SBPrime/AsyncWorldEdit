@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -59,12 +67,14 @@ import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RedoJob;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
+import org.primesoft.asyncworldedit.injector.validators.StackValidator;
+import org.primesoft.asyncworldedit.platform.api.IScheduler;
+import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 
@@ -73,17 +83,16 @@ import org.primesoft.asyncworldedit.utils.WaitFor;
  * @author SBPrime
  */
 public class AsyncEditSession extends ThreadSafeEditSession {
+
     /**
      * Bukkit schedule
      */
-    private final BukkitScheduler m_schedule;
-
+    private final IScheduler m_schedule;
 
     /**
      * The function wait object
      */
     private final WaitFor m_wait = new WaitFor();
-    
 
     /**
      * Get the wait object
@@ -93,21 +102,26 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     public WaitFor getWait() {
         return m_wait;
     }
-   
 
-    public AsyncEditSession(AsyncWorldEditBukkit plugin,
+    public AsyncEditSession(IAsyncWorldEditCore aweCore,
             IPlayerEntry player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
         //super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);
-        super(plugin, player, eventBus, world, maxBlocks, blockBag, event);
-        
-        m_schedule = plugin.getServer().getScheduler();
+        super(aweCore, player, eventBus, world, maxBlocks, blockBag, event);
+
+        m_schedule = aweCore.getPlatform().getScheduler();
+
+        InOutParam<String> method = InOutParam.Out();
+        if (StackValidator.isVaild(method)) {
+            setAsyncForcedDisable(!checkAsync(method.getValue()));
+        }
     }
 
     /**
      * Do not change! Requires special processing
-     * @param sess 
+     *
+     * @param sess
      */
     @Override
     public void undo(final EditSession sess) {
@@ -128,7 +142,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new UndoJob(m_player, session, jobId, "undo");
         m_blockPlacer.addJob(m_player, job);
 
-        SchedulerUtils.runTaskAsynchronouslyInSequence(m_plugin, m_schedule, new AsyncTask(session, m_player, "undo",
+        SchedulerUtils.runTaskAsynchronouslyInSequence(m_schedule, new AsyncTask(session, m_player, "undo",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -161,10 +175,11 @@ public class AsyncEditSession extends ThreadSafeEditSession {
             resetAsync();
         }
     }
-    
+
     /**
      * Do not change! Requires special processing
-     * @param sess 
+     *
+     * @param sess
      */
     @Override
     public void redo(final EditSession sess) {
@@ -183,7 +198,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new RedoJob(m_player, session, jobId, "redo");
         m_blockPlacer.addJob(m_player, job);
 
-        SchedulerUtils.runTaskAsynchronouslyInSequence(m_plugin, m_schedule, new AsyncTask(session, m_player, "redo",
+        SchedulerUtils.runTaskAsynchronouslyInSequence(m_schedule, new AsyncTask(session, m_player, "redo",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -195,9 +210,9 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                 }, ls);
     }
 
-    
     /**
      * Does not use Operations - do not change!
+     *
      * @param region
      * @param zero
      * @param unit
@@ -206,7 +221,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @param hollow
      * @return
      * @throws ExpressionException
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeBiomeShape(final Region region, final Vector zero, final Vector unit,
@@ -223,7 +238,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeBiomeShape");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeBiomeShape",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeBiomeShape",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -238,15 +253,15 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                 });
 
         return 0;
-    }    
-    
+    }
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param region
      * @param pattern
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeFaces(final Region region, final Pattern pattern) throws MaxChangedBlocksException {
@@ -260,7 +275,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeFaces");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeFaces",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeFaces",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -275,10 +290,11 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param region
      * @param pattern
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeWalls(final Region region, final Pattern pattern) throws MaxChangedBlocksException {
@@ -292,7 +308,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeWalls");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeWalls",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeWalls",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -304,16 +320,17 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         return 0;
     }
-    
+
     /**
      * Does not use Operations - do not change!
+     *
      * @param pattern
      * @param pos1
      * @param pos2
      * @param radius
      * @param filled
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int drawLine(final Pattern pattern, final Vector pos1, final Vector pos2, final double radius,
@@ -329,7 +346,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "drawLine");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "drawLine",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "drawLine",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -344,6 +361,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param pattern
      * @param nodevectors
      * @param tension
@@ -353,7 +371,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @param radius
      * @param filled
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int drawSpline(final Pattern pattern,
@@ -371,7 +389,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "drawLine");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "drawLine",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "drawLine",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -384,16 +402,16 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
-    
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param block
      * @param radius
      * @param height
      * @param filled
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeCylinder(final Vector pos, final Pattern block,
@@ -410,7 +428,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeCylinder");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCylinder",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeCylinder",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -423,9 +441,9 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
-    
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param block
      * @param radiusX
@@ -433,7 +451,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @param height
      * @param filled
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeCylinder(final Vector pos, final Pattern block,
@@ -451,7 +469,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeCylinder");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeCylinder",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeCylinder",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -464,15 +482,15 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
-    
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param block
      * @param radius
      * @param filled
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeSphere(final Vector pos, final Pattern block,
@@ -489,7 +507,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeSphere");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeSphere",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeSphere",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -502,9 +520,9 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
-    
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param block
      * @param radiusX
@@ -512,7 +530,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @param radiusZ
      * @param filled
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeSphere(final Vector pos, final Pattern block,
@@ -530,7 +548,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeSphere");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeSphere",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeSphere",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -545,12 +563,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param block
      * @param size
      * @param filled
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makePyramid(final Vector pos, final Pattern block, final int size,
@@ -566,7 +585,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makePyramid");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makePyramid",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makePyramid",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -581,10 +600,11 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param radius
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int thaw(final Vector pos, final double radius)
@@ -599,7 +619,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "thaw");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "thaw",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "thaw",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -612,13 +632,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
-    
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param radius
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int simulateSnow(final Vector pos, final double radius)
@@ -633,7 +653,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "simulateSnow");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "simulateSnow",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "simulateSnow",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -648,11 +668,12 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param radius
      * @param onlyNormalDirt
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int green(final Vector pos, final double radius, final boolean onlyNormalDirt)
@@ -667,7 +688,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "green");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "green",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "green",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -680,13 +701,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
-    
     /**
      * Does not use Operations - do not change!
+     *
      * @param pos
      * @param radius
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int green(final Vector pos, final double radius)
@@ -701,7 +722,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "green");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "green",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "green",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -716,10 +737,11 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * TODO: Broken
+     *
      * @param basePos
      * @param size
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makePumpkinPatches(final Vector basePos, final int size)
@@ -734,7 +756,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makePumpkinPatches");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makePumpkinPatches",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makePumpkinPatches",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -749,12 +771,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param basePos
      * @param size
      * @param density
      * @param treeGenerator
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeForest(final Vector basePos, final int size,
@@ -771,13 +794,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeForest");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeForest",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeForest",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
                         m_wait.checkAndWait(null);
-                        return session.makeForest(basePos, size, density, treeGenerator);
+                    return session.makeForest(basePos, size, density, treeGenerator);
                     }
                 });
 
@@ -786,6 +809,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param region
      * @param zero
      * @param unit
@@ -794,7 +818,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @param hollow
      * @return
      * @throws ExpressionException
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int makeShape(final Region region, final Vector zero,
@@ -812,7 +836,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "makeShape");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "makeShape",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeShape",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -820,7 +844,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                         m_wait.checkAndWait(null);
                         try {
                             return session.makeShape(region, zero, unit, pattern, expressionString, hollow);
-                        } catch (ExpressionException ex) {                            
+                        } catch (ExpressionException ex) {
                             return 0;
                         }
                     }
@@ -831,13 +855,14 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
     /**
      * Does not use Operations - do not change!
+     *
      * @param region
      * @param zero
      * @param unit
      * @param expressionString
      * @return
      * @throws ExpressionException
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int deformRegion(final Region region, final Vector zero,
@@ -854,7 +879,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "deformRegion");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "deformRegion",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "deformRegion",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -871,14 +896,14 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return 0;
     }
 
-    
     /**
      * Does not use Operations - do not change!
+     *
      * @param region
      * @param thickness
      * @param pattern
      * @return
-     * @throws MaxChangedBlocksException 
+     * @throws MaxChangedBlocksException
      */
     @Override
     public int hollowOutRegion(final Region region, final int thickness,
@@ -894,7 +919,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         final JobEntry job = new JobEntry(m_player, session, jobId, "hollowOutRegion");
         m_blockPlacer.addJob(m_player, job);
 
-        m_schedule.runTaskAsynchronously(m_plugin, new AsyncTask(session, m_player, "hollowOutRegion",
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "hollowOutRegion",
                 m_blockPlacer, job) {
                     @Override
                     public int task(CancelabeEditSession session)
@@ -914,8 +939,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     public int center(Region region, Pattern pattern) throws MaxChangedBlocksException {
         return super.center(region, pattern); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
+
     @Override
     public int drainArea(Vector origin, double radius) throws MaxChangedBlocksException {
         return super.drainArea(origin, radius); //To change body of generated methods, choose Tools | Templates.

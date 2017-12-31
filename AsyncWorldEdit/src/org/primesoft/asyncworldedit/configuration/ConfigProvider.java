@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,16 +47,17 @@
  */
 package org.primesoft.asyncworldedit.configuration;
 
+import org.primesoft.asyncworldedit.configuration.update.ConfigurationUpdater;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.configuration.ConfigurationSection;
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
-import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
-import org.primesoft.asyncworldedit.worldedit.WorldeditOperations;
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
+import org.primesoft.asyncworldedit.platform.api.IConfiguration;
+import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
  * This class contains configuration
@@ -63,30 +71,17 @@ public class ConfigProvider {
      */
     public static final int TICKS_PER_SECOND = 20;
 
-    /**
-     * The config file version
-     */
-    private static final int CONFIG_VERSION = 3;
-
     private static boolean m_checkUpdate = false;
 
     private static boolean m_isConfigUpdate = false;
 
-    private static long m_interval;
-
-    private static int m_queueMaxSize;
-
-    private static int m_queueTalkInterval;
 
     private static String m_configVersion;
 
-    private static HashSet<WorldeditOperations> m_allowedOperations;
+    private static EnumSet<WorldeditOperations> m_disabledOperations;
 
     private static boolean m_physicsFreez;
 
-    private static boolean m_checkAccess;
-
-    private static boolean m_logBlocks;
 
     private static boolean m_debugMode;
 
@@ -95,6 +90,7 @@ public class ConfigProvider {
     private static String m_stringsFile;
 
     private static int m_forceFlushBlockCount;
+
 
     /**
      * The default permissions group
@@ -106,20 +102,106 @@ public class ConfigProvider {
      */
     private static PermissionGroup[] m_groups;
 
+    
     /**
-     * Maximum number of dispatcher idle runs
+     * The memory configuration
      */
-    private static int m_dispatcherMaxIdle;
+    private static ConfigMemory m_configMemory;
+    
+    /**
+     * The renderer configuration
+     */
+    private static ConfigRenderer m_configRenderer;
+        
+    /**
+     * The BlocksHub configuration
+     */
+    private static ConfigBlocksHub m_configBlocksHub;
+    
+    
+    /**
+     * The dispatcher configuration
+     */
+    private static ConfigDispatcher m_configDispatcher;
+    
+    
+    /**
+     * The permission configuration
+     */
+    private static ConfigPermission m_configPermission;
+    
+    
+    /**
+     * The undo configuration
+     */
+    private static ConfigUndo m_configUndo;
+    
+    /**
+     * The undo folder
+     */
+    private static File m_undoFolder;
+    
+    /**
+     * The DIrectChunk API configuration
+     */
+    private static ConfigDirectChunkApi m_configDCApi;
+        
+    /**
+     * Get the undo configuration
+     * @return 
+     */
+    public static ConfigUndo undo() {
+        return m_configUndo;
+    }
+    
+    /**
+     * Get the permission configuration
+     * @return 
+     */
+    public static ConfigPermission permission() {
+        return m_configPermission;
+    }
+    
+    /**
+     * The dispatcher configuration
+     * @return 
+     */
+    public static ConfigDispatcher dispatcher() {
+        return m_configDispatcher;
+    }
+    
+    /**
+     * The blocks hub config
+     * @return 
+     */
+    public static ConfigBlocksHub blocksHub() {
+        return m_configBlocksHub;
+    }
 
     /**
-     * Maximum number of jobs performed in one run
+     * Get the DirectChunk configuration
+     * @return 
      */
-    private static int m_dispatcherMaxJobs;
-
+    public static ConfigDirectChunkApi directChunk() {
+        return m_configDCApi;
+    }
+    
     /**
-     * Maximum dime spend in one run
+     * Get the renderer configuration
+     * @return 
      */
-    private static int m_dispatcherMaxTime;
+    public static ConfigRenderer renderer() {
+        return m_configRenderer;
+    }
+    
+    /**
+     * Get the memory configuration
+     * @return 
+     */
+    public static ConfigMemory memory() {
+        return m_configMemory;
+    }
+    
 
     public static int getForceFlushBlocks() {
         return m_forceFlushBlockCount;
@@ -136,18 +218,7 @@ public class ConfigProvider {
     public static boolean isDebugOn() {
         return m_debugMode;
     }
-
-    public static int getDispatcherMaxIdle() {
-        return m_dispatcherMaxIdle;
-    }
-
-    public static int getDispatcherMaxJobs() {
-        return m_dispatcherMaxJobs;
-    }
-
-    public static int getDispatcherMaxTime() {
-        return m_dispatcherMaxTime;
-    }
+    
 
     /**
      * Plugin root folder
@@ -157,6 +228,16 @@ public class ConfigProvider {
     public static File getPluginFolder() {
         return m_pluginFolder;
     }
+    
+    
+    /**
+     * The disk undo folder
+     * @return
+     */
+    public static File getUndoFolder() {
+        return m_undoFolder;
+    }
+    
 
     /**
      * Get the config version
@@ -177,37 +258,6 @@ public class ConfigProvider {
     }
 
     /**
-     * Block drawing interval
-     *
-     * @return the interval
-     */
-    public static long getInterval() {
-        return m_interval;
-    }
-
-    /**
-     * Is block login enabled
-     *
-     * @return
-     */
-    public static boolean getLogBlocks() {
-        return m_logBlocks;
-    }
-
-    /**
-     * Is block perms checking enabled
-     *
-     * @return
-     */
-    public static boolean getCheckAccess() {
-        return m_checkAccess;
-    }
-
-    public static int getQueueTalkInterval() {
-        return m_queueTalkInterval;
-    }
-
-    /**
      * Is the configuration up to date
      *
      * @return
@@ -216,14 +266,6 @@ public class ConfigProvider {
         return m_isConfigUpdate;
     }
 
-    /**
-     * Get maximum size of the queue
-     *
-     * @return
-     */
-    public static int getQueueMaxSize() {
-        return m_queueMaxSize;
-    }
 
     public static boolean isPhysicsFreezEnabled() {
         return m_physicsFreez;
@@ -233,41 +275,71 @@ public class ConfigProvider {
         return m_stringsFile;
     }
 
-
     /**
      * Load configuration
      *
-     * @param plugin parent plugin
+     * @param aweCore parent plugin
      * @return true if config loaded
      */
-    public static boolean load(AsyncWorldEditBukkit plugin) {
-        if (plugin == null) {
+    public static boolean load(IAsyncWorldEditCore aweCore) {
+        if (aweCore == null) {
             return false;
         }
 
-        plugin.saveDefaultConfig();
-        m_pluginFolder = plugin.getDataFolder();
-
-        Configuration config = plugin.getConfig();
-        ConfigurationSection mainSection = config.getConfigurationSection("awe");
+        IConfiguration config = aweCore.getPlatform().getConfig();
+        m_pluginFolder = config.getDataFolder();
+        m_undoFolder = new File(m_pluginFolder, "undo");
+        
+        if (!m_undoFolder.exists()) {
+            m_undoFolder.mkdirs();
+        }
+        
+        IConfigurationSection mainSection = config.getConfigurationSection("awe");
         if (mainSection == null) {
             return false;
         }
 
+        int configVersion = mainSection.getInt("version", 0);
+        if (configVersion < ConfigurationUpdater.CONFIG_VERSION) {
+            if (ConfigurationUpdater.updateConfig(config, configVersion)) {
+                SimpleDateFormat formater = new SimpleDateFormat("yyyyMMddHHmmss");
+                File oldConfig = new File(m_pluginFolder, "config.yml");
+                File newConfig = new File(m_pluginFolder, String.format("config.v%1$s", formater.format(new Date())));
+
+                oldConfig.renameTo(newConfig);
+                
+                config.save();
+
+                int newVersion = mainSection.getInt("version", 0);
+                log(String.format("Configuration updated from %1$s to %2$s.", configVersion, newVersion));
+                if (newVersion != ConfigurationUpdater.CONFIG_VERSION) {
+                    log(String.format("Unable to update config to the required version (%1$s).", ConfigurationUpdater.CONFIG_VERSION));
+                }
+
+                configVersion = mainSection.getInt("version", 0);
+            } else {
+                log(String.format("Unable to update config to the required version (%1$s).", ConfigurationUpdater.CONFIG_VERSION));
+            }
+        }
+
         m_configVersion = mainSection.getString("version", "?");
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
-        m_isConfigUpdate = mainSection.getInt("version", 0) == CONFIG_VERSION;
+        m_isConfigUpdate = configVersion == ConfigurationUpdater.CONFIG_VERSION;
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
         m_stringsFile = mainSection.getString("strings", "");
         m_debugMode = mainSection.getBoolean("debug", false);
         m_forceFlushBlockCount = mainSection.getInt("forceFlushBlocks", 1000);
 
         parseGroupsSection(mainSection.getConfigurationSection("permissionGroups"));
-        parseRenderSection(mainSection);
-        parseBlocksHubSection(mainSection.getConfigurationSection("blocksHub"));
-        parseDispatcherSection(mainSection.getConfigurationSection("dispatcher"));
-
-        m_allowedOperations = parseOperationsSection(mainSection);
+        m_configMemory = new ConfigMemory(mainSection.getConfigurationSection("memory"));
+        m_configRenderer = new ConfigRenderer(mainSection.getConfigurationSection("rendering"));
+        m_configBlocksHub = new ConfigBlocksHub(mainSection.getConfigurationSection("blocksHub"));
+        m_configDispatcher = new ConfigDispatcher(mainSection.getConfigurationSection("dispatcher"));
+        m_configDCApi = new ConfigDirectChunkApi(mainSection.getConfigurationSection("directChunk"));
+        m_configPermission = new ConfigPermission(mainSection.getConfigurationSection("permissions"));
+        m_configUndo = new ConfigUndo(mainSection.getConfigurationSection("undo"));
+        
+        m_disabledOperations = parseOperationsSection(mainSection);
 
         return true;
     }
@@ -280,29 +352,7 @@ public class ConfigProvider {
      * @return
      */
     public static boolean isAsyncAllowed(WorldeditOperations operation) {
-        return m_allowedOperations.contains(operation);
-    }
-
-    /**
-     * Parse render section
-     *
-     * @param mainSection
-     */
-    private static void parseRenderSection(ConfigurationSection mainSection) {
-        ConfigurationSection renderSection = mainSection.getConfigurationSection("rendering");
-        if (renderSection == null) {
-            m_interval = 15;
-            m_queueTalkInterval = 10;
-            m_queueMaxSize = 10000000;
-        } else {
-            m_interval = renderSection.getInt("interval", 15);
-            m_queueTalkInterval = renderSection.getInt("talk-interval", 10);
-            m_queueMaxSize = renderSection.getInt("queue-max-size", 10000000);
-
-            if (m_queueMaxSize <= 0) {
-                log("Warinig: Block queue is disabled!");
-            }
-        }
+        return !m_disabledOperations.contains(operation);
     }
 
     /**
@@ -311,82 +361,34 @@ public class ConfigProvider {
      * @param mainSection
      * @return
      */
-    private static HashSet<WorldeditOperations> parseOperationsSection(
-            ConfigurationSection mainSection) {
-        HashSet<WorldeditOperations> result = new HashSet<WorldeditOperations>();
+    private static EnumSet<WorldeditOperations> parseOperationsSection(
+            IConfigurationSection mainSection) {
+        EnumSet<WorldeditOperations> result = EnumSet.noneOf(WorldeditOperations.class);
 
-        for (String string : mainSection.getStringList("enabledOperations")) {
+        for (String string : mainSection.getStringList("disabledOperations")) {
             try {
                 result.add(WorldeditOperations.valueOf(string));
             } catch (Exception e) {
-                log("* unknown operation name " + string);
+                log(String.format("* unknown operation name %1$s", string));
             }
         }
-        if (result.isEmpty()) {
-            //Add all entries
-            log("Warning: No operations defined in config file. Enabling all.");
-            result.addAll(Arrays.asList(WorldeditOperations.values()));
+        if (m_debugMode) {
+            log("World edit operations:");
+            for (WorldeditOperations op : WorldeditOperations.values()) {
+                log("* " + op + "..." + (result.contains(op) ? "regular" : "async"));
+            }
         }
-        //PluginMain.Log("World edit operations:");
-        //for (WorldeditOperations op : WorldeditOperations.values()) {
-        //    Log("* " + op + "..." + (result.contains(op) ? "async" : "regular"));
-        //}
 
         return result;
     }
 
-    /**
-     * Initialize the dispatcher configuration
-     *
-     * @param dSection
-     */
-    private static void parseDispatcherSection(ConfigurationSection dSection) {
-        if (dSection == null) {
-            m_dispatcherMaxIdle = 200;
-            m_dispatcherMaxJobs = 2000;
-            m_dispatcherMaxTime = 20;
-        } else {
-            m_dispatcherMaxIdle = dSection.getInt("max-idle-runs", 200);
-            m_dispatcherMaxJobs = dSection.getInt("max-jobs", 2000);
-            m_dispatcherMaxTime = dSection.getInt("max-time", 20);
-        }
-
-        if (m_dispatcherMaxTime < 1) {
-            m_dispatcherMaxTime = 10;
-            log("Warning: Dispatcher time is set to lower then 1ms, changing to 10ms.");
-        }
-        if (m_dispatcherMaxJobs < 1) {
-            m_dispatcherMaxJobs = 100;
-            log("Warning: Dispatcher max jobs is lower then 1, changing to 100");
-        }
-
-        if (m_dispatcherMaxIdle < 1) {
-            m_dispatcherMaxIdle = 10;
-            log("Warning: Dispatcher max idle is lower then 1, changing to 10");
-        }
-    }
-
-    /**
-     * Initialize blocks hub configuration
-     *
-     * @param bhSection
-     */
-    private static void parseBlocksHubSection(ConfigurationSection bhSection) {
-        if (bhSection == null) {
-            m_logBlocks = true;
-            m_checkAccess = false;
-        } else {
-            m_logBlocks = bhSection.getBoolean("logBlocks", true);
-            m_checkAccess = bhSection.getBoolean("checkAccess", false);
-        }
-    }
 
     /**
      * Parse the groups section
      *
      * @param groupsSection
      */
-    private static void parseGroupsSection(ConfigurationSection groupsSection) {
+    private static void parseGroupsSection(IConfigurationSection groupsSection) {
         if (groupsSection == null) {
             m_defaultGroup = PermissionGroup.getDefaultGroup();
             m_groups = new PermissionGroup[]{m_defaultGroup};
@@ -394,12 +396,12 @@ public class ConfigProvider {
             return;
         }
 
-        ConfigurationSection defaultGroup = null;
-        List<ConfigurationSection> subSections = new ArrayList<ConfigurationSection>();
-        String[] groupNames = groupsSection.getKeys(false).toArray(new String[0]);
+        IConfigurationSection defaultGroup = null;
+        List<IConfigurationSection> subSections = new ArrayList<IConfigurationSection>();
+        String[] groupNames = groupsSection.getSubNodes().toArray(new String[0]);
 
         for (String sectionName : groupNames) {
-            ConfigurationSection section = groupsSection.getConfigurationSection(sectionName);
+            IConfigurationSection section = groupsSection.getConfigurationSection(sectionName);
             if (section != null) {
                 subSections.add(section);
                 if (defaultGroup == null && section.getBoolean("isDefault", false)) {
@@ -421,7 +423,7 @@ public class ConfigProvider {
 
         m_defaultGroup = new PermissionGroup(defaultGroup, true);
         List<PermissionGroup> groups = new ArrayList<PermissionGroup>(subSections.size());
-        for (ConfigurationSection subSection : subSections) {
+        for (IConfigurationSection subSection : subSections) {
             groups.add(new PermissionGroup(subSection, m_defaultGroup, false));
         }
 

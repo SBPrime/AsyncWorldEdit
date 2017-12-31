@@ -55,6 +55,16 @@ public interface ISimpleChunkData extends IChunkDataCommon {
      * @return
      */
     byte getEmissionLight(int x, int y, int z);
+    
+    /**
+     * Get block sky light from chunk data
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
+    byte getSkyLight(int x, int y, int z);
 
     /**
      * Get block material ID at provided possition
@@ -84,6 +94,16 @@ public interface ISimpleChunkData extends IChunkDataCommon {
      * @param lightLevel
      */
     void setEmissionLight(int x, int y, int z, byte lightLevel);
+    
+    /**
+     * Set sky light to chunk data
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @param lightLevel
+     */
+    void setSkyLight(int x, int y, int z, byte lightLevel);
 
     /**
      * Set chunk block

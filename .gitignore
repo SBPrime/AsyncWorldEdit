@@ -1,8 +1,12 @@
 /*/nbproject/private/
 /*/build/
-/*/dist/
-/*/lib/
+/release/
+/dist/
+*/dist/
+*/lib/
+*.jar
 /*/test/
+lib/
 
 # Idea
 *.iml
@@ -10,3 +14,4 @@
 *.iws
 .idea/
 /AsyncWorldEdit-ActionBarAPI/AsyncWorldEdit-ActionBarAPI/nbproject/private/
+/AsyncWorldEdit/src/*.jar

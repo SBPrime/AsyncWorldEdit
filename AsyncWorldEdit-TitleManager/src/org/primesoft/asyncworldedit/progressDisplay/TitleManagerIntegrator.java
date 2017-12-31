@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,69 +45,67 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+
 package org.primesoft.asyncworldedit.progressDisplay;
 
 import io.puharesource.mc.titlemanager.api.ActionbarTitleObject;
-import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
-import org.primesoft.asyncworldedit.strings.MessageType;
 
 import javax.annotation.Nonnull;
+import org.bukkit.Server;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
+import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
 
 /**
  * @author Weby@we-bb.com <Nicolas Glassey>
  * @version 1.0.0
  * @since 29/04/15
  */
-public class TitleManagerIntegrator implements IProgressDisplay {
-
+public class TitleManagerIntegrator implements IProgressDisplay
+{
+    private final Server m_server;
+    private final IProgressDisplayManager m_progressManager;
+    
+    public TitleManagerIntegrator(IProgressDisplayManager progressDisplayManager, Server server) {
+        m_progressManager = progressDisplayManager;
+        m_server = server;
+    }
+    
     @Override
-    public void disableMessage(@Nonnull IPlayerEntry player) {
-        if (!(player instanceof PlayerEntry)) {
-            return;
-        }
-
-        new ActionbarTitleObject("").send(((PlayerEntry) player).getPlayer());
+    public void disableMessage(@Nonnull IPlayerEntry player)
+    {
+        new ActionbarTitleObject("").send(m_server.getPlayer(player.getUUID()));
     }
 
     @Override
-    public void setMessage(IPlayerEntry player, int jobs, int blocks, int maxBlocks, double time, double speed, double percentage) {
-        if (!(player instanceof PlayerEntry)) {
-            return;
-        }
+    public void setMessage(IPlayerEntry player, int jobs, int blocks, int maxBlocks, double time, double speed, double percentage)    
+    {
 
-        String block_full = "█";
-        String block_half = "░";
+        String block_full =  "█";
+        String block_half =  "░";
         int barAmount = 20;
 
-        String message = MessageType.CMD_JOBS_PROGRESS_BAR.format(jobs, speed, time);
+        String message = m_progressManager.formatMessage(jobs, speed, time);
 
-        if (message == null) {
-            message = "";
-        }
-        if (percentage < 0) {
-            percentage = 0;
-        }
-        if (percentage > 100) {
-            percentage = 100;
-        }
+        if(message==null)
+            message="";
+        if(percentage<0) percentage=0;
+        if(percentage>100) percentage=100;
 
-        int increment = 100 / barAmount;
-        int darkAmount = (int) percentage / increment;
-        int lightAmount = barAmount - darkAmount;
+        int increment = 100/barAmount;
+        int darkAmount = (int) percentage/increment;
+        int lightAmount = barAmount-darkAmount;
 
         String bars = "";
-        for (int i = 0; i < darkAmount; i++) {
-            bars += block_full;
-        }
-        for (int i = 0; i < lightAmount; i++) {
-            bars += block_half;
-        }
+        for(int i = 0; i < darkAmount; i++)
+            bars+=block_full;
+        for(int i = 0; i < lightAmount; i++)
+            bars+=block_half;
 
-        message += " : " + bars + " " + (int) percentage + "%";
+        message += " : "+bars+" "+(int) percentage+"%";
 
-        new ActionbarTitleObject(message).send(((PlayerEntry) player).getPlayer());
+        new ActionbarTitleObject(message).send(m_server.getPlayer(player.getUUID()));
     }
 
     @Override

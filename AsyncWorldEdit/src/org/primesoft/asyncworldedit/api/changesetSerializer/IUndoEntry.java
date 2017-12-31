@@ -45,6 +45,11 @@ package org.primesoft.asyncworldedit.api.changesetSerializer;
  * @author SBPrime
  */
 public interface IUndoEntry {
+    /**
+     * Get the entry sequence ID
+     * @return 
+     */
+    long getId();
 
     /**
      * Get the serialized Change

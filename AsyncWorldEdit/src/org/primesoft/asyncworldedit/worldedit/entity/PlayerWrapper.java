@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,7 +45,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.primesoft.asyncworldedit.worldedit.entity;
 
 import com.sk89q.worldedit.PlayerDirection;
@@ -59,7 +65,7 @@ import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.world.World;
 import java.io.File;
 import java.util.UUID;
-import org.primesoft.asyncworldedit.AsyncWorldEditBukkit;
+import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.utils.Pair;
@@ -79,31 +85,31 @@ public class PlayerWrapper implements Player {
     private final Object m_mutex = new Object();
 
     private UUID m_uuid = null;
-    
+
     private IPlayerEntry m_entry = null;
 
     private Pair<World, AsyncWorld> m_world = null;
-
+        
     public PlayerWrapper(Player player) {
         m_parent = player;
     }
 
-    
-    private IPlayerEntry getEntry() {        
+    private IPlayerEntry getEntry() {
         if (m_entry == null) {
             synchronized (m_mutex) {
                 if (m_entry == null) {
-                    IPlayerManager pm = AsyncWorldEditBukkit.getInstance().getPlayerManager();
+                    IPlayerManager pm = AwePlatform.getInstance().getCore().getPlayerManager();
                     m_entry = pm.getPlayer(m_parent.getName());
                 }
             }
         }
         return m_entry;
     }
-        
+
     /**
      * Ge the player UUID
-     * @return 
+     *
+     * @return
      */
     public UUID getUUID() {
         if (m_uuid == null) {
@@ -112,7 +118,7 @@ public class PlayerWrapper implements Player {
                     if (m_parent instanceof BukkitPlayer) {
                         m_uuid = ((BukkitPlayer) m_parent).getPlayer().getUniqueId();
                     } else {
-                        IPlayerManager pm = AsyncWorldEditBukkit.getInstance().getPlayerManager();
+                        IPlayerManager pm = AwePlatform.getInstance().getCore().getPlayerManager();
                         IPlayerEntry entry = pm.getPlayer(m_parent.getName());
                         return entry.getUUID();
                     }
@@ -156,7 +162,6 @@ public class PlayerWrapper implements Player {
     public void checkPermission(String string) throws AuthorizationException {
         m_parent.checkPermission(string);
     }
-       
 
     @Override
     public boolean descendLevel() {
@@ -251,7 +256,7 @@ public class PlayerWrapper implements Player {
     @Override
     public World getWorld() {
         World world = m_parent.getWorld();
-        
+
         synchronized (m_mutex) {
             if (m_world == null || m_world.getX1() != world) {
                 AsyncWorld aWorld = AsyncWorld.wrap(world, getEntry());

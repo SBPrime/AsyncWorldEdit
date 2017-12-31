@@ -5,27 +5,34 @@
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution in source, use in source and binary forms, with or without
  * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,11 +47,11 @@
  */
 package org.primesoft.asyncworldedit.configuration;
 
-import org.bukkit.configuration.ConfigurationSection;
-import static org.primesoft.asyncworldedit.AsyncWorldEditBukkit.log;
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.permissions.PermissionManager;
+import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
  * The player permission group
@@ -116,6 +123,11 @@ public class PermissionGroup implements IPermissionGroup {
      * Use the bar api to display progress
      */
     private final boolean m_useBarApi;
+    
+    /**
+     * The minimum number of blocks on the queue to show the progress bar
+     */
+    private final int m_barApiMin;
 
     /**
      * Use chat to display progress
@@ -123,9 +135,21 @@ public class PermissionGroup implements IPermissionGroup {
     private final boolean m_useChat;
 
     /**
+     * Is the undo disabled
+     */
+    private final boolean m_undoDisabled;
+
+    /**
      * The group name
      */
     private final String m_name;
+    
+    
+    /**
+     * The worldedit config
+     */
+    private final IWorldEditConfig m_worldEditConfig;
+    
 
     /**
      * Is the group default
@@ -238,14 +262,45 @@ public class PermissionGroup implements IPermissionGroup {
     }
 
     /**
+     * Is the undo disabled
+     *
+     * @return
+     */
+    @Override
+    public boolean isUndoDisabled() {
+        return m_undoDisabled;
+    }
+
+    /**
      * The permission node
      *
      * @return
      */
     @Override
     public String getPermissionNode() {
-        return PermissionManager.AWE_PREFIX + "Groups." + m_name;
+        return String.format("%1$sGroups.%2$s", PermissionManager.AWE_PREFIX, m_name);
     }
+    
+    
+    /**
+     * The minimum number of blocks to show the progress bar
+     * @return 
+     */
+    @Override
+    public int getBarApiProgresMinBlocks() {
+        return m_barApiMin;
+    }
+
+    
+    /**
+     * The WorldEdit config
+     * @return 
+     */
+    @Override
+    public IWorldEditConfig getWorldEditConfig() {
+        return m_worldEditConfig;
+    }
+        
 
     /**
      * The default values
@@ -262,7 +317,10 @@ public class PermissionGroup implements IPermissionGroup {
         m_rendererTime = 40;
         m_useBarApi = true;
         m_useChat = true;
+        m_undoDisabled = false;
         m_name = "default-values";
+        m_barApiMin = 100;
+        m_worldEditConfig = null;
     }
 
     /**
@@ -271,7 +329,7 @@ public class PermissionGroup implements IPermissionGroup {
      * @param config
      * @param forceDefault
      */
-    public PermissionGroup(ConfigurationSection config, boolean forceDefault) {
+    public PermissionGroup(IConfigurationSection config, boolean forceDefault) {
         this(config, s_defaultValue, forceDefault);
     }
 
@@ -283,17 +341,19 @@ public class PermissionGroup implements IPermissionGroup {
      * @param defaults
      * @param forceDefault
      */
-    public PermissionGroup(ConfigurationSection config, PermissionGroup defaults,
+    public PermissionGroup(IConfigurationSection config, PermissionGroup defaults,
             boolean forceDefault) {
         m_name = config.getName();
         m_isDefault = config.getBoolean("isDefault", forceDefault);
         m_maxJobs = validate(config.getInt("maxJobs", defaults.getMaxJobs()), defaults.getMaxJobs(), true);
         m_cleanOnLogout = config.getBoolean("cleanOnLogout", defaults.getCleanOnLogout());
         m_isOnByDefault = config.getBoolean("defaultMode", defaults.isOnByDefault());
+        m_undoDisabled = config.getBoolean("disableUndo", defaults.isUndoDisabled());
 
-        ConfigurationSection rendererSection = config.getConfigurationSection("renderer");
-        ConfigurationSection queueSection = config.getConfigurationSection("queue");
-        ConfigurationSection messagesSection = config.getConfigurationSection("messages");
+        IConfigurationSection rendererSection = config.getConfigurationSection("renderer");
+        IConfigurationSection queueSection = config.getConfigurationSection("queue");
+        IConfigurationSection messagesSection = config.getConfigurationSection("messages");
+        IConfigurationSection worldEdit = config.getConfigurationSection("worldedit");
 
         int rendererBlocks = validate(rendererSection == null
                 ? defaults.getRendererBlocks() : rendererSection.getInt("blocks", defaults.getRendererBlocks()),
@@ -303,7 +363,7 @@ public class PermissionGroup implements IPermissionGroup {
                 defaults.getRendererTime(), true);
 
         if (rendererBlocks == -1 && rendererTime == -1) {
-            log("Warning: Time and blocks are set to unlimited! For group " + m_name);
+            log(String.format("Warning: Time and blocks are set to unlimited! For group %1$s", m_name));
             rendererBlocks = s_defaultValue.getRendererBlocks();
             rendererTime = s_defaultValue.getRendererTime();
         }
@@ -320,10 +380,15 @@ public class PermissionGroup implements IPermissionGroup {
 
         m_useBarApi = messagesSection == null
                 ? defaults.isBarApiProgressEnabled() : messagesSection.getBoolean("progress-bar", defaults.isBarApiProgressEnabled());
+        m_barApiMin = messagesSection == null
+                ? defaults.getBarApiProgresMinBlocks() : messagesSection.getInt("progress-bar-min", defaults.getBarApiProgresMinBlocks());
         m_useChat = messagesSection == null
                 ? defaults.isChatProgressEnabled() : messagesSection.getBoolean("progress-chat", defaults.isChatProgressEnabled());
         m_isTalkative = messagesSection == null
                 ? defaults.isTalkative() : messagesSection.getBoolean("talkative", defaults.isTalkative());
+
+        m_worldEditConfig = worldEdit == null 
+                ? defaults.getWorldEditConfig() : WorldEditConfig.parse(worldEdit);
     }
 
     /**
@@ -335,20 +400,5 @@ public class PermissionGroup implements IPermissionGroup {
         }
 
         return (value < 1) ? defaultValue : value;
-    }
-
-    @Override
-    public int getBarApiProgresMinBlocks() {
-        throw new UnsupportedOperationException("Not supported in this version of the plugin.");
-    }
-
-    @Override
-    public boolean isUndoDisabled() {
-        throw new UnsupportedOperationException("Not supported in this version of the plugin.");
-    }
-
-    @Override
-    public IWorldEditConfig getWorldEditConfig() {
-        throw new UnsupportedOperationException("Not supported in this version of the plugin.");
-    }
+    }    
 }

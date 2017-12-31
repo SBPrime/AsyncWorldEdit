@@ -1,31 +1,42 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
+ * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
+ * the WorldEdit plugin.
+ *
  * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
+ * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following 
+ * Redistribution in source, use in source and binary forms, with or without
+ * modification, are permitted free of charge provided that the following
  * conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution,
- * 3. Redistributions of source code, with or without modification, in any form 
- *    other then free of charge is not allowed,
- * 4. Redistributions in binary form in any form other then free of charge is 
- *    not allowed.
- * 5. Any derived work based on or containing parts of this software must reproduce 
- *    the above copyright notice, this list of conditions and the following 
- *    disclaimer in the documentation and/or other materials provided with the 
- *    derived work.
- * 6. The original author of the software is allowed to change the license 
- *    terms or the entire license of the software as he sees fit.
- * 7. The original author of the software is allowed to sublicense the software 
- *    or its parts using any license terms he sees fit.
+ * 1.  Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ * 2.  Redistributions of source code, with or without modification, in any form
+ *     other then free of charge is not allowed,
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ *     software is not allowed,
+ * 4.  Redistributions of source code, with information on how to compile the software
+ *     is not allowed,
+ * 5.  Providing information of any sort (excluding information from the software page)
+ *     on how to compile the software is not allowed,
+ * 6.  You are allowed to build the software for your personal use,
+ * 7.  You are allowed to build the software using a non public build server,
+ * 8.  Redistributions in binary form in not allowed.
+ * 9.  The original author is allowed to redistrubute the software in bnary form.
+ * 10. Any derived work based on or containing parts of this software must reproduce
+ *     the above copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided with the
+ *     derived work.
+ * 11. The original author of the software is allowed to change the license
+ *     terms or the entire license of the software as he sees fit.
+ * 12. The original author of the software is allowed to sublicense the software
+ *     or its parts using any license terms he sees fit.
+ * 13. By contributing to this project you agree that your contribution falls under this
+ *     license.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,25 +51,63 @@
  */
 package org.primesoft.asyncworldedit.injector.classfactory.base;
 
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
+import com.sk89q.worldedit.function.RegionFunction;
+import com.sk89q.worldedit.math.transform.Transform;
+import com.sk89q.worldedit.regions.Region;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
+import org.primesoft.asyncworldedit.injector.classfactory.IClipboardFormat;
+import org.primesoft.asyncworldedit.injector.classfactory.base.clipboard.BlockArrayClipboard;
+import org.primesoft.asyncworldedit.injector.classfactory.base.clipboard.formats.NullFormat;
+import org.primesoft.asyncworldedit.injector.classfactory.base.clipboard.formats.SchematicFormat;
 
 /**
  *
  * @author SBPrime
  */
 public class BaseClassFactory implements IClassFactory {
-    private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();    
+
+    private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();
     private final IJobProcessor m_jobProcessor = new BaseJobProcessor();
+
+    private final IClipboardFormat m_null = new NullFormat();
+    private final IClipboardFormat m_sehematic = new SchematicFormat();
 
     @Override
     public IOperationProcessor getOperationProcessor() {
         return m_operationProcessor;
     }
-    
+
     @Override
     public IJobProcessor getJobProcessor() {
         return m_jobProcessor;
     }
+
+    @Override
+    public Clipboard createClipboard(Region region) {
+        return new BlockArrayClipboard(region);
+    }
+
+    @Override
+    public RegionFunction addBiomeCopy(RegionFunction blockCopy, 
+            Extent source, Vector from, 
+            Extent destination, Vector to, Transform currentTransform,
+            boolean singleSet) {
+        return blockCopy;
+    }
+
+    @Override
+    public IClipboardFormat getClipboardFormat(ClipboardFormat format) {
+        if (format == null || !format.equals(ClipboardFormat.SCHEMATIC)) {
+            return m_null;
+        }
+        
+        return m_sehematic;
+    }
+
 }

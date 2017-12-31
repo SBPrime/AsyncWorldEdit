@@ -190,4 +190,33 @@ public interface IDirectChunkAPI {
      * @return
      */
     short getOpacityLevel(char id);
+    
+    
+    /**
+     * Get the material opacity level (how much it obscures light)
+     * for skylight
+     *
+     * @param type
+     * @param data
+     * @return
+     */
+    short getOpacityLevelSkyLight(int type, int data);
+
+    /**
+     * Get the material opacity level (how much it obscures light)
+     * for skylight
+     *
+     * @param block
+     * @return
+     */
+    short getOpacityLevelSkyLight(BaseBlock block);
+
+    /**
+     * Get the material opacity level (how much it obscures light)
+     * for skylight
+     *
+     * @param id
+     * @return
+     */
+    short getOpacityLevelSkyLight(char id);
 }

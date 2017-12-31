@@ -1,15 +1,11 @@
 name: AsyncWorldEdit
 main: org.primesoft.asyncworldedit.AsyncWorldEditBukkit
-version: 2.3.3
+version: 3.4.11
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin attaches into WorldEdit and makes it asynchronous.
 authors: [SBPrime]
-depend: [WorldEdit]
-softdepend: [BlocksHub]
+loadbefore: [WorldEdit]
+load: STARTUP
 commands:
-  awe:
-    description: 'Displays the help for Async world edit.'
-    usage: /<command>
-    aliases: /awe
 permissions:

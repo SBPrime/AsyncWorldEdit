@@ -1,8 +1,8 @@
 name: AsyncWorldEdit-PlotMe013g
 main: org.primesoft.asyncworldedit.plotme.PlotMeFix_013g
-version: 2.3.0
+version: 3.3.0
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin implements PlotMeFix for PlotMe 0.13g
 authors: [SBPrime]
-depend: [AsyncWorldEdit, PlotMe]
+depend: [PlotMe]
