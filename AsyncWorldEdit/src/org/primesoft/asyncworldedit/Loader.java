@@ -226,11 +226,12 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
                             + "PUB Key 4"
                             + "PUB Key 5";
                     int len = pub.length() / 5;
+                    int pos = pub.indexOf('=');
                     String part1 = pub.substring(len * 0, len * 1);
                     String part2 = pub.substring(len * 1, len * 2);
                     String part3 = pub.substring(len * 2, len * 3);
                     String part4 = pub.substring(len * 3, len * 4);
-                    String part5 = pub.substring(len * 4, pub.indexOf('='));
+                    String part5 = pos < 0 ? "" : pub.substring(len * 4, pos);
 
                     boolean hasMatch = true;
                     int iMatch = 0;
@@ -274,12 +275,18 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
                         aesKey[i] = (byte) (keyData[i * 2 + 0] ^ keyData[i * 2 + 1]);
                     }
                     m_key = new SecretKeySpec(aesKey, "AES");
-                } catch (NoSuchAlgorithmException ex) {
+                } catch (NoSuchAlgorithmException ex) {                    
+                    return null;
                 } catch (InvalidKeySpecException ex) {
+                    return null;
                 } catch (NoSuchPaddingException ex) {
+                    return null;
                 } catch (InvalidKeyException ex) {
+                    return null;
                 } catch (IllegalBlockSizeException ex) {
+                    return null;
                 } catch (BadPaddingException ex) {
+                    return null;
                 }
 
                 key = m_key;
@@ -470,6 +477,10 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
             int part1l = part1.length();
             int part2l = part2.length();
 
+            if (part1l < 5 || part2l < 5) {
+                return null;
+            }
+            
             boolean hasMatch = true;
             int iMatch = 0;
             int iSkip = 0;
@@ -496,6 +507,9 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
                     seed.substring(seed.indexOf('='))
             );
             m_seed = Base64.decodeBase64(seed);
+            if (m_seed.length < 2) {
+                return null;
+            }
             xor = m_seed;
         }
 
