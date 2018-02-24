@@ -35,7 +35,9 @@
  */
 package org.primesoft.asyncworldedit.api.inner;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.stream.Stream;
 import org.primesoft.asyncworldedit.api.changesetSerializer.ISerializerManager;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IUndoEntry;
 
@@ -53,4 +55,13 @@ public interface IInnerSerializerManager extends ISerializerManager {
      * @throws IOException
      */
     IUndoEntry load(IChunkCacheStream stream) throws IOException;
+
+    Stream<File> getUndoFiles() throws IOException;
+    
+    /**
+     * Try to get the timestamp of the undo file
+     * @param file
+     * @return File timestamp (in milisecconds) or NULL
+     */
+    Long getTimestamp(File file);
 }

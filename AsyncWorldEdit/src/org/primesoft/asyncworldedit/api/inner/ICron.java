@@ -45,39 +45,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.configuration.update;
+package org.primesoft.asyncworldedit.api.inner;
 
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
-import org.primesoft.asyncworldedit.platform.api.IConfiguration;
-import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
- *
+ * This interface provides access to delayed tasks and scheduled tasks
  * @author SBPrime
  */
-class ConfigUpdater_v18_v19 extends BaseConfigurationUpdater {
-
-    public ConfigUpdater_v18_v19() {
-    }
-
-    @Override
-    public int updateConfig(IConfiguration config) {
-        log("Updating configuration v18 --> v19");
-
-        IConfigurationSection mainSection = config.getConfigurationSection("awe");
-        if (mainSection == null) {
-            return -1;
-        }
-        
-
-        IConfigurationSection undo = getOrCreate(mainSection, "undo");
-        setIfNone(undo, "keepUndoFileFor", getAndRemoveBoolean(undo, "keepUndoFile", false) ? -1 : 0);
-        setIfNone(undo, "keepSessionOnLogoutFor", getAndRemoveBoolean(undo, "cleanOnLogout", true) ? 0 : -1);
-        setIfNone(undo, "undoFileCleanupInterval", 30);
-
-        mainSection.set("version", 19);
-
-        return 19;
-    }
+public interface ICron {
+    /**
+     * Schedule the local session removal after X amount of minutes
+     * @param entry
+     * @param delayTime 
+     */
+    void scheduleSessionForRemoval(IPlayerEntry entry, int delayTime);
+    
     
 }

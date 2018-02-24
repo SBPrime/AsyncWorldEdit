@@ -54,6 +54,7 @@ import java.util.UUID;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.primesoft.asyncworldedit.api.inner.ICron;
 import org.primesoft.asyncworldedit.api.inner.IWorldeditIntegratorInner;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -145,10 +146,19 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
         }
 
         ConfigUndo undoConfig = ConfigProvider.undo();
-        if (undoConfig != null && undoConfig.keepSessionOnLogoutFor() == 0) {
-            IWorldeditIntegratorInner integrator = m_parrent.getWorldEditIntegrator();
-            if (integrator != null) {
-                integrator.removeSession(entry);
+        if (undoConfig != null) {
+            int keepSessionOnLogoutFor = undoConfig.keepSessionOnLogoutFor();
+
+            if (keepSessionOnLogoutFor == 0) {
+                IWorldeditIntegratorInner integrator = m_parrent.getWorldEditIntegrator();
+                if (integrator != null) {
+                    integrator.removeSession(entry);
+                }
+            } else if (keepSessionOnLogoutFor > 0) {
+                ICron cron = m_parrent.getCron();
+                if (cron!= null) {
+                    cron.scheduleSessionForRemoval(entry, keepSessionOnLogoutFor);
+                }
             }
         }
     }
@@ -276,7 +286,31 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
 
         return findPlayer(playerName, null);
     }
+    
+    /**
+     * Get the player wrapper based on UUID
+     *
+     * @param playerUuid
+     * @return returns null if player not found online
+     */
+    @Override
+    public IPlayerEntry getOnlinePlayer(UUID playerUuid) {
+        if (playerUuid == null) {
+            return null;
+        }
 
+        IPlayerEntry result;
+
+        synchronized (m_playersUids) {
+            result = m_playersUids.get(playerUuid);
+            if (result != null) {
+                return result;
+            }
+        }
+
+        return null;
+    }
+    
     /**
      * Search the block placer queues for player entry
      *

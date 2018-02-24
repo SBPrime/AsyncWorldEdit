@@ -155,7 +155,7 @@ public class FileChangeSet implements ChangeSet {
 
         ConfigUndo undoConfig = ConfigProvider.undo();
         boolean removeFile = undoConfig != null && undoConfig.keepUndoFileFor() == 0;
-
+        
         final StreamProvider sp = StreamProvider.getInstance();
         if (!sp.initializeStream(m_storageFile, removeFile)
                 || !sp.initializeStream(new File(m_storageFile.getPath() + ".idx"), removeFile)) {

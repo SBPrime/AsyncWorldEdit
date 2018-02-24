@@ -95,7 +95,9 @@ awe:
     #logner used in WE.
     #Values: -1 Do not delete, 0 - Delete immediately, X - Number of minutes to store 
     #the file
-    keepUndoFileFor: 0    
+    keepUndoFileFor: 0
+    #The number of minutes between undo files cleanup
+    undoFileCleanupInterval: 30
   #The direct chunk options
   directChunk:
     #Do auto relight after each edit    

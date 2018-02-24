@@ -58,6 +58,8 @@ public interface IAsyncWorldEditCore extends IAsyncWorldEdit {
     
     @Override
     public IWorldeditIntegratorInner getWorldEditIntegrator();
+    
+    public ICron getCron();
 
     public void onEnable();
 
