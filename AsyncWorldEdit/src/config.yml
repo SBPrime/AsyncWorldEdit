@@ -88,13 +88,14 @@ awe:
     memoryLowStorage: wait
     #Store the undo data on disk (a bit slower but does not use so much RAM)
     storeOnDisk: true
-    #Remove the WorldEdit session on player logout    
-    cleanOnLogout: true
+    #How much time should the WorldEdit session be kept after player logged out
+    #Values: -1 Do not remove, 0 - immediately, X - Number of minutes
+    keepSessionOnLogoutFor: 0
     #How long should the undo files be keept on the disk after the undo is no 
     #logner used in WE.
-    #Values: -1 Do not delete, 0 - Delete immediately, X - Timber of hours to store 
+    #Values: -1 Do not delete, 0 - Delete immediately, X - Number of minutes to store 
     #the file
-    keepUndoFileFor: 0
+    keepUndoFileFor: 0    
   #The direct chunk options
   directChunk:
     #Do auto relight after each edit    

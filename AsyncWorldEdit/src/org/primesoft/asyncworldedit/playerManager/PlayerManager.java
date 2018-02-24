@@ -145,7 +145,7 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
         }
 
         ConfigUndo undoConfig = ConfigProvider.undo();
-        if (undoConfig != null && undoConfig.cleanOnLogout()) {
+        if (undoConfig != null && undoConfig.keepSessionOnLogoutFor() == 0) {
             IWorldeditIntegratorInner integrator = m_parrent.getWorldEditIntegrator();
             if (integrator != null) {
                 integrator.removeSession(entry);

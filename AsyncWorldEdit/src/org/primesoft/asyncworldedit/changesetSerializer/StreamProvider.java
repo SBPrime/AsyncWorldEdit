@@ -93,11 +93,7 @@ public class StreamProvider {
          * The MTA mutex
          */
         private final Object m_mutex = new Object();
-
-        public StreamDescription(File file) {
-            this(file, false);
-        }
-
+        
         public StreamDescription(File file, boolean removeOnClean) {
             m_file = file;
             m_removeOnClean = removeOnClean;

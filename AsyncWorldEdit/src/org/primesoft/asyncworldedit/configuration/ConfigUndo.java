@@ -60,7 +60,7 @@ public class ConfigUndo {
     private final UndoBehaviour m_undoAsync;
     private final UndoBehaviour m_undoLoad;
     private final boolean m_storeOnDisk;
-    private final boolean m_cleanOnLogout;
+    private final int m_keepSessionOnLogoutFor;
     private int m_keepUndoFileFor;
 
     public UndoBehaviour getMainBehaviour() {
@@ -79,8 +79,8 @@ public class ConfigUndo {
         return m_storeOnDisk;
     }
     
-    public boolean cleanOnLogout() {
-        return m_cleanOnLogout;
+    public int keepSessionOnLogoutFor() {
+        return m_keepSessionOnLogoutFor;
     }
     
     
@@ -95,11 +95,11 @@ public class ConfigUndo {
             m_undoMain = UndoBehaviour.Cancel;
             m_undoLoad = UndoBehaviour.Wait;
             m_storeOnDisk = true;
-            m_cleanOnLogout = true;
+            m_keepSessionOnLogoutFor = 0;
             m_keepUndoFileFor = 0;
         } else {
             m_storeOnDisk = secUndo.getBoolean("storeOnDisk", true);
-            m_cleanOnLogout = secUndo.getBoolean("cleanOnLogout", true);
+            m_keepSessionOnLogoutFor = secUndo.getInt("keepSessionOnLogoutFor", 0);
             m_keepUndoFileFor = secUndo.getInt("keepUndoFileFor", 0);
             
             m_undoAsync = parse(secUndo.getString("memoryLow", null), UndoBehaviour.Wait);

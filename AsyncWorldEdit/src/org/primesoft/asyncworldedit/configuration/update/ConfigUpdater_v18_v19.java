@@ -47,7 +47,6 @@
  */
 package org.primesoft.asyncworldedit.configuration.update;
 
-import java.util.Set;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.platform.api.IConfiguration;
 import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
@@ -73,6 +72,7 @@ class ConfigUpdater_v18_v19 extends BaseConfigurationUpdater {
 
         IConfigurationSection undo = getOrCreate(mainSection, "undo");
         setIfNone(undo, "keepUndoFileFor", getAndRemoveBoolean(undo, "keepUndoFile", false) ? -1 : 0);
+        setIfNone(undo, "keepSessionOnLogoutFor", getAndRemoveBoolean(undo, "cleanOnLogout", true) ? 0 : -1);
 
         mainSection.set("version", 19);
 
