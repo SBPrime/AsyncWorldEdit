@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.IntUtils;
@@ -67,11 +66,6 @@ import org.primesoft.asyncworldedit.utils.IntUtils;
  */
 public class VersionChecker {
     /**
-     * Spigot API key
-     */
-    private static final String API_KEY = "98BE0FE67F88AB82B4C197FAF1DC3B69206EFDCC4D3B80FC83A00037510B99B4";
-
-    /**
      * AWE plugin ID
      */
     private static final int PLUGIN_ID = 9661;
@@ -79,23 +73,17 @@ public class VersionChecker {
     /**
      * Spigo API url
      */
-    private static final String URL = "http://www.spigotmc.org/api/general.php";
-
-    /**
-     * The API function
-     */
-    private static final String DATA = "key=%s&resource=%s";
+    private static final String URL = "https://api.spigotmc.org/legacy/update.php?resource=%1$s";
 
     /**
      * Get the latest plugin version
      * @return 
      */
-    private static String getVersion() {
+    public static String getVersion() {
         try {
-            HttpURLConnection con = (HttpURLConnection) new URL(URL).openConnection();
+            HttpURLConnection con = (HttpURLConnection) new URL(String.format(URL, PLUGIN_ID)).openConnection();
             con.setDoOutput(true);
-            con.setRequestMethod("POST");
-            con.getOutputStream().write(String.format(DATA, API_KEY, PLUGIN_ID).getBytes("UTF-8"));
+            con.setRequestMethod("GET");
             return new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
         } catch (Exception ex) {
             ExceptionHelper.printException(ex, "Unable to check AWE version");
@@ -110,7 +98,7 @@ public class VersionChecker {
      * @param localVersion Current plugin version
      * @return Version comperation answer
      */
-    public static VersionCheckResult CheckVersion(String localVersion) {
+    public static VersionCheckResult checkVersion(String localVersion) {
         String remoteVersion = getVersion();
 
         if (remoteVersion == null || remoteVersion.isEmpty()) {

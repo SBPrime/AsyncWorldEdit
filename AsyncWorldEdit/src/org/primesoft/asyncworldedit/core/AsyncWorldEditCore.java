@@ -348,7 +348,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    log(VersionChecker.CheckVersion(m_platform.getVersion()).getMessage());
+                    log(VersionChecker.checkVersion(m_platform.getVersion()).getMessage());
 
                 }
             }).start();
