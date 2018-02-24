@@ -7,11 +7,14 @@
 *.jar
 /*/test/
 lib/
+/JarProcessor/*
 
 # Idea
 *.iml
 *.ipr
 *.iws
+*.path
+
 .idea/
 /AsyncWorldEdit-ActionBarAPI/AsyncWorldEdit-ActionBarAPI/nbproject/private/
 /AsyncWorldEdit/src/*.jar
