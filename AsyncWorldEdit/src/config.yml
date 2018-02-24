@@ -1,6 +1,6 @@
 awe:
   #Do not change
-  version: 18
+  version: 19
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
     interval: 1
@@ -90,8 +90,11 @@ awe:
     storeOnDisk: true
     #Remove the WorldEdit session on player logout    
     cleanOnLogout: true
-    #Should the undo be keept on disk when the undo is no logner used in WE
-    keepUndoFile: false
+    #How long should the undo files be keept on the disk after the undo is no 
+    #logner used in WE.
+    #Values: -1 Do not delete, 0 - Delete immediately, X - Timber of hours to store 
+    #the file
+    keepUndoFileFor: 0
   #The direct chunk options
   directChunk:
     #Do auto relight after each edit    
