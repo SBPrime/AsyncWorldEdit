@@ -154,7 +154,7 @@ public class FileChangeSet implements ChangeSet {
         m_storageFile = m_changesetSerializer.open(player, newId, true);
 
         ConfigUndo undoConfig = ConfigProvider.undo();
-        boolean removeFile = undoConfig != null && !undoConfig.keepUndoFile();
+        boolean removeFile = undoConfig != null && undoConfig.keepUndoFileFor() == 0;
 
         final StreamProvider sp = StreamProvider.getInstance();
         if (!sp.initializeStream(m_storageFile, removeFile)
