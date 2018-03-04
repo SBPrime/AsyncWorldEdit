@@ -110,7 +110,7 @@ public class ActionBarAPIBackend extends JavaPlugin implements IAwePlugin {
             return;
         }
         
-        m_integrator = new ActionBarAPIIntegrator(this, m_progressManager);
+        m_integrator = new ActionBarAPIIntegrator(this, m_progressManager, awe.getExceptionHelper());
         m_progressManager.registerProgressDisplay(m_integrator);
         
         super.onEnable();
