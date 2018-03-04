@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.primesoft.asyncworldedit</groupId>
-    <artifactId>AsyncWorldEdit-APIInner</artifactId>
+    <artifactId>AsyncWorldEdit-BlocksHub_v1x</artifactId>
 
     <version>3.5.0</version>
 
@@ -17,32 +17,35 @@
 
     <repositories>
         <repository>
-            <id>sk89q</id>
-            <url>http://maven.sk89q.com/artifactory/repo</url>
+            <id>github-blockshub</id>
+            <url>https://raw.githubusercontent.com/SBPrime/BlocksHub/maven-artifact/</url>
         </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>com.sk89q.worldedit</groupId>
-            <artifactId>worldedit-core</artifactId>
-            <version>[6.1,6.2)</version>
+            <groupId>org.primesoft</groupId>
+            <artifactId>BlocksHub</artifactId>
+            <version>1.2.0</version>
+            <type>jar</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.primesoft.asyncworldedit</groupId>
+            <artifactId>AsyncWorldEdit-API</artifactId>
+            <version>[2.1.0, 3.0.0)</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEditInjector</artifactId>
-            <version>[3.4.9, 4.0)</version>
+            <artifactId>AsyncWorldEdit-APIInner</artifactId>
+            <version>[3.5.0, 4.0.0)</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-API</artifactId>
-            <version>[2.1.0, 3.0)</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>[1.12.2, 1.13.0)</version>
+            <artifactId>AsyncWorldEdit-Utils</artifactId>
+            <version>[3.5.0, 4.0.0)</version>
             <type>jar</type>
         </dependency>
     </dependencies>

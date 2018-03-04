@@ -47,27 +47,20 @@
  */
 package org.primesoft.asyncworldedit.api.inner;
 
-import java.util.List;
-import org.primesoft.asyncworldedit.api.classScanner.IClassScannerOptions;
+import java.lang.reflect.Field;
 
 /**
  *
  * @author SBPrime
  */
-public interface IClassScanner extends IClassScannerOptions {
-    /**
-     * Initialize the class scanner
-     * @return
-     */
-    IClassScanner initialize();
+public interface IClassScannerResult {
 
-    /**
-     * Scan object (and all fields) for T
-     *
-     * @param types The types of classes to find
-     * @param o Object to find
-     * @return
-     */
-    List<IClassScannerResult> scan(Class<?>[] types, Object o);
+    Field getField();
+
+    Object getOwner();
+
+    Class<?> getType();
+
+    Object getValue();
     
 }

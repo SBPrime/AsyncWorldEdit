@@ -45,29 +45,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.inner;
+package org.primesoft.asyncworldedit.platform.bukkit;
 
-import java.util.List;
-import org.primesoft.asyncworldedit.api.classScanner.IClassScannerOptions;
+import org.bukkit.World;
 
 /**
  *
  * @author SBPrime
  */
-public interface IClassScanner extends IClassScannerOptions {
-    /**
-     * Initialize the class scanner
-     * @return
-     */
-    IClassScanner initialize();
+public interface IBukkitWorld {
 
-    /**
-     * Scan object (and all fields) for T
-     *
-     * @param types The types of classes to find
-     * @param o Object to find
-     * @return
-     */
-    List<IClassScannerResult> scan(Class<?>[] types, Object o);
+    World getWorld();
     
 }
