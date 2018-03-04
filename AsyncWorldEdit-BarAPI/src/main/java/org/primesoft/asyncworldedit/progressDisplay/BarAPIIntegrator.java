@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -47,89 +47,95 @@
  */
 package org.primesoft.asyncworldedit.progressDisplay;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.plugin.PluginDescriptionFile;
+import me.confuser.barapi.BarAPI;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
-import org.primesoft.asyncworldedit.api.inner.IAwePlugin;
+import org.primesoft.asyncworldedit.api.inner.IExceptionHelper;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
+import static org.primesoft.asyncworldedit.progressDisplay.BarAPIBackend.log;
 
 /**
  *
  * @author SBPrime
  */
-public class BarAPIBackend extends JavaPlugin implements IAwePlugin {
-    private static final Logger s_log = Logger.getLogger("Minecraft.AWE.BarAPI");
-    private static String s_prefix = null;
-    private static final String s_logFormat = "%s %s";
-    
+public class BarAPIIntegrator implements IProgressDisplay {
+
+    private final Server m_server;
+    private final IProgressDisplayManager m_progressManager;
+    private final boolean m_isInitialized;
+
     /**
-     * Send message to the log
+     * Get instance of the core blocks hub plugin
      *
-     * @param msg
+     * @param plugin
+     * @return
      */
-    public static void log(String msg) {
-        if (s_log == null || msg == null || s_prefix == null) {
-            return;
-        }
+    private static BarAPI getBarAPI(JavaPlugin plugin, IExceptionHelper exceptionHelper) {
+        try {
+            Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BarAPI");
 
-        s_log.log(Level.INFO, String.format(s_logFormat, s_prefix, msg));
+            if ((cPlugin == null) || (!(cPlugin instanceof BarAPI))) {
+                log("BarAPI not found.");
+                return null;
+            }
+
+            return (BarAPI) cPlugin;
+        } catch (NoClassDefFoundError ex) {
+            exceptionHelper.printException(ex, "Error initializing BarAPI.");
+            return null;
+        }
     }
 
-    
-    /**
-     * The AWE API
-     */
-    private IAsyncWorldEdit m_awe;
-    
-    /**
-     * The progress display manager
-     */
-    private IProgressDisplayManager m_progressManager;
-    
-    /**
-     * The API integrator
-     */
-    private IProgressDisplay m_integrator;
-
-    @Override
-    public void onEnable() {
-        PluginDescriptionFile desc = getDescription();
-        s_prefix = String.format("[%s]", desc.getName());
-        
-        super.onEnable();
-        log("Enabled.");
+    public BarAPIIntegrator(JavaPlugin plugin, IProgressDisplayManager progressDisplayManager,
+            IExceptionHelper exceptionHelper) {
+        BarAPI ba = getBarAPI(plugin, exceptionHelper);
+        m_isInitialized = ba != null;
+        m_progressManager = progressDisplayManager;
+        m_server = plugin.getServer();
     }
 
     @Override
-    public void initialize(IAsyncWorldEditCore awe) {        
-        m_awe = awe;
-        
-        if (m_awe == null) {
-            log("AsyncWorldEdit API not found.");
-            return;
-        }
-        
-        m_progressManager = m_awe.getProgressDisplayManager();
-        
-        if (m_progressManager == null) {
-            log("No progress display manager found.");
-            return;
-        }
-        
-        m_integrator = new BarAPIIntegrator(this, m_progressManager);               
-        m_progressManager.registerProgressDisplay(m_integrator);
+    public void setMessage(IPlayerEntry player, int jobsCount,
+            int queuedBlocks, int maxQueuedBlocks, double timeLeft, double placingSpeed, double percentage) {
 
-        log("Initialized.");
+        if (!m_isInitialized || player == null) {
+            return;
+        }
+
+        Player bPlayer = m_server.getPlayer(player.getUUID());
+        if (bPlayer == null) {
+            return;
+        }
+
+        String message = m_progressManager.formatMessage(jobsCount, placingSpeed, timeLeft);
+        if (percentage < 0) {
+            percentage = 0;
+        } else if (percentage > 100) {
+            percentage = 100;
+        }
+
+        BarAPI.setMessage(bPlayer, message, (float) percentage);
     }
 
     @Override
-    public void onDisable() {
-        m_progressManager.unregisterProgressDisplay(m_integrator);
-        
-        super.onDisable();
+    public void disableMessage(IPlayerEntry player) {
+        if (!m_isInitialized || player == null) {
+            return;
+        }
+        Player bPlayer = m_server.getPlayer(player.getUUID());
+        if (bPlayer == null) {
+            return;
+        }
+
+        BarAPI.removeBar(bPlayer);
+    }
+
+    @Override
+    public String getName() {
+        return "Bar API";
     }
 }
