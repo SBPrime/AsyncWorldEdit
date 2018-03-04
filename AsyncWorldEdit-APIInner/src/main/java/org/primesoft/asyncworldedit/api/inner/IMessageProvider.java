@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,155 +45,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.platform.api;
+package org.primesoft.asyncworldedit.api.inner;
 
-import java.util.UUID;
-import org.primesoft.asyncworldedit.api.IPhysicsWatch;
-import org.primesoft.asyncworldedit.api.IWorld;
-import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
-import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
-import org.primesoft.asyncworldedit.api.inner.IWorldeditIntegratorInner;
-import org.primesoft.asyncworldedit.api.map.IMapUtils;
-import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
-import org.primesoft.asyncworldedit.strings.MessageProvider;
+import java.io.InputStream;
+import java.util.HashMap;
 
 /**
  *
  * @author SBPrime
  */
-public interface IPlatform {
-    /**
-     * Get the platform name
-     * @return 
-     */
-    String getName();
+public interface IMessageProvider {
 
     /**
-     * Get the plugin version
-     * @return 
+     * Initialise the default strings
+     *
+     * @return
      */
-    String getVersion();
-    
-    
-    /**
-     * Gets the server class
-     * @return 
-     */
-    String getServerAPI();
-    
-    /**
-     * Gets the server api version
-     * @return 
-     */
-    String getServerAPILong();
-    
-    /**
-     * Get the command manager
-     * @return 
-     */
-    ICommandManager getCommandManager();
-    
-    /**
-     * Get the player provider
-     * @return 
-     */
-    IPlayerProvider getPlayerProvider();
-
+    boolean loadDefault();
 
     /**
-     * Get the scheduler
-     * @return 
+     * Load the message file
+     *
+     * @param file
+     * @param messages
+     * @return
      */
-    IScheduler getScheduler();
-    
-    /**
-     * Initialize the platform
-     * @param core 
-     */
-    void initialize(IAsyncWorldEditCore core);
-
-    void onEnable();
-    
-    void onDisable();
-
-    
-    /**
-     * Get the plugin configuration
-     * @return 
-     */
-    IConfiguration getConfig();
-
-    
-    /**
-     * The physics watcher
-     * @return 
-     */
-    IPhysicsWatch getPhysicsWatcher();
-    
-    /**
-     * Get the chunk watcher
-     * @return 
-     */
-    IChunkWatch getChunkWatcher();
-    
-    
-    /**
-     * Get the AsyncWorldEdit world
-     * @param worldUUID
-     * @return 
-     */
-    IWorld getWorld(UUID worldUUID);
-    
-    /**
-     * Get the AsyncWorldEdit world
-     * @param worldName
-     * @return 
-     */
-    IWorld getWorld(String worldName);
-    
-    
-    /**
-     * Get the map utils
-     * @return 
-     */
-    IMapUtils getMapUtils();
+    boolean loadFile(InputStream file, HashMap<String, String> messages);
 
     /**
-     * Get the material library
-     * @return 
+     * Load the message file
+     *
+     * @param file
+     * @return
      */
-    IMaterialLibrary getMaterialLibrary();
-
+    boolean loadFile(String file);
     
-    /**
-     * Create the WorldEdit integrator
-     * @return 
-     */
-    IWorldeditIntegratorInner getWorldEditIntegrator();
-    
-    
-    /**
-     * Create the message provider
-     * @return 
-     */
-    MessageProvider createMessageProvider();
-
-    /**
-     * The class scanner
-     * @return 
-     */
-    ClassScanner getClasScanner();
-
-    
-    /**
-     * Get plugin
-     * @param pluginName
-     * @return 
-     */
-    Object getPlugin(String pluginName);
-
-    /**
-     * Reload the plugin config
-     */
-    void reloadConfig();
 }

@@ -37,7 +37,7 @@ package org.primesoft.asyncworldedit.api.inner;
 
 import java.io.DataInput;
 import java.io.IOException;
-import org.primesoft.asyncworldedit.utils.io.SeekOrigin;
+import org.primesoft.asyncworldedit.api.io.SeekOrigin;
 
 /**
  *
