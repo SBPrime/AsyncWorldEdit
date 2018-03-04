@@ -53,10 +53,10 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.api.inner.IExceptionHelper;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import static org.primesoft.asyncworldedit.progressDisplay.ActionBarAPIBackend.log;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 
 /**
@@ -78,7 +78,7 @@ public class ActionBarAPIIntegrator implements IProgressDisplay
      * @param plugin
      * @return
      */
-    private static ActionBarAPI getABAPI(JavaPlugin plugin, IExceptionHelper exceptionHelper) {
+    private static ActionBarAPI getABAPI(JavaPlugin plugin) {
         try {
             Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("ActionBarAPI");
 
@@ -89,14 +89,13 @@ public class ActionBarAPIIntegrator implements IProgressDisplay
 
             return (ActionBarAPI) cPlugin;
         } catch (NoClassDefFoundError ex) {
-            exceptionHelper.printException(ex, "Error initializing BarAPI.");
+            ExceptionHelper.printException(ex, "Error initializing BarAPI.");
             return null;
         }
     }
 
-    public ActionBarAPIIntegrator(JavaPlugin plugin, IProgressDisplayManager progressManager, 
-            IExceptionHelper exceptionHelper) {
-        ActionBarAPI ba = getABAPI(plugin, exceptionHelper);
+    public ActionBarAPIIntegrator(JavaPlugin plugin, IProgressDisplayManager progressManager) {
+        ActionBarAPI ba = getABAPI(plugin);
         m_isInitialized = ba != null;
         
         m_progressManager = progressManager;

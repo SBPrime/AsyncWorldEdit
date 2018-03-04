@@ -52,11 +52,11 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.api.inner.IExceptionHelper;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
 import static org.primesoft.asyncworldedit.progressDisplay.BarAPIBackend.log;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
@@ -74,7 +74,7 @@ public class BarAPIIntegrator implements IProgressDisplay {
      * @param plugin
      * @return
      */
-    private static BarAPI getBarAPI(JavaPlugin plugin, IExceptionHelper exceptionHelper) {
+    private static BarAPI getBarAPI(JavaPlugin plugin) {
         try {
             Plugin cPlugin = plugin.getServer().getPluginManager().getPlugin("BarAPI");
 
@@ -85,14 +85,13 @@ public class BarAPIIntegrator implements IProgressDisplay {
 
             return (BarAPI) cPlugin;
         } catch (NoClassDefFoundError ex) {
-            exceptionHelper.printException(ex, "Error initializing BarAPI.");
+            ExceptionHelper.printException(ex, "Error initializing BarAPI.");
             return null;
         }
     }
 
-    public BarAPIIntegrator(JavaPlugin plugin, IProgressDisplayManager progressDisplayManager,
-            IExceptionHelper exceptionHelper) {
-        BarAPI ba = getBarAPI(plugin, exceptionHelper);
+    public BarAPIIntegrator(JavaPlugin plugin, IProgressDisplayManager progressDisplayManager) {
+        BarAPI ba = getBarAPI(plugin);
         m_isInitialized = ba != null;
         m_progressManager = progressDisplayManager;
         m_server = plugin.getServer();

@@ -120,7 +120,7 @@ public class BarAPIBackend extends JavaPlugin implements IAwePlugin {
             return;
         }
         
-        m_integrator = new BarAPIIntegrator(this, m_progressManager, awe.getExceptionHelper());               
+        m_integrator = new BarAPIIntegrator(this, m_progressManager);
         m_progressManager.registerProgressDisplay(m_integrator);
 
         log("Initialized.");
