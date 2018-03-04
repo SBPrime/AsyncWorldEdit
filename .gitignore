@@ -5,7 +5,7 @@
 */dist/
 */lib/
 *.jar
-/*/test-server/
+/test-server/
 lib/
 /JarProcessor/*
 

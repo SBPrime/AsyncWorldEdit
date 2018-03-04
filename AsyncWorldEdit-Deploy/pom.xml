@@ -164,6 +164,58 @@
                     </execution>
                 </executions>
             </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.primesoft.asyncworldedit</groupId>
+                                    <artifactId>JarProcessor</artifactId>
+                                    <version>1.0.0</version>
+                                    <outputDirectory>${project.build.directory}/</outputDirectory>
+                                    <destFileName>JarProcessor.jar</destFileName>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <workingDirectory>${project.build.directory}/</workingDirectory>
+                            <arguments>
+                                <argument>-jar</argument>
+                                <argument>JarProcessor.jar</argument>
+                                <argument>${project.artifactId}.jar</argument>
+                                <argument>${project.artifactId}-sec.jar</argument>
+                            </arguments>
+                        </configuration>                        
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <properties>
