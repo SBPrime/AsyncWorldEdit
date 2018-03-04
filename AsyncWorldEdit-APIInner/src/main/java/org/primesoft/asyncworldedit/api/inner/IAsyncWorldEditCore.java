@@ -74,4 +74,6 @@ public interface IAsyncWorldEditCore extends IAsyncWorldEdit {
     public IInnerDirectChunkAPI getInnerDirectChunkAPI();
     
     public EventBus getEventBus();
+    
+    public IExceptionHelper getExceptionHelper();
 }
