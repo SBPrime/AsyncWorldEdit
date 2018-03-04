@@ -18,3 +18,5 @@ lib/
 .idea/
 /AsyncWorldEdit-ActionBarAPI/AsyncWorldEdit-ActionBarAPI/nbproject/private/
 /AsyncWorldEdit/src/*.jar
+/AsyncWorldEdit-API/target/
+/AsyncWorldEditInjector/target/
