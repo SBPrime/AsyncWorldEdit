@@ -22,19 +22,31 @@
         </repository>
     </repositories>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>1.2</version>
+                <artifactId>maven-patch-plugin</artifactId>
+                <configuration>
+                    <targetDirectory>${basedir}</targetDirectory>
+                    <patchDirectory>src/main/patches/</patchDirectory>
+                    <naturalOrderProcessing>true</naturalOrderProcessing>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>patch</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
-        <dependency>
-            <groupId>com.sk89q.worldedit</groupId>
-            <artifactId>worldedit-core</artifactId>
-            <version>[6.1,6.2)</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.sk89q.worldedit</groupId>
-            <artifactId>worldedit-bukkit</artifactId>
-            <version>[6.1,6.2)</version>
-            <type>jar</type>
-        </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
@@ -81,6 +93,19 @@
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-BlocksHub_v2x</artifactId>
             <version>[3.5.0, 4.0.0)</version>
+            <type>jar</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-core</artifactId>
+            <version>[6.1,6.2)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-bukkit</artifactId>
+            <version>[6.1,6.2)</version>
             <type>jar</type>
         </dependency>
     </dependencies>
