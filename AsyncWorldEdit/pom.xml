@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.primesoft.asyncworldedit</groupId>
+    <artifactId>AsyncWorldEdit-Core</artifactId>
+
+    <version>3.5.0</version>
+
+    <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>sk89q</id>
+            <url>http://maven.sk89q.com/artifactory/repo</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>1.2</version>
+                <artifactId>maven-patch-plugin</artifactId>
+                <configuration>
+                    <targetDirectory>${basedir}</targetDirectory>
+                    <patchDirectory>src/main/patches/</patchDirectory>
+                    <naturalOrderProcessing>true</naturalOrderProcessing>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>patch</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>[1.12.2, 1.13)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.9</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>[2.0.0, 3.0.0)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.primesoft.asyncworldedit</groupId>
+            <artifactId>AsyncWorldEdit-API</artifactId>
+            <version>[2.1.0, 3.0.0)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.primesoft.asyncworldedit</groupId>
+            <artifactId>AsyncWorldEdit-APIInner</artifactId>
+            <version>[3.5.0, 4.0.0)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.primesoft.asyncworldedit</groupId>
+            <artifactId>AsyncWorldEdit-Utils</artifactId>
+            <version>[3.5.0, 4.0.0)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.primesoft.asyncworldedit</groupId>
+            <artifactId>AsyncWorldEdit-BlocksHub_v1x</artifactId>
+            <version>[3.5.0, 4.0.0)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.primesoft.asyncworldedit</groupId>
+            <artifactId>AsyncWorldEdit-BlocksHub_v2x</artifactId>
+            <version>[3.5.0, 4.0.0)</version>
+            <type>jar</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-core</artifactId>
+            <version>[6.1,6.2)</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-bukkit</artifactId>
+            <version>[6.1,6.2)</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
+</project>
