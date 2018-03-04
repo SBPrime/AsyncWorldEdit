@@ -20,3 +20,4 @@ lib/
 /AsyncWorldEdit/src/*.jar
 /AsyncWorldEdit-API/target/
 /AsyncWorldEditInjector/target/
+/AsyncWorldEdit-APIInner/target/
