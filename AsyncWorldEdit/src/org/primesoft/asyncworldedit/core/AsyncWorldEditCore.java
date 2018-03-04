@@ -96,6 +96,7 @@ import org.primesoft.asyncworldedit.api.classScanner.IClassScannerOptions;
 import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkCommands;
 import org.primesoft.asyncworldedit.api.inner.IBlockRelighter;
 import org.primesoft.asyncworldedit.api.inner.IBlocksHubBridge;
+import org.primesoft.asyncworldedit.api.inner.ICron;
 import org.primesoft.asyncworldedit.api.inner.IInitializableAdapter;
 import org.primesoft.asyncworldedit.api.inner.IInnerDirectChunkAPI;
 import org.primesoft.asyncworldedit.blockshub.BlocksHubBridge;
@@ -112,6 +113,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
 
     private Boolean m_isInitialized = false;
     private BlockPlacer m_blockPlacer;
+    private Cron m_cron;
     private TaskDispatcher m_dispatcher;
     private IPlotMeFix m_plotMeFix;
     private final PlayerManager m_playerManager = new PlayerManager(this);
@@ -301,6 +303,11 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
     }
 
     @Override
+    public ICron getCron() {
+        return m_cron;
+    }        
+
+    @Override
     public void onEnable() {
         m_isInitialized = false;
         m_platform.onEnable();
@@ -316,6 +323,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
 
         m_dispatcher = new TaskDispatcher(this);
         m_blockPlacer = new BlockPlacer(this);
+        m_cron = new Cron(this);
 
         m_changesetSerializer = new SerializerManager(this);
 
@@ -348,7 +356,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    log(VersionChecker.CheckVersion(m_platform.getVersion()).getMessage());
+                    log(VersionChecker.checkVersion(m_platform.getVersion()).getMessage());
 
                 }
             }).start();
@@ -371,64 +379,6 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
         initializeConfig();
 
         m_platform.getPlayerProvider().initialize(m_playerManager);
-
-        //testSerializer();
-    }
-
-    private void testSerializer() {
-        int cnt = 100000;
-        ISerializerManager sm = new SerializerManager(this);
-        List<Change> change = new ArrayList<Change>(cnt);
-
-        for (int i = 0; i < cnt; i++) {
-            change.add(new BlockChange(new BlockVector(i, i % 3, i % 7), new BaseBlock(i % 255, 0), new BaseBlock(i % 255, 1)));
-        }
-
-        UUID uuid = new UUID(0, 0);
-        IPlayerEntry player = getPlayerManager().createFakePlayer("FAKE", uuid);
-        File file = sm.open(player, 0);
-
-        long now1 = System.currentTimeMillis();
-        sm.save(file, change);
-        long now2 = System.currentTimeMillis();
-
-        System.out.println("SAVE: " + (now2 - now1));
-
-        Change[] tmp;
-        now1 = System.currentTimeMillis();
-        List<Change> list = sm.load(file, cnt, player, null);
-        tmp = list.toArray(new Change[0]);
-        now2 = System.currentTimeMillis();
-        System.out.println("LOAD: " + (now2 - now1));
-
-        now1 = System.currentTimeMillis();
-        tmp = Lists.reverse(list).toArray(new Change[0]);
-        now2 = System.currentTimeMillis();
-        System.out.println("INVERSE: " + (now2 - now1));
-
-        sm.close(file);
-
-        System.out.println("SIZE: " + list.size());
-        for (int i = 0; i < cnt; i++) {
-            BlockChange c = (BlockChange) list.get(i);
-
-            BlockVector vector = c.getPosition();
-            int x = vector.getBlockX();
-            int y = vector.getBlockY();
-            int z = vector.getBlockZ();
-
-            BaseBlock before = c.getPrevious();
-            BaseBlock current = c.getCurrent();
-
-            boolean isOk = x == i && y == (i % 3) && z == (i % 7);
-            isOk &= before.getId() == i % 255;
-            isOk &= current.getId() == i % 255;
-
-            isOk &= before.getData() == 0 && current.getData() == 1;
-            if (!isOk) {
-                System.out.println("ERROR: " + i);
-            }
-        }
     }
 
     /**
@@ -436,6 +386,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
      */
     private void initializeConfig() {
         m_blockPlacer.loadConfig();
+        m_cron.loadConfig();
         if (ConfigProvider.isPhysicsFreezEnabled()) {
             m_platform.getPhysicsWatcher().enable();
         } else {
@@ -463,6 +414,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
     public void onDisable() {
         if (m_isInitialized) {
             m_blockPlacer.stop();
+            m_cron.stop();
             m_dispatcher.stop();
 
             IInnerDirectChunkAPI dcApi = getInnerDirectChunkAPI();

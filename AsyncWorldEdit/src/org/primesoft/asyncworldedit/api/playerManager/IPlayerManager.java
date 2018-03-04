@@ -111,4 +111,13 @@ public interface IPlayerManager {
      * @return never returns null
      */
     IPlayerEntry getPlayer(String playerName);
+    
+    
+    /**
+     * Get the player wrapper based on UUID
+     *
+     * @param playerUuid
+     * @return returns null if player not found online
+     */
+    IPlayerEntry getOnlinePlayer(UUID playerUuid);
 }

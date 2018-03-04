@@ -58,7 +58,6 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
  * @author SBPrime
  */
 public class StreamProvider {
-
     /**
      * The stream description
      */
@@ -93,11 +92,7 @@ public class StreamProvider {
          * The MTA mutex
          */
         private final Object m_mutex = new Object();
-
-        public StreamDescription(File file) {
-            this(file, false);
-        }
-
+        
         public StreamDescription(File file, boolean removeOnClean) {
             m_file = file;
             m_removeOnClean = removeOnClean;
@@ -118,6 +113,20 @@ public class StreamProvider {
                 m_referenceCount++;
                 return m_referenceCount;
             }
+        }
+        
+        /**
+         * Get the reference count for
+         * @return 
+         */
+        public int referenceCount() {
+            synchronized (m_mutex) {
+                if (m_isRemoved) {
+                    return -1;
+                }
+
+                return m_referenceCount;
+            }            
         }
 
         /**
@@ -367,6 +376,23 @@ public class StreamProvider {
                 log(String.format("StreamProvider: removed reference from stream %1$s, stream released.", stream));
             }
             return true;
+        }
+    }
+    
+    
+    /**
+     * Check if the provided file is in use
+     * @param stream
+     * @return 
+     */
+    public boolean isInUse(File stream) {
+        synchronized (m_streamReferences) {
+            StreamDescription sd = m_streamReferences.get(stream);
+            if (sd == null) {
+                return false;
+            }
+
+            return sd.referenceCount() >= 0;
         }
     }
 }

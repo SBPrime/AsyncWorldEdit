@@ -1,6 +1,6 @@
 awe:
   #Do not change
-  version: 18
+  version: 19
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
     interval: 1
@@ -88,10 +88,16 @@ awe:
     memoryLowStorage: wait
     #Store the undo data on disk (a bit slower but does not use so much RAM)
     storeOnDisk: true
-    #Remove the WorldEdit session on player logout    
-    cleanOnLogout: true
-    #Should the undo be keept on disk when the undo is no logner used in WE
-    keepUndoFile: false
+    #How much time should the WorldEdit session be kept after player logged out
+    #Values: -1 Do not remove, 0 - immediately, X - Number of minutes
+    keepSessionOnLogoutFor: 0
+    #How long should the undo files be keept on the disk after the undo is no 
+    #logner used in WE.
+    #Values: -1 Do not delete, 0 - Delete immediately, X - Number of minutes to store 
+    #the file
+    keepUndoFileFor: 0
+    #The number of minutes between undo files cleanup
+    undoFileCleanupInterval: 30
   #The direct chunk options
   directChunk:
     #Do auto relight after each edit    

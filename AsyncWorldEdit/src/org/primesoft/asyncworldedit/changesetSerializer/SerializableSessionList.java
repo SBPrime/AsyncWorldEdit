@@ -106,8 +106,8 @@ public class SerializableSessionList extends LinkedList<EditSession> {
         final ChangeSet tmpChangeSet = tsSession != null ? tsSession.getRootChangeSet() : null;
         final FileChangeSet fileChangeSet = tmpChangeSet instanceof FileChangeSet ? (FileChangeSet) tmpChangeSet : null;
 
-        if (fileChangeSet == null) {
-            return;
+        if (fileChangeSet != null) {
+            fileChangeSet.close();
         }
 
         synchronized (m_mutex) {
@@ -118,8 +118,6 @@ public class SerializableSessionList extends LinkedList<EditSession> {
                 m_availableIds.add(oldId);
             }
         }
-
-        fileChangeSet.close();
     }
 
     @Override

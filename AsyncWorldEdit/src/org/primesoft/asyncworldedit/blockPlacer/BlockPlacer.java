@@ -50,7 +50,6 @@ package org.primesoft.asyncworldedit.blockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerListener;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.util.eventbus.EventBus;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -348,7 +347,7 @@ public class BlockPlacer implements IBlockPlacer {
             talk = true;
         }
 
-        if (m_task.isShutingDown()) {
+        if (task.isShutingDown()) {
             IPlayerEntry[] entries;
             synchronized (m_mutex) {
                 entries = m_blocks.keySet().toArray(new IPlayerEntry[0]);

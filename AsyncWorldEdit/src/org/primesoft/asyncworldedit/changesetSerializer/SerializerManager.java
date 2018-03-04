@@ -61,12 +61,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IChangesetSerializer;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IMemoryStorage;
@@ -99,6 +102,8 @@ public final class SerializerManager implements IInnerSerializerManager {
 
     private final String MEMORY_ENTRY = "++MEMORY++";
 
+    private final String PREFIX = "ts";
+
     /**
      * Current memory storage seed
      */
@@ -107,12 +112,12 @@ public final class SerializerManager implements IInnerSerializerManager {
     /**
      * List of all undo descriptors
      */
-    private final Map<File, UndoDescriptor> m_undoDescriptors = new LinkedHashMap<File, UndoDescriptor>();
+    private final Map<File, UndoDescriptor> m_undoDescriptors = new LinkedHashMap<>();
 
     /**
      * List of all known serializers
      */
-    private final List<IChangesetSerializer> m_serializers = new LinkedList<IChangesetSerializer>();
+    private final List<IChangesetSerializer> m_serializers = new LinkedList<>();
 
     /**
      * The AWE
@@ -182,8 +187,14 @@ public final class SerializerManager implements IInnerSerializerManager {
         File undoFolder = ConfigProvider.getUndoFolder();
         File playerFolder = new File(undoFolder, player.getUUID().toString());
         UUID uuid = addRandomSeed ? UUID.randomUUID() : UUID_ZERO;
+        int ua = Long.hashCode(uuid.getLeastSignificantBits() ^ uuid.getMostSignificantBits());
+        long timestamp = System.currentTimeMillis();
 
-        File undoFile = new File(playerFolder, String.format("%1$s.%2$s", uuid.toString(), id));
+        File undoFile = new File(playerFolder, String.format("%1$s.%2$s.%3$s.%4$s",
+                PREFIX,
+                Long.toHexString(timestamp),
+                Integer.toHexString(ua),
+                id));
 
         if (!playerFolder.exists()) {
             playerFolder.mkdirs();
@@ -237,13 +248,11 @@ public final class SerializerManager implements IInnerSerializerManager {
         if (storageFile == null) {
             return null;
         }
-        
+
         synchronized (m_undoDescriptors) {
             return m_undoDescriptors.get(storageFile);
         }
     }
-    
-    
 
     @Override
     public void save(File storageFile, List<Change> data) {
@@ -261,25 +270,25 @@ public final class SerializerManager implements IInnerSerializerManager {
 
         final StreamProvider sp = StreamProvider.getInstance();
         final File fileName = ud.getFile();
-        final File fileNameIdx = new File(ud.getFile().getPath()+".idx");
+        final File fileNameIdx = new File(ud.getFile().getPath() + ".idx");
 
         sp.reserve();
         sp.reserve();
-        
+
         sp.addReference(fileName);
         sp.addReference(fileNameIdx);
-        
+
         synchronized (ud.getMutex()) {
             FileOutputStream stream = null;
-            FileOutputStream streamIdx = null;                        
-            
+            FileOutputStream streamIdx = null;
+
             try {
                 stream = new FileOutputStream(fileName, true);
                 streamIdx = new FileOutputStream(fileNameIdx, true);
-                
+
                 ByteArrayOutputStream memoryOut = new ByteArrayOutputStream();
                 ByteArrayOutputStream memoryOutIdx = new ByteArrayOutputStream();
-                
+
                 DataOutputStream bufferStream = new DataOutputStream(memoryOut);
                 DataOutputStream bufferStreamIdx = new DataOutputStream(memoryOutIdx);
 
@@ -287,7 +296,7 @@ public final class SerializerManager implements IInnerSerializerManager {
                     if (bufferStreamIdx.size() > 1000000) {
                         bufferStreamIdx.flush();
                         bufferStreamIdx.close();
-                        streamIdx.write(memoryOutIdx.toByteArray());                                                
+                        streamIdx.write(memoryOutIdx.toByteArray());
 
                         memoryOutIdx = new ByteArrayOutputStream();
                         bufferStreamIdx = new DataOutputStream(memoryOutIdx);
@@ -295,12 +304,12 @@ public final class SerializerManager implements IInnerSerializerManager {
                     if (bufferStream.size() > 1000000) {
                         bufferStream.flush();
                         bufferStream.close();
-                        stream.write(memoryOut.toByteArray());                                                
+                        stream.write(memoryOut.toByteArray());
 
                         memoryOut = new ByteArrayOutputStream();
                         bufferStream = new DataOutputStream(memoryOut);
                     }
-                    
+
                     long size = save(ud, bufferStream, change);
                     VarInt.writeLong(bufferStreamIdx, size);
 
@@ -309,22 +318,22 @@ public final class SerializerManager implements IInnerSerializerManager {
                     }
                 }
 
-                bufferStream.flush();                
+                bufferStream.flush();
                 bufferStream.close();
-                
-                bufferStreamIdx.flush();                
+
+                bufferStreamIdx.flush();
                 bufferStreamIdx.close();
-                
+
                 memoryOut.flush();
                 memoryOut.close();
-                
+
                 memoryOutIdx.flush();
                 memoryOutIdx.close();
 
                 stream.write(memoryOut.toByteArray());
                 stream.flush();
                 stream.close();
-                
+
                 streamIdx.write(memoryOutIdx.toByteArray());
                 streamIdx.flush();
                 streamIdx.close();
@@ -337,7 +346,7 @@ public final class SerializerManager implements IInnerSerializerManager {
                     } catch (IOException ex) {
                     }
                 }
-                
+
                 if (streamIdx != null) {
                     try {
                         streamIdx.close();
@@ -347,7 +356,7 @@ public final class SerializerManager implements IInnerSerializerManager {
             } finally {
                 sp.release();
                 sp.release();
-                
+
                 sp.removeReference(fileName);
                 sp.removeReference(fileNameIdx);
             }
@@ -382,7 +391,7 @@ public final class SerializerManager implements IInnerSerializerManager {
 
         sp.reserve();
         sp.addReference(fileName);
-                
+
         synchronized (mutex) {
             RandomAccessFile stream = null;
             try {
@@ -609,7 +618,7 @@ public final class SerializerManager implements IInnerSerializerManager {
     public IUndoEntry load(DataInputStream stream) throws IOException {
         return UndoEntry.load(stream);
     }
-    
+
     @Override
     public IUndoEntry load(IChunkCacheStream stream) throws IOException {
         return UndoEntry.load(stream);
@@ -623,5 +632,33 @@ public final class SerializerManager implements IInnerSerializerManager {
     @Override
     public int save(DataOutputStream stream, IUndoEntry undoEntry) throws IOException {
         return UndoEntry.save(stream, undoEntry);
+    }
+
+    @Override
+    public Stream<File> getUndoFiles() throws IOException {
+        return Files.walk(ConfigProvider.getUndoFolder().toPath(),
+                2, FileVisitOption.FOLLOW_LINKS)
+                .map(i -> i.toFile())
+                .filter(i -> i.isFile() && i.getName().startsWith(PREFIX));
+    }
+
+    @Override
+    public Long getTimestamp(File file) {
+        if (file == null) {
+            return null;
+        }
+
+        String[] nameParts = file.getName().split("\\.");
+        if (nameParts == null || nameParts.length < 2) {
+            return null;
+        }
+
+        long timestamp;
+        try {
+            return Long.parseLong(nameParts[1], 16);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+
     }
 }

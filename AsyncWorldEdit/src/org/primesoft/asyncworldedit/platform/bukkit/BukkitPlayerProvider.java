@@ -169,7 +169,7 @@ public class BukkitPlayerProvider implements Listener, IPlayerProvider {
             public void run() {
                 if (ConfigProvider.getCheckUpdate()) {
                     PluginDescriptionFile desc = m_plugin.getDescription();
-                    VersionCheckResult result = VersionChecker.CheckVersion(desc.getVersion());
+                    VersionCheckResult result = VersionChecker.checkVersion(desc.getVersion());
 
                     if (!result.getType().equals(VersionCheckResult.Type.Latest)) {
                         entry.say(MessageType.CHECK_VERSION_FORMAT.format(LoggerProvider.PREFIX, result.getMessage()));
