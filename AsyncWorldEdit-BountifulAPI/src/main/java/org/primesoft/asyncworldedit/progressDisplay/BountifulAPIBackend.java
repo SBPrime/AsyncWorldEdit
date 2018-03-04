@@ -49,7 +49,6 @@ package org.primesoft.asyncworldedit.progressDisplay;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
@@ -57,7 +56,6 @@ import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.IAwePlugin;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplayManager;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
