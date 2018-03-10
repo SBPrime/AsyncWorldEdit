@@ -161,9 +161,15 @@ public class StackValidator {
                 if (debugOn) {
                     log(String.format("* %1$s", element.toString()));
                 }
+
+                if (!element.getClassName().equals("org.primesoft.asyncworldedit.worldedit.WrappedLocalSession")) {
+                    continue;
+                }
                 
-                if (element.getClass().equals(WrappedLocalSession.class) &&
-                    element.getMethodName().equals("createEditSession")) {
+                String method = element.getMethodName();
+                if ("createEditSession".equals(method) ||
+                    "undo".equals(method) ||
+                    "redo".equals(method)) {
                     return false;
                 }
             }
