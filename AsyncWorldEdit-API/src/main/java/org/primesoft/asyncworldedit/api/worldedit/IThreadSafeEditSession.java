@@ -122,6 +122,14 @@ public interface IThreadSafeEditSession extends IAweEditSession {
      * @param value true to enable async mode force
      */
     void setAsyncForced(boolean value);
+    
+    /**
+     * Enables or disables the async mode configuration bypass.
+     * This function should by used only by other plugins.
+     *
+     * @param value true to enable asunc mpde disable forced
+     */
+    void setAsyncForcedDisable(boolean value);
 
     boolean setBlock(int jobId, Vector position, BaseBlock block, EditSession.Stage stage) throws WorldEditException;
 
