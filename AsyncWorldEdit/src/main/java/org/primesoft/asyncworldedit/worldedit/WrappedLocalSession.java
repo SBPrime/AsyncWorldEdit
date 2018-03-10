@@ -74,7 +74,6 @@ import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
 import java.lang.reflect.Field;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.List;
 import java.util.TimeZone;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
@@ -82,7 +81,6 @@ import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.worldedit.IExtendedLocalSession;
 import org.primesoft.asyncworldedit.core.AwePlatform;
-import org.primesoft.asyncworldedit.events.LimitChanged;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.command.tool.ToolWrapper;
 

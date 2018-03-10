@@ -185,7 +185,7 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
                 m_eventBus, world, maxBlocks, blockBag,
                 new EditSessionEvent(world, player, maxBlocks, null));
         m_aweCore.getPlotMeFix().setMask(entry.getUUID());
-
+        
         return result;
     }
 
@@ -198,7 +198,6 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
                 new EditSessionEvent(world, getPlayer(playerEntry), maxBlocks, null));
 
         m_aweCore.getPlotMeFix().setMask(playerEntry.getUUID());
-
         return result;
     }
 }

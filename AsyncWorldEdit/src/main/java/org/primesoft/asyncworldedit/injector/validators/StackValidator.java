@@ -52,6 +52,7 @@ import java.util.regex.Pattern;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.InOutParam;
+import org.primesoft.asyncworldedit.worldedit.WrappedLocalSession;
 
 /**
  * Validateif operation call stack allows asyncing of the operation
@@ -111,7 +112,7 @@ public class StackValidator {
     };
 
     /**
-     * Does the stack trace allow asyncing
+     * Check if the stack trace allow asyncing
      *
      * @param methodName
      * @return
@@ -137,6 +138,40 @@ public class StackValidator {
             if (debugOn) {
                 log("****************************************************************");
 
+            }
+        }
+    }
+    
+    /**
+     * Check if the call originated from the LocalSession or API call
+     * @return true - the call originated only from API
+     */
+    public static boolean isWorldEditApi() {
+        final boolean debugOn = ConfigProvider.isDebugOn();
+        try {
+            if (debugOn) {
+                log("****************************************************************");
+                log("* Checking stack trace for API call");
+                log("****************************************************************");
+            }
+
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            for (int i = stackTrace.length - 1; i >= 0; i--) {
+                StackTraceElement element = stackTrace[i];
+                if (debugOn) {
+                    log(String.format("* %1$s", element.toString()));
+                }
+                
+                if (element.getClass().equals(WrappedLocalSession.class) &&
+                    element.getMethodName().equals("createEditSession")) {
+                    return false;
+                }
+            }
+            
+            return true;
+        } finally {
+            if (debugOn) {
+                log("****************************************************************");
             }
         }
     }
@@ -245,5 +280,5 @@ public class StackValidator {
         }
 
         return result;
-    }
+    }   
 }
