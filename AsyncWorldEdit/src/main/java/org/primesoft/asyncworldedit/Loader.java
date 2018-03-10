@@ -65,6 +65,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,7 +77,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import org.apache.commons.codec.binary.Base64;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.IAwePlugin;
@@ -263,13 +263,13 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
                     sb.append(part4.replaceAll(sUser, "").replaceAll(sSkip, ""));
                     sb.append(part5.replaceAll(sUser, "").replaceAll(sSkip, ""));
 
-                    KeyFactory factory = KeyFactory.getInstance("RSA");
-                    PublicKey publicKey = factory.generatePublic(new X509EncodedKeySpec(Base64.decodeBase64(sb.toString())));
+                    KeyFactory factory = KeyFactory.getInstance("RSA");                    
+                    PublicKey publicKey = factory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(sb.toString())));
 
                     Cipher cipher = Cipher.getInstance("RSA");
                     cipher.init(Cipher.DECRYPT_MODE, publicKey);
 
-                    byte[] keyData = cipher.doFinal(Base64.decodeBase64(aes));
+                    byte[] keyData = cipher.doFinal(Base64.getDecoder().decode(aes));
                     byte[] aesKey = new byte[keyData.length / 2];
                     for (int i = 0; i < aesKey.length; i++) {
                         aesKey[i] = (byte) (keyData[i * 2 + 0] ^ keyData[i * 2 + 1]);
@@ -506,7 +506,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
                     part2.substring(0, part2l - iMatch).replaceFirst(part1.substring(part1l - iSkip), ""),
                     seed.substring(seed.indexOf('='))
             );
-            m_seed = Base64.decodeBase64(seed);
+            m_seed = Base64.getDecoder().decode(seed);
             if (m_seed.length < 2) {
                 return null;
             }
@@ -522,7 +522,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
         StringBuilder result = new StringBuilder();
 
         result.append("/res");
-        String base64Name = Base64.encodeBase64String(m_sha.digest(bFileName)).replace('+', '-').replace('/', '_');
+        String base64Name = Base64.getEncoder().encodeToString(m_sha.digest(bFileName)).replace('+', '-').replace('/', '_');
         sb.append(base64Name);
 
         result.append("/");
