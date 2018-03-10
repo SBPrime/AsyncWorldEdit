@@ -82,7 +82,6 @@ public class ConfigProvider {
 
     private static boolean m_physicsFreez;
 
-
     private static boolean m_debugMode;
 
     private static File m_pluginFolder;
@@ -145,6 +144,11 @@ public class ConfigProvider {
      * The DIrectChunk API configuration
      */
     private static ConfigDirectChunkApi m_configDCApi;
+    
+    /**
+     * The overrides for AWE mode
+     */
+    private static ConfigOverrides m_overrides;
         
     /**
      * Get the undo configuration
@@ -152,6 +156,14 @@ public class ConfigProvider {
      */
     public static ConfigUndo undo() {
         return m_configUndo;
+    }
+    
+    /**
+     * Get the AWE mode overrides config
+     * @return 
+     */
+    public static ConfigOverrides overrides() {
+        return m_overrides;
     }
     
     /**
@@ -331,6 +343,7 @@ public class ConfigProvider {
         m_forceFlushBlockCount = mainSection.getInt("forceFlushBlocks", 1000);
 
         parseGroupsSection(mainSection.getConfigurationSection("permissionGroups"));
+        m_overrides = new ConfigOverrides(mainSection.getConfigurationSection("overrides"));
         m_configMemory = new ConfigMemory(mainSection.getConfigurationSection("memory"));
         m_configRenderer = new ConfigRenderer(mainSection.getConfigurationSection("rendering"));
         m_configBlocksHub = new ConfigBlocksHub(mainSection.getConfigurationSection("blocksHub"));
