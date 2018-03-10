@@ -67,11 +67,21 @@ import org.primesoft.asyncworldedit.platform.api.IPlayerStorage;
  */
 public class PlayerManager implements IPlayerManager, IPlayerStorage {
 
-    final static UUID UUID_CONSOLE = UUID.randomUUID();
-    final static UUID UUID_UNKNOWN = UUID.randomUUID();
+    final static UUID UUID_CONSOLE = UUID.fromString("6b61e629-2982-4a56-a1c2-176154862267");
+    final static UUID UUID_UNKNOWN = UUID.fromString("bcb12e06-f4a4-4bb5-9b82-b22b38e2ee1a");
 
-    final static IPlayerEntry CONSOLE = new NoPlatformPlayerEntry("<Console>", UUID_CONSOLE, true);
-    final static IPlayerEntry UNKNOWN = new NoPlatformPlayerEntry("<Unknown>", UUID_UNKNOWN, false);
+    final static IPlayerEntry CONSOLE = new NoPlatformPlayerEntry("<Console>", UUID_CONSOLE, true) {
+        @Override
+        public boolean getAweMode() {
+            return super.getAweMode() && !ConfigProvider.overrides().isDisableForConsole();
+        }
+    };
+    final static IPlayerEntry UNKNOWN = new NoPlatformPlayerEntry("<Unknown>", UUID_UNKNOWN, false) {
+        @Override
+        public boolean getAweMode() {
+            return super.getAweMode() && !ConfigProvider.overrides().isDisableForUnknown();
+        }
+    };
 
     private final IAsyncWorldEditCore m_parrent;
 
