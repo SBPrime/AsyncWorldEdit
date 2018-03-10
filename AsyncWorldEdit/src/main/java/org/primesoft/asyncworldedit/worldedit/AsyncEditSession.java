@@ -72,6 +72,7 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RedoJob;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.validators.StackValidator;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.utils.InOutParam;
@@ -113,9 +114,10 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         m_schedule = aweCore.getPlatform().getScheduler();
 
         InOutParam<String> method = InOutParam.Out();
-        if (StackValidator.isVaild(method)) {
-            setAsyncForcedDisable(!checkAsync(method.getValue()));
-        }
+        boolean forceDisable = ConfigProvider.overrides().isDsableForWorldEditApi() && StackValidator.isWorldEditApi();
+        forceDisable |= StackValidator.isVaild(method) && !checkAsync(method.getValue());
+        
+        setAsyncForcedDisable(forceDisable);
     }
 
     /**
@@ -144,14 +146,14 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronouslyInSequence(m_schedule, new AsyncTask(session, m_player, "undo",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        session.undo(sess);
-                        return 0;
-                    }
-                }, ls);
+                m_wait.checkAndWait(null);
+                session.undo(sess);
+                return 0;
+            }
+        }, ls);
     }
 
     /**
@@ -200,14 +202,14 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronouslyInSequence(m_schedule, new AsyncTask(session, m_player, "redo",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        session.redo(sess);
-                        return 0;
-                    }
-                }, ls);
+                m_wait.checkAndWait(null);
+                session.redo(sess);
+                return 0;
+            }
+        }, ls);
     }
 
     /**
@@ -240,17 +242,17 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeBiomeShape",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        try {
-                            return session.makeBiomeShape(region, zero, unit, biomeType, expressionString, hollow);
-                        } catch (ExpressionException ex) {
-                            return 0;
-                        }
-                    }
-                });
+                m_wait.checkAndWait(null);
+                try {
+                    return session.makeBiomeShape(region, zero, unit, biomeType, expressionString, hollow);
+                } catch (ExpressionException ex) {
+                    return 0;
+                }
+            }
+        });
 
         return 0;
     }
@@ -277,13 +279,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeFaces",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makeFaces(region, pattern);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makeFaces(region, pattern);
+            }
+        });
 
         return 0;
     }
@@ -310,13 +312,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeWalls",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makeWalls(region, pattern);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makeWalls(region, pattern);
+            }
+        });
 
         return 0;
     }
@@ -348,13 +350,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "drawLine",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.drawLine(pattern, pos1, pos2, radius, filled);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.drawLine(pattern, pos1, pos2, radius, filled);
+            }
+        });
 
         return 0;
     }
@@ -391,13 +393,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "drawLine",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.drawSpline(pattern, nodevectors, tension, bias, continuity, quality, radius, filled);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.drawSpline(pattern, nodevectors, tension, bias, continuity, quality, radius, filled);
+            }
+        });
 
         return 0;
     }
@@ -430,13 +432,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeCylinder",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makeCylinder(pos, block, radius, height, filled);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makeCylinder(pos, block, radius, height, filled);
+            }
+        });
 
         return 0;
     }
@@ -471,13 +473,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeCylinder",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makeCylinder(pos, block, radiusX, radiusZ, height, filled);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makeCylinder(pos, block, radiusX, radiusZ, height, filled);
+            }
+        });
 
         return 0;
     }
@@ -509,13 +511,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeSphere",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makeSphere(pos, block, radius, filled);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makeSphere(pos, block, radius, filled);
+            }
+        });
 
         return 0;
     }
@@ -550,13 +552,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeSphere",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makeSphere(pos, block, radiusX, radiusY, radiusZ, filled);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makeSphere(pos, block, radiusX, radiusY, radiusZ, filled);
+            }
+        });
 
         return 0;
     }
@@ -587,13 +589,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makePyramid",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makePyramid(pos, block, size, filled);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makePyramid(pos, block, size, filled);
+            }
+        });
 
         return 0;
     }
@@ -621,13 +623,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "thaw",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.thaw(pos, radius);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.thaw(pos, radius);
+            }
+        });
 
         return 0;
     }
@@ -655,13 +657,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "simulateSnow",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.simulateSnow(pos, radius);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.simulateSnow(pos, radius);
+            }
+        });
 
         return 0;
     }
@@ -690,13 +692,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "green",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.green(pos, radius, onlyNormalDirt);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.green(pos, radius, onlyNormalDirt);
+            }
+        });
 
         return 0;
     }
@@ -724,13 +726,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "green",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.green(pos, radius);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.green(pos, radius);
+            }
+        });
 
         return 0;
     }
@@ -758,13 +760,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makePumpkinPatches",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.makePumpkinPatches(basePos, size);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makePumpkinPatches(basePos, size);
+            }
+        });
 
         return 0;
     }
@@ -796,13 +798,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeForest",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                    return session.makeForest(basePos, size, density, treeGenerator);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.makeForest(basePos, size, density, treeGenerator);
+            }
+        });
 
         return 0;
     }
@@ -838,17 +840,17 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "makeShape",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        try {
-                            return session.makeShape(region, zero, unit, pattern, expressionString, hollow);
-                        } catch (ExpressionException ex) {
-                            return 0;
-                        }
-                    }
-                });
+                m_wait.checkAndWait(null);
+                try {
+                    return session.makeShape(region, zero, unit, pattern, expressionString, hollow);
+                } catch (ExpressionException ex) {
+                    return 0;
+                }
+            }
+        });
 
         return 0;
     }
@@ -881,17 +883,17 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "deformRegion",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        try {
-                            return session.deformRegion(region, zero, unit, expressionString);
-                        } catch (ExpressionException ex) {
-                            return 0;
-                        }
-                    }
-                });
+                m_wait.checkAndWait(null);
+                try {
+                    return session.deformRegion(region, zero, unit, expressionString);
+                } catch (ExpressionException ex) {
+                    return 0;
+                }
+            }
+        });
 
         return 0;
     }
@@ -921,13 +923,13 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "hollowOutRegion",
                 m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        m_wait.checkAndWait(null);
-                        return session.hollowOutRegion(region, thickness, pattern);
-                    }
-                });
+                m_wait.checkAndWait(null);
+                return session.hollowOutRegion(region, thickness, pattern);
+            }
+        });
 
         return 0;
     }

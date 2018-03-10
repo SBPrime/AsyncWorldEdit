@@ -1,6 +1,6 @@
 awe:
   #Do not change
-  version: 19
+  version: 20
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
     interval: 1
@@ -42,6 +42,14 @@ awe:
   strings: "english.yml"
   #Show debug messages
   debug: false
+  #Disable async mode for
+  overrides:
+    #WorldEdit api calls
+    disableForWeApi: false
+    #for console player
+    disableForConsole: false
+    #for unknown player
+    disableForUnknown: false
   #Blocks hub plugin options  
   blocksHub:
     log:

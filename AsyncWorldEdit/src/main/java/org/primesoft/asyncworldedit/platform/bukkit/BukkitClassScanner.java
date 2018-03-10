@@ -47,7 +47,9 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
-import org.apache.commons.lang.ArrayUtils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.Server;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
@@ -58,12 +60,17 @@ import org.primesoft.asyncworldedit.injector.scanner.ClassScannerEntry;
  * @author SBPrime
  */
 class BukkitClassScanner extends ClassScanner {
+
     @Override
     protected ClassScannerEntry[] getBlackList() {
-        return (ClassScannerEntry[])ArrayUtils.addAll(super.getBlackList(), new ClassScannerEntry[]{
+        List<ClassScannerEntry> result = new ArrayList<>();
+        Collections.addAll(result, super.getBlackList());
+        Collections.addAll(result, new ClassScannerEntry[]{
             new ClassScannerEntry(Server.class),
             new ClassScannerEntry(JavaPlugin.class)
         });
+
+        return result.toArray(new ClassScannerEntry[result.size()]);
     }
 
 }

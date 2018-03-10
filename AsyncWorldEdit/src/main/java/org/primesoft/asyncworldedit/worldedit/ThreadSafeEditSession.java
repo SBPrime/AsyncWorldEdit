@@ -232,7 +232,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     protected boolean isAsyncEnabled() {
-        return m_asyncForced || (m_player.getAweMode() && !m_asyncDisabled && !m_asyncForceDisabled);
+        return m_asyncForced || 
+            (m_player.getAweMode() && !m_asyncDisabled && !m_asyncForceDisabled);
     }
 
     public ThreadSafeEditSession(IAsyncWorldEditCore core,
@@ -781,12 +782,12 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     /**
-     * Force diabsle the AWE features for this edit session (only for inner use
-     * atm)
+     * Force diabsle the AWE features for this edit session
      *
      * @param value
      */
-    protected void setAsyncForcedDisable(boolean value) {
+    @Override
+    public final void setAsyncForcedDisable(boolean value) {
         m_asyncForceDisabled = value;
     }
 
@@ -822,8 +823,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
      * @return
      */
     public boolean checkAsync(WorldeditOperations operation) {
-        boolean result = m_asyncForced
-                || (ConfigProvider.isAsyncAllowed(operation) && m_player.getAweMode() && !m_asyncForceDisabled);
+        boolean result = m_asyncForced || 
+                (ConfigProvider.isAsyncAllowed(operation) && 
+                 m_player.getAweMode() && !m_asyncForceDisabled);
 
         m_asyncDisabled = !result;
         return result;

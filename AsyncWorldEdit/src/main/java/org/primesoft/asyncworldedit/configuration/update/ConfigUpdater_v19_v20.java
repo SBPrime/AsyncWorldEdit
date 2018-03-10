@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -47,62 +47,37 @@
  */
 package org.primesoft.asyncworldedit.configuration.update;
 
-import java.util.HashMap;
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.platform.api.IConfiguration;
+import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
- * The automatic configuration updater.
- * Updates configuration files in sequence
+ *
  * @author SBPrime
  */
-public class ConfigurationUpdater {
-    private final static HashMap<Integer, IConfigurationUpdater> s_configurationUpdaters;
-    
-    
-    /**
-     * The config file version
-     */
-    public static final int CONFIG_VERSION = 20;
+class ConfigUpdater_v19_v20 extends BaseConfigurationUpdater {
 
-    
-    static {
-        s_configurationUpdaters = new HashMap<Integer, IConfigurationUpdater>();
-        s_configurationUpdaters.put(1, new ConfigUpdater_v1_v2());
-        s_configurationUpdaters.put(2, new ConfigUpdater_v2_v3());
-        s_configurationUpdaters.put(3, new ConfigUpdater_v3_v4());
-        s_configurationUpdaters.put(4, new ConfigUpdater_v4_v5());
-        s_configurationUpdaters.put(5, new ConfigUpdater_v5_v6());
-        s_configurationUpdaters.put(6, new ConfigUpdater_v6_v7());
-        s_configurationUpdaters.put(7, new ConfigUpdater_v7_v8());
-        s_configurationUpdaters.put(8, new ConfigUpdater_v8_v9());
-        s_configurationUpdaters.put(9, new ConfigUpdater_v9_v10());
-        s_configurationUpdaters.put(10, new ConfigUpdater_v10_v11());
-        s_configurationUpdaters.put(11, new ConfigUpdater_v11_v12());
-        s_configurationUpdaters.put(12, new ConfigUpdater_v12_v13());
-        s_configurationUpdaters.put(13, new ConfigUpdater_v13_v14());
-        s_configurationUpdaters.put(14, new ConfigUpdater_v14_v15());
-        s_configurationUpdaters.put(15, new ConfigUpdater_v15_v16());
-        s_configurationUpdaters.put(16, new ConfigUpdater_v16_v17());
-        s_configurationUpdaters.put(17, new ConfigUpdater_v17_v18());
-        s_configurationUpdaters.put(18, new ConfigUpdater_v18_v19());
-        s_configurationUpdaters.put(19, new ConfigUpdater_v19_v20());
+    public ConfigUpdater_v19_v20() {
     }
-    
-    public static boolean updateConfig(IConfiguration config, int version) {
-        int oldVersion = version;
-        int newVersion = version;
-        while (s_configurationUpdaters.containsKey(oldVersion)) {
-            IConfigurationUpdater updater = s_configurationUpdaters.get(oldVersion);
-            
-            newVersion = updater.updateConfig(config);
-            
-            if (newVersion < 0) {
-                return false;
-            }
-            
-            oldVersion = newVersion;
+
+    @Override
+    public int updateConfig(IConfiguration config) {
+        log("Updating configuration v19 --> v20");
+
+        IConfigurationSection mainSection = config.getConfigurationSection("awe");
+        if (mainSection == null) {
+            return -1;
         }
-                
-        return newVersion != version;
+        
+
+        IConfigurationSection overrides = getOrCreate(mainSection, "overrides");        
+        setIfNone(overrides, "disableForWeApi", false);
+        setIfNone(overrides, "disableForConsole", false);
+        setIfNone(overrides, "disableForUnknown", false);
+        
+        mainSection.set("version", 20);
+
+        return 20;
     }
+    
 }
