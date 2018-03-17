@@ -177,7 +177,7 @@ public final class Cron implements ICron {
         }
     }
 
-    private void runUndoCleanup() {        
+    private void runUndoCleanup() {
         final ConfigUndo undoConfig = ConfigProvider.undo();
 
         if (undoConfig == null) {
@@ -188,8 +188,8 @@ public final class Cron implements ICron {
         if (keepUndoFor < 0) {
             return;
         }
-        log("Undo cleanup sarted...");
-        
+        log("Undo cleanup started...");
+
         final long time = System.currentTimeMillis() - keepUndoFor * 60000;
 
         m_undoCleanupRunning = true;
