@@ -29,10 +29,5 @@
             <version>[6.1,6.2)</version>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEditInjector</artifactId>
-            <version>[3.4.9, 4.0)</version>
-        </dependency>
     </dependencies>
 </project>
