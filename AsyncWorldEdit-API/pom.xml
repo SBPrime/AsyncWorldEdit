@@ -26,13 +26,8 @@
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit-core</artifactId>
-            <version>[6.1,6.2)</version>
+            <version>6.1.4-SNAPSHOT</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEditInjector</artifactId>
-            <version>[3.4.9, 4.0)</version>
         </dependency>
     </dependencies>
 </project>

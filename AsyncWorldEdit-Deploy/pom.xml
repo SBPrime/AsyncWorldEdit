@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEditInjector</artifactId>
-            <version>3.4.9</version>
+            <version>[3.5.2, 4.0.0)</version>
         </dependency>
         
         <!-- PlotMe -->
