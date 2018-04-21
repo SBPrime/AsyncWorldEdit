@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit</artifactId>
-    <version>3.5.2</version>
+    <version>3.5.3</version>
 
     <packaging>jar</packaging>
     <dependencies>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-Core</artifactId>
-            <version>3.5.2</version>
+            <version>3.5.3</version>
         </dependency>
         
         <!-- Injector -->
