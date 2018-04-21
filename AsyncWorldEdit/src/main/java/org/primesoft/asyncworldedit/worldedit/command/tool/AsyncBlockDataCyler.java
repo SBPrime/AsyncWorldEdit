@@ -86,7 +86,7 @@ public class AsyncBlockDataCyler extends BlockDataCyler implements IAsyncTool {
             }
         }, "blockDataCyler", WorldeditOperations.replaceBlocks);
     }
-    
+
     private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {        
         return super.actPrimary(server, config, player, session, clicked);
     }
