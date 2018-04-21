@@ -48,5 +48,13 @@
             <version>[3.5.0, 4.0.0)</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-core</artifactId>
+            <version>6.1.9-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-core-6.1.9-SNAPSHOT-dist.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
