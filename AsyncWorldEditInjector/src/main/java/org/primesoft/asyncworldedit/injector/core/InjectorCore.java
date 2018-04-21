@@ -53,10 +53,13 @@ package org.primesoft.asyncworldedit.injector.core;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.command.FlattenedClipboardTransform;
+import com.sk89q.worldedit.command.SnapshotUtilCommands;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operations;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 
@@ -142,12 +145,13 @@ public class InjectorCore {
 
         log("Injecting WorldEdit classes...");
         try {
-            log("Class " + EditSession.ForceClassLoad().getName() + " injected.");
-            log("Class " + Operations.ForceClassLoad().getName() + " injected.");
-            log("Class " + ForwardExtentCopy.ForceClassLoad().getName() + " injected.");
-            log("Class " + BlockArrayClipboard.ForceClassLoad().getName() + " injected.");
-            log("Class " + FlattenedClipboardTransform.ForceClassLoad().getName() + " injected.");
-            log("Class " + ClipboardFormat.ForceClassLoad().getName() + " injected.");
+            log("Class " + EditSession.forceClassLoad().getName() + " injected.");
+            log("Class " + Operations.forceClassLoad().getName() + " injected.");
+            log("Class " + ForwardExtentCopy.forceClassLoad().getName() + " injected.");
+            log("Class " + BlockArrayClipboard.forceClassLoad().getName() + " injected.");
+            log("Class " + FlattenedClipboardTransform.forceClassLoad().getName() + " injected.");
+            log("Class " + SnapshotUtilCommands.forceClassLoad().getName() + " injected.");
+            log("Class " + ClipboardFormat.forceClassLoad().getName() + " injected.");
         } catch (Error ex) {
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");
@@ -197,6 +201,6 @@ public class InjectorCore {
      * @return 
      */
     public double getVersion() {
-        return 1.0300;
+        return 1.0400;
     }   
 }

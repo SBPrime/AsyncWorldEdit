@@ -42,6 +42,8 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Makes a copy of a portion of one extent to another extent or another point.
@@ -307,7 +309,7 @@ public class ForwardExtentCopy implements Operation {
     public void addStatusMessages(List<String> messages) {
     }
 
-    public static Class<?> ForceClassLoad() {
+    public static Class<?> forceClassLoad() {
         return ForwardExtentCopy.class;
     }
 

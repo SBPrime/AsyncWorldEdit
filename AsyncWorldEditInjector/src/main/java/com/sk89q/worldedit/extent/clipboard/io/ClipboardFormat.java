@@ -39,6 +39,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A collection of supported clipboard formats.
@@ -144,7 +145,7 @@ public enum ClipboardFormat {
         return null;
     }
 
-    public static Class<?> ForceClassLoad() {
+    public static Class<?> forceClassLoad() {
         return ClipboardFormat.class;
     }
 }

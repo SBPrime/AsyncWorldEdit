@@ -101,7 +101,7 @@ public final class Operations {
                 });
     }
 
-    public static Class<?> ForceClassLoad() {
+    public static Class<?> forceClassLoad() {
         return Operations.class;
     }
 }

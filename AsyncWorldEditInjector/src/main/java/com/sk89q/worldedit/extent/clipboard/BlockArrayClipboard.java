@@ -68,7 +68,7 @@ public class BlockArrayClipboard extends InjectableClipboard implements Clipboar
         super(region);
     }
 
-    public static Class<?> ForceClassLoad() {
+    public static Class<?> forceClassLoad() {
         return BlockArrayClipboard.class;
     }
 }
