@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,89 +45,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.validators;
+package org.primesoft.asyncworldedit.configuration.update;
 
-import com.sk89q.worldedit.function.operation.Operation;
-import java.util.regex.Pattern;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.platform.api.IConfiguration;
+import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
- * Validate if operation should by asynced
  *
  * @author SBPrime
  */
-public class OperationValidator {
+class ConfigUpdater_v20_v21 extends BaseConfigurationUpdater {
 
-    /**
-     * The blacklisted operations regexp
-     */
-    private static final Pattern[] s_blackList;
-
-    /**
-     * The whitelisted operations regexp
-     */
-    private static final Pattern[] s_whiteList;
-
-    static {
-        //No operations are on the black list (for now!)
-        s_blackList = new Pattern[]{};
-
-        s_whiteList = new Pattern[]{
-            Pattern.compile(".*") //All operations are on the whitelist
-        };
+    public ConfigUpdater_v20_v21() {
     }
 
-    /**
-     * Is the operation enabled for asyncing
-     *
-     * @param op
-     * @return
-     */
-    public static boolean isValid(Operation op) {
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
-        Class c = op.getClass();
-        String className = c.getName();
+    @Override
+    public int updateConfig(IConfiguration config) {
+        log("Updating configuration v20 --> v21");
 
-        if (debugOn) {
-            log("****************************************************************");
-            log("* Validating operation");
-            log("****************************************************************");
+        IConfigurationSection mainSection = config.getConfigurationSection("awe");
+        if (mainSection == null) {
+            return -1;
         }
-        try {
-            for (Pattern p : s_blackList) {
-                if (p.matcher(className).matches()) {
-                    if (debugOn) {
-                        log("*");
-                        log("* Found on blacklist");
-                        log(String.format("* Opeation:\t%1$s", className));
-                        log(String.format("* Pattern:\t%1$s", p.pattern()));
-                    }
-                    return false;
-                }
-            }
+        
+        boolean isDebugEnabled = getAndRemoveBoolean(mainSection, "debug", false);
+        
+        IConfigurationSection messages = getOrCreate(mainSection, "messages");        
+        setIfNone(messages, "debug", isDebugEnabled);
+        setIfNone(messages, "undoCleanup", "on");
+        
+        mainSection.set("version", 21);
 
-            for (Pattern p : s_whiteList) {
-                if (p.matcher(className).matches()) {
-                    if (debugOn) {
-                        log("*");
-                        log("* Found on whitelist");
-                        log(String.format("* Opeation:\t%1$s", className));
-                        log(String.format("* Pattern:\t%1$s", p.pattern()));
-                    }
-                    return true;
-                }
-            }
-
-            if (debugOn) {
-                log("*");
-                log("* No match found");
-            }
-            return false;
-        } finally {
-            if (debugOn) {
-                log("****************************************************************");
-            }
-        }
+        return 21;
     }
+    
 }

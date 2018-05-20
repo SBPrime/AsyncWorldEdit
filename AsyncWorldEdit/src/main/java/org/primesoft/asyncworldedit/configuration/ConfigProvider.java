@@ -75,14 +75,11 @@ public class ConfigProvider {
 
     private static boolean m_isConfigUpdate = false;
 
-
     private static String m_configVersion;
 
     private static EnumSet<WorldeditOperations> m_disabledOperations;
 
     private static boolean m_physicsFreez;
-
-    private static boolean m_debugMode;
 
     private static File m_pluginFolder;
 
@@ -136,6 +133,11 @@ public class ConfigProvider {
     private static ConfigUndo m_configUndo;
     
     /**
+     * The configuration for the console messaging system
+     */
+    private static ConfigMessages m_configMessages;
+    
+    /**
      * The undo folder
      */
     private static File m_undoFolder;
@@ -156,6 +158,15 @@ public class ConfigProvider {
      */
     public static ConfigUndo undo() {
         return m_configUndo;
+    }
+    
+    
+    /**
+     * The configuration for the console messaging system
+     * @return 
+     */
+    public static ConfigMessages messages() {
+        return m_configMessages;
     }
     
     /**
@@ -226,11 +237,6 @@ public class ConfigProvider {
     public static PermissionGroup[] getGroups() {
         return m_groups;
     }
-
-    public static boolean isDebugOn() {
-        return m_debugMode;
-    }
-    
 
     /**
      * Plugin root folder
@@ -339,10 +345,8 @@ public class ConfigProvider {
         m_isConfigUpdate = configVersion == ConfigurationUpdater.CONFIG_VERSION;
         m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
         m_stringsFile = mainSection.getString("strings", "");
-        m_debugMode = mainSection.getBoolean("debug", false);
         m_forceFlushBlockCount = mainSection.getInt("forceFlushBlocks", 1000);
 
-        parseGroupsSection(mainSection.getConfigurationSection("permissionGroups"));
         m_overrides = new ConfigOverrides(mainSection.getConfigurationSection("overrides"));
         m_configMemory = new ConfigMemory(mainSection.getConfigurationSection("memory"));
         m_configRenderer = new ConfigRenderer(mainSection.getConfigurationSection("rendering"));
@@ -351,7 +355,9 @@ public class ConfigProvider {
         m_configDCApi = new ConfigDirectChunkApi(mainSection.getConfigurationSection("directChunk"));
         m_configPermission = new ConfigPermission(mainSection.getConfigurationSection("permissions"));
         m_configUndo = new ConfigUndo(mainSection.getConfigurationSection("undo"));
+        m_configMessages = new ConfigMessages(mainSection.getConfigurationSection("messages"));
         
+        parseGroupsSection(mainSection.getConfigurationSection("permissionGroups"));        
         m_disabledOperations = parseOperationsSection(mainSection);
 
         return true;
@@ -384,8 +390,9 @@ public class ConfigProvider {
             } catch (Exception e) {
                 log(String.format("* unknown operation name %1$s", string));
             }
+
         }
-        if (m_debugMode) {
+        if (messages().isDebugOn()) {
             log("World edit operations:");
             for (WorldeditOperations op : WorldeditOperations.values()) {
                 log("* " + op + "..." + (result.contains(op) ? "regular" : "async"));

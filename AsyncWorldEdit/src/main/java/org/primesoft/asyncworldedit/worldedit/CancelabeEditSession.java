@@ -129,7 +129,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             ((FileChangeSet) tmp).setCancelable(this);
         }
 
-        boolean isDebug = ConfigProvider.isDebugOn();
+        boolean isDebug = ConfigProvider.messages().isDebugOn();
         if (isDebug) {
             ExtentUtils.dumpExtents("Original extents:", this);
         }

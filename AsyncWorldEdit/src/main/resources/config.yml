@@ -1,6 +1,6 @@
 awe:
   #Do not change
-  version: 20
+  version: 21
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
     interval: 1
@@ -40,8 +40,15 @@ awe:
   physicsFreez: true
   #File containing all the messages
   strings: "english.yml"
-  #Show debug messages
-  debug: false
+  messages:
+    #Show debug messages
+    debug: false
+    #Show undo cleanup messages
+    #Valid options: 
+    # * off - no message (only errors),
+    # * statup - show the message only on statrup
+    # * [Default] on - show all undo cleanup messages
+    undoCleanup: on
   #Disable async mode for
   overrides:
     #WorldEdit api calls
