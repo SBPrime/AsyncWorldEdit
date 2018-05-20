@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,89 +45,50 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.validators;
+package org.primesoft.asyncworldedit.configuration;
 
-import com.sk89q.worldedit.function.operation.Operation;
-import java.util.regex.Pattern;
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
- * Validate if operation should by asynced
  *
  * @author SBPrime
  */
-public class OperationValidator {
+public final class ConfigMessages {
+    public final static int UNDO_ON = 0x3;
+    public final static int UNDO_STARTUP = 0x2;
+    public final static int UNDO_ERROR = 0x1;
+    public final static int UNDO_OFF = 0x0;
+    
+    private final boolean m_debugMode;
+    
+    private final int m_undoMode;
 
-    /**
-     * The blacklisted operations regexp
-     */
-    private static final Pattern[] s_blackList;
-
-    /**
-     * The whitelisted operations regexp
-     */
-    private static final Pattern[] s_whiteList;
-
-    static {
-        //No operations are on the black list (for now!)
-        s_blackList = new Pattern[]{};
-
-        s_whiteList = new Pattern[]{
-            Pattern.compile(".*") //All operations are on the whitelist
-        };
+    ConfigMessages(IConfigurationSection section) {
+        if (section == null) {
+            m_debugMode = false;
+            m_undoMode = UNDO_ON;
+        } else {
+            m_debugMode = section.getBoolean("debug", false);
+            String s = section.getString("undoCleanup", "on");
+            
+            if ("on".equalsIgnoreCase(s)) {
+                m_undoMode = UNDO_ON;
+            } else if ("startup".equalsIgnoreCase(s)) {
+                m_undoMode = UNDO_STARTUP;
+            } else if ("off".equalsIgnoreCase(s)) {
+                m_undoMode = UNDO_ERROR;
+            } else {
+                //For now default to on
+                m_undoMode = UNDO_ON;
+            }
+        }
     }
 
-    /**
-     * Is the operation enabled for asyncing
-     *
-     * @param op
-     * @return
-     */
-    public static boolean isValid(Operation op) {
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
-        Class c = op.getClass();
-        String className = c.getName();
-
-        if (debugOn) {
-            log("****************************************************************");
-            log("* Validating operation");
-            log("****************************************************************");
-        }
-        try {
-            for (Pattern p : s_blackList) {
-                if (p.matcher(className).matches()) {
-                    if (debugOn) {
-                        log("*");
-                        log("* Found on blacklist");
-                        log(String.format("* Opeation:\t%1$s", className));
-                        log(String.format("* Pattern:\t%1$s", p.pattern()));
-                    }
-                    return false;
-                }
-            }
-
-            for (Pattern p : s_whiteList) {
-                if (p.matcher(className).matches()) {
-                    if (debugOn) {
-                        log("*");
-                        log("* Found on whitelist");
-                        log(String.format("* Opeation:\t%1$s", className));
-                        log(String.format("* Pattern:\t%1$s", p.pattern()));
-                    }
-                    return true;
-                }
-            }
-
-            if (debugOn) {
-                log("*");
-                log("* No match found");
-            }
-            return false;
-        } finally {
-            if (debugOn) {
-                log("****************************************************************");
-            }
-        }
+    public boolean isDebugOn() {
+        return m_debugMode;
+    }
+    
+    public int getUndoMode() {
+        return m_undoMode;
     }
 }

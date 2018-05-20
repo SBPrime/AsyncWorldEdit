@@ -5,9 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit-Core</artifactId>
-
     <version>3.5.3</version>
-
+    
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -73,7 +72,7 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-Utils</artifactId>
-            <version>[3.5.0, 4.0.0)</version>
+            <version>[3.5.2, 4.0.0)</version>
             <type>jar</type>
         </dependency>
         <dependency>
