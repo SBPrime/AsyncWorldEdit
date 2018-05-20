@@ -21,6 +21,7 @@ package com.sk89q.worldedit.function.operation;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Entity;
+import com.sk89q.worldedit.entity.metadata.EntityType;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.CombinedRegionFunction;
 import com.sk89q.worldedit.function.RegionFunction;
@@ -35,19 +36,21 @@ import com.sk89q.worldedit.math.transform.Identity;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Makes a copy of a portion of one extent to another extent or another point.
  *
- * <p>
- * This is a forward extent copy, meaning that it iterates over the blocks in
- * the source extent, and will copy as many blocks as there are in the source.
- * Therefore, interpolation will not occur to fill in the gaps.</p>
+ * <p>This is a forward extent copy, meaning that it iterates over the blocks
+ * in the source extent, and will copy as many blocks as there are in the
+ * source. Therefore, interpolation will not occur to fill in the gaps.</p>
  */
 public class ForwardExtentCopy implements Operation {
 
@@ -59,6 +62,7 @@ public class ForwardExtentCopy implements Operation {
     private int repetitions = 1;
     private Mask sourceMask = Masks.alwaysTrue();
     private boolean removingEntities;
+    private boolean copyingEntities = true; // default to true for backwards compatibility, sort of
     private RegionFunction sourceFunction = null;
     private Transform transform = new Identity();
     private Transform currentTransform = null;
@@ -68,15 +72,14 @@ public class ForwardExtentCopy implements Operation {
     private boolean m_copyBiome = false;
 
     /**
-     * Create a new copy using the region's lowest minimum point as the "from"
-     * position.
+     * Create a new copy using the region's lowest minimum point as the
+     * "from" position.
      *
      * @param source the source extent
      * @param region the region to copy
      * @param destination the destination extent
      * @param to the destination position
-     * @see #ForwardExtentCopy(Extent, Region, Vector, Extent, Vector) the main
-     * constructor
+     * @see #ForwardExtentCopy(Extent, Region, Vector, Extent, Vector) the main constructor
      */
     public ForwardExtentCopy(Extent source, Region region, Extent destination, Vector to) {
         this(source, region, region.getMinimumPoint(), destination, to);
@@ -107,8 +110,7 @@ public class ForwardExtentCopy implements Operation {
     /**
      * Get the transformation that will occur on every point.
      *
-     * <p>
-     * The transformation will stack with each repetition.</p>
+     * <p>The transformation will stack with each repetition.</p>
      *
      * @return a transformation
      */
@@ -130,8 +132,7 @@ public class ForwardExtentCopy implements Operation {
     /**
      * Get the mask that gets applied to the source extent.
      *
-     * <p>
-     * This mask can be used to filter what will be copied from the source.</p>
+     * <p>This mask can be used to filter what will be copied from the source.</p>
      *
      * @return a source mask
      */
@@ -187,6 +188,24 @@ public class ForwardExtentCopy implements Operation {
     public void setRepetitions(int repetitions) {
         checkArgument(repetitions >= 0, "number of repetitions must be non-negative");
         this.repetitions = repetitions;
+    }
+
+    /**
+     * Return whether entities should be copied along with blocks.
+     *
+     * @return true if copying
+     */
+    public boolean isCopyingEntities() {
+        return copyingEntities;
+    }
+
+    /**
+     * Set whether entities should be copied along with blocks.
+     *
+     * @param copyingEntities true if copying
+     */
+    public void setCopyingEntities(boolean copyingEntities) {
+        this.copyingEntities = copyingEntities;
     }
 
     /**
@@ -256,15 +275,27 @@ public class ForwardExtentCopy implements Operation {
             RegionFunction function = sourceFunction != null ? new CombinedRegionFunction(filter, sourceFunction) : filter;
             RegionVisitor blockVisitor = new RegionVisitor(region, function);
 
-            ExtentEntityCopy entityCopy = new ExtentEntityCopy(from, destination, to, currentTransform);
-            entityCopy.setRemoving(removingEntities);
-            List<? extends Entity> entities = source.getEntities(region);
-            EntityVisitor entityVisitor = new EntityVisitor(entities.iterator(), entityCopy);
-
             lastVisitor = blockVisitor;
             currentTransform = currentTransform.combine(transform);
-                        
-            return new DelegateOperation(this, new OperationQueue(blockVisitor, entityVisitor));
+
+            if (copyingEntities) {
+                ExtentEntityCopy entityCopy = new ExtentEntityCopy(from, destination, to, currentTransform);
+                entityCopy.setRemoving(removingEntities);
+                List<? extends Entity> entities = source.getEntities(region);
+                // Switch to entities.removeIf after Java 8 cutoff.
+                Iterator<? extends Entity> entityIterator = entities.iterator();
+                while (entityIterator.hasNext()) {
+                    EntityType type = entityIterator.next().getFacet(EntityType.class);
+
+                    if (type != null && !type.isPasteable()) {
+                        entityIterator.remove();
+                    }
+                }
+                EntityVisitor entityVisitor = new EntityVisitor(entities.iterator(), entityCopy);
+                return new DelegateOperation(this, new OperationQueue(blockVisitor, entityVisitor));
+            } else {
+                return new DelegateOperation(this, blockVisitor);
+            }
         } else {
             return null;
         }
@@ -278,7 +309,7 @@ public class ForwardExtentCopy implements Operation {
     public void addStatusMessages(List<String> messages) {
     }
 
-    public static Class<?> ForceClassLoad() {
+    public static Class<?> forceClassLoad() {
         return ForwardExtentCopy.class;
     }
 

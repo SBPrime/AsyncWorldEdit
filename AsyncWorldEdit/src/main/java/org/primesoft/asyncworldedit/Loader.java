@@ -90,8 +90,8 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  */
 public abstract class Loader extends ClassLoader implements ILibraryLoader {
 
-    private final static double INJECTOR_MIN = 1.03;
-    private final static double INJECTOR_MAX = 1.04;
+    private final static double INJECTOR_MIN = 1.04;
+    private final static double INJECTOR_MAX = 1.05;
 
     private final static String PREFIX = "org.primesoft.asyncworldedit";
     private final static String API = ".api.";

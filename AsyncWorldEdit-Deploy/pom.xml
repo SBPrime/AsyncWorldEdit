@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit</artifactId>
-    <version>3.5.1</version>
+    <version>3.5.3</version>
 
     <packaging>jar</packaging>
     <dependencies>
@@ -38,14 +38,14 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-Core</artifactId>
-            <version>3.5.1</version>
+            <version>3.5.3</version>
         </dependency>
         
         <!-- Injector -->
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEditInjector</artifactId>
-            <version>3.4.9</version>
+            <version>[3.5.2, 4.0.0)</version>
         </dependency>
         
         <!-- PlotMe -->

@@ -33,6 +33,9 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.registry.WorldData;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Helper class to 'bake' a transform into a clipboard.
@@ -140,7 +143,7 @@ public class FlattenedClipboardTransform {
         return new FlattenedClipboardTransform(original, transform, worldData);
     }
 
-    public static Class<?> ForceClassLoad() {
+    public static Class<?> forceClassLoad() {
         return FlattenedClipboardTransform.class;
     }
 }

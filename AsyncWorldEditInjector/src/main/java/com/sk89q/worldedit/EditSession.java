@@ -59,6 +59,7 @@ import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.internal.expression.Expression;
 import com.sk89q.worldedit.internal.expression.ExpressionException;
 import com.sk89q.worldedit.internal.expression.runtime.RValue;
+import com.sk89q.worldedit.math.MathUtils;
 import com.sk89q.worldedit.math.interpolation.Interpolation;
 import com.sk89q.worldedit.math.interpolation.KochanekBartelsInterpolation;
 import com.sk89q.worldedit.math.interpolation.Node;
@@ -86,6 +87,20 @@ import java.util.logging.Logger;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sk89q.worldedit.regions.Regions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An {@link Extent} that handles history, {@link BlockBag}s, change limits,
@@ -963,8 +978,9 @@ public class EditSession implements Extent {
         Vector center = region.getCenter();
         Region centerRegion = new CuboidRegion(
                 getWorld(), // Causes clamping of Y range
-                new Vector((int) center.getX(), (int) center.getY(), (int) center.getZ()),
-                center.toBlockVector());
+                new Vector(((int) center.getX()), ((int) center.getY()), ((int) center.getZ())),
+                new Vector(MathUtils.roundHalfUp(center.getX()),
+                            center.getY(), MathUtils.roundHalfUp(center.getZ())));
         return setBlocks(centerRegion, pattern);
     }
 
@@ -1654,7 +1670,10 @@ public class EditSession implements Extent {
 
                     // Snow should not cover these blocks
                     if (BlockType.isTranslucent(id)) {
-                        break;
+                        // Add snow on leaves
+                        if (id != BlockID.LEAVES && id != BlockID.LEAVES2) {
+                            break;
+                        }
                     }
 
                     // Too high?
@@ -2301,7 +2320,7 @@ public class EditSession implements Extent {
 
                 try {
                     if (expression.evaluate(scaled.getX(), scaled.getZ()) <= 0) {
-                        return null;
+                        return null; // TODO should return OUTSIDE? seems to cause issues otherwise, workedaround for now
                     }
 
                     // TODO: Allow biome setting via a script variable (needs BiomeType<->int mapping)
@@ -2333,7 +2352,7 @@ public class EditSession implements Extent {
         return (x * x) + (z * z);
     }
 
-    public static Class<?> ForceClassLoad(){
+    public static Class<?> forceClassLoad(){
         return EditSession.class;
     }
 }

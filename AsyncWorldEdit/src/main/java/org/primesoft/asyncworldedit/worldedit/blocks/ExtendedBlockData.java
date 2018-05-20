@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,26 +45,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sk89q.worldedit.extent.clipboard;
+package org.primesoft.asyncworldedit.worldedit.blocks;
 
-import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.blocks.BlockData;
+import com.sk89q.worldedit.blocks.BlockID;
 
 /**
+ * Block data related classes.
  *
  * @author SBPrime
  */
-public class BlockArrayClipboard extends InjectableClipboard implements Clipboard {
+public final class ExtendedBlockData {
 
     /**
-     * Create new instance of the clipboard
+     * Cycle a block's data value. This usually goes through some rotational
+     * pattern depending on the block. If it returns -1, it means the id and
+     * data specified do not have anything to cycle to.
      *
-     * @param region
+     * @param type block id to be cycled
+     * @param data block data value that it starts at
+     * @param increment whether to go forward (1) or backward (-1) in the cycle
+     * @return the new data value for the block
      */
-    public BlockArrayClipboard(Region region) {
-        super(region);
-    }
-
-    public static Class<?> forceClassLoad() {
-        return BlockArrayClipboard.class;
+    public static int cycle(int type, int data, int increment) {
+        switch (type) {
+            case BlockID.MINECART_TRACKS:
+                return (data + increment + 0xa) % 0xa;
+            case BlockID.POWERED_RAIL:
+            case BlockID.DETECTOR_RAIL:
+            case BlockID.ACTIVATOR_RAIL:
+                return (data + increment + 0x6) % 0x6;
+        }
+        
+        return BlockData.cycle(type, data, increment);
     }
 }

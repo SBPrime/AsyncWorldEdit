@@ -8,7 +8,7 @@
 /test-server/
 lib/
 /JarProcessor/*
-
+/obfuscation/
 # Idea
 *.iml
 *.ipr

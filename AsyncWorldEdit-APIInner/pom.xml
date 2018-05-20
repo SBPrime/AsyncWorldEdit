@@ -15,19 +15,14 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>sk89q</id>
-            <url>http://maven.sk89q.com/artifactory/repo</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit-core</artifactId>
-            <version>[6.1,6.2)</version>
+            <version>6.1.9-SNAPSHOT</version>
             <type>jar</type>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-core-6.1.9-SNAPSHOT-dist.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
