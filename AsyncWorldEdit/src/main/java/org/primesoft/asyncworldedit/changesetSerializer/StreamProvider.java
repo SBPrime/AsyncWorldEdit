@@ -263,7 +263,7 @@ public class StreamProvider {
      * exists
      */
     public boolean initializeStream(File stream, boolean remove) {
-        boolean debug = ConfigProvider.isDebugOn();
+        boolean debug = ConfigProvider.messages().isDebugOn();
 
         synchronized (m_streamReferences) {
             if (m_streamReferences.containsKey(stream)) {
@@ -292,7 +292,7 @@ public class StreamProvider {
      * if the stream still has references
      */
     public boolean disposeStream(File stream) {
-        boolean debug = ConfigProvider.isDebugOn();
+        boolean debug = ConfigProvider.messages().isDebugOn();
 
         synchronized (m_streamReferences) {
             StreamDescription sd = m_streamReferences.get(stream);
@@ -325,7 +325,7 @@ public class StreamProvider {
      * @return False if stream is disposed
      */
     public boolean addReference(File stream) {
-        boolean debug = ConfigProvider.isDebugOn();
+        boolean debug = ConfigProvider.messages().isDebugOn();
         synchronized (m_streamReferences) {
             StreamDescription sd = m_streamReferences.get(stream);
             if (sd == null) {
@@ -351,7 +351,7 @@ public class StreamProvider {
      * @return True if stream is removed
      */
     public boolean removeReference(File stream) {
-        boolean debug = ConfigProvider.isDebugOn();
+        boolean debug = ConfigProvider.messages().isDebugOn();
         synchronized (m_streamReferences) {
             StreamDescription sd = m_streamReferences.get(stream);
             if (sd == null) {

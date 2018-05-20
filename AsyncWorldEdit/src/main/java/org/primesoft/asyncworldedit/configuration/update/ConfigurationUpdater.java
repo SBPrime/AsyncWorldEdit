@@ -62,11 +62,11 @@ public class ConfigurationUpdater {
     /**
      * The config file version
      */
-    public static final int CONFIG_VERSION = 20;
+    public static final int CONFIG_VERSION = 21;
 
     
     static {
-        s_configurationUpdaters = new HashMap<Integer, IConfigurationUpdater>();
+        s_configurationUpdaters = new HashMap<>();
         s_configurationUpdaters.put(1, new ConfigUpdater_v1_v2());
         s_configurationUpdaters.put(2, new ConfigUpdater_v2_v3());
         s_configurationUpdaters.put(3, new ConfigUpdater_v3_v4());
@@ -86,6 +86,7 @@ public class ConfigurationUpdater {
         s_configurationUpdaters.put(17, new ConfigUpdater_v17_v18());
         s_configurationUpdaters.put(18, new ConfigUpdater_v18_v19());
         s_configurationUpdaters.put(19, new ConfigUpdater_v19_v20());
+        s_configurationUpdaters.put(20, new ConfigUpdater_v20_v21());
     }
     
     public static boolean updateConfig(IConfiguration config, int version) {

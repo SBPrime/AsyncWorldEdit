@@ -57,12 +57,15 @@ import org.primesoft.asyncworldedit.api.inner.IInnerSerializerManager;
 import org.primesoft.asyncworldedit.api.inner.IWorldeditIntegratorInner;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
+import org.primesoft.asyncworldedit.api.utils.IInOutParam;
 import org.primesoft.asyncworldedit.changesetSerializer.StreamProvider;
+import org.primesoft.asyncworldedit.configuration.ConfigMessages;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.ConfigUndo;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.platform.api.ITask;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.utils.InOutParam;
 
 /**
  *
@@ -113,7 +116,7 @@ public final class Cron implements ICron {
 
         loadConfig();
         
-        new Thread(this::runUndoCleanup).start();
+        new Thread(() -> runUndoCleanup(true)).start();
     }
 
     public void loadConfig() {
@@ -172,12 +175,12 @@ public final class Cron implements ICron {
             m_lastUndoScann = now;
 
             if (!m_undoCleanupRunning) {
-                new Thread(this::runUndoCleanup).start();
+                new Thread(() -> runUndoCleanup(false)).start();
             }
         }
     }
 
-    private void runUndoCleanup() {
+    private void runUndoCleanup(boolean startup) {
         final ConfigUndo undoConfig = ConfigProvider.undo();
 
         if (undoConfig == null) {
@@ -188,7 +191,16 @@ public final class Cron implements ICron {
         if (keepUndoFor < 0) {
             return;
         }
-        log("Undo cleanup started...");
+        
+        final int undoMode = ConfigProvider.messages().getUndoMode();        
+        boolean showMessages = undoMode >= (startup ? ConfigMessages.UNDO_STARTUP : ConfigMessages.UNDO_ON);
+        boolean showError = undoMode >= ConfigMessages.UNDO_ERROR;
+        final IInOutParam<Boolean> headerShown = InOutParam.Ref(false);
+        
+        if (showMessages) {
+            log("Undo cleanup started...");
+            headerShown.setValue(true);
+        }
 
         final long time = System.currentTimeMillis() - keepUndoFor * 60000;
 
@@ -211,19 +223,35 @@ public final class Cron implements ICron {
                     .forEach(i -> {
                 try {
                     if (!i.delete()) {
-                        log(String.format("\t * %1$s...error", i));
+                        if (showMessages || showError) {
+                            if (!headerShown.getValue()) {
+                                log("Undo cleanup started...");
+                                headerShown.setValue(true);
+                            }
+                            log(String.format("\t * %1$s...error", i));
+                        }
                     } else {
-                        log(String.format("\t * %1$s...ok", i));
+                        if (showMessages) {
+                            log(String.format("\t * %1$s...ok", i));
+                        }
                     }
                 } catch (Exception ex) {
-                    log(String.format("\t * %1$s...error", i));
+                    if (showError) {
+                        if (!headerShown.getValue()) {
+                            log("Undo cleanup started...");
+                            headerShown.setValue(true);
+                        }
+                        log(String.format("\t * %1$s...error", i));
+                    }
                 }
             });
         } catch (IOException ex) {
             ExceptionHelper.printException(ex, "Unable to iterate undo files.");
         } finally {
             m_undoCleanupRunning = false;
-            log("...undo cleanup done.");
+            if (showMessages) {
+                log("...undo cleanup done.");
+            }
         }
     }
 }

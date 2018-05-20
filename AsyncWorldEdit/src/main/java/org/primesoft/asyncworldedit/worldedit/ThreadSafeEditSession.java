@@ -262,7 +262,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         m_asyncForceDisabled = false;
         m_asyncDisabled = false;
 
-        boolean isDebug = ConfigProvider.isDebugOn();
+        boolean isDebug = ConfigProvider.messages().isDebugOn();
         if (isDebug) {
             ExtentUtils.dumpExtents("Original extents:", this);
         }
