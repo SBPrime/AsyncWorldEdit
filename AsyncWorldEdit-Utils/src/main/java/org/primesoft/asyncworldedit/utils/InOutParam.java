@@ -66,7 +66,7 @@ public class InOutParam<T> implements IInOutParam<T> {
      * @return
      */
     public static <T> InOutParam<T> Ref(T value) {
-        return new InOutParam<T>(value);
+        return new InOutParam<>(value);
     }
 
     /**
@@ -76,7 +76,7 @@ public class InOutParam<T> implements IInOutParam<T> {
      * @return
      */
     public static <T> InOutParam<T> Out() {
-        return new InOutParam<T>();
+        return new InOutParam<>();
     }
 
     /**
