@@ -6,7 +6,7 @@
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEditInjector</artifactId>
 
-    <version>3.5.2</version>
+    <version>3.5.4</version>
 
     <packaging>jar</packaging>
     <properties>
