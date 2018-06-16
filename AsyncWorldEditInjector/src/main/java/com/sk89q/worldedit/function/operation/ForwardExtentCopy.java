@@ -44,13 +44,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Makes a copy of a portion of one extent to another extent or another point.
  *
- * <p>This is a forward extent copy, meaning that it iterates over the blocks
- * in the source extent, and will copy as many blocks as there are in the
- * source. Therefore, interpolation will not occur to fill in the gaps.</p>
+ * <p>
+ * This is a forward extent copy, meaning that it iterates over the blocks in
+ * the source extent, and will copy as many blocks as there are in the source.
+ * Therefore, interpolation will not occur to fill in the gaps.</p>
  */
 public class ForwardExtentCopy implements Operation {
 
@@ -68,18 +71,19 @@ public class ForwardExtentCopy implements Operation {
     private Transform currentTransform = null;
     private RegionVisitor lastVisitor;
     private int affected;
-    
+
     private boolean m_copyBiome = false;
 
     /**
-     * Create a new copy using the region's lowest minimum point as the
-     * "from" position.
+     * Create a new copy using the region's lowest minimum point as the "from"
+     * position.
      *
      * @param source the source extent
      * @param region the region to copy
      * @param destination the destination extent
      * @param to the destination position
-     * @see #ForwardExtentCopy(Extent, Region, Vector, Extent, Vector) the main constructor
+     * @see #ForwardExtentCopy(Extent, Region, Vector, Extent, Vector) the main
+     * constructor
      */
     public ForwardExtentCopy(Extent source, Region region, Extent destination, Vector to) {
         this(source, region, region.getMinimumPoint(), destination, to);
@@ -110,7 +114,8 @@ public class ForwardExtentCopy implements Operation {
     /**
      * Get the transformation that will occur on every point.
      *
-     * <p>The transformation will stack with each repetition.</p>
+     * <p>
+     * The transformation will stack with each repetition.</p>
      *
      * @return a transformation
      */
@@ -132,7 +137,8 @@ public class ForwardExtentCopy implements Operation {
     /**
      * Get the mask that gets applied to the source extent.
      *
-     * <p>This mask can be used to filter what will be copied from the source.</p>
+     * <p>
+     * This mask can be used to filter what will be copied from the source.</p>
      *
      * @return a source mask
      */
@@ -228,20 +234,22 @@ public class ForwardExtentCopy implements Operation {
 
     /**
      * Set biome copy on/off
-     * @param status 
+     *
+     * @param status
      */
     public void setBiomeCopy(boolean status) {
         m_copyBiome = status;
     }
-    
+
     /**
      * Is the biome copy on or off
-     * @return 
+     *
+     * @return
      */
     public boolean isBiomeCopy() {
         return m_copyBiome;
     }
-    
+
     /**
      * Get the number of affected objects.
      *
@@ -270,7 +278,7 @@ public class ForwardExtentCopy implements Operation {
                 blockCopy = InjectorCore.getInstance().getClassFactory().
                         addBiomeCopy(blockCopy, source, from, destination, to, currentTransform, true);
             }
-            
+
             RegionMaskingFilter filter = new RegionMaskingFilter(sourceMask, blockCopy);
             RegionFunction function = sourceFunction != null ? new CombinedRegionFunction(filter, sourceFunction) : filter;
             RegionVisitor blockVisitor = new RegionVisitor(region, function);
@@ -282,15 +290,8 @@ public class ForwardExtentCopy implements Operation {
                 ExtentEntityCopy entityCopy = new ExtentEntityCopy(from, destination, to, currentTransform);
                 entityCopy.setRemoving(removingEntities);
                 List<? extends Entity> entities = source.getEntities(region);
-                // Switch to entities.removeIf after Java 8 cutoff.
-                Iterator<? extends Entity> entityIterator = entities.iterator();
-                while (entityIterator.hasNext()) {
-                    EntityType type = entityIterator.next().getFacet(EntityType.class);
 
-                    if (type != null && !type.isPasteable()) {
-                        entityIterator.remove();
-                    }
-                }
+                we619(entities);
                 EntityVisitor entityVisitor = new EntityVisitor(entities.iterator(), entityCopy);
                 return new DelegateOperation(this, new OperationQueue(blockVisitor, entityVisitor));
             } else {
@@ -299,6 +300,37 @@ public class ForwardExtentCopy implements Operation {
         } else {
             return null;
         }
+    }
+
+    private Consumer<List<? extends Entity>> m_we619 = null;
+
+    private void executeWe619NoOp(List<? extends Entity> entities) {
+
+    }
+
+    private void executeWe619(List<? extends Entity> entities) {
+        // Switch to entities.removeIf after Java 8 cutoff.
+        Iterator<? extends Entity> entityIterator = entities.iterator();
+        while (entityIterator.hasNext()) {
+            EntityType type = entityIterator.next().getFacet(EntityType.class);
+
+            if (type != null && !type.isPasteable()) {
+                entityIterator.remove();
+            }
+        }
+    }
+
+    private void we619(List<? extends Entity> entities) {
+        if (m_we619 == null) {
+            boolean is619 = Stream.of(EntityType.class.getDeclaredMethods()).anyMatch(
+                    i -> i.isAccessible() && "isPasteable".equals(i.getName())
+                    && i.getParameterCount() == 0 && boolean.class.isAssignableFrom(i.getReturnType())
+            );
+
+            m_we619 = is619 ? this::executeWe619 : this::executeWe619NoOp;
+        }
+
+        m_we619.accept(entities);
     }
 
     @Override
