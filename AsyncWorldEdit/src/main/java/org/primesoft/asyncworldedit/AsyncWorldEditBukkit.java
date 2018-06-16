@@ -47,12 +47,23 @@
  */
 package org.primesoft.asyncworldedit;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.security.CodeSource;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.ILogger;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -62,9 +73,123 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  * @author SBPrime
  */
 public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger {
+
+    static {
+        s_log = Logger.getLogger("Minecraft.AWE");
+
+        detectFawe();
+    }
+
+    private static final String FAWE = "com.boydti.fawe.";
+    
     private static final String CORE = "org.primesoft.asyncworldedit.platform.bukkit.core.BukkitAsyncWorldEditCore";
 
-    private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
+    private static final Logger s_log;
+
+    private static void detectFawe() {
+        PluginManager pm = Bukkit.getPluginManager();
+        Class<?> clsPluginManager = pm.getClass();
+        Field[] fields = clsPluginManager.getDeclaredFields();
+        Field fPlugins = null;
+        Field fLookupNames = null;
+
+        Object faweClass = null;
+
+        boolean canContinue = true;
+
+        for (Field f : fields) {
+            Object o = Reflection.get(pm, f, "Unable to get field " + f.getName());
+
+            if (o == null) {
+                continue;
+            }
+
+            Class<?> cls = o.getClass();
+            if (cls == null) {
+                continue;
+            }
+
+            if (cls.getName().startsWith(FAWE)) {
+                String name = f.getName();
+                if ("plugins".equals(name)) {
+                    fPlugins = f;
+                    faweClass = o;
+                } else if ("lookupNames".equals(name)) {
+                    fLookupNames = f;
+                    faweClass = o;
+                } else {
+                    canContinue = false;
+                }
+            }
+        }
+
+        if (faweClass == null) {
+            return;
+        }
+
+        s_log.log(Level.SEVERE, String.format("%s ==========================================", LoggerProvider.PREFIX));
+        s_log.log(Level.SEVERE, String.format("%s = fawe detected, trying to disable...    =", LoggerProvider.PREFIX));
+
+        try {
+            boolean jarDeleted = false;
+            CodeSource src = faweClass.getClass().getProtectionDomain().getCodeSource();
+            if (src != null) {
+                URL jar = src.getLocation();
+                String fileName = jar != null ? jar.getFile() : null;
+
+                if (fileName != null) {
+                    try {
+                        File jarFile = new File(fileName);
+                        jarDeleted = jarFile.renameTo(new File(fileName + ".disabled"));
+                    } catch (Exception ex) {
+
+                    }
+                }
+            }
+
+            if (!jarDeleted) {
+                s_log.log(Level.SEVERE, String.format("%s = Unable to remove fawe jar.             =", LoggerProvider.PREFIX));
+            }
+
+            if (canContinue) {
+                List<Plugin> plugins = (List<Plugin>) Reflection.get(pm, List.class, fPlugins, "Getting plugins");
+                Map<String, Plugin> lookupNames = (Map<String, Plugin>) Reflection.get(pm, Map.class, fLookupNames, "Getting lookupNames");
+                
+                if (plugins != null && lookupNames != null) {
+                    List<Plugin> newPlugins = new ArrayList<>(plugins);
+                    Map<String, Plugin> newLookupNames = new ConcurrentHashMap<>(lookupNames);
+                    
+                    canContinue = Reflection.set(pm, fPlugins, newPlugins, "Set plugins") && 
+                            Reflection.set(pm, fLookupNames, newLookupNames, "Set lookupNames");
+                    
+                    
+                    Optional<Plugin> fawePlugin = plugins.stream()
+                            .filter(i -> i.getDescription().getMain().startsWith(FAWE))
+                            .findAny();
+                    
+                    if (fawePlugin.isPresent()) {
+                        newPlugins.remove(fawePlugin.get());
+                        newLookupNames.remove(fawePlugin.get().getName());
+                    }
+                } else {
+                    canContinue = false;
+                }
+            }
+
+            if (!canContinue) {
+                s_log.log(Level.SEVERE, String.format("%s = Pleas make up your mind.               =", LoggerProvider.PREFIX));
+                s_log.log(Level.SEVERE, String.format("%s = Choose: or the other.                  =", LoggerProvider.PREFIX));
+
+                try {
+                    Thread.sleep(20000);
+                } catch (InterruptedException ex) {
+                }
+            }
+
+        } finally {
+            s_log.log(Level.SEVERE, String.format("%s ==========================================", LoggerProvider.PREFIX));
+        }
+    }
 
     private ConsoleCommandSender m_console;
 
