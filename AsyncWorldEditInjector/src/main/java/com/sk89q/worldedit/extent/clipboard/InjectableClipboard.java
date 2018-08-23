@@ -54,13 +54,15 @@ package com.sk89q.worldedit.extent.clipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.List;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
@@ -125,13 +127,13 @@ public abstract class InjectableClipboard implements Clipboard {
     }
 
     @Override
-    public BaseBlock getBlock(Vector position) {
-        return m_injected.getBlock(position);
+    public BlockState getBlock(Vector vector) {
+        return m_injected.getBlock(vector);
     }
 
     @Override
-    public BaseBlock getLazyBlock(Vector position) {
-        return m_injected.getLazyBlock(position);
+    public BaseBlock getFullBlock(Vector vector) {
+        return m_injected.getFullBlock(vector);
     }
 
     @Override
@@ -140,7 +142,7 @@ public abstract class InjectableClipboard implements Clipboard {
     }
 
     @Override
-    public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
+    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
         return m_injected.setBlock(position, block);
     }
 

@@ -89,7 +89,6 @@ public final class Operations {
                 new OperationAction() {
                     @Override
                     public void Execute(Operation op) {
-
                         while (op != null) {
                             try {
                                 op = op.resume(new RunContext());
