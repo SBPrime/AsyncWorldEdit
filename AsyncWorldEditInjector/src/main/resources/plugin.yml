@@ -1,6 +1,7 @@
 name: AsyncWorldEditInjector
 main: org.primesoft.asyncworldedit.injector.InjectorBukkit
-version: 3.5.2
+version: 3.6.0
+api-version: 1.13
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin attaches into WorldEdit and makes it asynchronous.
