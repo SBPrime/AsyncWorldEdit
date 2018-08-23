@@ -196,11 +196,11 @@ public class InjectorCore {
     }
 
     
-    /**
+    /**getInjectorVersion
      * The injector version
      * @return 
      */
     public double getVersion() {
-        return 1.0500;
+        return 1.0600;
     }   
 }
