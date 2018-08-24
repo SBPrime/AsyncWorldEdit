@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.platform.api;
 
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 
 /**
  * Wrapper class for materials
@@ -70,5 +70,5 @@ public interface IMaterial {
      * Convert to base block
      * @return 
      */
-    BaseBlock getBaseBlock();
+    BlockStateHolder getBaseBlock();
 }

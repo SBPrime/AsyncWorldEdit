@@ -36,7 +36,7 @@
 package org.primesoft.asyncworldedit.api.inner;
 
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
@@ -79,7 +79,7 @@ public interface IBlocksHubIntegration {
      * @return
      */
     boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location,
-            BaseBlock oldBlock, BaseBlock newBlock);
+            BlockStateHolder oldBlock, BlockStateHolder newBlock);
 
     /**
      * Check if the block can be changed
@@ -93,7 +93,7 @@ public interface IBlocksHubIntegration {
      * @return
      */
     boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, 
-            BaseBlock oldBlock, BaseBlock newBlock, boolean dc);
+            BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
 
     /**
      * Log block change using BlocksHub
@@ -105,5 +105,5 @@ public interface IBlocksHubIntegration {
      * @param newBlock
      * @param dc
      */
-    void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, BaseBlock oldBlock, BaseBlock newBlock, boolean dc);
+    void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
 }
