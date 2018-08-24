@@ -39,8 +39,6 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalConfiguration;
-import com.sk89q.worldedit.LocalPlayer;
-import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.command.tool.BlockTool;
 import com.sk89q.worldedit.command.tool.BrushTool;
@@ -56,9 +54,12 @@ import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.RegionSelectorType;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
+
 import java.util.Calendar;
 import java.util.TimeZone;
+
 import javax.annotation.Nullable;
 
 /**
@@ -120,16 +121,7 @@ interface ILocalSession {
      * @param editSession the edit session
      */
     public void remember(EditSession editSession);
-    
-    /**
-     * Performs an undo.
-     *
-     * @param newBlockBag a new block bag
-     * @param player the player
-     * @return whether anything was undone
-     */
-    public EditSession undo(@Nullable BlockBag newBlockBag, LocalPlayer player);
-    
+
     /**
      * Performs an undo.
      *
@@ -138,15 +130,6 @@ interface ILocalSession {
      * @return whether anything was undone
      */
     public EditSession undo(@Nullable BlockBag newBlockBag, Player player);
-
-    /**
-     * Performs a redo
-     *
-     * @param newBlockBag a new block bag
-     * @param player the player
-     * @return whether anything was redone
-     */
-    public EditSession redo(@Nullable BlockBag newBlockBag, LocalPlayer player);
 
     /**
      * Performs a redo
@@ -172,12 +155,6 @@ interface ILocalSession {
     public void setDefaultRegionSelector(RegionSelectorType defaultSelector);
 
     /**
-     * @deprecated Use {@link #getRegionSelector(World)}
-     */
-    @Deprecated
-    public RegionSelector getRegionSelector(LocalWorld world);
-
-    /**
      * Get the region selector for defining the selection. If the selection
      * was defined for a different world, the old selection will be discarded.
      *
@@ -185,18 +162,6 @@ interface ILocalSession {
      * @return position the position
      */
     public RegionSelector getRegionSelector(World world);
-
-    /**
-     * @deprecated use {@link #getRegionSelector(World)}
-     */
-    @Deprecated
-    public RegionSelector getRegionSelector();
-
-    /**
-     * @deprecated use {@link #setRegionSelector(World, RegionSelector)}
-     */
-    @Deprecated
-    public void setRegionSelector(LocalWorld world, RegionSelector selector);
 
     /**
      * Set the region selector.
@@ -207,38 +172,12 @@ interface ILocalSession {
     public void setRegionSelector(World world, RegionSelector selector);
 
     /**
-     * Returns true if the region is fully defined.
-     *
-     * @return true if a region selection is defined
-     */
-    @Deprecated
-    public boolean isRegionDefined();
-
-    /**
-     * @deprecated use {@link #isSelectionDefined(World)}
-     */
-    @Deprecated
-    public boolean isSelectionDefined(LocalWorld world);
-
-    /**
      * Returns true if the region is fully defined for the specified world.
      *
      * @param world the world
      * @return true if a region selection is defined
      */
-    public boolean isSelectionDefined(World world);    
-
-    /**
-     * @deprecated use {@link #getSelection(World)}
-     */
-    @Deprecated
-    public Region getRegion() throws IncompleteRegionException;
-
-    /**
-     * @deprecated use {@link #getSelection(World)}
-     */
-    @Deprecated
-    public Region getSelection(LocalWorld world) throws IncompleteRegionException;
+    public boolean isSelectionDefined(World world);
 
     /**
      * Get the selection region. If you change the region, you should
@@ -275,7 +214,7 @@ interface ILocalSession {
      * @param clipboard the clipboard, or null if the clipboard is to be cleared
      */
     public void setClipboard(@Nullable ClipboardHolder clipboard);
-    
+
     /**
      * See if tool control is enabled.
      *
@@ -386,31 +325,31 @@ interface ILocalSession {
     /**
      * Get the tool assigned to the item.
      *
-     * @param item the item type ID
+     * @param item the item type
      * @return the tool, which may be {@link null}
      */
     @Nullable
-    public Tool getTool(int item);
+    public Tool getTool(ItemType item);
 
     /**
      * Get the brush tool assigned to the item. If there is no tool assigned
      * or the tool is not assigned, the slot will be replaced with the
      * brush tool.
      *
-     * @param item the item type ID
+     * @param item the item type
      * @return the tool, or {@code null}
      * @throws InvalidToolBindException if the item can't be bound to that item
      */
-    public BrushTool getBrushTool(int item) throws InvalidToolBindException;
+    public BrushTool getBrushTool(ItemType item) throws InvalidToolBindException;
 
     /**
      * Set the tool.
      *
-     * @param item the item type ID
+     * @param item the item type
      * @param tool the tool to set, which can be {@code null}
      * @throws InvalidToolBindException if the item can't be bound to that item
      */
-    public void setTool(int item, @Nullable Tool tool) throws InvalidToolBindException;
+    public void setTool(ItemType item, @Nullable Tool tool) throws InvalidToolBindException;
 
     /**
      * Returns whether inventory usage is enabled for this session.
@@ -447,6 +386,17 @@ interface ILocalSession {
      * @param player the player
      */
     public void tellVersion(Actor player);
+
+    public boolean shouldUseServerCUI();
+
+    public void setUseServerCUI(boolean useServerCUI);
+
+    /**
+     * Update server-side WorldEdit CUI.
+     *
+     * @param actor The player
+     */
+    public void updateServerCUI(Actor actor);
 
     /**
      * Dispatch a CUI event but only if the actor has CUI support.
@@ -522,18 +472,11 @@ interface ILocalSession {
     public Calendar detectDate(String input);
 
     /**
-     * @deprecated use {@link #createEditSession(Player)}
-     */
-    @Deprecated
-    public EditSession createEditSession(LocalPlayer player);
-
-    /**
      * Construct a new edit session.
      *
      * @param player the player
      * @return an edit session
      */
-    @SuppressWarnings("deprecation")
     public EditSession createEditSession(Player player);
 
     /**
@@ -563,12 +506,4 @@ interface ILocalSession {
      * @param mask mask or null
      */
     public void setMask(Mask mask);
-
-    /**
-     * Set a mask.
-     *
-     * @param mask mask or null
-     */
-    @SuppressWarnings("deprecation")
-    public void setMask(com.sk89q.worldedit.masks.Mask mask);
 }

@@ -42,8 +42,8 @@ package org.primesoft.asyncworldedit.api.directChunk;
 
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.Entity;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 
 /**
  *
@@ -58,7 +58,7 @@ public interface IBaseChunkData extends ISimpleChunkData {
      * @param z Z coordinate inside chunk (0-15)
      * @param b WorldEdit block
      */
-    void setBlock(int x, int y, int z, BaseBlock b);
+    void setBlock(int x, int y, int z, BlockStateHolder b);
 
 
     /**
@@ -82,7 +82,7 @@ public interface IBaseChunkData extends ISimpleChunkData {
      * @param b WorldEdit block
      * @param emission The block emission level
      */
-    void setBlockAndEmission(int x, int y, int z, BaseBlock b, byte emission);
+    void setBlockAndEmission(int x, int y, int z, BlockStateHolder b, byte emission);
 
 
     /**
@@ -130,7 +130,7 @@ public interface IBaseChunkData extends ISimpleChunkData {
      * @param z
      * @return
      */
-    BaseBlock getBlock(int x, int y, int z);
+    BlockStateHolder getBlock(int x, int y, int z);
 
     /**
      * Get the chunk entities

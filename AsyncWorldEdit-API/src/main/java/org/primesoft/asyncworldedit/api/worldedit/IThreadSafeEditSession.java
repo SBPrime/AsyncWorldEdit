@@ -40,16 +40,17 @@
  */
 package org.primesoft.asyncworldedit.api.worldedit;
 
-import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
-import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.Iterator;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
@@ -131,13 +132,20 @@ public interface IThreadSafeEditSession extends IAweEditSession {
      */
     void setAsyncForcedDisable(boolean value);
 
-    boolean setBlock(int jobId, Vector position, BaseBlock block, EditSession.Stage stage) throws WorldEditException;
+    /**
+     * Set a block, bypassing both history and block re-ordering.
+     *
+     * @param position the position to set the block at
+     * @param block the block
+     * @param stage the level
+     * @return whether the block changed
+     * @throws WorldEditException thrown on a set error
+     */
+    boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException;
 
-    boolean setBlock(Vector pt, Pattern pat, int jobId) throws MaxChangedBlocksException;
-
-    boolean setBlock(Vector pt, BaseBlock block, int jobId) throws MaxChangedBlocksException;
-
-    boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId) throws MaxChangedBlocksException;    
+    boolean setBlock(Vector vector, BlockStateHolder bsh, int jobId) throws WorldEditException;
+    
+    boolean setBlock(Vector position, Pattern pattern, int jobId) throws MaxChangedBlocksException;
     
     Iterator<Change> doUndo();
 
