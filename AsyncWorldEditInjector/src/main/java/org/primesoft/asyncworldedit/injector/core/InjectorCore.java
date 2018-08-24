@@ -151,7 +151,6 @@ public class InjectorCore {
             log("Class " + BlockArrayClipboard.forceClassLoad().getName() + " injected.");
             log("Class " + FlattenedClipboardTransform.forceClassLoad().getName() + " injected.");
             log("Class " + SnapshotUtilCommands.forceClassLoad().getName() + " injected.");
-            log("Class " + ClipboardFormat.forceClassLoad().getName() + " injected.");
         } catch (Error ex) {
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");

@@ -77,14 +77,6 @@ public interface IClassFactory {
      */
     IJobProcessor getJobProcessor();
     
-    
-    /**
-     * Get the clipboard format provider
-     * @param format
-     * @return 
-     */
-    IClipboardFormat getClipboardFormat(ClipboardFormat format);
-    
     /**
      * Create new instance of the clipboard
      * @param region

@@ -42,6 +42,8 @@ import com.sk89q.worldedit.world.storage.MissingWorldException;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
+import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
 public class SnapshotUtilCommands {
 

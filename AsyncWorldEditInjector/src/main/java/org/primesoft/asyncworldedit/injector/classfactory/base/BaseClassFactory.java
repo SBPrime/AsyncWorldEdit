@@ -54,17 +54,13 @@ package org.primesoft.asyncworldedit.injector.classfactory.base;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
-import org.primesoft.asyncworldedit.injector.classfactory.IClipboardFormat;
 import org.primesoft.asyncworldedit.injector.classfactory.base.clipboard.BlockArrayClipboard;
-import org.primesoft.asyncworldedit.injector.classfactory.base.clipboard.formats.NullFormat;
-import org.primesoft.asyncworldedit.injector.classfactory.base.clipboard.formats.SchematicFormat;
 
 /**
  *
@@ -74,9 +70,6 @@ public class BaseClassFactory implements IClassFactory {
 
     private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();
     private final IJobProcessor m_jobProcessor = new BaseJobProcessor();
-
-    private final IClipboardFormat m_null = new NullFormat();
-    private final IClipboardFormat m_sehematic = new SchematicFormat();
 
     @Override
     public IOperationProcessor getOperationProcessor() {
@@ -100,14 +93,4 @@ public class BaseClassFactory implements IClassFactory {
             boolean singleSet) {
         return blockCopy;
     }
-
-    @Override
-    public IClipboardFormat getClipboardFormat(ClipboardFormat format) {
-        if (format == null || !format.equals(ClipboardFormat.SCHEMATIC)) {
-            return m_null;
-        }
-        
-        return m_sehematic;
-    }
-
 }
