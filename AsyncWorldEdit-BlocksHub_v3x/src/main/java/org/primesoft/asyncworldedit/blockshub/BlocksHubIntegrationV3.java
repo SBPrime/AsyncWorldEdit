@@ -48,6 +48,7 @@
 package org.primesoft.asyncworldedit.blockshub;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -56,6 +57,7 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.blockshub.IBlocksHubApi;
 import org.primesoft.blockshub.api.IBlockData;
+import org.primesoft.blockshub.api.platform.BukkitBlockData;
 
 /**
  *
@@ -117,8 +119,8 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
             return false;
         }
 
-        IBlockData oldData = null;//(oldBlock == null) ? BlockData.AIR : new BlockData(oldBlock.getType(), oldBlock.getData());
-        IBlockData newData = null;//(newBlock == null) ? BlockData.AIR : new BlockData(newBlock.getType(), newBlock.getData());*/
+        IBlockData oldData = convert(oldBlock);
+        IBlockData newData = convert(newBlock);
 
         try {
             return m_blocksApi.canPlace(playerEntry.getUUID(), world.getUUID(), 
@@ -157,8 +159,8 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
             return;
         }
 
-        IBlockData oldData = null;//(oldBlock == null) ? BlockData.AIR : new BlockData(oldBlock.getType(), oldBlock.getData());
-        IBlockData newData = null;//(newBlock == null) ? BlockData.AIR : new BlockData(newBlock.getType(), newBlock.getData());
+        IBlockData oldData = convert(oldBlock);
+        IBlockData newData = convert(newBlock);
 
         try {
             m_blocksApi.logBlock(playerEntry.getUUID(), world.getUUID(),
@@ -206,5 +208,13 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
             ExceptionHelper.printException(ex, "Block checking error.");
             return true;
         }
-    }            
+    }
+    
+    private static IBlockData convert(BlockStateHolder bsh) {
+        if (bsh == null) {
+            return null;
+        }
+        
+        return new BukkitBlockData(BukkitAdapter.adapt(bsh));
+    }
 }
