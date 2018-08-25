@@ -16,8 +16,9 @@
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-API</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-APIInner</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-Utils</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-BlocksHub_v1x</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-BlocksHub_v2x</include>
+                <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-BlocksHub_v1x</include>
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-BlocksHub_v2x</include>-->
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-BlocksHub_v3x</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-Core</include>
             </includes>
         </dependencySet>
@@ -30,30 +31,31 @@
                 <!-- Injector -->
                 <include>org.primesoft.asyncworldedit:AsyncWorldEditInjector</include>        
                 <!-- PlotMe -->
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMe013g</include>
+                <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMe013g</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMeCore015</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMeCore016</include>
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMeCore016</include>->>
                 <!-- Progress display -->
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-ActionBarAPI</include>
+                <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-ActionBarAPI</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-ActionMessager</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-BarAPI</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-BountifulAPI</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-TitleManager</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-WelcomeTitle</include>
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-WelcomeTitle</include>-->
                 <!-- Direct chunk API -->
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_8_R3</include>
+                <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_8_R3</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_9_R1</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_9_R2</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_10_R1</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_11_R1</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1_12_1</include>
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1_12_1</include>-->
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_13</include>
             </includes>
         </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/</outputDirectory><include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1_12_1</include>
             <directory>${project.build.outputDirectory}</directory>
         </fileSet>
     </fileSets>
