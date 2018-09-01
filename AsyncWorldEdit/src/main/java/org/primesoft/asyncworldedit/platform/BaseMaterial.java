@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.platform;
 
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.platform.api.IMaterial;
 
 /**
@@ -59,8 +59,6 @@ public abstract class BaseMaterial implements IMaterial {
     
 
     @Override
-    public BaseBlock getBaseBlock() {
-        return new BaseBlock(getId());
-    }
+    public abstract BlockStateHolder getBaseBlock();
     
 }

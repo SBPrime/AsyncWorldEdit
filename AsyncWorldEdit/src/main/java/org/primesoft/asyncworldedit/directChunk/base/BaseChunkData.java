@@ -51,10 +51,10 @@ import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -281,8 +281,8 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
      */
     protected BaseChunkData() {
         m_chunkCoords = new BlockVector2D(0, 0);
-        m_tileEntities = new HashMap<BlockVector, ISerializedTileEntity>();
-        m_entities = new LinkedList<ISerializedEntity>();
+        m_tileEntities = new HashMap<>();
+        m_entities = new LinkedList<>();
 
         m_maxHeight = new int[256];
         m_biomeData = new byte[256];
@@ -320,7 +320,10 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public BaseBlock getBlock(int x, int y, int z) {
+    public BlockStateHolder getBlock(int x, int y, int z) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    /*
         BlockVector2D cPos = getChunkCoords();
         InOutParam<ISerializedTileEntity> entity = InOutParam.Out();
 
@@ -328,7 +331,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         BaseBlock block = getDirectChunkAPI().getBaseBlock(combinedId, entity.isSet()
                 ? entity.getValue().getRawData(cPos.getBlockX(), cPos.getBlockZ()) : null);
 
-        return block;
+        return block;*/
     }
 
     @Override
@@ -342,7 +345,10 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public void setBlockAndEmission(int x, int y, int z, BaseBlock b, byte emission) {
+    public void setBlockAndEmission(int x, int y, int z, BlockStateHolder b, byte emission) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    /*
         final int data = b.getData();
         final int type = b.getType();
         final char id = getDirectChunkAPI().getCombinedId(type, data);
@@ -352,11 +358,14 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
             setTileEntityAndEmission(x, y, z, id, ct, emission);
         } else {
             setBlockAndEmission(x, y, z, id, emission);
-        }
+        }*/
     }
 
     @Override
-    public void setBlock(int x, int y, int z, BaseBlock b) {
+    public void setBlock(int x, int y, int z, BlockStateHolder b) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    /*
         final int data = b.getData();
         final int type = b.getType();
         final char id = getDirectChunkAPI().getCombinedId(type, data);
@@ -366,7 +375,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
             setTileEntity(x, y, z, id, ct);
         } else {
             setBlock(x, y, z, id);
-        }
+        }*/
     }
 
     @Override

@@ -200,7 +200,7 @@ public class ChunkCommands {
 
         AsyncCommand.run(command, playerEntry, blockPlacer, editSession);
 
-        session.setClipboard(new ClipboardHolder(clipboard, editSession.getWorld().getWorldData()));
+        session.setClipboard(new ClipboardHolder(clipboard));
     }
 
     /**

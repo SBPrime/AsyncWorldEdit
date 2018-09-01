@@ -49,6 +49,8 @@ package org.primesoft.asyncworldedit.worldedit.entity;
 
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.entity.BaseEntity;
+import com.sk89q.worldedit.world.entity.EntityType;
+import com.sk89q.worldedit.world.entity.EntityTypes;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
@@ -109,7 +111,7 @@ public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
     
     private BaseEntityWrapper(BaseEntity parent, int jobId, boolean isAsync,
                              IPlayerEntry player) {
-        super("");
+        super((EntityType)null);
 
         m_jobId = jobId;
         m_parent = parent;
@@ -134,20 +136,13 @@ public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
         return m_parent.hashCode();
     }
 
+    
     @Override
     public CompoundTag getNbtData() {
         if (m_parent == null) {
             return null;
         }
         return m_parent.getNbtData(); 
-    }
-
-    @Override
-    public String getTypeId() {
-        if (m_parent == null) {
-            return null;
-        }
-        return m_parent.getTypeId(); 
     }
 
     @Override
@@ -164,13 +159,5 @@ public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
             return;
         }
         m_parent.setNbtData(ct); 
-    }
-
-    @Override
-    public void setTypeId(String id) {
-        if (m_parent == null) {
-            return;
-        }
-        m_parent.setTypeId(id); 
     }
 }

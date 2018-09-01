@@ -50,26 +50,32 @@ package org.primesoft.asyncworldedit.changesetSerializer.serializers;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.Tag;
 import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.history.change.Change;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockTypes;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IChangesetSerializer;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IMemoryStorage;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataInput;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataOutput;
+import org.primesoft.asyncworldedit.worldedit.blocks.BlockStates;
 
 /**
  *
  * @author SBPrime
  */
 public class SerializerBlockChange implements IChangesetSerializer {
-    private static final String CLASS_TYPE = BlockChange.class.getName();
-    
-    private static final int AIR = 0;
+
+    private final static Charset UTF8 = Charset.forName("UTF8");
+
+    private static final String CLASS_TYPE = BlockChange.class.getName();    
 
     @Override
     public boolean canSerialize(String type) {
@@ -89,15 +95,15 @@ public class SerializerBlockChange implements IChangesetSerializer {
             return null;
         }
 
-        BaseBlock current = bChange.getCurrent();
-        BaseBlock previous = bChange.getPrevious();
+        BlockStateHolder current = bChange.getCurrent();
+        BlockStateHolder previous = bChange.getPrevious();
 
         if (current == null) {
-            current = new BaseBlock(AIR);
+            current = BlockStates.AIR;
         }
 
         if (previous == null) {
-            previous = new BaseBlock(AIR);
+            previous = BlockStates.AIR;
         }
 
         try {
@@ -107,8 +113,8 @@ public class SerializerBlockChange implements IChangesetSerializer {
             stream.writeDouble(position.getY());
             stream.writeDouble(position.getZ());
 
-            writeBlock(stream, previous);
-            writeBlock(stream, current);
+            writeBlock(stream, previous.toBaseBlock());
+            writeBlock(stream, current.toBaseBlock());
 
             return stream.toByteArray();
         } catch (IOException ex) {
@@ -125,14 +131,14 @@ public class SerializerBlockChange implements IChangesetSerializer {
 
         try {
             UnsafeDataInput stream = new UnsafeDataInput(data);
-            
+
             double x = stream.readDouble();
             double y = stream.readDouble();
             double z = stream.readDouble();
-            
-            BaseBlock previous = readBlock(stream);
-            BaseBlock current = readBlock(stream);
-            
+
+            BlockStateHolder previous = readBlock(stream);
+            BlockStateHolder current = readBlock(stream);
+
             return new BlockChange(new BlockVector(x, y, z), previous, current);
         } catch (IOException ioe) {
             ExceptionHelper.printException(ioe, "Unable to deserialize BlockChange");
@@ -147,22 +153,31 @@ public class SerializerBlockChange implements IChangesetSerializer {
      * @param block
      */
     private void writeBlock(DataOutput stream, BaseBlock block) throws IOException {
-        stream.writeInt(block.getId());
-        stream.writeInt(block.getData());
+        String id = block.toImmutableState().getAsString();
+        byte[] idData = id.getBytes(UTF8);
+        int idLength = idData.length;
+
+        stream.writeInt(idLength);
+        stream.write(idData);
 
         NbtTagSerializer.serialize(stream, block.hasNbtData() ? block.getNbtData() : NbtTagSerializer.END_TAG);
     }
 
-    private BaseBlock readBlock(DataInput stream) throws IOException {
-        int id = stream.readInt();
-        int data = stream.readInt();
-        
+    private BlockStateHolder readBlock(DataInput stream) throws IOException {
+        int idLength = stream.readInt();
+        byte[] idData = new byte[idLength];
+        stream.readFully(idData);
+        String id = new String(idData, UTF8);
+
+        BlockState state = BlockFactory.getState(id);
+        if (state == null) {
+            return null;
+        }
         Tag nbtTag = NbtTagSerializer.deserialize(stream);
         if (nbtTag instanceof CompoundTag) {
-            return new BaseBlock(id, data, (CompoundTag)nbtTag);
+            return state.toBaseBlock((CompoundTag) nbtTag);
         }
-        
-        
-        return new BaseBlock(id, data);
+
+        return state.toBaseBlock();
     }
 }

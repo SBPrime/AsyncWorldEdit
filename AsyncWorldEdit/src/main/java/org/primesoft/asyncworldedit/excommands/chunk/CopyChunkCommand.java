@@ -53,7 +53,6 @@ import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
@@ -168,7 +167,7 @@ public class CopyChunkCommand extends DCCommand {
         final Vector chunkZero = PositionHelper.chunkToPosition(cPos, 0);
 
         for (ISerializedEntity entity : cData.getEntity()) {
-            Stack<ISerializedEntity> stack = new Stack<ISerializedEntity>();
+            Stack<ISerializedEntity> stack = new Stack<>();
             do {
                 stack.push(entity);
                 entity = entity.getVehicle();
@@ -193,12 +192,14 @@ public class CopyChunkCommand extends DCCommand {
                 }
 
                 if (vehicle != null) {
-                    Map<String, Tag> nbt = new HashMap<String, Tag>(tagData.getValue());
+                    Map<String, Tag> nbt = new HashMap<>(tagData.getValue());
                     nbt.put("Riding", vehicle);
                     tagData = new CompoundTag(nbt);
                 }
-
-                m_target.createEntity(new Location(m_world, pos, entity.getYaw(), entity.getPitch()), new BaseEntity(tagData.getString("id"), tagData));
+                
+                //TODO: 1.13
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
+                //m_target.createEntity(new Location(m_world, pos, entity.getYaw(), entity.getPitch()), new BaseEntity(tagData.getString("id"), tagData));
             }
         }
 
@@ -236,9 +237,11 @@ public class CopyChunkCommand extends DCCommand {
                     InOutParam<ISerializedTileEntity> entity = InOutParam.Out();
 
                     char combinedId = cData.getBlock(x, py, z, entity);
-                    BaseBlock block = m_chunkApi.convertId(combinedId);
+                    //BaseBlock block = m_chunkApi.convertId(combinedId);
+                    //TODO: 1.13
+                    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
 
-                    if (entity.isSet()) {
+                    /*if (entity.isSet()) {
                         block.setNbtData(entity.getValue().getRawData(cPos.getBlockX(), cPos.getBlockZ()));
                     }
 
@@ -249,7 +252,7 @@ public class CopyChunkCommand extends DCCommand {
                     } catch (WorldEditException ex) {
                         //This is never thrown but better log it
                         ExceptionHelper.printException(ex, "Unable to set clipboard block");
-                    }
+                    }*/
                 }
             }
         }

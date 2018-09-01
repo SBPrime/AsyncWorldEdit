@@ -61,6 +61,7 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
@@ -72,7 +73,6 @@ import com.sk89q.worldedit.util.command.binding.Switch;
 import com.sk89q.worldedit.util.command.parametric.Optional;
 import com.sk89q.worldedit.util.io.Closer;
 import com.sk89q.worldedit.util.io.file.FilenameException;
-import com.sk89q.worldedit.world.registry.WorldData;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -82,27 +82,19 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.utils.IAsyncCommand;
-import org.primesoft.asyncworldedit.excommands.AsyncCommand;
-import org.primesoft.asyncworldedit.excommands.schematic.InfoCommand;
-import org.primesoft.asyncworldedit.excommands.schematic.PlaceCommand;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
-import org.primesoft.asyncworldedit.schematics.ReaderFactory;
-import org.primesoft.asyncworldedit.schematics.ISchematicReader;
-import org.primesoft.asyncworldedit.strings.MessageType;
-import org.primesoft.asyncworldedit.utils.OrientationTransform;
 
 /**
  * The AsyncWorldEdit schematic injected commands
+ *
  * @author SBPrime
  */
 public class SchematicCommands {
+
     private static final Logger log = Logger.getLogger(com.sk89q.worldedit.command.SchematicCommands.class.getCanonicalName());
-    
+
     /**
      * Instance of WorldEdit
      */
@@ -134,107 +126,14 @@ public class SchematicCommands {
         m_worldEdit = worldEdit;
     }
 
-    /**
-     *
-     * @param player
-     * @param formatName
-     * @param filename
-     * @throws WorldEditException
-     */
     @Command(
-            aliases = {"info", "size"},
-            usage = "[<format>] <filename>",
-            desc = "Show information about schematic file.",
-            min = 1,
-            max = 2
-    )
-    @CommandPermissions("awe.excommands.schematic.info")
-    public void info(Player player, @Optional("schematic") String formatName, String filename) throws WorldEditException {
-        LocalConfiguration config = m_worldEdit.getConfiguration();
-
-        File dir = m_worldEdit.getWorkingDirectoryFile(config.saveDir);
-        File f = m_worldEdit.getSafeOpenFile(player, dir, filename, "schematic", "schematic");
-
-        if (!f.exists()) {
-            player.printError(MessageType.EX_CMD_SCHEMATIC_NOT_FOUND.format(filename));
-            return;
-        }
-
-        ClipboardFormat format = ClipboardFormat.findByAlias(formatName);
-        ISchematicReader schematicReader = ReaderFactory.getReader(format);
-        if (schematicReader == null) {
-            player.printError(MessageType.EX_CMD_SCHEMATIC_UNKNOWN_FORMAT.format());
-            return;
-        }
-
-        m_jobProcessor.executeJob(player, new InfoCommand(player, filename, f, schematicReader));
-    }
-
-    /**
-     *
-     * @param player
-     * @param session
-     * @param editSession
-     * @param formatName
-     * @param filename
-     * @param ignoreAirBlocks
-     * @param useFacing
-     * @throws WorldEditException
-     */
-    @Command(
-            aliases = {"place"},
-            usage = "[<format>] <filename>",
-            flags = "af",
-            desc = "Place schematic immediately on the map.",
-            help = "Place schematic immediately on the map.\n"
-            + "Flags:\n"
-            + "  -a skips air blocks\n"
-            + "  -f use player facing for orientation",
-            min = 1,
-            max = 2
-    )
-    @CommandPermissions("awe.excommands.schematic.place")
-    public void place(Player player, LocalSession session, EditSession editSession,
-            @Optional("schematic") String formatName, String filename,
-            @Switch('a') boolean ignoreAirBlocks, @Switch('f') boolean useFacing) throws WorldEditException {
-        LocalConfiguration config = m_worldEdit.getConfiguration();
-
-        File dir = m_worldEdit.getWorkingDirectoryFile(config.saveDir);
-        File file = m_worldEdit.getSafeOpenFile(player, dir, filename, "schematic", "schematic");
-
-        if (!file.exists()) {
-            player.printError(MessageType.EX_CMD_SCHEMATIC_NOT_FOUND.format(filename));
-            return;
-        }
-
-        ClipboardFormat format = ClipboardFormat.findByAlias(formatName);
-        ISchematicReader schematicReader = ReaderFactory.getReader(format);
-        if (schematicReader == null) {
-            player.printError(MessageType.EX_CMD_SCHEMATIC_UNKNOWN_FORMAT.format());
-            return;
-        }
-
-        final BlockVector to = session.getPlacementPosition(player).toBlockVector();
-        final OrientationTransform orientation = new OrientationTransform(useFacing ? player.getYaw() : 0);
-
-        final IBlockPlacer blockPlacer = m_asyncWorldEdit.getBlockPlacer();
-        final IPlayerEntry playerEntry = m_asyncWorldEdit.getPlayerManager().getPlayer(player.getUniqueId());
-
-        final IAsyncCommand command = new PlaceCommand(player, playerEntry, filename, file, schematicReader,
-                to, orientation, ignoreAirBlocks);
-
-        AsyncCommand.run(command, playerEntry, blockPlacer, editSession);
-    }
-    
-    @Command(
-            aliases = { "load" },
+            aliases = {"load"},
             usage = "[<format>] <filename>",
             desc = "Load a schematic into your clipboard",
             min = 1, max = 2
     )
-    @Deprecated
     @CommandPermissions({"worldedit.clipboard.load", "worldedit.schematic.load"})
-    public void load(final Player player, final LocalSession session, @Optional("schematic") String formatName, final String filename) throws FilenameException {
+    public void load(Player player, LocalSession session, @Optional("sponge") String formatName, String filename) throws FilenameException {
         LocalConfiguration config = m_worldEdit.getConfiguration();
 
         final File dir = m_worldEdit.getWorkingDirectoryFile(config.saveDir);
@@ -245,7 +144,11 @@ public class SchematicCommands {
             return;
         }
 
-        final ClipboardFormat format = ClipboardFormat.findByAlias(formatName);
+        ClipboardFormat tmpFormat = ClipboardFormats.findByFile(f);
+        if (tmpFormat == null) {
+            tmpFormat = ClipboardFormats.findByAlias(formatName);
+        }
+        final ClipboardFormat format = tmpFormat;
         if (format == null) {
             player.printError("Unknown schematic format: " + formatName);
             return;
@@ -259,47 +162,42 @@ public class SchematicCommands {
 
             @Override
             public void execute() {
-                Closer closer = Closer.create();
-                try {
+                try (Closer closer = Closer.create()) {
                     FileInputStream fis = closer.register(new FileInputStream(f));
                     BufferedInputStream bis = closer.register(new BufferedInputStream(fis));
-                    ClipboardReader reader = format.getReader(bis);
+                    ClipboardReader reader = closer.register(format.getReader(bis));
 
-                    WorldData worldData = player.getWorld().getWorldData();
-                    Clipboard clipboard = reader.read(player.getWorld().getWorldData());
-                    session.setClipboard(new ClipboardHolder(clipboard, worldData));
+                    Clipboard clipboard = reader.read();
+                    session.setClipboard(new ClipboardHolder(clipboard));
 
                     log.info(player.getName() + " loaded " + f.getCanonicalPath());
                     player.print(filename + " loaded. Paste it with //paste");
                 } catch (IOException e) {
                     player.printError("Schematic could not read or it does not exist: " + e.getMessage());
                     log.log(Level.WARNING, "Failed to load a saved clipboard", e);
-                } finally {
-                    try {
-                        closer.close();
-                    } catch (IOException ignored) {
-                    }
                 }
             }
         });
     }
-    
+
     @Command(
             aliases = { "save" },
             usage = "[<format>] <filename>",
             desc = "Save a schematic into your clipboard",
             min = 1, max = 2
     )
-    @Deprecated
-    @CommandPermissions({"worldedit.clipboard.save", "worldedit.schematic.save"})
-
-    public void save(final Player player, LocalSession session, @Optional("schematic") String formatName, final String filename) throws CommandException, WorldEditException {
+    @CommandPermissions({ "worldedit.clipboard.save", "worldedit.schematic.save" })
+    public void save(Player player, LocalSession session, @Optional("sponge") String formatName, String filename) throws CommandException, WorldEditException {
         LocalConfiguration config = m_worldEdit.getConfiguration();
 
         File dir = m_worldEdit.getWorkingDirectoryFile(config.saveDir);
         final File f = m_worldEdit.getSafeSaveFile(player, dir, filename, "schematic", "schematic");
 
-        final ClipboardFormat format = ClipboardFormat.findByAlias(formatName);
+        ClipboardFormat tmpFormat = ClipboardFormats.findByFile(f);
+        if (tmpFormat == null) {
+            tmpFormat = ClipboardFormats.findByAlias(formatName);
+        }
+        final ClipboardFormat format = tmpFormat;
         if (format == null) {
             player.printError("Unknown schematic format: " + formatName);
             return;
@@ -312,16 +210,16 @@ public class SchematicCommands {
 
         // If we have a transform, bake it into the copy
         if (!transform.isIdentity()) {
-            FlattenedClipboardTransform result = FlattenedClipboardTransform.transform(clipboard, transform, holder.getWorldData());
+            FlattenedClipboardTransform result = FlattenedClipboardTransform.transform(clipboard, transform);
             target = new BlockArrayClipboard(result.getTransformedRegion());
             target.setOrigin(clipboard.getOrigin());
-            
+
             Operation copyOperation = result.copyTo(target);
-            
+
             if (copyOperation instanceof ForwardExtentCopy) {
-                ((ForwardExtentCopy)copyOperation).setBiomeCopy(true);
+                ((ForwardExtentCopy) copyOperation).setBiomeCopy(true);
             }
-            
+
             Operations.completeLegacy(copyOperation);
         } else {
             target = clipboard;
@@ -349,7 +247,7 @@ public class SchematicCommands {
                     FileOutputStream fos = closer.register(new FileOutputStream(f));
                     BufferedOutputStream bos = closer.register(new BufferedOutputStream(fos));
                     ClipboardWriter writer = closer.register(format.getWriter(bos));
-                    writer.write(target, holder.getWorldData());
+                    writer.write(target);
                     log.info(player.getName() + " saved " + f.getCanonicalPath());
                     player.print(filename + " saved.");
                 } catch (IOException e) {

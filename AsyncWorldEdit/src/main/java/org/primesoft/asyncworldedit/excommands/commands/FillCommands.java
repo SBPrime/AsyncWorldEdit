@@ -56,8 +56,8 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.function.pattern.Patterns;
-import com.sk89q.worldedit.patterns.Pattern;
+import com.sk89q.worldedit.extension.input.ParserContext;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -188,7 +188,11 @@ public class FillCommands {
      */
     private void fill(Player player, LocalSession session, EditSession editSession, CommandContext args, 
             boolean axisX, boolean axisY, boolean axisZ) throws WorldEditException {
-        Pattern pattern = m_worldEdit.getBlockPattern(player, args.getString(0));
+        ParserContext context = new ParserContext();
+        context.setActor(player);
+        context.setWorld(player.getWorld());
+        context.setSession(session);
+        Pattern pattern = m_worldEdit.getPatternFactory().parseFromInput(args.getString(0), context);
         double radius = Math.max(1, args.getDouble(1));
         m_worldEdit.checkMaxRadius(radius);
         int depth = args.argsLength() > 2 ? Math.max(1, args.getInteger(2)) : 1;
@@ -199,7 +203,7 @@ public class FillCommands {
         IPlayerManager pm = m_asyncWorldEdit.getPlayerManager();        
         IPlayerEntry playerEntry = pm.getPlayer(player.getUniqueId());
         
-        AsyncCommand.run(new FillCommand(playerEntry, pos, Patterns.wrap(pattern), radius, depth,
+        AsyncCommand.run(new FillCommand(playerEntry, pos, pattern, radius, depth,
                 axisX, axisY, axisZ), playerEntry, bp, editSession);
     }
 }

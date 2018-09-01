@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit.function;
 
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 
 /**
  *
@@ -58,5 +58,5 @@ public interface IBlockData {
      * Set the block data
      * @param block 
      */
-    void setBlockData(BaseBlock block);
+    void setBlockData(BlockStateHolder block);
 }

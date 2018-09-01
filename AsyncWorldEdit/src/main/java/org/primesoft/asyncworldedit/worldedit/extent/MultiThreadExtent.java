@@ -50,7 +50,6 @@ package org.primesoft.asyncworldedit.worldedit.extent;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.Extent;
@@ -58,6 +57,9 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,10 +74,11 @@ public class MultiThreadExtent implements Extent {
      */
     private Extent m_default;
     
+    //TODO: Consider using thread locale
     /**
      * Thread delegate extents
-     */
-    private final HashMap<Thread, Extent> m_extents = new LinkedHashMap<Thread, Extent>();
+     */    
+    private final HashMap<Thread, Extent> m_extents = new LinkedHashMap<>();
     
     public MultiThreadExtent() { }
     
@@ -117,13 +120,13 @@ public class MultiThreadExtent implements Extent {
      */
     private Extent getExtent() {
         final Thread current = Thread.currentThread();
+        
+        Extent result;
         synchronized (m_extents) {
-            if (m_extents.containsKey(current)) {
-                return m_extents.get(current);
-            }
+            result = m_extents.get(current);
         }
         
-        return m_default;
+        return result != null ? result : m_default;
     }
 
     @Override
@@ -152,13 +155,13 @@ public class MultiThreadExtent implements Extent {
     }
 
     @Override
-    public BaseBlock getBlock(Vector position) {
+    public BlockState getBlock(Vector position) {
         return getExtent().getBlock(position);
     }
 
     @Override
-    public BaseBlock getLazyBlock(Vector position) {
-        return getExtent().getLazyBlock(position);
+    public BaseBlock getFullBlock(Vector position) {
+        return getExtent().getFullBlock(position);
     }
 
     @Override
@@ -167,7 +170,7 @@ public class MultiThreadExtent implements Extent {
     }
 
     @Override
-    public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
+    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
         return getExtent().setBlock(position, block);
     }
 

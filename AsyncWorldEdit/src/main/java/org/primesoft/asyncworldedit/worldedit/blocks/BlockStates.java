@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,27 +45,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.extent.clipboard;
+package org.primesoft.asyncworldedit.worldedit.blocks;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockTypes;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class BaseClipboard implements Clipboard {
-    private final Region m_region;
-    private final BaseBlock[][][] m_blocks;    
-    private Vector m_origin;    
-    
-    protected BaseClipboard(Region region) {        
-        m_region = region.clone();
-        m_origin = region.getMinimumPoint();
-
-        Vector dimensions = getDimensions();
-        m_blocks = new BaseBlock[dimensions.getBlockX()][dimensions.getBlockY()][dimensions.getBlockZ()];
-    }
+public final class BlockStates {
+    public static final BlockState AIR = BlockTypes.AIR.getDefaultState();
 }

@@ -51,7 +51,6 @@ import com.sk89q.util.yaml.YAMLNode;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
@@ -64,6 +63,9 @@ import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.registry.BlockRegistry;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -330,8 +332,10 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry(FastModeExtent.class),
             new ClassScannerEntry(Change.class),
             new ClassScannerEntry(Vector.class),
-            new ClassScannerEntry(BaseBlock.class),
+            new ClassScannerEntry(BlockStateHolder.class),
             new ClassScannerEntry(BaseBlockWrapper.class),
+            new ClassScannerEntry(BaseBlock.class),
+            new ClassScannerEntry(BlockState.class),
             new ClassScannerEntry(PermissionGroup.class),
             new ClassScannerEntry(IPlayerEntry.class),
             new ClassScannerEntry(Clipboard.class),

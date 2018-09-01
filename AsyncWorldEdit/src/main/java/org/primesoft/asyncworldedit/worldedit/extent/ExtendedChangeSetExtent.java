@@ -50,7 +50,6 @@ package org.primesoft.asyncworldedit.worldedit.extent;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
@@ -59,6 +58,8 @@ import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.history.change.EntityCreate;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.history.change.BiomeChange;
@@ -95,8 +96,8 @@ public class ExtendedChangeSetExtent extends ChangeSetExtent {
     }
 
     @Override
-    public boolean setBlock(Vector location, BaseBlock block) throws WorldEditException {
-        BaseBlock previous = getBlock(location);
+    public boolean setBlock(Vector location, BlockStateHolder block) throws WorldEditException {
+        BaseBlock previous = getFullBlock(location);
         m_changeSet.addExtended(new BlockChange(location.toBlockVector(), previous, block), m_cancelableEditSession);
         return super.setBlock(location, block);
     }

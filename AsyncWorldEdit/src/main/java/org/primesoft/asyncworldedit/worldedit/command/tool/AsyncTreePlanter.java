@@ -64,7 +64,7 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  */
 public class AsyncTreePlanter extends TreePlanter implements IAsyncTool {
 
-    private final static Field s_treePlanterGen = Reflection.findField(TreePlanter.class, "gen", "Unable to get TreePlanter gen field");
+    private final static Field s_treePlanterTreeType = Reflection.findField(TreePlanter.class, "treeType", "Unable to get TreePlanter treeType field");
 
     /**
      * Wrap the TreePlanter
@@ -73,26 +73,27 @@ public class AsyncTreePlanter extends TreePlanter implements IAsyncTool {
      * @return
      */
     public static TreePlanter wrap(TreePlanter parrent) {
-        if (parrent == null || s_treePlanterGen == null) {
+        if (parrent == null || s_treePlanterTreeType == null) {
             return parrent;
         }
 
-        TreeGenerator gen = Reflection.get(parrent, TreeGenerator.class, s_treePlanterGen, "Unable to TreePlanter gen");
-        if (gen == null) {
+        TreeGenerator.TreeType treeType = Reflection.get(parrent, TreeGenerator.TreeType.class, s_treePlanterTreeType, "Unable to TreePlanter treeType");
+        if (treeType == null) {
             return parrent;
         }
 
-        return new AsyncTreePlanter(gen);
+        return new AsyncTreePlanter(treeType);
     }
 
-    private AsyncTreePlanter(TreeGenerator gen) {
-        super(gen);
+    private AsyncTreePlanter(TreeGenerator.TreeType treeType) {
+        super(treeType);
     }
 
     @Override
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
         return ToolWrapper.performAction(server, config, player,session, clicked,
             new ToolAction() {
+                @Override
                 public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
                     return doActPrimary(server, config, player, session, clicked);
                 }

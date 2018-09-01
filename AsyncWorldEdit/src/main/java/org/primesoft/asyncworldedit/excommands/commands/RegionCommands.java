@@ -57,8 +57,6 @@ import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.buffer.ForgetfulExtentBuffer;
 import com.sk89q.worldedit.function.RegionFunction;
@@ -86,6 +84,8 @@ import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldedit.util.command.binding.Range;
 import com.sk89q.worldedit.util.command.binding.Switch;
 import com.sk89q.worldedit.util.command.parametric.Optional;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockTypes;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import org.primesoft.asyncworldedit.LoggerProvider;
@@ -231,7 +231,7 @@ public class RegionCommands {
             @Override
             public void execute(EditSession es) {
                 try {
-                    HeightMap heightMap = new HeightMap(es, region, affectNatural);
+                    HeightMap heightMap = new HeightMap(es, region);
                     GaussianKernel kernel = new GaussianKernel(5, 1.0);                    
                                         
                     HeightMapFilter filter = Reflection.create(HeightMapFilter.class, s_ctorHeightMapFilter, "Unable to create the HeightMapFilter.", kernel);
@@ -328,7 +328,7 @@ public class RegionCommands {
                      @Selection Region region,
                      @Optional("1") @Range(min = 1) int count,
                      @Optional(Direction.AIM) @Direction Vector direction,
-                     @Optional("air") BaseBlock replace,
+                     @Optional("air") BlockStateHolder replace,
                      @Switch('s') boolean moveSelection,
                      @Switch('a') boolean ignoreAirBlocks,
                      @Switch('m') Mask mask) throws WorldEditException {
@@ -336,8 +336,8 @@ public class RegionCommands {
 
         // Remove the original blocks
         com.sk89q.worldedit.function.pattern.Pattern pattern = replace != null ?
-                new BlockPattern(replace) :
-                new BlockPattern(new BaseBlock(BlockID.AIR));
+                new BlockPattern(replace) :                
+                new BlockPattern(BlockTypes.AIR.getDefaultState());
         BlockReplace remove = new BlockReplace(editSession, pattern);
 
         // Copy to a buffer so we don't destroy our original before we can copy all the blocks from it

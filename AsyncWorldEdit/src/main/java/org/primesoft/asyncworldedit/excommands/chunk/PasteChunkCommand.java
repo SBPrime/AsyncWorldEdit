@@ -53,7 +53,6 @@ import com.sk89q.worldedit.BlockVector2D;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.transform.BlockTransformExtent;
@@ -64,7 +63,7 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BaseBiome;
-import com.sk89q.worldedit.world.registry.WorldData;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -90,20 +89,19 @@ import org.primesoft.asyncworldedit.utils.PositionHelper;
  */
 public class PasteChunkCommand extends DCMaskCommand {
 
-    private final static BaseBlock AIR = new BaseBlock(0);
+    //private final static BaseBlock AIR = new BaseBlock(0);
 
     private final Vector m_location;
     private final World m_locationWorld;
     private final Transform m_transform;
     private final Clipboard m_clipboard;
     private final boolean m_skipAir;
-    private final boolean m_updateLight;
-    private final WorldData m_worldData;
+    private final boolean m_updateLight;    
     private final boolean m_copyBiome;
 
     public PasteChunkCommand(ClipboardHolder clipboardHolder, Location location, World world,
             IAsyncWorldEditCore awe, boolean skipAir, boolean updateLight, boolean copyBiome,
-            WorldData worldData, Mask destinationMask, IPlayerEntry playerEntry) {
+            Mask destinationMask, IPlayerEntry playerEntry) {
         super(awe, destinationMask, playerEntry);
 
         m_location = new Vector(
@@ -119,8 +117,6 @@ public class PasteChunkCommand extends DCMaskCommand {
         m_skipAir = skipAir;
         m_updateLight = updateLight;
         m_copyBiome = copyBiome;
-
-        m_worldData = worldData;
     }
 
     @Override
@@ -184,7 +180,7 @@ public class PasteChunkCommand extends DCMaskCommand {
 
         final Vector chunkZero = PositionHelper.chunkToPosition(cPos, 0);
         final List<Pair<Location, Entity>> entities = entityCache.get(cPos);
-        final Map<UUID, Pair<ISerializedEntity, UUID>> serialised = new HashMap<UUID, Pair<ISerializedEntity, UUID>>();
+        final Map<UUID, Pair<ISerializedEntity, UUID>> serialised = new HashMap<>();
 
         for (Pair<Location, Entity> entry : entities) {
             Location pos = entry.getX1();
@@ -201,12 +197,12 @@ public class PasteChunkCommand extends DCMaskCommand {
                     UUID sEntityId = CompoundTagUtils.getUUID(entity);
                     UUID sRiding = CompoundTagUtils.getRidingUUID(entity);
 
-                    serialised.put(sEntityId, new Pair<ISerializedEntity, UUID>(serializedEntity, sRiding));
+                    serialised.put(sEntityId, new Pair<>(serializedEntity, sRiding));
                 }
             }
         }
 
-        HashSet<UUID> toRemove = new HashSet<UUID>();
+        HashSet<UUID> toRemove = new HashSet<>();
         for (Pair<ISerializedEntity, UUID> entry : serialised.values()) {
             ISerializedEntity entity = entry.getX1();
             UUID ridingId = entry.getX2();
@@ -233,7 +229,9 @@ public class PasteChunkCommand extends DCMaskCommand {
 
     private int setBlocks(final BlockVector2D cPos, final Transform reverse,
             final Vector from, final Region region, IChangesetChunkData cData) {
-        final Vector chunkZero = PositionHelper.chunkToPosition(cPos, 0);
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
+/*        final Vector chunkZero = PositionHelper.chunkToPosition(cPos, 0);
         int changedBlocks = 0;
         for (int x = 0; x < 16; x++) {
             final Vector xPos = chunkZero.add(x, 0, 0);
@@ -246,7 +244,7 @@ public class PasteChunkCommand extends DCMaskCommand {
                     final Vector read = new Vector(Math.round(transformed.getX()), Math.round(transformed.getY()), Math.round(transformed.getZ()));
 
                     if (region.contains(read) && maskTest(yPos)) {
-                        final BaseBlock bBlock = BlockTransformExtent.transform(m_clipboard.getBlock(read), m_transform, m_worldData.getBlockRegistry());
+                        final BlockStateHolder bBlock = BlockTransformExtent.transform(m_clipboard.getBlock(read), m_transform);
                         final int data = bBlock.getData();
                         final int type = bBlock.getType();
                         final char id = m_chunkApi.getCombinedId(type, data);
@@ -277,12 +275,12 @@ public class PasteChunkCommand extends DCMaskCommand {
             }
         }
 
-        return changedBlocks;
+        return changedBlocks;*/
     }
 
     private HashMap<BlockVector2D, IWrappedChunk> cacheChunks(int cMinX, int cMaxX, int cMinZ, int cMaxZ,
             final IWorld world, IAweEditSession editSesstion) throws WorldEditException {
-        final HashMap<BlockVector2D, IWrappedChunk> dataCatch = new HashMap<BlockVector2D, IWrappedChunk>();
+        final HashMap<BlockVector2D, IWrappedChunk> dataCatch = new HashMap<>();
         for (int cx = cMinX; cx <= cMaxX; cx++) {
             for (int cz = cMinZ; cz <= cMaxZ; cz++) {
                 final BlockVector2D cPos = new BlockVector2D(cx, cz);
@@ -304,7 +302,7 @@ public class PasteChunkCommand extends DCMaskCommand {
      * @return
      */
     private HashMap<BlockVector2D, List<Pair<Location, Entity>>> aggregateEntities(final Vector from) {
-        HashMap<BlockVector2D, List<Pair<Location, Entity>>> result = new HashMap<BlockVector2D, List<Pair<Location, Entity>>>();
+        HashMap<BlockVector2D, List<Pair<Location, Entity>>> result = new HashMap<>();
         Vector location = m_location; //PositionHelper.positionToBlockPosition(m_location);        
 
         for (Entity e : m_clipboard.getEntities()) {
@@ -321,13 +319,13 @@ public class PasteChunkCommand extends DCMaskCommand {
             if (result.containsKey(cPos)) {
                 list = result.get(cPos);
             } else {
-                list = new LinkedList<Pair<Location, Entity>>();
+                list = new LinkedList<>();
                 result.put(cPos, list);
             }
 
             Location newPos = new Location(m_clipboard, targetPosition,
                     m_transform.apply(direction).subtract(m_transform.apply(Vector.ZERO)).normalize());
-            list.add(new Pair<Location, Entity>(newPos, e));
+            list.add(new Pair<>(newPos, e));
         }
 
         return result;

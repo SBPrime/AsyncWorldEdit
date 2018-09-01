@@ -49,11 +49,11 @@ package org.primesoft.asyncworldedit.worldedit.command.tool;
 
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.command.tool.BlockReplacer;
 import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.util.Location;
 import java.lang.reflect.Field;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
@@ -65,24 +65,24 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  */
 public class AsyncBlockReplacer extends BlockReplacer implements IAsyncTool {
 
-    private static final Field s_blockReplacerTargetBlock = Reflection.findField(BlockReplacer.class, "targetBlock", "Unable to get targetBlock field from BlockReplacer");
+    private static final Field s_blockReplacerPattern = Reflection.findField(BlockReplacer.class, "pattern", "Unable to get pattern field from BlockReplacer");
 
     public static Tool wrap(BlockReplacer blockReplacer) {
-        if (blockReplacer == null || s_blockReplacerTargetBlock == null) {
+        if (blockReplacer == null || s_blockReplacerPattern == null) {
             return null;
         }
 
-        BaseBlock targetBlock = Reflection.get(blockReplacer, BaseBlock.class, s_blockReplacerTargetBlock, "Unable to get targetBlock from BlockReplacer");
+        Pattern pattern = Reflection.get(blockReplacer, Pattern.class, s_blockReplacerPattern, "Unable to get targetBlock from BlockReplacer");
 
-        if (targetBlock == null) {
+        if (pattern == null) {
             return null;
         }
 
-        return new AsyncBlockReplacer(targetBlock);
+        return new AsyncBlockReplacer(pattern);
     }
 
-    public AsyncBlockReplacer(BaseBlock targetBlock) {
-        super(targetBlock);
+    public AsyncBlockReplacer(Pattern pattern) {
+        super(pattern);
     }
 
     @Override

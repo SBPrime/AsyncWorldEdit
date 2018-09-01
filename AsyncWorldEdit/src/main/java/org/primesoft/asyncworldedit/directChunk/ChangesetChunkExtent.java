@@ -52,7 +52,6 @@ import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.Extent;
@@ -60,6 +59,9 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.LinkedList;
 import java.util.List;
 import org.primesoft.asyncworldedit.api.directChunk.IBaseChunkData;
@@ -99,13 +101,13 @@ public class ChangesetChunkExtent implements Extent {
     @Override
     public List<? extends Entity> getEntities(Region region) {
         //TODO: Implement entity get
-        return new LinkedList<Entity>();
+        return new LinkedList<>();
     }
 
     @Override
     public List<? extends Entity> getEntities() {
         //TODO: Implement entity get
-        return new LinkedList<Entity>();
+        return new LinkedList<>();
     }
 
     @Override
@@ -115,15 +117,22 @@ public class ChangesetChunkExtent implements Extent {
     }
 
     @Override
-    public BaseBlock getBlock(Vector position) {
-        Vector p = position.subtract(m_minPoint);
-        return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ());
-    }
+    public BlockState getBlock(Vector position) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        /*Vector p = position.subtract(m_minPoint);
+        return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ());*/
+    }    
 
     @Override
-    public BaseBlock getLazyBlock(Vector position) {
+    public BaseBlock getFullBlock(Vector position) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        /*
         Vector p = position.subtract(m_minPoint);
         return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ());
+        */
     }
 
     @Override
@@ -133,7 +142,7 @@ public class ChangesetChunkExtent implements Extent {
     }
 
     @Override
-    public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
+    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
         Vector p = position.subtract(m_minPoint);
         m_data.setBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ(), block);
         return true;

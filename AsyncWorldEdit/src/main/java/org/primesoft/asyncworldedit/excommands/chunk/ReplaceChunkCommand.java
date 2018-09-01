@@ -51,13 +51,13 @@ import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.mask.Masks;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.directChunk.IChangesetChunkData;
 import org.primesoft.asyncworldedit.api.directChunk.IWrappedChunk;
@@ -155,7 +155,7 @@ public class ReplaceChunkCommand extends DCMaskCommand {
 
                         if ((m_wholeWorld || m_region.contains(yPos))
                                 && m_from.test(yPos) && maskTest(yPos)) {
-                            final BaseBlock block = m_to.apply(yPos);
+                            final BlockStateHolder block = m_to.apply(yPos);
                             cData.setBlock(x, py, z, block);
                             changedBlocks++;
                         }

@@ -107,7 +107,7 @@ public class ClipboardCommands {
         copy.setBiomeCopy(copyBiomes);
         
         Operations.completeLegacy(copy);
-        session.setClipboard(new ClipboardHolder(clipboard, editSession.getWorld().getWorldData()));
+        session.setClipboard(new ClipboardHolder(clipboard));
 
         player.print(region.getArea() + " block(s) were copied.");
     }
@@ -142,7 +142,7 @@ public class ClipboardCommands {
         copy.setBiomeCopy(copyBiomes);
         
         Operations.completeLegacy(copy);
-        session.setClipboard(new ClipboardHolder(clipboard, editSession.getWorld().getWorldData()));
+        session.setClipboard(new ClipboardHolder(clipboard));
 
         player.print(region.getArea() + " block(s) were copied.");
     }
@@ -174,7 +174,7 @@ public class ClipboardCommands {
 
         Vector to = atOrigin ? clipboard.getOrigin() : session.getPlacementPosition(player);
         Operation operation = holder
-                .createPaste(editSession, editSession.getWorld().getWorldData())
+                .createPaste(editSession)
                 .to(to)
                 .ignoreAirBlocks(ignoreAirBlocks)
                 .build();

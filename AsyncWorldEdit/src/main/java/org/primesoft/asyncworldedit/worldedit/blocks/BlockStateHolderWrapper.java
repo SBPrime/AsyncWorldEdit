@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,44 +45,123 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.blockshub;
+package org.primesoft.asyncworldedit.worldedit.blocks;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.worldedit.registry.state.Property;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
-import org.primesoft.asyncworldedit.api.IWorld;
-import org.primesoft.asyncworldedit.api.inner.IBlocksHubIntegration;
+import com.sk89q.worldedit.world.block.BlockType;
+import java.util.Map;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**
  *
  * @author SBPrime
  */
-public class NullBlocksHubIntegration implements IBlocksHubIntegration {
+public class BlockStateHolderWrapper implements BlockStateHolder, IAsyncWrapper {
+    public static BlockStateHolderWrapper wrap(BlockStateHolder block, int jobId,
+                                        boolean isAsync, IPlayerEntry player) {
+        BlockStateHolderWrapper result;
+        if (block instanceof BlockStateHolderWrapper) {
+            result = (BlockStateHolderWrapper) block;
+            result.setAsync(isAsync);
+            result.setPlayer(player);
+        } else {
+            result = new BlockStateHolderWrapper(block, jobId, isAsync, player);
+        }
 
+        return result;
+    }
+    
+    private final BlockStateHolder m_parent;
+
+    private final int m_jobId;
+
+    private boolean m_isAsync;
+
+    private IPlayerEntry m_player;
+    
     @Override
-    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, 
-            BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {        
+    public int getJobId() {
+        return m_jobId;
     }
 
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, 
-            BlockStateHolder oldBlock, BlockStateHolder newBlock) {
-        return true;
+    public BlockStateHolder getParent() {
+        return m_parent;
     }
 
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location,
-            BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
-        return true;
+    public boolean isAsync() {
+        return m_isAsync;
+    }
+
+    public void setAsync(boolean async) {
+        m_isAsync = async;
+    }
+
+    public void setPlayer(IPlayerEntry player) {
+        m_player = player;
     }
 
     @Override
-    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location) {
-        return true;
+    public IPlayerEntry getPlayer() {
+        return m_player;
+    }
+    
+    private BlockStateHolderWrapper(BlockStateHolder parent, int jobId, boolean isAsync,
+                             IPlayerEntry player) {
+        m_jobId = jobId;
+        m_parent = parent;
+        m_isAsync = isAsync;
+        m_player = player;
     }
 
     @Override
-    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location, boolean dc) {
-        return true;
+    public BlockType getBlockType() {
+        return m_parent.getBlockType();
+    }
+
+    @Override
+    public BlockStateHolder with(Property property, Object value) {
+        return m_parent.with(property, value);
+    }
+
+    @Override
+    public Object getState(Property property) {
+        return m_parent.getState(property);
+    }
+
+    @Override
+    public Map getStates() {
+        return m_parent.getStates();
+    }
+
+    @Override
+    public boolean equalsFuzzy(BlockStateHolder o) {
+        return m_parent.equalsFuzzy(o);
+    }
+
+    @Override
+    public BlockState toImmutableState() {
+        return m_parent.toImmutableState();
+    }
+
+    @Override
+    public BaseBlock toBaseBlock() {
+        return m_parent.toBaseBlock();
+    }
+
+    @Override
+    public BaseBlock toBaseBlock(CompoundTag compoundTag) {
+        return m_parent.toBaseBlock(compoundTag);
+    }
+
+    @Override
+    public String getAsString() {
+        return m_parent.getAsString();
     }
 }

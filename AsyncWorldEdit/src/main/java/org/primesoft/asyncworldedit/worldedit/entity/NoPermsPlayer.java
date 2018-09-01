@@ -50,21 +50,18 @@ package org.primesoft.asyncworldedit.worldedit.entity;
 import com.sk89q.worldedit.PlayerDirection;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.WorldVector;
-import com.sk89q.worldedit.WorldVectorFace;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
-import com.sk89q.worldedit.internal.cui.CUIEvent;
-import com.sk89q.worldedit.session.SessionKey;
+import com.sk89q.worldedit.util.HandSide;
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.world.World;
-import java.io.File;
-import java.util.UUID;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.gamemode.GameMode;
+import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.worldedit.extension.platform.NoPermsActor;
 
 /**
@@ -99,18 +96,18 @@ public class NoPermsPlayer extends NoPermsActor implements Player {
     }
 
     @Override
-    public int getItemInHand() {
-        return m_parrent.getItemInHand();
+    public BaseItemStack getItemInHand(HandSide handSide) {
+        return m_parrent.getItemInHand(handSide);
     }
 
     @Override
-    public BaseBlock getBlockInHand() throws WorldEditException {
-        return m_parrent.getBlockInHand();
+    public BaseBlock getBlockInHand(HandSide handSide) throws WorldEditException {
+        return m_parrent.getBlockInHand(handSide);
     }
 
     @Override
-    public void giveItem(int type, int amount) {
-        m_parrent.giveItem(type, amount);
+    public void giveItem(BaseItemStack itemStack) {
+        m_parrent.giveItem(itemStack);
     }
 
     @Override
@@ -119,17 +116,22 @@ public class NoPermsPlayer extends NoPermsActor implements Player {
     }
 
     @Override
-    public boolean hasCreativeMode() {
-        return m_parrent.hasCreativeMode();
+    public GameMode getGameMode() {
+        return m_parrent.getGameMode();
     }
 
     @Override
-    public void findFreePosition(WorldVector searchPos) {
+    public void setGameMode(GameMode gameMode) {
+        m_parrent.setGameMode(gameMode);
+    }
+
+    @Override
+    public void findFreePosition(Location searchPos) {
         m_parrent.findFreePosition(searchPos);
     }
 
     @Override
-    public void setOnGround(WorldVector searchPos) {
+    public void setOnGround(Location searchPos) {
         m_parrent.setOnGround(searchPos);
     }
 
@@ -174,53 +176,38 @@ public class NoPermsPlayer extends NoPermsActor implements Player {
     }
 
     @Override
-    public WorldVector getBlockIn() {
+    public Location getBlockIn() {
         return m_parrent.getBlockIn();
     }
 
     @Override
-    public WorldVector getBlockOn() {
+    public Location getBlockOn() {
         return m_parrent.getBlockOn();
     }
 
     @Override
-    public WorldVector getBlockTrace(int range, boolean useLastBlock) {
+    public Location getBlockTrace(int range, boolean useLastBlock) {
         return m_parrent.getBlockTrace(range, useLastBlock);
     }
 
     @Override
-    public WorldVectorFace getBlockTraceFace(int range, boolean useLastBlock) {
+    public Location getBlockTraceFace(int range, boolean useLastBlock) {
         return m_parrent.getBlockTraceFace(range, useLastBlock);
     }
 
     @Override
-    public WorldVector getBlockTrace(int range) {
+    public Location getBlockTrace(int range) {
         return m_parrent.getBlockTrace(range);
     }
 
     @Override
-    public WorldVector getSolidBlockTrace(int range) {
+    public Location getSolidBlockTrace(int range) {
         return m_parrent.getSolidBlockTrace(range);
     }
 
     @Override
     public PlayerDirection getCardinalDirection() {
         return m_parrent.getCardinalDirection();
-    }
-
-    @Override
-    public WorldVector getPosition() {
-        return m_parrent.getPosition();
-    }
-
-    @Override
-    public double getPitch() {
-        return m_parrent.getPitch();
-    }
-
-    @Override
-    public double getYaw() {
-        return m_parrent.getYaw();
     }
 
     @Override
@@ -236,6 +223,10 @@ public class NoPermsPlayer extends NoPermsActor implements Player {
     @Override
     public void setPosition(Vector pos) {
         m_parrent.setPosition(pos);
+    }
+    @Override
+    public void sendFakeBlock(Vector pos, @Nullable BlockStateHolder block) {
+        m_parrent.sendFakeBlock(pos, block);
     }
 
     @Override

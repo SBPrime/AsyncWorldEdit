@@ -50,7 +50,6 @@ package org.primesoft.asyncworldedit.worldedit;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
-import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 import org.primesoft.asyncworldedit.worldedit.world.biome.BaseBiomeWrapper;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.AweEditSession;
@@ -58,7 +57,6 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
@@ -66,19 +64,23 @@ import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.UndoContext;
-import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
-import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockType;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -93,11 +95,11 @@ import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
-import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.events.EditSessionLimitChanged;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.worldedit.blocks.BlockStateHolderWrapper;
 import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.extent.ExtendedChangeSetExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.FixedBlockBagExtent;
@@ -370,11 +372,12 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         super.setBlockBag(ThreadSafeBlockBag.warap(blockBag));
     }
 
+    
     @Override
-    public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException {
+    public boolean setBlock(Vector position, BlockStateHolder block, Stage stage) throws WorldEditException {
         boolean isAsync = isAsyncEnabled();
         boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, m_jobId, isAsync, m_player), stage);
+                BlockStateHolderWrapper.wrap(block, m_jobId, isAsync, m_player), stage);
         if (r) {
             forceFlush();
         }
@@ -382,29 +385,14 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException {
+    public boolean setBlock(int jobId, Vector position, BlockStateHolder block, Stage stage) throws WorldEditException {
         boolean isAsync = isAsyncEnabled();
         boolean r = super.setBlock(VectorWrapper.wrap(position, jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player), stage);
+                BlockStateHolderWrapper.wrap(block, jobId, isAsync, m_player), stage);
         if (r) {
             forceFlush();
         }
         return r;
-    }
-
-    @Override
-    public boolean setBlockIfAir(Vector pt, BaseBlock block, int jobId)
-            throws MaxChangedBlocksException {
-        boolean isAsync = isAsyncEnabled();
-        return super.setBlockIfAir(VectorWrapper.wrap(pt, jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
-    }
-
-    @Override
-    public boolean setBlockIfAir(Vector position, BaseBlock block) throws MaxChangedBlocksException {
-        boolean isAsync = isAsyncEnabled();
-        return super.setBlockIfAir(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, m_jobId, isAsync, m_player));
     }
 
     @Override
@@ -421,11 +409,11 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean setBlock(Vector pt, BaseBlock block, int jobId)
+    public boolean setBlock(Vector pt, BlockStateHolder block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
         boolean r = super.setBlock(VectorWrapper.wrap(pt, jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, jobId, isAsync, m_player));
+                BlockStateHolderWrapper.wrap(block, jobId, isAsync, m_player));
         if (r) {
             forceFlush();
         }
@@ -484,27 +472,12 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         m_blockPlacer.addTasks(m_player, entry);
     }
 
-    @Override
-    public void rememberChange(Vector position, BaseBlock existing, BaseBlock block) {
-        final ChangeSet cs = getChangeSet();
-        final IExtendedChangeSet ecs = (cs instanceof IExtendedChangeSet) ? (IExtendedChangeSet) cs : null;
-        final Change change = new BlockChange(position.toBlockVector(), existing, block);
-
-        if (ecs != null) {
-            try {
-                ecs.addExtended(change, null);
-            } catch (WorldEditException ex) {
-            }
-        } else {
-            cs.add(change);
-        }
-    }
 
     @Override
-    public boolean setBlock(Vector position, BaseBlock block) throws MaxChangedBlocksException {
+    public boolean setBlock(Vector position, BlockStateHolder block) throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
         boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
-                BaseBlockWrapper.wrap(block, m_jobId, isAsync, m_player));
+                BlockStateHolderWrapper.wrap(block, m_jobId, isAsync, m_player));
         if (r) {
             forceFlush();
         }
@@ -523,7 +496,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean smartSetBlock(Vector pt, BaseBlock block) {
+    public boolean smartSetBlock(Vector pt, BlockStateHolder block) {
         return super.smartSetBlock(pt, block);
     }
 
@@ -535,184 +508,96 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public BaseBlock getBlock(final Vector position) {
+    public BlockState getBlock(final Vector position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<BaseBlock>() {
-            @Override
-            public BaseBlock execute() {
-                return es.doGetBlock(position);
-            }
-        }, m_bukkitWorld, position);
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), () -> es.doGetBlock(position), m_bukkitWorld, position);
     }
 
     @Override
-    public int getBlockData(final Vector position) {
+    public BaseBlock getFullBlock(final Vector position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Integer>() {
-            @Override
-            public Integer execute() {
-                return es.doGetBlockData(position);
-            }
-        }, m_bukkitWorld, position);
-    }
-
-    @Override
-    public int getBlockType(final Vector position) {
-        final ThreadSafeEditSession es = this;
-
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Integer>() {
-            @Override
-            public Integer execute() {
-                return es.doGetBlockType(position);
-            }
-        }, m_bukkitWorld, position);
-    }
-
-    @Override
-    public BaseBlock getLazyBlock(final Vector position) {
-        final ThreadSafeEditSession es = this;
-
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<BaseBlock>() {
-            @Override
-            public BaseBlock execute() {
-                return es.doGetLazyBlock(position);
-            }
-        }, m_bukkitWorld, position);
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), () -> es.doGetFullBlock(position), m_bukkitWorld, position);
     }
 
     @Override
     public BaseBiome getBiome(final Vector2D position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<BaseBiome>() {
-            @Override
-            public BaseBiome execute() {
-                return es.doGetBiome(position);
-            }
-        }, m_bukkitWorld, new Vector(position.getX(), 0, position.getZ()));
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                () -> es.doGetBiome(position), m_bukkitWorld, new Vector(position.getX(), 0, position.getZ()));
     }
 
     @Override
     public int getBlockChangeCount() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(this), new IFunc<Integer>() {
-            @Override
-            public Integer execute() {
-                return es.doGetBlockChangeCount();
-            }
-        });
+        return m_dispatcher.performSafe(MutexProvider.getMutex(this), 
+                () -> es.doGetBlockChangeCount());
     }
 
     @Override
     public int getBlockChangeLimit() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(this), new IFunc<Integer>() {
-            @Override
-            public Integer execute() {
-                return es.doGetBlockChangeLimit();
-            }
-        });
+        return m_dispatcher.performSafe(MutexProvider.getMutex(this), es::doGetBlockChangeLimit);
     }
 
     @Override
-    public List<Countable<Integer>> getBlockDistribution(final Region region) {
+    public List<Countable<BlockType>> getBlockDistribution(final Region region) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<List<Countable<Integer>>>() {
-            @Override
-            public List<Countable<Integer>> execute() {
-                return es.doGetBlockDistribution(region);
-            }
-        }, m_bukkitWorld, region);
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                () -> es.doGetBlockDistribution(region), m_bukkitWorld, region);
     }
 
     @Override
-    public List<Countable<BaseBlock>> getBlockDistributionWithData(final Region region) {
+    public List<Countable<BlockStateHolder>> getBlockDistributionWithData(final Region region) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<List<Countable<BaseBlock>>>() {
-            @Override
-            public List<Countable<BaseBlock>> execute() {
-                return es.doGetBlockDistributionWithData(region);
-            }
-        }, m_bukkitWorld, region);
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
+                () -> es.doGetBlockDistributionWithData(region), m_bukkitWorld, region);
     }
 
     @Override
     public List<? extends Entity> getEntities() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<List<? extends Entity>>() {
-            @Override
-            public List<? extends Entity> execute() {
-                return es.doGetEntities();
-            }
-        });
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                () -> es.doGetEntities());
     }
 
     @Override
     public List<? extends Entity> getEntities(final Region region) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<List<? extends Entity>>() {
-            @Override
-            public List<? extends Entity> execute() {
-                return es.doGetEntities(region);
-            }
-        }, m_bukkitWorld, region);
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                () -> es.doGetEntities(region), m_bukkitWorld, region);
     }
 
     @Override
     public int getHighestTerrainBlock(final int x, final int z, final int minY, final int maxY) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Integer>() {
-            @Override
-            public Integer execute() {
-                return es.doGetHighestTerrainBlock(x, z, minY, maxY);
-            }
-        }, m_bukkitWorld, new Vector(x, minY, z));
-    }
-
-    @Override
-    public int getHighestTerrainBlock(final int x, final int z,
-            final int minY, final int maxY, final boolean naturalOnly) {
-        final ThreadSafeEditSession es = this;
-
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Integer>() {
-            @Override
-            public Integer execute() {
-                return es.doGetHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
-            }
-        }, m_bukkitWorld, new Vector(x, minY, z));
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                () -> es.doGetHighestTerrainBlock(x, z, minY, maxY), m_bukkitWorld, new Vector(x, minY, z));
     }
 
     @Override
     public Vector getMaximumPoint() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Vector>() {
-            @Override
-            public Vector execute() {
-                return es.doGetMaximumPoint();
-            }
-        });
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                es::doGetMaximumPoint);
     }
 
     @Override
     public Vector getMinimumPoint() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), new IFunc<Vector>() {
-            @Override
-            public Vector execute() {
-                return es.doGetMinimumPoint();
-            }
-        });
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                es::doGetMinimumPoint);
     }
 
     /**
@@ -900,20 +785,12 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         return m_blockPlacer.getJobId(m_player);
     }
 
-    private BaseBlock doGetBlock(Vector position) {
+    private BlockState doGetBlock(Vector position) {
         return super.getBlock(position);
     }
 
-    private Integer doGetBlockData(Vector position) {
-        return super.getBlockData(position);
-    }
-
-    private Integer doGetBlockType(Vector position) {
-        return super.getBlockType(position);
-    }
-
-    private BaseBlock doGetLazyBlock(Vector position) {
-        return super.getLazyBlock(position);
+    private BaseBlock doGetFullBlock(Vector position) {
+        return super.getFullBlock(position);
     }
 
     public BaseBiome doGetBiome(Vector2D position) {
@@ -928,11 +805,11 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         return super.getBlockChangeLimit();
     }
 
-    public List<Countable<Integer>> doGetBlockDistribution(Region region) {
+    public List<Countable<BlockType>> doGetBlockDistribution(Region region) {
         return super.getBlockDistribution(region);
     }
 
-    public List<Countable<BaseBlock>> doGetBlockDistributionWithData(Region region) {
+    public List<Countable<BlockStateHolder>> doGetBlockDistributionWithData(Region region) {
         return super.getBlockDistributionWithData(region);
     }
 
@@ -946,10 +823,6 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
     public int doGetHighestTerrainBlock(int x, int z, int minY, int maxY) {
         return super.getHighestTerrainBlock(x, z, minY, maxY);
-    }
-
-    public int doGetHighestTerrainBlock(int x, int z, int minY, int maxY, boolean naturalOnly) {
-        return super.getHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
     }
 
     public Vector doGetMaximumPoint() {

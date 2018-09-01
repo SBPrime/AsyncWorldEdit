@@ -64,16 +64,6 @@ public class BukkitMaterialLibrary implements IMaterialLibrary {
     }
 
     @Override
-    public IMaterial getMaterial(int id) {
-        Material m = Material.getMaterial(id);
-        if (m == null) {
-            return null;
-        }
-        
-        return new BukkitMaterial(m);
-    }
-
-    @Override
     public IMaterial getMaterial(String name) {
         Material m = Material.getMaterial(name);
         if (m == null) {

@@ -49,7 +49,7 @@ package org.primesoft.asyncworldedit.blockshub;
 
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -85,7 +85,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     /**
      * List of all factories
      */
-    private final List<IBlocksHubFactory> m_factories = new ArrayList<IBlocksHubFactory>();
+    private final List<IBlocksHubFactory> m_factories = new ArrayList<>();
 
     /**
      * The platform
@@ -93,13 +93,12 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     private final IPlatform m_platform;
 
     public BlocksHubBridge(IPlatform platform) {
-        m_factories.add(new BlocksHubV2Factory());
-
         m_platform = platform;
     }
 
     @Override
-    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, BaseBlock oldBlock, BaseBlock newBlock, boolean dc) {
+    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, 
+            BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
         BHLevel level = ConfigProvider.blocksHub().getLogBlocks();
         if (level == BHLevel.Disabled || (dc && level == BHLevel.Regular)) {
             return;
@@ -201,7 +200,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
      * @param newBlock
      * @return
      */
-    private boolean canPlace(IPlayerEntry playerEntry, BaseBlock newBlock) {
+    private boolean canPlace(IPlayerEntry playerEntry, BlockStateHolder newBlock) {
         if (playerEntry == null || newBlock == null || playerEntry.isAllowed(Permission.BYPASS_WHITELIST)) {
             return true;
         }
@@ -225,7 +224,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
             return true;
         }
 
-        Set<Integer> blackList = weConfig.getDisallowedBlocks();
+        Set<String> blackList = weConfig.getDisallowedBlocks();
 
         if (blackList == null) {
             if (m_platform == null) {
@@ -252,11 +251,12 @@ public class BlocksHubBridge implements IBlocksHubBridge {
             return true;
         }
 
-        return !blackList.contains(newBlock.getType());
+        return !blackList.contains(newBlock.getBlockType().getId());
     }
 
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, BaseBlock oldBlock, BaseBlock newBlock) {        
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, 
+            BlockStateHolder oldBlock, BlockStateHolder newBlock) {        
         if (!canPlace(playerEntry, newBlock)) {
             return false;
         }
@@ -299,7 +299,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     }
 
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, BaseBlock oldBlock, BaseBlock newBlock, boolean dc) {
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, 
+            BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
         if (!canPlace(playerEntry, newBlock)) {
             return false;
         }

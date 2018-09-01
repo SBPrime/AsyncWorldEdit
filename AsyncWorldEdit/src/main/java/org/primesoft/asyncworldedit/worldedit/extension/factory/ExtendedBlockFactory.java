@@ -48,13 +48,14 @@
 package org.primesoft.asyncworldedit.worldedit.extension.factory;
 
 import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.factory.BlockFactory;
 import com.sk89q.worldedit.extension.input.DisallowedUsageException;
 import com.sk89q.worldedit.extension.input.InputParseException;
 import com.sk89q.worldedit.extension.input.ParserContext;
 import com.sk89q.worldedit.extension.platform.Actor;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockType;
 import java.util.Set;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
@@ -62,7 +63,6 @@ import org.primesoft.asyncworldedit.api.inner.configuration.IConfigBlackList;
 import org.primesoft.asyncworldedit.api.inner.configuration.IPremiumWorldEditConfig;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.primesoft.asyncworldedit.platform.api.IMaterial;
 import org.primesoft.asyncworldedit.platform.api.IPlatform;
 import org.primesoft.asyncworldedit.worldedit.entity.NoPermsPlayer;
 import org.primesoft.asyncworldedit.worldedit.extension.platform.NoPermsActor;
@@ -91,8 +91,8 @@ public class ExtendedBlockFactory extends BlockFactory {
     }
 
     @Override
-    public BaseBlock parseFromInput(String input, ParserContext context) throws InputParseException {
-        Actor actor = context.requireActor();
+    public BlockStateHolder parseFromInput(String input, ParserContext context) throws InputParseException {
+        Actor actor = context.getActor();
         if (actor == null || !actor.isPlayer() || actor.hasPermission("worldedit.anyblock")) {
             return super.parseFromInput(input, context);
         }
@@ -100,7 +100,7 @@ public class ExtendedBlockFactory extends BlockFactory {
 
         IPermissionGroup permGroup = playerEntry != null ? playerEntry.getPermissionGroup() : null;
         IWorldEditConfig weConfig = permGroup != null ? permGroup.getWorldEditConfig() : null;
-        Set<Integer> disallowedBlocks = weConfig != null ? weConfig.getDisallowedBlocks() : null;
+        Set<String> disallowedBlocks = weConfig != null ? weConfig.getDisallowedBlocks() : null;
 
         IPremiumWorldEditConfig premiumWeConfig = weConfig instanceof IPremiumWorldEditConfig ? (IPremiumWorldEditConfig) weConfig : null;
         IConfigBlackList blackListOptions = premiumWeConfig != null ? premiumWeConfig.getBlockListOptions() : null;
@@ -111,7 +111,7 @@ public class ExtendedBlockFactory extends BlockFactory {
         }
 
         ParserContext newContext = cloneContext(context);
-        BaseBlock resul = super.parseFromInput(input, newContext);
+        BlockStateHolder resul = super.parseFromInput(input, newContext);
 
         if (resul == null) {
             return null;
@@ -125,8 +125,8 @@ public class ExtendedBlockFactory extends BlockFactory {
     }
 
     @Override
-    public Set<BaseBlock> parseFromListInput(String input, ParserContext context) throws InputParseException {
-        Actor actor = context.requireActor();
+    public Set<BlockStateHolder> parseFromListInput(String input, ParserContext context) throws InputParseException {  
+        Actor actor = context.getActor();
         if (actor == null || !actor.isPlayer() || actor.hasPermission("worldedit.anyblock")) {
             return super.parseFromListInput(input, context);
         }
@@ -134,7 +134,7 @@ public class ExtendedBlockFactory extends BlockFactory {
 
         IPermissionGroup permGroup = playerEntry != null ? playerEntry.getPermissionGroup() : null;
         IWorldEditConfig weConfig = permGroup != null ? permGroup.getWorldEditConfig() : null;
-        Set<Integer> disallowedBlocks = weConfig != null ? weConfig.getDisallowedBlocks() : null;
+        Set<String> disallowedBlocks = weConfig != null ? weConfig.getDisallowedBlocks() : null;
 
         IPremiumWorldEditConfig premiumWeConfig = weConfig instanceof IPremiumWorldEditConfig ? (IPremiumWorldEditConfig) weConfig : null;
         IConfigBlackList blackListOptions = premiumWeConfig != null ? premiumWeConfig.getBlockListOptions() : null;
@@ -145,14 +145,14 @@ public class ExtendedBlockFactory extends BlockFactory {
         }
 
         ParserContext newContext = cloneContext(context);
-        Set<BaseBlock> result = super.parseFromListInput(input, newContext);
+        Set<BlockStateHolder> result = super.parseFromListInput(input, newContext);
 
         if (result == null) {
             return null;
         }
 
         if (patternEnabled) {
-            for (BaseBlock block : result) {
+            for (BlockStateHolder block : result) {
                 checkBlocks(disallowedBlocks, block);
             }
         }
@@ -166,27 +166,19 @@ public class ExtendedBlockFactory extends BlockFactory {
      * @param disallowedBlocks
      * @param block
      */
-    private void checkBlocks(Set<Integer> disallowedBlocks, BaseBlock block)
+    private void checkBlocks(Set<String> disallowedBlocks, BlockStateHolder block)
             throws InputParseException {
         if (disallowedBlocks == null || block == null) {
             return;
         }
 
-        int id = block.getId();
+        BlockType bType = block.getBlockType();
+        String id = bType.getId();
         if (!disallowedBlocks.contains(id)) {
             return;
         }
 
-        String s;
-
-        IMaterial material = m_platform.getMaterialLibrary().getMaterial(id);
-        if (material != null) {
-            s = material.getName();
-        } else {
-            s = String.format("Material_#%1$s", id);
-        }
-
-        throw new DisallowedUsageException(String.format("You are not allowed to use '%1$s'", s));
+        throw new DisallowedUsageException(String.format("You are not allowed to use '%1$s'", bType.getName()));
     }
 
     /**

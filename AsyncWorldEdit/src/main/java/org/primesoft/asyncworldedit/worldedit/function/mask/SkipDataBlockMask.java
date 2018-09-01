@@ -48,11 +48,10 @@
 package org.primesoft.asyncworldedit.worldedit.function.mask;
 
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.function.mask.AbstractExtentMask;
 import com.sk89q.worldedit.function.mask.BlockMask;
-import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.mask.Mask2D;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -66,23 +65,20 @@ public class SkipDataBlockMask extends AbstractExtentMask implements ILastBlock 
     /**
      * All block it's that this mask passes
      */
-    private final Set<Integer> m_blocks = new HashSet<Integer>();
+    private final Set<String> m_blocks = new HashSet<String>();
     
     /**
-     * THe last cheked block
+     * The last cheked block
      */
-    private BaseBlock m_lastBlock = null;
+    private BlockStateHolder m_lastBlock = null;
     
     
     public SkipDataBlockMask(BlockMask blockMask) {
         super(blockMask != null ? blockMask.getExtent() : null);
         
         if (blockMask != null) {
-            for (BaseBlock bb : blockMask.getBlocks()) {
-                Integer id = bb.getId();
-                if (!m_blocks.contains(id)) {
-                    m_blocks.add(id);
-                }
+            for (BlockStateHolder bb : blockMask.getBlocks()) {
+                m_blocks.add(bb.getBlockType().getId());
             }
         }
     }
@@ -91,7 +87,7 @@ public class SkipDataBlockMask extends AbstractExtentMask implements ILastBlock 
     public boolean test(Vector vector) {
         m_lastBlock = getExtent().getBlock(vector);
         
-        return m_blocks.contains(m_lastBlock.getId());
+        return m_blocks.contains(m_lastBlock.getBlockType().getId());
     }
 
     @Nullable
@@ -101,7 +97,7 @@ public class SkipDataBlockMask extends AbstractExtentMask implements ILastBlock 
     }
 
     @Override
-    public BaseBlock getLastBlock() {
+    public BlockStateHolder getLastBlock() {
         return m_lastBlock;
     }
     

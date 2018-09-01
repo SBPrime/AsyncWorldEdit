@@ -50,11 +50,11 @@ package org.primesoft.asyncworldedit.worldedit.command.tool.brush;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.command.tool.brush.Brush;
 import com.sk89q.worldedit.command.tool.brush.GravityBrush;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,18 +91,17 @@ public class AsyncGravityBrush extends GravityBrush {
 
     @Override
     public void build(EditSession editSession, Vector position, Pattern pattern, double size) throws MaxChangedBlocksException {
-        final BaseBlock air = new BaseBlock(BlockID.AIR, 0);
         final double startY = m_fullHeight ? editSession.getWorld().getMaxY() : position.getBlockY() + size;
         final double endY = position.getBlockY() - size;
         
         for (double x = position.getBlockX() + size; x > position.getBlockX() - size; --x) {
             for (double z = position.getBlockZ() + size; z > position.getBlockZ() - size; --z) {
-                final List<BaseBlock> blockTypes = new ArrayList<BaseBlock>();
+                final List<BlockStateHolder> blockTypes = new ArrayList<>();
                 double y = startY;
                 for (; y > endY; --y) {
                     final Vector pt = new Vector(x, y, z);
-                    final BaseBlock block = editSession.getBlock(pt);
-                    if (!block.isAir()) {
+                    final BlockStateHolder block = editSession.getBlock(pt);
+                    if (!block.getBlockType().getMaterial().isAir()) {
                         blockTypes.add(block);
                     }
                 }
@@ -112,14 +111,14 @@ public class AsyncGravityBrush extends GravityBrush {
                 
                 
                 y = startY;
-                for (BaseBlock block : blockTypes) {
+                for (BlockStateHolder block : blockTypes) {
                     editSession.setBlock(pt, block);
                     pt = pt.add(0, 1, 0);
                     --y;
                 }
                 
                 while (y >= endY) {
-                    editSession.setBlock(pt, air);
+                    editSession.setBlock(pt, BlockTypes.AIR.getDefaultState());
                     pt = pt.add(0, 1, 0);
                     --y;
                 }

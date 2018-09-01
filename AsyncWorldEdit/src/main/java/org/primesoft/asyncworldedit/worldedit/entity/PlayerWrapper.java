@@ -50,9 +50,7 @@ package org.primesoft.asyncworldedit.worldedit.entity;
 import com.sk89q.worldedit.PlayerDirection;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.WorldVector;
-import com.sk89q.worldedit.WorldVectorFace;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Player;
@@ -60,9 +58,13 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
 import com.sk89q.worldedit.session.SessionKey;
+import com.sk89q.worldedit.util.HandSide;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.gamemode.GameMode;
 import java.io.File;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.core.AwePlatform;
@@ -179,7 +181,7 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public void findFreePosition(WorldVector searchPos) {
+    public void findFreePosition(Location searchPos) {
         m_parent.findFreePosition(searchPos);
     }
 
@@ -189,27 +191,27 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public WorldVector getBlockIn() {
+    public Location getBlockIn() {
         return m_parent.getBlockIn();
     }
 
     @Override
-    public WorldVector getBlockOn() {
+    public Location getBlockOn() {
         return m_parent.getBlockOn();
     }
 
     @Override
-    public WorldVector getBlockTrace(int range) {
+    public Location getBlockTrace(int range) {
         return m_parent.getBlockTrace(range);
     }
 
     @Override
-    public WorldVector getBlockTrace(int range, boolean useLastBlock) {
+    public Location getBlockTrace(int range, boolean useLastBlock) {
         return m_parent.getBlockTrace(range, useLastBlock);
     }
 
     @Override
-    public WorldVectorFace getBlockTraceFace(int range, boolean useLastBlock) {
+    public Location getBlockTraceFace(int range, boolean useLastBlock) {
         return m_parent.getBlockTraceFace(range, useLastBlock);
     }
 
@@ -229,27 +231,17 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public int getItemInHand() {
-        return m_parent.getItemInHand();
+    public BaseItemStack getItemInHand(HandSide hand) {
+        return m_parent.getItemInHand(hand);
     }
 
     @Override
     public String getName() {
         return m_parent.getName();
     }
-
+    
     @Override
-    public double getPitch() {
-        return m_parent.getPitch();
-    }
-
-    @Override
-    public WorldVector getPosition() {
-        return m_parent.getPosition();
-    }
-
-    @Override
-    public WorldVector getSolidBlockTrace(int range) {
+    public Location getSolidBlockTrace(int range) {
         return m_parent.getSolidBlockTrace(range);
     }
 
@@ -261,7 +253,7 @@ public class PlayerWrapper implements Player {
             if (m_world == null || m_world.getX1() != world) {
                 AsyncWorld aWorld = AsyncWorld.wrap(world, getEntry());
                 if (aWorld != null) {
-                    m_world = new Pair<World, AsyncWorld>(world, aWorld);
+                    m_world = new Pair<>(world, aWorld);
                     world = aWorld;
                 } else if (m_world != null) {
                     m_world = null;
@@ -275,18 +267,13 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public double getYaw() {
-        return m_parent.getYaw();
+    public void giveItem(BaseItemStack itemStack) {
+        m_parent.giveItem(itemStack);
     }
 
     @Override
-    public void giveItem(int type, int amt) {
-        m_parent.giveItem(type, amt);
-    }
-
-    @Override
-    public boolean hasCreativeMode() {
-        return m_parent.hasCreativeMode();
+    public GameMode getGameMode() {
+        return m_parent.getGameMode();
     }
 
     @Override
@@ -353,7 +340,7 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public void setOnGround(WorldVector searchPos) {
+    public void setOnGround(Location searchPos) {
         m_parent.setOnGround(searchPos);
     }
 
@@ -368,9 +355,9 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public BaseBlock getBlockInHand()
+    public BaseBlock getBlockInHand(HandSide hand)
             throws WorldEditException {
-        return m_parent.getBlockInHand();
+        return m_parent.getBlockInHand(hand);
     }
 
     @Override
@@ -416,5 +403,15 @@ public class PlayerWrapper implements Player {
     @Override
     public SessionKey getSessionKey() {
         return m_parent.getSessionKey();
+    }
+
+    @Override
+    public void setGameMode(GameMode gameMode) {
+        m_parent.setGameMode(gameMode);
+    }
+
+    @Override
+    public void sendFakeBlock(Vector pos, BlockStateHolder block) {
+        m_parent.sendFakeBlock(pos, block);
     }
 }

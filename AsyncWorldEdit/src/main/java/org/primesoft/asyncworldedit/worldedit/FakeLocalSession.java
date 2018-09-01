@@ -48,7 +48,6 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.entity.Player;
 
@@ -64,11 +63,6 @@ public class FakeLocalSession extends WrappedLocalSession {
         super(parrent);
         
         m_editSession = editSession;
-    }
-
-    @Override
-    public EditSession createEditSession(LocalPlayer player) {
-        return m_editSession;
     }
 
     @Override

@@ -152,7 +152,7 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
             Reflection.set(m_commandManager, "dispatcher", new DispatcherWrapper(m_oldDispatcher),
                     "Unable to inject new commands manager");
         }
-
+        
         CommandsInjector.injectCommands(m_worldEdit, m_aweCore,
                 findMostPreferred(Capability.USER_COMMANDS, m_platformManager.getPlatforms()),
                 m_commandManager);
@@ -179,9 +179,7 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
         }
 
         return preferred;
-    }
-
-    
+    }    
     
     /**
      * Stop the wrapper
@@ -267,5 +265,9 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
         }
         
         return m_aweCore.getWorld(world.getName());
+    }
+    
+    protected final void initializationDone() {
+        m_aweCore.onWorldEditEnabled();
     }
 }

@@ -48,8 +48,12 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -62,6 +66,8 @@ import org.primesoft.asyncworldedit.worldedit.WorldEditIntegrator;
  * @author SBPrime
  */
 public class BukkitWorldeditIntegrator extends WorldEditIntegrator {
+    private static final BlockData AIR = Material.AIR.createBlockData();
+    
     private WorldEditPlugin m_worldEditPlugin;
 
     /**
@@ -74,6 +80,8 @@ public class BukkitWorldeditIntegrator extends WorldEditIntegrator {
         super(aweCore);
         
         initialize(worldEdit);
+        
+        initializationDone();
     }
 
     /**
@@ -136,8 +144,4 @@ public class BukkitWorldeditIntegrator extends WorldEditIntegrator {
         
         return new BukkitWorld(bWorld.getWorld());
     }
-    
-    
-    
-    
 }

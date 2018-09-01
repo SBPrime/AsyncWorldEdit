@@ -78,7 +78,10 @@ public abstract class BukkitDirectChunkAPI extends BaseDirectChunkAPI {
             return 0;
         }
 
-        switch (material) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        /*switch (material) {
             case BEACON:
             case ENDER_PORTAL:
             case FIRE:
@@ -110,7 +113,7 @@ public abstract class BukkitDirectChunkAPI extends BaseDirectChunkAPI {
                 return 1;
         }
 
-        return 0;
+        return 0;*/
     }
     
     /**
@@ -127,7 +130,10 @@ public abstract class BukkitDirectChunkAPI extends BaseDirectChunkAPI {
             return 1;
         }
         
-        switch (material) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        /*switch (material) {
             case WATER:
             case STATIONARY_WATER:
                 return 3;
@@ -150,7 +156,7 @@ public abstract class BukkitDirectChunkAPI extends BaseDirectChunkAPI {
             return 0;
         }
 
-        return 255;
+        return 255;*/
     }
     
     
@@ -168,7 +174,9 @@ public abstract class BukkitDirectChunkAPI extends BaseDirectChunkAPI {
             return 1;
         }
         
-        switch (material) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        /*switch (material) {
             case WATER:
             case STATIONARY_WATER:
             case ICE:
@@ -191,22 +199,31 @@ public abstract class BukkitDirectChunkAPI extends BaseDirectChunkAPI {
             return 0;
         }
 
-        return 255;
+        return 255;*/
     }
 
     @Override
     public byte getLightEmissionLevel(int type, int data) {
-        return getLightEmissionLevel(Material.getMaterial(type));
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        //return getLightEmissionLevel(Material.getMaterial(type));
     }
 
     @Override
     public short getOpacityLevel(int type, int data) {
-        return getOpacityLevel(Material.getMaterial(type));
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        //return getOpacityLevel(Material.getMaterial(type));
     }
 
     @Override
     public short getOpacityLevelSkyLight(int type, int data) {
-        return getOpacityLevelSkyLight(Material.getMaterial(type));
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        //return getOpacityLevelSkyLight(Material.getMaterial(type));
     }
     
     

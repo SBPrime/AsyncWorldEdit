@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,35 +45,84 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.schematics;
+package org.primesoft.asyncworldedit.worldedit.world.weather;
 
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import java.util.HashMap;
+import com.sk89q.worldedit.world.weather.WeatherType;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
 /**
  *
  * @author SBPrime
  */
-public class ReaderFactory {
-    private static final HashMap<ClipboardFormat, ISchematicReader> s_readers;
-    
-    static {
-        s_readers= new HashMap<ClipboardFormat, ISchematicReader>();
-        s_readers.put(ClipboardFormat.SCHEMATIC, new MCEditSchematicFormat());
-    }
-    
-    
-    /**
-     * Get the schematic reader
-     * @param format
-     * @return 
-     */
-    public static ISchematicReader getReader(ClipboardFormat format) {
-        if (s_readers.containsKey(format)) {
-            return s_readers.get(format);
+public class WeatherTypeWrapper extends WeatherType implements IAsyncWrapper {
+    public static WeatherTypeWrapper wrap(WeatherType parent, int jobId,
+                                        boolean isAsync, IPlayerEntry player) {
+        WeatherTypeWrapper result;
+        if (parent instanceof WeatherTypeWrapper) {
+            result = (WeatherTypeWrapper) parent;
+            result.setAsync(isAsync);
+            result.setPlayer(player);
+        } else {
+            result = new WeatherTypeWrapper(parent, jobId, isAsync, player);
         }
-        
-        return null;
+
+        return result;
     }
     
+    private final WeatherType m_parent;
+
+    private final int m_jobId;
+
+    private boolean m_isAsync;
+
+    private IPlayerEntry m_player;
+    
+    @Override
+    public int getJobId() {
+        return m_jobId;
+    }
+
+    @Override
+    public WeatherType getParent() {
+        return m_parent;
+    }
+
+    @Override
+    public boolean isAsync() {
+        return m_isAsync;
+    }
+    
+    public void setAsync(boolean async) {
+        m_isAsync = async;
+    }
+
+    public void setPlayer(IPlayerEntry player) {
+        m_player = player;
+    }
+
+    @Override
+    public IPlayerEntry getPlayer() {
+        return m_player;
+    }
+    
+    private WeatherTypeWrapper(WeatherType parent, int jobId, boolean isAsync,
+                             IPlayerEntry player) {
+        super(null);
+
+        m_jobId = jobId;
+        m_parent = parent;
+        m_isAsync = isAsync;
+        m_player = player;
+    }
+
+    @Override
+    public String getId() {
+        return m_parent.getId();
+    }
+
+    @Override
+    public String getName() {
+        return m_parent.getName(); 
+    }
 }

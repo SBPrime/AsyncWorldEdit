@@ -52,9 +52,7 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalConfiguration;
-import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.command.tool.BlockTool;
 import com.sk89q.worldedit.command.tool.BrushTool;
@@ -71,6 +69,7 @@ import com.sk89q.worldedit.regions.selector.RegionSelectorType;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
 import java.lang.reflect.Field;
 import java.util.Calendar;
@@ -148,11 +147,6 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public EditSession createEditSession(LocalPlayer player) {
-        return m_parrent.createEditSession(player);
-    }
-
-    @Override
     public EditSession createEditSession(Player player) {
         return m_parrent.createEditSession(player);
     }
@@ -218,7 +212,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public BrushTool getBrushTool(int item) throws InvalidToolBindException {
+    public BrushTool getBrushTool(ItemType item) throws InvalidToolBindException {
         Tool tool = getTool(item);
 
         if (tool == null || !(tool instanceof BrushTool)) {
@@ -260,28 +254,8 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public Region getRegion() throws IncompleteRegionException {
-        return m_parrent.getRegion();
-    }
-
-    @Override
-    public RegionSelector getRegionSelector() {
-        return m_parrent.getRegionSelector();
-    }
-
-    @Override
-    public RegionSelector getRegionSelector(LocalWorld world) {
-        return m_parrent.getRegionSelector(world);
-    }
-
-    @Override
     public RegionSelector getRegionSelector(World world) {
         return m_parrent.getRegionSelector(world);
-    }
-
-    @Override
-    public Region getSelection(LocalWorld world) throws IncompleteRegionException {
-        return m_parrent.getSelection(world);
     }
 
     @Override
@@ -310,7 +284,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public Tool getTool(int item) {
+    public Tool getTool(ItemType item) {
         return m_parrent.getTool(item);
     }
 
@@ -345,16 +319,6 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public boolean isRegionDefined() {
-        return m_parrent.isRegionDefined();
-    }
-
-    @Override
-    public boolean isSelectionDefined(LocalWorld world) {
-        return m_parrent.isSelectionDefined(world);
-    }
-
-    @Override
     public boolean isSelectionDefined(World world) {
         return m_parrent.isSelectionDefined(world);
     }
@@ -372,11 +336,6 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     @Override
     public void postLoad() {
         m_parrent.postLoad();
-    }
-
-    @Override
-    public EditSession redo(BlockBag newBlockBag, LocalPlayer player) {
-        return m_parrent.redo(newBlockBag, player);
     }
 
     @Override
@@ -460,18 +419,8 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public void setMask(com.sk89q.worldedit.masks.Mask mask) {
-        m_parrent.setMask(mask);
-    }
-
-    @Override
     public void setMask(Mask mask) {
         m_parrent.setMask(mask);
-    }
-
-    @Override
-    public void setRegionSelector(LocalWorld world, RegionSelector selector) {
-        m_parrent.setRegionSelector(world, selector);
     }
 
     @Override
@@ -495,7 +444,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public void setTool(int item, Tool tool) throws InvalidToolBindException {
+    public void setTool(ItemType item, Tool tool) throws InvalidToolBindException {
         m_parrent.setTool(item, ToolWrapper.wrapTool(tool));
     }
 
@@ -522,11 +471,6 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     @Override
     public boolean toggleSuperPickAxe() {
         return m_parrent.toggleSuperPickAxe();
-    }
-
-    @Override
-    public EditSession undo(BlockBag newBlockBag, LocalPlayer player) {
-        return m_parrent.undo(newBlockBag, player);
     }
 
     @Override
@@ -558,8 +502,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
         if (s_fieldHistoryPointer == null) {
             return -1;
         }
-        
-        
+
         return Reflection.get(m_parrent, int.class, s_fieldHistoryPointer, "Unable to get history pointer.");
     }
 
@@ -571,4 +514,19 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
                 
         return Reflection.get(m_parrent, List.class, s_fieldHistory, "Unable to get history");                
     }    
+
+    @Override
+    public boolean shouldUseServerCUI() {
+        return m_parrent.shouldUseServerCUI();
+    }
+
+    @Override
+    public void setUseServerCUI(boolean useServerCUI) {
+        m_parrent.setUseServerCUI(useServerCUI);
+    }
+
+    @Override
+    public void updateServerCUI(Actor actor) {
+        m_parrent.updateServerCUI(actor);
+    }
 }

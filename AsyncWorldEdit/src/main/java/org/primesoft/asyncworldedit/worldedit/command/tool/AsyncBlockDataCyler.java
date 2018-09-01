@@ -47,21 +47,14 @@
  */
 package org.primesoft.asyncworldedit.worldedit.command.tool;
 
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockData;
 import com.sk89q.worldedit.command.tool.BlockDataCyler;
 import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.world.World;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.worldedit.blocks.ExtendedBlockData;
 
 /**
  *
@@ -96,46 +89,10 @@ public class AsyncBlockDataCyler extends BlockDataCyler implements IAsyncTool {
     }
 
     private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return handleCycle(server, config, player, session, clicked, true);
+        return super.actPrimary(server, config, player, session, clicked);
     }
 
     private boolean doActSecondary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return handleCycle(server, config, player, session, clicked, false);
-    }
-
-    private boolean handleCycle(Platform server, LocalConfiguration config,
-            Player player, LocalSession session, Location clicked, boolean forward) {
-
-        final World world = (World) clicked.getExtent();
-        final Vector location = clicked.toVector();
-        final BaseBlock cb = world.getLazyBlock(location);
-
-        final int type = cb.getType();
-        final int data = cb.getData();
-
-        if (!config.allowedDataCycleBlocks.isEmpty()
-                && !player.hasPermission("worldedit.override.data-cycler")
-                && !config.allowedDataCycleBlocks.contains(type)) {
-            player.printError("You are not permitted to cycle the data value of that block.");
-            return true;
-        }
-
-        int dataNew = ExtendedBlockData.cycle(type, data, forward ? 1 : -1);
-        if (dataNew < 0) {
-            player.printError("That block's data cannot be cycled!");
-            return true;
-        }
-        
-        EditSession editSession = session.createEditSession(player);
-
-        try {
-            editSession.setBlock(location, new BaseBlock(type, dataNew));
-        } catch (MaxChangedBlocksException e) {
-            player.printError("Max blocks change limit reached.");
-        } finally {
-            session.remember(editSession);
-        }
-
-        return true;
+        return super.actSecondary(server, config, player, session, clicked);
     }
 }

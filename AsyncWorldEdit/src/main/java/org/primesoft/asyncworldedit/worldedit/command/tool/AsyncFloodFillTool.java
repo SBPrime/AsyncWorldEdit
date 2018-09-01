@@ -53,7 +53,7 @@ import com.sk89q.worldedit.command.tool.FloodFillTool;
 import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
-import com.sk89q.worldedit.patterns.Pattern;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.util.Location;
 import java.lang.reflect.Field;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
@@ -76,7 +76,7 @@ public class AsyncFloodFillTool extends FloodFillTool implements IAsyncTool {
         Object oRange = Reflection.get(floodFillTool, s_floodFillToolRange, "Unable to get range from FloodFilTool");
         Pattern pattern = Reflection.get(floodFillTool, Pattern.class, s_floodFillToolPattern, "Unable to get pattern from FloodFilTool");
         
-        return new AsyncFloodFillTool((oRange instanceof Integer) ? ((Integer)oRange).intValue() : 0, pattern);
+        return new AsyncFloodFillTool((oRange instanceof Integer) ? ((Integer)oRange) : 0, pattern);
     }
 
     public AsyncFloodFillTool(int range, Pattern pattern) {

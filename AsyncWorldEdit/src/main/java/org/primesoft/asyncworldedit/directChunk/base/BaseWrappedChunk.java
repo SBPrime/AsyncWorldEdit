@@ -50,7 +50,6 @@ package org.primesoft.asyncworldedit.directChunk.base;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -255,7 +254,10 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
     private void setBlocks(final IChunkData cData,
             final IBlockEntry[] dataBlocks, final IBlocksHubIntegration bh,
             InOutParam<IBlockEntry[]> oldBlocks) {
-        List<IBlockEntry> tOldBlocks = new ArrayList<IBlockEntry>();
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+/*        List<IBlockEntry> tOldBlocks = new ArrayList<IBlockEntry>();
 
         IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
         Vector chunkZero = PositionHelper.chunkToPosition(new BlockVector2D(m_cx, m_cz), 0);
@@ -314,7 +316,7 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
         if (oldBlocks
                 != null) {
             oldBlocks.setValue(tOldBlocks.toArray(new IBlockEntry[0]));
-        }
+        }*/
     }
 
     /**

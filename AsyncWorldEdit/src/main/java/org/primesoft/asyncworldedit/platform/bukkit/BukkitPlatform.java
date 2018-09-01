@@ -48,9 +48,6 @@
 package org.primesoft.asyncworldedit.platform.bukkit;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.event.extent.EditSessionEvent;
-import com.sk89q.worldedit.util.eventbus.EventBus;
-import com.sk89q.worldedit.util.eventbus.Subscribe;
 import java.io.IOException;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -82,14 +79,12 @@ import org.primesoft.asyncworldedit.platform.api.IPlatform;
 import org.primesoft.asyncworldedit.platform.api.IPlayerProvider;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.api.IWorld;
-import org.primesoft.asyncworldedit.api.events.IEvent;
 import org.primesoft.asyncworldedit.api.inner.IBlocksHubBridge;
 import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
 import org.primesoft.asyncworldedit.api.inner.IClassScanner;
 import org.primesoft.asyncworldedit.api.map.IMapUtils;
-import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
 import org.primesoft.asyncworldedit.platform.api.IMaterialLibrary;
-import org.primesoft.asyncworldedit.platform.bukkit.blockshub.BlocksHubV1Factory;
+import org.primesoft.asyncworldedit.blockshub.platform.bukkit.BlocksHubV3Factory;
 import org.primesoft.asyncworldedit.platform.bukkit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -178,9 +173,9 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
     public void initialize(IAsyncWorldEditCore core) {
         m_aweCore = core;
         m_blocksHub = core.getBlocksHubBridge();
-        m_blocksHub.addFacroty(new  BlocksHubV1Factory());
+        m_blocksHub.addFacroty(new BlocksHubV3Factory());
     }
-
+    
     @Override
     public void onEnable() {
         try {
@@ -261,8 +256,8 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         }
 
         PluginDescriptionFile pd = wPlugin.getDescription();
-        if (!pd.getVersion().startsWith("6.")) {
-            log(String.format("Unsupported version of WorldEdit, found: %1$s required: 6.x", pd.getVersion()));
+        if (!pd.getVersion().startsWith("7.")) {
+            log(String.format("Unsupported version of WorldEdit, found: %1$s required: 7.x", pd.getVersion()));
             return null;
         }
         return (WorldEditPlugin) wPlugin;
@@ -371,10 +366,6 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
             m_weIntegrator = null;
         } else {
             m_weIntegrator = new BukkitWorldeditIntegrator(m_aweCore, worldEdit);
-            
-            /*m_eventTest = new EventTest();
-            
-            m_weIntegrator.getEventBus().register(m_eventTest);*/
         }
     }
 

@@ -50,7 +50,6 @@ package org.primesoft.asyncworldedit.worldedit.extent.clipboard;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
@@ -58,6 +57,9 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -138,7 +140,7 @@ public class ThreadSafeBlockArrayClipboard extends BlockArrayClipboard {
                 return null;
             }
 
-            return new LinkedList<Entity>(result);
+            return new LinkedList<>(result);
         }
     }
 
@@ -152,7 +154,7 @@ public class ThreadSafeBlockArrayClipboard extends BlockArrayClipboard {
                 return null;
             }
 
-            return new LinkedList<Entity>(result);
+            return new LinkedList<>(result);
         }
     }
 
@@ -162,23 +164,23 @@ public class ThreadSafeBlockArrayClipboard extends BlockArrayClipboard {
             return super.createEntity(location, entity);
         }
     }
-
+    
     @Override
-    public BaseBlock getBlock(Vector position) {
+    public BlockState getBlock(Vector position) {
         synchronized (m_mutex) {
             return super.getBlock(position);
         }
     }
 
     @Override
-    public BaseBlock getLazyBlock(Vector position) {
+    public BaseBlock getFullBlock(Vector position) {
         synchronized (m_mutex) {
-            return super.getLazyBlock(position);
+            return super.getFullBlock(position);
         }
     }
-
+    
     @Override
-    public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
+    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
         synchronized (m_mutex) {
             return super.setBlock(position, block);
         }

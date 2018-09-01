@@ -48,25 +48,24 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
-import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 import com.sk89q.worldedit.*;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
-import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.UndoContext;
-import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
-import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
-import java.util.ArrayList;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,10 +80,10 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
-import org.primesoft.asyncworldedit.events.EditSessionLimitChanged;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
+import org.primesoft.asyncworldedit.worldedit.blocks.BlockStateHolderWrapper;
 import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.extent.ExtendedChangeSetExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.FixedBlockBagExtent;
@@ -233,19 +232,14 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     public void cancel() {
         m_cWorld.cancel();
     }
-
+    
     @Override
-    public int countBlock(Region region, Set<Integer> searchIDs) {
-        return m_parent.countBlock(region, searchIDs);
-    }
-
-    @Override
-    public int countBlocks(Region region, Set<BaseBlock> searchBlocks) {
+    public int countBlocks(Region region, Set<BlockStateHolder> searchBlocks) {
         return m_parent.countBlocks(region, searchBlocks);
     }
 
     @Override
-    public BaseBlock getBlock(Vector pt) {
+    public BlockState getBlock(Vector pt) {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -259,31 +253,13 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public int getBlockData(Vector pt) {
-        if (m_cWorld.isCanceled()) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-
-        return m_parent.getBlockData(pt);
-    }
-
-    @Override
-    public List<Countable<Integer>> getBlockDistribution(Region region) {
+    public List<Countable<BlockType>> getBlockDistribution(Region region) {
         return m_parent.getBlockDistribution(region);
     }
 
     @Override
-    public List<Countable<BaseBlock>> getBlockDistributionWithData(Region region) {
+    public List<Countable<BlockStateHolder>> getBlockDistributionWithData(Region region) {
         return m_parent.getBlockDistributionWithData(region);
-    }
-
-    @Override
-    public int getBlockType(Vector pt) {
-        if (m_cWorld.isCanceled()) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-
-        return m_parent.getBlockType(pt);
     }
 
     @Override
@@ -292,23 +268,17 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public int getHighestTerrainBlock(int x, int z, int minY, int maxY,
-            boolean naturalOnly) {
-        return m_parent.getHighestTerrainBlock(x, z, minY, maxY, naturalOnly);
-    }
-
-    @Override
-    public Map<Integer, Integer> popMissingBlocks() {
+    public Map<BlockType, Integer> popMissingBlocks() {
         return m_parent.popMissingBlocks();
     }
 
     @Override
-    public BaseBlock rawGetBlock(Vector pt) {
+    public BaseBlock getFullBlock(Vector pt) {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return m_parent.rawGetBlock(pt);
+        return m_parent.getFullBlock(pt);
     }
 
     /**
@@ -331,12 +301,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         final IBlockPlacer blockPlacer = m_parent.getBlockPlacer();
         final Change safeChange = new BlockPlacerChange(change, blockPlacer, isDemanding);
 
-        final IActionEx<WorldEditException> action = new IActionEx<WorldEditException>() {
-            @Override
-            public void execute() throws WorldEditException {
-                change.redo(undoContext);
-            }
-        };
+        final IActionEx<WorldEditException> action = 
+                () -> { change.redo(undoContext); };
 
         if (ecs != null) {
             ecs.addExtended(safeChange, this);
@@ -361,38 +327,21 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     @Override
     public int getBlockChangeCount() {
         return m_parent.getBlockChangeCount();
-    }
-        
-    
-    @Override
-    public void rememberChange(Vector position, BaseBlock existing, BaseBlock block) {
-        final ChangeSet cs = getChangeSet();
-        final IExtendedChangeSet ecs = (cs instanceof IExtendedChangeSet) ? (IExtendedChangeSet) cs : null;
-        final Change change = new BlockChange(position.toBlockVector(), existing, block);
-
-        if (ecs != null) {
-            try {
-                ecs.addExtended(change, this);
-            } catch (WorldEditException ex) {
-            }
-        } else {
-            cs.add(change);
-        }
-    }
+    }    
 
     @Override
-    public boolean setBlock(Vector position, BaseBlock block, Stage stage)
+    public boolean setBlock(Vector position, BlockStateHolder block, Stage stage)
             throws WorldEditException {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         forceFlush();
         return super.setBlock(VectorWrapper.wrap(position, m_jobId, true, m_player),
-                BaseBlockWrapper.wrap(block, m_jobId, true, m_player), stage);
+                BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player), stage);
     }
 
     @Override
-    public boolean setBlock(Vector pt, BaseBlock block)
+    public boolean setBlock(Vector pt, BlockStateHolder block)
             throws MaxChangedBlocksException {
 
         if (m_cWorld.isCanceled()) {
@@ -400,7 +349,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         }
 
         return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player),
-                BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
+                BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override
@@ -425,27 +374,6 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public boolean setBlockIfAir(Vector pt, BaseBlock block)
-            throws MaxChangedBlocksException {
-        if (m_cWorld.isCanceled()) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-
-        return super.setBlockIfAir(VectorWrapper.wrap(pt, m_jobId, true, m_player),
-                BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
-    }
-
-    @Override
-    public boolean setChanceBlockIfAir(Vector pos, BaseBlock block, double c)
-            throws MaxChangedBlocksException {
-        if (m_cWorld.isCanceled()) {
-            throw new IllegalArgumentException(new SessionCanceled());
-        }
-        return super.setChanceBlockIfAir(VectorWrapper.wrap(pos, m_jobId, true, m_player),
-                BaseBlockWrapper.wrap(block, m_jobId, true, m_player), c);
-    }
-
-    @Override
     public void undo(EditSession sess) {
         doUndo(sess);
     }
@@ -464,12 +392,12 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public boolean smartSetBlock(Vector pt, BaseBlock block) {
+    public boolean smartSetBlock(Vector pt, BlockStateHolder block) {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         return super.smartSetBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player),
-                BaseBlockWrapper.wrap(block, m_jobId, true, m_player));
+                BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override

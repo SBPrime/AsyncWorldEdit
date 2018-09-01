@@ -50,17 +50,14 @@ package org.primesoft.asyncworldedit.injector.async;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
-import org.primesoft.asyncworldedit.injector.classfactory.IClipboardFormat;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 import org.primesoft.asyncworldedit.worldedit.extent.clipboard.BiomeClipboard;
-import org.primesoft.asyncworldedit.worldedit.extent.clipboard.formats.SchematicFormat;
 import org.primesoft.asyncworldedit.worldedit.function.CascadeRegionFunction;
 import org.primesoft.asyncworldedit.worldedit.function.biome.ExtentBiomeCopy;
 
@@ -111,18 +108,4 @@ public class AsyncClassFactory extends BaseClassFactory {
         
         return new CascadeRegionFunction(blockCopy, bc);
     }
-
-    
-    
-    
-
-    @Override
-    public IClipboardFormat getClipboardFormat(ClipboardFormat format) {
-        switch (format) {
-            case SCHEMATIC:
-                return SchematicFormat.getInstance();
-        }
-        
-        return super.getClipboardFormat(format);
-    }            
 }

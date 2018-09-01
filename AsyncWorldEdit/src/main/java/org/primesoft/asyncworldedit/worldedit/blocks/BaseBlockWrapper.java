@@ -48,8 +48,12 @@
 package org.primesoft.asyncworldedit.worldedit.blocks;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.CuboidClipboard;
-import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.registry.state.Property;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockType;
+import java.util.Map;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
 
@@ -110,7 +114,7 @@ public class BaseBlockWrapper extends BaseBlock implements IAsyncWrapper {
 
     private BaseBlockWrapper(BaseBlock parent, int jobId, boolean isAsync,
                              IPlayerEntry player) {
-        super(0);
+        super(null);
 
         m_jobId = jobId;
         m_parent = parent;
@@ -119,44 +123,54 @@ public class BaseBlockWrapper extends BaseBlock implements IAsyncWrapper {
     }
 
     @Override
-    public int cycleData(int increment) {
-        return m_parent.cycleData(increment);
+    public String toString() {
+        return m_parent.toString();
+    }
+    
+    
+    @Override
+    public BlockType getBlockType() {
+        return m_parent.getBlockType();
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o instanceof BaseBlockWrapper) {
-            o = ((BaseBlockWrapper) o).getParent();
-        }
-        return m_parent.equals(o);
+    public <V> BaseBlock with(Property<V> property, V value) {
+        return m_parent.with(property, value);
+    }    
+
+    @Override
+    public Object getState(Property property) {
+        return m_parent.getState(property);
     }
 
     @Override
-    public boolean equalsFuzzy(BaseBlock o) {
-        if (o instanceof BaseBlockWrapper) {
-            o = ((BaseBlockWrapper) o).getParent();
-        }
+    public Map getStates() {
+        return m_parent.getStates();
+    }
+
+    @Override
+    public boolean equalsFuzzy(BlockStateHolder o) {
         return m_parent.equalsFuzzy(o);
     }
 
     @Override
-    public BaseBlock flip() {
-        return m_parent.flip();
+    public BlockState toImmutableState() {
+        return m_parent.toImmutableState();
     }
 
     @Override
-    public BaseBlock flip(CuboidClipboard.FlipDirection direction) {
-        return m_parent.flip(direction);
+    public BaseBlock toBaseBlock() {
+        return m_parent.toBaseBlock();
     }
 
     @Override
-    public int getData() {
-        return m_parent.getData();
+    public BaseBlock toBaseBlock(CompoundTag compoundTag) {
+        return m_parent.toBaseBlock(compoundTag);
     }
 
     @Override
-    public int getId() {
-        return m_parent.getId();
+    public String getAsString() {
+        return m_parent.getAsString();
     }
 
     @Override
@@ -170,72 +184,12 @@ public class BaseBlockWrapper extends BaseBlock implements IAsyncWrapper {
     }
 
     @Override
-    public int getType() {
-        return m_parent.getType();
-    }
-
-    @Override
     public boolean hasNbtData() {
         return m_parent.hasNbtData();
     }
 
     @Override
-    public boolean hasWildcardData() {
-        return m_parent.hasWildcardData();
-    }
-
-    @Override
-    public int hashCode() {
-        return m_parent.hashCode();
-    }
-
-    @Override
-    public boolean inIterable(Iterable<BaseBlock> iter) {
-        return m_parent.inIterable(iter);
-    }
-
-    @Override
-    public boolean isAir() {
-        return m_parent.isAir();
-    }
-
-    @Override
-    public int rotate90() {
-        return m_parent.rotate90();
-    }
-
-    @Override
-    public int rotate90Reverse() {
-        return m_parent.rotate90Reverse();
-    }
-
-    @Override
-    public void setData(int data) {
-        m_parent.setData(data);
-    }
-
-    @Override
-    public void setId(int id) {
-        m_parent.setId(id);
-    }
-
-    @Override
-    public void setIdAndData(int id, int data) {
-        m_parent.setIdAndData(id, data);
-    }
-
-    @Override
-    public void setNbtData(CompoundTag ct) {
-        m_parent.setNbtData(ct);
-    }
-    
-    @Override
-    public void setType(int type) {
-        m_parent.setType(type);
-    }
-
-    @Override
-    public String toString() {
-        return m_parent.toString();
+    public void setNbtData(CompoundTag nbtData) {
+        m_parent.setNbtData(nbtData);
     }
 }

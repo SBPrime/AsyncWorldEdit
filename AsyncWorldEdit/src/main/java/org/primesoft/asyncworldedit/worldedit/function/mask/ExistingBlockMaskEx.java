@@ -48,12 +48,10 @@
 package org.primesoft.asyncworldedit.worldedit.function.mask;
 
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.AbstractExtentMask;
-import com.sk89q.worldedit.function.mask.ExistingBlockMask;
 import com.sk89q.worldedit.function.mask.Mask2D;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.worldedit.function.ILastBlock;
 
@@ -65,7 +63,7 @@ public class ExistingBlockMaskEx extends AbstractExtentMask implements ILastBloc
     /**
      * The last processed block
      */
-    private BaseBlock m_lastBlock;
+    private BlockStateHolder m_lastBlock;
 
     /**
      * Create a new existing block map.
@@ -78,8 +76,8 @@ public class ExistingBlockMaskEx extends AbstractExtentMask implements ILastBloc
 
     @Override
     public boolean test(Vector vector) {
-        m_lastBlock = getExtent().getLazyBlock(vector);
-        return m_lastBlock.getType() != BlockID.AIR;
+        m_lastBlock = getExtent().getBlock(vector);
+        return !m_lastBlock.getBlockType().getMaterial().isAir();
     }
 
     @Nullable
@@ -89,7 +87,7 @@ public class ExistingBlockMaskEx extends AbstractExtentMask implements ILastBloc
     }
 
     @Override
-    public BaseBlock getLastBlock() {
+    public BlockStateHolder getLastBlock() {
         return m_lastBlock;
     }
 }

@@ -101,7 +101,7 @@ public class DirectChunkCommands implements IDirectChunkCommands {
     public IAsyncCommand createPaste(IPlayerEntry playerEntry, Location position, World world, Mask mask, ClipboardHolder clipboard, 
             boolean ignoreAirBlocks, boolean relight, boolean copyBiome) {
         return new PasteChunkCommand(clipboard, position, world,
-                m_awe, ignoreAirBlocks, relight, copyBiome, world.getWorldData(), mask,
+                m_awe, ignoreAirBlocks, relight, copyBiome, mask,
                 playerEntry);
     }
     

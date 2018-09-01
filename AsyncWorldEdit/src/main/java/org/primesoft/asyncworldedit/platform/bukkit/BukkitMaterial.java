@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.bukkit.Material;
 import org.primesoft.asyncworldedit.platform.BaseMaterial;
 
@@ -62,12 +64,12 @@ public class BukkitMaterial extends BaseMaterial {
     }
 
     @Override
-    public int getId() {
-        return m_material.getId();
+    public String getName() {
+        return m_material.name();
     }
 
     @Override
-    public String getName() {
-        return m_material.name();
+    public BlockStateHolder getBaseBlock() {
+        return BukkitAdapter.adapt(m_material.createBlockData());
     }
 }

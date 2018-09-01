@@ -47,10 +47,10 @@
  */
 package org.primesoft.asyncworldedit.worldedit.extent.inventory;
 
-import com.sk89q.worldedit.WorldVector;
-import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagException;
+import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.block.BlockState;
 
 /**
  *
@@ -85,7 +85,7 @@ public class ThreadSafeBlockBag extends BlockBag {
     }
 
     @Override
-    public void addSourcePosition(WorldVector pos) {
+    public void addSourcePosition(Location pos) {
         synchronized (m_mutex) {
             m_parrent.addSourcePosition(pos);
             m_parrent.flushChanges();
@@ -93,7 +93,7 @@ public class ThreadSafeBlockBag extends BlockBag {
     }
 
     @Override
-    public void addSingleSourcePosition(WorldVector pos) {
+    public void addSingleSourcePosition(Location pos) {
         synchronized (m_mutex) {
             m_parrent.addSingleSourcePosition(pos);
             m_parrent.flushChanges();
@@ -101,72 +101,48 @@ public class ThreadSafeBlockBag extends BlockBag {
     }
 
     @Override
-    public void fetchBlock(int id) throws BlockBagException {
+    public void fetchBlock(BlockState blockState) throws BlockBagException {
         synchronized (m_mutex) {
-            m_parrent.fetchBlock(id);
+            m_parrent.fetchBlock(blockState);
             m_parrent.flushChanges();
         }
     }
 
     @Override
-    public void fetchItem(BaseItem item) throws BlockBagException {
+    public void fetchPlacedBlock(BlockState blockState) throws BlockBagException {
         synchronized (m_mutex) {
-            m_parrent.fetchItem(item);
+            m_parrent.fetchPlacedBlock(blockState);
             m_parrent.flushChanges();
         }
     }
 
     @Override
-    public void fetchPlacedBlock(int id) throws BlockBagException {
+    public boolean peekBlock(BlockState blockState) {
         synchronized (m_mutex) {
-            m_parrent.fetchPlacedBlock(id);
+            return m_parrent.peekBlock(blockState);
+        }
+    }
+
+    @Override
+    public void storeBlock(BlockState blockState) throws BlockBagException {
+        synchronized (m_mutex) {
+            m_parrent.storeBlock(blockState);
             m_parrent.flushChanges();
         }
     }
 
     @Override
-    public void fetchPlacedBlock(int id, int data) throws BlockBagException {
+    public void storeBlock(BlockState blockState, int amount) throws BlockBagException {
         synchronized (m_mutex) {
-            m_parrent.fetchPlacedBlock(id, data);
+            m_parrent.storeBlock(blockState, amount);
             m_parrent.flushChanges();
         }
     }
 
     @Override
-    public boolean peekBlock(int id) {
+    public void storeDroppedBlock(BlockState blockState) throws BlockBagException {
         synchronized (m_mutex) {
-            return m_parrent.peekBlock(id);
-        }
-    }
-
-    @Override
-    public void storeBlock(int id) throws BlockBagException {
-        synchronized (m_mutex) {
-            m_parrent.storeBlock(id);
-            m_parrent.flushChanges();
-        }
-    }
-
-    @Override
-    public void storeDroppedBlock(int id) throws BlockBagException {
-        synchronized (m_mutex) {
-            m_parrent.storeDroppedBlock(id);
-            m_parrent.flushChanges();
-        }
-    }
-
-    @Override
-    public void storeDroppedBlock(int id, int data) throws BlockBagException {
-        synchronized (m_mutex) {
-            m_parrent.storeDroppedBlock(id, data);
-            m_parrent.flushChanges();
-        }
-    }
-
-    @Override
-    public void storeItem(BaseItem item) throws BlockBagException {
-        synchronized (m_mutex) {
-            m_parrent.storeItem(item);
+            m_parrent.storeDroppedBlock(blockState);
             m_parrent.flushChanges();
         }
     }

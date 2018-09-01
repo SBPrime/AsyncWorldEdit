@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,41 +45,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.extent.clipboard.io;
+package org.primesoft.asyncworldedit.changesetSerializer.serializers;
+
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.extension.input.InputParseException;
+import com.sk89q.worldedit.extension.input.ParserContext;
+import com.sk89q.worldedit.world.block.BlockState;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
- * MCEdit schematic tag names
+ *
  * @author SBPrime
  */
-public class FormatSchematic {
-    public static final String TAG_ROOT = "Schematic";
-    public static final String TAG_WIDTH = "Width";
-    public static final String TAG_LENGTH = "Length";
-    public static final String TAG_HEIGHT = "Height";
-    
-    public static final String TAG_MATERIALS = "Materials";
-    public static final String TAG_ORIGIN_X = "WEOriginX";
-    public static final String TAG_ORIGIN_Y = "WEOriginY";
-    public static final String TAG_ORIGIN_Z = "WEOriginZ";
-    public static final String TAG_OFFSET_X = "WEOffsetX";
-    public static final String TAG_OFFSET_Y = "WEOffsetY";
-    public static final String TAG_OFFSET_Z = "WEOffsetZ";
-    public static final String TAG_BIOMES = "AWEBiomes";
-    
-    public static final String TAG_BLOCKS_ID = "Blocks";
-    public static final String TAG_BLOCKS_IDEX = "AddBlocks";    
-    public static final String TAG_BLOCKS_DATA = "Data";
-    public static final String TAG_TILEENTITIES = "TileEntities";
-    
-    public static final String TAG_ID = "id";
-    public static final String TAG_X = "x";
-    public static final String TAG_Y = "y";
-    public static final String TAG_Z = "z";
-    public static final String TAG_POSITION = "Pos";
-    public static final String TAG_ROTATION = "Rotation";
-    
-    public static final String TAG_ENTITIES = "Entities";
-    
-    
-    public static final String MATERIAL = "Alpha";
+final class BlockFactory {
+
+    private final static ParserContext PARSER;
+
+    private final static int MAX_ENTRIES = 512;
+
+    private final static Map<String, BlockState> KNOWN_STATES = new LinkedHashMap(MAX_ENTRIES + 1, .75F, true) {
+        @Override
+        public boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_ENTRIES;
+        }
+    };
+
+    static {
+        PARSER = new ParserContext();
+        PARSER.setRestricted(false);
+        PARSER.setTryLegacy(false);
+        PARSER.setPreferringWildcard(false);
+    }
+
+    public static BlockState getState(String id) {
+        return KNOWN_STATES.computeIfAbsent(id, BlockFactory::parse);
+    }
+
+    private static BlockState parse(String id) {
+        try {
+            return WorldEdit.getInstance().getBlockFactory().parseFromInput(id, PARSER).toImmutableState();
+        } catch (InputParseException ex) {
+            return null;
+        }
+    }
 }

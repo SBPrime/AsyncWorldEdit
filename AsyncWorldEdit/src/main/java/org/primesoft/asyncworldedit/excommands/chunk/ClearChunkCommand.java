@@ -51,7 +51,6 @@ import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
@@ -71,8 +70,8 @@ import org.primesoft.asyncworldedit.utils.PositionHelper;
  * @author SBPrime
  */
 class ClearChunkCommand extends DCMaskCommand {
-
-    private final static BaseBlock AIR = new BaseBlock(0);
+    //TODO: 1.13
+    //private final static BaseBlock AIR = new BaseBlock(0);
 
     private final Region m_region;
 
@@ -114,8 +113,10 @@ class ClearChunkCommand extends DCMaskCommand {
                     for (int y = 0; y < 256; y++) {
                         final Vector yPos = zPos.add(0, y, 0);
                         if (maskTest(yPos)) {
-                            destination.setBlock(x, y, z, AIR);
-                            changedBlocks++;
+                            //destination.setBlock(x, y, z, AIR);
+                            //changedBlocks++;
+                            //TODO: 1.13
+                            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                            
                         }
                     }
                 }

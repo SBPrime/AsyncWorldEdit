@@ -66,18 +66,14 @@ public class WorldEditConfig implements IPremiumWorldEditConfig {
             return null;
         }
 
-        HashSet<Integer> disallowedBlocks;
+        HashSet<String> disallowedBlocks;
         if (config.contains("disallowedBlocks")) {
-            List<Integer> tmp = config.getIntegerList("disallowedBlocks");
-            disallowedBlocks = new HashSet<Integer>();
+            List<String> tmp = config.getStringList("disallowedBlocks");
+            disallowedBlocks = new HashSet<>();
 
             if (tmp != null) {
-                for (Integer o : tmp) {
-                    int id = o;
-
-                    if (!disallowedBlocks.contains(id)) {
-                        disallowedBlocks.add(id);
-                    }
+                for (String o : tmp) {
+                    disallowedBlocks.add(o);
                 }
             }
         }
@@ -113,10 +109,10 @@ public class WorldEditConfig implements IPremiumWorldEditConfig {
     /**
      * List of all disallowed blocks
      */
-    private final HashSet<Integer> m_disallowedBlocks;
+    private final HashSet<String> m_disallowedBlocks;
 
     private WorldEditConfig(int maxBlockChanged, int historySize,
-            HashSet<Integer> disallowedBlocks, IConfigBlackList blackListOptions) {
+            HashSet<String> disallowedBlocks, IConfigBlackList blackListOptions) {
 
         m_blockChangeLimit = maxBlockChanged;
         m_historySize = historySize;
@@ -136,7 +132,7 @@ public class WorldEditConfig implements IPremiumWorldEditConfig {
     }
 
     @Override
-    public Set<Integer> getDisallowedBlocks() {
+    public Set<String> getDisallowedBlocks() {
         return m_disallowedBlocks;
     }
 

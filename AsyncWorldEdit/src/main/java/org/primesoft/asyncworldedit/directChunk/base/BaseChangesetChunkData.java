@@ -50,10 +50,10 @@ package org.primesoft.asyncworldedit.directChunk.base;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.UUID;
@@ -81,7 +81,8 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
     /**
      * The air block
      */
-    private static final BaseBlock AIR = new BaseBlock(0);
+    //TODO: 1.13
+    //private static final BaseBlock AIR = new BaseBlock(0);
 
     /**
      * The MTA mutex
@@ -160,14 +161,17 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
     }
 
     @Override
-    public void setBlock(int x, int y, int z, BaseBlock b) {
-        final IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
+    public void setBlock(int x, int y, int z, BlockStateHolder b) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
+    
+/*        final IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
         final int data = b.getData();
         final int type = b.getType();
         final char id = dcApi.getCombinedId(type, data);
         final CompoundTag ct = b.getNbtData();
 
-        setTileEntity(x, y, z, id, ct);
+        setTileEntity(x, y, z, id, ct);*/
     }
 
     @Override
@@ -176,14 +180,18 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
     }
 
     @Override
-    public void setBlockAndEmission(int x, int y, int z, BaseBlock b, byte emission) {
+    public void setBlockAndEmission(int x, int y, int z, BlockStateHolder b, byte emission) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //TODO: 1.13
+        
+        /*
         final IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
         final int data = b.getData();
         final int type = b.getType();
         final char id = dcApi.getCombinedId(type, data);
         final CompoundTag ct = b.getNbtData();
 
-        setTileEntityAndEmission(x, y, z, id, ct, emission);
+        setTileEntityAndEmission(x, y, z, id, ct, emission);*/
     }
 
     @Override
@@ -338,11 +346,14 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
             return null;
         }
 
-        CompoundTag ct = bEntity.getNbtData();
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
+        /*CompoundTag ct = bEntity.getNbtData();
         ISerializedEntity result = createSerializedEntity(pos, location, ct, bEntity.getTypeId());
 
         addEntity(result);
-        return result;
+        return result;*/
+        
     }
 
     /**
@@ -373,7 +384,9 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
 
     @Override
     public int getMaterial(int x, int y, int z) {
-        return getBlock(x, y, z).getType();
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
+        /*return getBlock(x, y, z).getType();*/
     }
 
     @Override
@@ -401,7 +414,10 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
     }
 
     @Override
-    public BaseBlock getBlock(int x, int y, int z) {
+    public BlockStateHolder getBlock(int x, int y, int z) {
+        //TODO: 1.13
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
+    /*
         if (!isValidPosition(x, y, z)) {
             log(String.format("getBlock: invalid position %1$s,%2$s,%3$s", x, y, z));
             return AIR;
@@ -427,7 +443,7 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
 
                 return m_fullChunkData.getBlock(x, y, z);
             }
-        }
+        }*/
     }
 
     @Override
