@@ -184,7 +184,7 @@ public interface IEditSession extends Extent {
      *
      * @return a map of missing blocks
      */
-    public Map<Integer, Integer> popMissingBlocks();
+    public Map<BlockType, Integer> popMissingBlocks();
 
     /**
      * Get the number of blocks changed, including repeated block changes.
@@ -208,36 +208,6 @@ public interface IEditSession extends Extent {
     public BaseBlock getFullBlock(Vector vector);
 
     /**
-     * Get a block type at the given position.
-     *
-     * @param position the position
-     * @return the block type
-     * @deprecated Use {@link #getLazyBlock(Vector)} or {@link #getBlock(Vector)}
-     */
-    @Deprecated
-    public int getBlockType(Vector position);
-
-    /**
-     * Get a block data at the given position.
-     *
-     * @param position the position
-     * @return the block data
-     * @deprecated Use {@link #getLazyBlock(Vector)} or {@link #getBlock(Vector)}
-     */
-    @Deprecated
-    public int getBlockData(Vector position);
-
-    /**
-     * Gets the block type at a position.
-     *
-     * @param position the position
-     * @return a block
-     * @deprecated Use {@link #getBlock(Vector)}
-     */
-    @Deprecated
-    public BaseBlock rawGetBlock(Vector position);
-
-    /**
      * Returns the highest solid 'terrain' block which can occur naturally.
      *
      * @param x the X coordinate
@@ -248,17 +218,6 @@ public interface IEditSession extends Extent {
      */
     public int getHighestTerrainBlock(int x, int z, int minY, int maxY);
 
-    /**
-     * Returns the highest solid 'terrain' block which can occur naturally.
-     *
-     * @param x the X coordinate
-     * @param z the Z coordinate
-     * @param minY minimal height
-     * @param maxY maximal height
-     * @param naturalOnly look at natural blocks or all blocks
-     * @return height of highest block found or 'minY'
-     */
-    public int getHighestTerrainBlock(int x, int z, int minY, int maxY, boolean naturalOnly);
     
     /**
      * Set a block, bypassing both history and block re-ordering.
@@ -269,7 +228,7 @@ public interface IEditSession extends Extent {
      * @return whether the block changed
      * @throws WorldEditException thrown on a set error
      */
-    public boolean setBlock(Vector position, BaseBlock block, Stage stage) throws WorldEditException;
+    public boolean setBlock(Vector position, BlockStateHolder block, Stage stage) throws WorldEditException;
 
     /**
      * Set a block, bypassing both history and block re-ordering.
@@ -355,7 +314,7 @@ public interface IEditSession extends Extent {
      * @param searchBlocks the list of blocks to search
      * @return the number of blocks that matched the pattern
      */
-    public int countBlocks(Region region, Set<BaseBlock> searchBlocks);
+    public int countBlocks(Region region, Set<BlockStateHolder> searchBlocks);
 
     /**
      * Fills an area recursively in the X/Z directions.
@@ -492,7 +451,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makeCuboidFaces(Region region, BaseBlock block) throws MaxChangedBlocksException;
+    public int makeCuboidFaces(Region region, BlockStateHolder block) throws MaxChangedBlocksException;
 
     /**
      * Make the faces of the given region as if it was a {@link CuboidRegion}.
@@ -526,7 +485,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makeCuboidWalls(Region region, BaseBlock block) throws MaxChangedBlocksException;
+    public int makeCuboidWalls(Region region, BlockStateHolder block) throws MaxChangedBlocksException;
 
     /**
      * Make the walls (all faces but those parallel to the X-Z plane) of the given region
@@ -560,7 +519,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int overlayCuboidBlocks(Region region, BaseBlock block) throws MaxChangedBlocksException;
+    public int overlayCuboidBlocks(Region region, BlockStateHolder block) throws MaxChangedBlocksException;
 
     /**
      * Places a layer of blocks on top of ground blocks in the given region
@@ -606,7 +565,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks moved
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int moveRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException;
+    public int moveRegion(Region region, Vector dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException;
 
     /**
      * Move the blocks in a region a certain direction.
@@ -619,7 +578,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks moved
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int moveCuboidRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException;
+    public int moveCuboidRegion(Region region, Vector dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException;
 
     /**
      * Drain nearby pools of water or lava.

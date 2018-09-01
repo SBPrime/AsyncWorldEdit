@@ -64,5 +64,5 @@ public interface IWorldEditConfig {
      * Get the list of disallowed blocks
      * @return 
      */
-    Set<Integer> getDisallowedBlocks();
+    Set<String> getDisallowedBlocks();
 }

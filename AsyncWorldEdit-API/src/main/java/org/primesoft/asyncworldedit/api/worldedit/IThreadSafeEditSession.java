@@ -49,7 +49,6 @@ import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.util.eventbus.EventBus;
-import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.Iterator;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -141,7 +140,7 @@ public interface IThreadSafeEditSession extends IAweEditSession {
      * @return whether the block changed
      * @throws WorldEditException thrown on a set error
      */
-    boolean setBlock(int jobId, Vector position, BaseBlock block, Stage stage) throws WorldEditException;
+    boolean setBlock(int jobId, Vector position, BlockStateHolder block, Stage stage) throws WorldEditException;
 
     boolean setBlock(Vector vector, BlockStateHolder bsh, int jobId) throws WorldEditException;
     
