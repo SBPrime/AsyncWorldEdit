@@ -45,7 +45,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.blockshub;
+package org.primesoft.asyncworldedit.blockshub.platform.bukkit;
 
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IBlocksHubFactory;
@@ -57,14 +57,14 @@ import org.primesoft.blockshub.IBlocksHubApiProvider;
  *
  * @author SBPrime
  */
-class BlocksHubV3Factory implements IBlocksHubFactory {
+public class BlocksHubV3Factory implements IBlocksHubFactory {
     private static final String NAME = "BlocksHub v3.x";
 
     @Override
     public String getName() {
         return NAME;
     }
-    
+
     public BlocksHubV3Factory() {
     }
 
@@ -73,27 +73,26 @@ class BlocksHubV3Factory implements IBlocksHubFactory {
                 if (blocksHub == null) {
             return null;
         }
-        
+
         if (!(blocksHub instanceof IBlocksHubApiProvider)) {
             log(String.format("%1$s: ...wrong plugin type", NAME));
             return null;
         }
-        
+
         IBlocksHubApiProvider apiProvider = (IBlocksHubApiProvider)blocksHub;
         IBlocksHubApi api = apiProvider.getApi();
-        
+
         if (api == null) {
             log(String.format("%1$s: ...API not available", NAME));
             return null;
         }
-        
+
         double apiVersion = api.getVersion();
         if (apiVersion < 3 || apiVersion >= 4) {
             log(String.format("%1$s: ...unsupported API v%2$s, supported 3.x", NAME, apiVersion));
             return null;
         }
-        
+
         return new BlocksHubIntegrationV3(api);
     }
-    
 }
