@@ -37,6 +37,7 @@ package org.primesoft.asyncworldedit.api.inner;
 
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.api.IWorldeditIntegrator;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 

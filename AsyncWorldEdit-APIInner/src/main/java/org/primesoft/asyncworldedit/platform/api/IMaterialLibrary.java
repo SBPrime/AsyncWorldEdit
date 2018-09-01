@@ -57,15 +57,7 @@ public interface IMaterialLibrary {
      * @return 
      */
     IMaterial getAIR();
-    
-    
-    /**
-     * Get material based on ID
-     * @param id
-     * @return 
-     */
-    IMaterial getMaterial(int id);
-    
+
     /**
      * Get material based on name
      * @param name

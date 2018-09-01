@@ -55,12 +55,6 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
  */
 public interface IMaterial {
     /**
-     * Get material ID
-     * @return 
-     */
-    int getId();
-    
-    /**
      * Get the name
      * @return 
      */

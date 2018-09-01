@@ -62,6 +62,8 @@ public interface IAsyncWorldEditCore extends IAsyncWorldEdit {
     public ICron getCron();
 
     public void onEnable();
+    
+    public void onWorldEditEnabled();
 
     public void onDisable();
 
