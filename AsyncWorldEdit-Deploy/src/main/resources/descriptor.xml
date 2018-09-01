@@ -33,7 +33,7 @@
                 <!-- PlotMe -->
                 <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMe013g</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMeCore015</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMeCore016</include>->>
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMeCore016</include> -->
                 <!-- Progress display -->
                 <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-ActionBarAPI</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-ActionMessager</include>
@@ -49,13 +49,13 @@
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_11_R1</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1_12_1</include>-->
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_13</include>
+                <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_13</include>-->
             </includes>
         </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>
-            <outputDirectory>/</outputDirectory><include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1_12_1</include>
+            <outputDirectory>/</outputDirectory>
             <directory>${project.build.outputDirectory}</directory>
         </fileSet>
     </fileSets>
