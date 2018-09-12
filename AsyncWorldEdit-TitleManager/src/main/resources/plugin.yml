@@ -1,9 +1,9 @@
 name: AsyncWorldEdit-TitleManager
 main: org.primesoft.asyncworldedit.progressDisplay.TitleManagerBackend
-version: 3.3.0
+version: 3.6.0-alpha-2
+api-version: 1.13
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin provides TitleManager progress display backend for AsyncWorldEdit
 authors: [SBPrime]
 depend: [TitleManager]
-

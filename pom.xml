@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit_AllInOne</artifactId>
-    <version>3.6.0-alpha-1</version>
+    <version>3.6.0-alpha-2</version>
     <packaging>pom</packaging>
     <name>AsyncWorldEdit_AllInOne</name>
     <modules>
@@ -16,12 +16,7 @@
         <module>AsyncWorldEdit-Utils</module>
         <module>AsyncWorldEdit</module>
         <module>AsyncWorldEditInjector</module>
-        <!--<module>AsyncWorldEdit-BlocksHub_v1x</module>
-        <module>AsyncWorldEdit-BlocksHub_v2x</module>-->
         <module>AsyncWorldEdit-BlocksHub_v3x</module>
-        <!--<module>AsyncWorldEdit-PlotMe013g</module>
-        <module>AsyncWorldEdit-PlotMeCore015</module>
-        <module>AsyncWorldEdit-PlotMeCore016</module>-->        
         <!--<module>AsyncWorldEdit-spigot_v1_8_R3</module>
         <module>AsyncWorldEdit-spigot_v1_9_R1</module>
         <module>AsyncWorldEdit-spigot_v1_9_R2</module>
@@ -29,12 +24,9 @@
         <module>AsyncWorldEdit-spigot_v1_11_R1</module>
         <module>AsyncWorldEdit-spigot_v1_12_R1</module>
         <module>AsyncWorldEdit-spigot_v1_12_R1_12_1</module>-->
-        <module>AsyncWorldEdit-spigot_v1_13_R1</module>
+        <!--<module>AsyncWorldEdit-spigot_v1_13_R1</module>-->
         <module>AsyncWorldEdit-ActionBarAPI</module>
-        <module>AsyncWorldEdit-ActionMessager</module>
-        <module>AsyncWorldEdit-BarAPI</module>
         <module>AsyncWorldEdit-BountifulAPI</module>
         <module>AsyncWorldEdit-TitleManager</module>        
-        <module>AsyncWorldEdit-WelcomeTitle</module>        
     </modules>
 </project>

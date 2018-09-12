@@ -30,17 +30,10 @@
             <includes>
                 <!-- Injector -->
                 <include>org.primesoft.asyncworldedit:AsyncWorldEditInjector</include>        
-                <!-- PlotMe -->
-                <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMe013g</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMeCore015</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-PlotMeCore016</include> -->
                 <!-- Progress display -->
-                <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-ActionBarAPI</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-ActionMessager</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-BarAPI</include>
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-ActionBarAPI</include>                
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-BountifulAPI</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-TitleManager</include>
-                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-WelcomeTitle</include>-->
                 <!-- Direct chunk API -->
                 <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_8_R3</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_9_R1</include>

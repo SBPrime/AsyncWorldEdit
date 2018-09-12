@@ -63,14 +63,8 @@ import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 class LoaderBukkit extends Loader {
 
     private final static String PLUGIN_ACTIONBAR = "AsyncWorldEdit-ActionBarAPI.jar";
-    private final static String PLUGIN_ACTIONMESSAGER = "AsyncWorldEdit-ActionMessager.jar";
-    private final static String PLUGIN_BARAPI = "AsyncWorldEdit-BarAPI.jar";
     private final static String PLUGIN_BOUNTIFULAPI = "AsyncWorldEdit-BountifulAPI.jar";
-    private final static String PLUGIN_PLOTME13 = "AsyncWorldEdit-PlotMe013g.jar";
-    private final static String PLUGIN_PLOTMR15 = "AsyncWorldEdit-PlotMeCore015.jar";
-    private final static String PLUGIN_PLOTME16 = "AsyncWorldEdit-PlotMeCore016.jar";
     private final static String PLUGIN_TITLEMANAGER = "AsyncWorldEdit-TitleManager.jar";
-    private final static String PLUGIN_WELCOMETITLE = "AsyncWorldEdit-WelcomeTitle.jar";
 
     /**
      * The plugin main file
@@ -145,14 +139,8 @@ class LoaderBukkit extends Loader {
         }
 
         extract(PLUGIN_ACTIONBAR, awePluginFolder, String.format("%1$s%2$s", PLUGIN_ACTIONBAR, DISABLED));
-        extract(PLUGIN_ACTIONMESSAGER, awePluginFolder, String.format("%1$s%2$s", PLUGIN_ACTIONMESSAGER, DISABLED));
-        extract(PLUGIN_BARAPI, awePluginFolder, String.format("%1$s%2$s", PLUGIN_BARAPI, DISABLED));
         extract(PLUGIN_BOUNTIFULAPI, awePluginFolder, String.format("%1$s%2$s", PLUGIN_BOUNTIFULAPI, DISABLED));
-        extract(PLUGIN_PLOTME13, awePluginFolder, String.format("%1$s%2$s", PLUGIN_PLOTME13, DISABLED));
-        extract(PLUGIN_PLOTMR15, awePluginFolder, String.format("%1$s%2$s", PLUGIN_PLOTMR15, DISABLED));
-        extract(PLUGIN_PLOTME16, awePluginFolder, String.format("%1$s%2$s", PLUGIN_PLOTME16, DISABLED));
         extract(PLUGIN_TITLEMANAGER, awePluginFolder, String.format("%1$s%2$s", PLUGIN_TITLEMANAGER, DISABLED));
-        extract(PLUGIN_WELCOMETITLE, awePluginFolder, String.format("%1$s%2$s", PLUGIN_WELCOMETITLE, DISABLED));
 
         return true;
     }

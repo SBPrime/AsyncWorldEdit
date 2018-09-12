@@ -6,7 +6,8 @@
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit-BountifulAPI</artifactId>
 
-    <version>3.3.0</version>
+    <version>3.6.0-alpha-2</version>
+
 
     <packaging>jar</packaging>
     <properties>
@@ -19,26 +20,27 @@
         <dependency>
             <groupId>com.connorlinfoot</groupId>
             <artifactId>BountifulAPI</artifactId>
-            <version>1.6.1</version>
+            <version>1.6.4</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/progress/BountifulAPI-1.6.1.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/progress/BountifulAPI-1.6.4.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>[1.12.2, 1.13.0)</version>
+            <version>1.13-fe3ab0d-0611294</version>
             <type>jar</type>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../libs/spigot/spigot-1.13-fe3ab0d-0611294.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-API</artifactId>
-            <version>[2.1.0, 3.0.0)</version>
-            <type>jar</type>
+            <version>[2.2.0-alpha-2, 2.2.0-beta)</version>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-APIInner</artifactId>
-            <version>[3.5.0, 4.0.0)</version>
+            <version>[3.6.0-alpha-2, 3.6.0-beta)</version>
             <type>jar</type>
         </dependency>
         <dependency>
