@@ -53,9 +53,9 @@
 package org.primesoft.asyncworldedit.injector.classfactory;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
@@ -98,4 +98,11 @@ public interface IClassFactory {
     RegionFunction addBiomeCopy(RegionFunction blockCopy, 
             Extent source, Vector from, Extent destination, Vector to, 
             Transform currentTransform, boolean singleSet);
+
+    /**
+     * Handle the exception from operation
+     * @param ex The exception to hanlde 
+     * @param name The operation name
+     */
+    void handleError(WorldEditException ex, String name);
 }

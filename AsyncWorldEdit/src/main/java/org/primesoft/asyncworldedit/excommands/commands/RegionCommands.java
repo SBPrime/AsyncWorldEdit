@@ -93,6 +93,7 @@ import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
 import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.function.RegionMaskingFilterEx;
 import org.primesoft.asyncworldedit.worldedit.function.block.KeepDataBlockReplace;
@@ -240,8 +241,9 @@ public class RegionCommands {
                     player.print("Terrain's height map smoothed. " + affected + " block(s) changed.");
                     
                     es.flushQueue();
-                } catch (WorldEditException ex) {
-                    player.printError("Error while executing CraftScript.");
+                } catch (WorldEditException ex) {                    
+                    player.printError("Error while executing smooth.");
+                    ExceptionHelper.printException(ex, String.format("Error while processing async operation smooth"));
                 }
             }
         });

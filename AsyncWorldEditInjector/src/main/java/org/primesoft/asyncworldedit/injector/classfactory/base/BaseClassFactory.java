@@ -52,6 +52,7 @@
 package org.primesoft.asyncworldedit.injector.classfactory.base;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.RegionFunction;
@@ -92,5 +93,10 @@ public class BaseClassFactory implements IClassFactory {
             Extent destination, Vector to, Transform currentTransform,
             boolean singleSet) {
         return blockCopy;
+    }
+
+    @Override
+    public void handleError(WorldEditException ex, String name) {
+        // No op
     }
 }

@@ -48,6 +48,7 @@
 package org.primesoft.asyncworldedit.injector.async;
 
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.RegionFunction;
@@ -57,6 +58,7 @@ import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.extent.clipboard.BiomeClipboard;
 import org.primesoft.asyncworldedit.worldedit.function.CascadeRegionFunction;
 import org.primesoft.asyncworldedit.worldedit.function.biome.ExtentBiomeCopy;
@@ -100,12 +102,13 @@ public class AsyncClassFactory extends BaseClassFactory {
     public RegionFunction addBiomeCopy(RegionFunction blockCopy, 
             Extent source, Vector from, Extent destination, Vector to, 
             Transform currentTransform, boolean singleSet) {
-        ExtentBiomeCopy bc = new ExtentBiomeCopy(source, from, destination, to, currentTransform, singleSet);
-        
-        if (blockCopy == null) {
-            return bc;
-        }
+        ExtentBiomeCopy bc = new ExtentBiomeCopy(source, from, destination, to, currentTransform, singleSet);        
         
         return new CascadeRegionFunction(blockCopy, bc);
+    }
+
+    @Override
+    public void handleError(WorldEditException ex, String name) {
+        ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
     }
 }

@@ -61,6 +61,7 @@ import java.io.File;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
@@ -109,6 +110,7 @@ public class ScriptingCommands {
                     m_worldEdit.runScript(player, f, scriptArgs);
                 } catch (WorldEditException ex) {
                     player.printError("Error while executing CraftScript.");
+                    ExceptionHelper.printException(ex, String.format("Error while processing async operation CraftScript"));
                 }
             }
         });
@@ -154,6 +156,7 @@ public class ScriptingCommands {
                     m_worldEdit.runScript(player, f, scriptArgs);
                 } catch (WorldEditException ex) {
                     player.printError("Error while executing CraftScript.");
+                    ExceptionHelper.printException(ex, String.format("Error while processing async operation CraftScript"));
                 }
             }
         });
