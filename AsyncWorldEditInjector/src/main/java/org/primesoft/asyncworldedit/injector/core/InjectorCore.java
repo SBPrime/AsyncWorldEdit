@@ -51,17 +51,25 @@
  */
 package org.primesoft.asyncworldedit.injector.core;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.command.FlattenedClipboardTransform;
-import com.sk89q.worldedit.command.SnapshotUtilCommands;
-import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
-import com.sk89q.worldedit.function.operation.Operations;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.primesoft.asyncworldedit.injector.IClassInjector;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import org.primesoft.asyncworldedit.injector.core.visitors.BlockArrayClipboardClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.EditSessionClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.FlattenedClipboardTransformClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.ForwardExtentCopyClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
+import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.OperationsClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.SnapshotUtilCommandsVisitor;
 
 /**
  *
@@ -106,6 +114,8 @@ public class InjectorCore {
      */
     private IClassFactory m_classFactory = new BaseClassFactory();
 
+    private IClassInjector m_classInjector;
+
     /**
      * The MTA access mutex
      */
@@ -130,7 +140,7 @@ public class InjectorCore {
      *
      * @param platform
      */
-    public void initialize(IInjectorPlatform platform) {
+    public void initialize(IInjectorPlatform platform, IClassInjector classInjector) {
         synchronized (m_mutex) {
             if (m_platform != null) {
                 log("Injector platform is already set to "
@@ -138,29 +148,30 @@ public class InjectorCore {
                         + "Ignoring new platform " + platform.getPlatformName());
                 return;
             }
-            
+
             m_platform = platform;
+            m_classInjector = classInjector;
+
             log("Injector platform set to: " + platform.getPlatformName());
         }
 
         log("Injecting WorldEdit classes...");
         try {
-            log("Class " + EditSession.forceClassLoad().getName() + " injected.");
-            log("Class " + Operations.forceClassLoad().getName() + " injected.");
-            log("Class " + ForwardExtentCopy.forceClassLoad().getName() + " injected.");
-            log("Class " + BlockArrayClipboard.forceClassLoad().getName() + " injected.");
-            log("Class " + FlattenedClipboardTransform.forceClassLoad().getName() + " injected.");
-            log("Class " + SnapshotUtilCommands.forceClassLoad().getName() + " injected.");
-        } catch (Error ex) {
+            modiffyClasses("com.sk89q.worldedit.EditSession", c -> new EditSessionClassVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.function.operation.Operations", (c, cc) -> new OperationsClassVisitor(c, cc));
+            modiffyClasses("com.sk89q.worldedit.function.operation.ForwardExtentCopy", c -> new ForwardExtentCopyClassVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
+            modiffyClasses("com.sk89q.worldedit.command.FlattenedClipboardTransform", (c, cc) -> new FlattenedClipboardTransformClassVisitor(c, cc));
+            modiffyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
+        } catch (Throwable ex) {
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");
             log("****************************");
             log("* AsyncWorldEdit won't work properly.");
             log("* Exception: " + ex.getClass().getName());
-            log("* Error message: " +ex.getLocalizedMessage());
+            log("* Error message: " + ex.getLocalizedMessage());
             log("* Stack:");
-            for (StackTraceElement element : ex.getStackTrace())
-            {
+            for (StackTraceElement element : ex.getStackTrace()) {
                 log("* " + element.toString());
             }
             log("****************************");
@@ -194,12 +205,64 @@ public class InjectorCore {
         return m_classFactory;
     }
 
-    
-    /**getInjectorVersion
-     * The injector version
-     * @return 
+    /**
+     * getInjectorVersion The injector version
+     *
+     * @return
      */
     public double getVersion() {
         return 1.0600;
-    }   
+    }
+
+    private void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
+        log("Modiffy class " + className);
+        
+        ClassReader classReader = m_classInjector.getClassReader(className);
+        ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+
+        InjectorClassVisitor icv = classVisitor.apply(classWriter);
+
+        classReader.accept(icv, 0);
+        icv.validate();
+
+        byte[] data = classWriter.toByteArray();
+
+        try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+            dout.write(data);
+        }
+
+        m_classInjector.injectClass(className, data, 0, data.length);
+    }
+
+    private void modiffyClasses(String className,
+            BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
+        log("Modiffy class " + className);
+                
+        ClassReader classReader = m_classInjector.getClassReader(className);
+        ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+
+        InjectorClassVisitor icv = classVisitor.apply(classWriter, this::createClasses);
+        classReader.accept(icv, 0);
+       
+        icv.validate();
+
+        byte[] data = classWriter.toByteArray();
+
+        try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+            dout.write(data);
+        }
+
+        m_classInjector.injectClass(className, data, 0, data.length);
+    }
+
+    private void createClasses(String className, ClassWriter classWriter) throws IOException {
+        byte[] data = classWriter.toByteArray();
+
+        try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+            dout.write(data);
+        }
+
+        m_classInjector.injectClass(className, data, 0, data.length);
+    }
+
 }

@@ -84,7 +84,7 @@ public class InjectorManual implements IInjectorPlatform {
         m_prefix = "[AsyncWorldEditInjector]";
 
         m_core = InjectorCore.getInstance();
-        m_core.initialize(this);
+        m_core.initialize(this, null);
 
         log("Enabled");
     }

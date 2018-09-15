@@ -119,7 +119,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         InOutParam<String> operationName = InOutParam.Out();
 
         if (!StackValidator.isVaild(operationName) || !OperationValidator.isValid(op)) {
-            action.Execute(op);
+            action.execute(op);
             return;
         }
 
@@ -128,7 +128,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
          */
         List<IClassScannerResult> sessions = m_classScanner.scan(new Class<?>[]{AsyncEditSession.class, Region.class}, op);
         if (!validate(sessions)) {
-            action.Execute(op);
+            action.execute(op);
             return;
         }
 
@@ -138,7 +138,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         
         if (!asyncSession.checkAsync(name)) {
             try {
-                action.Execute(op);
+                action.execute(op);
             } catch (Exception ex) {
                 ErrorHandler.handleError(playerEntry, name, null, ex);
             }
@@ -161,7 +161,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     throws MaxChangedBlocksException {
                         try {
                             wait.checkAndWait(null);
-                            action.Execute(op);
+                            action.execute(op);
 
                             return session.getChangeSet().size();
                         } catch (Exception ex) {
@@ -176,7 +176,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         InOutParam<String> operationName = InOutParam.Out();
 
         if (!StackValidator.isVaild(operationName) || !OperationValidator.isValid(op)) {
-            action.Execute(op);
+            action.execute(op);
             return;
 
         }
@@ -187,7 +187,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         List<IClassScannerResult> sessions = m_classScanner.scan(new Class<?>[]{AsyncEditSession.class, Region.class}, op);
 
         if (!validate(sessions)) {
-            action.Execute(op);
+            action.execute(op);
             return;
         }
 
@@ -197,7 +197,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         if (!asyncSession.checkAsync(name)) {
             try {
-                action.Execute(op);
+                action.execute(op);
             } catch (Exception ex) {
                 ErrorHandler.handleError(playerEntry, name, null, ex);
             }
@@ -221,7 +221,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     throws MaxChangedBlocksException {
                         try {
                             wait.checkAndWait(null);
-                            action.Execute(op);
+                            action.execute(op);
 
                             return cancelableSession.getChangeSet().size();
                         } catch (Exception ex) {

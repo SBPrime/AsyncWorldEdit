@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,15 +45,83 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.utils;
+package org.primesoft.asyncworldedit.injector.core.visitors;
 
-import com.sk89q.worldedit.function.operation.Operation;
+import java.util.Collection;
+import org.objectweb.asm.AnnotationVisitor;
+import org.primesoft.asyncworldedit.injector.utils.AnnotationEntry;
 
 /**
  *
  * @author SBPrime
  */
-public interface OperationAction {
+public class AnnotationScannerVisitor extends AnnotationVisitor {
+    private final AnnotationEntry m_entry;
+    
+    public AnnotationScannerVisitor(AnnotationEntry entry,
+            int api, AnnotationVisitor annotationVisitor) {
+        super(api, annotationVisitor);
+        
+        m_entry = entry;
+    }
 
-    void execute(Operation op);
+    @Override
+    public final void visit(String name, Object value) {
+        m_entry.addVisit(name, value);
+        
+        doVisit(name, value);
+    }
+
+    @Override
+    public final AnnotationVisitor visitAnnotation(String name, String descriptor) {
+        m_entry.addAnnotation(name, descriptor);
+        
+        return doVisitAnnotation(name, descriptor);
+    }
+
+    @Override
+    public final AnnotationVisitor visitArray(String name) {
+        Collection<Object> values = m_entry.addArray(name);
+        
+        return doVisitArray(name, values);
+    }
+
+    @Override
+    public final void visitEnum(String name, String descriptor, String value) {
+        m_entry.addEnum(name, descriptor, value);
+        
+        doVisitEnum(name, descriptor, value);
+    }
+
+    @Override
+    public final void visitEnd() {
+        doVisitEnd();
+    }
+
+    protected void doVisit(String name, Object value) {
+        super.visit(name, value);
+    }
+
+    protected AnnotationVisitor doVisitAnnotation(String name, String descriptor) {
+        return super.visitAnnotation(name, descriptor);
+    }
+
+    protected AnnotationVisitor doVisitArray(String name, Collection<Object> values) {
+        return new AnnotationVisitor(api, super.visitArray(name)) {
+            @Override
+            public void visit(String name, Object value) {
+                values.add(value);
+                
+                super.visit(name, value);
+            }
+        };
+    }
+
+    protected void doVisitEnum(String name, String descriptor, String value) {
+        super.visitEnum(name, descriptor, value);
+    }
+
+    protected void doVisitEnd() {
+        super.visitEnd();
+    }
 }

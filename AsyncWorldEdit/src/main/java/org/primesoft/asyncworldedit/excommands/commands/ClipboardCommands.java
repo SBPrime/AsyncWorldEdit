@@ -72,6 +72,7 @@ import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.command.binding.Switch;
 import com.sk89q.worldedit.util.command.parametric.Optional;
+import org.primesoft.asyncworldedit.injector.injected.function.operation.IForwardExtentCopy;
 
 /**
  *
@@ -104,7 +105,10 @@ public class ClipboardCommands {
         if (mask != null) {
             copy.setSourceMask(mask);
         }
-        copy.setBiomeCopy(copyBiomes);
+        
+        if (copy instanceof IForwardExtentCopy) {
+            ((IForwardExtentCopy)copy).setBiomeCopy(copyBiomes);
+        }
         
         Operations.completeLegacy(copy);
         session.setClipboard(new ClipboardHolder(clipboard));
@@ -139,7 +143,10 @@ public class ClipboardCommands {
         if (mask != null) {
             copy.setSourceMask(mask);
         }
-        copy.setBiomeCopy(copyBiomes);
+        
+        if (copy instanceof IForwardExtentCopy) {
+            ((IForwardExtentCopy)copy).setBiomeCopy(copyBiomes);
+        }
         
         Operations.completeLegacy(copy);
         session.setClipboard(new ClipboardHolder(clipboard));
@@ -178,8 +185,8 @@ public class ClipboardCommands {
                 .to(to)
                 .ignoreAirBlocks(ignoreAirBlocks)
                 .build();
-        if (operation instanceof ForwardExtentCopy) {
-            ((ForwardExtentCopy)operation).setBiomeCopy(copyBiomes);
+        if (operation instanceof IForwardExtentCopy) {
+            ((IForwardExtentCopy)operation).setBiomeCopy(copyBiomes);
         }
         
         Operations.completeLegacy(operation);

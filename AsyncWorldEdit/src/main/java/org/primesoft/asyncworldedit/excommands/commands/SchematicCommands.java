@@ -50,13 +50,10 @@ package org.primesoft.asyncworldedit.excommands.commands;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.command.FlattenedClipboardTransform;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
@@ -64,7 +61,6 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
-import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.transform.Transform;
@@ -85,6 +81,9 @@ import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import org.primesoft.asyncworldedit.injector.injected.command.FlattenedClipboardTransformFactory;
+import org.primesoft.asyncworldedit.injector.injected.command.IFlattenedClipboardTransform;
+import org.primesoft.asyncworldedit.injector.injected.function.operation.IForwardExtentCopy;
 
 /**
  * The AsyncWorldEdit schematic injected commands
@@ -210,14 +209,14 @@ public class SchematicCommands {
 
         // If we have a transform, bake it into the copy
         if (!transform.isIdentity()) {
-            FlattenedClipboardTransform result = FlattenedClipboardTransform.transform(clipboard, transform);
+            IFlattenedClipboardTransform result = FlattenedClipboardTransformFactory.transform(clipboard, transform);
             target = new BlockArrayClipboard(result.getTransformedRegion());
             target.setOrigin(clipboard.getOrigin());
 
             Operation copyOperation = result.copyTo(target);
 
-            if (copyOperation instanceof ForwardExtentCopy) {
-                ((ForwardExtentCopy) copyOperation).setBiomeCopy(true);
+            if (copyOperation instanceof IForwardExtentCopy) {
+                ((IForwardExtentCopy) copyOperation).setBiomeCopy(true);
             }
 
             Operations.completeLegacy(copyOperation);

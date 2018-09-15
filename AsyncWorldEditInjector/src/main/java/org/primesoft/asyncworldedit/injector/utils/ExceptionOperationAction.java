@@ -60,5 +60,5 @@ import com.sk89q.worldedit.function.operation.Operation;
  */
 public interface ExceptionOperationAction<TException extends Exception> {
 
-    void Execute(Operation op) throws TException;
+    void execute(Operation op) throws TException;
 }

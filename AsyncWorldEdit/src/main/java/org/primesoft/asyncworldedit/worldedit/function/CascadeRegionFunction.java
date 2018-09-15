@@ -55,7 +55,7 @@ import com.sk89q.worldedit.function.RegionFunction;
  *
  * @author SBPrime
  */
-public class CascadeRegionFunction  implements RegionFunction {
+public class CascadeRegionFunction implements RegionFunction {
     private final RegionFunction[] m_functions;
 
     public CascadeRegionFunction(RegionFunction... function) {

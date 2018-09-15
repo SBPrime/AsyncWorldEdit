@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,15 +45,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.utils;
+package org.primesoft.asyncworldedit.injector.core.visitors;
 
-import com.sk89q.worldedit.function.operation.Operation;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 
 /**
  *
  * @author SBPrime
  */
-public interface OperationAction {
+public final class EditSessionClassVisitor extends BaseClassVisitor {
+    private final static String DESCRIPTOR_CTOR = "(Lcom/sk89q/worldedit/util/eventbus/EventBus;Lcom/sk89q/worldedit/world/World;ILcom/sk89q/worldedit/extent/inventory/BlockBag;Lcom/sk89q/worldedit/event/extent/EditSessionEvent;)V";
 
-    void execute(Operation op);
+    private final SimpleValidator m_vCtor = new SimpleValidator("Constructor not injected");
+    
+    public EditSessionClassVisitor(ClassVisitor classVisitor) {
+        super(classVisitor);
+    }
+
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        if (isCtor(name) && isInternal(access) && descriptor.equals(DESCRIPTOR_CTOR)) {
+            m_vCtor.set();
+            
+            return cv.visitMethod(changeVisibility(access, Opcodes.ACC_PROTECTED), 
+                    name, descriptor, signature, exceptions);
+        }
+
+        return super.visitMethod(access, name, descriptor, signature, exceptions);
+    }
+
+    @Override
+    public void validate() throws RuntimeException {
+        m_vCtor.validate();
+    }
 }

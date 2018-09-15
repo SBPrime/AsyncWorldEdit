@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,26 +45,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sk89q.worldedit.extent.clipboard;
+package org.primesoft.asyncworldedit.injector;
 
-import com.sk89q.worldedit.regions.Region;
+import java.io.IOException;
+import org.objectweb.asm.ClassReader;
 
 /**
  *
  * @author SBPrime
  */
-public class BlockArrayClipboard extends InjectableClipboard implements Clipboard {
+public interface IClassInjector {
 
-    /**
-     * Create new instance of the clipboard
-     *
-     * @param region
-     */
-    public BlockArrayClipboard(Region region) {
-        super(region);
-    }
+    ClassReader getClassReader(String name) throws IOException;
 
-    public static Class<?> forceClassLoad() {
-        return BlockArrayClipboard.class;
-    }
+    Class<?> injectClass(String name, byte[] bin, int off, int len) throws ClassFormatError;
+    
 }

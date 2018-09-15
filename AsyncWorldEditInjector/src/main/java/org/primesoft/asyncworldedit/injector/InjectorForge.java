@@ -88,7 +88,7 @@ public class InjectorForge implements IInjectorPlatform {
         m_prefix = "[AsyncWorldEditInjector]";
         
         InjectorCore core = InjectorCore.getInstance();
-        core.initialize(this);
+        core.initialize(this, null);
     }
 
     @EventHandler

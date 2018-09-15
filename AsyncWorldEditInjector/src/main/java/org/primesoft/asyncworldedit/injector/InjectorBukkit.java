@@ -96,7 +96,7 @@ public class InjectorBukkit extends JavaPlugin implements IInjectorPlatform {
         m_prefix = String.format("[%s]", desc.getName());
 
         m_core = InjectorCore.getInstance();
-        m_core.initialize(this);
+        m_core.initialize(this, new ClassInjectorBukkit());
 
         log("Enabled");
     }

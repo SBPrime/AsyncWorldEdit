@@ -65,11 +65,11 @@ public class BaseOperationProcessor implements IOperationProcessor {
 
     @Override
     public <TException extends Exception> void process(Operation op, ExceptionOperationAction<TException> action) throws TException {
-        action.Execute(op);
+        action.execute(op);
     }
 
     @Override
     public void process(Operation op, OperationAction action) {
-        action.Execute(op);
+        action.execute(op);
     }
 }
