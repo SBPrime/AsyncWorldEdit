@@ -46,7 +46,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <move                                    
+                                <move
                                     file="src/main/java/org/primesoft/asyncworldedit/Loader.java.bak"
                                     tofile="src/main/java/org/primesoft/asyncworldedit/Loader.java" 
                                 />
@@ -139,7 +139,7 @@
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEditInjector</artifactId>
+            <artifactId>AsyncWorldEdit-Injector</artifactId>
             <version>[3.6.0-alpha-2, 3.6.0-beta)</version>
             <type>jar</type>
         </dependency>

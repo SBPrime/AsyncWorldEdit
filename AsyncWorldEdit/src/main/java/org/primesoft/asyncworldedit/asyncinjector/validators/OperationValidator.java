@@ -45,70 +45,89 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.async;
+package org.primesoft.asyncworldedit.asyncinjector.validators;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.math.transform.Transform;
-import com.sk89q.worldedit.regions.Region;
-import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
-import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
-import org.primesoft.asyncworldedit.worldedit.extent.clipboard.BiomeClipboard;
-import org.primesoft.asyncworldedit.worldedit.function.CascadeRegionFunction;
-import org.primesoft.asyncworldedit.worldedit.function.biome.ExtentBiomeCopy;
+import com.sk89q.worldedit.function.operation.Operation;
+import java.util.regex.Pattern;
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 
 /**
+ * Validate if operation should by asynced
  *
  * @author SBPrime
  */
-public class AsyncClassFactory extends BaseClassFactory {
+public class OperationValidator {
 
     /**
-     * The operation processor
+     * The blacklisted operations regexp
      */
-    private final AsyncOperationProcessor m_operationProcessor;
-    
-    private final AsyncJobProcessor m_jobProcessor;
-    
-    public AsyncClassFactory(IAsyncWorldEditCore aweCore)
-    {        
-        m_operationProcessor = new AsyncOperationProcessor(aweCore);
-        
-        m_jobProcessor = new AsyncJobProcessor(aweCore);
-    }
-    
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
-    }
-    
-    @Override
-    public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
+    private static final Pattern[] s_blackList;
+
+    /**
+     * The whitelisted operations regexp
+     */
+    private static final Pattern[] s_whiteList;
+
+    static {
+        //No operations are on the black list (for now!)
+        s_blackList = new Pattern[]{};
+
+        s_whiteList = new Pattern[]{
+            Pattern.compile(".*") //All operations are on the whitelist
+        };
     }
 
-    @Override
-    public Clipboard createClipboard(Region region) {
-        return new BiomeClipboard(region);
-    }
+    /**
+     * Is the operation enabled for asyncing
+     *
+     * @param op
+     * @return
+     */
+    public static boolean isValid(Operation op) {
+        boolean debugOn = ConfigProvider.messages().isDebugOn();
+        Class c = op.getClass();
+        String className = c.getName();
 
-    @Override
-    public RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, Vector from, Extent destination, Vector to, 
-            Transform currentTransform, boolean singleSet) {
-        ExtentBiomeCopy bc = new ExtentBiomeCopy(source, from, destination, to, currentTransform, singleSet);        
-        
-        return new CascadeRegionFunction(blockCopy, bc);
-    }
+        if (debugOn) {
+            log("****************************************************************");
+            log("* Validating operation");
+            log("****************************************************************");
+        }
+        try {
+            for (Pattern p : s_blackList) {
+                if (p.matcher(className).matches()) {
+                    if (debugOn) {
+                        log("*");
+                        log("* Found on blacklist");
+                        log(String.format("* Opeation:\t%1$s", className));
+                        log(String.format("* Pattern:\t%1$s", p.pattern()));
+                    }
+                    return false;
+                }
+            }
 
-    @Override
-    public void handleError(WorldEditException ex, String name) {
-        ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
+            for (Pattern p : s_whiteList) {
+                if (p.matcher(className).matches()) {
+                    if (debugOn) {
+                        log("*");
+                        log("* Found on whitelist");
+                        log(String.format("* Opeation:\t%1$s", className));
+                        log(String.format("* Pattern:\t%1$s", p.pattern()));
+                    }
+                    return true;
+                }
+            }
+
+            if (debugOn) {
+                log("*");
+                log("* No match found");
+            }
+            return false;
+        } finally {
+            if (debugOn) {
+                log("****************************************************************");
+            }
+        }
     }
 }

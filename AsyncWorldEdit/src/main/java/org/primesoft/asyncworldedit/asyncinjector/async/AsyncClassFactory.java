@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,44 +45,70 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector;
+package org.primesoft.asyncworldedit.asyncinjector.async;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.primesoft.asyncworldedit.injector.core.IInjectorPlatform;
-import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.function.RegionFunction;
+import com.sk89q.worldedit.math.transform.Transform;
+import com.sk89q.worldedit.regions.Region;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
+import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
+import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
+import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.worldedit.extent.clipboard.BiomeClipboard;
+import org.primesoft.asyncworldedit.worldedit.function.CascadeRegionFunction;
+import org.primesoft.asyncworldedit.worldedit.function.biome.ExtentBiomeCopy;
 
 /**
  *
  * @author SBPrime
  */
-public class InjectorManual implements IInjectorPlatform {
-    private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
-    private String m_prefix = null;
-    private final String m_logFormat = "%s %s";
-    private InjectorCore m_core;
+public class AsyncClassFactory extends BaseClassFactory {
+
+    /**
+     * The operation processor
+     */
+    private final AsyncOperationProcessor m_operationProcessor;
+    
+    private final AsyncJobProcessor m_jobProcessor;
+    
+    public AsyncClassFactory(IAsyncWorldEditCore aweCore)
+    {        
+        m_operationProcessor = new AsyncOperationProcessor(aweCore);
+        
+        m_jobProcessor = new AsyncJobProcessor(aweCore);
+    }
+    
+    @Override
+    public IOperationProcessor getOperationProcessor() {
+        return m_operationProcessor;
+    }
+    
+    @Override
+    public IJobProcessor getJobProcessor() {
+        return m_jobProcessor;
+    }
 
     @Override
-    public void log(String msg) {
-        if (s_log == null || msg == null || m_prefix == null) {
-            return;
-        }
-
-        s_log.log(Level.INFO, String.format(m_logFormat, m_prefix, msg));
+    public Clipboard createClipboard(Region region) {
+        return new BiomeClipboard(region);
     }
 
     @Override
-    public String getPlatformName() {
-        return "Manual";
+    public RegionFunction addBiomeCopy(RegionFunction blockCopy, 
+            Extent source, Vector from, Extent destination, Vector to, 
+            Transform currentTransform, boolean singleSet) {
+        ExtentBiomeCopy bc = new ExtentBiomeCopy(source, from, destination, to, currentTransform, singleSet);        
+        
+        return new CascadeRegionFunction(blockCopy, bc);
     }
 
-    public void onEnable() {
-        m_prefix = "[AsyncWorldEditInjector]";
-
-        m_core = InjectorCore.getInstance();
-        m_core.initialize(this, null);
-
-        log("Enabled");
+    @Override
+    public void handleError(WorldEditException ex, String name) {
+        ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
     }
-
 }

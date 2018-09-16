@@ -81,7 +81,6 @@ import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.IAwePlugin;
 import org.primesoft.asyncworldedit.api.inner.ILibraryLoader;
-import org.primesoft.asyncworldedit.injector.InjectorManual;
 import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
@@ -89,16 +88,12 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  * @author SBPrime
  */
 public abstract class Loader extends ClassLoader implements ILibraryLoader {
-
-    private final static double INJECTOR_MIN = 1.06;
-    private final static double INJECTOR_MAX = 1.07;
-
+    protected final static String PLUGIN_INJECTOR = "AsyncWorldEditInjector";
+    
     private final static String PREFIX = "org.primesoft.asyncworldedit";
     private final static String API = ".api.";
     private final static int BUF_SIZE = 0x10000;
 
-    protected final static String PLUGIN_INJECTOR = "AsyncWorldEditInjector";
-    private final static String PLUGIN_INJECTOR_JAR = "AsyncWorldEditInjector.jar";
     private final static String INSTALLED = "installed";
     private final static String LICENSE = "license.txt";
 
@@ -394,19 +389,9 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
             }
         }
 
-        if (!checkInjector()) {
-            log("AsyncWorldEdit Injector not detected. Installing...");
-            if (!extract(PLUGIN_INJECTOR_JAR, pluginFolder, PLUGIN_INJECTOR_JAR)) {
-                log("ERROR: Unable to extract the Injector");
-                return false;
-            }
-
-            if (!injectClass(new File(pluginFolder, PLUGIN_INJECTOR_JAR))) {
-                log("ERROR: Unable to load the injector");
-                return false;
-            }
-
-            new InjectorManual().onEnable();
+        if (checkInjector()) {
+            log("ERROR: AsyncWorldEdit Injector detected. This version of AsyncWorldEdit does not require the injector, please remove it.");            
+            return false;
         }
 
         File installed = new File(dataFolder, INSTALLED);
@@ -681,30 +666,9 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
     }
 
     /**
-     * Try to get the injector version
-     *
-     * @return Returns the injector version or -1 if not found
-     */
-    protected abstract double getInjectorVersion();
-
-    /**
      * Check if the injector is installed
      *
      * @return
      */
-    private boolean checkInjector() {
-        double version = getInjectorVersion();
-
-        if (version < 0) {
-            return false;
-        }
-        
-        if (version < INJECTOR_MIN || version >= INJECTOR_MAX) {
-            log(String.format("Invalid injecotr version. Current version: %1$s. Valid version: <%2$s, %3$s).",
-                    version, INJECTOR_MIN, INJECTOR_MAX));
-            return false;
-        }
-
-        return true;
-    }
+    protected abstract boolean checkInjector();
 }

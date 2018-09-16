@@ -53,15 +53,12 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IAwePlugin;
-import org.primesoft.asyncworldedit.injector.InjectorBukkit;
-import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
 /**
  *
  * @author SBPrime
  */
 class LoaderBukkit extends Loader {
-
     private final static String PLUGIN_ACTIONBAR = "AsyncWorldEdit-ActionBarAPI.jar";
     private final static String PLUGIN_BOUNTIFULAPI = "AsyncWorldEdit-BountifulAPI.jar";
     private final static String PLUGIN_TITLEMANAGER = "AsyncWorldEdit-TitleManager.jar";
@@ -90,32 +87,10 @@ class LoaderBukkit extends Loader {
     }
 
     @Override
-    protected double getInjectorVersion() {
+    protected boolean checkInjector() {
         Plugin plugin = m_pluginManager.getPlugin(PLUGIN_INJECTOR);
-
-        try {
-            InjectorCore injector = null;
-
-            if (plugin != null) {
-                InjectorBukkit platform = plugin instanceof InjectorBukkit ? (InjectorBukkit) plugin : null;
-
-                if (platform != null) {
-                    injector = platform.getCore();
-                }
-            }
-
-            if (injector == null) {
-                injector = InjectorCore.getInstance();
-            }
-
-            if (injector == null) {
-                return -1;
-            }
-
-            return injector.getVersion();
-        } catch (Error ex) {
-            return -1;
-        }
+        
+        return plugin != null;
     }
 
     @Override

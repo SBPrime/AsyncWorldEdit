@@ -52,8 +52,8 @@ import java.util.Collections;
 import java.util.List;
 import org.bukkit.Server;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
-import org.primesoft.asyncworldedit.injector.scanner.ClassScannerEntry;
+import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScanner;
+import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScannerEntry;
 
 /**
  *

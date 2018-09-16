@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,89 +45,90 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.validators;
+package org.primesoft.asyncworldedit.asyncinjector.scanner;
 
-import com.sk89q.worldedit.function.operation.Operation;
+import java.lang.reflect.Field;
 import java.util.regex.Pattern;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 
 /**
- * Validate if operation should by asynced
  *
  * @author SBPrime
  */
-public class OperationValidator {
+public class ClassScannerEntry {
 
-    /**
-     * The blacklisted operations regexp
-     */
-    private static final Pattern[] s_blackList;
+    private final Class<?> m_cls;
+    private final Pattern[] m_fields;
 
-    /**
-     * The whitelisted operations regexp
-     */
-    private static final Pattern[] s_whiteList;
-
-    static {
-        //No operations are on the black list (for now!)
-        s_blackList = new Pattern[]{};
-
-        s_whiteList = new Pattern[]{
-            Pattern.compile(".*") //All operations are on the whitelist
-        };
+    private static Class<?> getClass(String name) {
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException ex) {
+            log(String.format("Warning: Unable to get class %1$s", name));
+            return null;
+        }
     }
 
-    /**
-     * Is the operation enabled for asyncing
-     *
-     * @param op
-     * @return
-     */
-    public static boolean isValid(Operation op) {
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
-        Class c = op.getClass();
-        String className = c.getName();
-
-        if (debugOn) {
-            log("****************************************************************");
-            log("* Validating operation");
-            log("****************************************************************");
+    public ClassScannerEntry(Class<?> cls, String[] fields) {
+        m_cls = cls;
+        if (fields == null) {
+            fields = new String[0];
         }
-        try {
-            for (Pattern p : s_blackList) {
-                if (p.matcher(className).matches()) {
-                    if (debugOn) {
-                        log("*");
-                        log("* Found on blacklist");
-                        log(String.format("* Opeation:\t%1$s", className));
-                        log(String.format("* Pattern:\t%1$s", p.pattern()));
-                    }
-                    return false;
-                }
-            }
 
-            for (Pattern p : s_whiteList) {
-                if (p.matcher(className).matches()) {
-                    if (debugOn) {
-                        log("*");
-                        log("* Found on whitelist");
-                        log(String.format("* Opeation:\t%1$s", className));
-                        log(String.format("* Pattern:\t%1$s", p.pattern()));
-                    }
-                    return true;
-                }
-            }
+        m_fields = new Pattern[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            m_fields[i] = Pattern.compile(fields[i]);
+        }
+    }
 
-            if (debugOn) {
-                log("*");
-                log("* No match found");
-            }
+    public ClassScannerEntry(Class<?> cls, String field) {
+        this(cls, new String[]{field});
+    }
+
+    public ClassScannerEntry(Class<?> cls) {
+        this(cls, (String[]) null);
+    }
+
+    public ClassScannerEntry(String cls, String[] fields) {
+        this(getClass(cls), fields);
+    }
+
+    public ClassScannerEntry(String cls, String field) {
+        this(cls, new String[]{field});
+    }
+
+    public ClassScannerEntry(String cls) {
+        this(cls, (String[]) null);
+    }
+
+    public boolean isMatch(Class<?> c) {
+        return isMatch(c, null);
+    }
+
+    public boolean isMatch(Class<?> c, Field f) {
+        if (c == null || m_cls == null) {
             return false;
-        } finally {
-            if (debugOn) {
-                log("****************************************************************");
+        }
+
+        if (!m_cls.isAssignableFrom(c)) {
+            return false;
+        }
+
+        if (f == null) {
+            if (m_fields == null || m_fields.length == 0) {
+                return true;
+            } else {
+                return false;
             }
         }
+
+        String fName = f.getName();
+        for (Pattern p : m_fields) {            
+            if (p.matcher(fName).matches()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

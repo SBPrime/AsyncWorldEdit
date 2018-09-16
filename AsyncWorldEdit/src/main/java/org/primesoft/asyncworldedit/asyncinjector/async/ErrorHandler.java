@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,49 +45,55 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.scanner;
+package org.primesoft.asyncworldedit.asyncinjector.async;
 
-import java.lang.reflect.Field;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.history.changeset.ChangeSet;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.strings.MessageType;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.utils.SessionCanceled;
+import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 /**
  *
  * @author SBPrime
  */
-public class ScannerQueueEntry {
-
-    private final Object m_parent;
-    private final Object m_value;
-    private final Class<?> m_valueClass;
-    private final Field m_field;
-
-    public ScannerQueueEntry(Object value, Object parent, Field field) {
-        /*
-         * String sParent = parent == null ? 
-         *        "null:null" : (parent.hashCode() + ":" + parent.getClass().getName());
-         * String sValue = value == null ?
-         *        "null:null" : (value.hashCode() + ":" + value.getClass().getName());
-         * String sField = field != null ? field.getName() : "";
-         * 
-         */        
-        m_parent = parent;
-        m_value = value;
-        m_valueClass = value != null ? value.getClass() : null;
-        m_field = field;
-    }
-
-    public Object getParent() {
-        return m_parent;
-    }
-
-    public Class<?> getValueClass() {
-        return m_valueClass;
-    }
+public class ErrorHandler {
     
-    public Object getValue() {
-        return m_value;
+    /**
+     * Handle operation errors
+     *
+     * @param playerEntry
+     * @param name
+     * @param session
+     * @param ex
+     * @return
+     */
+    public static int handleError(IPlayerEntry playerEntry, String name,
+            CancelabeEditSession session, Exception ex) {        
+        
+        Throwable inner = ex.getCause();
+        if (ex instanceof SessionCanceled || inner instanceof SessionCanceled) {
+            playerEntry.say(MessageType.BLOCK_PLACER_CANCELED.format());
+        } else if (ex instanceof MaxChangedBlocksException || inner instanceof MaxChangedBlocksException) {
+            playerEntry.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
+        } else {
+            ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
+            //Silently discard other errors :(
+            return 0;
+        }
+
+        if (session == null) {
+            return 0;
+        }
+
+        ChangeSet cs = session.getChangeSet();
+        if (cs == null) {
+            return 0;
+        }
+
+        return cs.size();
     }
 
-    public Field getField() {
-        return m_field;
-    }
 }

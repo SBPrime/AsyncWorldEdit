@@ -45,7 +45,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.validators;
+package org.primesoft.asyncworldedit.asyncinjector.validators;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

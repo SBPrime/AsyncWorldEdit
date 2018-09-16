@@ -45,7 +45,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.scanner;
+package org.primesoft.asyncworldedit.asyncinjector.scanner;
 
 import com.sk89q.util.yaml.YAMLNode;
 import com.sk89q.worldedit.BlockVector;

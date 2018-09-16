@@ -55,7 +55,7 @@ import java.util.List;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IClassScanner;
 import org.primesoft.asyncworldedit.api.inner.IClassScannerResult;
-import org.primesoft.asyncworldedit.injector.scanner.ClassScannerResult;
+import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScannerResult;
 import org.primesoft.asyncworldedit.worldedit.extent.MultiThreadExtent;
 
 /**

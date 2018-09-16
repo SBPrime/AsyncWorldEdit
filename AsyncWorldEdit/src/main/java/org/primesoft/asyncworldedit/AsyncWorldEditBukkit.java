@@ -66,6 +66,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.ILogger;
+import org.primesoft.asyncworldedit.injector.core.IInjectorPlatform;
 import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
@@ -82,7 +83,8 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
 
     private static final String FAWE = "com.boydti.fawe.";
     
-    private static final String CORE = "org.primesoft.asyncworldedit.platform.bukkit.core.BukkitAsyncWorldEditCore";
+    private static final String CLS_CORE = "org.primesoft.asyncworldedit.platform.bukkit.core.BukkitAsyncWorldEditCore";
+    private static final String CLS_INJECTOR = "org.primesoft.asyncworldedit.injector.InjectorBukkit";
 
     private static final Logger s_log;
 
@@ -230,6 +232,11 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
         m_console = server.getConsoleSender();
 
         final Loader loader = new LoaderBukkit(this);
+        IInjectorPlatform injector = createInjector(loader);
+        if (injector == null) {
+            return;
+        }
+        injector.onEnable();
 
         if (!loader.install()) {
             log("ERROR: Unable to install the plugin.");
@@ -241,15 +248,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
             return;
         }
 
-        Constructor<?> ctorCore = null;
-        try {
-            Class<?> clsAweCore = loader.loadClass(CORE);
-            ctorCore = Reflection.findConstructor(clsAweCore, "Unable to find core constructor", Plugin.class);
-        } catch (ClassNotFoundException ex) {
-            log("ERROR: Unable to create AWE core, plugin disabled");
-        }
-
-        m_api = ctorCore != null ? Reflection.create(IAsyncWorldEditCore.class, ctorCore, "Unable to create AWE Core", this) : null;
+        m_api = createCore(loader);
 
         if (m_api != null) {
             m_api.initialize();
@@ -266,6 +265,34 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
         m_loader = loader;
 
         log("Enabled");
+    }
+
+    private IAsyncWorldEditCore createCore(final Loader loader) {
+        Constructor<?> ctor;
+        try {
+            Class<?> cls = loader.loadClass(CLS_CORE);
+            ctor = Reflection.findConstructor(cls, "Unable to find core constructor", Plugin.class);
+        } catch (ClassNotFoundException ex) {
+            log("ERROR: Unable to create AWE core, plugin disabled");
+            
+            return null;
+        }
+        
+        return Reflection.create(IAsyncWorldEditCore.class, ctor, "Unable to create AWE Core", this);
+    }
+    
+    private IInjectorPlatform createInjector(final Loader loader) {
+        Constructor<?> ctor;
+        try {
+            Class<?> clsAweCore = loader.loadClass(CLS_INJECTOR);
+            ctor = Reflection.findConstructor(clsAweCore, "Unable to find ijector constructor");
+        } catch (ClassNotFoundException ex) {
+            log("ERROR: Unable to create AWE Injector, plugin disabled");
+            
+            return null;
+        }
+        
+        return Reflection.create(IInjectorPlatform.class, ctor, "Unable to create AWE Injector");
     }
 
     @Override

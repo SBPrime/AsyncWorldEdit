@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,90 +45,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.scanner;
+package org.primesoft.asyncworldedit.asyncinjector.scanner;
 
 import java.lang.reflect.Field;
-import java.util.regex.Pattern;
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
+import org.primesoft.asyncworldedit.api.inner.IClassScannerResult;
 
 /**
  *
  * @author SBPrime
  */
-public class ClassScannerEntry {
+public class ClassScannerResult implements IClassScannerResult {
 
-    private final Class<?> m_cls;
-    private final Pattern[] m_fields;
+    private final Object m_owner;
 
-    private static Class<?> getClass(String name) {
-        try {
-            return Class.forName(name);
-        } catch (ClassNotFoundException ex) {
-            log(String.format("Warning: Unable to get class %1$s", name));
-            return null;
-        }
+    private final Field m_field;
+
+    private final Object m_value;
+    
+    private final Class<?> m_type;
+
+    public ClassScannerResult(Object value, Class<?> type, Object owner, Field field) {
+        m_owner = owner;
+        m_field = field;
+        m_value = value;
+        m_type = type;
     }
 
-    public ClassScannerEntry(Class<?> cls, String[] fields) {
-        m_cls = cls;
-        if (fields == null) {
-            fields = new String[0];
-        }
-
-        m_fields = new Pattern[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            m_fields[i] = Pattern.compile(fields[i]);
-        }
+    @Override
+    public Object getOwner() {
+        return m_owner;
     }
 
-    public ClassScannerEntry(Class<?> cls, String field) {
-        this(cls, new String[]{field});
+    @Override
+    public Field getField() {
+        return m_field;
     }
 
-    public ClassScannerEntry(Class<?> cls) {
-        this(cls, (String[]) null);
+    @Override
+    public Object getValue() {
+        return m_value;
     }
-
-    public ClassScannerEntry(String cls, String[] fields) {
-        this(getClass(cls), fields);
-    }
-
-    public ClassScannerEntry(String cls, String field) {
-        this(cls, new String[]{field});
-    }
-
-    public ClassScannerEntry(String cls) {
-        this(cls, (String[]) null);
-    }
-
-    public boolean isMatch(Class<?> c) {
-        return isMatch(c, null);
-    }
-
-    public boolean isMatch(Class<?> c, Field f) {
-        if (c == null || m_cls == null) {
-            return false;
-        }
-
-        if (!m_cls.isAssignableFrom(c)) {
-            return false;
-        }
-
-        if (f == null) {
-            if (m_fields == null || m_fields.length == 0) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        String fName = f.getName();
-        for (Pattern p : m_fields) {            
-            if (p.matcher(fName).matches()) {
-                return true;
-            }
-        }
-
-        return false;
+    
+    @Override
+    public Class<?> getType() {
+        return m_type;
     }
 }

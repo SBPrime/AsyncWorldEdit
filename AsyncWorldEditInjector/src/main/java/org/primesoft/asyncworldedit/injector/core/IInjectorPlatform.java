@@ -59,4 +59,6 @@ public interface IInjectorPlatform {
     String getPlatformName();
     
     void log(String s);
+    
+    void onEnable();
 }

@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,55 +45,81 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.async;
+package org.primesoft.asyncworldedit.asyncinjector.validators;
 
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.history.changeset.ChangeSet;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.strings.MessageType;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
-import org.primesoft.asyncworldedit.utils.SessionCanceled;
-import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
+import java.util.regex.Pattern;
 
 /**
+ * Stack trace validator entry
  *
  * @author SBPrime
  */
-public class ErrorHandler {
+public class StackValidatorEntry {
+    /**
+     * Regexp for whitelisted methods
+     */
+    private final Pattern[] m_methodWhiteRegexp;
     
     /**
-     * Handle operation errors
-     *
-     * @param playerEntry
-     * @param name
-     * @param session
-     * @param ex
-     * @return
+     * Regexp for blacklisted methods
      */
-    public static int handleError(IPlayerEntry playerEntry, String name,
-            CancelabeEditSession session, Exception ex) {        
-        
-        Throwable inner = ex.getCause();
-        if (ex instanceof SessionCanceled || inner instanceof SessionCanceled) {
-            playerEntry.say(MessageType.BLOCK_PLACER_CANCELED.format());
-        } else if (ex instanceof MaxChangedBlocksException || inner instanceof MaxChangedBlocksException) {
-            playerEntry.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
-        } else {
-            ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
-            //Silently discard other errors :(
-            return 0;
-        }
+    private final Pattern[] m_methodBlackRegexp;
+    
+    /**
+     * The class regexp
+     */
+    private final Pattern m_classRegexp;
 
-        if (session == null) {
-            return 0;
-        }
-
-        ChangeSet cs = session.getChangeSet();
-        if (cs == null) {
-            return 0;
-        }
-
-        return cs.size();
+    public Pattern[] getMethodWhiteList() {
+        return m_methodWhiteRegexp;
     }
 
+    public Pattern[] getMethodBlackList() {
+        return m_methodBlackRegexp;
+    }
+
+    
+    public Pattern getClassPattern() {
+        return m_classRegexp;
+    }
+    
+    public String getOperationName(String name) {
+        return name;
+    }
+
+    public StackValidatorEntry(String classRegexp,
+            String[] methodWhiteList, String[] methodBlackList) {
+        m_methodWhiteRegexp = new Pattern[methodWhiteList.length];
+        m_methodBlackRegexp = new Pattern[methodBlackList.length];
+
+        for (int i = 0; i < methodWhiteList.length; i++) {
+            m_methodWhiteRegexp[i] = Pattern.compile(methodWhiteList[i]);
+        }
+
+        for (int i = 0; i < methodBlackList.length; i++) {
+            m_methodBlackRegexp[i] = Pattern.compile(methodBlackList[i]);
+        }
+
+        m_classRegexp = Pattern.compile(classRegexp);
+    }
+
+    public StackValidatorEntry(String classRegexp, String methodAllow, String methodDeny) {
+        this(classRegexp, new String[]{methodAllow}, new String[]{methodDeny});
+    }
+
+    public StackValidatorEntry(String classRegexp, String[] methodWhiteList, String methodDeny) {
+        this(classRegexp, methodWhiteList, new String[]{methodDeny});
+    }
+
+    public StackValidatorEntry(String classRegexp, String methodAllow, String[] methodBlackList) {
+        this(classRegexp, new String[]{methodAllow}, methodBlackList);
+    }
+
+    public StackValidatorEntry(String classRegexp, String methodAllow) {
+        this(classRegexp, new String[]{methodAllow}, new String[0]);
+    }
+
+    public StackValidatorEntry(String classRegexp) {
+        this(classRegexp, new String[0], new String[0]);
+    }
 }

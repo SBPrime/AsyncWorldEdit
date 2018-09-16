@@ -45,13 +45,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.async;
+package org.primesoft.asyncworldedit.asyncinjector.async;
 
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import org.primesoft.asyncworldedit.injector.validators.OperationValidator;
-import org.primesoft.asyncworldedit.injector.validators.StackValidator;
+import org.primesoft.asyncworldedit.asyncinjector.validators.OperationValidator;
+import org.primesoft.asyncworldedit.asyncinjector.validators.StackValidator;
 import com.sk89q.worldedit.function.operation.Operation;
-import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -66,8 +65,8 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
-import org.primesoft.asyncworldedit.injector.scanner.ClassScanner;
-import org.primesoft.asyncworldedit.injector.scanner.ClassScannerResult;
+import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScanner;
+import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScannerResult;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.OperationAction;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;

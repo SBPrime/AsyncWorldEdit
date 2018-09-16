@@ -45,81 +45,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.validators;
+package org.primesoft.asyncworldedit.asyncinjector.scanner;
 
-import java.util.regex.Pattern;
+import java.lang.reflect.Field;
 
 /**
- * Stack trace validator entry
  *
  * @author SBPrime
  */
-public class StackValidatorEntry {
-    /**
-     * Regexp for whitelisted methods
-     */
-    private final Pattern[] m_methodWhiteRegexp;
+public class ScannerQueueEntry {
+
+    private final Object m_parent;
+    private final Object m_value;
+    private final Class<?> m_valueClass;
+    private final Field m_field;
+
+    public ScannerQueueEntry(Object value, Object parent, Field field) {
+        /*
+         * String sParent = parent == null ? 
+         *        "null:null" : (parent.hashCode() + ":" + parent.getClass().getName());
+         * String sValue = value == null ?
+         *        "null:null" : (value.hashCode() + ":" + value.getClass().getName());
+         * String sField = field != null ? field.getName() : "";
+         * 
+         */        
+        m_parent = parent;
+        m_value = value;
+        m_valueClass = value != null ? value.getClass() : null;
+        m_field = field;
+    }
+
+    public Object getParent() {
+        return m_parent;
+    }
+
+    public Class<?> getValueClass() {
+        return m_valueClass;
+    }
     
-    /**
-     * Regexp for blacklisted methods
-     */
-    private final Pattern[] m_methodBlackRegexp;
-    
-    /**
-     * The class regexp
-     */
-    private final Pattern m_classRegexp;
-
-    public Pattern[] getMethodWhiteList() {
-        return m_methodWhiteRegexp;
+    public Object getValue() {
+        return m_value;
     }
 
-    public Pattern[] getMethodBlackList() {
-        return m_methodBlackRegexp;
-    }
-
-    
-    public Pattern getClassPattern() {
-        return m_classRegexp;
-    }
-    
-    public String getOperationName(String name) {
-        return name;
-    }
-
-    public StackValidatorEntry(String classRegexp,
-            String[] methodWhiteList, String[] methodBlackList) {
-        m_methodWhiteRegexp = new Pattern[methodWhiteList.length];
-        m_methodBlackRegexp = new Pattern[methodBlackList.length];
-
-        for (int i = 0; i < methodWhiteList.length; i++) {
-            m_methodWhiteRegexp[i] = Pattern.compile(methodWhiteList[i]);
-        }
-
-        for (int i = 0; i < methodBlackList.length; i++) {
-            m_methodBlackRegexp[i] = Pattern.compile(methodBlackList[i]);
-        }
-
-        m_classRegexp = Pattern.compile(classRegexp);
-    }
-
-    public StackValidatorEntry(String classRegexp, String methodAllow, String methodDeny) {
-        this(classRegexp, new String[]{methodAllow}, new String[]{methodDeny});
-    }
-
-    public StackValidatorEntry(String classRegexp, String[] methodWhiteList, String methodDeny) {
-        this(classRegexp, methodWhiteList, new String[]{methodDeny});
-    }
-
-    public StackValidatorEntry(String classRegexp, String methodAllow, String[] methodBlackList) {
-        this(classRegexp, new String[]{methodAllow}, methodBlackList);
-    }
-
-    public StackValidatorEntry(String classRegexp, String methodAllow) {
-        this(classRegexp, new String[]{methodAllow}, new String[0]);
-    }
-
-    public StackValidatorEntry(String classRegexp) {
-        this(classRegexp, new String[0], new String[0]);
+    public Field getField() {
+        return m_field;
     }
 }

@@ -49,7 +49,7 @@
         <!-- Injector -->
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEditInjector</artifactId>
+            <artifactId>AsyncWorldEdit-Injector</artifactId>
             <version>[3.6.0-alpha-2, 3.6.0-beta)</version>
         </dependency>
 

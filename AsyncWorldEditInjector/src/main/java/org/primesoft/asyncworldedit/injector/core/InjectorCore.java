@@ -211,7 +211,7 @@ public class InjectorCore {
      * @return
      */
     public double getVersion() {
-        return 1.0600;
+        return 2.0000;
     }
 
     private void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
@@ -248,9 +248,9 @@ public class InjectorCore {
 
         byte[] data = classWriter.toByteArray();
 
-        try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
             dout.write(data);
-        }
+        }*/
 
         m_classInjector.injectClass(className, data, 0, data.length);
     }
@@ -258,9 +258,9 @@ public class InjectorCore {
     private void createClasses(String className, ClassWriter classWriter) throws IOException {
         byte[] data = classWriter.toByteArray();
 
-        try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
             dout.write(data);
-        }
+        }*/
 
         m_classInjector.injectClass(className, data, 0, data.length);
     }

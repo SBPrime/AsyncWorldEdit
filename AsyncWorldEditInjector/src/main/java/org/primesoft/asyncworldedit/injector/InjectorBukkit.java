@@ -51,10 +51,7 @@
  */
 package org.primesoft.asyncworldedit.injector;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.primesoft.asyncworldedit.LoggerProvider;
 import org.primesoft.asyncworldedit.injector.core.IInjectorPlatform;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
@@ -62,10 +59,7 @@ import org.primesoft.asyncworldedit.injector.core.InjectorCore;
  *
  * @author SBPrime
  */
-public class InjectorBukkit extends JavaPlugin implements IInjectorPlatform {
-    private static final Logger s_log = Logger.getLogger("Minecraft.AWE");
-    private String m_prefix = null;
-    private final String m_logFormat = "%s %s";
+public class InjectorBukkit implements IInjectorPlatform {
     private InjectorCore m_core;
 
     @Override
@@ -75,34 +69,14 @@ public class InjectorBukkit extends JavaPlugin implements IInjectorPlatform {
 
     @Override
     public void log(String msg) {
-        if (s_log == null || msg == null || m_prefix == null) {
-            return;
-        }
-
-        s_log.log(Level.INFO, String.format(m_logFormat, m_prefix, msg));
-    }
-
-    /**
-     * The injector core
-     * @return 
-     */
-    public InjectorCore getCore() {
-        return m_core;
+        LoggerProvider.log(msg);
     }
 
     @Override
     public void onEnable() {
-        PluginDescriptionFile desc = getDescription();
-        m_prefix = String.format("[%s]", desc.getName());
-
         m_core = InjectorCore.getInstance();
         m_core.initialize(this, new ClassInjectorBukkit());
 
-        log("Enabled");
-    }
-
-    @Override
-    public void onDisable() {
-        log("Disabled");
+        log("Injector Enabled");
     }
 }

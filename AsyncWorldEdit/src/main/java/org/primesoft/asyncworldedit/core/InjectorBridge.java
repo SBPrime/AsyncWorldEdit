@@ -47,12 +47,9 @@
  */
 package org.primesoft.asyncworldedit.core;
 
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
-import org.primesoft.asyncworldedit.injector.InjectorBukkit;
-import org.primesoft.asyncworldedit.injector.async.AsyncClassFactory;
+import org.primesoft.asyncworldedit.asyncinjector.async.AsyncClassFactory;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
-import org.primesoft.asyncworldedit.platform.api.IPlatform;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -79,7 +76,7 @@ public class InjectorBridge {
      */
     public static InjectorBridge initialize(IAsyncWorldEditCore aweCore) {
         try {
-            InjectorCore injector = getAWEInjector(aweCore.getPlatform());
+            InjectorCore injector = InjectorCore.getInstance();
 
             if (injector == null) {
                 return null;
@@ -90,27 +87,5 @@ public class InjectorBridge {
             ExceptionHelper.printException(ex, "AsyncWorldEditInjector not found.");
             return null;
         }
-    }
-
-    /**
-     * Get instance of the world edit plugin
-     *
-     * @param plugin
-     * @return
-     */
-    private static InjectorCore getAWEInjector(IPlatform platform) {        
-        final Object wPlugin = platform.getPlugin("AsyncWorldEditInjector");
-
-        if ((wPlugin == null) || (!(wPlugin instanceof InjectorBukkit))) {
-            log("AsyncWorldEditInjector plugin not found, trying to initialize using static instances...");
-            try {
-                return InjectorCore.getInstance();
-            } catch (Error ex) {
-                ExceptionHelper.printException(ex, "AsyncWorldEditInjector not found.");
-                return null;
-            }
-        }
-
-        return ((InjectorBukkit) wPlugin).getCore();
     }
 }

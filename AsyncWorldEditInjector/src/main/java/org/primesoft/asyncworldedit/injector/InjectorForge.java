@@ -114,4 +114,9 @@ public class InjectorForge implements IInjectorPlatform {
         s_log.info(String.format(m_logFormat, m_prefix, msg));
     }
 
+    @Override
+    public void onEnable() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
