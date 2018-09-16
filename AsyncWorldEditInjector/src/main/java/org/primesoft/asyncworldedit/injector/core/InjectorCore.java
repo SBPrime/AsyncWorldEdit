@@ -227,9 +227,9 @@ public class InjectorCore {
 
         byte[] data = classWriter.toByteArray();
 
-        try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
             dout.write(data);
-        }
+        }*/
 
         m_classInjector.injectClass(className, data, 0, data.length);
     }

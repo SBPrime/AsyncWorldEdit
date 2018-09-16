@@ -1,6 +1,6 @@
 name: AsyncWorldEdit-ActionBarAPI
 main: org.primesoft.asyncworldedit.progressDisplay.ActionBarAPIBackend
-version: 3.6.0-alpha-2
+version: 3.6.0-alpha-3
 api-version: 1.13
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki

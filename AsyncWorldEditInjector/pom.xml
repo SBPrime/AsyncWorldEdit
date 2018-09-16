@@ -6,7 +6,7 @@
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit-Injector</artifactId>
 
-    <version>3.6.0-alpha-2</version>
+    <version>3.6.0-alpha-3</version>
 
     <packaging>jar</packaging>
     
@@ -99,7 +99,7 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-Utils</artifactId>
-            <version>[3.6.0-alpha-2, 3.6.0-beta)</version>
+            <version>[3.6.0-alpha-3, 3.6.0-beta)</version>
             <type>jar</type>
         </dependency>
     </dependencies>    
