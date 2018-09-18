@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -96,34 +97,29 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         if (isCtor(name)) {
             return new MethodVisitor(api, super.visitMethod(access, name, descriptor, signature, exceptions)) {
-                private boolean m_isDone = false;
-                
                 @Override
-                public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-                    super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+                public void visitInsn(int opcode) {
+                    if (opcode == Opcodes.RETURN) {
+                        super.visitVarInsn(Opcodes.ALOAD, 0);
+                        super.visitTypeInsn(Opcodes.NEW, IC_DESCRIPTOR);
+                        super.visitInsn(Opcodes.DUP);
+                        super.visitVarInsn(Opcodes.ALOAD, 0);
+                        super.visitMethodInsn(Opcodes.INVOKESPECIAL,
+                                IC_DESCRIPTOR,
+                                "<init>",
+                                "(L" + m_clsDescriptor + ";)V",
+                                false);
+                        super.visitVarInsn(Opcodes.ALOAD, 1);
+                        super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                Type.getInternalName(Helpers.class),
+                                "createClipboard",
+                                "(Lcom/sk89q/worldedit/extent/clipboard/Clipboard;Lcom/sk89q/worldedit/regions/Region;)Lcom/sk89q/worldedit/extent/clipboard/Clipboard;",
+                                false);
 
-                    if (opcode != Opcodes.INVOKESPECIAL || !isCtor(name) || m_isDone) {
-                        return;
+                        super.visitFieldInsn(Opcodes.PUTFIELD, m_clsDescriptor, "m_injected", Type.getDescriptor(Clipboard.class));
                     }
 
-                    super.visitVarInsn(Opcodes.ALOAD, 0);
-                    super.visitTypeInsn(Opcodes.NEW, IC_DESCRIPTOR);
-                    super.visitInsn(Opcodes.DUP);
-                    super.visitVarInsn(Opcodes.ALOAD, 0);
-                    super.visitMethodInsn(Opcodes.INVOKESPECIAL,
-                            IC_DESCRIPTOR,
-                            "<init>",
-                            "(L" + m_clsDescriptor + ";)V",
-                            false);
-                    super.visitVarInsn(Opcodes.ALOAD, 1);
-                    super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                            Type.getInternalName(Helpers.class),
-                            "createClipboard",
-                            "(Lcom/sk89q/worldedit/extent/clipboard/Clipboard;Lcom/sk89q/worldedit/regions/Region;)Lcom/sk89q/worldedit/extent/clipboard/Clipboard;",
-                            false);
-
-                    super.visitFieldInsn(Opcodes.PUTFIELD, m_clsDescriptor, "m_injected", Type.getDescriptor(Clipboard.class));
-                    m_isDone = true;
+                    super.visitInsn(opcode);
                 }
             };
         }
@@ -229,19 +225,37 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
 
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, m_clsDescriptor, "m_injected", Type.getDescriptor(Clipboard.class));
+        
+        Label lTrue = new Label();
+        mv.visitJumpInsn(Opcodes.IFNULL, lTrue);
+        
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, m_clsDescriptor, "m_injected", Type.getDescriptor(Clipboard.class));
 
         for (int i = 0; i < getArgsCount(descriptor); i++) {
             mv.visitVarInsn(Opcodes.ALOAD, i + 1);
         }
-
+        
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE,
                 clsName,
                 name, descriptor,
                 true);
-
         visitReturn(resultType, mv);
-
+        
+        mv.visitLabel(lTrue);
+        
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        for (int i = 0; i < getArgsCount(descriptor); i++) {
+            mv.visitVarInsn(Opcodes.ALOAD, i + 1);
+        }        
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                m_clsDescriptor,
+                RANDOM_PREFIX + name, descriptor,
+                false);
+        visitReturn(resultType, mv);
+        
         mv.visitCode();
+        
         mv.visitMaxs(1, 1);
         mv.visitEnd();
     }
