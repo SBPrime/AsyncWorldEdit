@@ -49,25 +49,34 @@ package org.primesoft.asyncworldedit.worldedit.extent.clipboard;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.entity.BaseEntity;
+import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BaseBiome;
-import org.primesoft.asyncworldedit.injector.classfactory.base.clipboard.BlockArrayClipboard;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import java.util.List;
 
 /**
  *
  * @author SBPrime
  */
-public class BiomeClipboard extends BlockArrayClipboard implements Clipboard {
+public final class BiomeClipboard implements Clipboard {
 
     private final BaseBiome[][] m_biomes;
     private final Region m_region;
     private final int m_minY;
     private final int m_minX;
     private final int m_minZ;
+    private final Clipboard m_parent;
 
-    public BiomeClipboard(Region region) {
-        super(region);
+    public BiomeClipboard(Clipboard parent, Region region) {
+        m_parent = parent;
 
         Vector dimensions = getDimensions();
         m_biomes = new BaseBiome[dimensions.getBlockX()][dimensions.getBlockZ()];
@@ -101,5 +110,70 @@ public class BiomeClipboard extends BlockArrayClipboard implements Clipboard {
         
         m_biomes[position.getBlockX() - m_minX][position.getBlockZ() - m_minZ] = new BaseBiome(biome);
         return true;
+    }
+
+    @Override
+    public Region getRegion() {
+        return m_parent.getRegion();
+    }
+
+    @Override
+    public Vector getDimensions() {
+        return m_parent.getDimensions();
+    }
+
+    @Override
+    public Vector getOrigin() {
+        return m_parent.getOrigin();
+    }
+
+    @Override
+    public void setOrigin(Vector origin) {
+        m_parent.setOrigin(origin);
+    }
+
+    @Override
+    public Vector getMinimumPoint() {
+        return m_parent.getMinimumPoint();
+    }
+
+    @Override
+    public Vector getMaximumPoint() {
+        return m_parent.getMaximumPoint();
+    }
+
+    @Override
+    public List<? extends Entity> getEntities(Region region) {
+        return m_parent.getEntities(region);
+    }
+
+    @Override
+    public List<? extends Entity> getEntities() {
+        return m_parent.getEntities();
+    }
+
+    @Override
+    public Entity createEntity(Location location, BaseEntity entity) {
+        return m_parent.createEntity(location, entity);
+    }
+
+    @Override
+    public BlockState getBlock(Vector position) {
+        return m_parent.getBlock(position);
+    }
+
+    @Override
+    public BaseBlock getFullBlock(Vector position) {
+        return m_parent.getFullBlock(position);
+    }
+
+    @Override
+    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
+        return m_parent.setBlock(position, block);
+    }
+
+    @Override
+    public Operation commit() {
+        return m_parent.commit();
     }
 }

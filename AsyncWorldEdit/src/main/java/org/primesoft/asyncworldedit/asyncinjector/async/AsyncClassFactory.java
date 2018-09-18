@@ -94,9 +94,16 @@ public class AsyncClassFactory extends BaseClassFactory {
     }
 
     @Override
+    public Clipboard createClipboard(Clipboard c, Region region) {
+        return new BiomeClipboard(c, region);
+    }
+
+    
+    
+    /*@Override
     public Clipboard createClipboard(Region region) {
         return new BiomeClipboard(region);
-    }
+    }*/
 
     @Override
     public RegionFunction addBiomeCopy(RegionFunction blockCopy, 
