@@ -61,7 +61,6 @@ import com.sk89q.worldedit.regions.Region;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
-import org.primesoft.asyncworldedit.injector.classfactory.base.clipboard.BlockArrayClipboard;
 
 /**
  *
@@ -83,8 +82,8 @@ public class BaseClassFactory implements IClassFactory {
     }
 
     @Override
-    public Clipboard createClipboard(Region region) {
-        return new BlockArrayClipboard(region);
+    public Clipboard createClipboard(Clipboard c, Region region) {
+        return c;
     }
 
     @Override

@@ -115,7 +115,7 @@ public final class Helpers {
         return blockCopy;
     }
 
-    public static Clipboard createClipboard(Region region) {
-        return InjectorCore.getInstance().getClassFactory().createClipboard(region);
+    public static Clipboard createClipboard(Clipboard parent, Region region) {
+        return InjectorCore.getInstance().getClassFactory().createClipboard(parent, region);
     }
 }

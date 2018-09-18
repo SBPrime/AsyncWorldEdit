@@ -79,10 +79,11 @@ public interface IClassFactory {
     
     /**
      * Create new instance of the clipboard
+     * @param parent
      * @param region
      * @return 
      */
-    Clipboard createClipboard(Region region);
+    Clipboard createClipboard(Clipboard parent, Region region);
 
     /**
      * Add biome copy to region function
