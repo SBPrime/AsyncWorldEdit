@@ -51,6 +51,7 @@ import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
+import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
@@ -62,6 +63,7 @@ import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
+import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
@@ -92,6 +94,7 @@ import org.primesoft.asyncworldedit.worldedit.history.changeset.IExtendedChangeS
 import org.primesoft.asyncworldedit.worldedit.history.changeset.NullChangeSet;
 import org.primesoft.asyncworldedit.worldedit.world.CancelableWorld;
 import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
+import org.primesoft.asyncworldedit.worldedit.util.eventbus.EventBusWrapper;
 
 /**
  *
@@ -113,7 +116,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     private int m_blocksQueued;
 
     public CancelabeEditSession(IThreadSafeEditSession parent, Mask mask, int jobId) {
-        super(parent.getEventBus(),
+        super(new EventBusESEventCancel(parent.getEventBus()),
                 new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
                 parent.getBlockChangeLimit(), parent.getBlockBag(),
                 parent.getEditSessionEvent());
@@ -428,6 +431,22 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
                 m_blocksQueued = 0;
                 super.flushQueue();
             }
+        }
+    }
+
+    private static class EventBusESEventCancel extends EventBusWrapper {
+
+        public EventBusESEventCancel(EventBus target) {
+            super(target);
+        }
+
+        @Override
+        public void post(Object event) {
+            if (event instanceof EditSessionEvent) {
+                return;
+            }
+            
+            super.post(event);
         }
     }
 }
