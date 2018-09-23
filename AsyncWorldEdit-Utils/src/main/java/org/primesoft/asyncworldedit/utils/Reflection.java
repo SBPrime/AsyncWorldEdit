@@ -55,7 +55,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Stack;
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
 
 /**
  * Reflection GET and SET operations.
@@ -69,7 +68,7 @@ public class Reflection {
         try {
             return Class.forName(String.format(pattern, p, name));
         } catch (ClassNotFoundException ex) {
-            log(String.format("%1$s: unsupported version, class %2$s not found.", message, name));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, class %2$s not found.", message, name));
         }
 
         return null;
@@ -94,19 +93,19 @@ public class Reflection {
                 }
             }
         } catch (InstantiationException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (InvocationTargetException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalArgumentException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (ClassCastException ex) {
-            log(String.format("%1$s: unsupported version, unable to cast result.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, unable to cast result.", message));
         }
 
         return null;
@@ -131,17 +130,17 @@ public class Reflection {
                 }
             }
         } catch (InvocationTargetException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalArgumentException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (ClassCastException ex) {
-            log(String.format("%1$s: unsupported version, unable to cast result.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, unable to cast result.", message));
         }
 
         return null;
@@ -167,17 +166,17 @@ public class Reflection {
                 }
             }
         } catch (InvocationTargetException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalArgumentException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (ClassCastException ex) {
-            log(String.format("%1$s: unsupported version, unable to cast result.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, unable to cast result.", message));
         }
 
         return false;
@@ -201,15 +200,15 @@ public class Reflection {
                 }
             }
         } catch (IllegalArgumentException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (ClassCastException ex) {
-            log(String.format("%1$s: unsupported version, unable to cast result.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, unable to cast result.", message));
         }
 
         return null;
@@ -233,15 +232,15 @@ public class Reflection {
                 }
             }
         } catch (IllegalArgumentException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (ClassCastException ex) {
-            log(String.format("%1$s: unsupported version, unable to cast result.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, unable to cast result.", message));
         }
 
         return null;
@@ -278,15 +277,15 @@ public class Reflection {
                 }
             }
         } catch (IllegalArgumentException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (ClassCastException ex) {
-            log(String.format("%1$s: unsupported version, unable to cast result.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, unable to cast result.", message));
         }
 
         return null;
@@ -333,13 +332,13 @@ public class Reflection {
                 }
             }
         } catch (IllegalArgumentException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         }
     }
 
@@ -373,13 +372,13 @@ public class Reflection {
                 }                
             }
         } catch (IllegalArgumentException ex) {
-            log(String.format("%1$s: unsupported version.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version, field modifiers not found.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field modifiers not found.", message));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         }
         
         return false;
@@ -389,9 +388,9 @@ public class Reflection {
         try {
             return c.getDeclaredMethod(methodName, paramTypes);
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchMethodException ex) {
-            log(String.format("%1$s: unsupported version, method %2$s not found.", message, methodName));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, method %2$s not found.", message, methodName));
         }
 
         return null;
@@ -401,9 +400,9 @@ public class Reflection {
         try {
             return c.getDeclaredField(fieldName);
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
         }
 
         return null;
@@ -417,9 +416,9 @@ public class Reflection {
             }
             return f;
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchFieldException ex) {
-            log(String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
         }
 
         return null;
@@ -429,9 +428,9 @@ public class Reflection {
         try {
             return c.getDeclaredConstructor(paramTypes);
         } catch (NoSuchMethodException ex) {
-            log(String.format("%1$s: unsupported version, constructor not found.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, constructor not found.", message));
         } catch (SecurityException ex) {
-            log(String.format("%1$s: security exception.", message));
+            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         }
 
         return null;

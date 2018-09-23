@@ -97,7 +97,7 @@ public abstract class ClassScanner implements IClassScanner {
     /**
      * List of all filters
      */
-    private final List<IClassFilter> m_filters = new LinkedList<IClassFilter>();
+    private final List<IClassFilter> m_filters = new LinkedList<>();
     
     
     private ClassScannerEntry[] m_blackList = new ClassScannerEntry[0];

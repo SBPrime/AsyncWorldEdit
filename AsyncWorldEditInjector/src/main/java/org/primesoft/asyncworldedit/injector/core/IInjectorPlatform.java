@@ -60,5 +60,5 @@ public interface IInjectorPlatform {
     
     void log(String s);
     
-    void onEnable();
+    boolean onEnable();
 }

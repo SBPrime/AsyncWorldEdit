@@ -54,12 +54,14 @@ package org.primesoft.asyncworldedit.injector;
 import org.primesoft.asyncworldedit.LoggerProvider;
 import org.primesoft.asyncworldedit.injector.core.IInjectorPlatform;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
  * @author SBPrime
  */
 public class InjectorBukkit implements IInjectorPlatform {
+
     private InjectorCore m_core;
 
     @Override
@@ -73,10 +75,23 @@ public class InjectorBukkit implements IInjectorPlatform {
     }
 
     @Override
-    public void onEnable() {
+    public boolean onEnable() {
         m_core = InjectorCore.getInstance();
-        m_core.initialize(this, new ClassInjectorBukkit());
+        IClassInjector classInjector;
+
+        try {
+            classInjector = new ClassInjectorBukkit();
+        } catch (Throwable ex) {
+            ExceptionHelper.printException(ex, "Unable to create the class injector.");
+            return false;
+        }
+
+        if (!m_core.initialize(this, classInjector)) {
+            log("Unable to initialize injector.");
+            return false;
+        }
 
         log("Injector Enabled");
+        return true;
     }
 }

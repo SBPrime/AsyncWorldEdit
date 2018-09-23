@@ -115,7 +115,7 @@ public class InjectorForge implements IInjectorPlatform {
     }
 
     @Override
-    public void onEnable() {
+    public boolean onEnable() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

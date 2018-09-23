@@ -67,10 +67,12 @@ public class ExceptionHelper {
         log("***********************************");
         log(message);
         log("***********************************");
-        log(String.format("* Exception: %1$s", ex.getClass().getName()));
-        log(String.format("* Error message: %1$s", ex.getLocalizedMessage()));
-        log("* Stack: ");
-        printStack(ex, "* ");
+        while (ex != null) {
+            log(String.format("* Exception: %1$s", ex.getClass().getName()));
+            log(String.format("* Error message: %1$s", ex.getLocalizedMessage()));
+            log("* Stack: ");
+            printStack(ex, "* ");
+        }
         log("***********************************");
     }
 

@@ -51,9 +51,6 @@
  */
 package org.primesoft.asyncworldedit.injector.core;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -139,14 +136,16 @@ public class InjectorCore {
      * Initialize the injector core
      *
      * @param platform
+     * @param classInjector
+     * @return 
      */
-    public void initialize(IInjectorPlatform platform, IClassInjector classInjector) {
+    public boolean initialize(IInjectorPlatform platform, IClassInjector classInjector) {
         synchronized (m_mutex) {
             if (m_platform != null) {
                 log("Injector platform is already set to "
                         + m_platform.getPlatformName() + "."
                         + "Ignoring new platform " + platform.getPlatformName());
-                return;
+                return false;
             }
 
             m_platform = platform;
@@ -163,6 +162,8 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.FlattenedClipboardTransform", (c, cc) -> new FlattenedClipboardTransformClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
+            
+            return true;
         } catch (Throwable ex) {
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");
@@ -175,6 +176,8 @@ public class InjectorCore {
                 log("* " + element.toString());
             }
             log("****************************");
+            
+            return false;
         }
     }
 
@@ -226,11 +229,6 @@ public class InjectorCore {
         icv.validate();
 
         byte[] data = classWriter.toByteArray();
-
-        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
-            dout.write(data);
-        }*/
-
         m_classInjector.injectClass(className, data, 0, data.length);
     }
 
@@ -247,21 +245,11 @@ public class InjectorCore {
         icv.validate();
 
         byte[] data = classWriter.toByteArray();
-
-        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
-            dout.write(data);
-        }*/
-
         m_classInjector.injectClass(className, data, 0, data.length);
     }
 
     private void createClasses(String className, ClassWriter classWriter) throws IOException {
         byte[] data = classWriter.toByteArray();
-
-        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
-            dout.write(data);
-        }*/
-
         m_classInjector.injectClass(className, data, 0, data.length);
     }
 

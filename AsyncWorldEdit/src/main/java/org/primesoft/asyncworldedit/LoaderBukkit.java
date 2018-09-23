@@ -50,6 +50,7 @@ package org.primesoft.asyncworldedit;
 import java.io.File;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IAwePlugin;
@@ -59,6 +60,7 @@ import org.primesoft.asyncworldedit.api.inner.IAwePlugin;
  * @author SBPrime
  */
 class LoaderBukkit extends Loader {
+
     private final static String PLUGIN_ACTIONBAR = "AsyncWorldEdit-ActionBarAPI.jar";
     private final static String PLUGIN_BOUNTIFULAPI = "AsyncWorldEdit-BountifulAPI.jar";
     private final static String PLUGIN_TITLEMANAGER = "AsyncWorldEdit-TitleManager.jar";
@@ -89,7 +91,7 @@ class LoaderBukkit extends Loader {
     @Override
     protected boolean checkInjector() {
         Plugin plugin = m_pluginManager.getPlugin(PLUGIN_INJECTOR);
-        
+
         return plugin != null;
     }
 
@@ -122,8 +124,32 @@ class LoaderBukkit extends Loader {
 
     @Override
     boolean checkDependencies() {
-        if (m_pluginManager.getPlugin("WorldEdit") == null) {
+        final String bv = m_server.getBukkitVersion();
+        final String[] bukkitVersion = bv.split("-")[0].split("\\.");
+        if (bukkitVersion.length < 2 || !"1".equals(bukkitVersion[0])) {
+            log(String.format("Invalid Bukkit, found: %1$s required: 1.13+", bv));
+            return false;
+        }
+
+        try {
+            if (Integer.parseInt(bukkitVersion[1]) < 13) {
+                log(String.format("Invalid Bukkit, found: %1$s required: 1.13+", bv));
+                return false;
+            }
+        } catch (NumberFormatException ex) {
+            log(String.format("Invalid Bukkit, found: %1$s required: 1.13+", bv));
+            return false;
+        }
+
+        Plugin we = m_pluginManager.getPlugin("WorldEdit");
+        if (we == null) {
             log("ERROR: WorldEdit not found.");
+            return false;
+        }
+
+        PluginDescriptionFile pd = we.getDescription();
+        if (!pd.getVersion().startsWith("7.")) {
+            log(String.format("Unsupported WorldEdit, found: %1$s required: 7.x", pd.getVersion()));
             return false;
         }
 
@@ -134,18 +160,17 @@ class LoaderBukkit extends Loader {
     protected IAwePlugin loadPlugin(File pluginFile) {
         try {
             Plugin plugin = m_pluginManager.loadPlugin(pluginFile);
-            
+
             if (!(plugin instanceof IAwePlugin)) {
                 log(String.format("Unable to load plugin: %1$s. Plugin needs to implement IAwePlugin.", pluginFile.getName()));
                 return null;
             }
-            
-            
+
             m_pluginManager.enablePlugin(plugin);
 
             log(String.format("Plugin %1$s loaded.", plugin.getName()));
 
-            return (IAwePlugin)plugin;
+            return (IAwePlugin) plugin;
         } catch (Exception ex) {
             log(String.format("Unable to load plugin: %1$s, check dependencies.", pluginFile.getName()));
             return null;
@@ -154,17 +179,17 @@ class LoaderBukkit extends Loader {
 
     @Override
     protected void unloadPlugin(IAwePlugin plugin) {
-        if (plugin == null){
+        if (plugin == null) {
             return;
         }
-        
+
         if (!(plugin instanceof Plugin)) {
             log(String.format("Unable to unload %1$s this is not a Bukkit plugin.", plugin.getClass().getName()));
             return;
         }
-        
-        Plugin bPlugin = (Plugin)plugin;
-        
+
+        Plugin bPlugin = (Plugin) plugin;
+
         try {
             m_pluginManager.disablePlugin(bPlugin);
             log(String.format("Plugin %1$s unloaded.", bPlugin.getName()));

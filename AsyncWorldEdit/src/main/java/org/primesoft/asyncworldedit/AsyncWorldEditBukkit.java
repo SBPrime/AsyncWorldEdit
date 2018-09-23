@@ -232,11 +232,23 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
         m_console = server.getConsoleSender();
 
         final Loader loader = new LoaderBukkit(this);
-        IInjectorPlatform injector = createInjector(loader);
-        if (injector == null) {
+        if (!loader.checkDependencies()) {
+            log("ERROR: Missing plugin dependencies. Plugin disabled.");
             return;
         }
-        injector.onEnable();
+
+        
+        
+        IInjectorPlatform injector = createInjector(loader);
+        if (injector == null) {
+            log("ERROR: Injector not found.");
+            return;
+        }
+        
+        if (!injector.onEnable()) {
+            log("ERROR: Unable to enable the injector.");
+            return;   
+        }
 
         if (!loader.install()) {
             log("ERROR: Unable to install the plugin.");
@@ -255,21 +267,14 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
         if (m_loader == null) {
             return;
         }
-        
-        if (!m_loader.checkDependencies()) {
-            log("ERROR: Missing plugin dependencies. Plugin disabled.");
-            m_loader = null;
-            return;
-        }
-
         m_api = createCore(m_loader);
 
         if (m_api != null) {
             m_api.initialize();
             m_api.onEnable();
+            
+            getServer().getScheduler().runTaskLater(this, () -> m_loader.loadPlugins(m_api), 0);
         }
-
-        getServer().getScheduler().runTaskLater(this, () -> m_loader.loadPlugins(m_api), 0);
 
         log("Enabled");
     }
