@@ -203,7 +203,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
      * @param msg
      */
     @Override
-    public void log(String msg) {
+    public final void log(String msg) {
         if (s_log == null || msg == null) {
             return;
         }
@@ -222,9 +222,9 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
     }
 
     @Override
-    public void onEnable() {
-        super.onEnable();
-
+    public void onLoad() {
+        super.onLoad();
+    
         LoggerProvider.setLogger(this);
 
         final Server server = getServer();
@@ -242,27 +242,34 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
             log("ERROR: Unable to install the plugin.");
             return;
         }
+        
+        m_loader = loader;
+    }
+    
+    
 
-        if (!loader.checkDependencies()) {
+    @Override
+    public void onEnable() {
+        super.onEnable();
+
+        if (m_loader == null) {
+            return;
+        }
+        
+        if (!m_loader.checkDependencies()) {
             log("ERROR: Missing plugin dependencies. Plugin disabled.");
+            m_loader = null;
             return;
         }
 
-        m_api = createCore(loader);
+        m_api = createCore(m_loader);
 
         if (m_api != null) {
             m_api.initialize();
             m_api.onEnable();
         }
 
-        server.getScheduler().runTaskLater(this, new Runnable() {
-            @Override
-            public void run() {
-                loader.loadPlugins(m_api);
-            }
-        }, 0);
-
-        m_loader = loader;
+        getServer().getScheduler().runTaskLater(this, () -> m_loader.loadPlugins(m_api), 0);
 
         log("Enabled");
     }
