@@ -72,6 +72,8 @@ public class ExceptionHelper {
             log(String.format("* Error message: %1$s", ex.getLocalizedMessage()));
             log("* Stack: ");
             printStack(ex, "* ");
+            
+            ex = ex.getCause();
         }
         log("***********************************");
     }

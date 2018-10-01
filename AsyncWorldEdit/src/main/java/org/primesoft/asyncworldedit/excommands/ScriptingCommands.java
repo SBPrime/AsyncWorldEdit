@@ -56,6 +56,7 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.command.InsufficientArgumentsException;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;
 import org.primesoft.asyncworldedit.core.AwePlatform;
@@ -108,6 +109,8 @@ public class ScriptingCommands {
             public void execute() {
                 try {
                     m_worldEdit.runScript(player, f, scriptArgs);
+                } catch (InsufficientArgumentsException ex) {
+                    player.printError(ex.getMessage());
                 } catch (WorldEditException ex) {
                     player.printError("Error while executing CraftScript.");
                     ExceptionHelper.printException(ex, String.format("Error while processing async operation CraftScript"));
@@ -154,6 +157,8 @@ public class ScriptingCommands {
             public void execute() {
                 try {
                     m_worldEdit.runScript(player, f, scriptArgs);
+                } catch (InsufficientArgumentsException ex) {
+                    player.printError(ex.getMessage());
                 } catch (WorldEditException ex) {
                     player.printError("Error while executing CraftScript.");
                     ExceptionHelper.printException(ex, String.format("Error while processing async operation CraftScript"));
