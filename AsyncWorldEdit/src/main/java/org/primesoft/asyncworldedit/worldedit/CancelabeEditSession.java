@@ -256,16 +256,6 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public List<Countable<BlockType>> getBlockDistribution(Region region) {
-        return m_parent.getBlockDistribution(region);
-    }
-
-    @Override
-    public List<Countable<BlockStateHolder>> getBlockDistributionWithData(Region region) {
-        return m_parent.getBlockDistributionWithData(region);
-    }
-
-    @Override
     public int getHighestTerrainBlock(int x, int z, int minY, int maxY) {
         return m_parent.getHighestTerrainBlock(x, z, minY, maxY);
     }

@@ -76,7 +76,14 @@ import javax.annotation.Nullable;
  * @author SBPrime
  */
 public interface IEditSession extends Extent {
-
+    
+    /**
+     * Turns on specific features for a normal WorldEdit session, such as
+     * {@link #enableQueue() queuing} and {@link #setBatchingChunks(boolean)
+     * chunk batching}.
+     */
+    void enableStandardMode();
+    
     /**
      * Get the world.
      *
@@ -186,6 +193,29 @@ public interface IEditSession extends Extent {
      */
     public Map<BlockType, Integer> popMissingBlocks();
 
+      /**
+     * Returns chunk batching status.
+     *
+     * @return whether chunk batching is enabled
+     */
+    public boolean isBatchingChunks();
+
+    /**
+     * Enable or disable chunk batching. Disabling will
+     * {@linkplain #flushSession() flush the session}.
+     *
+     * @param batchingChunks {@code true} to enable, {@code false} to disable
+     */
+    public void setBatchingChunks(boolean batchingChunks);
+
+    /**
+     * Disable all buffering extents.
+     *
+     * @see #disableQueue()
+     * @see #setBatchingChunks(boolean)
+     */
+    //public void disableBuffering();
+    
     /**
      * Get the number of blocks changed, including repeated block changes.
      *
@@ -299,6 +329,17 @@ public interface IEditSession extends Extent {
     @Override
     public List<? extends Entity> getEntities();
 
+    /**
+     * Closing an EditSession {@linkplain #flushSession() flushes its buffers}.
+     */
+    //public void close(); Not yet added
+    
+    /**
+     * Communicate to the EditSession that all block changes are complete,
+     * and that it should apply them to the world.
+     */
+    //public void flushSession(); Is this realy removed?
+    
     /**
      * Finish off the queue.
      */
@@ -725,17 +766,10 @@ public interface IEditSession extends Extent {
      * Get the block distribution inside a region.
      *
      * @param region a region
+     * @param fuzzy
      * @return the results
      */
-    public List<Countable<BlockType>> getBlockDistribution(Region region);
-
-    /**
-     * Get the block distribution (with data values) inside a region.
-     *
-     * @param region a region
-     * @return the results
-     */
-    public List<Countable<BlockStateHolder>> getBlockDistributionWithData(Region region);
+    public List<Countable<BlockStateHolder>> getBlockDistribution(Region region, boolean fuzzy);
 
     public int makeShape(final Region region, final Vector zero, final Vector unit, final Pattern pattern, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException;
 

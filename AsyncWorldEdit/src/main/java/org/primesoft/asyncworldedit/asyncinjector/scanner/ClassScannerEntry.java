@@ -131,4 +131,8 @@ public class ClassScannerEntry {
 
         return false;
     }
+    
+    final Class<?> getCls() {
+        return m_cls;
+    }
 }

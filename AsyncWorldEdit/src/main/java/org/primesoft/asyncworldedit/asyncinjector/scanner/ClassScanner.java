@@ -55,7 +55,6 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.world.FastModeExtent;
-import com.sk89q.worldedit.function.operation.BlockMapEntryPlacer;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.ClipboardPattern;
 import com.sk89q.worldedit.function.pattern.RandomPattern;
@@ -78,6 +77,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.classScanner.IClassFilter;
 import org.primesoft.asyncworldedit.api.inner.IClassScanner;
@@ -321,9 +321,9 @@ public abstract class ClassScanner implements IClassScanner {
      * @return 
      */
     protected ClassScannerEntry[] getBlackList() {
-        return new ClassScannerEntry[]{
+        return Stream.of(
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
-            new ClassScannerEntry(BlockMapEntryPlacer.class, "iterator"),
+            new ClassScannerEntry("com.sk89q.worldedit.function.operation.BlockMapEntryPlacer", "iterator"),
             new ClassScannerEntry(ChangeSet.class),
             new ClassScannerEntry(EditSession.class),
             new ClassScannerEntry(Region.class),
@@ -351,7 +351,8 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry(Player.class),
             new ClassScannerEntry(ChangeSet.class),
             new ClassScannerEntry(Entity.class)
-        };
+        ).filter(i -> i.getCls() != null)
+         .toArray(ClassScannerEntry[]::new);
     }
 
     private boolean isBlackList(Class<?> oClass, Field f) {

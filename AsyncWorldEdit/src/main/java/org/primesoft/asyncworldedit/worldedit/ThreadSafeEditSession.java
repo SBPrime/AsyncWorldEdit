@@ -545,22 +545,6 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public List<Countable<BlockType>> getBlockDistribution(final Region region) {
-        final ThreadSafeEditSession es = this;
-
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
-                () -> es.doGetBlockDistribution(region), m_bukkitWorld, region);
-    }
-
-    @Override
-    public List<Countable<BlockStateHolder>> getBlockDistributionWithData(final Region region) {
-        final ThreadSafeEditSession es = this;
-
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
-                () -> es.doGetBlockDistributionWithData(region), m_bukkitWorld, region);
-    }
-
-    @Override
     public List<? extends Entity> getEntities() {
         final ThreadSafeEditSession es = this;
 
@@ -803,15 +787,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
     public int doGetBlockChangeLimit() {
         return super.getBlockChangeLimit();
-    }
-
-    public List<Countable<BlockType>> doGetBlockDistribution(Region region) {
-        return super.getBlockDistribution(region);
-    }
-
-    public List<Countable<BlockStateHolder>> doGetBlockDistributionWithData(Region region) {
-        return super.getBlockDistributionWithData(region);
-    }
+    }  
 
     public List<? extends Entity> doGetEntities() {
         return super.getEntities();
