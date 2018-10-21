@@ -71,11 +71,11 @@ public final class ConfigMessages {
             m_debugMode = section.getBoolean("debug", false);
             String s = section.getString("undoCleanup", "on");
             
-            if ("on".equalsIgnoreCase(s)) {
+            if ("on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s)) {
                 m_undoMode = UNDO_ON;
             } else if ("startup".equalsIgnoreCase(s)) {
                 m_undoMode = UNDO_STARTUP;
-            } else if ("off".equalsIgnoreCase(s)) {
+            } else if ("off".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s)) {
                 m_undoMode = UNDO_ERROR;
             } else {
                 //For now default to on
