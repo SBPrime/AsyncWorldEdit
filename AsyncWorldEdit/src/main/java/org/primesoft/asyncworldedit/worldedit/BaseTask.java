@@ -49,6 +49,8 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import java.util.function.Function;
+import java.util.stream.Stream;
 import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.JobStatus;
@@ -105,7 +107,8 @@ public abstract class BaseTask extends BukkitRunnable {
      * The permission group
      */
     protected final IPermissionGroup m_group;
-
+    
+    private Function<EditSession, Boolean> m_queueTester;
 
     public BaseTask(final EditSession editSession, final IPlayerEntry player,
             final String commandName, IBlockPlacer blocksPlacer, JobEntry job) {
@@ -157,7 +160,11 @@ public abstract class BaseTask extends BukkitRunnable {
         }
 
         if (m_editSession != null) {
-            if (m_editSession.isQueueEnabled()) {
+            if (m_queueTester == null) {
+                m_queueTester = initializeQT();
+            }
+            
+            if (m_queueTester.apply(m_editSession)) {
                 m_editSession.flushQueue();
             } else if (m_cancelableEditSession != null) {
                 m_cancelableEditSession.resetAsync();
@@ -188,5 +195,22 @@ public abstract class BaseTask extends BukkitRunnable {
     protected abstract void doPostRun(Object result);
 
     protected void postProcess() {
+    }
+
+    private static Function<EditSession, Boolean> initializeQT() {
+        boolean batchingSupported = Stream.of(EditSession.class.getDeclaredMethods())
+                .filter(i -> "isBatchingChunks".equals(i.getName()))
+                .findFirst().isPresent();
+        
+        return batchingSupported ? 
+                BaseTask::queueTestBatching : BaseTask::queueTestNoBatching;
+    }
+    
+    private static boolean queueTestBatching(EditSession es) {
+        return es.isQueueEnabled() || es.isBatchingChunks();
+    }
+    
+    private static boolean queueTestNoBatching(EditSession es) {
+        return es.isQueueEnabled();
     }
 }

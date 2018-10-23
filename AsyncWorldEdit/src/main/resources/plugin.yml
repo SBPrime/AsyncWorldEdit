@@ -1,6 +1,6 @@
 name: AsyncWorldEdit
 main: org.primesoft.asyncworldedit.AsyncWorldEditBukkit
-version: 3.6.0-beta-3
+version: 3.6.0-beta-4
 api-version: 1.13
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
