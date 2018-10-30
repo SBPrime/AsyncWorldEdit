@@ -84,7 +84,7 @@ public class UndoProcessor implements Operation {
                     sender, session, changes));
 
         } finally {
-            session.flushQueue();
+            session.flushSession();
             session.setMask(oldMask);            
         }
     }

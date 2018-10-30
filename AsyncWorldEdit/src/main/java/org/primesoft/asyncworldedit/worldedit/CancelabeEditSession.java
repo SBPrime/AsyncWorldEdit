@@ -62,7 +62,6 @@ import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.util.Countable;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
@@ -404,9 +403,9 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public void flushQueue() {
+    public void flushSession() {
         m_blocksQueued = 0;
-        super.flushQueue();
+        super.flushSession();
     }
 
     /**
@@ -419,7 +418,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             m_blocksQueued++;
             if (m_blocksQueued > maxBlocks) {
                 m_blocksQueued = 0;
-                super.flushQueue();
+                super.flushSession();
             }
         }
     }

@@ -84,7 +84,7 @@ public class RedoProcessor implements Operation {
                     sender, session, changes));
 
         } finally {
-            session.flushQueue();
+            session.flushSession();
             session.setMask(oldMask);
         }
     }

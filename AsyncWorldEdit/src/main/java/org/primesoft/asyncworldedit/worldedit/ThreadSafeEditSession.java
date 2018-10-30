@@ -69,18 +69,15 @@ import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.util.Countable;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
-import com.sk89q.worldedit.world.block.BlockType;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.Nullable;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -244,7 +241,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
         super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, ThreadSafeBlockBag.warap(blockBag), event);
 
-        m_asyncTasks = new HashSet<IJobEntry>();
+        m_asyncTasks = new HashSet<>();
 
         m_aweCore = core;
         m_blockPlacer = core.getBlockPlacer();
@@ -448,12 +445,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         final IBlockPlacer blockPlacer = getBlockPlacer();
         final Change safeChange = new BlockPlacerChange(change, blockPlacer, isDemanding);
 
-        final IActionEx<WorldEditException> action = new IActionEx<WorldEditException>() {
-            @Override
-            public void execute() throws WorldEditException {
-                change.redo(undoContext);
-            }
-        };
+        final IActionEx<WorldEditException> action = () -> change.redo(undoContext);
 
         if (ecs != null) {
             ecs.addExtended(safeChange, null);
@@ -615,9 +607,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public void flushQueue() {
+    public void flushSession() {
         boolean queued = isQueueEnabled();
-        super.flushQueue();
+        super.flushSession();
         m_blocksQueued = 0;
         if (queued) {
             resetAsync();
@@ -634,7 +626,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
             m_blocksQueued++;
             if (m_blocksQueued > maxBlocks) {
                 m_blocksQueued = 0;
-                super.flushQueue();
+                super.flushSession();
             }
         }
     }

@@ -165,7 +165,7 @@ public abstract class BaseTask extends BukkitRunnable {
             }
             
             if (m_queueTester.apply(m_editSession)) {
-                m_editSession.flushQueue();
+                m_editSession.flushSession();
             } else if (m_cancelableEditSession != null) {
                 m_cancelableEditSession.resetAsync();
             } else if (m_safeEditSession != null) {

@@ -100,7 +100,7 @@ public class StackValidator {
         new StackValidatorEntry(".*primesoft.*ThreadSafeEditSession", "", ".*"),
         new StackValidatorEntry(".*primesoft.*AsyncEditSessionFactory.*", "", ".*"),
         new StackValidatorEntry(".*primesoft.*AsyncEditSession.*", ".*", new String[]{
-            "undo", "redo", "task", "flushQueue"
+            "undo", "redo", "task", "flushQueue", "flushSession"
         })
     };
 

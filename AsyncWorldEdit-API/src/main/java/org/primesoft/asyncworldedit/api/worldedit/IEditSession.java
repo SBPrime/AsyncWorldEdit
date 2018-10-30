@@ -214,7 +214,7 @@ public interface IEditSession extends Extent {
      * @see #disableQueue()
      * @see #setBatchingChunks(boolean)
      */
-    //public void disableBuffering();
+    public void disableBuffering();
     
     /**
      * Get the number of blocks changed, including repeated block changes.
@@ -332,18 +332,13 @@ public interface IEditSession extends Extent {
     /**
      * Closing an EditSession {@linkplain #flushSession() flushes its buffers}.
      */
-    //public void close(); Not yet added
+    public void close();
     
     /**
      * Communicate to the EditSession that all block changes are complete,
      * and that it should apply them to the world.
      */
-    //public void flushSession(); Is this realy removed?
-    
-    /**
-     * Finish off the queue.
-     */
-    public void flushQueue();
+    public void flushSession();
 
     @Override
     public @Nullable Operation commit();

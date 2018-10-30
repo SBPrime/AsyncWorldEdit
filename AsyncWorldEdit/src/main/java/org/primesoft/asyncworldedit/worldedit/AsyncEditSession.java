@@ -170,10 +170,10 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return ls;
     }
 
-    public void flushQueue(int jobId) {
+    public void flushSession(int jobId) {
         boolean queued = isQueueEnabled();
         m_jobId = jobId;
-        super.flushQueue();
+        super.flushSession();
         m_jobId = -1;
         if (queued) {
             resetAsync();

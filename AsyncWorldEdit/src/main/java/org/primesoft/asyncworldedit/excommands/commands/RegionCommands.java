@@ -240,7 +240,7 @@ public class RegionCommands {
                     int affected = heightMap.applyFilter(filter, iterations);
                     player.print("Terrain's height map smoothed. " + affected + " block(s) changed.");
                     
-                    es.flushQueue();
+                    es.flushSession();
                 } catch (WorldEditException ex) {                    
                     player.printError("Error while executing smooth.");
                     ExceptionHelper.printException(ex, String.format("Error while processing async operation smooth"));
