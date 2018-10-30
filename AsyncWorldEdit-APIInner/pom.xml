@@ -6,7 +6,7 @@
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit-APIInner</artifactId>
 
-    <version>3.6.0-beta-4</version>
+    <version>3.6.0-beta-5</version>
 
     <packaging>jar</packaging>
     <properties>
@@ -27,15 +27,15 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-API</artifactId>
-            <version>[2.2.0-beta-4, 2.2.0)</version>
+            <version>[2.2.0-beta-5, 2.2.0)</version>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.13-fe3ab0d-0611294</version>
+            <version>1.13.2-e4d0c66-f3f2fe5</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/spigot/spigot-1.13-fe3ab0d-0611294.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/spigot/spigot-1.13.2-e4d0c66-f3f2fe5.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.primesoft.asyncworldedit</groupId>
   <artifactId>AsyncWorldEdit-Injector</artifactId>
-  <version>3.6.0-beta-4</version>
+  <version>3.6.0-beta-5</version>
   <build>
     <plugins>
       <plugin>
@@ -49,7 +49,7 @@
     <dependency>
       <groupId>org.primesoft.asyncworldedit</groupId>
       <artifactId>AsyncWorldEdit-Utils</artifactId>
-      <version>[3.6.0-beta-4, 3.6.0)</version>
+      <version>[3.6.0-beta-5, 3.6.0)</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -62,9 +62,9 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
-      <version>1.13-fe3ab0d-0611294</version>
+      <version>1.13.2-e4d0c66-f3f2fe5</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../libs/spigot/spigot-1.13-fe3ab0d-0611294.jar</systemPath>
+      <systemPath>${project.basedir}/../libs/spigot/spigot-1.13.2-e4d0c66-f3f2fe5.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>net.minecraftforge</groupId>
