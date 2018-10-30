@@ -189,7 +189,7 @@ public class FileChangeSet implements ChangeSet {
      * @return
      */
     boolean save() {
-        List<Change> dataToSave = new ArrayList<Change>();
+        List<Change> dataToSave = new ArrayList<>();
 
         synchronized (m_saveMutex) {
             m_savePending = true;

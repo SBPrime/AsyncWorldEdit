@@ -49,8 +49,7 @@ package org.primesoft.asyncworldedit.worldedit.history.changeset;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
@@ -83,13 +82,7 @@ public class FileChangeSetManager {
             return;
         }
 
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                saveLoop();
-            }
-        }).start();
+        new Thread(FileChangeSetManager::saveLoop).start();
     }
 
     /**
@@ -127,7 +120,15 @@ public class FileChangeSetManager {
                 }
 
                 for (FileChangeSet changeSet : changeSets) {
-                    boolean result = changeSet.save();
+                    boolean result;
+                    
+                    try {
+                        result = changeSet.save();
+                    }
+                    catch (Exception ex) {
+                        ExceptionHelper.printException(ex, "Unable to save undo data. Preventing undo subsystem from breaking.");
+                        result = true;
+                    }
                     if (result) {
                         try {
                             /**

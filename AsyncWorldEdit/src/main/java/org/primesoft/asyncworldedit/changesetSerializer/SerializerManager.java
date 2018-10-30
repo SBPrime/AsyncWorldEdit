@@ -498,11 +498,16 @@ public final class SerializerManager implements IInnerSerializerManager {
         if (serializer == null) {
             data = serializeToMemory(storage, change);
         } else {
-            byte[] buf = serializer.serialize(change, storage);
-            if (buf == null) {
+            try {
+                byte[] buf = serializer.serialize(change, storage);
+                if (buf == null) {
+                    data = serializeToMemory(storage, change);
+                } else {
+                    data = new UndoEntry(className, buf, -1);
+                }
+            } catch (Exception ex) {
+                ExceptionHelper.printException(ex, "Unable to serialize. Using memory fallback");
                 data = serializeToMemory(storage, change);
-            } else {
-                data = new UndoEntry(className, buf, -1);
             }
         }
         return data;
