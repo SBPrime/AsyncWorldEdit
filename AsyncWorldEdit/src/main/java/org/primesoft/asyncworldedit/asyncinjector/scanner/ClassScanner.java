@@ -202,17 +202,21 @@ public abstract class ClassScanner implements IClassScanner {
                                 }
                             }
 
-                            if (!isPrimitive(ct) && !isBlackList(ct) && 
-                                    ((f.getField().getModifiers() & Modifier.STATIC) != Modifier.STATIC)
-                                    && !isBlackList(cClass, f.getField())) {
+                            if (isPrimitive(ct) || 
+                                isBlackList(ct) ||
+                                isStatic(f.getField()) ||
+                                isBlackList(cClass, f.getField()))
+                            {
+                                if (debugOn) {
+                                    log(String.format("* - %1$s", classMsg));
+                                }
+                            } else {
                                 toScan.add(f);
                                 added++;
 
                                 if (debugOn) {
                                     log(String.format("* + %1$s", classMsg));
                                 }
-                            } else if (debugOn) {
-                                log(String.format("* - %1$s", classMsg));
                             }
 
                         }
@@ -385,7 +389,7 @@ public abstract class ClassScanner implements IClassScanner {
      * @return
      */
     private static List<Field> getAllFields(Class<?> oClass) {
-        List<Field> result = new ArrayList<Field>();
+        List<Field> result = new ArrayList<>();
 
         while (oClass != null) {
             result.addAll(Arrays.asList(oClass.getDeclaredFields()));
@@ -422,6 +426,14 @@ public abstract class ClassScanner implements IClassScanner {
             
             m_filters.remove(filter);
         }
+    }
+
+    private boolean isStatic(Field f) {
+        if (f == null) {
+            return false;
+        }
+        
+        return (f.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
     }
     
 }
