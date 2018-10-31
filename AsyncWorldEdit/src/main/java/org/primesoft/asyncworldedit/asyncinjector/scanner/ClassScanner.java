@@ -68,6 +68,7 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.registry.BlockRegistry;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -201,7 +202,8 @@ public abstract class ClassScanner implements IClassScanner {
                                 }
                             }
 
-                            if (!isPrimitive(ct) && !isBlackList(ct)
+                            if (!isPrimitive(ct) && !isBlackList(ct) && 
+                                    ((f.getField().getModifiers() & Modifier.STATIC) != Modifier.STATIC)
                                     && !isBlackList(cClass, f.getField())) {
                                 toScan.add(f);
                                 added++;
@@ -324,6 +326,9 @@ public abstract class ClassScanner implements IClassScanner {
         return Stream.of(
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
             new ClassScannerEntry("com.sk89q.worldedit.function.operation.BlockMapEntryPlacer", "iterator"),
+            new ClassScannerEntry("com.sk89q.worldedit.function.operation.BlockMapEntryPlacer", "iterator"),
+            new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", "batches"),
+            new ClassScannerEntry("org.primesoft.asyncworldedit.blockshub.BlocksHubBridge"),
             new ClassScannerEntry(ChangeSet.class),
             new ClassScannerEntry(EditSession.class),
             new ClassScannerEntry(Region.class),
