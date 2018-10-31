@@ -55,7 +55,6 @@ import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
-import com.sk89q.worldedit.world.block.BlockTypes;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -66,6 +65,8 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataInput;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataOutput;
 import org.primesoft.asyncworldedit.worldedit.blocks.BlockStates;
+import org.bukkit.Bukkit;
+import org.primesoft.asyncworldedit.worldedit.blocks.BlockStateHolderWrapper;
 
 /**
  *
@@ -113,8 +114,8 @@ public class SerializerBlockChange implements IChangesetSerializer {
             stream.writeDouble(position.getY());
             stream.writeDouble(position.getZ());
 
-            writeBlock(stream, previous.toBaseBlock());
-            writeBlock(stream, current.toBaseBlock());
+            writeBlock(stream, previous);
+            writeBlock(stream, current);
 
             return stream.toByteArray();
         } catch (IOException ex) {
@@ -152,24 +153,36 @@ public class SerializerBlockChange implements IChangesetSerializer {
      * @param stream
      * @param block
      */
-    private void writeBlock(DataOutput stream, BaseBlock block) throws IOException {
-        String id = block.toImmutableState().getAsString();
-        byte[] idData = id.getBytes(UTF8);
-        int idLength = idData.length;
-
+    private void writeBlock(DataOutput stream, BlockStateHolder bsh) throws IOException {
+        final String id;
+        final boolean isBs = isBlockState(bsh);
+        final BaseBlock block;
+        
+        if (isBs) {
+            id = bsh.getAsString();
+            block = null;
+        } else {
+            block = bsh.toBaseBlock();
+            id = block.toImmutableState().getAsString();
+        }                 
+        final byte[] idData = id.getBytes(UTF8);
+        final int idLength = idData.length;
+        
+        stream.writeBoolean(isBs);
         stream.writeInt(idLength);
         stream.write(idData);
 
-        NbtTagSerializer.serialize(stream, block.hasNbtData() ? block.getNbtData() : NbtTagSerializer.END_TAG);
+        NbtTagSerializer.serialize(stream, block != null && block.hasNbtData() ? block.getNbtData() : NbtTagSerializer.END_TAG);
     }
 
     private BlockStateHolder readBlock(DataInput stream) throws IOException {
-        int idLength = stream.readInt();
-        byte[] idData = new byte[idLength];
+        final boolean isBs = stream.readBoolean();
+        final int idLength = stream.readInt();
+        final byte[] idData = new byte[idLength];
         stream.readFully(idData);
         String id = new String(idData, UTF8);
 
-        BlockState state = BlockFactory.getState(id);
+        final BlockState state = BlockFactory.getState(id);
         if (state == null) {
             return null;
         }
@@ -178,6 +191,24 @@ public class SerializerBlockChange implements IChangesetSerializer {
             return state.toBaseBlock((CompoundTag) nbtTag);
         }
 
-        return state.toBaseBlock();
+        return isBs ? state : state.toBaseBlock();
+    }
+
+    private BaseBlock safeToBaseBlock(final BlockStateHolder bsh) {
+        if (bsh instanceof BlockState) {
+            final BlockState bs = (BlockState)bsh;
+            
+            Bukkit.createBlockData(bs.getAsString());
+        }
+        
+        return bsh.toBaseBlock();
+    }
+
+    private boolean isBlockState(BlockStateHolder bsh) {
+        if (bsh instanceof BlockStateHolderWrapper) {
+            return isBlockState(((BlockStateHolderWrapper)bsh).getParent());
+        }
+                
+        return bsh instanceof BlockState;
     }
 }

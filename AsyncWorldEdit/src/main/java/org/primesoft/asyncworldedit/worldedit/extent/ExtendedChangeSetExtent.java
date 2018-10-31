@@ -95,12 +95,12 @@ public class ExtendedChangeSetExtent extends ChangeSetExtent {
         return super.setBiome(position, biome);
     }
 
-    @Override
+    /*@Override
     public boolean setBlock(Vector location, BlockStateHolder block) throws WorldEditException {
         BaseBlock previous = getFullBlock(location);
         m_changeSet.addExtended(new BlockChange(location.toBlockVector(), previous, block), m_cancelableEditSession);
         return super.setBlock(location, block);
-    }
+    }*/
 
     @Nullable
     @Override
