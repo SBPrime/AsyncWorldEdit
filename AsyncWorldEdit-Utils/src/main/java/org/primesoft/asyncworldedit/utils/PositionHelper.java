@@ -47,10 +47,10 @@
  */
 package org.primesoft.asyncworldedit.utils;
 
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 
 /**
  *
@@ -79,8 +79,8 @@ public class PositionHelper {
      * @param v
      * @return
      */
-    public static BlockVector positionToBlockPosition(Vector v) {
-        return new BlockVector(PositionHelper.positionToBlockPosition(v.getX()), 
+    public static BlockVector3 positionToBlockPosition(Vector3 v) {
+        return BlockVector3.at(PositionHelper.positionToBlockPosition(v.getX()), 
                 PositionHelper.positionToBlockPosition(v.getY()), 
                 PositionHelper.positionToBlockPosition(v.getZ()));
     }
@@ -103,15 +103,15 @@ public class PositionHelper {
         return (double) c * CHUNK_SIZE;
     }
 
-    public static Vector chunkToPosition(Vector2D c, double y) {
-        return new Vector(chunkToPosition((int) c.getX()), y, chunkToPosition((int) c.getZ()));
+    public static Vector3 chunkToPosition(Vector2 c, double y) {
+        return Vector3.at(chunkToPosition((int) c.getX()), y, chunkToPosition((int) c.getZ()));
     }
     
-    public static Vector chunkToPosition(int x, int z, double y) {
-        return new Vector(chunkToPosition(x), y, chunkToPosition(z));
+    public static Vector3 chunkToPosition(int x, int z, double y) {
+        return Vector3.at(chunkToPosition(x), y, chunkToPosition(z));
     }
 
-    public static BlockVector2D positionToChunk(Vector v) {
-        return new BlockVector2D(positionToChunk((int) v.getX()), positionToChunk((int) v.getZ()));
+    public static BlockVector2 positionToChunk(Vector3 v) {
+        return BlockVector2.at(positionToChunk((int) v.getX()), positionToChunk((int) v.getZ()));
     }
 }
