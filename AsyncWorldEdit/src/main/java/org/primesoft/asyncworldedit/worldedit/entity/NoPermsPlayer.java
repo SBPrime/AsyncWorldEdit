@@ -48,13 +48,14 @@
 package org.primesoft.asyncworldedit.worldedit.entity;
 
 import com.sk89q.worldedit.PlayerDirection;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.util.HandSide;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
@@ -216,16 +217,16 @@ public class NoPermsPlayer extends NoPermsActor implements Player {
     }
 
     @Override
-    public void setPosition(Vector pos, float pitch, float yaw) {
+    public void setPosition(Vector3 pos, float pitch, float yaw) {
         m_parrent.setPosition(pos, pitch, yaw);
     }
 
     @Override
-    public void setPosition(Vector pos) {
+    public void setPosition(Vector3 pos) {
         m_parrent.setPosition(pos);
     }
     @Override
-    public void sendFakeBlock(Vector pos, @Nullable BlockStateHolder block) {
+    public void sendFakeBlock(BlockVector3 pos, @Nullable BlockStateHolder block) {
         m_parrent.sendFakeBlock(pos, block);
     }
 

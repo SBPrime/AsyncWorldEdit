@@ -48,12 +48,13 @@
 
 package org.primesoft.asyncworldedit.worldedit.util;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
-import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
+import org.primesoft.asyncworldedit.worldedit.Vector3Wrapper;
 
 
 /**
@@ -154,8 +155,8 @@ public class LocationWrapper extends Location implements IAsyncWrapper
     }
 
     @Override
-    public Vector getDirection() {
-        return VectorWrapper.wrap(m_parent.getDirection(), m_jobId, m_isAsync, m_player);
+    public Vector3 getDirection() {
+        return Vector3Wrapper.wrap(m_parent.getDirection(), m_jobId, m_isAsync, m_player);
     }
 
     @Override
@@ -189,7 +190,7 @@ public class LocationWrapper extends Location implements IAsyncWrapper
     }
 
     @Override
-    public Location setDirection(Vector direction) {
+    public Location setDirection(Vector3 direction) {
         return LocationWrapper.wrap(m_parent.setDirection(direction), 
                 m_jobId, m_isAsync, m_player);
     }
@@ -219,19 +220,7 @@ public class LocationWrapper extends Location implements IAsyncWrapper
     }
 
     @Override
-    public Location setX(int x) {
-        return LocationWrapper.wrap(m_parent.setX(x),
-                m_jobId, m_isAsync, m_player);
-    }
-
-    @Override
     public Location setY(double y) {
-        return LocationWrapper.wrap(m_parent.setY(y), 
-                m_jobId, m_isAsync, m_player);
-    }
-
-    @Override
-    public Location setY(int y) {
         return LocationWrapper.wrap(m_parent.setY(y), 
                 m_jobId, m_isAsync, m_player);
     }
@@ -249,14 +238,21 @@ public class LocationWrapper extends Location implements IAsyncWrapper
     }
 
     @Override
-    public Location setZ(int z) {
-        return LocationWrapper.wrap(m_parent.setZ(z), 
+    public Vector3 toVector() {
+        return Vector3Wrapper.wrap(m_parent.toVector(),
+                m_jobId, m_isAsync, m_player);
+    }          
+
+    @Override
+    public Location setPosition(Vector3 position) {
+        return LocationWrapper.wrap(m_parent.setPosition(position),
                 m_jobId, m_isAsync, m_player);
     }
 
     @Override
-    public Vector toVector() {
-        return VectorWrapper.wrap(m_parent.toVector(),
-                m_jobId, m_isAsync, m_player);
-    }          
+    public Direction getDirectionEnum() {
+        return m_parent.getDirectionEnum();
+    }
+    
+    
 }

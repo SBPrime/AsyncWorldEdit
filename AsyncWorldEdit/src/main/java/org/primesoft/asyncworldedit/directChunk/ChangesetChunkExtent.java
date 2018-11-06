@@ -47,10 +47,10 @@
  */
 package org.primesoft.asyncworldedit.directChunk;
 
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -73,8 +73,8 @@ import org.primesoft.asyncworldedit.api.directChunk.IBaseChunkData;
 public class ChangesetChunkExtent implements Extent {
 
     private final IBaseChunkData m_data;
-    private final BlockVector m_minPoint;
-    private final BlockVector m_maxPoint;
+    private final BlockVector3 m_minPoint;
+    private final BlockVector3 m_maxPoint;
 
     public ChangesetChunkExtent(IBaseChunkData data) {
         if (data == null) {
@@ -83,18 +83,18 @@ public class ChangesetChunkExtent implements Extent {
 
         m_data = data;
 
-        BlockVector2D zero = m_data.getChunkCoords();
-        m_minPoint = new BlockVector(zero.getBlockX() << 4, 0, zero.getBlockZ() << 4);
-        m_maxPoint = new BlockVector(15 + zero.getBlockX() << 4, 255, 15 + zero.getBlockZ() << 4);
+        BlockVector2 zero = m_data.getChunkCoords();
+        m_minPoint = BlockVector3.at(zero.getBlockX() << 4, 0, zero.getBlockZ() << 4);
+        m_maxPoint = BlockVector3.at(15 + zero.getBlockX() << 4, 255, 15 + zero.getBlockZ() << 4);
     }
 
     @Override
-    public Vector getMinimumPoint() {
+    public BlockVector3 getMinimumPoint() {
         return m_minPoint;
     }
 
     @Override
-    public Vector getMaximumPoint() {
+    public BlockVector3 getMaximumPoint() {
         return m_maxPoint;
     }
 
@@ -117,39 +117,39 @@ public class ChangesetChunkExtent implements Extent {
     }
 
     @Override
-    public BlockState getBlock(Vector position) {
+    public BlockState getBlock(BlockVector3 position) {
         //TODO: 1.13
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        /*Vector p = position.subtract(m_minPoint);
+        /*Vector3 p = position.subtract(m_minPoint);
         return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ());*/
     }    
 
     @Override
-    public BaseBlock getFullBlock(Vector position) {
+    public BaseBlock getFullBlock(BlockVector3 position) {
         //TODO: 1.13
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         
         /*
-        Vector p = position.subtract(m_minPoint);
+        Vector3 p = position.subtract(m_minPoint);
         return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ());
         */
     }
 
     @Override
-    public BaseBiome getBiome(Vector2D position) {
+    public BaseBiome getBiome(BlockVector2 position) {
         //TODO: Implement
         return new BaseBiome(0);
     }
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
-        Vector p = position.subtract(m_minPoint);
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block) throws WorldEditException {
+        BlockVector3 p = position.subtract(m_minPoint);
         m_data.setBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ(), block);
         return true;
     }
 
     @Override
-    public boolean setBiome(Vector2D position, BaseBiome biome) {
+    public boolean setBiome(BlockVector2 position, BaseBiome biome) {
         //TODO: Implement
         return false;
     }

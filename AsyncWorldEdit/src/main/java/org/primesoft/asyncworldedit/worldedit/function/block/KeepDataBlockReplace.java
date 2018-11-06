@@ -48,11 +48,12 @@
 package org.primesoft.asyncworldedit.worldedit.function.block;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.worldedit.function.IBlockData;
 
@@ -75,7 +76,7 @@ public class KeepDataBlockReplace implements RegionFunction, IBlockData {
     }
 
     @Override
-    public boolean apply(Vector position) throws WorldEditException {
+    public boolean apply(BlockVector3 position) throws WorldEditException {
         BlockStateHolder newBlock = m_pattern.apply(position);
         
         if (m_block != null) {           

@@ -48,7 +48,7 @@
 package org.primesoft.asyncworldedit.worldedit.entity;
 
 import com.sk89q.worldedit.PlayerDirection;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
@@ -57,6 +57,7 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.util.HandSide;
 import com.sk89q.worldedit.util.Location;
@@ -345,12 +346,12 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public void setPosition(Vector pos) {
+    public void setPosition(Vector3 pos) {
         m_parent.setPosition(pos);
     }
 
     @Override
-    public void setPosition(Vector pos, float pitch, float yaw) {
+    public void setPosition(Vector3 pos, float pitch, float yaw) {
         m_parent.setPosition(pos, pitch, yaw);
     }
 
@@ -411,7 +412,7 @@ public class PlayerWrapper implements Player {
     }
 
     @Override
-    public void sendFakeBlock(Vector pos, BlockStateHolder block) {
+    public void sendFakeBlock(BlockVector3 pos, BlockStateHolder block) {
         m_parent.sendFakeBlock(pos, block);
     }
 }

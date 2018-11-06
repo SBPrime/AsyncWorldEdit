@@ -47,11 +47,11 @@
  */
 package org.primesoft.asyncworldedit.taskdispatcher;
 
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.api.taskdispatcher.IDispatcherEntry;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.regions.Region;
 import java.util.Collection;
 import java.util.HashSet;
@@ -419,7 +419,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param pos
      */
     @Override
-    public void performSafeChunk(Object mutex, IAction action, IWorld world, Vector2D pos) {
+    public void performSafeChunk(Object mutex, IAction action, IWorld world, BlockVector2 pos) {
         long id = Thread.currentThread().getId();
         try {
             if (!markThread(id)) {
@@ -468,7 +468,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param pos
      */
     @Override
-    public void performSafe(Object mutex, IAction action, IWorld world, Vector pos) {
+    public void performSafe(Object mutex, IAction action, IWorld world, BlockVector3 pos) {
         long id = Thread.currentThread().getId();
         try {
             if (!markThread(id)) {
@@ -524,12 +524,12 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                 return;
             }
             synchronized (mutex) {
-                Set<Vector2D> chunks = region.getChunks();
+                Set<BlockVector2> chunks = region.getChunks();
                 String worldName = world != null ? world.getName() : null;
 
                 try {
                     boolean canPerform = true;
-                    for (Vector2D vector : chunks) {
+                    for (BlockVector2 vector : chunks) {
                         int cx = vector.getBlockX();
                         int cz = vector.getBlockZ();
                         m_chunkWatch.add(cx, cz, worldName);
@@ -550,7 +550,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                         }
                     }
                 } finally {
-                    for (Vector2D vector : chunks) {
+                    for (BlockVector2 vector : chunks) {
                         int cx = vector.getBlockX();
                         int cz = vector.getBlockZ();
                         m_chunkWatch.remove(cx, cz, worldName);
@@ -583,12 +583,12 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                 return action.execute();
             }
             synchronized (mutex) {
-                Set<Vector2D> chunks = region.getChunks();
+                Set<BlockVector2> chunks = region.getChunks();
                 String worldName = world != null ? world.getName() : null;
 
                 try {
                     boolean canPerform = true;
-                    for (Vector2D vector : chunks) {
+                    for (BlockVector2 vector : chunks) {
                         int cx = vector.getBlockX();
                         int cz = vector.getBlockZ();
                         m_chunkWatch.add(cx, cz, worldName);
@@ -609,7 +609,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                         }
                     }
                 } finally {
-                    for (Vector2D vector : chunks) {
+                    for (BlockVector2 vector : chunks) {
                         int cx = vector.getBlockX();
                         int cz = vector.getBlockZ();
                         m_chunkWatch.remove(cx, cz, worldName);
@@ -634,7 +634,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @return
      */
     @Override
-    public <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Vector pos) {
+    public <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, BlockVector3 pos) {
         long id = Thread.currentThread().getId();
         try {
             if (!markThread(id)) {
@@ -682,7 +682,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @return
      */
     @Override
-    public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Vector2D pos) {
+    public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, BlockVector2 pos) {
         long id = Thread.currentThread().getId();
         try {
             if (!markThread(id)) {
@@ -786,7 +786,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     }
 
     @Override
-    public void performSafeChunk(Object mutex, IAction action, IWorld world, Collection<BlockVector2D> chunks) {
+    public void performSafeChunk(Object mutex, IAction action, IWorld world, Collection<BlockVector2> chunks) {
         long id = Thread.currentThread().getId();
         try {
             if (!markThread(id)) {
@@ -798,7 +798,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
 
                 try {
                     boolean canPerform = true;
-                    for (Vector2D vector : chunks) {
+                    for (BlockVector2 vector : chunks) {
                         int cx = vector.getBlockX();
                         int cz = vector.getBlockZ();
                         m_chunkWatch.add(cx, cz, worldName);
@@ -819,7 +819,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                         }
                     }
                 } finally {
-                    for (Vector2D vector : chunks) {
+                    for (BlockVector2 vector : chunks) {
                         int cx = vector.getBlockX();
                         int cz = vector.getBlockZ();
                         m_chunkWatch.remove(cx, cz, worldName);
@@ -834,7 +834,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     }
 
     @Override
-    public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Collection<BlockVector2D> chunks) {
+    public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Collection<BlockVector2> chunks) {
         long id = Thread.currentThread().getId();
         try {
             if (!markThread(id)) {
@@ -846,7 +846,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
 
                 try {
                     boolean canPerform = true;
-                    for (Vector2D vector : chunks) {
+                    for (BlockVector2 vector : chunks) {
                         int cx = vector.getBlockX();
                         int cz = vector.getBlockZ();
                         m_chunkWatch.add(cx, cz, worldName);
@@ -867,7 +867,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                         }
                     }
                 } finally {
-                    for (Vector2D vector : chunks) {
+                    for (BlockVector2 vector : chunks) {
                         int cx = vector.getBlockX();
                         int cz = vector.getBlockZ();
                         m_chunkWatch.remove(cx, cz, worldName);

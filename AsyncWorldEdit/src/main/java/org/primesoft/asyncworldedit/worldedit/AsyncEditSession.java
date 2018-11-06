@@ -51,19 +51,19 @@ import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.internal.expression.ExpressionException;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BaseBiome;
-import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import java.util.List;
@@ -228,7 +228,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makeBiomeShape(final Region region, final Vector zero, final Vector unit,
+    public int makeBiomeShape(final Region region, final Vector3 zero, final Vector3 unit,
             final BaseBiome biomeType, final String expressionString,
             final boolean hollow)
             throws ExpressionException, MaxChangedBlocksException {
@@ -337,7 +337,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int drawLine(final Pattern pattern, final Vector pos1, final Vector pos2, final double radius,
+    public int drawLine(final Pattern pattern, final BlockVector3 pos1, final BlockVector3 pos2, final double radius,
             final boolean filled)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.drawLine);
@@ -379,7 +379,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      */
     @Override
     public int drawSpline(final Pattern pattern,
-            final List<Vector> nodevectors, final double tension, final double bias,
+            final List<BlockVector3> nodevectors, final double tension, final double bias,
             final double continuity, final double quality, final double radius,
             final boolean filled)
             throws MaxChangedBlocksException {
@@ -418,7 +418,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makeCylinder(final Vector pos, final Pattern block,
+    public int makeCylinder(final BlockVector3 pos, final Pattern block,
             final double radius, final int height,
             final boolean filled)
             throws MaxChangedBlocksException {
@@ -458,7 +458,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makeCylinder(final Vector pos, final Pattern block,
+    public int makeCylinder(final BlockVector3 pos, final Pattern block,
             final double radiusX,
             final double radiusZ, final int height,
             final boolean filled)
@@ -497,7 +497,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makeSphere(final Vector pos, final Pattern block,
+    public int makeSphere(final BlockVector3 pos, final Pattern block,
             final double radius,
             final boolean filled)
             throws MaxChangedBlocksException {
@@ -537,7 +537,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makeSphere(final Vector pos, final Pattern block,
+    public int makeSphere(final BlockVector3 pos, final Pattern block,
             final double radiusX,
             final double radiusY, final double radiusZ,
             final boolean filled)
@@ -576,7 +576,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makePyramid(final Vector pos, final Pattern block, final int size,
+    public int makePyramid(final BlockVector3 pos, final Pattern block, final int size,
             final boolean filled)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.makePyramid);
@@ -611,7 +611,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int thaw(final Vector pos, final double radius)
+    public int thaw(final BlockVector3 pos, final double radius)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.thaw);
         if (!isAsync) {
@@ -645,7 +645,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int simulateSnow(final Vector pos, final double radius)
+    public int simulateSnow(final BlockVector3 pos, final double radius)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.simulateSnow);
         if (!isAsync) {
@@ -680,7 +680,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int green(final Vector pos, final double radius, final boolean onlyNormalDirt)
+    public int green(final BlockVector3 pos, final double radius, final boolean onlyNormalDirt)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.green);
         if (!isAsync) {
@@ -714,7 +714,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makePumpkinPatches(final Vector basePos, final int size)
+    public int makePumpkinPatches(final BlockVector3 basePos, final int size)
             throws MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.makePumpkinPatches);
         if (!isAsync) {
@@ -750,7 +750,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makeForest(final Vector basePos, final int size,
+    public int makeForest(final BlockVector3 basePos, final int size,
             final double density,
             final TreeGenerator.TreeType treeGenerator)
             throws MaxChangedBlocksException {
@@ -792,8 +792,8 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int makeShape(final Region region, final Vector zero,
-            final Vector unit,
+    public int makeShape(final Region region, final Vector3 zero,
+            final Vector3 unit,
             final Pattern pattern, final String expressionString,
             final boolean hollow)
             throws ExpressionException, MaxChangedBlocksException {
@@ -836,8 +836,8 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      * @throws MaxChangedBlocksException
      */
     @Override
-    public int deformRegion(final Region region, final Vector zero,
-            final Vector unit,
+    public int deformRegion(final Region region, final Vector3 zero,
+            final Vector3 unit,
             final String expressionString)
             throws ExpressionException, MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.deformRegion);
@@ -912,22 +912,22 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     @Override
-    public int drainArea(Vector origin, double radius) throws MaxChangedBlocksException {
+    public int drainArea(BlockVector3 origin, double radius) throws MaxChangedBlocksException {
         return super.drainArea(origin, radius); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public int fillXZ(Vector origin, BlockStateHolder block, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
+    public int fillXZ(BlockVector3 origin, BlockStateHolder block, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
         return super.fillXZ(origin, block, radius, depth, recursive); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public int fillXZ(Vector origin, Pattern pattern, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
+    public int fillXZ(BlockVector3 origin, Pattern pattern, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
         return super.fillXZ(origin, pattern, radius, depth, recursive); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public int fixLiquid(Vector origin, double radius, BlockType fluid) throws MaxChangedBlocksException {
+    public int fixLiquid(BlockVector3 origin, double radius, BlockType fluid) throws MaxChangedBlocksException {
         return super.fixLiquid(origin, radius, fluid); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -952,12 +952,12 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     @Override
-    public int moveCuboidRegion(Region region, Vector dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException {
+    public int moveCuboidRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException {
         return super.moveCuboidRegion(region, dir, distance, copyAir, replacement); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public int moveRegion(Region region, Vector dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException {
+    public int moveRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException {
         return super.moveRegion(region, dir, distance, copyAir, replacement); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -977,17 +977,17 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     @Override
-    public int removeAbove(Vector position, int apothem, int height) throws MaxChangedBlocksException {
+    public int removeAbove(BlockVector3 position, int apothem, int height) throws MaxChangedBlocksException {
         return super.removeAbove(position, apothem, height); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public int removeBelow(Vector position, int apothem, int height) throws MaxChangedBlocksException {
+    public int removeBelow(BlockVector3 position, int apothem, int height) throws MaxChangedBlocksException {
         return super.removeBelow(position, apothem, height); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public int removeNear(Vector position, BlockType blockType, int apothem) throws MaxChangedBlocksException {
+    public int removeNear(BlockVector3 position, BlockType blockType, int apothem) throws MaxChangedBlocksException {
         return super.removeNear(position, blockType, apothem); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -1017,7 +1017,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     @Override
-    public int stackCuboidRegion(Region region, Vector dir, int count, boolean copyAir) throws MaxChangedBlocksException {
+    public int stackCuboidRegion(Region region, BlockVector3 dir, int count, boolean copyAir) throws MaxChangedBlocksException {
         return super.stackCuboidRegion(region, dir, count, copyAir); //To change body of generated methods, choose Tools | Templates.
     }
     

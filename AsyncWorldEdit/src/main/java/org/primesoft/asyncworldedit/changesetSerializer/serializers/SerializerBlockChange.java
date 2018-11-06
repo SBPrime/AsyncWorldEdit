@@ -49,7 +49,7 @@ package org.primesoft.asyncworldedit.changesetSerializer.serializers;
 
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.Tag;
-import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.world.block.BaseBlock;
@@ -90,7 +90,7 @@ public class SerializerBlockChange implements IChangesetSerializer {
             return null;
         }
 
-        BlockVector position = bChange.getPosition();
+        BlockVector3 position = bChange.getPosition();
 
         if (position == null) {
             return null;
@@ -140,7 +140,7 @@ public class SerializerBlockChange implements IChangesetSerializer {
             BlockStateHolder previous = readBlock(stream);
             BlockStateHolder current = readBlock(stream);
 
-            return new BlockChange(new BlockVector(x, y, z), previous, current);
+            return new BlockChange(BlockVector3.at(x, y, z), previous, current);
         } catch (IOException ioe) {
             ExceptionHelper.printException(ioe, "Unable to deserialize BlockChange");
             return null;

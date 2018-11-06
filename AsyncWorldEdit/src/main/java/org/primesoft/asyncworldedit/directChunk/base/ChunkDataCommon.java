@@ -47,9 +47,9 @@
  */
 package org.primesoft.asyncworldedit.directChunk.base;
 
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.api.directChunk.IChunkDataCommon;
 import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
 import org.primesoft.asyncworldedit.configuration.ConfigDirectChunkApi;
@@ -68,7 +68,7 @@ public abstract class ChunkDataCommon implements IChunkDataCommon {
      * @param v
      * @return
      */
-    public static boolean isValidPosition(BlockVector v) {
+    public static boolean isValidPosition(BlockVector3 v) {
         return isValidPosition(v.getBlockX(), v.getBlockY(), v.getBlockZ());
     }
 
@@ -78,7 +78,7 @@ public abstract class ChunkDataCommon implements IChunkDataCommon {
      * @param v
      * @return
      */
-    public static boolean isValidPosition(Vector v) {
+    public static boolean isValidPosition(Vector3 v) {
         return isValidPosition(v.getX(), v.getY(), v.getZ());
     }
 
@@ -169,7 +169,7 @@ public abstract class ChunkDataCommon implements IChunkDataCommon {
     /**
      * The chunk coordinates
      */
-    protected BlockVector2D m_chunkCoords;
+    protected BlockVector2 m_chunkCoords;
 
     /**
      * Get the direct chunk API
@@ -212,12 +212,12 @@ public abstract class ChunkDataCommon implements IChunkDataCommon {
     }
     
     @Override
-    public BlockVector2D getChunkCoords() {
+    public BlockVector2 getChunkCoords() {
         return m_chunkCoords;
     }
 
     @Override
-    public void setChunkCoords(BlockVector2D coords) {
+    public void setChunkCoords(BlockVector2 coords) {
         m_chunkCoords = coords;
     }
 }

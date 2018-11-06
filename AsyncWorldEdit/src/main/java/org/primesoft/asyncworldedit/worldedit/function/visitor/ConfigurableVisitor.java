@@ -47,10 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit.function.visitor;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.visitor.RecursiveVisitor;
+import com.sk89q.worldedit.math.BlockVector3;
 import java.util.Collection;
 
 /**
@@ -63,28 +64,28 @@ public class ConfigurableVisitor extends RecursiveVisitor {
             boolean axisX, boolean axisY, boolean axisZ) {
         super(mask, function);
 
-        Collection<Vector> directions = getDirections();
+        Collection<BlockVector3> directions = getDirections();
         directions.clear();
 
         if (axisX) {
-            directions.add(new Vector(1, 0, 0));
-            directions.add(new Vector(-1, 0, 0));
+            directions.add(BlockVector3.at(1, 0, 0));
+            directions.add(BlockVector3.at(-1, 0, 0));
         } else {
-            directions.add(new Vector(-1, 0, 0));
+            directions.add(BlockVector3.at(-1, 0, 0));
         }
         
         if (axisY) {
-            directions.add(new Vector(0, 1,0));
-            directions.add(new Vector(0, -1, 0));
+            directions.add(BlockVector3.at(0, 1,0));
+            directions.add(BlockVector3.at(0, -1, 0));
         } else {
-            directions.add(new Vector(0, -1, 0));
+            directions.add(BlockVector3.at(0, -1, 0));
         }
         
         if (axisZ) {
-            directions.add(new Vector(0, 0, 1));
-            directions.add(new Vector(0, 0, -1));
+            directions.add(BlockVector3.at(0, 0, 1));
+            directions.add(BlockVector3.at(0, 0, -1));
         } else {
-            directions.add(new Vector(0, 0, -1));
+            directions.add(BlockVector3.at(0, 0, -1));
         }
     }
 

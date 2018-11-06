@@ -47,11 +47,12 @@
  */
 package org.primesoft.asyncworldedit.worldedit.extent.inventory;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -83,7 +84,7 @@ public class FixedBlockBagExtent extends BlockBagExtent {
     }
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block) throws WorldEditException {
         BlockState oldBlock = getBlock(position);
         
         if (!m_blocksHub.canPlace(m_playerEntry, m_bukkitWorld, position, oldBlock, block)) {

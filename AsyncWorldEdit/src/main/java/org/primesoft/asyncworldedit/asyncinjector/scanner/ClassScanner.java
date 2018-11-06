@@ -48,9 +48,9 @@
 package org.primesoft.asyncworldedit.asyncinjector.scanner;
 
 import com.sk89q.util.yaml.YAMLNode;
-import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
@@ -336,11 +336,11 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry(ChangeSet.class),
             new ClassScannerEntry(EditSession.class),
             new ClassScannerEntry(Region.class),
-            new ClassScannerEntry(BlockVector.class),
+            new ClassScannerEntry(BlockVector3.class),
             new ClassScannerEntry(World.class),
             new ClassScannerEntry(FastModeExtent.class),
             new ClassScannerEntry(Change.class),
-            new ClassScannerEntry(Vector.class),
+            new ClassScannerEntry(Vector3.class),
             new ClassScannerEntry(BlockStateHolder.class),
             new ClassScannerEntry(BaseBlockWrapper.class),
             new ClassScannerEntry(BaseBlock.class),

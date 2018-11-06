@@ -47,7 +47,8 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.api.utils.IFunc;
@@ -63,6 +64,17 @@ public class WorldFuncEntry<T>
 
     private final IFunc<T> m_function;
 
+    /**
+     *
+     * @param worldName
+     * @param jobId
+     * @param location
+     * @param function
+     */
+    public WorldFuncEntry(String worldName,
+            int jobId, Vector3 location, IFunc<T> function) {
+        this(worldName, jobId, location.toBlockPoint(), function);
+    }
 
     /**
      *
@@ -72,7 +84,7 @@ public class WorldFuncEntry<T>
      * @param function
      */
     public WorldFuncEntry(String worldName,
-            int jobId, Vector location, IFunc<T> function) {
+            int jobId, BlockVector3 location, IFunc<T> function) {
         super(worldName, jobId, location);
         m_function = function;
     }

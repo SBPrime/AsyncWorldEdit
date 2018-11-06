@@ -47,11 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit.history.change;
 
-import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 
 /**
@@ -60,7 +60,7 @@ import com.sk89q.worldedit.world.biome.BaseBiome;
  * @author SBPrime
  */
 public class BiomeChange implements Change {
-    private final Vector2D m_position;
+    private final BlockVector2 m_position;
     private final BaseBiome m_previous;
     private final BaseBiome m_current;
 
@@ -71,7 +71,7 @@ public class BiomeChange implements Change {
      * @param previous the previous biome
      * @param current the current biome
      */
-    public BiomeChange(Vector2D position, BaseBiome previous, BaseBiome current) {
+    public BiomeChange(BlockVector2 position, BaseBiome previous, BaseBiome current) {
         m_position = position;
         m_previous = previous;
         m_current = current;
@@ -82,7 +82,7 @@ public class BiomeChange implements Change {
      *
      * @return
      */
-    public Vector2D getPosition() {
+    public BlockVector2 getPosition() {
         return m_position;
     }
 

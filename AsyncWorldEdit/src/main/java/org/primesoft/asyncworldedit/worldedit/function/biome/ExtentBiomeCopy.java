@@ -47,12 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit.function.biome;
 
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.RegionFunction;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.HashMap;
@@ -65,10 +64,10 @@ import java.util.LinkedHashMap;
 public class ExtentBiomeCopy implements RegionFunction {
 
     private final Extent m_source;
-    private final Vector m_from;
+    private final BlockVector3 m_from;
 
     private final Extent m_destination;
-    private final Vector m_to;
+    private final BlockVector3 m_to;
 
     private final Transform m_transform;
 
@@ -84,8 +83,8 @@ public class ExtentBiomeCopy implements RegionFunction {
      * @param transform
      * @param singleSet
      */
-    public ExtentBiomeCopy(Extent source, Vector from,
-            Extent destination, Vector to,
+    public ExtentBiomeCopy(Extent source, BlockVector3 from,
+            Extent destination, BlockVector3 to,
             Transform transform, boolean singleSet) {
 
         m_source = source;
@@ -96,16 +95,16 @@ public class ExtentBiomeCopy implements RegionFunction {
 
         m_transform = transform;
 
-        m_biomeCache = singleSet ? new LinkedHashMap<Integer, HashMap<Integer, Integer>>() : null;
+        m_biomeCache = singleSet ? new LinkedHashMap<>() : null;
     }
 
     @Override
-    public boolean apply(Vector position) throws WorldEditException {
-        BaseBiome biome = m_source.getBiome(position.toVector2D());
-        Vector orig = position.subtract(m_from);
-        Vector transformed = m_transform.apply(orig);
+    public boolean apply(BlockVector3 position) throws WorldEditException {
+        BaseBiome biome = m_source.getBiome(position.toBlockVector2());
+        BlockVector3 orig = position.subtract(m_from);
+        BlockVector3 transformed = m_transform.apply(orig.toVector3()).toBlockPoint();
 
-        BlockVector2D biomePosition = transformed.add(m_to).toVector2D().toBlockVector2D();        
+        BlockVector2 biomePosition = transformed.add(m_to).toBlockVector2();
         if (m_biomeCache == null) {
             return m_destination.setBiome(biomePosition, biome);
         }

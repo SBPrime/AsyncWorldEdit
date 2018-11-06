@@ -48,8 +48,9 @@
 package org.primesoft.asyncworldedit.directChunk.base;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -260,7 +261,7 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
 /*        List<IBlockEntry> tOldBlocks = new ArrayList<IBlockEntry>();
 
         IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
-        Vector chunkZero = PositionHelper.chunkToPosition(new BlockVector2D(m_cx, m_cz), 0);
+        Vector3 chunkZero = PositionHelper.chunkToPosition(BlockVector2.at(m_cx, m_cz), 0);
 
         for (IBlockEntry block : dataBlocks) {
             int x = block.getX();
@@ -270,7 +271,7 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
             final byte emissionLight = cData.getEmissionLight(x, y, z);
 
             if (block.hasBlock()) {
-                Vector pos = chunkZero.add(x, y, z);
+                Vector3 pos = chunkZero.add(x, y, z);
 
                 char id = block.getId();
                 CompoundTag nbt = block.getNbt();
@@ -330,13 +331,13 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
         List<IBiomeEntry> tOldBiome = new ArrayList<IBiomeEntry>();
 
         IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
-        Vector chunkZero = PositionHelper.chunkToPosition(new BlockVector2D(m_cx, m_cz), 0);
+        BlockVector3 chunkZero = PositionHelper.chunkToPosition(BlockVector2.at(m_cx, m_cz), 0);
 
         for (IBiomeEntry entry : dataBiomes) {
             int x = entry.getX();
             int z = entry.getZ();
 
-            Vector pos = chunkZero.add(x, 0, z);
+            BlockVector3 pos = chunkZero.add(x, 0, z);
             int id = entry.getId();
 
             int old = cData.getBiome(x, z);

@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.directChunk.base;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Direction;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.api.directChunk.ISerializedEntity;
@@ -60,7 +60,7 @@ public abstract class BaseSerializedEntity implements ISerializedEntity {
 
     protected final byte[] m_data;
     protected float m_pitch;
-    protected Vector m_postion;
+    protected Vector3 m_postion;
     private final UUID m_uuid;
     private ISerializedEntity m_vehicle;
     protected float m_yaw;
@@ -131,12 +131,12 @@ public abstract class BaseSerializedEntity implements ISerializedEntity {
     
 
     @Override
-    public Vector getPosition() {
+    public Vector3 getPosition() {
         return m_postion;
     }
     
     @Override
-    public void setPosition(Vector p) {
+    public void setPosition(Vector3 p) {
         m_postion = p;
     }
 
@@ -163,7 +163,7 @@ public abstract class BaseSerializedEntity implements ISerializedEntity {
     }
     
 
-    protected BaseSerializedEntity(UUID uuid, Vector position, float yaw, float pitch, byte[] data) {
+    protected BaseSerializedEntity(UUID uuid, Vector3 position, float yaw, float pitch, byte[] data) {
         if (!BaseChunkData.isValidPosition(position)) {
             throw new IllegalArgumentException(String.format("Provided position is out of range: %1$s", position));
         }

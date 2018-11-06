@@ -49,10 +49,11 @@ package org.primesoft.asyncworldedit.worldedit.command.tool.brush;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.command.tool.brush.Brush;
 import com.sk89q.worldedit.command.tool.brush.GravityBrush;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import java.lang.reflect.Field;
@@ -90,7 +91,7 @@ public class AsyncGravityBrush extends GravityBrush {
     }
 
     @Override
-    public void build(EditSession editSession, Vector position, Pattern pattern, double size) throws MaxChangedBlocksException {
+    public void build(EditSession editSession, BlockVector3 position, Pattern pattern, double size) throws MaxChangedBlocksException {
         final double startY = m_fullHeight ? editSession.getWorld().getMaxY() : position.getBlockY() + size;
         final double endY = position.getBlockY() - size;
         
@@ -99,14 +100,14 @@ public class AsyncGravityBrush extends GravityBrush {
                 final List<BlockStateHolder> blockTypes = new ArrayList<>();
                 double y = startY;
                 for (; y > endY; --y) {
-                    final Vector pt = new Vector(x, y, z);
+                    final BlockVector3 pt = BlockVector3.at(x, y, z);
                     final BlockStateHolder block = editSession.getBlock(pt);
                     if (!block.getBlockType().getMaterial().isAir()) {
                         blockTypes.add(block);
                     }
                 }
                 
-                Vector pt = new Vector(x, y, z);
+                BlockVector3 pt = BlockVector3.at(x, y, z);
                 Collections.reverse(blockTypes);
                 
                 

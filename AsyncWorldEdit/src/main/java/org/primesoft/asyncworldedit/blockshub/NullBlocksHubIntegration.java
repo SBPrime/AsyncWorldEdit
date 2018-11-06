@@ -47,7 +47,8 @@
  */
 package org.primesoft.asyncworldedit.blockshub;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.inner.IBlocksHubIntegration;
@@ -60,29 +61,34 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 public class NullBlocksHubIntegration implements IBlocksHubIntegration {
 
     @Override
-    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, 
+    public void logBlock(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {        
     }
 
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, 
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock) {
         return true;
     }
 
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location,
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
         return true;
     }
 
     @Override
-    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location) {
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location) {
         return true;
     }
 
     @Override
-    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location, boolean dc) {
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location, boolean dc) {
+        return true;
+    }
+
+    @Override
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, BlockVector3 location) {
         return true;
     }
 }

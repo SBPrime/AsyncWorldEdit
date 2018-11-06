@@ -48,9 +48,9 @@
 package org.primesoft.asyncworldedit.directChunk.base;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.util.Location;
@@ -81,7 +81,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     private final int[] m_heightMap;
 
     private final IChunkSection[] m_chunkSections;
-    private final HashMap<BlockVector, ISerializedTileEntity> m_tileEntities;
+    private final HashMap<BlockVector3, ISerializedTileEntity> m_tileEntities;
     private final List<ISerializedEntity> m_entities;
     private boolean m_done;
     private boolean m_lit;
@@ -148,7 +148,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
             m_tileEntities.clear();
 
             for (ISerializedTileEntity entry : entities) {
-                BlockVector v = entry.getPosition();
+                BlockVector3 v = entry.getPosition();
 
                 m_tileEntities.put(v, entry);
             }
@@ -188,7 +188,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
      *
      * @param v
      */
-    protected void removeTileEntity(BlockVector v) {
+    protected void removeTileEntity(BlockVector3 v) {
         if (!isValidPosition(v)) {
             log(String.format("removeTileEntity: invalid position %1$s", v));
             return;
@@ -204,7 +204,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
      * @param v
      * @param tEntity
      */
-    protected void setTileEntity(BlockVector v, ISerializedTileEntity tEntity) {
+    protected void setTileEntity(BlockVector3 v, ISerializedTileEntity tEntity) {
         if (!isValidPosition(v)) {
             log(String.format("setTileEntity: invalid position %1$s", v));
             return;
@@ -221,7 +221,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
      * @param v
      * @return
      */
-    protected ISerializedTileEntity getTileEntity(BlockVector v) {
+    protected ISerializedTileEntity getTileEntity(BlockVector3 v) {
         if (!isValidPosition(v)) {
             log(String.format("getTileEntity: invalid position %1$s", v));
             return null;
@@ -280,7 +280,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
      * Create new instance of chunk data
      */
     protected BaseChunkData() {
-        m_chunkCoords = new BlockVector2D(0, 0);
+        m_chunkCoords = BlockVector2.at(0, 0);
         m_tileEntities = new HashMap<>();
         m_entities = new LinkedList<>();
 
@@ -324,7 +324,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         //TODO: 1.13
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     /*
-        BlockVector2D cPos = getChunkCoords();
+        BlockVector2 cPos = getChunkCoords();
         InOutParam<ISerializedTileEntity> entity = InOutParam.Out();
 
         char combinedId = getBlock(x, y, z, entity);
@@ -399,7 +399,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
             return;
         }
 
-        removeTileEntity(new BlockVector(x, y, z));
+        removeTileEntity(BlockVector3.at(x, y, z));
 
         ids[idx] = id;
         if (emission >= 0) {
@@ -430,7 +430,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
             setChunkSection(cy, cs);
         }
 
-        BlockVector entityCoords = new BlockVector(x, y, z);
+        BlockVector3 entityCoords = BlockVector3.at(x, y, z);
         ISerializedTileEntity entity = createTileEntity(entityCoords, ct);
 
         char[] ids = cs.getBlockIds();
@@ -441,7 +441,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
             return;
         }
 
-        setTileEntity(new BlockVector(x, y, z), entity);
+        setTileEntity(BlockVector3.at(x, y, z), entity);
 
         ids[idx] = id;
 
@@ -510,7 +510,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         }
 
         if (tileEntity != null) {
-            ISerializedTileEntity entity = getTileEntity(new BlockVector(x, y, z));
+            ISerializedTileEntity entity = getTileEntity(BlockVector3.at(x, y, z));
 
             if (entity != null) {
                 tileEntity.setValue(entity);
@@ -614,7 +614,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public ISerializedEntity addEntity(Vector pos, Entity entity) {
+    public ISerializedEntity addEntity(Vector3 pos, Entity entity) {
         if (entity == null) {
             return null;
         }
@@ -666,7 +666,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
      * @param ct
      * @return
      */
-    protected abstract ISerializedTileEntity createTileEntity(BlockVector entityCoords, CompoundTag ct);
+    protected abstract ISerializedTileEntity createTileEntity(BlockVector3 entityCoords, CompoundTag ct);
 
     /**
      * Create new entity
@@ -677,5 +677,5 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
      * @param ct
      * @return
      */
-    protected abstract ISerializedEntity createEntity(BaseEntity entity, Vector pos, Location location, CompoundTag ct);
+    protected abstract ISerializedEntity createEntity(BaseEntity entity, Vector3 pos, Location location, CompoundTag ct);
 }

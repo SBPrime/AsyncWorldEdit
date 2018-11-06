@@ -47,11 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
@@ -60,6 +60,8 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
@@ -76,9 +78,10 @@ import java.util.Iterator;
 import java.util.List;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
-import org.primesoft.asyncworldedit.worldedit.BlockVector2DWrapper;
-import org.primesoft.asyncworldedit.worldedit.Vector2DWrapper;
-import org.primesoft.asyncworldedit.worldedit.VectorWrapper;
+import org.primesoft.asyncworldedit.worldedit.BlockVector2Wrapper;
+import org.primesoft.asyncworldedit.worldedit.BlockVector3Wrapper;
+import org.primesoft.asyncworldedit.worldedit.Vector2Wrapper;
+import org.primesoft.asyncworldedit.worldedit.Vector3Wrapper;
 import org.primesoft.asyncworldedit.worldedit.blocks.BlockStateHolderWrapper;
 import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
@@ -134,7 +137,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean useItem(Vector position, BaseItem item, Direction face) {
+    public boolean useItem(BlockVector3 position, BaseItem item, Direction face) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -143,41 +146,41 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block, boolean notifyAndLight) throws WorldEditException {
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block, boolean notifyAndLight) throws WorldEditException {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlock(VectorWrapper.wrap(position, m_jobId, true, m_player),
+        return m_parent.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player),
                 BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player), notifyAndLight);
     }
 
     @Override
-    public int getBlockLightLevel(Vector position) {
+    public int getBlockLightLevel(BlockVector3 position) {
         return m_parent.getBlockLightLevel(position);
     }
 
     @Override
-    public boolean clearContainerBlockContents(Vector position) {
+    public boolean clearContainerBlockContents(BlockVector3 position) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return m_parent.clearContainerBlockContents(VectorWrapper.wrap(position, m_jobId, true, m_player));
+        return m_parent.clearContainerBlockContents(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player));
     }
 
     @Override
-    public void dropItem(Vector position, BaseItemStack item, int count) {
-        m_parent.dropItem(VectorWrapper.wrap(position, m_jobId, true, m_player), item, count);
+    public void dropItem(Vector3 position, BaseItemStack item, int count) {
+        m_parent.dropItem(Vector3Wrapper.wrap(position, m_jobId, true, m_player), item, count);
     }
 
     @Override
-    public void dropItem(Vector position, BaseItemStack item) {
-        m_parent.dropItem(VectorWrapper.wrap(position, m_jobId, true, m_player), item);
+    public void dropItem(Vector3 position, BaseItemStack item) {
+        m_parent.dropItem(Vector3Wrapper.wrap(position, m_jobId, true, m_player), item);
     }
 
     @Override
-    public void simulateBlockMine(Vector position) {
-        m_parent.simulateBlockMine(VectorWrapper.wrap(position, m_jobId, true, m_player));
+    public void simulateBlockMine(BlockVector3 position) {
+        m_parent.simulateBlockMine(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player));
     }
 
     @Override
@@ -190,46 +193,46 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean generateTree(TreeGenerator.TreeType type, EditSession editSession, Vector position) throws MaxChangedBlocksException {
+    public boolean generateTree(TreeGenerator.TreeType type, EditSession editSession, BlockVector3 position) throws MaxChangedBlocksException {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
         return m_parent.generateTree(type, editSession, 
-                VectorWrapper.wrap(position, m_jobId, true, m_player));
+                BlockVector3Wrapper.wrap(position, m_jobId, true, m_player));
     }
 
     @Override
-    public void checkLoadedChunk(Vector position) {
+    public void checkLoadedChunk(BlockVector3 position) {
         m_parent.checkLoadedChunk(position);
     }
 
     @Override
-    public void fixAfterFastMode(Iterable<BlockVector2D> chunks) {
-        List<BlockVector2D> tmp = new ArrayList<>();
-        for (Iterator<BlockVector2D> it = chunks.iterator(); it.hasNext();) {
-            tmp.add(BlockVector2DWrapper.wrap(it.next(), m_jobId, true, m_player));
+    public void fixAfterFastMode(Iterable<BlockVector2> chunks) {
+        List<BlockVector2> tmp = new ArrayList<>();
+        for (Iterator<BlockVector2> it = chunks.iterator(); it.hasNext();) {
+            tmp.add(BlockVector2Wrapper.wrap(it.next(), m_jobId, true, m_player));
         }
         m_parent.fixAfterFastMode(tmp);
     }
 
     @Override
-    public void fixLighting(Iterable<BlockVector2D> chunks) {
-        List<BlockVector2D> tmp = new ArrayList<>();
-        for (Iterator<BlockVector2D> it = chunks.iterator(); it.hasNext();) {
-            tmp.add(BlockVector2DWrapper.wrap(it.next(), m_jobId, true, m_player));
+    public void fixLighting(Iterable<BlockVector2> chunks) {
+        List<BlockVector2> tmp = new ArrayList<>();
+        for (Iterator<BlockVector2> it = chunks.iterator(); it.hasNext();) {
+            tmp.add(BlockVector2Wrapper.wrap(it.next(), m_jobId, true, m_player));
         }
         m_parent.fixLighting(tmp);
     }
 
     @Override
-    public boolean playEffect(Vector position, int type, int data) {
-        return m_parent.playEffect(VectorWrapper.wrap(position, m_jobId, true, m_player), type, data);
+    public boolean playEffect(Vector3 position, int type, int data) {
+        return m_parent.playEffect(Vector3Wrapper.wrap(position, m_jobId, true, m_player), type, data);
     }
 
     @Override
-    public boolean queueBlockBreakEffect(Platform server, Vector position, BlockType blockType, double priority) {
-        return m_parent.queueBlockBreakEffect(server, VectorWrapper.wrap(position, m_jobId, true, m_player), blockType, priority);
+    public boolean queueBlockBreakEffect(Platform server, BlockVector3 position, BlockType blockType, double priority) {
+        return m_parent.queueBlockBreakEffect(server, BlockVector3Wrapper.wrap(position, m_jobId, true, m_player), blockType, priority);
     }
 
     @Override
@@ -261,12 +264,12 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public Vector getMinimumPoint() {
+    public BlockVector3 getMinimumPoint() {
         return m_parent.getMinimumPoint();
     }
 
     @Override
-    public Vector getMaximumPoint() {
+    public BlockVector3 getMaximumPoint() {
         return m_parent.getMaximumPoint();
     }
 
@@ -291,7 +294,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public BlockState getBlock(Vector position) {
+    public BlockState getBlock(BlockVector3 position) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -300,7 +303,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public BaseBlock getFullBlock(Vector position) {
+    public BaseBlock getFullBlock(BlockVector3 position) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -309,7 +312,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public BaseBiome getBiome(Vector2D position) {
+    public BaseBiome getBiome(BlockVector2 position) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -318,21 +321,21 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block) throws WorldEditException {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.setBlock(VectorWrapper.wrap(position, m_jobId, true, m_player),
+        return m_parent.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player),
                 BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override
-    public boolean setBiome(Vector2D position, BaseBiome biome) {
+    public boolean setBiome(BlockVector2 position, BaseBiome biome) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBiome(Vector2DWrapper.wrap(position, m_jobId, true, m_player), biome);
+        return m_parent.setBiome(BlockVector2Wrapper.wrap(position, m_jobId, true, m_player), biome);
     }
 
     @Override

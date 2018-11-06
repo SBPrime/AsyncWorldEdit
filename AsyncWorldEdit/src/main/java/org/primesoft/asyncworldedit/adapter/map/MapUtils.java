@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.adapter.map;
 
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector2;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -132,14 +132,14 @@ public abstract class MapUtils implements IMapUtils {
      * @return
      */
     @Override
-    public BlockVector2D[] getAllWorldChunks(IWorld w) {
+    public BlockVector2[] getAllWorldChunks(IWorld w) {
         File[] regionFiles = getMapFiles(w);
 
         if (regionFiles == null) {
             return null;
         }
 
-        final List<BlockVector2D> result = new ArrayList<BlockVector2D>();
+        final List<BlockVector2> result = new ArrayList<BlockVector2>();
 
         for (File f : regionFiles) {
             if (!f.canRead() || !f.exists()) {
@@ -161,14 +161,14 @@ public abstract class MapUtils implements IMapUtils {
                 continue;
             }
 
-            Collection<BlockVector2D> chunks = getRegionChunks(f, rx.getValue() << 5, rz.getValue() << 5);
+            Collection<BlockVector2> chunks = getRegionChunks(f, rx.getValue() << 5, rz.getValue() << 5);
             if (chunks != null) {
                 result.addAll(chunks);
             }
 
         }
 
-        return result.toArray(new BlockVector2D[0]);
+        return result.toArray(new BlockVector2[0]);
     }
 
     /**
@@ -180,7 +180,7 @@ public abstract class MapUtils implements IMapUtils {
      * @return
      * @throws IOException
      */
-    private Collection<BlockVector2D> getRegionChunks(File regionFile, int cx, int cz) {
+    private Collection<BlockVector2> getRegionChunks(File regionFile, int cx, int cz) {
         final byte[] chunkData = new byte[0x1000];
         final int read;
 
@@ -208,7 +208,7 @@ public abstract class MapUtils implements IMapUtils {
             return null;
         }
 
-        List<BlockVector2D> result = new ArrayList<BlockVector2D>();
+        List<BlockVector2> result = new ArrayList<>();
 
         int idx = 0;
         for (int z = 0; z < 32; z++) {
@@ -219,7 +219,7 @@ public abstract class MapUtils implements IMapUtils {
                 idx+=4;
                 
                 if (hasData) {
-                    result.add(new BlockVector2D(cx + x, cz + z));
+                    result.add(BlockVector2.at(cx + x, cz + z));
                 }
             }
         }

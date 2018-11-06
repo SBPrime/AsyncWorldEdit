@@ -320,7 +320,7 @@ public class BlockPlacer implements IBlockPlacer {
         boolean talk = false;
         final List<IJobEntry> jobsToCancel = new ArrayList<IJobEntry>();
         //Number of blocks placed for player        
-        final HashMap<IPermissionGroup, HashSet<IPlayerEntry>> groups = new HashMap<IPermissionGroup, HashSet<IPlayerEntry>>();
+        final HashMap<IPermissionGroup, HashSet<IPlayerEntry>> groups = new HashMap<>();
 
         synchronized (m_mutex) {
             final IPlayerEntry[] keys = m_blocks.keySet().toArray(new IPlayerEntry[0]);
@@ -329,7 +329,7 @@ public class BlockPlacer implements IBlockPlacer {
 
                 HashSet<IPlayerEntry> uuids;
                 if (!groups.containsKey(group)) {
-                    uuids = new HashSet<IPlayerEntry>();
+                    uuids = new HashSet<>();
                     uuids.add(player);
                     groups.put(group, uuids);
                 } else {

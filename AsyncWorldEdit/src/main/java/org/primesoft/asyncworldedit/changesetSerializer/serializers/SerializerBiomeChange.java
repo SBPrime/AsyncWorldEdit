@@ -47,8 +47,9 @@
  */
 package org.primesoft.asyncworldedit.changesetSerializer.serializers;
 
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.history.change.Change;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.io.IOException;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IChangesetSerializer;
@@ -79,7 +80,7 @@ public class SerializerBiomeChange  implements IChangesetSerializer {
             return null;
         }
 
-        Vector2D position = bChange.getPosition();
+        BlockVector2 position = bChange.getPosition();
 
         if (position == null) {
             return null;
@@ -115,13 +116,13 @@ public class SerializerBiomeChange  implements IChangesetSerializer {
         try {
             UnsafeDataInput stream = new UnsafeDataInput(data);
             
-            double x = stream.readDouble();
-            double z = stream.readDouble();
+            int x = stream.readInt();
+            int z = stream.readInt();
             
             BaseBiome previous = new BaseBiome(stream.readInt());
             BaseBiome current = new BaseBiome(stream.readInt());
             
-            return new BiomeChange(new Vector2D(x, z), previous, current);
+            return new BiomeChange(BlockVector2.at(x, z), previous, current);
         } catch (IOException ioe) {
             ExceptionHelper.printException(ioe, "Unable to deserialize BaseBiome");
             return null;

@@ -47,7 +47,8 @@
  */
 package org.primesoft.asyncworldedit.changesetSerializer.serializers;
 
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector2;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -124,6 +125,6 @@ public class WrappedChunkSerializer {
         IPlayerEntry pEntry = playerManager.getPlayer(playerUUID);
         IWorld world = awe.getWorld(worldUUID);
 
-        return DcUtils.wrapChunk(taskDispatcher, dcApi, awe.getWorldEditIntegrator().getWorld(world), world, pEntry, new Vector2D(x, z));
+        return DcUtils.wrapChunk(taskDispatcher, dcApi, awe.getWorldEditIntegrator().getWorld(world), world, pEntry, BlockVector2.at(x, z));
     }
 }

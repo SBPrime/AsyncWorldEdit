@@ -48,7 +48,7 @@
 package org.primesoft.asyncworldedit.core;
 
 import com.google.common.collect.Lists;
-import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.util.eventbus.EventBus;

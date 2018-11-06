@@ -47,10 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit.function.mask;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.function.mask.AbstractExtentMask;
 import com.sk89q.worldedit.function.mask.BlockMask;
 import com.sk89q.worldedit.function.mask.Mask2D;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,7 +66,7 @@ public class SkipDataBlockMask extends AbstractExtentMask implements ILastBlock 
     /**
      * All block it's that this mask passes
      */
-    private final Set<String> m_blocks = new HashSet<String>();
+    private final Set<String> m_blocks = new HashSet<>();
     
     /**
      * The last cheked block
@@ -84,7 +85,7 @@ public class SkipDataBlockMask extends AbstractExtentMask implements ILastBlock 
     }
 
     @Override
-    public boolean test(Vector vector) {
+    public boolean test(BlockVector3 vector) {
         m_lastBlock = getExtent().getBlock(vector);
         
         return m_blocks.contains(m_lastBlock.getBlockType().getId());

@@ -47,7 +47,8 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -72,7 +73,7 @@ public class WorldFuncEntryEx<T, TException extends Exception>
      * @param function
      */
     public WorldFuncEntryEx(String worldName,
-            int jobId, Vector location, IFuncEx<T, TException> function) {
+            int jobId, BlockVector3 location, IFuncEx<T, TException> function) {
         super(worldName, jobId, location);
 
         m_function = function;

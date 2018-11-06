@@ -48,8 +48,8 @@
 package org.primesoft.asyncworldedit.directChunk.base;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.util.Location;
@@ -127,7 +127,7 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
     protected BaseChangesetChunkData(IWrappedChunk wrappedChunk, ITaskDispatcher dispatcher) {
         m_dispatcher = dispatcher;
         m_wrappedChunk = wrappedChunk;
-        m_chunkCoords = new BlockVector2D(wrappedChunk.getX(), wrappedChunk.getZ());
+        m_chunkCoords = BlockVector2.at(wrappedChunk.getX(), wrappedChunk.getZ());
 
         m_changedBlocks = new LinkedHashMap<Short, IBlockEntry>();
         m_changedBiomes = new LinkedHashMap<Byte, IBiomeEntry>();
@@ -329,7 +329,7 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
     }
 
     @Override
-    public ISerializedEntity addEntity(Vector pos, Entity entity) {
+    public ISerializedEntity addEntity(Vector3 pos, Entity entity) {
         if (entity == null) {
             return null;
         }
@@ -365,7 +365,7 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
      * @param typeId
      * @return
      */
-    protected abstract ISerializedEntity createSerializedEntity(Vector pos, Location location,
+    protected abstract ISerializedEntity createSerializedEntity(Vector3 pos, Location location,
             CompoundTag ct, String typeId);
 
     @Override

@@ -54,8 +54,8 @@ import org.primesoft.asyncworldedit.worldedit.world.biome.BaseBiomeWrapper;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.AweEditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -68,13 +68,17 @@ import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockType;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -371,9 +375,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
     
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block, Stage stage) throws WorldEditException {
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block, Stage stage) throws WorldEditException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
+        boolean r = super.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, isAsync, m_player),
                 BlockStateHolderWrapper.wrap(block, m_jobId, isAsync, m_player), stage);
         if (r) {
             forceFlush();
@@ -382,9 +386,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean setBlock(int jobId, Vector position, BlockStateHolder block, Stage stage) throws WorldEditException {
+    public boolean setBlock(int jobId, BlockVector3 position, BlockStateHolder block, Stage stage) throws WorldEditException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(VectorWrapper.wrap(position, jobId, isAsync, m_player),
+        boolean r = super.setBlock(BlockVector3Wrapper.wrap(position, jobId, isAsync, m_player),
                 BlockStateHolderWrapper.wrap(block, jobId, isAsync, m_player), stage);
         if (r) {
             forceFlush();
@@ -393,11 +397,11 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean setBlock(Vector pt, Pattern pat, int jobId)
+    public boolean setBlock(BlockVector3 pt, Pattern pat, int jobId)
             throws MaxChangedBlocksException {
         m_jobId = jobId;
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(VectorWrapper.wrap(pt, jobId, isAsync, m_player), pat);
+        boolean r = super.setBlock(BlockVector3Wrapper.wrap(pt, jobId, isAsync, m_player), pat);
         if (r) {
             forceFlush();
         }
@@ -406,10 +410,10 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean setBlock(Vector pt, BlockStateHolder block, int jobId)
+    public boolean setBlock(BlockVector3 pt, BlockStateHolder block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(VectorWrapper.wrap(pt, jobId, isAsync, m_player),
+        boolean r = super.setBlock(BlockVector3Wrapper.wrap(pt, jobId, isAsync, m_player),
                 BlockStateHolderWrapper.wrap(block, jobId, isAsync, m_player));
         if (r) {
             forceFlush();
@@ -418,9 +422,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean setBiome(Vector2D position, BaseBiome biome) {
+    public boolean setBiome(BlockVector2 position, BaseBiome biome) {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBiome(Vector2DWrapper.wrap(position, m_jobId, isAsync, m_player),
+        boolean r = super.setBiome(BlockVector2Wrapper.wrap(position, m_jobId, isAsync, m_player),
                 BaseBiomeWrapper.wrap(biome, m_jobId, isAsync, m_player));
         if (r) {
             forceFlush();
@@ -466,9 +470,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block) throws MaxChangedBlocksException {
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block) throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player),
+        boolean r = super.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, isAsync, m_player),
                 BlockStateHolderWrapper.wrap(block, m_jobId, isAsync, m_player));
         if (r) {
             forceFlush();
@@ -477,9 +481,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean setBlock(Vector position, Pattern pattern) throws MaxChangedBlocksException {
+    public boolean setBlock(BlockVector3 position, Pattern pattern) throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(VectorWrapper.wrap(position, m_jobId, isAsync, m_player), pattern);
+        boolean r = super.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, isAsync, m_player), pattern);
 
         if (r) {
             forceFlush();
@@ -488,7 +492,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean smartSetBlock(Vector pt, BlockStateHolder block) {
+    public boolean smartSetBlock(BlockVector3 pt, BlockStateHolder block) {
         return super.smartSetBlock(pt, block);
     }
 
@@ -500,25 +504,25 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public BlockState getBlock(final Vector position) {
+    public BlockState getBlock(final BlockVector3 position) {
         final ThreadSafeEditSession es = this;
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), () -> es.doGetBlock(position), m_bukkitWorld, position);
     }
 
     @Override
-    public BaseBlock getFullBlock(final Vector position) {
+    public BaseBlock getFullBlock(final BlockVector3 position) {
         final ThreadSafeEditSession es = this;
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), () -> es.doGetFullBlock(position), m_bukkitWorld, position);
     }
 
     @Override
-    public BaseBiome getBiome(final Vector2D position) {
+    public BaseBiome getBiome(final BlockVector2 position) {
         final ThreadSafeEditSession es = this;
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
-                () -> es.doGetBiome(position), m_bukkitWorld, new Vector(position.getX(), 0, position.getZ()));
+                () -> es.doGetBiome(position), m_bukkitWorld, BlockVector3.at(position.getX(), 0, position.getZ()));
     }
 
     @Override
@@ -557,11 +561,11 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         final ThreadSafeEditSession es = this;
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
-                () -> es.doGetHighestTerrainBlock(x, z, minY, maxY), m_bukkitWorld, new Vector(x, minY, z));
+                () -> es.doGetHighestTerrainBlock(x, z, minY, maxY), m_bukkitWorld, BlockVector3.at(x, minY, z));
     }
 
     @Override
-    public Vector getMaximumPoint() {
+    public BlockVector3 getMaximumPoint() {
         final ThreadSafeEditSession es = this;
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
@@ -569,7 +573,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public Vector getMinimumPoint() {
+    public BlockVector3 getMinimumPoint() {
         final ThreadSafeEditSession es = this;
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
@@ -761,15 +765,15 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         return m_blockPlacer.getJobId(m_player);
     }
 
-    private BlockState doGetBlock(Vector position) {
+    private BlockState doGetBlock(BlockVector3 position) {
         return super.getBlock(position);
     }
 
-    private BaseBlock doGetFullBlock(Vector position) {
+    private BaseBlock doGetFullBlock(BlockVector3 position) {
         return super.getFullBlock(position);
     }
 
-    public BaseBiome doGetBiome(Vector2D position) {
+    public BaseBiome doGetBiome(BlockVector2 position) {
         return super.getBiome(position);
     }
 
@@ -793,11 +797,11 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         return super.getHighestTerrainBlock(x, z, minY, maxY);
     }
 
-    public Vector doGetMaximumPoint() {
+    public BlockVector3 doGetMaximumPoint() {
         return super.getMaximumPoint();
     }
 
-    public Vector doGetMinimumPoint() {
+    public BlockVector3 doGetMinimumPoint() {
         return super.getMinimumPoint();
     }
 

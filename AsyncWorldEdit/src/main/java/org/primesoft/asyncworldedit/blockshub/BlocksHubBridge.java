@@ -48,7 +48,8 @@
 package org.primesoft.asyncworldedit.blockshub;
 
 import com.sk89q.worldedit.LocalConfiguration;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +98,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     }
 
     @Override
-    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, 
+    public void logBlock(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
         BHLevel level = ConfigProvider.blocksHub().getLogBlocks();
         if (level == BHLevel.Disabled || (dc && level == BHLevel.Regular)) {
@@ -126,7 +127,42 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     }
 
     @Override
-    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location) {
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location) {
+        ConfigBlocksHub bhConfig = ConfigProvider.blocksHub();
+
+        BHLevel level = bhConfig.getCheckAccess();
+        if (level == BHLevel.Disabled) {
+            return true;
+        }
+
+        if (playerEntry == null) {
+            return bhConfig.isAccessAllowed(AccessType.Null);
+        }
+
+        boolean isUnknown = playerEntry.isUnknown()
+                || playerEntry.getName() == null || playerEntry.getName().isEmpty()
+                || playerEntry.getUUID() == null || !playerEntry.isPlayer();
+
+        boolean isConsole = playerEntry.isConsole();
+        boolean isOffline = playerEntry.isPlayer() && playerEntry.isDisposed();
+
+        if (isUnknown) {
+            return bhConfig.isAccessAllowed(AccessType.Unknown);
+        }
+        if (isConsole) {
+            return bhConfig.isAccessAllowed(AccessType.Console);
+        }
+
+        if (isOffline) {
+            return bhConfig.isAccessAllowed(AccessType.Offline);
+        }
+
+        return m_integrator.hasAccess(playerEntry, world, location);
+    }
+    
+    
+    @Override
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, BlockVector3 location) {
         ConfigBlocksHub bhConfig = ConfigProvider.blocksHub();
 
         BHLevel level = bhConfig.getCheckAccess();
@@ -160,7 +196,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     }
 
     @Override
-    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location, boolean dc) {
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location, boolean dc) {
         ConfigBlocksHub bhConfig = ConfigProvider.blocksHub();
 
         BHLevel level = bhConfig.getCheckAccess();
@@ -191,7 +227,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
         }
 
         return m_integrator.hasAccess(playerEntry, world, location, dc);
-    }
+    }    
 
     /**
      * Check if player can place a block using WorldEdit black list
@@ -255,7 +291,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     }
 
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, 
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock) {        
         if (!canPlace(playerEntry, newBlock)) {
             return false;
@@ -299,7 +335,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     }
 
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, 
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
         if (!canPlace(playerEntry, newBlock)) {
             return false;

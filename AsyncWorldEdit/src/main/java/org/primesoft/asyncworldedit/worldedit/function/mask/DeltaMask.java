@@ -47,9 +47,10 @@
  */
 package org.primesoft.asyncworldedit.worldedit.function.mask;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.function.mask.AbstractMask;
 import com.sk89q.worldedit.function.mask.Mask2D;
+import com.sk89q.worldedit.math.BlockVector3;
 
 /**
  *
@@ -63,7 +64,7 @@ public class DeltaMask  extends AbstractMask {
     private final boolean m_axisY;
     private final boolean m_axisZ;
     
-    public DeltaMask(Vector pos,
+    public DeltaMask(BlockVector3 pos,
             int delta, 
             boolean axisX, boolean axisY, boolean axisZ) {
         this(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(),
@@ -83,7 +84,7 @@ public class DeltaMask  extends AbstractMask {
     }
     
     @Override
-    public boolean test(Vector vector) {
+    public boolean test(BlockVector3 vector) {
         return (!m_axisX || test(m_px, vector.getX())) &&
                 (!m_axisY || test(m_py, vector.getY())) &&
                 (!m_axisZ || test(m_pz, vector.getZ()));

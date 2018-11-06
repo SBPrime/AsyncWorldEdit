@@ -47,34 +47,35 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
  * @author SBPrime
  */
-public class VectorWrapper extends Vector implements IAsyncWrapper {
-    public static Vector wrap(Vector v, int jobId, boolean isAsync, IPlayerEntry player) {        
-        if (v instanceof BlockVector) {
-            return BlockVectorWrapper.wrap((BlockVector)v, jobId, isAsync, player);
+public class Vector2Wrapper extends Vector2 implements IAsyncWrapper {
+    public static Vector2 wrap(Vector2 v, int jobId, boolean isAsync, IPlayerEntry player) {
+        if (v instanceof BlockVector2) {
+            return BlockVector2Wrapper.wrap((BlockVector2)v, jobId, isAsync, player);
         }
         
-        VectorWrapper result;
-        if (v instanceof VectorWrapper) {
-            result = (VectorWrapper) v;
+        
+        Vector2Wrapper result;
+        if (v instanceof Vector2Wrapper) {
+            result = (Vector2Wrapper) v;
             result.setAsync(isAsync);
             result.setPlayer(player);
         } else {
-            result = new VectorWrapper(v, jobId, isAsync, player);
-        }        
-        
+            result = new Vector2Wrapper(v, jobId, isAsync, player);
+        }
+
         return result;
     }
 
-    private final Vector m_parent;
+    private final Vector2 m_parent;
 
     private final int m_jobId;
 
@@ -88,7 +89,7 @@ public class VectorWrapper extends Vector implements IAsyncWrapper {
     }
 
     @Override
-    public Vector getParent() {
+    public Vector2 getParent() {
         return m_parent;
     }
 
@@ -110,8 +111,8 @@ public class VectorWrapper extends Vector implements IAsyncWrapper {
         return m_player;
     }
 
-    private VectorWrapper(Vector parent, int jobId, boolean isAsync, IPlayerEntry player) {
-        super(parent.getX(), parent.getY(), parent.getZ());
+    private Vector2Wrapper(Vector2 parent, int jobId, boolean isAsync, IPlayerEntry player) {
+        super(parent.getX(), parent.getZ());
 
         m_jobId = jobId;
         m_parent = parent;
@@ -119,127 +120,102 @@ public class VectorWrapper extends Vector implements IAsyncWrapper {
         m_player = player;
     }
 
-    private Vector wrap(Vector v) {
+    private Vector2 wrap(Vector2 v) {
         return wrap(v, m_jobId, m_isAsync, m_player);
     }
-    
+
     @Override
-    public Vector add(Vector other) {
+    public Vector2 add(Vector2 other) {
         return wrap(m_parent.add(other));
     }
 
     @Override
-    public Vector add(Vector... others) {
+    public Vector2 add(Vector2... others) {
         return wrap(m_parent.add(others));
     }
 
     @Override
-    public Vector add(double x, double y, double z) {
-        return wrap(m_parent.add(x, y, z));
+    public Vector2 add(double x, double z) {
+        return wrap(m_parent.add(x, z));
     }
 
     @Override
-    public Vector add(int x, int y, int z) {
-        return wrap(m_parent.add(x, y, z));
+    public Vector2 add(int x, int z) {
+        return wrap(m_parent.add(x, z));
     }
 
     @Override
-    public Vector ceil() {
+    public Vector2 ceil() {
         return wrap(m_parent.ceil());
     }
 
     @Override
-    public Vector clampY(int min, int max) {
-        return wrap(m_parent.clampY(min, max));
-    }
-
-    @Override
-    public int compareTo(Vector other) {
-        return m_parent.compareTo(other);
-    }
-
-    @Override
-    public boolean containedWithin(Vector min, Vector max) {
+    public boolean containedWithin(Vector2 min, Vector2 max) {
         return m_parent.containedWithin(min, max);
     }
 
     @Override
-    public boolean containedWithinBlock(Vector min, Vector max) {
+    public boolean containedWithinBlock(Vector2 min, Vector2 max) {
         return m_parent.containedWithinBlock(min, max);
     }
 
     @Override
-    public Vector cross(Vector other) {
-        return wrap(m_parent.cross(other));
-    }
-
-    @Override
-    public double distance(Vector pt) {
+    public double distance(Vector2 pt) {
         return m_parent.distance(pt);
     }
 
     @Override
-    public double distanceSq(Vector pt) {
+    public double distanceSq(Vector2 pt) {
         return m_parent.distanceSq(pt);
     }
 
     @Override
-    public Vector divide(Vector other) {
+    public Vector2 divide(Vector2 other) {
         return wrap(m_parent.divide(other));
     }
 
     @Override
-    public Vector divide(double n) {
+    public Vector2 divide(double n) {
         return wrap(m_parent.divide(n));
     }
 
     @Override
-    public Vector divide(float n) {
+    public Vector2 divide(float n) {
         return wrap(m_parent.divide(n));
     }
 
     @Override
-    public Vector divide(int n) {
+    public Vector2 divide(int n) {
         return wrap(m_parent.divide(n));
     }
 
     @Override
-    public Vector divide(double x, double y, double z) {
-        return wrap(m_parent.divide(x, y, z));
+    public Vector2 divide(double x, double z) {
+        return wrap(m_parent.divide(x, z));
     }
 
     @Override
-    public Vector divide(int x, int y, int z) {
-        return wrap(m_parent.divide(x, y, z));
+    public Vector2 divide(int x, int z) {
+        return wrap(m_parent.divide(x, z));
     }
 
     @Override
-    public double dot(Vector other) {
+    public double dot(Vector2 other) {
         return m_parent.dot(other);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof VectorWrapper)
+        if (obj instanceof Vector2Wrapper)
         {
-            obj = ((VectorWrapper)obj).getParent();
+            obj = ((Vector2Wrapper)obj).getParent();
         }
         return m_parent.equals(obj);
     }
 
     @Override
-    public Vector floor() {
+    public Vector2 floor() {
         return wrap(m_parent.floor());
-    }
-
-    @Override
-    public int getBlockX() {
-        return m_parent.getBlockX();
-    }
-
-    @Override
-    public int getBlockY() {
-        return m_parent.getBlockY();
     }
 
     @Override
@@ -248,13 +224,13 @@ public class VectorWrapper extends Vector implements IAsyncWrapper {
     }
 
     @Override
-    public double getX() {
-        return m_parent.getX();
+    public int getBlockX() {
+        return m_parent.getBlockX();
     }
 
     @Override
-    public double getY() {
-        return m_parent.getY();
+    public double getX() {
+        return m_parent.getX();
     }
 
     @Override
@@ -268,7 +244,7 @@ public class VectorWrapper extends Vector implements IAsyncWrapper {
     }
 
     @Override
-    public boolean isCollinearWith(Vector other) {
+    public boolean isCollinearWith(Vector2 other) {
         return m_parent.isCollinearWith(other);
     }
 
@@ -283,133 +259,118 @@ public class VectorWrapper extends Vector implements IAsyncWrapper {
     }
 
     @Override
-    public Vector multiply(Vector other) {
+    public Vector2 multiply(Vector2 other) {
         return wrap(m_parent.multiply(other));
     }
 
     @Override
-    public Vector multiply(Vector... others) {
+    public Vector2 multiply(Vector2... others) {
         return wrap(m_parent.multiply(others));
     }
 
     @Override
-    public Vector multiply(double n) {
+    public Vector2 multiply(double n) {
         return wrap(m_parent.multiply(n));
     }
 
     @Override
-    public Vector multiply(float n) {
+    public Vector2 multiply(float n) {
         return wrap(m_parent.multiply(n));
     }
 
     @Override
-    public Vector multiply(int n) {
+    public Vector2 multiply(int n) {
         return wrap(m_parent.multiply(n));
     }
 
     @Override
-    public Vector multiply(double x, double y, double z) {
-        return wrap(m_parent.multiply(x, y, z));
+    public Vector2 multiply(double x, double z) {
+        return wrap(m_parent.multiply(x, z));
     }
 
     @Override
-    public Vector multiply(int x, int y, int z) {
-        return wrap(m_parent.multiply(x, y, z));
+    public Vector2 multiply(int x, int z) {
+        return wrap(m_parent.multiply(x, z));
     }
 
     @Override
-    public Vector normalize() {
+    public Vector2 normalize() {
         return wrap(m_parent.normalize());
     }
 
     @Override
-    public Vector positive() {
+    public Vector2 positive() {
         return wrap(m_parent.positive());
     }
 
     @Override
-    public Vector round() {
+    public Vector2 round() {
         return wrap(m_parent.round());
     }
 
     @Override
-    public Vector setX(double x) {
+    public Vector2 setX(double x) {
         return wrap(m_parent.setX(x));
     }
 
     @Override
-    public Vector setX(int x) {
+    public Vector2 setX(int x) {
         return wrap(m_parent.setX(x));
     }
 
     @Override
-    public Vector setY(double y) {
-        return wrap(m_parent.setY(y));
-    }
-
-    @Override
-    public Vector setY(int y) {
-        return wrap(m_parent.setY(y));
-    }
-
-    @Override
-    public Vector setZ(double z) {
+    public Vector2 setZ(double z) {
         return wrap(m_parent.setZ(z));
     }
 
     @Override
-    public Vector setZ(int z) {
+    public Vector2 setZ(int z) {
         return wrap(m_parent.setZ(z));
     }
 
     @Override
-    public Vector subtract(Vector other) {
+    public Vector2 subtract(Vector2 other) {
         return wrap(m_parent.subtract(other));
     }
 
     @Override
-    public Vector subtract(Vector... others) {
+    public Vector2 subtract(Vector2... others) {
         return wrap(m_parent.subtract(others));
     }
 
     @Override
-    public Vector subtract(double x, double y, double z) {
-        return wrap(m_parent.subtract(x, y, z));
+    public Vector2 subtract(double x, double z) {
+        return wrap(m_parent.subtract(x, z));
     }
 
     @Override
-    public Vector subtract(int x, int y, int z) {
-        return wrap(m_parent.subtract(x, y, z));
+    public Vector2 subtract(int x, int z) {
+        return wrap(m_parent.subtract(x, z));
     }
 
     @Override
-    public BlockVector toBlockPoint() {
-        return BlockVectorWrapper.wrap(m_parent.toBlockPoint(), m_jobId, m_isAsync, m_player);
+    public BlockVector2 toBlockVector2D() {
+        return BlockVector2Wrapper.wrap(m_parent.toBlockVector2D(), m_jobId, m_isAsync, m_player);
     }
 
     @Override
-    public BlockVector toBlockVector() {
-        return BlockVectorWrapper.wrap(m_parent.toBlockVector(), m_jobId, m_isAsync, m_player);
+    public String toString() {
+        return m_parent.toString();
     }
 
     @Override
-    public Vector2D toVector2D() {
-        return Vector2DWrapper.wrap(m_parent.toVector2D(), m_jobId, m_isAsync, m_player);
+    public Vector3 toVector() {
+        return Vector3Wrapper.wrap(m_parent.toVector(), m_jobId, m_isAsync, m_player);
     }
 
     @Override
-    public Vector transform2D(double angle, double aboutX, double aboutZ,
-                              double translateX, double translateZ) {
+    public Vector3 toVector(double y) {
+        return Vector3Wrapper.wrap(m_parent.toVector(y), m_jobId, m_isAsync, m_player);
+    }
+
+    @Override
+    public Vector2 transform2D(double angle, double aboutX, double aboutZ,
+                                double translateX, double translateZ) {
         return wrap(m_parent.transform2D(angle, aboutX, aboutZ, translateX, translateZ));
-    }
-
-    @Override
-    public float toPitch() {
-        return m_parent.toPitch();
-    }
-
-    @Override
-    public float toYaw() {
-        return m_parent.toYaw();
     }
 }

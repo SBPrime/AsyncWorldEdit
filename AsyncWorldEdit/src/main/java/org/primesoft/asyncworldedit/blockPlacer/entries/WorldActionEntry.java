@@ -47,7 +47,8 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.api.utils.IAction;
@@ -70,9 +71,22 @@ public class WorldActionEntry
      * @param function
      */
     public WorldActionEntry(String worldName,
-            int jobId, Vector location, IAction function) {
+            int jobId, BlockVector3 location, IAction function) {
         super(worldName, jobId, location);
         m_function = function;
+    }
+
+    
+    /**
+     *
+     * @param worldName
+     * @param jobId
+     * @param location
+     * @param function
+     */
+    public WorldActionEntry(String worldName,
+            int jobId, Vector3 location, IAction function) {
+        this(worldName, jobId, location.toBlockPoint(), function);
     }
 
     @Override

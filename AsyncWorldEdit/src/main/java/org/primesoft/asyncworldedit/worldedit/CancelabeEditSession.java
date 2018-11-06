@@ -61,6 +61,7 @@ import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.block.BaseBlock;
@@ -241,7 +242,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public BlockState getBlock(Vector pt) {
+    public BlockState getBlock(BlockVector3 pt) {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -265,7 +266,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public BaseBlock getFullBlock(Vector pt) {
+    public BaseBlock getFullBlock(BlockVector3 pt) {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -322,37 +323,37 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }    
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block, Stage stage)
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block, Stage stage)
             throws WorldEditException {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         forceFlush();
-        return super.setBlock(VectorWrapper.wrap(position, m_jobId, true, m_player),
+        return super.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player),
                 BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player), stage);
     }
 
     @Override
-    public boolean setBlock(Vector pt, BlockStateHolder block)
+    public boolean setBlock(BlockVector3 pt, BlockStateHolder block)
             throws MaxChangedBlocksException {
 
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player),
+        return super.setBlock(BlockVector3Wrapper.wrap(pt, m_jobId, true, m_player),
                 BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player));
     }
 
     @Override
-    public boolean setBlock(Vector pt, Pattern pat)
+    public boolean setBlock(BlockVector3 pt, Pattern pat)
             throws MaxChangedBlocksException {
 
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return super.setBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player), pat);
+        return super.setBlock(BlockVector3Wrapper.wrap(pt, m_jobId, true, m_player), pat);
     }
 
     @Override
@@ -384,11 +385,11 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public boolean smartSetBlock(Vector pt, BlockStateHolder block) {
+    public boolean smartSetBlock(BlockVector3 pt, BlockStateHolder block) {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return super.smartSetBlock(VectorWrapper.wrap(pt, m_jobId, true, m_player),
+        return super.smartSetBlock(BlockVector3Wrapper.wrap(pt, m_jobId, true, m_player),
                 BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player));
     }
 

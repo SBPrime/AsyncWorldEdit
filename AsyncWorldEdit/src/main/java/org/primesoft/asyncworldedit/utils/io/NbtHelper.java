@@ -56,7 +56,7 @@ import com.sk89q.jnbt.ListTag;
 import com.sk89q.jnbt.ShortTag;
 import com.sk89q.jnbt.StringTag;
 import com.sk89q.jnbt.Tag;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Location;
 import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
 import java.io.IOException;
@@ -70,7 +70,7 @@ import java.util.Map;
  */
 public final class NbtHelper {
 
-    public static Tag createVector(Vector vector) {
+    public static Tag createVector(Vector3 vector) {
         List<DoubleTag> list = new ArrayList<DoubleTag>();
         list.add(new DoubleTag(vector.getX()));
         list.add(new DoubleTag(vector.getY()));

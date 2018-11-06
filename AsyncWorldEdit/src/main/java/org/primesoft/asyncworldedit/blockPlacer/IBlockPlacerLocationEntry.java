@@ -48,7 +48,7 @@
 
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
 
 /**
  * Interface for block placer entries that provide world location.
@@ -67,5 +67,5 @@ public interface IBlockPlacerLocationEntry {
      * The location
      * @return
      */
-    Vector getLocation();
+    BlockVector3 getLocation();
 }

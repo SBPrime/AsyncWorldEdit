@@ -47,11 +47,12 @@
  */
 package org.primesoft.asyncworldedit.asyncinjector.async;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.RegionFunction;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
@@ -107,7 +108,7 @@ public class AsyncClassFactory extends BaseClassFactory {
 
     @Override
     public RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, Vector from, Extent destination, Vector to, 
+            Extent source, BlockVector3 from, Extent destination, BlockVector3 to, 
             Transform currentTransform, boolean singleSet) {
         ExtentBiomeCopy bc = new ExtentBiomeCopy(source, from, destination, to, currentTransform, singleSet);        
         

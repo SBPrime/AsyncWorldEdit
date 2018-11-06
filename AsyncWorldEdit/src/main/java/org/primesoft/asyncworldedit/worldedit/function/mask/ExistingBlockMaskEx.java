@@ -47,10 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit.function.mask;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.AbstractExtentMask;
 import com.sk89q.worldedit.function.mask.Mask2D;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.worldedit.function.ILastBlock;
@@ -75,7 +76,7 @@ public class ExistingBlockMaskEx extends AbstractExtentMask implements ILastBloc
     }
 
     @Override
-    public boolean test(Vector vector) {
+    public boolean test(BlockVector3 vector) {
         m_lastBlock = getExtent().getBlock(vector);
         return !m_lastBlock.getBlockType().getMaterial().isAir();
     }

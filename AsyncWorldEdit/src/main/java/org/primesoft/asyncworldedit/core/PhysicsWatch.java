@@ -47,8 +47,9 @@
  */
 package org.primesoft.asyncworldedit.core;
 
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
-import com.sk89q.worldedit.Vector;
 import java.util.HashMap;
 
 /**
@@ -78,7 +79,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      */
     public PhysicsWatch() {
         m_mutex = new Object();
-        m_locked = new HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
+        m_locked = new HashMap<>();
     }
 
     /**
@@ -107,7 +108,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      * @param location The block location
      */
     @Override
-    public void addLocation(String name, Vector location) {
+    public void addLocation(String name, BlockVector3 location) {
         int x = location.getBlockX();
         int y = location.getBlockY();
         int z = location.getBlockZ();
@@ -119,7 +120,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
 
             HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> xhash;
             if (!m_locked.containsKey(name)) {
-                xhash = new HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>();
+                xhash = new HashMap<>();
                 m_locked.put(name, xhash);
             } else {
                 xhash = m_locked.get(name);
@@ -127,7 +128,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
 
             HashMap<Integer, HashMap<Integer, Integer>> yhash;
             if (!xhash.containsKey(x)) {
-                yhash = new HashMap<Integer, HashMap<Integer, Integer>>();
+                yhash = new HashMap<>();
                 xhash.put(x, yhash);
             } else {
                 yhash = xhash.get(x);
@@ -135,7 +136,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
 
             HashMap<Integer, Integer> zhash;
             if (!yhash.containsKey(y)) {
-                zhash = new HashMap<Integer, Integer>();
+                zhash = new HashMap<>();
                 yhash.put(y, zhash);
             } else {
                 zhash = yhash.get(y);
@@ -156,7 +157,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      * @param location the location
      */
     @Override
-    public void removeLocation(String name, Vector location) {
+    public void removeLocation(String name, BlockVector3 location) {
         int x = location.getBlockX();
         int y = location.getBlockY();
         int z = location.getBlockZ();

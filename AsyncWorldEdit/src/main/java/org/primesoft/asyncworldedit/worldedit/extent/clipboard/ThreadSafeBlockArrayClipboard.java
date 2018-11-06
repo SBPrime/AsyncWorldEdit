@@ -47,13 +47,15 @@
  */
 package org.primesoft.asyncworldedit.worldedit.extent.clipboard;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BaseBiome;
@@ -93,21 +95,21 @@ public class ThreadSafeBlockArrayClipboard extends BlockArrayClipboard {
     }
 
     @Override
-    public Vector getOrigin() {
+    public BlockVector3 getOrigin() {
         synchronized (m_mutex) {
             return super.getOrigin();
         }
     }
 
     @Override
-    public void setOrigin(Vector origin) {
+    public void setOrigin(BlockVector3 origin) {
         synchronized (m_mutex) {
             super.setOrigin(origin);
         }
     }
 
     @Override
-    public Vector getDimensions() {
+    public BlockVector3 getDimensions() {
         if (m_mutex == null) {
             return super.getDimensions();
         }
@@ -117,14 +119,14 @@ public class ThreadSafeBlockArrayClipboard extends BlockArrayClipboard {
     }
 
     @Override
-    public Vector getMinimumPoint() {
+    public BlockVector3 getMinimumPoint() {
         synchronized (m_mutex) {
             return super.getMinimumPoint();
         }
     }
 
     @Override
-    public Vector getMaximumPoint() {
+    public BlockVector3 getMaximumPoint() {
         synchronized (m_mutex) {
             return super.getMaximumPoint();
         }
@@ -166,35 +168,35 @@ public class ThreadSafeBlockArrayClipboard extends BlockArrayClipboard {
     }
     
     @Override
-    public BlockState getBlock(Vector position) {
+    public BlockState getBlock(BlockVector3 position) {
         synchronized (m_mutex) {
             return super.getBlock(position);
         }
     }
 
     @Override
-    public BaseBlock getFullBlock(Vector position) {
+    public BaseBlock getFullBlock(BlockVector3 position) {
         synchronized (m_mutex) {
             return super.getFullBlock(position);
         }
     }
     
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block) throws WorldEditException {
         synchronized (m_mutex) {
             return super.setBlock(position, block);
         }
     }
 
     @Override
-    public BaseBiome getBiome(Vector2D position) {
+    public BaseBiome getBiome(BlockVector2 position) {
         synchronized (m_mutex) {
             return super.getBiome(position);
         }
     }
 
     @Override
-    public boolean setBiome(Vector2D position, BaseBiome biome) {
+    public boolean setBiome(BlockVector2 position, BaseBiome biome) {
         synchronized (m_mutex) {
             return super.setBiome(position, biome);
         }

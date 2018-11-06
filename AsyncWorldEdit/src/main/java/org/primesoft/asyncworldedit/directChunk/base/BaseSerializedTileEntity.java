@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.directChunk.base;
 
-import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.math.BlockVector3;
 import org.primesoft.asyncworldedit.api.directChunk.ISerializedTileEntity;
 
 /**
@@ -56,10 +56,10 @@ import org.primesoft.asyncworldedit.api.directChunk.ISerializedTileEntity;
  */
 public abstract class BaseSerializedTileEntity implements ISerializedTileEntity {
 
-    protected BlockVector m_postion;
+    protected BlockVector3 m_postion;
     protected final byte[] m_data;
 
-    protected BaseSerializedTileEntity(BlockVector position, byte[] data) {
+    protected BaseSerializedTileEntity(BlockVector3 position, byte[] data) {
         if (!BaseChunkData.isValidPosition(position)) {
             throw new IllegalArgumentException(String.format("Provided position is out of range: %1$s", position));
         }
@@ -73,12 +73,12 @@ public abstract class BaseSerializedTileEntity implements ISerializedTileEntity 
     }
 
     @Override
-    public BlockVector getPosition() {
+    public BlockVector3 getPosition() {
         return m_postion;
     }
 
     @Override
-    public void setPosition(BlockVector p) {
+    public void setPosition(BlockVector3 p) {
         m_postion = p;
     }
 

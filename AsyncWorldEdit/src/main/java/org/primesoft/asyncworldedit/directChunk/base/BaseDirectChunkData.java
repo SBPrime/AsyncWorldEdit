@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.directChunk.base;
 
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector2;
 import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkData;
 import org.primesoft.asyncworldedit.api.directChunk.IWrappedChunk;
 
@@ -81,11 +81,11 @@ public abstract class BaseDirectChunkData extends ChunkDataCommon implements IDi
     }
 
     @Override
-    public BlockVector2D getChunkCoords() {
-        return new BlockVector2D(m_parrent.getX(), m_parrent.getZ());
+    public BlockVector2 getChunkCoords() {
+        return BlockVector2.at(m_parrent.getX(), m_parrent.getZ());
     }
 
     @Override
-    public void setChunkCoords(BlockVector2D coords) {
+    public void setChunkCoords(BlockVector2 coords) {
     }
 }

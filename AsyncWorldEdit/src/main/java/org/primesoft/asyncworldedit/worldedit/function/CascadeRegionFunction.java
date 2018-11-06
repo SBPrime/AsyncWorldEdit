@@ -47,9 +47,10 @@
  */
 package org.primesoft.asyncworldedit.worldedit.function;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.function.RegionFunction;
+import com.sk89q.worldedit.math.BlockVector3;
 
 /**
  *
@@ -64,7 +65,7 @@ public class CascadeRegionFunction implements RegionFunction {
     }
 
     @Override
-    public boolean apply(Vector position) throws WorldEditException {        
+    public boolean apply(BlockVector3 position) throws WorldEditException {        
         for (RegionFunction function : m_functions) {
             if (!function.apply(position)) {
                 return false;

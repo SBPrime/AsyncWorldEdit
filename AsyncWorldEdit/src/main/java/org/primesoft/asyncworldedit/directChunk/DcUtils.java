@@ -47,7 +47,8 @@
  */
 package org.primesoft.asyncworldedit.directChunk;
 
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.world.World;
 import java.util.Arrays;
 import org.primesoft.asyncworldedit.api.IChunk;
@@ -88,19 +89,15 @@ public class DcUtils {
     private static IWrappedChunk wrapChunk(ITaskDispatcher taskDispatcher, final IDirectChunkAPI chunkApi,
             Object mutex, final IWorld world, final IPlayerEntry player,
             final int cx, final int cz) {
-        IWrappedChunk wrappedChunk = taskDispatcher.performSafe(mutex,
-                new IFunc<IWrappedChunk>() {
-                    @Override
-                    public IWrappedChunk execute() {
-                        IChunk chunk = world.getChunkAt(cx, cz);
-
-                        if (player== null) {
-                            return chunkApi.wrapChunk(chunk);
-                        } else {
-                            return chunkApi.wrapChunk(chunk, player);
-                        }
-                    }
-                },
+        IWrappedChunk wrappedChunk = taskDispatcher.performSafe(mutex, () -> {
+            IChunk chunk = world.getChunkAt(cx, cz);
+            
+            if (player== null) {
+                return chunkApi.wrapChunk(chunk);
+            } else {
+                return chunkApi.wrapChunk(chunk, player);
+            }
+        },
                 world, PositionHelper.chunkToPosition(cx, 0, cz)
         );
 
@@ -141,9 +138,8 @@ public class DcUtils {
      */
     public static IWrappedChunk wrapChunk(ITaskDispatcher taskDispatcher, final IDirectChunkAPI chunkApi,
             World weWorld, final IWorld world, final IPlayerEntry player,
-            Vector2D cPos) {
+            BlockVector2 cPos) {
         return wrapChunk(taskDispatcher, chunkApi, weWorld, world, player, cPos.getBlockX(), cPos.getBlockZ());
-
     }
 
     /**
@@ -157,7 +153,7 @@ public class DcUtils {
      * @return
      */
     public static IWrappedChunk wrapChunk(ITaskDispatcher taskDispatcher, final IDirectChunkAPI chunkApi,
-            World weWorld, final IWorld world, Vector2D cPos) {
+            World weWorld, final IWorld world, BlockVector2 cPos) {
         return wrapChunk(taskDispatcher, chunkApi, weWorld, world, null, cPos.getBlockX(), cPos.getBlockZ());
     }
 
@@ -189,7 +185,7 @@ public class DcUtils {
      */
     public static IWrappedChunk wrapChunk(ITaskDispatcher taskDispatcher, final IDirectChunkAPI chunkApi,
             final IWorld world, final IPlayerEntry player,
-            Vector2D cPos) {
+            BlockVector2 cPos) {
         return wrapChunk(taskDispatcher, chunkApi, world, player, cPos.getBlockX(), cPos.getBlockZ());
 
     }
@@ -221,7 +217,7 @@ public class DcUtils {
      * @return
      */
     public static IWrappedChunk wrapChunk(ITaskDispatcher taskDispatcher, final IDirectChunkAPI chunkApi,
-            final IWorld world, Vector2D cPos) {
+            final IWorld world, BlockVector2 cPos) {
         return wrapChunk(taskDispatcher, chunkApi, world, null, cPos.getBlockX(), cPos.getBlockZ());
     }
 

@@ -49,7 +49,7 @@ package org.primesoft.asyncworldedit.changesetSerializer.serializers;
 
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.Tag;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -174,7 +174,7 @@ class ChangesetSerializer {
         stream.writeFloat(entity.getYaw());
         stream.writeFloat(entity.getPitch());
 
-        Vector vector = entity.getPosition();
+        Vector3 vector = entity.getPosition();
         stream.writeDouble(vector.getX());
         stream.writeDouble(vector.getY());
         stream.writeDouble(vector.getZ());
@@ -212,7 +212,7 @@ class ChangesetSerializer {
         double x = stream.readDouble();
         double y = stream.readDouble();
         double z = stream.readDouble();
-        Vector vector = new Vector(x, y, z);
+        Vector3 vector = Vector3.at(x, y, z);
 
         byte[] nbt = new byte[stream.readInt()];
         stream.readFully(nbt);

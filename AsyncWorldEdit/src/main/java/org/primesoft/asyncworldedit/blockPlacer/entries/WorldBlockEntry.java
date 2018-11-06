@@ -48,7 +48,8 @@
 
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.IBlockPlacerLocationEntry;
 
@@ -61,13 +62,13 @@ public abstract class WorldBlockEntry extends BlockPlacerEntry implements IBlock
     /**
      * The changed block location
      */
-    protected final Vector m_location;
+    protected final BlockVector3 m_location;
 
     /**
      * The world name
      */
     protected final String m_worldName;
-
+    
     /**
      * Create new instance of the class
      * @param worldName The World name
@@ -75,7 +76,7 @@ public abstract class WorldBlockEntry extends BlockPlacerEntry implements IBlock
      * @param location The changed block location
      */
     public WorldBlockEntry(String worldName,
-            int jobId, Vector location) {
+            int jobId, BlockVector3 location) {
         super(jobId, false);
         
         m_location = location;
@@ -88,7 +89,7 @@ public abstract class WorldBlockEntry extends BlockPlacerEntry implements IBlock
     }
 
     @Override
-    public Vector getLocation() {
+    public BlockVector3 getLocation() {
         return m_location;
     }
 }

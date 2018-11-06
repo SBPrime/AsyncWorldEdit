@@ -47,11 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
@@ -61,6 +61,7 @@ import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.history.change.BlockChange;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
@@ -218,7 +219,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         return ConfigProvider.isAsyncAllowed(operation) && m_player.getAweMode();
     }
 
-    private boolean canPlace(IPlayerEntry player, IWorld world, Vector location,
+    private boolean canPlace(IPlayerEntry player, IWorld world, BlockVector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock) {
         return m_blocksHub.canPlace(player, world, location, oldBlock, newBlock);
     }
@@ -230,7 +231,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * Log placed block using blocks hub
      */
-    private void logBlock(Vector location, IPlayerEntry player,
+    private void logBlock(BlockVector3 location, IPlayerEntry player,
             BlockStateHolder oldBlock, BlockStateHolder newBlock) {
         m_blocksHub.logBlock(player, m_bukkitWorld, location, oldBlock, newBlock, false);
     }
@@ -254,9 +255,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean useItem(Vector position, BaseItem item, Direction face) {
-        final DataAsyncParams<Vector> paramVector = DataAsyncParams.extract(position);
-        final Vector v = paramVector.getData();
+    public boolean useItem(BlockVector3 position, BaseItem item, Direction face) {
+        final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
+        final BlockVector3 v = paramVector.getData();
         final IPlayerEntry player = getPlayer(paramVector);
 
         IFunc<Boolean> func = () -> m_parent.useItem(position, item, face);
@@ -270,12 +271,12 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block, boolean notifyAndLight) throws WorldEditException {
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block, boolean notifyAndLight) throws WorldEditException {
         final DataAsyncParams<BlockStateHolder> paramBlock = DataAsyncParams.extract(block);
-        final DataAsyncParams<Vector> paramVector = DataAsyncParams.extract(position);
+        final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
 
         final BlockStateHolder newBlock = paramBlock.getData();
-        final Vector v = paramVector.getData();
+        final BlockVector3 v = paramVector.getData();
         final IPlayerEntry player = getPlayer(paramBlock, paramVector);
 
         IFuncEx<Boolean, WorldEditException> func = () -> {
@@ -306,15 +307,15 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public int getBlockLightLevel(final Vector position) {
+    public int getBlockLightLevel(final BlockVector3 position) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> m_parent.getBlockLightLevel(position), m_bukkitWorld, position);
     }
 
     @Override
-    public boolean clearContainerBlockContents(final Vector position) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(position);
-        final Vector v = param.getData();
+    public boolean clearContainerBlockContents(final BlockVector3 position) {
+        final DataAsyncParams<BlockVector3> param = DataAsyncParams.extract(position);
+        final BlockVector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, v)) {
@@ -332,9 +333,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public void dropItem(Vector position, final BaseItemStack item, final int count) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(position);
-        final Vector v = param.getData();
+    public void dropItem(Vector3 position, final BaseItemStack item, final int count) {
+        final DataAsyncParams<Vector3> param = DataAsyncParams.extract(position);
+        final Vector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, v)) {
@@ -353,9 +354,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public void dropItem(Vector position, final BaseItemStack item) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(position);
-        final Vector v = param.getData();
+    public void dropItem(Vector3 position, final BaseItemStack item) {
+        final DataAsyncParams<Vector3> param = DataAsyncParams.extract(position);
+        final Vector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
 
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, v)) {
@@ -374,9 +375,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public void simulateBlockMine(Vector position) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(position);
-        final Vector v = param.getData();
+    public void simulateBlockMine(BlockVector3 position) {
+        final DataAsyncParams<BlockVector3> param = DataAsyncParams.extract(position);
+        final BlockVector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
 
         final BlockStateHolder air = BlockTypes.AIR.getDefaultState();
@@ -452,8 +453,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
             }
         };
         
-        for (Vector2D chunk : region.getChunks()) {
-            Vector min = PositionHelper.chunkToPosition(chunk, 0);
+        for (BlockVector2 chunk : region.getChunks()) {
+            BlockVector3 min = PositionHelper.chunkToPosition(chunk, 0);
 
             m_chunkWatcher.add(chunk.getBlockX(), chunk.getBlockZ(), getName());
             // First save all the blocks inside
@@ -461,7 +462,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             for (int x = 0; x < 16; ++x) {
                 for (int y = 0; y < (maxY + 1); ++y) {
                     for (int z = 0; z < 16; ++z) {
-                        Vector pt = min.add(x, y, z);                        
+                        BlockVector3 pt = min.add(x, y, z);                        
                         history[index] = eSession.getBlock(pt);
                         index++;
                     }
@@ -485,13 +486,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
             for (int x = 0; x < 16; ++x) {
                 for (int y = 0; y < (maxY + 1); ++y) {
                     for (int z = 0; z < 16; ++z) {
-                        Vector pt = min.add(x, y, z);
+                        BlockVector3 pt = min.add(x, y, z);
                         // We have to restore the block if it was outside
                         if (!region.contains(pt)) {
                             eSession.smartSetBlock(pt, history[index]);
                         } else { // Otherwise fool with history
                             eSession.getChangeSet().add(
-                                    new BlockChange(pt.toBlockVector(), history[index], eSession.getFullBlock(pt)));
+                                    new BlockChange(pt, history[index], eSession.getFullBlock(pt)));
                         }
                         index++;
                     }
@@ -502,9 +503,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean generateTree(final TreeGenerator.TreeType type, final EditSession editSession, Vector position) throws MaxChangedBlocksException {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(position);
-        final Vector v = param.getData();
+    public boolean generateTree(final TreeGenerator.TreeType type, final EditSession editSession, BlockVector3 position) throws MaxChangedBlocksException {
+        final DataAsyncParams<BlockVector3> param = DataAsyncParams.extract(position);
+        final BlockVector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
         
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, v)) {
@@ -522,16 +523,16 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public void checkLoadedChunk(final Vector position) {
+    public void checkLoadedChunk(final BlockVector3 position) {
         m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> {
             m_parent.checkLoadedChunk(position);
         }, m_bukkitWorld, PositionHelper.positionToChunk(position));
     }
 
     @Override
-    public void fixAfterFastMode(final Iterable<BlockVector2D> chunks) {
-        final Collection<BlockVector2D> tmp = new ArrayList<>();
-        for (Iterator<BlockVector2D> iterator = chunks.iterator(); iterator.hasNext();) {
+    public void fixAfterFastMode(final Iterable<BlockVector2> chunks) {
+        final Collection<BlockVector2> tmp = new ArrayList<>();
+        for (Iterator<BlockVector2> iterator = chunks.iterator(); iterator.hasNext();) {
             tmp.add(iterator.next());
         }
         
@@ -541,9 +542,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public void fixLighting(final Iterable<BlockVector2D> chunks) {
-        final Collection<BlockVector2D> tmp = new ArrayList<>();
-        for (Iterator<BlockVector2D> iterator = chunks.iterator(); iterator.hasNext();) {
+    public void fixLighting(final Iterable<BlockVector2> chunks) {
+        final Collection<BlockVector2> tmp = new ArrayList<>();
+        for (Iterator<BlockVector2> iterator = chunks.iterator(); iterator.hasNext();) {
             tmp.add(iterator.next());
         }
         
@@ -553,9 +554,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean playEffect(Vector position, final int type, final int data) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(position);
-        final Vector v = param.getData();
+    public boolean playEffect(Vector3 position, final int type, final int data) {
+        final DataAsyncParams<Vector3> param = DataAsyncParams.extract(position);
+        final Vector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
         
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, v)) {
@@ -573,9 +574,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean queueBlockBreakEffect(final Platform server, Vector position, final BlockType blockType, final double priority) {
-        final DataAsyncParams<Vector> param = DataAsyncParams.extract(position);
-        final Vector v = param.getData();
+    public boolean queueBlockBreakEffect(final Platform server, BlockVector3 position, final BlockType blockType, final double priority) {
+        final DataAsyncParams<BlockVector3> param = DataAsyncParams.extract(position);
+        final BlockVector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
         
         final BlockStateHolder air = BlockTypes.AIR.getDefaultState();
@@ -641,13 +642,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public Vector getMinimumPoint() {
+    public BlockVector3 getMinimumPoint() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
                 m_parent::getMinimumPoint);
     }
 
     @Override
-    public Vector getMaximumPoint() {
+    public BlockVector3 getMaximumPoint() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
                 m_parent::getMaximumPoint);
     }
@@ -672,6 +673,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final IPlayerEntry player = getPlayer(paramLocation, paramEntity);
         
         final EntityLazyWrapper entityWrapper = new EntityLazyWrapper(l, this);
+        
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, l.toVector())) {
             return entityWrapper; //Return the entity wrapper so WorldEdit does not complain
         }
@@ -697,31 +699,31 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public BlockState getBlock(final Vector position) {
+    public BlockState getBlock(final BlockVector3 position) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
                 () -> m_parent.getBlock(position), m_bukkitWorld, position);
     }
 
     @Override
-    public BaseBlock getFullBlock(final Vector position) {
+    public BaseBlock getFullBlock(final BlockVector3 position) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
                 () -> m_parent.getFullBlock(position), m_bukkitWorld, position);
     }
 
     @Override
-    public BaseBiome getBiome(Vector2D position) {
+    public BaseBiome getBiome(BlockVector2 position) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
                 () -> m_parent.getBiome(position),
-                m_bukkitWorld, new Vector(position.getX(), 0, position.getZ()));
+                m_bukkitWorld, BlockVector3.at(position.getX(), 0, position.getZ()));
     }
 
     @Override
-    public boolean setBlock(final Vector position, final BlockStateHolder block) throws WorldEditException {
+    public boolean setBlock(final BlockVector3 position, final BlockStateHolder block) throws WorldEditException {
         final DataAsyncParams<BlockStateHolder> paramBlock = DataAsyncParams.extract(block);
-        final DataAsyncParams<Vector> paramVector = DataAsyncParams.extract(position);
+        final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
         
         final BlockStateHolder newBlock = paramBlock.getData();
-        final Vector v = paramVector.getData();
+        final BlockVector3 v = paramVector.getData();
         final IPlayerEntry player = getPlayer(paramBlock, paramVector);
         
         IFuncEx<Boolean, WorldEditException> func = () -> {
@@ -752,13 +754,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean setBiome(Vector2D vector, final BaseBiome biome) {
-        final DataAsyncParams<Vector2D> paramVector = DataAsyncParams.extract(vector);
+    public boolean setBiome(BlockVector2 vector, final BaseBiome biome) {
+        final DataAsyncParams<BlockVector2> paramVector = DataAsyncParams.extract(vector);
         final DataAsyncParams<BaseBiome> paramBiome = DataAsyncParams.extract(biome);
-        final Vector2D v = paramVector.getData();
+        final BlockVector2 v = paramVector.getData();
         final BaseBiome b = paramBiome.getData();
         final IPlayerEntry player = getPlayer(paramBiome, paramVector);
-        final Vector tmpV = new Vector(v.getX(), 0, v.getZ());
+        final BlockVector3 tmpV = BlockVector3.at(v.getX(), 0, v.getZ());
         
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, tmpV)) {
             return false;
