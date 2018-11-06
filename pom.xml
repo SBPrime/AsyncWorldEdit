@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit_AllInOne</artifactId>
-    <version>3.6.0-beta-6</version>
+    <version>3.6.0-beta-7</version>
     <packaging>pom</packaging>
     <name>AsyncWorldEdit_AllInOne</name>
     <modules>
