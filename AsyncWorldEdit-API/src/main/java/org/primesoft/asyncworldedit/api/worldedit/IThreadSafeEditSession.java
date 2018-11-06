@@ -42,7 +42,7 @@ package org.primesoft.asyncworldedit.api.worldedit;
 
 import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.function.pattern.Pattern;
@@ -140,11 +140,11 @@ public interface IThreadSafeEditSession extends IAweEditSession {
      * @return whether the block changed
      * @throws WorldEditException thrown on a set error
      */
-    boolean setBlock(int jobId, Vector position, BlockStateHolder block, Stage stage) throws WorldEditException;
+    boolean setBlock(int jobId, Vector3 position, BlockStateHolder block, Stage stage) throws WorldEditException;
 
-    boolean setBlock(Vector vector, BlockStateHolder bsh, int jobId) throws WorldEditException;
+    boolean setBlock(Vector3 vector, BlockStateHolder bsh, int jobId) throws WorldEditException;
     
-    boolean setBlock(Vector position, Pattern pattern, int jobId) throws MaxChangedBlocksException;
+    boolean setBlock(Vector3 position, Pattern pattern, int jobId) throws MaxChangedBlocksException;
     
     Iterator<Change> doUndo();
 

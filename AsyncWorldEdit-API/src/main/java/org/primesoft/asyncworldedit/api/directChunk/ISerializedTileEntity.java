@@ -41,7 +41,7 @@
 package org.primesoft.asyncworldedit.api.directChunk;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.math.BlockVector3;
 
 /**
  * Serialized tile entity
@@ -52,13 +52,13 @@ public interface ISerializedTileEntity {
      * Get the in chunk position
      * @return 
      */
-    BlockVector getPosition();
+    BlockVector3 getPosition();
     
     /**
      * Set the in chunk position (0-16, 0-255, 0-16)
      * @param p 
      */
-    void setPosition(BlockVector p);
+    void setPosition(BlockVector3 p);
     
     /**
      * Get the raw NBT data

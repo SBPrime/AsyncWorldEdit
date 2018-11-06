@@ -41,7 +41,7 @@
 package org.primesoft.asyncworldedit.api.directChunk;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.api.IChunk;
@@ -138,7 +138,7 @@ public interface IDirectChunkAPI {
      * @param nbt
      * @return
      */
-    ISerializedEntity createEntity(UUID uuid, Vector position,
+    ISerializedEntity createEntity(UUID uuid, Vector3 position,
             float yaw, float pitch, byte[] nbt);
 
     /**

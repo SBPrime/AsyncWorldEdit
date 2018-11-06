@@ -41,7 +41,7 @@
 package org.primesoft.asyncworldedit.api.directChunk;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import java.util.UUID;
 
 /**
@@ -86,14 +86,14 @@ public interface ISerializedEntity {
      *
      * @return
      */
-    Vector getPosition();
+    Vector3 getPosition();
 
     /**
      * Set the entity in chunk position (in range 0-15, 0-255, 0-15)
      *
      * @param p
      */
-    void setPosition(Vector p);
+    void setPosition(Vector3 p);
 
     /**
      * Get the raw NBT data

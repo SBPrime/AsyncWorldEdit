@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.api.map;
 
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector2;
 import java.io.File;
 import org.primesoft.asyncworldedit.api.IWorld;
 
@@ -76,5 +76,5 @@ public interface IMapUtils {
      * @param w
      * @return 
      */
-    public BlockVector2D[] getAllWorldChunks(IWorld w);
+    public BlockVector2[] getAllWorldChunks(IWorld w);
 }

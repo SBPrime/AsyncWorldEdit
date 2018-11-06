@@ -40,9 +40,9 @@
  */
 package org.primesoft.asyncworldedit.api.taskdispatcher;
 
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.regions.Region;
 import java.util.Collection;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -85,7 +85,7 @@ public interface ITaskDispatcher {
      * @param world
      * @param pos
      */
-    void performSafeChunk(Object mutex, IAction action, IWorld world, Vector2D pos);
+    void performSafeChunk(Object mutex, IAction action, IWorld world, Vector2 pos);
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -98,7 +98,7 @@ public interface ITaskDispatcher {
      * @param pos
      * @return
      */
-    <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Vector2D pos);
+    <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Vector2 pos);
     
     
     /**
@@ -110,7 +110,7 @@ public interface ITaskDispatcher {
      * @param world
      * @param chunks
      */
-    void performSafeChunk(Object mutex, IAction action, IWorld world, Collection<BlockVector2D> chunks);
+    void performSafeChunk(Object mutex, IAction action, IWorld world, Collection<BlockVector2> chunks);
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -123,7 +123,7 @@ public interface ITaskDispatcher {
      * @param chunks
      * @return
      */
-    <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Collection<BlockVector2D> chunks);
+    <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Collection<BlockVector2> chunks);
     
 
     /**
@@ -135,7 +135,7 @@ public interface ITaskDispatcher {
      * @param world
      * @param pos
      */
-    void performSafe(Object mutex, IAction action, IWorld world, Vector pos);
+    void performSafe(Object mutex, IAction action, IWorld world, Vector3 pos);
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -172,7 +172,7 @@ public interface ITaskDispatcher {
      * @param pos
      * @return
      */
-    <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Vector pos);
+    <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Vector3 pos);
     
     /**
      * Perform an action on the dispatcher

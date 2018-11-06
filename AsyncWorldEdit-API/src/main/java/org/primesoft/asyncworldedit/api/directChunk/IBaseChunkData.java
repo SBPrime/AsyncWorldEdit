@@ -41,7 +41,7 @@
 package org.primesoft.asyncworldedit.api.directChunk;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 
@@ -120,7 +120,7 @@ public interface IBaseChunkData extends ISimpleChunkData {
      * @param entity
      * @return serialized entity
      */
-    ISerializedEntity addEntity(Vector pos, Entity entity);
+    ISerializedEntity addEntity(Vector3 pos, Entity entity);
 
     /**
      * Get block from chunk data

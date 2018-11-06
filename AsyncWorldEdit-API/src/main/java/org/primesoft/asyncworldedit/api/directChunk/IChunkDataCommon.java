@@ -40,7 +40,7 @@
  */
 package org.primesoft.asyncworldedit.api.directChunk;
 
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector2;
 
 /**
  *
@@ -53,12 +53,12 @@ public interface IChunkDataCommon {
      *
      * @return
      */
-    BlockVector2D getChunkCoords();
+    BlockVector2 getChunkCoords();
     
     /**
      * Set the chunk coords
      *
      * @param coords
      */
-    void setChunkCoords(BlockVector2D coords);
+    void setChunkCoords(BlockVector2 coords);
 }
