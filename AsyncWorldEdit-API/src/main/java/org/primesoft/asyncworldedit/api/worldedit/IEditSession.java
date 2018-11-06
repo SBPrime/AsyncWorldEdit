@@ -44,7 +44,6 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -260,7 +259,7 @@ public interface IEditSession extends Extent {
      * @return whether the block changed
      * @throws WorldEditException thrown on a set error
      */
-    public boolean setBlock(Vector3 position, BlockStateHolder block, Stage stage) throws WorldEditException;
+    public boolean setBlock(BlockVector3 position, BlockStateHolder block, Stage stage) throws WorldEditException;
 
     /**
      * Set a block, bypassing both history and block re-ordering.
@@ -269,7 +268,7 @@ public interface IEditSession extends Extent {
      * @param block the block
      * @return whether the block changed
      */
-    public boolean rawSetBlock(Vector3 position, BlockStateHolder block);
+    public boolean rawSetBlock(BlockVector3 position, BlockStateHolder block);
 
     /**
      * Set a block, bypassing history but still utilizing block re-ordering.
@@ -278,7 +277,7 @@ public interface IEditSession extends Extent {
      * @param block the block
      * @return whether the block changed
      */
-    public boolean smartSetBlock(Vector3 position, BlockStateHolder block);
+    public boolean smartSetBlock(BlockVector3 position, BlockStateHolder block);
 
     @Override
     public boolean setBlock(BlockVector3 vector, BlockStateHolder bsh) throws WorldEditException;
@@ -292,7 +291,7 @@ public interface IEditSession extends Extent {
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     @SuppressWarnings("deprecation")
-    public boolean setBlock(Vector3 position, Pattern pattern) throws MaxChangedBlocksException;
+    public boolean setBlock(BlockVector3 position, Pattern pattern) throws MaxChangedBlocksException;
 
     @Override
     @Nullable
@@ -365,7 +364,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int fillXZ(Vector3 origin, BlockStateHolder block, double radius, int depth, boolean recursive) throws MaxChangedBlocksException;
+    public int fillXZ(BlockVector3 origin, BlockStateHolder block, double radius, int depth, boolean recursive) throws MaxChangedBlocksException;
 
     /**
      * Fills an area recursively in the X/Z directions.
@@ -378,7 +377,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int fillXZ(Vector3 origin, Pattern pattern, double radius, int depth, boolean recursive) throws MaxChangedBlocksException;
+    public int fillXZ(BlockVector3 origin, Pattern pattern, double radius, int depth, boolean recursive) throws MaxChangedBlocksException;
     
     /**
      * Remove a cuboid above the given position with a given apothem and a given height.
@@ -389,7 +388,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int removeAbove(Vector3 position, int apothem, int height) throws MaxChangedBlocksException;
+    public int removeAbove(BlockVector3 position, int apothem, int height) throws MaxChangedBlocksException;
 
     /**
      * Remove a cuboid below the given position with a given apothem and a given height.
@@ -400,7 +399,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int removeBelow(Vector3 position, int apothem, int height) throws MaxChangedBlocksException;
+    public int removeBelow(BlockVector3 position, int apothem, int height) throws MaxChangedBlocksException;
 
     /**
      * Remove blocks of a certain type nearby a given position.
@@ -411,7 +410,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int removeNear(Vector3 position, BlockType blockType, int apothem) throws MaxChangedBlocksException;
+    public int removeNear(BlockVector3 position, BlockType blockType, int apothem) throws MaxChangedBlocksException;
 
     /**
      * Sets all the blocks inside a region to a given block type.
@@ -590,7 +589,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int stackCuboidRegion(Region region, Vector3 dir, int count, boolean copyAir) throws MaxChangedBlocksException;
+    public int stackCuboidRegion(Region region, BlockVector3 dir, int count, boolean copyAir) throws MaxChangedBlocksException;
 
     /**
      * Move the blocks in a region a certain direction.
@@ -603,7 +602,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks moved
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int moveRegion(Region region, Vector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException;
+    public int moveRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException;
 
     /**
      * Move the blocks in a region a certain direction.
@@ -616,7 +615,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks moved
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int moveCuboidRegion(Region region, Vector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException;
+    public int moveCuboidRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException;
 
     /**
      * Drain nearby pools of water or lava.
@@ -626,7 +625,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int drainArea(Vector3 origin, double radius) throws MaxChangedBlocksException;
+    public int drainArea(BlockVector3 origin, double radius) throws MaxChangedBlocksException;
 
     /**
      * Fix liquids so that they turn into stationary blocks and extend outward.
@@ -637,7 +636,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int fixLiquid(Vector3 origin, double radius, BlockType fluid) throws MaxChangedBlocksException;
+    public int fixLiquid(BlockVector3 origin, double radius, BlockType fluid) throws MaxChangedBlocksException;
 
     /**
      * Makes a cylinder.
@@ -650,7 +649,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks changed
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makeCylinder(Vector3 pos, Pattern block, double radius, int height, boolean filled) throws MaxChangedBlocksException;
+    public int makeCylinder(BlockVector3 pos, Pattern block, double radius, int height, boolean filled) throws MaxChangedBlocksException;
 
     /**
      * Makes a cylinder.
@@ -664,7 +663,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks changed
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makeCylinder(Vector3 pos, Pattern block, double radiusX, double radiusZ, int height, boolean filled) throws MaxChangedBlocksException;
+    public int makeCylinder(BlockVector3 pos, Pattern block, double radiusX, double radiusZ, int height, boolean filled) throws MaxChangedBlocksException;
 
     /**
     * Makes a sphere.
@@ -676,7 +675,7 @@ public interface IEditSession extends Extent {
     * @return number of blocks changed
     * @throws MaxChangedBlocksException thrown if too many blocks are changed
     */
-    public int makeSphere(Vector3 pos, Pattern block, double radius, boolean filled) throws MaxChangedBlocksException;
+    public int makeSphere(BlockVector3 pos, Pattern block, double radius, boolean filled) throws MaxChangedBlocksException;
 
     /**
      * Makes a sphere or ellipsoid.
@@ -690,7 +689,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks changed
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makeSphere(Vector3 pos, Pattern block, double radiusX, double radiusY, double radiusZ, boolean filled) throws MaxChangedBlocksException;
+    public int makeSphere(BlockVector3 pos, Pattern block, double radiusX, double radiusY, double radiusZ, boolean filled) throws MaxChangedBlocksException;
 
     /**
      * Makes a pyramid.
@@ -702,7 +701,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks changed
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makePyramid(Vector3 position, Pattern block, int size, boolean filled) throws MaxChangedBlocksException;
+    public int makePyramid(BlockVector3 position, Pattern block, int size, boolean filled) throws MaxChangedBlocksException;
 
     /**
      * Thaw blocks in a radius.
@@ -712,7 +711,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int thaw(Vector3 position, double radius)
+    public int thaw(BlockVector3 position, double radius)
             throws MaxChangedBlocksException;
 
     /**
@@ -723,7 +722,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int simulateSnow(Vector3 position, double radius) throws MaxChangedBlocksException;
+    public int simulateSnow(BlockVector3 position, double radius) throws MaxChangedBlocksException;
 
     /**
      * Make dirt green.
@@ -734,7 +733,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int green(Vector3 position, double radius, boolean onlyNormalDirt)
+    public int green(BlockVector3 position, double radius, boolean onlyNormalDirt)
             throws MaxChangedBlocksException;
 
     /**
@@ -745,7 +744,7 @@ public interface IEditSession extends Extent {
      * @return number of patches created
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makePumpkinPatches(Vector3 position, int apothem) throws MaxChangedBlocksException;
+    public int makePumpkinPatches(BlockVector3 position, int apothem) throws MaxChangedBlocksException;
 
     /**
      * Makes a forest.
@@ -757,7 +756,7 @@ public interface IEditSession extends Extent {
      * @return number of trees created
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makeForest(Vector3 basePosition, int size, double density, TreeGenerator.TreeType treeType) throws MaxChangedBlocksException;
+    public int makeForest(BlockVector3 basePosition, int size, double density, TreeGenerator.TreeType treeType) throws MaxChangedBlocksException;
 
     /**
      * Get the block distribution inside a region.
@@ -796,7 +795,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int drawLine(Pattern pattern, Vector3 pos1, Vector3 pos2, double radius, boolean filled)
+    public int drawLine(Pattern pattern, BlockVector3 pos1, BlockVector3 pos2, double radius, boolean filled)
             throws MaxChangedBlocksException;
 
     /**
@@ -814,7 +813,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int drawSpline(Pattern pattern, List<Vector3> nodevectors, double tension, double bias, double continuity, double quality, double radius, boolean filled)
+    public int drawSpline(Pattern pattern, List<BlockVector3> nodevectors, double tension, double bias, double continuity, double quality, double radius, boolean filled)
             throws MaxChangedBlocksException;
 
     public int makeBiomeShape(final Region region, final Vector3 zero, final Vector3 unit, final BaseBiome biomeType, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException;

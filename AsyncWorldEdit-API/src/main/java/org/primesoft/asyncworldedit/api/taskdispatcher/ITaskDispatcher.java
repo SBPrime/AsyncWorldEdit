@@ -41,8 +41,7 @@
 package org.primesoft.asyncworldedit.api.taskdispatcher;
 
 import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import java.util.Collection;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -85,7 +84,7 @@ public interface ITaskDispatcher {
      * @param world
      * @param pos
      */
-    void performSafeChunk(Object mutex, IAction action, IWorld world, Vector2 pos);
+    void performSafeChunk(Object mutex, IAction action, IWorld world, BlockVector2 pos);
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -98,7 +97,7 @@ public interface ITaskDispatcher {
      * @param pos
      * @return
      */
-    <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Vector2 pos);
+    <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, BlockVector2 pos);
     
     
     /**
@@ -135,7 +134,7 @@ public interface ITaskDispatcher {
      * @param world
      * @param pos
      */
-    void performSafe(Object mutex, IAction action, IWorld world, Vector3 pos);
+    void performSafe(Object mutex, IAction action, IWorld world, BlockVector3 pos);
 
     /**
      * Perform operation using a safe wrapper. If the basic operation fails
@@ -172,7 +171,7 @@ public interface ITaskDispatcher {
      * @param pos
      * @return
      */
-    <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Vector3 pos);
+    <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, BlockVector3 pos);
     
     /**
      * Perform an action on the dispatcher

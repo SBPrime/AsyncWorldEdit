@@ -103,15 +103,19 @@ public class PositionHelper {
         return (double) c * CHUNK_SIZE;
     }
 
-    public static Vector3 chunkToPosition(Vector2 c, double y) {
-        return Vector3.at(chunkToPosition((int) c.getX()), y, chunkToPosition((int) c.getZ()));
+    public static BlockVector3 chunkToPosition(BlockVector2 c, double y) {
+        return BlockVector3.at(chunkToPosition((int) c.getX()), y, chunkToPosition((int) c.getZ()));
     }
     
-    public static Vector3 chunkToPosition(int x, int z, double y) {
-        return Vector3.at(chunkToPosition(x), y, chunkToPosition(z));
+    public static BlockVector3 chunkToPosition(int x, int z, double y) {
+        return BlockVector3.at(chunkToPosition(x), y, chunkToPosition(z));
     }
 
     public static BlockVector2 positionToChunk(Vector3 v) {
+        return BlockVector2.at(positionToChunk((int) v.getX()), positionToChunk((int) v.getZ()));
+    }
+    
+    public static BlockVector2 positionToChunk(BlockVector3 v) {
         return BlockVector2.at(positionToChunk((int) v.getX()), positionToChunk((int) v.getZ()));
     }
 }

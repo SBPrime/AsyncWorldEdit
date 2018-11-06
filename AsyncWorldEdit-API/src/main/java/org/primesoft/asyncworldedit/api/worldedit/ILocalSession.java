@@ -49,6 +49,7 @@ import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.RegionSelectorType;
@@ -275,7 +276,7 @@ interface ILocalSession {
      * @return the position to use
      * @throws IncompleteRegionException thrown if a region is not fully selected
      */
-    public Vector3 getPlacementPosition(Player player) throws IncompleteRegionException;
+    public BlockVector3 getPlacementPosition(Player player) throws IncompleteRegionException;
 
     /**
      * Toggle placement position.

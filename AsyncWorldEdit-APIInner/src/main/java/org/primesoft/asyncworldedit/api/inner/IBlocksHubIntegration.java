@@ -35,6 +35,7 @@
  */
 package org.primesoft.asyncworldedit.api.inner;
 
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -53,6 +54,7 @@ public interface IBlocksHubIntegration {
      * @param location
      * @return
      */
+    boolean hasAccess(IPlayerEntry playerEntry, IWorld world, BlockVector3 location);
     boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location);
 
     /**
@@ -78,7 +80,7 @@ public interface IBlocksHubIntegration {
      * @param newBlock
      * @return
      */
-    boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location,
+    boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock);
 
     /**
@@ -105,5 +107,5 @@ public interface IBlocksHubIntegration {
      * @param newBlock
      * @param dc
      */
-    void logBlock(IPlayerEntry playerEntry, IWorld world, Vector3 location, BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
+    void logBlock(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
 }

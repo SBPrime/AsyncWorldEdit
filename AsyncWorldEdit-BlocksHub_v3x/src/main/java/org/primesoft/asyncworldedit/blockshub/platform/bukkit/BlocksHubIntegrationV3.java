@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.blockshub.platform.bukkit;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
@@ -88,7 +88,7 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
      * @return
      */
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location,
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock) {
         return canPlace(playerEntry, world, location,
                 oldBlock, newBlock, false);
@@ -106,7 +106,7 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
      * @return
      */
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location,
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock,
             boolean dc) {
         if (location == null || world == null) {
@@ -147,7 +147,7 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
      * @param dc
      */
     @Override
-    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location,
+    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
         if (location == null || world == null) {
             return;
@@ -180,12 +180,12 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
     }
 
     @Override
-    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location) {
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location) {
         return hasAccess(playerEntry, world, location, false);
     }
 
     @Override
-    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location, boolean dc) {
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location, boolean dc) {
         if (location == null || world == null) {
             return false;
         }

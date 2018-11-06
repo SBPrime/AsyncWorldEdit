@@ -45,12 +45,17 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
+import com.sk89q.worldedit.world.block.BlockType;
 import java.util.Iterator;
+import java.util.Map;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
@@ -140,11 +145,11 @@ public interface IThreadSafeEditSession extends IAweEditSession {
      * @return whether the block changed
      * @throws WorldEditException thrown on a set error
      */
-    boolean setBlock(int jobId, Vector3 position, BlockStateHolder block, Stage stage) throws WorldEditException;
+    boolean setBlock(int jobId, BlockVector3 position, BlockStateHolder block, Stage stage) throws WorldEditException;
 
-    boolean setBlock(Vector3 vector, BlockStateHolder bsh, int jobId) throws WorldEditException;
+    boolean setBlock(BlockVector3 vector, BlockStateHolder bsh, int jobId) throws WorldEditException;
     
-    boolean setBlock(Vector3 position, Pattern pattern, int jobId) throws MaxChangedBlocksException;
+    boolean setBlock(BlockVector3 position, Pattern pattern, int jobId) throws MaxChangedBlocksException;
     
     Iterator<Change> doUndo();
 
