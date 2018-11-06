@@ -47,7 +47,6 @@
  */
 package org.primesoft.asyncworldedit.excommands;
 
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.function.block.BlockReplace;
 import com.sk89q.worldedit.function.mask.ExistingBlockMask;
@@ -57,6 +56,8 @@ import com.sk89q.worldedit.function.mask.RegionMask;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.function.visitor.RecursiveVisitor;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.regions.EllipsoidRegion;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
@@ -82,7 +83,7 @@ public class FillCommand extends AsyncCommand {
      * The operation name
      */
     private final WorldeditOperations m_operation;
-    private final Vector m_pos;
+    private final BlockVector3 m_pos;
     private final Pattern m_pattern;
     private final int m_depth;
     private final double m_radius;
@@ -95,7 +96,7 @@ public class FillCommand extends AsyncCommand {
         return m_operation.toString();
     }
 
-    public FillCommand(IPlayerEntry player, Vector pos,
+    public FillCommand(IPlayerEntry player, BlockVector3 pos,
             Pattern pattern, double radius, int depth,
             boolean axisX, boolean axisY, boolean axisZ) {
         super(player);
@@ -135,7 +136,7 @@ public class FillCommand extends AsyncCommand {
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
         MaskIntersection mask = new MaskIntersection(
-                new RegionMask(new EllipsoidRegion(m_pos, new Vector(m_radius, m_radius, m_radius))),
+                new RegionMask(new EllipsoidRegion(m_pos, Vector3.at(m_radius, m_radius, m_radius))),
                 new DeltaMask(m_pos, m_depth, !m_axisX, !m_axisY, !m_axisZ),
                 Masks.negate(new ExistingBlockMask(editSesstion)));
 

@@ -54,7 +54,6 @@ import static com.sk89q.minecraft.util.commands.Logging.LogMode.ORIENTATION_REGI
 import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
@@ -75,6 +74,7 @@ import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.function.visitor.RegionVisitor;
 import com.sk89q.worldedit.internal.annotation.Direction;
 import com.sk89q.worldedit.internal.annotation.Selection;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.convolution.GaussianKernel;
 import com.sk89q.worldedit.math.convolution.HeightMap;
 import com.sk89q.worldedit.math.convolution.HeightMapFilter;
@@ -269,12 +269,12 @@ public class RegionCommands {
     public void stack(Player player, EditSession editSession, LocalSession session,
                       @Selection Region region,
                       @Optional("1") @Range(min = 1) int count,
-                      @Optional(Direction.AIM) @Direction Vector direction,
+                      @Optional(Direction.AIM) @Direction BlockVector3 direction,
                       @Switch('s') boolean moveSelection,
                       @Switch('a') boolean ignoreAirBlocks,
                       @Switch('m') Mask mask) throws WorldEditException {        
-        final Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
-        final Vector to = region.getMinimumPoint();
+        final BlockVector3 size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
+        final BlockVector3 to = region.getMinimumPoint();
         
         final ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, editSession, to);
         copy.setRepetitions(count);
@@ -294,9 +294,9 @@ public class RegionCommands {
 
         if (moveSelection) {
             try {
-                final Vector ss = region.getMaximumPoint().subtract(region.getMinimumPoint());
+                final BlockVector3 ss = region.getMaximumPoint().subtract(region.getMinimumPoint());
 
-                final Vector shiftVector = direction.multiply(count * (Math.abs(direction.dot(ss)) + 1));
+                final BlockVector3 shiftVector = direction.toVector3().multiply(count * (Math.abs(direction.dot(ss)) + 1)).toBlockPoint();
                 region.shift(shiftVector);
 
                 session.getRegionSelector(player.getWorld()).learnChanges();
@@ -329,12 +329,12 @@ public class RegionCommands {
     public void move(Player player, EditSession editSession, LocalSession session,
                      @Selection Region region,
                      @Optional("1") @Range(min = 1) int count,
-                     @Optional(Direction.AIM) @Direction Vector direction,
+                     @Optional(Direction.AIM) @Direction BlockVector3 direction,
                      @Optional("air") BlockStateHolder replace,
                      @Switch('s') boolean moveSelection,
                      @Switch('a') boolean ignoreAirBlocks,
                      @Switch('m') Mask mask) throws WorldEditException {
-        Vector to = region.getMinimumPoint();
+        BlockVector3 to = region.getMinimumPoint();
 
         // Remove the original blocks
         com.sk89q.worldedit.function.pattern.Pattern pattern = replace != null ?

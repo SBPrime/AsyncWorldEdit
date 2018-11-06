@@ -47,12 +47,11 @@
  */
 package org.primesoft.asyncworldedit.excommands;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
 import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.mask.Mask2D;
 import com.sk89q.worldedit.function.mask.Masks;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.directChunk.ChangesetChunkExtent;
@@ -87,12 +86,12 @@ public abstract class Mask2DAsyncCommand extends AsyncCommand {
         m_destinationMaskExtent.setExtent(extent);
     }
 
-    protected boolean maskTest(Vector v) {
-        return m_destinationMask.test(v.toVector2D());
+    protected boolean maskTest(BlockVector3 v) {
+        return m_destinationMask.test(v.toBlockVector2());
     }
     
     
-    protected boolean maskTest2D(Vector2D v) {
+    protected boolean maskTest2D(BlockVector2 v) {
         return m_destinationMask.test(v);
     }
 }
