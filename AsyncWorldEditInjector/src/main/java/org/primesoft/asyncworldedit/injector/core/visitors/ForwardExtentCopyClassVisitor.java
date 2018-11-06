@@ -88,11 +88,11 @@ public class ForwardExtentCopyClassVisitor extends BaseClassVisitor {
             mv.visitFieldInsn(Opcodes.GETFIELD, CLASS_DESCRIPTOR, "source", "Lcom/sk89q/worldedit/extent/Extent;");
             
             mv.visitVarInsn(Opcodes.ALOAD, 0);
-            mv.visitFieldInsn(Opcodes.GETFIELD, CLASS_DESCRIPTOR, "from", "Lcom/sk89q/worldedit/Vector;");
+            mv.visitFieldInsn(Opcodes.GETFIELD, CLASS_DESCRIPTOR, "from", "Lcom/sk89q/worldedit/math/BlockVector3;");
             mv.visitVarInsn(Opcodes.ALOAD, 0);
             mv.visitFieldInsn(Opcodes.GETFIELD, CLASS_DESCRIPTOR, "destination", "Lcom/sk89q/worldedit/extent/Extent;");
             mv.visitVarInsn(Opcodes.ALOAD, 0);
-            mv.visitFieldInsn(Opcodes.GETFIELD, CLASS_DESCRIPTOR, "to", "Lcom/sk89q/worldedit/Vector;");
+            mv.visitFieldInsn(Opcodes.GETFIELD, CLASS_DESCRIPTOR, "to", "Lcom/sk89q/worldedit/math/BlockVector3;");
             mv.visitVarInsn(Opcodes.ALOAD, 0);
             mv.visitFieldInsn(Opcodes.GETFIELD, CLASS_DESCRIPTOR, "currentTransform", "Lcom/sk89q/worldedit/math/transform/Transform;");
 

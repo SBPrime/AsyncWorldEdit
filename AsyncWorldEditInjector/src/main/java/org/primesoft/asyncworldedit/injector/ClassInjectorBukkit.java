@@ -73,7 +73,7 @@ final class ClassInjectorBukkit implements IClassInjector {
 
     public ClassInjectorBukkit() {
         m_worldEdit = Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
-        ClassLoader worldEditClassLoader = com.sk89q.worldedit.Vector.class.getClassLoader();
+        ClassLoader worldEditClassLoader = com.sk89q.worldedit.WorldEditException.class.getClassLoader();
         Class<?> clsPluginClassLoader;
 
         try {

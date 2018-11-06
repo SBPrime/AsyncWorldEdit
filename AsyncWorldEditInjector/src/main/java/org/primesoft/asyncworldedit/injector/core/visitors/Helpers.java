@@ -48,13 +48,14 @@
 package org.primesoft.asyncworldedit.injector.core.visitors;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 import java.util.stream.Stream;
@@ -105,7 +106,7 @@ public final class Helpers {
     }
 
     public static RegionFunction addBiomeCopy(RegionFunction blockCopy,
-            Extent source, Vector from, Extent destination, Vector to, Transform currentTransform,
+            Extent source, BlockVector3 from, Extent destination, BlockVector3 to, Transform currentTransform,
             IForwardExtentCopy forwardExtentCopy) {
 
         if (forwardExtentCopy.isBiomeCopy()) {

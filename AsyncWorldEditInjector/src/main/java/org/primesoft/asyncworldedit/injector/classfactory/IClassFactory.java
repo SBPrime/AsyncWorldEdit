@@ -52,11 +52,11 @@
 
 package org.primesoft.asyncworldedit.injector.classfactory;
 
-import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.RegionFunction;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 
@@ -97,7 +97,7 @@ public interface IClassFactory {
      * @return 
      */
     RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, Vector from, Extent destination, Vector to, 
+            Extent source, BlockVector3 from, Extent destination, BlockVector3 to, 
             Transform currentTransform, boolean singleSet);
 
     /**
