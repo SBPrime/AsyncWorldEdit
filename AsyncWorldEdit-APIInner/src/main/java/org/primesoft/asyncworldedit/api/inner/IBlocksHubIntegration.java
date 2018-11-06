@@ -35,7 +35,7 @@
  */
 package org.primesoft.asyncworldedit.api.inner;
 
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -53,7 +53,7 @@ public interface IBlocksHubIntegration {
      * @param location
      * @return
      */
-    boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location);
+    boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location);
 
     /**
      * Check if the player has access
@@ -64,7 +64,7 @@ public interface IBlocksHubIntegration {
      * @param dc
      * @return
      */
-    boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector location,
+    boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location,
             boolean dc);    
     
     
@@ -78,7 +78,7 @@ public interface IBlocksHubIntegration {
      * @param newBlock
      * @return
      */
-    boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location,
+    boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock);
 
     /**
@@ -92,7 +92,7 @@ public interface IBlocksHubIntegration {
      * @param dc
      * @return
      */
-    boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector location, 
+    boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
 
     /**
@@ -105,5 +105,5 @@ public interface IBlocksHubIntegration {
      * @param newBlock
      * @param dc
      */
-    void logBlock(IPlayerEntry playerEntry, IWorld world, Vector location, BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
+    void logBlock(IPlayerEntry playerEntry, IWorld world, Vector3 location, BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
 }
