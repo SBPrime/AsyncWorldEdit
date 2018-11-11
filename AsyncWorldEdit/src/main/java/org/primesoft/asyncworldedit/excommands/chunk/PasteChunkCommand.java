@@ -48,10 +48,10 @@
 package org.primesoft.asyncworldedit.excommands.chunk;
 
 import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.BlockVector2;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
@@ -91,7 +91,7 @@ public class PasteChunkCommand extends DCMaskCommand {
 
     //private final static BaseBlock AIR = new BaseBlock(0);
 
-    private final Vector m_location;
+    private final Vector3 m_location;
     private final World m_locationWorld;
     private final Transform m_transform;
     private final Clipboard m_clipboard;
@@ -104,7 +104,7 @@ public class PasteChunkCommand extends DCMaskCommand {
             Mask destinationMask, IPlayerEntry playerEntry) {
         super(awe, destinationMask, playerEntry);
 
-        m_location = new Vector(
+        m_location = Vector3.at(
                 PositionHelper.positionToBlockPosition(location.getX()),
                 (int) location.getY(),
                 PositionHelper.positionToBlockPosition(location.getZ())
@@ -126,18 +126,18 @@ public class PasteChunkCommand extends DCMaskCommand {
 
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
-        final IWorld world = m_weIntegrator.getWorld(m_locationWorld);
+        /*final IWorld world = m_weIntegrator.getWorld(m_locationWorld);
         final Transform reverse = m_transform.inverse();
         final Region region = m_clipboard.getRegion();
-        final Vector from = m_clipboard.getOrigin();
+        final Vector3 from = m_clipboard.getOrigin();
 
-        final InOutParam<BlockVector2D> minIO = InOutParam.Out();
-        final InOutParam<BlockVector2D> maxIO = InOutParam.Out();
+        final InOutParam<BlockVector2> minIO = InOutParam.Out();
+        final InOutParam<BlockVector2> maxIO = InOutParam.Out();
 
         findMinMax(from, region, minIO, maxIO);
 
-        final BlockVector2D min = minIO.getValue();
-        final BlockVector2D max = maxIO.getValue();
+        final BlockVector2 min = minIO.getValue();
+        final BlockVector2 max = maxIO.getValue();
 
         int cMaxX = PositionHelper.positionToChunk(max.getX());
         int cMaxZ = PositionHelper.positionToChunk(max.getZ());
@@ -147,11 +147,11 @@ public class PasteChunkCommand extends DCMaskCommand {
 
         int changedBlocks = 0;
 
-        HashMap<BlockVector2D, IWrappedChunk> dataCache = cacheChunks(cMinX, cMaxX, cMinZ, cMaxZ, world, editSesstion);
-        HashMap<BlockVector2D, List<Pair<Location, Entity>>> entityCache = aggregateEntities(from);
+        HashMap<BlockVector2, IWrappedChunk> dataCache = cacheChunks(cMinX, cMaxX, cMinZ, cMaxZ, world, editSesstion);
+        HashMap<BlockVector2, List<Pair<Location, Entity>>> entityCache = aggregateEntities(from);
 
-        for (Map.Entry<BlockVector2D, IWrappedChunk> entrySet : dataCache.entrySet()) {
-            final BlockVector2D cPos = entrySet.getKey();
+        for (Map.Entry<BlockVector2, IWrappedChunk> entrySet : dataCache.entrySet()) {
+            final BlockVector2 cPos = entrySet.getKey();
             final IWrappedChunk wChunk = entrySet.getValue();
             final IChangesetChunkData cData = m_chunkApi.createLazyChunkData(wChunk);
             final ChangesetChunkExtent extent = new ChangesetChunkExtent(cData);
@@ -169,16 +169,17 @@ public class PasteChunkCommand extends DCMaskCommand {
             }
         }
 
-        return changedBlocks;
+        return changedBlocks;*/
+        return 0;
     }
 
-    private int addEntities(HashMap<BlockVector2D, List<Pair<Location, Entity>>> entityCache, BlockVector2D cPos,
+    /*private int addEntities(HashMap<BlockVector2, List<Pair<Location, Entity>>> entityCache, BlockVector2 cPos,
             IChangesetChunkData cData) {
         if (!entityCache.containsKey(cPos)) {
             return 0;
         }
 
-        final Vector chunkZero = PositionHelper.chunkToPosition(cPos, 0);
+        final Vector3 chunkZero = PositionHelper.chunkToPosition(cPos, 0);
         final List<Pair<Location, Entity>> entities = entityCache.get(cPos);
         final Map<UUID, Pair<ISerializedEntity, UUID>> serialised = new HashMap<>();
 
@@ -186,7 +187,7 @@ public class PasteChunkCommand extends DCMaskCommand {
             Location pos = entry.getX1();
             Entity entity = entry.getX2();
 
-            Vector target = pos.toVector();
+            Vector3 target = pos.toVector();
             if (maskTest(target)) {
                 ISerializedEntity serializedEntity = cData.addEntity(target.subtract(chunkZero), entity);
 
@@ -225,23 +226,23 @@ public class PasteChunkCommand extends DCMaskCommand {
         }
 
         return serialised.size() - toRemove.size();
-    }
+    }*/
 
-    private int setBlocks(final BlockVector2D cPos, final Transform reverse,
-            final Vector from, final Region region, IChangesetChunkData cData) {
+    /*private int setBlocks(final BlockVector2 cPos, final Transform reverse,
+            final Vector3 from, final Region region, IChangesetChunkData cData) {
         //TODO: 1.13
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
-/*        final Vector chunkZero = PositionHelper.chunkToPosition(cPos, 0);
+/*        final Vector3 chunkZero = PositionHelper.chunkToPosition(cPos, 0);
         int changedBlocks = 0;
         for (int x = 0; x < 16; x++) {
-            final Vector xPos = chunkZero.add(x, 0, 0);
+            final Vector3 xPos = chunkZero.add(x, 0, 0);
             for (int z = 0; z < 16; z++) {
-                final Vector zPos = xPos.add(0, 0, z);
+                final Vector3 zPos = xPos.add(0, 0, z);
                 for (int py = 0; py < 256; py++) {
-                    final Vector yPos = zPos.add(0, py, 0);
+                    final Vector3 yPos = zPos.add(0, py, 0);
 
-                    final Vector transformed = reverse.apply(yPos.subtract(m_location)).add(from);
-                    final Vector read = new Vector(Math.round(transformed.getX()), Math.round(transformed.getY()), Math.round(transformed.getZ()));
+                    final Vector3 transformed = reverse.apply(yPos.subtract(m_location)).add(from);
+                    final Vector3 read = Vector3.at(Math.round(transformed.getX()), Math.round(transformed.getY()), Math.round(transformed.getZ()));
 
                     if (region.contains(read) && maskTest(yPos)) {
                         final BlockStateHolder bBlock = BlockTransformExtent.transform(m_clipboard.getBlock(read), m_transform);
@@ -276,14 +277,14 @@ public class PasteChunkCommand extends DCMaskCommand {
         }
 
         return changedBlocks;*/
-    }
+    /*}
 
-    private HashMap<BlockVector2D, IWrappedChunk> cacheChunks(int cMinX, int cMaxX, int cMinZ, int cMaxZ,
+    /*private HashMap<BlockVector2, IWrappedChunk> cacheChunks(int cMinX, int cMaxX, int cMinZ, int cMaxZ,
             final IWorld world, IAweEditSession editSesstion) throws WorldEditException {
-        final HashMap<BlockVector2D, IWrappedChunk> dataCatch = new HashMap<>();
+        final HashMap<BlockVector2, IWrappedChunk> dataCatch = new HashMap<>();
         for (int cx = cMinX; cx <= cMaxX; cx++) {
             for (int cz = cMinZ; cz <= cMaxZ; cz++) {
-                final BlockVector2D cPos = new BlockVector2D(cx, cz);
+                final BlockVector2 cPos = new BlockVector2(cx, cz);
 
                 final IWrappedChunk chunk = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
                         m_locationWorld, world, getPlayer(), cPos);
@@ -301,19 +302,19 @@ public class PasteChunkCommand extends DCMaskCommand {
      *
      * @return
      */
-    private HashMap<BlockVector2D, List<Pair<Location, Entity>>> aggregateEntities(final Vector from) {
-        HashMap<BlockVector2D, List<Pair<Location, Entity>>> result = new HashMap<>();
-        Vector location = m_location; //PositionHelper.positionToBlockPosition(m_location);        
+    /*private HashMap<BlockVector2, List<Pair<Location, Entity>>> aggregateEntities(final Vector3 from) {
+        HashMap<BlockVector2, List<Pair<Location, Entity>>> result = new HashMap<>();
+        Vector3 location = m_location; //PositionHelper.positionToBlockPosition(m_location);        
 
         for (Entity e : m_clipboard.getEntities()) {
             if (e == null) {
                 continue;
             }
             Location pos = e.getLocation();
-            Vector direction = pos.getDirection();
-            Vector v = pos.toVector();
-            Vector targetPosition = m_transform.apply(v.subtract(from).subtract(0.5, 0.5, 0.5)).add(location).add(0.5, 0.5, 0.5);
-            BlockVector2D cPos = PositionHelper.positionToChunk(targetPosition);
+            Vector3 direction = pos.getDirection();
+            Vector3 v = pos.toVector();
+            Vector3 targetPosition = m_transform.apply(v.subtract(from).subtract(0.5, 0.5, 0.5)).add(location).add(0.5, 0.5, 0.5);
+            BlockVector2 cPos = PositionHelper.positionToChunk(targetPosition);
 
             List<Pair<Location, Entity>> list;
             if (result.containsKey(cPos)) {
@@ -324,7 +325,7 @@ public class PasteChunkCommand extends DCMaskCommand {
             }
 
             Location newPos = new Location(m_clipboard, targetPosition,
-                    m_transform.apply(direction).subtract(m_transform.apply(Vector.ZERO)).normalize());
+                    m_transform.apply(direction).subtract(m_transform.apply(Vector3.ZERO)).normalize());
             list.add(new Pair<>(newPos, e));
         }
 
@@ -339,16 +340,16 @@ public class PasteChunkCommand extends DCMaskCommand {
      * @param min
      * @param max
      */
-    private void findMinMax(Vector from, Region region,
-            InOutParam<BlockVector2D> min, InOutParam<BlockVector2D> max) {
+    /*private void findMinMax(Vector3 from, Region region,
+            InOutParam<BlockVector2> min, InOutParam<BlockVector2> max) {
         int minX = Integer.MAX_VALUE;
         int minZ = Integer.MAX_VALUE;
 
         int maxX = Integer.MIN_VALUE;
         int maxZ = Integer.MIN_VALUE;
 
-        for (BlockVector pos : region) {
-            Vector transformedPos = m_transform.apply(pos.subtract(from)).add(m_location);
+        for (BlockVector3 pos : region) {
+            Vector3 transformedPos = m_transform.apply(pos.subtract(from)).add(m_location);
 
             int x = PositionHelper.positionToBlockPosition(transformedPos.getX());
             int z = PositionHelper.positionToBlockPosition(transformedPos.getZ());
@@ -368,7 +369,7 @@ public class PasteChunkCommand extends DCMaskCommand {
             }
         }
 
-        min.setValue(new BlockVector2D(minX, minZ));
-        max.setValue(new BlockVector2D(maxX, maxZ));
-    }
+        min.setValue(new BlockVector2(minX, minZ));
+        max.setValue(new BlockVector2(maxX, maxZ));
+    }*/
 }

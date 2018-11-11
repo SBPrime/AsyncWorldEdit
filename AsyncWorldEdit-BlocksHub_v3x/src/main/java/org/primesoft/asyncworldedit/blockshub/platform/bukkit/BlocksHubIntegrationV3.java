@@ -49,6 +49,7 @@ package org.primesoft.asyncworldedit.blockshub.platform.bukkit;
 
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IWorld;
@@ -88,7 +89,7 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
      * @return
      */
     @Override
-    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location,
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock) {
         return canPlace(playerEntry, world, location,
                 oldBlock, newBlock, false);
@@ -135,6 +136,47 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
             return true;
         }
     }
+    
+    /**
+     * Check if the block can be changed
+     *
+     * @param playerEntry
+     * @param world
+     * @param location
+     * @param dc
+     * @param oldBlock
+     * @param newBlock
+     * @return
+     */
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location,
+            BlockStateHolder oldBlock, BlockStateHolder newBlock,
+            boolean dc) {
+        if (location == null || world == null) {
+            return false;
+        }
+
+        if (playerEntry == null 
+                || playerEntry.isDisposed()
+                || playerEntry.getUUID() == null) {
+            return false;
+        }
+
+        IBlockData oldData = convert(oldBlock);
+        IBlockData newData = convert(newBlock);
+
+        try {
+            return m_blocksApi.canPlace(playerEntry.getUUID(), world.getUUID(), 
+                    location.getX(), location.getY(), location.getZ(), oldData, newData);
+        } catch (Exception ex) {
+            log(String.format("Error checking block place perms: {0]", ex.toString()));
+            log(String.format("Player: %1$s", playerEntry.getName()));
+            log(String.format("World: %1$s", world.getName()));
+            log(String.format("Location: %1$s", location));
+
+            ExceptionHelper.printException(ex, "Block checking error.");
+            return true;
+        }
+    }
 
     /**
      * Log block change using BlocksHub
@@ -147,7 +189,7 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
      * @param dc
      */
     @Override
-    public void logBlock(IPlayerEntry playerEntry, IWorld world, Vector3 location,
+    public void logBlock(IPlayerEntry playerEntry, IWorld world, BlockVector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
         if (location == null || world == null) {
             return;
@@ -182,6 +224,33 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
     @Override
     public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location) {
         return hasAccess(playerEntry, world, location, false);
+    }
+    
+    
+    @Override
+    public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, BlockVector3 location) {
+        if (location == null || world == null) {
+            return false;
+        }
+
+        if (playerEntry == null
+                || playerEntry.isDisposed()
+                || playerEntry.getUUID() == null) {
+            return false;
+        }
+
+        try {
+            return m_blocksApi.hasAccess(playerEntry.getUUID(), world.getUUID(),
+                    location.getX(), location.getY(), location.getZ());
+        } catch (Exception ex) {
+            log(String.format("Error checking block place perms: {0]", ex.toString()));
+            log(String.format("Player: %1$s", playerEntry.getName()));
+            log(String.format("World: %1$s", world.getName()));
+            log(String.format("Location: %1$s", location));
+
+            ExceptionHelper.printException(ex, "Block checking error.");
+            return true;
+        }
     }
 
     @Override

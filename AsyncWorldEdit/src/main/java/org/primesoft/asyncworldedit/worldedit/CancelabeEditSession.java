@@ -85,15 +85,12 @@ import org.primesoft.asyncworldedit.api.utils.IActionEx;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
-import org.primesoft.asyncworldedit.worldedit.blocks.BlockStateHolderWrapper;
-import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.extent.ExtendedChangeSetExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.FixedBlockBagExtent;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.FileChangeSet;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.IExtendedChangeSet;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.NullChangeSet;
 import org.primesoft.asyncworldedit.worldedit.world.CancelableWorld;
-import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
 import org.primesoft.asyncworldedit.worldedit.util.eventbus.EventBusWrapper;
 
 /**
@@ -329,8 +326,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             throw new IllegalArgumentException(new SessionCanceled());
         }
         forceFlush();
-        return super.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player),
-                BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player), stage);
+        return super.setBlock(AsyncWrapper.initialize(position, m_jobId, true, m_player),
+                AsyncWrapper.initialize(block, m_jobId, true, m_player), stage);
     }
 
     @Override
@@ -341,8 +338,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return super.setBlock(BlockVector3Wrapper.wrap(pt, m_jobId, true, m_player),
-                BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player));
+        return super.setBlock(AsyncWrapper.initialize(pt, m_jobId, true, m_player),
+                AsyncWrapper.initialize(block, m_jobId, true, m_player));
     }
 
     @Override
@@ -353,7 +350,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return super.setBlock(BlockVector3Wrapper.wrap(pt, m_jobId, true, m_player), pat);
+        return super.setBlock(AsyncWrapper.initialize(pt, m_jobId, true, m_player), pat);
     }
 
     @Override
@@ -362,8 +359,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return super.createEntity(LocationWrapper.wrap(location, m_jobId, true, m_player),
-                BaseEntityWrapper.wrap(entity, m_jobId, true, m_player));
+        return super.createEntity(AsyncWrapper.initialize(location, m_jobId, true, m_player),
+                AsyncWrapper.initialize(entity, m_jobId, true, m_player));
     }
 
     @Override
@@ -389,8 +386,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return super.smartSetBlock(BlockVector3Wrapper.wrap(pt, m_jobId, true, m_player),
-                BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player));
+        return super.smartSetBlock(AsyncWrapper.initialize(pt, m_jobId, true, m_player),
+                AsyncWrapper.initialize(block, m_jobId, true, m_player));
     }
 
     @Override

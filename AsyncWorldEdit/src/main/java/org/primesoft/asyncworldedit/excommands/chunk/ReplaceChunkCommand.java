@@ -48,8 +48,8 @@
 package org.primesoft.asyncworldedit.excommands.chunk;
 
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.Mask;
@@ -114,7 +114,7 @@ public class ReplaceChunkCommand extends DCMaskCommand {
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
         //Get the chunks in chunk coords
-        final World weWorld = m_region.getWorld();
+        /*final World weWorld = m_region.getWorld();
         final IWorld world = m_weIntegrator.getWorld(weWorld);
         final IPlayerEntry player = getPlayer();
 
@@ -122,8 +122,8 @@ public class ReplaceChunkCommand extends DCMaskCommand {
             return 0;
         }
 
-        final Vector2D[] chunks = m_wholeWorld
-                ? m_mapUtils.getAllWorldChunks(world) : m_region.getChunks().toArray(new Vector2D[0]);
+        final Vector2[] chunks = m_wholeWorld
+                ? m_mapUtils.getAllWorldChunks(world) : m_region.getChunks().toArray(new Vector2[0]);
 
         int changedBlocks = 0;
 
@@ -131,7 +131,7 @@ public class ReplaceChunkCommand extends DCMaskCommand {
         int idx = 0;        
         
         player.say(MessageType.EX_CMD_CHUNK_REPLACE_CHUNKS.format(cnt));
-        for (Vector2D cPos : chunks) {
+        for (Vector2 cPos : chunks) {
             idx++;
             if (m_wholeWorld) {
                 player.say(MessageType.EX_CMD_CHUNK_REPLACE_PROGRESS.format(idx, cnt));
@@ -141,17 +141,17 @@ public class ReplaceChunkCommand extends DCMaskCommand {
 
             final IChangesetChunkData cData = m_chunkApi.createLazyChunkData(wChunk);
             final ChangesetChunkExtent extent = new ChangesetChunkExtent(cData);
-            final Vector chunkZero = PositionHelper.chunkToPosition(cPos, 0);
+            final Vector3 chunkZero = PositionHelper.chunkToPosition(cPos, 0);
 
             m_mtExtent.setExtent(extent);
             maskSetExtent(extent);
 
             for (int x = 0; x < 16; x++) {
-                final Vector xPos = chunkZero.add(x, 0, 0);
+                final Vector3 xPos = chunkZero.add(x, 0, 0);
                 for (int z = 0; z < 16; z++) {
-                    final Vector zPos = xPos.add(0, 0, z);
+                    final Vector3 zPos = xPos.add(0, 0, z);
                     for (int py = 0; py < 256; py++) {
-                        final Vector yPos = zPos.add(0, py, 0);
+                        final Vector3 yPos = zPos.add(0, py, 0);
 
                         if ((m_wholeWorld || m_region.contains(yPos))
                                 && m_from.test(yPos) && maskTest(yPos)) {
@@ -169,6 +169,7 @@ public class ReplaceChunkCommand extends DCMaskCommand {
             editSesstion.doCustomAction(new SetChangesetChunkChange(wChunk, cData), false);
         }
 
-        return changedBlocks;
+        return changedBlocks;*/
+        return 0;
     }
 }

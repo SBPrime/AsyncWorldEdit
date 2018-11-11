@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,119 +45,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.entity;
+package org.primesoft.asyncworldedit.asyncinjector.scanner;
 
-import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.worldedit.entity.BaseEntity;
-import com.sk89q.worldedit.world.entity.EntityType;
-import com.sk89q.worldedit.world.entity.EntityTypes;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
+import java.lang.reflect.Field;
 
 /**
  *
  * @author SBPrime
  */
-public class BaseEntityWrapper extends BaseEntity implements IAsyncWrapper {
-    public static BaseEntityWrapper wrap(BaseEntity entity, int jobId,
-                                        boolean isAsync, IPlayerEntry player) {
-        BaseEntityWrapper result;
-        if (entity instanceof BaseEntityWrapper) {
-            result = (BaseEntityWrapper) entity;
-            result.setAsync(isAsync);
-            result.setPlayer(player);
-        } else {
-            result = new BaseEntityWrapper(entity, jobId, isAsync, player);
-        }
-
-        return result;
-    }
+public class FuzyClassScannerEntry implements IClassScannerEntry {
+    private final String m_className;
     
-    private final BaseEntity m_parent;
-
-    private final int m_jobId;
-
-    private boolean m_isAsync;
-
-    private IPlayerEntry m_player;
-    
-    @Override
-    public int getJobId() {
-        return m_jobId;
-    }
-
-    @Override
-    public BaseEntity getParent() {
-        return m_parent;
-    }
-
-    @Override
-    public boolean isAsync() {
-        return m_isAsync;
-    }
-    
-    public void setAsync(boolean async) {
-        m_isAsync = async;
-    }
-
-    public void setPlayer(IPlayerEntry player) {
-        m_player = player;
-    }
-
-    @Override
-    public IPlayerEntry getPlayer() {
-        return m_player;
-    }
-    
-    private BaseEntityWrapper(BaseEntity parent, int jobId, boolean isAsync,
-                             IPlayerEntry player) {
-        super((EntityType)null);
-
-        m_jobId = jobId;
-        m_parent = parent;
-        m_isAsync = isAsync;
-        m_player = player;
+    public FuzyClassScannerEntry(String className) {
+        m_className = className;
     }
     
     @Override
-    public boolean equals(Object o) {
-        if (o instanceof BaseEntityWrapper) {
-            o = ((BaseEntityWrapper) o).getParent();
-        }
-        
-        if (m_parent == null) {
-            return false;
-        }
-        return m_parent.equals(o);
+    public boolean isMatch(Class<?> c) {        
+        return m_className.equals(c.getName());
     }
 
     @Override
-    public int hashCode() {
-        return m_parent.hashCode();
+    public boolean isMatch(Class<?> c, Field f) {
+        return isMatch(c);
     }
 
+    @Override
+    public boolean isValid() {
+        return true;
+    }
     
-    @Override
-    public CompoundTag getNbtData() {
-        if (m_parent == null) {
-            return null;
-        }
-        return m_parent.getNbtData(); 
-    }
-
-    @Override
-    public boolean hasNbtData() {
-        if (m_parent == null) {
-            return false;
-        }
-        return m_parent.hasNbtData(); 
-    }
-
-    @Override
-    public void setNbtData(CompoundTag ct) {
-        if (m_parent == null) {
-            return;
-        }
-        m_parent.setNbtData(ct); 
-    }
 }

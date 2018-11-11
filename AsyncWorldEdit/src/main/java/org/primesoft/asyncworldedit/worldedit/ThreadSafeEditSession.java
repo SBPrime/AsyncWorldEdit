@@ -49,8 +49,6 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
-import org.primesoft.asyncworldedit.worldedit.world.biome.BaseBiomeWrapper;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.AweEditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -100,8 +98,6 @@ import org.primesoft.asyncworldedit.events.EditSessionLimitChanged;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.utils.Reflection;
-import org.primesoft.asyncworldedit.worldedit.blocks.BlockStateHolderWrapper;
-import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
 import org.primesoft.asyncworldedit.worldedit.extent.ExtendedChangeSetExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.FixedBlockBagExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.ThreadSafeBlockBag;
@@ -377,8 +373,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     @Override
     public boolean setBlock(BlockVector3 position, BlockStateHolder block, Stage stage) throws WorldEditException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, isAsync, m_player),
-                BlockStateHolderWrapper.wrap(block, m_jobId, isAsync, m_player), stage);
+        boolean r = super.setBlock(AsyncWrapper.initialize(position, m_jobId, isAsync, m_player),
+                AsyncWrapper.initialize(block, m_jobId, isAsync, m_player), stage);
         if (r) {
             forceFlush();
         }
@@ -388,8 +384,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     @Override
     public boolean setBlock(int jobId, BlockVector3 position, BlockStateHolder block, Stage stage) throws WorldEditException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(BlockVector3Wrapper.wrap(position, jobId, isAsync, m_player),
-                BlockStateHolderWrapper.wrap(block, jobId, isAsync, m_player), stage);
+        boolean r = super.setBlock(AsyncWrapper.initialize(position, jobId, isAsync, m_player),
+                AsyncWrapper.initialize(block, jobId, isAsync, m_player), stage);
         if (r) {
             forceFlush();
         }
@@ -401,7 +397,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
             throws MaxChangedBlocksException {
         m_jobId = jobId;
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(BlockVector3Wrapper.wrap(pt, jobId, isAsync, m_player), pat);
+        boolean r = super.setBlock(AsyncWrapper.initialize(pt, jobId, isAsync, m_player), pat);
         if (r) {
             forceFlush();
         }
@@ -413,8 +409,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public boolean setBlock(BlockVector3 pt, BlockStateHolder block, int jobId)
             throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(BlockVector3Wrapper.wrap(pt, jobId, isAsync, m_player),
-                BlockStateHolderWrapper.wrap(block, jobId, isAsync, m_player));
+        boolean r = super.setBlock(AsyncWrapper.initialize(pt, jobId, isAsync, m_player),
+                AsyncWrapper.initialize(block, jobId, isAsync, m_player));
         if (r) {
             forceFlush();
         }
@@ -424,8 +420,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     @Override
     public boolean setBiome(BlockVector2 position, BaseBiome biome) {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBiome(BlockVector2Wrapper.wrap(position, m_jobId, isAsync, m_player),
-                BaseBiomeWrapper.wrap(biome, m_jobId, isAsync, m_player));
+        boolean r = super.setBiome(AsyncWrapper.initialize(position, m_jobId, isAsync, m_player),
+                AsyncWrapper.initialize(biome, m_jobId, isAsync, m_player));
         if (r) {
             forceFlush();
         }
@@ -472,8 +468,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     @Override
     public boolean setBlock(BlockVector3 position, BlockStateHolder block) throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, isAsync, m_player),
-                BlockStateHolderWrapper.wrap(block, m_jobId, isAsync, m_player));
+        boolean r = super.setBlock(AsyncWrapper.initialize(position, m_jobId, isAsync, m_player),
+                AsyncWrapper.initialize(block, m_jobId, isAsync, m_player));
         if (r) {
             forceFlush();
         }
@@ -483,7 +479,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     @Override
     public boolean setBlock(BlockVector3 position, Pattern pattern) throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
-        boolean r = super.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, isAsync, m_player), pattern);
+        boolean r = super.setBlock(AsyncWrapper.initialize(position, m_jobId, isAsync, m_player), pattern);
 
         if (r) {
             forceFlush();
@@ -499,8 +495,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     @Override
     public Entity createEntity(Location location, BaseEntity entity) {
         boolean isAsync = isAsyncEnabled();
-        return super.createEntity(LocationWrapper.wrap(location, m_jobId, isAsync, m_player),
-                BaseEntityWrapper.wrap(entity, m_jobId, isAsync, m_player));
+        return super.createEntity(AsyncWrapper.initialize(location, m_jobId, isAsync, m_player),
+                AsyncWrapper.initialize(entity, m_jobId, isAsync, m_player));
     }
 
     @Override

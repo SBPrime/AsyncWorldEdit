@@ -66,7 +66,6 @@ import org.primesoft.asyncworldedit.utils.io.UnsafeDataInput;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataOutput;
 import org.primesoft.asyncworldedit.worldedit.blocks.BlockStates;
 import org.bukkit.Bukkit;
-import org.primesoft.asyncworldedit.worldedit.blocks.BlockStateHolderWrapper;
 
 /**
  *
@@ -205,10 +204,6 @@ public class SerializerBlockChange implements IChangesetSerializer {
     }
 
     private boolean isBlockState(BlockStateHolder bsh) {
-        if (bsh instanceof BlockStateHolderWrapper) {
-            return isBlockState(((BlockStateHolderWrapper)bsh).getParent());
-        }
-                
         return bsh instanceof BlockState;
     }
 }

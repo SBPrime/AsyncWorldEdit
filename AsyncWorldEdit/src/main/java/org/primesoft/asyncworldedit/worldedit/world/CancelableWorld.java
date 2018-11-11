@@ -78,14 +78,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
-import org.primesoft.asyncworldedit.worldedit.BlockVector2Wrapper;
-import org.primesoft.asyncworldedit.worldedit.BlockVector3Wrapper;
-import org.primesoft.asyncworldedit.worldedit.Vector2Wrapper;
-import org.primesoft.asyncworldedit.worldedit.Vector3Wrapper;
-import org.primesoft.asyncworldedit.worldedit.blocks.BlockStateHolderWrapper;
-import org.primesoft.asyncworldedit.worldedit.entity.BaseEntityWrapper;
-import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
-import org.primesoft.asyncworldedit.worldedit.world.weather.WeatherTypeWrapper;
+import org.primesoft.asyncworldedit.worldedit.AsyncWrapper;
 
 /**
  *
@@ -150,8 +143,8 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player),
-                BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player), notifyAndLight);
+        return m_parent.setBlock(AsyncWrapper.initialize(position, m_jobId, true, m_player),
+                AsyncWrapper.initialize(block, m_jobId, true, m_player), notifyAndLight);
     }
 
     @Override
@@ -165,22 +158,22 @@ public class CancelableWorld extends AbstractWorldWrapper {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return m_parent.clearContainerBlockContents(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player));
+        return m_parent.clearContainerBlockContents(AsyncWrapper.initialize(position, m_jobId, true, m_player));
     }
 
     @Override
     public void dropItem(Vector3 position, BaseItemStack item, int count) {
-        m_parent.dropItem(Vector3Wrapper.wrap(position, m_jobId, true, m_player), item, count);
+        m_parent.dropItem(AsyncWrapper.initialize(position, m_jobId, true, m_player), item, count);
     }
 
     @Override
     public void dropItem(Vector3 position, BaseItemStack item) {
-        m_parent.dropItem(Vector3Wrapper.wrap(position, m_jobId, true, m_player), item);
+        m_parent.dropItem(AsyncWrapper.initialize(position, m_jobId, true, m_player), item);
     }
 
     @Override
     public void simulateBlockMine(BlockVector3 position) {
-        m_parent.simulateBlockMine(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player));
+        m_parent.simulateBlockMine(AsyncWrapper.initialize(position, m_jobId, true, m_player));
     }
 
     @Override
@@ -199,7 +192,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         }
 
         return m_parent.generateTree(type, editSession, 
-                BlockVector3Wrapper.wrap(position, m_jobId, true, m_player));
+                AsyncWrapper.initialize(position, m_jobId, true, m_player));
     }
 
     @Override
@@ -211,7 +204,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     public void fixAfterFastMode(Iterable<BlockVector2> chunks) {
         List<BlockVector2> tmp = new ArrayList<>();
         for (Iterator<BlockVector2> it = chunks.iterator(); it.hasNext();) {
-            tmp.add(BlockVector2Wrapper.wrap(it.next(), m_jobId, true, m_player));
+            tmp.add(AsyncWrapper.initialize(it.next(), m_jobId, true, m_player));
         }
         m_parent.fixAfterFastMode(tmp);
     }
@@ -220,19 +213,19 @@ public class CancelableWorld extends AbstractWorldWrapper {
     public void fixLighting(Iterable<BlockVector2> chunks) {
         List<BlockVector2> tmp = new ArrayList<>();
         for (Iterator<BlockVector2> it = chunks.iterator(); it.hasNext();) {
-            tmp.add(BlockVector2Wrapper.wrap(it.next(), m_jobId, true, m_player));
+            tmp.add(AsyncWrapper.initialize(it.next(), m_jobId, true, m_player));
         }
         m_parent.fixLighting(tmp);
     }
 
     @Override
     public boolean playEffect(Vector3 position, int type, int data) {
-        return m_parent.playEffect(Vector3Wrapper.wrap(position, m_jobId, true, m_player), type, data);
+        return m_parent.playEffect(AsyncWrapper.initialize(position, m_jobId, true, m_player), type, data);
     }
 
     @Override
     public boolean queueBlockBreakEffect(Platform server, BlockVector3 position, BlockType blockType, double priority) {
-        return m_parent.queueBlockBreakEffect(server, BlockVector3Wrapper.wrap(position, m_jobId, true, m_player), blockType, priority);
+        return m_parent.queueBlockBreakEffect(server, AsyncWrapper.initialize(position, m_jobId, true, m_player), blockType, priority);
     }
 
     @Override
@@ -251,7 +244,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        m_parent.setWeather(WeatherTypeWrapper.wrap(weatherType, m_jobId, m_isCanceled, m_player));
+        m_parent.setWeather(AsyncWrapper.initialize(weatherType, m_jobId, m_isCanceled, m_player));
     }
 
     @Override
@@ -289,8 +282,8 @@ public class CancelableWorld extends AbstractWorldWrapper {
             throw new IllegalArgumentException(new SessionCanceled());
         }
 
-        return m_parent.createEntity(LocationWrapper.wrap(location, m_jobId, true, m_player),
-                BaseEntityWrapper.wrap(entity, m_jobId, true, m_player));
+        return m_parent.createEntity(AsyncWrapper.initialize(location, m_jobId, true, m_player),
+                AsyncWrapper.initialize(entity, m_jobId, true, m_player));
     }
 
     @Override
@@ -326,8 +319,8 @@ public class CancelableWorld extends AbstractWorldWrapper {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return m_parent.setBlock(BlockVector3Wrapper.wrap(position, m_jobId, true, m_player),
-                BlockStateHolderWrapper.wrap(block, m_jobId, true, m_player));
+        return m_parent.setBlock(AsyncWrapper.initialize(position, m_jobId, true, m_player),
+                AsyncWrapper.initialize(block, m_jobId, true, m_player));
     }
 
     @Override
@@ -335,7 +328,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
-        return m_parent.setBiome(BlockVector2Wrapper.wrap(position, m_jobId, true, m_player), biome);
+        return m_parent.setBiome(AsyncWrapper.initialize(position, m_jobId, true, m_player), biome);
     }
 
     @Override

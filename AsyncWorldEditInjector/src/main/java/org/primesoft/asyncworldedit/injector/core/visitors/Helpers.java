@@ -48,7 +48,6 @@
 package org.primesoft.asyncworldedit.injector.core.visitors;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.Extent;
@@ -61,6 +60,7 @@ import com.sk89q.worldedit.regions.Region;
 import java.util.stream.Stream;
 import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
+import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
 import org.primesoft.asyncworldedit.injector.injected.function.operation.IForwardExtentCopy;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.MultiArgWorldEditOperationAction;
@@ -118,5 +118,18 @@ public final class Helpers {
 
     public static Clipboard createClipboard(Clipboard parent, Region region) {
         return InjectorCore.getInstance().getClassFactory().createClipboard(parent, region);
+    }
+    
+    public static Object wrapResult(Object result, Object sender) {
+        if (result == sender) {
+            return result;
+        }
+        
+        if (result instanceof IAsyncWrapper && sender instanceof IAsyncWrapper) {
+            IAsyncWrapper iaw = (IAsyncWrapper)sender;            
+            ((IAsyncWrapper)result).initializeAsyncWrapper(iaw);
+        }
+        
+        return result;
     }
 }

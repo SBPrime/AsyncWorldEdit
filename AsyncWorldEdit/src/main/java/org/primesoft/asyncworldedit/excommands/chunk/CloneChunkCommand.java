@@ -47,10 +47,10 @@
  */
 package org.primesoft.asyncworldedit.excommands.chunk;
 
-import com.sk89q.worldedit.BlockVector2D;
+import com.sk89q.worldedit.math.BlockVector2;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
+import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.regions.Region;
@@ -77,7 +77,7 @@ import org.primesoft.asyncworldedit.utils.PositionHelper;
 public class CloneChunkCommand extends DCMaskCommand {
 
     private final Region m_region;
-    private final Vector m_location;
+    private final Vector3 m_location;
     private final World m_locationWorld;
 
     public CloneChunkCommand(Region region, Location location, World world,
@@ -95,7 +95,7 @@ public class CloneChunkCommand extends DCMaskCommand {
 
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
-        final Set<Vector2D> chunks = m_region.getChunks();
+        /*final Set<Vector2> chunks = m_region.getChunks();
         final World weSource = m_region.getWorld();
         final IWorld wSource = m_weIntegrator.getWorld(weSource);
         final IWorld wDestination = m_weIntegrator.getWorld(m_locationWorld);
@@ -109,8 +109,8 @@ public class CloneChunkCommand extends DCMaskCommand {
         int minCZ = Integer.MAX_VALUE;
         int minCX = Integer.MAX_VALUE;
 
-        final HashMap<Vector2D, Pair<Boolean, LazyData>> chunksData = new HashMap<Vector2D, Pair<Boolean, LazyData>>();
-        for (Vector2D c : chunks) {
+        final HashMap<Vector2, Pair<Boolean, LazyData>> chunksData = new HashMap<Vector2, Pair<Boolean, LazyData>>();
+        for (Vector2 c : chunks) {
             int z = c.getBlockZ();
             int x = c.getBlockX();
 
@@ -124,15 +124,15 @@ public class CloneChunkCommand extends DCMaskCommand {
             chunksData.put(c, null);
         }
 
-        final HashMap<Vector2D, IWrappedChunk> wrappedChunks = new HashMap<Vector2D, IWrappedChunk>();
+        final HashMap<Vector2, IWrappedChunk> wrappedChunks = new HashMap<Vector2, IWrappedChunk>();
         int changedBlocks = 0;
 
-        for (final Vector2D cOrgPos : chunks) {
+        for (final Vector2 cOrgPos : chunks) {
             final int cOrgX = cOrgPos.getBlockX();
             final int cOrgZ = cOrgPos.getBlockZ();
             final int cDstX = cOrgX - minCX + clx;
             final int cDstZ = cOrgZ - minCZ + clz;
-            final Vector2D cDstPos = new BlockVector2D(cDstX, cDstZ);
+            final Vector2 cDstPos = new BlockVector2(cDstX, cDstZ);
 
             IWrappedChunk wcOrg, wcDst;
 
@@ -189,15 +189,15 @@ public class CloneChunkCommand extends DCMaskCommand {
             final IChunkData source = data.get();
             final IChangesetChunkData destination = m_chunkApi.createLazyChunkData(wcDst);
             final ChangesetChunkExtent extent = new ChangesetChunkExtent(destination);
-            final Vector zeroPos = PositionHelper.chunkToPosition(cDstPos, 0);
+            final Vector3 zeroPos = PositionHelper.chunkToPosition(cDstPos, 0);
 
             maskSetExtent(extent);
             for (int x = 0; x < 16; x++) {
-                final Vector xPos = zeroPos.add(x, 0, 0);
+                final Vector3 xPos = zeroPos.add(x, 0, 0);
                 for (int z = 0; z < 16; z++) {
-                    final Vector zPos = xPos.add(0, 0, z);
+                    final Vector3 zPos = xPos.add(0, 0, z);
                     for (int y = 0; y < 256; y++) {
-                        final Vector yPos = zPos.add(0, y, 0);
+                        final Vector3 yPos = zPos.add(0, y, 0);
                         if (maskTest(yPos)) {
                             destination.setBlock(x, y, z, source.getBlock(x, y, z));
                             changedBlocks++;
@@ -222,6 +222,7 @@ public class CloneChunkCommand extends DCMaskCommand {
             editSesstion.doCustomAction(new SetChangesetChunkChange(wcDst, destination), false);
         }
 
-        return changedBlocks;
+        return changedBlocks;*/
+        return 0;
     }
 }

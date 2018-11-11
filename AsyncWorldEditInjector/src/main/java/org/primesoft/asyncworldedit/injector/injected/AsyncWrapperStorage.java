@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,21 +45,69 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.injector.injected;
 
-package org.primesoft.asyncworldedit.worldedit;
-
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.function.Function;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
  * @author SBPrime
  */
-public interface IAsyncWrapper {
-    int getJobId();
+final class AsyncWrapperStorage {
 
-    Object getParent();
+    private final static Map<Object, Data> m_storage = new WeakHashMap<>();
 
-    boolean isAsync();
+    private AsyncWrapperStorage() {
+    }
+    
+    private static <T> T process(Object key, Function<Data, T> getter, T defaultValue) {
+        final Data data = m_storage.get(key);
+        if (data == null) {
+            return defaultValue;
+        }
+        return getter.apply(data);
+    }
+    
+    public static int getJob(Object key) {
+        return process(key, i -> i.jobId, -1);
+    }
+    
+    public static boolean isAsync(Object key) {
+        return process(key, i -> i.isAsync, false);
+    }
+    
+    public static IPlayerEntry getPlayerEntry(Object key) {
+        return process(key, i -> i.player, null);
+    }
+    
+    public static void setData(Object key, int jobId, boolean isAsync, IPlayerEntry playerEntry) {
+        m_storage.put(key, new Data(jobId, isAsync, playerEntry));
+    }
+    
+    public static void setData(Object key, IAsyncWrapper source) {
+        final Data data = m_storage.get(key);
+        
+        if (data == null) {
+            return;
+        }
+        
+        setData(key, data.jobId, data.isAsync, data.player);
+    }
 
-    IPlayerEntry getPlayer();
+
+    private static class Data {
+
+        public final boolean isAsync;
+        public final int jobId;
+        public final IPlayerEntry player;
+
+        public Data(int jobId, boolean isAsync, IPlayerEntry player) {
+            this.isAsync = isAsync;
+            this.jobId = jobId;
+            this.player = player;
+        }
+    }
 }

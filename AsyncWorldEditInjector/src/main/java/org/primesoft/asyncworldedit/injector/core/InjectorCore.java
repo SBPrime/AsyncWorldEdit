@@ -51,6 +51,9 @@
  */
 package org.primesoft.asyncworldedit.injector.core;
 
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -59,6 +62,7 @@ import org.objectweb.asm.ClassWriter;
 import org.primesoft.asyncworldedit.injector.IClassInjector;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import org.primesoft.asyncworldedit.injector.core.visitors.AsyncWrapperVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.BlockArrayClipboardClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.EditSessionClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.FlattenedClipboardTransformClassVisitor;
@@ -156,13 +160,25 @@ public class InjectorCore {
 
         log("Injecting WorldEdit classes...");
         try {
+            modiffyClasses("com.sk89q.worldedit.math.BlockVector2", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.math.BlockVector3", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.math.Vector2", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.math.Vector3", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.world.block.BlockStateHolder", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.world.block.BaseBlock", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.world.block.BlockState", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.entity.BaseEntity", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.util.Location", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.world.biome.BaseBiome", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.world.weather.WeatherType", c -> new AsyncWrapperVisitor(c));
+           
             modiffyClasses("com.sk89q.worldedit.EditSession", c -> new EditSessionClassVisitor(c));
             modiffyClasses("com.sk89q.worldedit.function.operation.Operations", (c, cc) -> new OperationsClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.function.operation.ForwardExtentCopy", c -> new ForwardExtentCopyClassVisitor(c));
             modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.FlattenedClipboardTransform", (c, cc) -> new FlattenedClipboardTransformClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
-            
+                        
             return true;
         } catch (Throwable ex) {
             log("****************************");
@@ -229,6 +245,11 @@ public class InjectorCore {
         icv.validate();
 
         byte[] data = classWriter.toByteArray();
+
+        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+            dout.write(data);
+        }*/
+
         m_classInjector.injectClass(className, data, 0, data.length);
     }
 
@@ -245,11 +266,21 @@ public class InjectorCore {
         icv.validate();
 
         byte[] data = classWriter.toByteArray();
+
+        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+            dout.write(data);
+        }*/
+
         m_classInjector.injectClass(className, data, 0, data.length);
     }
 
     private void createClasses(String className, ClassWriter classWriter) throws IOException {
         byte[] data = classWriter.toByteArray();
+
+        /*try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
+            dout.write(data);
+        }*/
+
         m_classInjector.injectClass(className, data, 0, data.length);
     }
 

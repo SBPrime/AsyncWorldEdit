@@ -87,7 +87,6 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
-import org.primesoft.asyncworldedit.worldedit.blocks.BaseBlockWrapper;
 
 /**
  * The class scanner
@@ -101,7 +100,7 @@ public abstract class ClassScanner implements IClassScanner {
     private final List<IClassFilter> m_filters = new LinkedList<>();
     
     
-    private ClassScannerEntry[] m_blackList = new ClassScannerEntry[0];
+    private IClassScannerEntry[] m_blackList = new IClassScannerEntry[0];
     
     /**
      * Is the class scanner initialized
@@ -326,7 +325,7 @@ public abstract class ClassScanner implements IClassScanner {
      * Get the class scanner black list entries
      * @return 
      */
-    protected ClassScannerEntry[] getBlackList() {
+    protected IClassScannerEntry[] getBlackList() {
         return Stream.of(
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
             new ClassScannerEntry("com.sk89q.worldedit.function.operation.BlockMapEntryPlacer", "iterator"),
@@ -342,7 +341,6 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry(Change.class),
             new ClassScannerEntry(Vector3.class),
             new ClassScannerEntry(BlockStateHolder.class),
-            new ClassScannerEntry(BaseBlockWrapper.class),
             new ClassScannerEntry(BaseBlock.class),
             new ClassScannerEntry(BlockState.class),
             new ClassScannerEntry(PermissionGroup.class),
@@ -359,13 +357,14 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry(Logger.class),
             new ClassScannerEntry(Player.class),
             new ClassScannerEntry(ChangeSet.class),
-            new ClassScannerEntry(Entity.class)
-        ).filter(i -> i.getCls() != null)
-         .toArray(ClassScannerEntry[]::new);
+            new ClassScannerEntry(Entity.class),
+            new FuzyClassScannerEntry("net.minecraft.")
+        ).filter(i -> i.isValid())
+         .toArray(IClassScannerEntry[]::new);
     }
 
     private boolean isBlackList(Class<?> oClass, Field f) {
-        for (ClassScannerEntry c : m_blackList) {
+        for (IClassScannerEntry c : m_blackList) {
             if (c.isMatch(oClass, f)) {
                 return true;
             }

@@ -81,9 +81,9 @@ import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.AsyncTask;
+import org.primesoft.asyncworldedit.worldedit.AsyncWrapper;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.FakeLocalSession;
-import org.primesoft.asyncworldedit.worldedit.util.LocationWrapper;
 
 /**
  *
@@ -192,7 +192,7 @@ public class ToolWrapper {
         boolean isAsync = aEditSession.checkAsync(WorldeditOperations.tool) && aEditSession.checkAsync(worldeditOperations);
 
         if (!isAsync) {
-            return toolAction.execute(server, config, player, session, LocationWrapper.wrap(clicked, -1, false, playerEntry));
+            return toolAction.execute(server, config, player, session, AsyncWrapper.initialize(clicked, -1, false, playerEntry));
         }
 
         final int jobId = blockPlacer.getJobId(playerEntry);
@@ -201,7 +201,7 @@ public class ToolWrapper {
         final JobEntry job = new JobEntry(playerEntry, cSession, jobId, jobName);
         blockPlacer.addJob(playerEntry, job);
 
-        final LocationWrapper clickedWrapped = LocationWrapper.wrap(clicked, jobId, isAsync, playerEntry);
+        final Location clickedWrapped = AsyncWrapper.initialize(clicked, jobId, isAsync, playerEntry);
 
         SchedulerUtils.runTaskAsynchronously(scheduler, new AsyncTask(cSession, playerEntry, jobName,
                 blockPlacer, job) {

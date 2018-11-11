@@ -54,6 +54,8 @@ import org.bukkit.Server;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScanner;
 import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScannerEntry;
+import org.primesoft.asyncworldedit.asyncinjector.scanner.FuzyClassScannerEntry;
+import org.primesoft.asyncworldedit.asyncinjector.scanner.IClassScannerEntry;
 
 /**
  *
@@ -62,15 +64,18 @@ import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScannerEntry;
 class BukkitClassScanner extends ClassScanner {
 
     @Override
-    protected ClassScannerEntry[] getBlackList() {
-        List<ClassScannerEntry> result = new ArrayList<>();
+    protected IClassScannerEntry[] getBlackList() {
+        List<IClassScannerEntry> result = new ArrayList<>();
         Collections.addAll(result, super.getBlackList());
-        Collections.addAll(result, new ClassScannerEntry[]{
+        Collections.addAll(result, new IClassScannerEntry[]{
             new ClassScannerEntry(Server.class),
-            new ClassScannerEntry(JavaPlugin.class)
+            new ClassScannerEntry(JavaPlugin.class),
+            new FuzyClassScannerEntry("org.bukkit"),
+            new FuzyClassScannerEntry("org.spigotmc"),
+            new ClassScannerEntry(BukkitWorld.class)
         });
 
-        return result.toArray(new ClassScannerEntry[result.size()]);
+        return result.toArray(new IClassScannerEntry[result.size()]);
     }
 
 }

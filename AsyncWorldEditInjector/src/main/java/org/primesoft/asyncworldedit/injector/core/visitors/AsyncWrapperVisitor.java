@@ -45,84 +45,72 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.world.weather;
+package org.primesoft.asyncworldedit.injector.core.visitors;
 
-import com.sk89q.worldedit.world.weather.WeatherType;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.worldedit.IAsyncWrapper;
+import java.util.stream.Stream;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
 
 /**
  *
  * @author SBPrime
  */
-public class WeatherTypeWrapper extends WeatherType implements IAsyncWrapper {
-    public static WeatherTypeWrapper wrap(WeatherType parent, int jobId,
-                                        boolean isAsync, IPlayerEntry player) {
-        WeatherTypeWrapper result;
-        if (parent instanceof WeatherTypeWrapper) {
-            result = (WeatherTypeWrapper) parent;
-            result.setAsync(isAsync);
-            result.setPlayer(player);
-        } else {
-            result = new WeatherTypeWrapper(parent, jobId, isAsync, player);
+public class AsyncWrapperVisitor extends BaseClassVisitor {
+    
+    
+    private final static String CLS_IASYNC_WRAPPER = Type.getInternalName(IAsyncWrapper.class);
+
+    public AsyncWrapperVisitor(ClassVisitor classVisitor) {
+        super(classVisitor);
+    }
+
+    private static String[] injectInterface(String[] interfaces) {
+        if (interfaces == null || interfaces.length == 0) {
+            return new String[]{ CLS_IASYNC_WRAPPER };
         }
+        
+        return Stream.concat(
+                Stream.of(CLS_IASYNC_WRAPPER),
+                Stream.of(interfaces)        
+        ).toArray(String[]::new);
+    }
 
-        return result;
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        super.visit(version, access, name, signature, superName, injectInterface(interfaces));
+    }
+
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        final MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+        if (isStatic(access)) {
+            return mv;
+        }
+        
+        final String result = Type.getReturnType(descriptor).getClassName().replace(".", "/");
+        
+        return new MethodVisitor(api, mv) {
+            @Override
+            public void visitInsn(int opcode) {
+                if (opcode == Opcodes.ARETURN) {
+                    super.visitVarInsn(Opcodes.ALOAD, 0);
+                    super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                Type.getInternalName(Helpers.class),
+                                "wrapResult",
+                                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                                false);
+                    mv.visitTypeInsn(Opcodes.CHECKCAST, result);
+                }
+                super.visitInsn(opcode);
+            }
+            
+        };
     }
     
-    private final WeatherType m_parent;
-
-    private final int m_jobId;
-
-    private boolean m_isAsync;
-
-    private IPlayerEntry m_player;
-    
     @Override
-    public int getJobId() {
-        return m_jobId;
-    }
-
-    @Override
-    public WeatherType getParent() {
-        return m_parent;
-    }
-
-    @Override
-    public boolean isAsync() {
-        return m_isAsync;
-    }
-    
-    public void setAsync(boolean async) {
-        m_isAsync = async;
-    }
-
-    public void setPlayer(IPlayerEntry player) {
-        m_player = player;
-    }
-
-    @Override
-    public IPlayerEntry getPlayer() {
-        return m_player;
-    }
-    
-    private WeatherTypeWrapper(WeatherType parent, int jobId, boolean isAsync,
-                             IPlayerEntry player) {
-        super(null);
-
-        m_jobId = jobId;
-        m_parent = parent;
-        m_isAsync = isAsync;
-        m_player = player;
-    }
-
-    @Override
-    public String getId() {
-        return m_parent.getId();
-    }
-
-    @Override
-    public String getName() {
-        return m_parent.getName(); 
+    public void validate() throws RuntimeException {
     }
 }
