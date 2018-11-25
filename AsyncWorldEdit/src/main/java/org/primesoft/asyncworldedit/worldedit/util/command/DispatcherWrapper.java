@@ -64,8 +64,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.primesoft.asyncworldedit.injector.injected.entity.PlayerFactory;
 import org.primesoft.asyncworldedit.utils.Reflection;
-import org.primesoft.asyncworldedit.worldedit.entity.PlayerWrapper;
 
 /**
  *
@@ -75,7 +75,7 @@ public class DispatcherWrapper implements Dispatcher {
 
     private final Dispatcher m_parent;
 
-    private final Map<String, CommandMapping> m_commandsOverride = new HashMap<String, CommandMapping>();
+    private final Map<String, CommandMapping> m_commandsOverride = new HashMap<>();
     private Set<CommandMapping> m_commandsUnion = null;
     private Set<String> m_aliasesUnion = null;
     
@@ -125,7 +125,7 @@ public class DispatcherWrapper implements Dispatcher {
         if (m_commandsUnion == null) {
             Collection<String> aliases = m_parent.getAliases();
 
-            HashSet<CommandMapping> mappings = new HashSet<CommandMapping>(aliases.size());
+            HashSet<CommandMapping> mappings = new HashSet<>(aliases.size());
 
             for (String a : aliases) {
                 String lower = a.toLowerCase();
@@ -159,7 +159,7 @@ public class DispatcherWrapper implements Dispatcher {
         }
 
         if (m_aliasesUnion == null) {
-            HashSet<String> tmp = new HashSet<String>();
+            HashSet<String> tmp = new HashSet<>();
 
             for (CommandMapping mapping : getCommands()) {
                 String[] aliases = mapping.getAllAliases();
@@ -202,7 +202,8 @@ public class DispatcherWrapper implements Dispatcher {
 
                 if (v instanceof Player) {
                     valuesMap.remove(key);
-                    valuesMap.put(key, new PlayerWrapper((Player) v));
+                    valuesMap.put(key, 
+                            PlayerFactory.createPlayerWrapper((Player) v));
                 }
             }
         }
@@ -233,9 +234,9 @@ public class DispatcherWrapper implements Dispatcher {
      * @return unique aliases
      */
     private String[] injectOverride(CommandCallable callable, String[] alias) {
-        HashSet<String> known = new HashSet<String>(m_parent.getAliases());
-        List<String> result = new ArrayList<String>(alias.length);
-        List<String> toOverride = new ArrayList<String>(alias.length);
+        HashSet<String> known = new HashSet<>(m_parent.getAliases());
+        List<String> result = new ArrayList<>(alias.length);
+        List<String> toOverride = new ArrayList<>(alias.length);
 
         for (String a : alias) {
             String lower = a.toLowerCase();

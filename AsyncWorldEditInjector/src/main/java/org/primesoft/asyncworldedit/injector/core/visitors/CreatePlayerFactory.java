@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,51 +45,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.utils;
+package org.primesoft.asyncworldedit.injector.core.visitors;
 
-import org.primesoft.asyncworldedit.LoggerProvider;
+import org.primesoft.asyncworldedit.injector.injected.entity.IPlayerFactory;
+import org.primesoft.asyncworldedit.injector.injected.entity.PlayerFactory;
 
 /**
  *
  * @author SBPrime
  */
-public class ExceptionHelper {
+public class CreatePlayerFactory extends BaseFactoryCreator<IPlayerFactory> {
 
-    private static void log(String m) {
-        LoggerProvider.log(m);
+    public CreatePlayerFactory(ICreateClass createClass) {
+        super(createClass, IPlayerFactory.class);
+    }    
+
+    @Override
+    protected void initializeFactory(IPlayerFactory instance) {
+        PlayerFactory.initialize(instance);
     }
 
-    public static void printException(Throwable ex, String message) {
-        if (ex == null) {
-            return;
+    @Override
+    protected String getClassForMethod(String name, String descriptor) {
+        if ("createPlayerNoPerms".equals(name)) {
+            return CreateNoPermsPlayer.IC_DESCRIPTOR;
         }
-
-        log("***********************************");
-        log(message);
-        log("***********************************");
-        printException(ex);
-        log("***********************************");
-    }
-    
-    public static void printException(Throwable ex) {
-        if (ex == null) {
-            return;
+        if ("createPlayerWrapper".equals(name)) {
+            return CreatePlayerWrapper.IC_DESCRIPTOR;
         }
-
-        while (ex != null) {
-            log("*");
-            log(String.format("* Exception: %1$s", ex.getClass().getName()));
-            log(String.format("* Error message: %1$s", ex.getLocalizedMessage()));
-            log("* Stack: ");
-            printStack(ex, "* ");
-            
-            ex = ex.getCause();
-        }
-    }
-
-    public static void printStack(Throwable ex, String lead) {
-        for (StackTraceElement element : ex.getStackTrace()) {
-            log(lead + element.toString());
-        }
+                
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

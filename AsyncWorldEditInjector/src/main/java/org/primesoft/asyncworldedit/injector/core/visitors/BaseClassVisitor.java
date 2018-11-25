@@ -48,6 +48,11 @@
 package org.primesoft.asyncworldedit.injector.core.visitors;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,6 +68,12 @@ import org.objectweb.asm.Type;
  * @author SBPrime
  */
 public abstract class BaseClassVisitor extends InjectorClassVisitor {
+    
+    @FunctionalInterface
+    protected interface MethodFactory {
+
+        void define(String name, String descriptor, String clsName, Method m);
+    }
 
     protected static final Handle BOOTSTRAP_LAMBDA = new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
             "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
@@ -160,5 +171,86 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(1, 1);
         mv.visitEnd();
+    }
+    
+    protected final void processMethods(MethodFactory mf, Class<?>... cls) throws SecurityException {
+        Queue<Class<?>> clsInterfaces = new ArrayDeque<>();
+        for (Class<?> c : cls) {
+            clsInterfaces.add(c);
+        }
+        Set<String> definedMethods = new HashSet<>();
+        while (!clsInterfaces.isEmpty()) {
+            Class<?> clsInterface = clsInterfaces.poll();
+            String clsName = Type.getInternalName(clsInterface);
+
+            for (Method m : clsInterface.getDeclaredMethods()) {
+                String descriptor = Type.getMethodDescriptor(m);
+                String name = m.getName();
+                if (definedMethods.contains(name + descriptor)) {
+                    continue;
+                }
+
+                definedMethods.add(name + descriptor);
+                mf.define(name, descriptor, clsName, m);
+            }
+
+            Class<?>[] newInterfaces = clsInterface.getInterfaces();
+            if (newInterfaces != null) {
+                for (Class<?> c : newInterfaces) {
+                    clsInterfaces.add(c);
+                }
+            }
+        }
+    }
+    
+    
+    protected final void visitReturn(MethodVisitor mv, Class<?> resultType) {
+        if (void.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.RETURN);
+        } else if (double.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.DRETURN);
+        } else if (float.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.FRETURN);
+        } else if (int.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (long.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.LRETURN);
+        } else if (boolean.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (byte.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (char.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (short.class.equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (resultType.isPrimitive()) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else {
+            mv.visitInsn(Opcodes.ARETURN);
+        }
+    }
+    
+    protected final void visitArgumemt(MethodVisitor mv, Class<?> type, int id) {
+        if (double.class.equals(type)) {
+            mv.visitVarInsn(Opcodes.DLOAD, id);
+        } else if (float.class.equals(type)) {
+            mv.visitVarInsn(Opcodes.FLOAD, id);
+        } else if (int.class.equals(type)) {
+            mv.visitVarInsn(Opcodes.ILOAD, id);
+        } else if (long.class.equals(type)) {
+            mv.visitVarInsn(Opcodes.LLOAD, id);
+        } else if (boolean.class.equals(type)) {
+            mv.visitVarInsn(Opcodes.ILOAD, id);
+        } else if (byte.class.equals(type)) {
+            mv.visitVarInsn(Opcodes.ILOAD, id);
+        } else if (char.class.equals(type)) {
+            mv.visitVarInsn(Opcodes.ILOAD, id);
+        } else if (short.class.equals(type)) {
+            mv.visitVarInsn(Opcodes.ILOAD, id);
+        } else if (type.isPrimitive()) {
+            mv.visitVarInsn(Opcodes.ILOAD, id);
+        } else {
+            mv.visitVarInsn(Opcodes.ALOAD, id);
+        }
     }
 }

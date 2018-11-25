@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,51 +45,79 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.utils;
+package org.primesoft.asyncworldedit.injector.core.visitors;
 
-import org.primesoft.asyncworldedit.LoggerProvider;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
+import java.lang.reflect.Method;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.primesoft.asyncworldedit.injector.injected.entity.WrappedPlayerData;
 
 /**
  *
  * @author SBPrime
  */
-public class ExceptionHelper {
+public class CreatePlayerWrapper extends BaseCreateWrapper {
 
-    private static void log(String m) {
-        LoggerProvider.log(m);
+    private static final String DESCRIPTOR_WRAPPER_DATA = Type.getDescriptor(WrappedPlayerData.class);
+    public final static String IC_DESCRIPTOR = "org/primesoft/asyncworldedit/worldedit/entity/PlayerWrapper";
+
+    public CreatePlayerWrapper(ICreateClass createClass) {
+        super(createClass, Player.class, IC_DESCRIPTOR);
     }
 
-    public static void printException(Throwable ex, String message) {
-        if (ex == null) {
+    @Override
+    protected void processFields(ClassWriter cw) {
+        super.processFields(cw);
+
+        cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "m_data", DESCRIPTOR_WRAPPER_DATA, null, null)
+                .visitEnd();
+    }
+
+    @Override
+    protected void ctorCode(MethodVisitor mv) {
+        super.ctorCode(mv);
+
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+
+        mv.visitTypeInsn(Opcodes.NEW, Type.getInternalName(WrappedPlayerData.class));
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL,
+                Type.getInternalName(WrappedPlayerData.class),
+                "<init>",
+                "()V",
+                false);
+
+        mv.visitFieldInsn(Opcodes.PUTFIELD, m_targetName, "m_data",
+                DESCRIPTOR_WRAPPER_DATA);
+    }
+
+    @Override
+    protected void methodBody(MethodVisitor mv, String name, String descriptor, Method m) {
+        if (!"getWorld".equals(name)) {
+            super.methodBody(mv, name, descriptor, m);
             return;
         }
+        
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, m_targetName, "m_data", DESCRIPTOR_WRAPPER_DATA);
 
-        log("***********************************");
-        log(message);
-        log("***********************************");
-        printException(ex);
-        log("***********************************");
-    }
-    
-    public static void printException(Throwable ex) {
-        if (ex == null) {
-            return;
-        }
-
-        while (ex != null) {
-            log("*");
-            log(String.format("* Exception: %1$s", ex.getClass().getName()));
-            log(String.format("* Error message: %1$s", ex.getLocalizedMessage()));
-            log("* Stack: ");
-            printStack(ex, "* ");
-            
-            ex = ex.getCause();
-        }
-    }
-
-    public static void printStack(Throwable ex, String lead) {
-        for (StackTraceElement element : ex.getStackTrace()) {
-            log(lead + element.toString());
-        }
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, m_targetName, "m_injected", Type.getDescriptor(Player.class));
+        
+        callParrent(mv, name, descriptor, m);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                Type.getInternalName(WrappedPlayerData.class),
+                "getWorld",
+                "("
+                + Type.getDescriptor(Player.class)
+                + Type.getDescriptor(World.class)
+                + ")" + Type.getDescriptor(World.class),
+                false);
+        
+        mv.visitInsn(Opcodes.ARETURN);
     }
 }

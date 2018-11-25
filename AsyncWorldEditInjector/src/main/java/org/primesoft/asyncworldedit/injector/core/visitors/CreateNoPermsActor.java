@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,99 +45,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.extension.platform;
+package org.primesoft.asyncworldedit.injector.core.visitors;
 
 import com.sk89q.worldedit.extension.platform.Actor;
-import com.sk89q.worldedit.internal.cui.CUIEvent;
-import com.sk89q.worldedit.session.SessionKey;
-import com.sk89q.worldedit.util.auth.AuthorizationException;
-import java.io.File;
-import java.util.UUID;
+import java.lang.reflect.Method;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  *
  * @author SBPrime
  */
-public class NoPermsActor implements Actor {
-
-    private final Actor m_actor;
-
-    public NoPermsActor(Actor parrent) {        
-        m_actor = parrent;
+public class CreateNoPermsActor extends BaseCreateWrapper {
+    
+    public final static String IC_DESCRIPTOR = "org/primesoft/asyncworldedit/worldedit/extension/platform/NoPermsActor";
+    
+    public CreateNoPermsActor(ICreateClass createClass) {
+        super(createClass, Actor.class, IC_DESCRIPTOR);
     }
-
+    
     @Override
-    public String getName() {
-        return m_actor.getName();
-    }
-
-    @Override
-    public void printRaw(String msg) {
-        m_actor.printRaw(msg);
-    }
-
-    @Override
-    public void printDebug(String msg) {
-        m_actor.printDebug(msg);
-    }
-
-    @Override
-    public void print(String msg) {
-        m_actor.print(msg);
-    }
-
-    @Override
-    public void printError(String msg) {
-        m_actor.printError(msg);
-    }
-
-    @Override
-    public boolean canDestroyBedrock() {
-        return m_actor.canDestroyBedrock();
-    }
-
-    @Override
-    public boolean isPlayer() {
-        return m_actor.isPlayer();
-    }
-
-    @Override
-    public File openFileOpenDialog(String[] extensions) {
-        return m_actor.openFileOpenDialog(extensions);
-    }
-
-    @Override
-    public File openFileSaveDialog(String[] extensions) {
-        return m_actor.openFileSaveDialog(extensions);
-    }
-
-    @Override
-    public void dispatchCUIEvent(CUIEvent event) {
-        m_actor.dispatchCUIEvent(event);
-    }
-
-    @Override
-    public UUID getUniqueId() {
-        return m_actor.getUniqueId();
-    }
-
-    @Override
-    public SessionKey getSessionKey() {
-        return m_actor.getSessionKey();
-    }
-
-    @Override
-    public String[] getGroups() {
-        return m_actor.getGroups();
-    }
-
-    @Override
-    public void checkPermission(String permission) throws AuthorizationException {
-
-    }
-
-    @Override
-    public boolean hasPermission(String permission) {
-        return true;
+    protected void methodBody(MethodVisitor mv, String name, String descriptor, Method m) {
+        if ("checkPermission".equals(name)) {
+            mv.visitInsn(Opcodes.RETURN);
+            return;
+        }
+        
+        if ("hasPermission".equals(name)) {
+            mv.visitLdcInsn(Boolean.TRUE);
+            mv.visitInsn(Opcodes.IRETURN);
+            return;
+        }
+        
+        super.methodBody(mv, name, descriptor, m);
     }
 }

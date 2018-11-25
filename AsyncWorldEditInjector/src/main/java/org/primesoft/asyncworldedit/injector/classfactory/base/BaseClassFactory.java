@@ -58,6 +58,9 @@ import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.World;
+import java.util.UUID;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
@@ -97,5 +100,15 @@ public class BaseClassFactory implements IClassFactory {
     @Override
     public void handleError(WorldEditException ex, String name) {
         // No op
+    }
+
+    @Override
+    public IPlayerEntry getPlayer(UUID uniqueId) {
+        return null;
+    }
+
+    @Override
+    public World wrapWorld(World world, IPlayerEntry player) {
+        return world;
     }
 }

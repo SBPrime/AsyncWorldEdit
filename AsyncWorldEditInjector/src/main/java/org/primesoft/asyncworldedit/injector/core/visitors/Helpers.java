@@ -57,10 +57,12 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
+import org.primesoft.asyncworldedit.injector.injected.IWrapper;
 import org.primesoft.asyncworldedit.injector.injected.function.operation.IForwardExtentCopy;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.MultiArgWorldEditOperationAction;
@@ -131,5 +133,21 @@ public final class Helpers {
         }
         
         return result;
+    }
+    
+        
+    public static boolean wrapperEquals(Object o1, Object o2) {
+        if (o1 == null && o2 == null) {
+            return true;
+        }
+        
+        if (o1 instanceof IWrapper) {
+            o1 = ((IWrapper)o1).getWrappedInstance();
+        }
+        if (o2 instanceof IWrapper) {
+            o2 = ((IWrapper)o2).getWrappedInstance();
+        }
+        
+        return Objects.equals(o1, o2);
     }
 }

@@ -50,94 +50,98 @@ package org.primesoft.asyncworldedit.injector.core.visitors;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import static org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor.RANDOM_PREFIX;
-import org.primesoft.asyncworldedit.injector.injected.command.FlattenedClipboardTransformFactory;
-import org.primesoft.asyncworldedit.injector.injected.command.IFlattenedClipboardTransform;
 import org.primesoft.asyncworldedit.injector.injected.command.IFlattenedClipboardTransformFactory;
 
 /**
  *
  * @author SBPrime
+ * @param <TFactory>
  */
-public class FlattenedClipboardTransformClassVisitor extends BaseClassVisitor {
+public abstract class BaseFactoryCreator<TFactory> extends BaseClassCreator {
 
-    private final String DESCRIPTOR_FACTORY_CLASS = "com.sk89q.worldedit.command.FlattenedClipboardTransformFactoryImpl_";
+    private final Class<? extends TFactory> m_factoryClass;
+    private final String m_targetName;
+    private final String m_targetNameClass;
 
-    public FlattenedClipboardTransformClassVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
-        super(classVisitor, createClass);
+    public BaseFactoryCreator(ICreateClass createClass,
+            Class<? extends TFactory> factoryClass) {
+        super(createClass);
+
+        m_factoryClass = factoryClass;
+
+        m_targetName = Type.getInternalName(m_factoryClass) + "Impl" + RANDOM_PREFIX;
+        m_targetNameClass = m_targetName.replace("/", ".");
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        super.visit(version, changeVisibility(access, Opcodes.ACC_PUBLIC), name, signature, superName,
-                Stream.concat(Stream.of(interfaces),
-                        Stream.of(Type.getInternalName(IFlattenedClipboardTransform.class)))
-                        .toArray(String[]::new));
+    public String getName() {
+        return Type.getInternalName(m_factoryClass);
     }
 
     @Override
-    public void visitEnd() {
-        String className = DESCRIPTOR_FACTORY_CLASS + RANDOM_PREFIX;
-        
-        try {
-            emitFactory(className);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Unable to create IFlattenedClipboardTransformFactory implementation.", ex);
-        }
-        
-        super.visitEnd();
-        
-        try {
-            FlattenedClipboardTransformFactory.initialize((IFlattenedClipboardTransformFactory) 
-                    Class.forName(className).getConstructor().newInstance());
-        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException |
-                InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
-            throw new IllegalStateException("Unable to create IFlattenedClipboardTransformFactory instance.", ex);
-        }
-    }
-
-    private void emitFactory(String className) throws IOException {        
-        String classDescriptor = className.replace(".", "/");
-
-        Method mTransform = IFlattenedClipboardTransformFactory.class
-                .getDeclaredMethods()[0];
+    public void run() {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, classDescriptor,
+        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, m_targetName,
                 null, "java/lang/Object",
                 new String[]{
-                    Type.getInternalName(IFlattenedClipboardTransformFactory.class)
+                    Type.getInternalName(m_factoryClass)
                 });
 
         emitEmptyCtor(cw);
-        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, mTransform.getName(),
-                Type.getMethodDescriptor(mTransform), null, null);
 
+        processMethods((String name, String descriptor, String clsName, Method m) -> defineMethod(cw, name, descriptor, m),
+                m_factoryClass);
+
+        cw.visitEnd();
+        try {
+            createClass(m_targetNameClass, cw);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to create " + m_targetName + ".", ex);
+        }
+
+        try {
+            initializeFactory((TFactory) Class.forName(m_targetNameClass).getConstructor().newInstance());
+        } catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException
+                | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
+            throw new IllegalStateException("Unable to create " + m_targetName + " instance.", ex);
+        }
+
+    }
+
+    private void defineMethod(ClassWriter cw, String name, String descriptor, Method m) {
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, name, descriptor, null, null);
         mv.visitCode();
 
-        mv.visitVarInsn(Opcodes.ALOAD, 1);
-        mv.visitVarInsn(Opcodes.ALOAD, 2);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, 
-                "com/sk89q/worldedit/command/FlattenedClipboardTransform", "transform",
-                "(Lcom/sk89q/worldedit/extent/clipboard/Clipboard;Lcom/sk89q/worldedit/math/transform/Transform;)Lcom/sk89q/worldedit/command/FlattenedClipboardTransform;",
+        Class<?>[] params = m.getParameterTypes();
+        String resultClass = getClassForMethod(name, descriptor);
+        
+        mv.visitTypeInsn(Opcodes.NEW, resultClass);
+        mv.visitInsn(Opcodes.DUP);
+        
+        for (int i = 0; i < params.length; i++) {
+            visitArgumemt(mv, params[i], i + 1);
+        }
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, resultClass,
+                "<init>",
+                "(" + Stream.of(params).map(Type::getDescriptor).collect(Collectors.joining()) + ")V",
                 false);
 
-        mv.visitInsn(Opcodes.ARETURN);
+
+        visitReturn(mv, m.getReturnType());
 
         mv.visitMaxs(2, 1);
         mv.visitEnd();
 
         cw.visitEnd();
-
-        createClass(className, cw);
     }
 
-    @Override
-    public void validate() throws RuntimeException {
-    }
+    protected abstract void initializeFactory(TFactory instance);
+
+    protected abstract String getClassForMethod(String name, String descriptor);
 }

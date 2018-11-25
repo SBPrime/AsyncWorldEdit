@@ -50,10 +50,6 @@ package org.primesoft.asyncworldedit.injector.core.visitors;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayDeque;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
 import java.util.stream.Stream;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -67,13 +63,6 @@ import org.objectweb.asm.Type;
  * @author SBPrime
  */
 public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
-
-    @FunctionalInterface
-    private interface MethodFactory {
-
-        void define(String name, String descriptor, String clsName, Method m);
-    }
-
     private final static String IC_DESCRIPTOR = "com/sk89q/worldedit/extent/clipboard/InjectableClipboard";
     private String m_clsDescriptor;
 
@@ -135,7 +124,8 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
     public void visitEnd() {
         addFields();
 
-        processMethods((String name, String descriptor, String clsName, Method m) -> defineClipboardMethod(name, descriptor, clsName, m));
+        processMethods((String name, String descriptor, String clsName, Method m) -> defineClipboardMethod(name, descriptor, clsName, m),
+                Clipboard.class);
         super.visitEnd();
 
         try {
@@ -197,8 +187,9 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, IC_DESCRIPTOR, "m_injected", "L" + m_clsDescriptor + ";");
 
-        for (int i = 0; i < getArgsCount(descriptor); i++) {
-            mv.visitVarInsn(Opcodes.ALOAD, i + 1);
+        Class<?>[] params = m.getParameterTypes();
+        for (int i = 0; i < params.length; i++) {
+            visitArgumemt(mv, params[i], i + 1);
         }
 
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
@@ -206,7 +197,7 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
                 RANDOM_PREFIX + name, descriptor,
                 false);
 
-        visitReturn(resultType, mv);
+        visitReturn(mv, resultType);
 
         mv.visitCode();
         mv.visitMaxs(1, 1);
@@ -232,86 +223,34 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, m_clsDescriptor, "m_injected", Type.getDescriptor(Clipboard.class));
 
-        for (int i = 0; i < getArgsCount(descriptor); i++) {
-            mv.visitVarInsn(Opcodes.ALOAD, i + 1);
+        Class<?>[] params = m.getParameterTypes();
+        for (int i = 0; i < params.length; i++) {
+            visitArgumemt(mv, params[i], i + 1);
         }
         
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE,
                 clsName,
                 name, descriptor,
                 true);
-        visitReturn(resultType, mv);
+        visitReturn(mv, resultType);
         
         mv.visitLabel(lTrue);
         
         mv.visitVarInsn(Opcodes.ALOAD, 0);
-        for (int i = 0; i < getArgsCount(descriptor); i++) {
-            mv.visitVarInsn(Opcodes.ALOAD, i + 1);
-        }        
+        params = m.getParameterTypes();
+        for (int i = 0; i < params.length; i++) {
+            visitArgumemt(mv, params[i], i + 1);
+        }
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 m_clsDescriptor,
                 RANDOM_PREFIX + name, descriptor,
                 false);
-        visitReturn(resultType, mv);
+        visitReturn(mv, resultType);
         
         mv.visitCode();
         
         mv.visitMaxs(1, 1);
         mv.visitEnd();
-    }
-
-    private void visitReturn(Class<?> resultType, MethodVisitor mv) {
-        if (void.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.RETURN);
-        } else if (double.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.DRETURN);
-        } else if (float.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.FRETURN);
-        } else if (int.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.IRETURN);
-        } else if (long.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.LRETURN);
-        } else if (boolean.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.IRETURN);
-        } else if (byte.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.IRETURN);
-        } else if (char.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.IRETURN);
-        } else if (short.class.equals(resultType)) {
-            mv.visitInsn(Opcodes.IRETURN);
-        } else if (resultType.isPrimitive()) {
-            mv.visitInsn(Opcodes.IRETURN);
-        } else {
-            mv.visitInsn(Opcodes.ARETURN);
-        }
-    }
-
-    private void processMethods(MethodFactory mf) throws SecurityException {
-        Queue<Class<?>> clsInterfaces = new ArrayDeque<>();
-        clsInterfaces.add(Clipboard.class);
-        Set<String> definedMethods = new HashSet<>();
-        while (!clsInterfaces.isEmpty()) {
-            Class<?> clsInterface = clsInterfaces.poll();
-            String clsName = Type.getInternalName(clsInterface);
-
-            for (Method m : clsInterface.getDeclaredMethods()) {
-                String descriptor = Type.getMethodDescriptor(m);
-                String name = m.getName();
-                if (definedMethods.contains(name + descriptor)) {
-                    continue;
-                }
-
-                definedMethods.add(name + descriptor);
-                mf.define(name, descriptor, clsName, m);
-            }
-
-            Class<?>[] newInterfaces = clsInterface.getInterfaces();
-            if (newInterfaces != null) {
-                for (Class<?> c : newInterfaces) {
-                    clsInterfaces.add(c);
-                }
-            }
-        }
     }
 
     @Override

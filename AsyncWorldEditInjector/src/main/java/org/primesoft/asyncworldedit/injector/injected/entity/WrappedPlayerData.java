@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,51 +45,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.utils;
+package org.primesoft.asyncworldedit.injector.injected.entity;
 
-import org.primesoft.asyncworldedit.LoggerProvider;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.world.World;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
 /**
  *
  * @author SBPrime
  */
-public class ExceptionHelper {
-
-    private static void log(String m) {
-        LoggerProvider.log(m);
-    }
-
-    public static void printException(Throwable ex, String message) {
-        if (ex == null) {
-            return;
-        }
-
-        log("***********************************");
-        log(message);
-        log("***********************************");
-        printException(ex);
-        log("***********************************");
-    }
+public final class WrappedPlayerData {
     
-    public static void printException(Throwable ex) {
-        if (ex == null) {
-            return;
-        }
+    private final Object m_mutex = new Object();
 
-        while (ex != null) {
-            log("*");
-            log(String.format("* Exception: %1$s", ex.getClass().getName()));
-            log(String.format("* Error message: %1$s", ex.getLocalizedMessage()));
-            log("* Stack: ");
-            printStack(ex, "* ");
-            
-            ex = ex.getCause();
+    private IPlayerEntry m_entry = null;
+
+    private World m_world = null;
+    private World m_worldAsync = null;
+        
+    private IPlayerEntry getEntry(Player p) {
+        if (m_entry == null) {
+            if (m_entry == null) {
+                m_entry = InjectorCore.getInstance().getClassFactory().getPlayer(p.getUniqueId());
+            }
         }
+        return m_entry;
     }
 
-    public static void printStack(Throwable ex, String lead) {
-        for (StackTraceElement element : ex.getStackTrace()) {
-            log(lead + element.toString());
+    
+    public World getWorld(Player p, World world) {
+        synchronized (m_mutex) {
+            if (m_world == null || m_world != world) {
+                World aWorld = InjectorCore.getInstance().getClassFactory().wrapWorld(world, getEntry(p));
+                if (aWorld != null) {
+                    m_world = world;
+                    m_worldAsync = aWorld;
+                    
+                    world = aWorld;
+                } else if (m_world != null) {
+                    m_world = null;
+                }
+            } else if (m_world != null) {
+                world = m_worldAsync;
+            }
         }
+
+        return world;
     }
 }

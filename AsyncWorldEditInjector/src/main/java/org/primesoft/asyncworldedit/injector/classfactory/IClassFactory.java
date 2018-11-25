@@ -59,6 +59,9 @@ import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.World;
+import java.util.UUID;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  * Interface for injected WorldEdit classes factory
@@ -106,4 +109,8 @@ public interface IClassFactory {
      * @param name The operation name
      */
     void handleError(WorldEditException ex, String name);
+
+     IPlayerEntry getPlayer(UUID uniqueId);
+     
+     World wrapWorld(World world, IPlayerEntry player);
 }

@@ -47,7 +47,6 @@
  */
 package org.primesoft.asyncworldedit.asyncinjector.async;
 
-import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
@@ -55,7 +54,12 @@ import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.World;
+import java.util.UUID;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
+import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
@@ -63,6 +67,7 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.extent.clipboard.BiomeClipboard;
 import org.primesoft.asyncworldedit.worldedit.function.CascadeRegionFunction;
 import org.primesoft.asyncworldedit.worldedit.function.biome.ExtentBiomeCopy;
+import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
  *
@@ -118,5 +123,16 @@ public class AsyncClassFactory extends BaseClassFactory {
     @Override
     public void handleError(WorldEditException ex, String name) {
         ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
+    }
+    
+    @Override
+    public IPlayerEntry getPlayer(UUID uniqueId) {
+        IPlayerManager pm = AwePlatform.getInstance().getCore().getPlayerManager();
+        return  pm.getPlayer(uniqueId);
+    }
+
+    @Override
+    public World wrapWorld(World world, IPlayerEntry player) {
+        return AsyncWorld.wrap(world, player);
     }
 }

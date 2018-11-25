@@ -63,9 +63,9 @@ import org.primesoft.asyncworldedit.api.inner.configuration.IConfigBlackList;
 import org.primesoft.asyncworldedit.api.inner.configuration.IPremiumWorldEditConfig;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
+import org.primesoft.asyncworldedit.injector.injected.entity.PlayerFactory;
+import org.primesoft.asyncworldedit.injector.injected.extension.platform.ActorFactory;
 import org.primesoft.asyncworldedit.platform.api.IPlatform;
-import org.primesoft.asyncworldedit.worldedit.entity.NoPermsPlayer;
-import org.primesoft.asyncworldedit.worldedit.extension.platform.NoPermsActor;
 
 /**
  *
@@ -196,9 +196,9 @@ public class ExtendedBlockFactory extends BlockFactory {
         }
 
         if (actor instanceof Player) {
-            result.setActor(new NoPermsPlayer((Player) actor));
+            result.setActor(PlayerFactory.createPlayerNoPerms((Player) actor));
         } else {
-            result.setActor(new NoPermsActor(actor));
+            result.setActor(ActorFactory.createActorNoPerms(actor));
         }
 
         return result;
