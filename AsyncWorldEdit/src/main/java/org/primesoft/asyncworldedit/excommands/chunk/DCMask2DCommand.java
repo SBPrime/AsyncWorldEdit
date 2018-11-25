@@ -70,5 +70,5 @@ public abstract class DCMask2DCommand extends Mask2DAsyncCommand {
         m_weIntegrator = awe.getWorldEditIntegrator();
         m_chunkApi = awe.getDirectChunkAPI();
         m_taskDispatcher = awe.getTaskDispatcher();
-    }    
+    }
 }

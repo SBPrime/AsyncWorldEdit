@@ -48,10 +48,10 @@
 package org.primesoft.asyncworldedit.excommands.chunk;
 
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
-import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
@@ -75,7 +75,7 @@ import org.primesoft.asyncworldedit.utils.PositionHelper;
 public class FillChunkCommand extends DCMaskCommand {
 
     private final Region m_region;
-    private final Vector3 m_location;
+    private final BlockVector3 m_location;
     private final World m_locationWorld;
 
     public FillChunkCommand(Region region, Location location, World world,
@@ -83,7 +83,7 @@ public class FillChunkCommand extends DCMaskCommand {
         super(awe, destinationMask, playerEntry);
 
         m_region = region;
-        m_location = location.toVector();
+        m_location = location.toVector().toBlockPoint();
         m_locationWorld = world;
     }
 
@@ -94,7 +94,7 @@ public class FillChunkCommand extends DCMaskCommand {
 
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
-        /*final Set<Vector2> chunks = m_region.getChunks();
+        final Set<BlockVector2> chunks = m_region.getChunks();
         final World weTarget = m_region.getWorld();
         final IWorld wTarget = m_weIntegrator.getWorld(weTarget);
         final IWorld wSource = m_weIntegrator.getWorld(m_locationWorld);
@@ -106,26 +106,26 @@ public class FillChunkCommand extends DCMaskCommand {
         final IWrappedChunk sourceChunk = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
                 m_locationWorld, wSource, getPlayer(), ChunkStore.toChunk(m_location));
 
-        final LazyData<IChunkData> newChunkData = new LazyData<IChunkData>();
+        final LazyData<IChunkData> newChunkData = new LazyData<>();
         editSesstion.doCustomAction(new GetChunkData(sourceChunk, newChunkData), false);
 
         int changedBlocks = 0;
 
-        for (Vector2 pos : chunks) {
+        for (BlockVector2 pos : chunks) {
             final IWrappedChunk wChunk = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi, weTarget, wTarget, getPlayer(), pos);
             final IChangesetChunkData destination = m_chunkApi.createLazyChunkData(wChunk);
             final ChangesetChunkExtent extent = new ChangesetChunkExtent(destination);
-            final Vector3 zeroPos = PositionHelper.chunkToPosition(pos, 0);
+            final BlockVector3 zeroPos = PositionHelper.chunkToPosition(pos, 0);
 
             maskSetExtent(extent);
 
             IChunkData source = newChunkData.get();
             for (int x = 0; x < 16; x++) {
-                final Vector3 xPos = zeroPos.add(x, 0, 0);
+                final BlockVector3 xPos = zeroPos.add(x, 0, 0);
                 for (int z = 0; z < 16; z++) {
-                    final Vector3 zPos = xPos.add(0, 0, z);
+                    final BlockVector3 zPos = xPos.add(0, 0, z);
                     for (int y = 0; y < 256; y++) {
-                        final Vector3 yPos = zPos.add(0, y, 0);
+                        final BlockVector3 yPos = zPos.add(0, y, 0);
                         if (maskTest(yPos)) {
                             destination.setBlock(x, y, z, source.getBlock(x, y, z));
                             changedBlocks++;
@@ -135,14 +135,14 @@ public class FillChunkCommand extends DCMaskCommand {
             }
 
             for (ISerializedEntity e : destination.getEntity()) {
-                if (maskTest(zeroPos.add(e.getPosition()))) {
+                if (maskTest(zeroPos.add(e.getPosition().toBlockPoint()))) {
                     destination.removeEntity(e);
                     changedBlocks++;
                 }
             }
 
             for (ISerializedEntity e : source.getEntity()) {
-                if (maskTest(zeroPos.add(e.getPosition()))) {
+                if (maskTest(zeroPos.add(e.getPosition().toBlockPoint()))) {
                     destination.addEntity(e);
                     changedBlocks++;
                 }
@@ -153,7 +153,6 @@ public class FillChunkCommand extends DCMaskCommand {
 
         }
 
-        return changedBlocks;*/
-        return 0;
+        return changedBlocks;
     }
 }

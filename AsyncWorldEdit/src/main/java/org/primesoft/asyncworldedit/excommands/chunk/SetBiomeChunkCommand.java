@@ -49,10 +49,9 @@ package org.primesoft.asyncworldedit.excommands.chunk;
 
 import com.sk89q.worldedit.math.BlockVector2;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
-import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldedit.world.World;
@@ -79,7 +78,7 @@ public class SetBiomeChunkCommand extends DCMask2DCommand {
     private final Region m_region;
     private final BaseBiome m_biome;
     private final boolean m_fillChunk;
-    private final double m_regionMin;
+    private final int m_regionMin;
 
     public SetBiomeChunkCommand(Region region, boolean fillChunk,
             BaseBiome biome, IAsyncWorldEditCore awe,
@@ -88,11 +87,11 @@ public class SetBiomeChunkCommand extends DCMask2DCommand {
 
         m_biome = biome;
         m_region = region.clone();
-        /*try {
-            m_region.expand(Vector3.at(0, -m_region.getMinimumPoint().getBlockY(), 0));
+        try {
+            m_region.expand(BlockVector3.at(0, -m_region.getMinimumPoint().getBlockY(), 0));
         } catch (RegionOperationException ex) {
             ExceptionHelper.printException(ex, "Unable to expand region, command might fail.");
-        }*/
+        }
         m_regionMin = m_region.getMinimumPoint().getY();
 
         m_fillChunk = fillChunk;
@@ -100,13 +99,13 @@ public class SetBiomeChunkCommand extends DCMask2DCommand {
 
     @Override
     public String getName() {
-        return "chunkSet";
+        return "chunkSetBiome";
     }
 
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
         //Get the chunks in chunk coords
-        /*final Set<Vector2> chunks = m_region.getChunks();
+        final Set<BlockVector2> chunks = m_region.getChunks();
         final World weWorld = m_region.getWorld();
         final IWorld world = m_weIntegrator.getWorld(weWorld);
 
@@ -123,13 +122,13 @@ public class SetBiomeChunkCommand extends DCMask2DCommand {
             final ChangesetChunkExtent extent = new ChangesetChunkExtent(cData);
             maskSetExtent(extent);
 
-            final Vector2 cPos = new BlockVector2(wChunk.getX(), wChunk.getZ());
-            final Vector2 chunkZero = PositionHelper.chunkToPosition(cPos, 0).toVector2D();
+            final BlockVector2 cPos = BlockVector2.at(wChunk.getX(), wChunk.getZ());
+            final BlockVector2 chunkZero = PositionHelper.chunkToPosition(cPos, 0).toBlockVector2();
             for (int x = 0; x < 16; x++) {
-                final Vector2 xPos = chunkZero.add(x, 0);
+                final BlockVector2 xPos = chunkZero.add(x, 0);
                 for (int z = 0; z < 16; z++) {
-                    final Vector2 zPos = xPos.add(0, z);
-                    final Vector3 yPos = zPos.toVector(m_regionMin);
+                    final BlockVector2 zPos = xPos.add(0, z);
+                    final BlockVector3 yPos = zPos.toBlockVector3(m_regionMin);
 
                     if (maskTest2D(zPos) && (m_fillChunk || m_region.contains(yPos))) {
                         cData.setBiome(x, z, m_biome.getId());
@@ -142,21 +141,22 @@ public class SetBiomeChunkCommand extends DCMask2DCommand {
             editSesstion.doCustomAction(new SetChangesetChunkChange(wChunk, cData), false);
         }
 
-        return changedBlocks;*/
-        return 0;
+        return changedBlocks;
     }
 
     /**
      * Catche the chunks
      *
+     * @param chunks
      * @param world
+     * @param weWorld
      * @return
      * @throws WorldEditException
      */
-    /*private List<IWrappedChunk> cacheChunks(Set<Vector2> chunks,
+    private List<IWrappedChunk> cacheChunks(Set<BlockVector2> chunks,
             final World weWorld, final IWorld world) throws WorldEditException {
-        List<IWrappedChunk> dataCatch = new ArrayList<IWrappedChunk>();
-        for (Vector2 cPos : chunks) {
+        List<IWrappedChunk> dataCatch = new ArrayList<>();
+        for (BlockVector2 cPos : chunks) {
             final IWrappedChunk chunk = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
                     weWorld, world, getPlayer(), cPos);
 
@@ -164,5 +164,5 @@ public class SetBiomeChunkCommand extends DCMask2DCommand {
         }
 
         return dataCatch;
-    }*/
+    }
 }

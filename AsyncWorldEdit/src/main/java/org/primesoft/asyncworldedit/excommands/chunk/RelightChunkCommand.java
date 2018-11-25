@@ -47,10 +47,10 @@
  */
 package org.primesoft.asyncworldedit.excommands.chunk;
 
-import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
 import java.util.Set;
@@ -86,7 +86,7 @@ class RelightChunkCommand extends DCCommand {
 
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
-/*        //Get the chunks in chunk coords
+        //Get the chunks in chunk coords
         final World weWorld = m_region.getWorld();
         final IWorld world = m_weIntegrator.getWorld(weWorld);
 
@@ -94,15 +94,14 @@ class RelightChunkCommand extends DCCommand {
             return relightVanilla(m_region.getChunks(), weWorld, world, editSesstion);
         }
 
-        return relightAsync(m_region, world);*/
-        return 0;
+        return relightAsync(m_region, world);
     }
 
-    /*private int relightAsync(final Region region, final IWorld world) {
+    private int relightAsync(final Region region, final IWorld world) {
         IBlockRelighter relighter = ((IInnerDirectChunkAPI) m_chunkApi).getBlockRelighter();
 
         int cnt = 0;
-        for (Vector2 chunk : region.getChunks()) {
+        for (BlockVector2 chunk : region.getChunks()) {
             synchronized (relighter.getDataMutex()) {
                 double cx = PositionHelper.chunkToPosition(chunk.getBlockX());
                 double cz = PositionHelper.chunkToPosition(chunk.getBlockZ());
@@ -111,7 +110,7 @@ class RelightChunkCommand extends DCCommand {
                         for (int y = 0; y < 256; y++) {
                             int px = (int) (x + cx);
                             int pz = (int) (z + cz);
-                            Vector3 v = Vector3.at(px, y, pz);
+                            BlockVector3 v = BlockVector3.at(px, y, pz);
                             if (region.contains(v)) {
                                 relighter.forceQueueBlock(world, px, y, pz);
                                 cnt++;
@@ -125,8 +124,8 @@ class RelightChunkCommand extends DCCommand {
         return cnt;
     }
 
-    private int relightVanilla(final Set<Vector2> chunks, final World weWorld, final IWorld world, IAweEditSession editSesstion) throws WorldEditException {
-        for (Vector2 pos : chunks) {
+    private int relightVanilla(final Set<BlockVector2> chunks, final World weWorld, final IWorld world, IAweEditSession editSesstion) throws WorldEditException {
+        for (BlockVector2 pos : chunks) {
             final IWrappedChunk wChunk = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi, weWorld, world, getPlayer(), pos);
 
             relightChunk(editSesstion, wChunk);
@@ -144,10 +143,10 @@ class RelightChunkCommand extends DCCommand {
      * @param chunk
      * @throws com.sk89q.worldedit.WorldEditException
      */
-    /*public static void relightChunk(final IAweEditSession editSesstion, final IWrappedChunk chunk) throws WorldEditException {
+    public static void relightChunk(final IAweEditSession editSesstion, final IWrappedChunk chunk) throws WorldEditException {
         editSesstion.doCustomAction(new RelightChange(chunk), false);
         for (int y = 0; y < 256; y++) {
             editSesstion.doCustomAction(new RelightChange(chunk, y), false);
         }
-    }*/
+    }
 }

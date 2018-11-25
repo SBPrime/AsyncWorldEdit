@@ -50,7 +50,8 @@ package org.primesoft.asyncworldedit.excommands.chunk;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.function.mask.Mask;
-import com.sk89q.worldedit.math.Vector2;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
 import java.util.Set;
@@ -87,13 +88,13 @@ class ClearChunkCommand extends DCMaskCommand {
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
         //Get the chunks in chunk coords
-        /*final Set<Vector2> chunks = m_region.getChunks();
+        final Set<BlockVector2> chunks = m_region.getChunks();
         final World weWorld = m_region.getWorld();
         final IWorld world = m_weIntegrator.getWorld(weWorld);
         
         int changedBlocks = 0;
 
-        for (Vector2 pos : chunks) {
+        for (BlockVector2 pos : chunks) {
             final int cx = pos.getBlockX();
             final int cz = pos.getBlockZ();
 
@@ -102,15 +103,15 @@ class ClearChunkCommand extends DCMaskCommand {
 
             IChangesetChunkData destination = m_chunkApi.createLazyChunkData(wChunk);
             final ChangesetChunkExtent extent = new ChangesetChunkExtent(destination);
-            final Vector3 zeroPos = PositionHelper.chunkToPosition(pos, 0);
+            final BlockVector3 zeroPos = PositionHelper.chunkToPosition(pos, 0);
 
             maskSetExtent(extent);
             for (int x = 0; x < 16; x++) {
-                final Vector3 xPos = zeroPos.add(x, 0, 0);
+                final BlockVector3 xPos = zeroPos.add(x, 0, 0);
                 for (int z = 0; z < 16; z++) {
-                    final Vector3 zPos = xPos.add(0, 0, z);
+                    final BlockVector3 zPos = xPos.add(0, 0, z);
                     for (int y = 0; y < 256; y++) {
-                        final Vector3 yPos = zPos.add(0, y, 0);
+                        final BlockVector3 yPos = zPos.add(0, y, 0);
                         if (maskTest(yPos)) {
                             //destination.setBlock(x, y, z, AIR);
                             //changedBlocks++;
@@ -121,7 +122,7 @@ class ClearChunkCommand extends DCMaskCommand {
                 }
             }
             for (ISerializedEntity e : destination.getEntity()) {
-                if (maskTest(zeroPos.add(e.getPosition()))) {
+                if (maskTest(zeroPos.add(e.getPosition().toBlockPoint()))) {
                     destination.removeEntity(e);
                 }
             }
@@ -131,7 +132,6 @@ class ClearChunkCommand extends DCMaskCommand {
             editSesstion.doCustomAction(new SetChangesetChunkChange(wChunk, destination), false);
         }
 
-        return changedBlocks;*/
-        return 0;
+        return changedBlocks;
     }
 }

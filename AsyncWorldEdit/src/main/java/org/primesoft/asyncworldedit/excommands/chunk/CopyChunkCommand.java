@@ -50,16 +50,14 @@ package org.primesoft.asyncworldedit.excommands.chunk;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.Tag;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
-import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.mask.Masks;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import java.util.HashMap;
@@ -76,7 +74,6 @@ import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.directChunk.ChangesetChunkExtent;
 import org.primesoft.asyncworldedit.directChunk.DcUtils;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.MaskUtils;
 import org.primesoft.asyncworldedit.utils.PositionHelper;
@@ -123,9 +120,9 @@ public class CopyChunkCommand extends DCCommand {
 
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
-        /*final IWorld world = m_weIntegrator.getWorld(m_world);
-        final Vector3 min = m_region.getMinimumPoint();
-        final Vector3 max = m_region.getMaximumPoint();
+        final IWorld world = m_weIntegrator.getWorld(m_world);
+        final BlockVector3 min = m_region.getMinimumPoint();
+        final BlockVector3 max = m_region.getMaximumPoint();
 
         int cMaxX = PositionHelper.positionToChunk(max.getX());
         int cMaxZ = PositionHelper.positionToChunk(max.getZ());
@@ -135,11 +132,11 @@ public class CopyChunkCommand extends DCCommand {
 
         int changedBlocks = 0;
 
-        final HashMap<Vector2, LazyData<IChunkData>> dataCache
+        final HashMap<BlockVector2, LazyData<IChunkData>> dataCache
                 = cacheChunks(cMinX, cMaxX, cMinZ, cMaxZ, world, editSesstion);
 
-        for (Map.Entry<Vector2, LazyData<IChunkData>> entrySet : dataCache.entrySet()) {
-            Vector2 cPos = entrySet.getKey();
+        for (Map.Entry<BlockVector2, LazyData<IChunkData>> entrySet : dataCache.entrySet()) {
+            BlockVector2 cPos = entrySet.getKey();
             LazyData<IChunkData> lcData = entrySet.getValue();
 
             final IChunkData cData = lcData.get();
@@ -152,8 +149,7 @@ public class CopyChunkCommand extends DCCommand {
             m_sourceMaskExtent.setExtent(null);
         }
 
-        return changedBlocks;*/
-        return 0;
+        return changedBlocks;
     }
 
     /**
@@ -163,9 +159,9 @@ public class CopyChunkCommand extends DCCommand {
      * @param cData
      * @return
      */
-    /*private int getEntities(Vector2 cPos, IChunkData cData) {
+    private int getEntities(BlockVector2 cPos, IChunkData cData) {
         int changedBlocks = 0;
-        final Vector3 chunkZero = PositionHelper.chunkToPosition(cPos, 0);
+        final BlockVector3 chunkZero = PositionHelper.chunkToPosition(cPos, 0);
 
         for (ISerializedEntity entity : cData.getEntity()) {
             Stack<ISerializedEntity> stack = new Stack<>();
@@ -180,8 +176,7 @@ public class CopyChunkCommand extends DCCommand {
                 vehicle = tagData;
                 entity = stack.pop();
 
-                Vector3 pos = chunkZero.add(entity.getPosition());
-                Vector3 posBlock = pos.toBlockPoint();
+                BlockVector3 posBlock = chunkZero.add(entity.getPosition().toBlockPoint());
                 if (!m_region.contains(posBlock) || !m_sourceMask.test(posBlock)) {
                     break;
                 }
@@ -205,7 +200,7 @@ public class CopyChunkCommand extends DCCommand {
         }
 
         return changedBlocks;
-    }*/
+    }
 
     /**
      * Get blocks from DirectChunk data and store them into the clipboard
@@ -214,22 +209,22 @@ public class CopyChunkCommand extends DCCommand {
      * @param cData
      * @return
      */
-    /*private int getBlocks(Vector2 cPos, IChunkData cData) {
-        final Vector3 chunkZero = PositionHelper.chunkToPosition(cPos, 0);
+    private int getBlocks(BlockVector2 cPos, IChunkData cData) {
+        final BlockVector3 chunkZero = PositionHelper.chunkToPosition(cPos, 0);
         int changedBlocks = 0;
 
         for (int x = 0; x < 16; x++) {
-            final Vector3 xPos = chunkZero.add(x, 0, 0);
+            final BlockVector3 xPos = chunkZero.add(x, 0, 0);
             for (int z = 0; z < 16; z++) {
-                final Vector3 zPos = xPos.add(0, 0, z);
-                final Vector2 zPos2d = zPos.toVector2D();
+                final BlockVector3 zPos = xPos.add(0, 0, z);
+                final BlockVector2 zPos2d = zPos.toBlockVector2();
 
                 if (m_copyBiome) {
                     m_target.setBiome(zPos2d, new BaseBiome(cData.getBiome(x, z)));
                 }
 
                 for (int py = 0; py < 256; py++) {
-                    final Vector3 yPos = zPos.add(0, py, 0);
+                    final BlockVector3 yPos = zPos.add(0, py, 0);
 
                     if (!m_region.contains(yPos) || !m_sourceMask.test(yPos)) {
                         continue;
@@ -254,20 +249,20 @@ public class CopyChunkCommand extends DCCommand {
                         //This is never thrown but better log it
                         ExceptionHelper.printException(ex, "Unable to set clipboard block");
                     }*/
-/*                }
+                }
             }
         }
 
         return changedBlocks;
     }
 
-    private HashMap<Vector2, LazyData<IChunkData>> cacheChunks(int cMinX, int cMaxX, int cMinZ, int cMaxZ,
+    private HashMap<BlockVector2, LazyData<IChunkData>> cacheChunks(int cMinX, int cMaxX, int cMinZ, int cMaxZ,
             final IWorld world, IAweEditSession editSesstion) throws WorldEditException {
-        HashMap<Vector2, LazyData<IChunkData>> dataCatch
-                = new HashMap<Vector2, LazyData<IChunkData>>();
+        HashMap<BlockVector2, LazyData<IChunkData>> dataCatch
+                = new HashMap<>();
         for (int cx = cMinX; cx <= cMaxX; cx++) {
             for (int cz = cMinZ; cz <= cMaxZ; cz++) {
-                final Vector2 cPos = new Vector2(cx, cz);
+                final BlockVector2 cPos = BlockVector2.at(cx, cz);
 
                 final IWrappedChunk chunk = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
                         m_world, world, getPlayer(), cPos);
@@ -280,5 +275,5 @@ public class CopyChunkCommand extends DCCommand {
         }
 
         return dataCatch;
-    }*/
+    }
 }

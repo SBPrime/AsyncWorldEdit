@@ -51,6 +51,7 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.mask.Masks;
 import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.directChunk.ChangesetChunkExtent;
@@ -85,6 +86,10 @@ public abstract class MaskAsyncCommand extends AsyncCommand {
         m_destinationMaskExtent.setExtent(extent);
     }
 
+    protected boolean maskTest(Vector3 v) {
+        return maskTest(v.toBlockPoint());
+    }
+    
     protected boolean maskTest(BlockVector3 v) {
         return m_destinationMask.test(v);
     }       

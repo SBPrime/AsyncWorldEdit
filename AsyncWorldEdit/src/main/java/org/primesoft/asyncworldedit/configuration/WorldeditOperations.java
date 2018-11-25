@@ -109,6 +109,7 @@ public enum WorldeditOperations
     placeSchematic,
     //Chunk commands
     chunkSet,
+    chunkSetBiome,
     chunkReplace,
     chunkClear,
     chunkFill,

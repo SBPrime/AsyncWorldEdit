@@ -50,9 +50,9 @@ package org.primesoft.asyncworldedit.excommands.chunk;
 import com.sk89q.worldedit.math.BlockVector2;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
@@ -95,7 +95,7 @@ public class CloneChunkCommand extends DCMaskCommand {
 
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
-        /*final Set<Vector2> chunks = m_region.getChunks();
+        final Set<BlockVector2> chunks = m_region.getChunks();
         final World weSource = m_region.getWorld();
         final IWorld wSource = m_weIntegrator.getWorld(weSource);
         final IWorld wDestination = m_weIntegrator.getWorld(m_locationWorld);
@@ -109,8 +109,8 @@ public class CloneChunkCommand extends DCMaskCommand {
         int minCZ = Integer.MAX_VALUE;
         int minCX = Integer.MAX_VALUE;
 
-        final HashMap<Vector2, Pair<Boolean, LazyData>> chunksData = new HashMap<Vector2, Pair<Boolean, LazyData>>();
-        for (Vector2 c : chunks) {
+        final HashMap<BlockVector2, Pair<Boolean, LazyData>> chunksData = new HashMap<>();
+        for (BlockVector2 c : chunks) {
             int z = c.getBlockZ();
             int x = c.getBlockX();
 
@@ -124,80 +124,68 @@ public class CloneChunkCommand extends DCMaskCommand {
             chunksData.put(c, null);
         }
 
-        final HashMap<Vector2, IWrappedChunk> wrappedChunks = new HashMap<Vector2, IWrappedChunk>();
+        final HashMap<BlockVector2, IWrappedChunk> wrappedChunks = new HashMap<>();
         int changedBlocks = 0;
 
-        for (final Vector2 cOrgPos : chunks) {
+        for (final BlockVector2 cOrgPos : chunks) {
             final int cOrgX = cOrgPos.getBlockX();
             final int cOrgZ = cOrgPos.getBlockZ();
             final int cDstX = cOrgX - minCX + clx;
             final int cDstZ = cOrgZ - minCZ + clz;
-            final Vector2 cDstPos = new BlockVector2(cDstX, cDstZ);
+            final BlockVector2 cDstPos = BlockVector2.at(cDstX, cDstZ);            
 
-            IWrappedChunk wcOrg, wcDst;
+            IWrappedChunk wcOrg = wrappedChunks.computeIfAbsent(cOrgPos, k -> 
+                DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
+                        weSource, wSource, getPlayer(), k)
+            );
 
-            synchronized (wrappedChunks) {
-                if (wrappedChunks.containsKey(cOrgPos)) {
-                    wcOrg = wrappedChunks.get(cOrgPos);
-                } else {
-                    wcOrg = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
-                            weSource, wSource, getPlayer(), cOrgPos);
-                    wrappedChunks.put(cOrgPos, wcOrg);
-                }
+            IWrappedChunk wcDst = wrappedChunks.computeIfAbsent(cDstPos, k -> 
+                    DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
+                        m_locationWorld, wDestination, getPlayer(), k)
+            );
 
-                if (wrappedChunks.containsKey(cDstPos)) {
-                    wcDst = wrappedChunks.get(cDstPos);
-                } else {
-                    wcDst = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
-                            m_locationWorld, wDestination, getPlayer(), cDstPos);
-                    wrappedChunks.put(cDstPos, wcDst);
+            LazyData<IChunkData> data;
+            if (chunksData.containsKey(cDstPos)) {
+                Pair<Boolean, LazyData> entry = chunksData.get(cDstPos);
+
+                if (entry == null) {
+                    LazyData tData = new LazyData();
+                    chunksData.put(cDstPos, new Pair<>(false, tData));
+                    editSesstion.doCustomAction(new GetChunkData(wcDst, tData), false);
                 }
             }
 
-            LazyData<IChunkData> data;
-            synchronized (chunksData) {
-                if (chunksData.containsKey(cDstPos)) {
-                    Pair<Boolean, LazyData> entry = chunksData.get(cDstPos);
+            if (chunksData.containsKey(cOrgPos)) {
+                Pair<Boolean, LazyData> entry = chunksData.get(cOrgPos);
 
-                    if (entry == null) {
-                        LazyData tData = new LazyData();
-                        chunksData.put(cDstPos, new Pair<Boolean, LazyData>(false, tData));
-                        editSesstion.doCustomAction(new GetChunkData(wcDst, tData), false);
-                    }
-                }
+                if (entry == null) {
+                    chunksData.put(cOrgPos, new Pair<>(true, null));
 
-                if (chunksData.containsKey(cOrgPos)) {
-                    Pair<Boolean, LazyData> entry = chunksData.get(cOrgPos);
-
-                    if (entry == null) {
-                        chunksData.put(cOrgPos, new Pair<Boolean, LazyData>(true, null));
-
-                        data = new LazyData();
-                        editSesstion.doCustomAction(new GetChunkData(wcOrg, data), false);
-                    } else {
-                        data = entry.getX2();
-                        chunksData.put(cOrgPos, new Pair<Boolean, LazyData>(true, null));
-                    }
-                } else {
-                    //Should not happen
                     data = new LazyData();
                     editSesstion.doCustomAction(new GetChunkData(wcOrg, data), false);
-                    chunksData.put(cOrgPos, new Pair<Boolean, LazyData>(true, null));
+                } else {
+                    data = entry.getX2();
+                    chunksData.put(cOrgPos, new Pair<>(true, null));
                 }
+            } else {
+                //Should not happen
+                data = new LazyData();
+                editSesstion.doCustomAction(new GetChunkData(wcOrg, data), false);
+                chunksData.put(cOrgPos, new Pair<>(true, null));
             }
 
             final IChunkData source = data.get();
             final IChangesetChunkData destination = m_chunkApi.createLazyChunkData(wcDst);
             final ChangesetChunkExtent extent = new ChangesetChunkExtent(destination);
-            final Vector3 zeroPos = PositionHelper.chunkToPosition(cDstPos, 0);
+            final BlockVector3 zeroPos = PositionHelper.chunkToPosition(cDstPos, 0);
 
             maskSetExtent(extent);
             for (int x = 0; x < 16; x++) {
-                final Vector3 xPos = zeroPos.add(x, 0, 0);
+                final BlockVector3 xPos = zeroPos.add(x, 0, 0);
                 for (int z = 0; z < 16; z++) {
-                    final Vector3 zPos = xPos.add(0, 0, z);
+                    final BlockVector3 zPos = xPos.add(0, 0, z);
                     for (int y = 0; y < 256; y++) {
-                        final Vector3 yPos = zPos.add(0, y, 0);
+                        final BlockVector3 yPos = zPos.add(0, y, 0);
                         if (maskTest(yPos)) {
                             destination.setBlock(x, y, z, source.getBlock(x, y, z));
                             changedBlocks++;
@@ -206,13 +194,13 @@ public class CloneChunkCommand extends DCMaskCommand {
                 }
             }
             for (ISerializedEntity e : destination.getEntity()) {
-                if (maskTest(zeroPos.add(e.getPosition()))) {
+                if (maskTest(zeroPos.add(e.getPosition().toBlockPoint()))) {
                     destination.removeEntity(e);
                     changedBlocks++;
                 }
             }
             for (ISerializedEntity e : source.getEntity()) {
-                if (maskTest(zeroPos.add(e.getPosition()))) {
+                if (maskTest(zeroPos.add(e.getPosition().toBlockPoint()))) {
                     destination.addEntity(e);
                     changedBlocks++;
                 }
@@ -222,7 +210,6 @@ public class CloneChunkCommand extends DCMaskCommand {
             editSesstion.doCustomAction(new SetChangesetChunkChange(wcDst, destination), false);
         }
 
-        return changedBlocks;*/
-        return 0;
+        return changedBlocks;
     }
 }
