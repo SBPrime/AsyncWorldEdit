@@ -52,7 +52,7 @@ public interface IBlockEntry extends IVectorEntry {
      *
      * @return
      */
-    char getId();
+    int getId();
 
     /**
      * Get the NBT data

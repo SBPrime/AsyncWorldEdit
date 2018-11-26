@@ -54,16 +54,17 @@ import org.primesoft.asyncworldedit.api.IAdapter;
  * @author SBPrime
  */
 enum Adapters {
-    v1_8_R1("Bukkit.v1_8_R1", null),
-    v1_8_R2("Bukkit.v1_8_R2", null),
-    v1_8_R3("Bukkit.v1_8_R3", new AdapterFactory("AsyncWorldEdit-spigot_v1_8_R3.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_8_R3.Spigot_v1_8_R3")),
-    v1_9_R1("Bukkit.v1_9_R1", new AdapterFactory("AsyncWorldEdit-spigot_v1_9_R1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_9_R1.Spigot_v1_9_R1")),
-    v1_9_R2("Bukkit.v1_9_R2", new AdapterFactory("AsyncWorldEdit-spigot_v1_9_R2.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_9_R2.Spigot_v1_9_R2")),
-    v1_10_R1("Bukkit.v1_10_R1", new AdapterFactory("AsyncWorldEdit-spigot_v1_10_R1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_10_R1.Spigot_v1_10_R1")),
-    v1_11_R1("Bukkit.v1_11_R1", new AdapterFactory("AsyncWorldEdit-spigot_v1_11_R1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_11_R1.Spigot_v1_11_R1")),    
-    v1_12_R1_12_1("Bukkit.v1_12_R1", "1.12.1", new AdapterFactory("AsyncWorldEdit-spigot_v1_12_R1_12_1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_12_R1_12_1.Spigot_v1_12_R1_12_1")),
-    v1_12_R1_12_2("Bukkit.v1_12_R1", "1.12.2", new AdapterFactory("AsyncWorldEdit-spigot_v1_12_R1_12_1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_12_R1_12_1.Spigot_v1_12_R1_12_1")),
-    v1_12_R1("Bukkit.v1_12_R1", new AdapterFactory("AsyncWorldEdit-spigot_v1_12_R1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_12_R1.Spigot_v1_12_R1")),
+    //v1_8_R1("Bukkit.v1_8_R1", null),
+    //v1_8_R2("Bukkit.v1_8_R2", null),
+    //v1_8_R3("Bukkit.v1_8_R3", new AdapterFactory("AsyncWorldEdit-spigot_v1_8_R3.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_8_R3.Spigot_v1_8_R3")),
+    //v1_9_R1("Bukkit.v1_9_R1", new AdapterFactory("AsyncWorldEdit-spigot_v1_9_R1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_9_R1.Spigot_v1_9_R1")),
+    //v1_9_R2("Bukkit.v1_9_R2", new AdapterFactory("AsyncWorldEdit-spigot_v1_9_R2.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_9_R2.Spigot_v1_9_R2")),
+    //v1_10_R1("Bukkit.v1_10_R1", new AdapterFactory("AsyncWorldEdit-spigot_v1_10_R1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_10_R1.Spigot_v1_10_R1")),
+    //v1_11_R1("Bukkit.v1_11_R1", new AdapterFactory("AsyncWorldEdit-spigot_v1_11_R1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_11_R1.Spigot_v1_11_R1")),    
+    //v1_12_R1_12_1("Bukkit.v1_12_R1", "1.12.1", new AdapterFactory("AsyncWorldEdit-spigot_v1_12_R1_12_1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_12_R1_12_1.Spigot_v1_12_R1_12_1")),
+    //v1_12_R1_12_2("Bukkit.v1_12_R1", "1.12.2", new AdapterFactory("AsyncWorldEdit-spigot_v1_12_R1_12_1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_12_R1_12_1.Spigot_v1_12_R1_12_1")),
+    //v1_12_R1("Bukkit.v1_12_R1", new AdapterFactory("AsyncWorldEdit-spigot_v1_12_R1.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_12_R1.Spigot_v1_12_R1")),
+    //v1_13_R2("Bukkit.v1_13_R2", new AdapterFactory("AsyncWorldEdit-spigot_v1_13_R2.jar", "org.primesoft.asyncworldedit.adapter.spigot_v1_13_R2.Spigot_v1_13_R2")),
     ;
     
     private final String m_apiString;

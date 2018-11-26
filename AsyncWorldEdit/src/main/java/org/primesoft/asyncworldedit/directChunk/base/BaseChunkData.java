@@ -66,7 +66,6 @@ import org.primesoft.asyncworldedit.api.directChunk.ISerializedEntity;
 import org.primesoft.asyncworldedit.api.directChunk.ISerializedTileEntity;
 import org.primesoft.asyncworldedit.api.utils.IInOutParam;
 import org.primesoft.asyncworldedit.directChunk.ChunkSectionData;
-import org.primesoft.asyncworldedit.utils.InOutParam;
 
 /**
  * The basic chunk data implementation
@@ -75,7 +74,7 @@ import org.primesoft.asyncworldedit.utils.InOutParam;
  */
 public abstract class BaseChunkData extends ChunkDataCommon implements IChunkData {
 
-    private final byte[] m_biomeData;
+    private final int[] m_biomeData;
     private final int[] m_maxHeight;
     private final boolean[] m_gaps;
     private final int[] m_heightMap;
@@ -87,12 +86,12 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     private boolean m_lit;
 
     @Override
-    public byte[] getBiomeData() {
+    public int[] getBiomeData() {
         return m_biomeData;
     }
 
     @Override
-    public void setBiomeData(byte[] data) {
+    public void setBiomeData(int[] data) {
         if (data == null || data.length != m_biomeData.length) {
             return;
         }
@@ -285,7 +284,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         m_entities = new LinkedList<>();
 
         m_maxHeight = new int[256];
-        m_biomeData = new byte[256];
+        m_biomeData = new int[256];
         m_gaps = new boolean[256];
         m_heightMap = new int[256];
 
@@ -340,7 +339,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public char getRawBlockData(int x, int y, int z) {
+    public int getRawBlockData(int x, int y, int z) {
         return getBlock(x, y, z, null);
     }
 
@@ -379,7 +378,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public void setBlockAndEmission(int x, int y, int z, char id, byte emission) {
+    public void setBlockAndEmission(int x, int y, int z, int id, byte emission) {
         if (!isValidPosition(x, y, z)) {
             log(String.format("setBlock: invalid position %1$s,%2$s,%3$s", x, y, z));
             return;
@@ -388,11 +387,11 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         int cy = y / 16;
         IChunkSection cs = getChunkSection(cy);
         if (cs == null) {
-            cs = new ChunkSectionData(y, new char[16 * 16 * 16], true);
+            cs = new ChunkSectionData(y, new int[16 * 16 * 16], true);
             setChunkSection(cy, cs);
         }
 
-        char[] ids = cs.getBlockIds();
+        int[] ids = cs.getBlockIds();
         int idx = (y % 16) * 256 + z * 16 + x;
 
         if (idx < 0 || idx >= ids.length) {
@@ -408,7 +407,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public void setBlock(int x, int y, int z, char id) {
+    public void setBlock(int x, int y, int z, int id) {
         if (isRelightEnabled()) {
             setBlockAndEmission(x, y, z, id, (byte) -1);
         } else {
@@ -417,7 +416,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public void setTileEntityAndEmission(int x, int y, int z, char id, CompoundTag ct, byte emission) {
+    public void setTileEntityAndEmission(int x, int y, int z, int id, CompoundTag ct, byte emission) {
         if (!isValidPosition(x, y, z)) {
             log(String.format("setTileEntity: invalid position %1$s,%2$s,%3$s", x, y, z));
             return;
@@ -426,14 +425,14 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         int cy = y / 16;
         IChunkSection cs = getChunkSection(cy);
         if (cs == null) {
-            cs = new ChunkSectionData(y, new char[16 * 16 * 16], true);
+            cs = new ChunkSectionData(y, new int[16 * 16 * 16], true);
             setChunkSection(cy, cs);
         }
 
         BlockVector3 entityCoords = BlockVector3.at(x, y, z);
         ISerializedTileEntity entity = createTileEntity(entityCoords, ct);
 
-        char[] ids = cs.getBlockIds();
+        int[] ids = cs.getBlockIds();
 
         int idx = (y % 16) * 256 + z * 16 + x;
 
@@ -451,7 +450,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public void setTileEntity(int x, int y, int z, char id, CompoundTag ct) {
+    public void setTileEntity(int x, int y, int z, int id, CompoundTag ct) {
         if (isRelightEnabled()) {
             setTileEntityAndEmission(x, y, z, id, ct, (byte) -1);
         } else {
@@ -490,7 +489,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public char getBlock(int x, int y, int z, IInOutParam<ISerializedTileEntity> tileEntity) {
+    public int getBlock(int x, int y, int z, IInOutParam<ISerializedTileEntity> tileEntity) {
         if (!isValidPosition(x, y, z)) {
             log(String.format("getBlock: invalid position %1$s,%2$s,%3$s", x, y, z));
             return 0;
@@ -502,7 +501,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
             return 0;
         }
 
-        char[] ids = cs.getBlockIds();
+        int[] ids = cs.getBlockIds();
         int idx = (y % 16) * 256 + z * 16 + x;
 
         if (idx < 0 || idx >= ids.length) {
@@ -530,7 +529,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         int cy = y / 16;
         IChunkSection cs = getChunkSection(cy);
         if (cs == null) {
-            cs = new ChunkSectionData(y, new char[16 * 16 * 16], true);
+            cs = new ChunkSectionData(y, new int[16 * 16 * 16], true);
             setChunkSection(cy, cs);
         }
 
@@ -552,7 +551,7 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         int cy = y / 16;
         IChunkSection cs = getChunkSection(cy);
         if (cs == null) {
-            cs = new ChunkSectionData(y, new char[16 * 16 * 16], true);
+            cs = new ChunkSectionData(y, new int[16 * 16 * 16], true);
             setChunkSection(cy, cs);
         }
 

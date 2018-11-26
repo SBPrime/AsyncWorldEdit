@@ -66,6 +66,7 @@ import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.directChunk.ChangesetChunkExtent;
 import org.primesoft.asyncworldedit.directChunk.DcUtils;
+import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.utils.PositionHelper;
 
 /**
@@ -94,6 +95,28 @@ public class SetChunkCommand extends DCMaskCommand {
     }
 
     @Override
+    public Integer task(IAweEditSession editSesstion) throws WorldEditException {
+        //Get the chunks in chunk coords
+        final Set<BlockVector2> chunks = m_region.getChunks();
+        final World weWorld = m_region.getWorld();
+        final IWorld world = m_weIntegrator.getWorld(weWorld);
+
+        if (world == null) {
+            return 0;
+        }
+        
+        final IWrappedChunk chunk = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
+                    weWorld, world, getPlayer(), 0,0);
+        
+        m_taskDispatcher.performSafe(MutexProvider.getMutex(weWorld),
+                () -> {
+                    chunk.getData();
+                }, world, BlockVector3.at(0, 0, 0));
+        
+        return 0;
+    }
+    
+    /*@Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
         //Get the chunks in chunk coords
         final Set<BlockVector2> chunks = m_region.getChunks();
@@ -136,7 +159,7 @@ public class SetChunkCommand extends DCMaskCommand {
         }
 
         return changedBlocks;
-    }
+    }*
 
     /**
      * Catche the chunks

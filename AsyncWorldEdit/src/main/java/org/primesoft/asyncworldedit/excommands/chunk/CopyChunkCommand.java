@@ -232,7 +232,7 @@ public class CopyChunkCommand extends DCCommand {
 
                     InOutParam<ISerializedTileEntity> entity = InOutParam.Out();
 
-                    char combinedId = cData.getBlock(x, py, z, entity);
+                    int combinedId = cData.getBlock(x, py, z, entity);
                     //BaseBlock block = m_chunkApi.convertId(combinedId);
                     //TODO: 1.13
                     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
@@ -267,7 +267,7 @@ public class CopyChunkCommand extends DCCommand {
                 final IWrappedChunk chunk = DcUtils.wrapChunk(m_taskDispatcher, m_chunkApi,
                         m_world, world, getPlayer(), cPos);
 
-                final LazyData<IChunkData> data = new LazyData<IChunkData>();
+                final LazyData<IChunkData> data = new LazyData<>();
                 editSesstion.doCustomAction(new GetChunkData(chunk, data), false);
 
                 dataCatch.put(cPos, data);

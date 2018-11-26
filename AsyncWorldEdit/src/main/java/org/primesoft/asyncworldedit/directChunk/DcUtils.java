@@ -71,8 +71,7 @@ import org.primesoft.asyncworldedit.utils.PositionHelper;
 public class DcUtils {
 
     public static final int CHUNK_SIZE = 16 * 16 * 256;
-    
-    
+
     /**
      * Wrap the provided chunk using the task dispatcher
      *
@@ -91,8 +90,8 @@ public class DcUtils {
             final int cx, final int cz) {
         IWrappedChunk wrappedChunk = taskDispatcher.performSafe(mutex, () -> {
             IChunk chunk = world.getChunkAt(cx, cz);
-            
-            if (player== null) {
+
+            if (player == null) {
                 return chunkApi.wrapChunk(chunk);
             } else {
                 return chunkApi.wrapChunk(chunk, player);
@@ -103,9 +102,7 @@ public class DcUtils {
 
         return wrappedChunk;
     }
-    
-    
-    
+
     /**
      * Wrap the provided chunk using the task dispatcher
      *
@@ -123,7 +120,6 @@ public class DcUtils {
             final int cx, final int cz) {
         return wrapChunk(taskDispatcher, chunkApi, MutexProvider.getMutex(weWorld), world, player, cx, cz);
     }
-    
 
     /**
      * Wrap the provided chunk using the task dispatcher
@@ -235,22 +231,20 @@ public class DcUtils {
             final IWorld world, int cx, int cz) {
         return wrapChunk(taskDispatcher, chunkApi, world, null, cx, cz);
     }
-    
-    
-    
-    
+
     /**
      * Initializes the light array
-     * @return 
+     *
+     * @return
      */
     public static byte[] newSectionEmittedLight() {
         byte[] result = new byte[2048];
-        
+
         ConfigDirectChunkApi dc = ConfigProvider.directChunk();
         int light = (dc == null ? 0 : dc.getSectionLight()) & 0xf;
-        
-        Arrays.fill(result, (byte)(light | (light << 4)));
-        
+
+        Arrays.fill(result, (byte) (light | (light << 4)));
+
         return result;
     }
 }

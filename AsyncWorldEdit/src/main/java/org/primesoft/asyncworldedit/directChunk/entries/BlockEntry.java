@@ -59,7 +59,7 @@ public class BlockEntry extends VectorEntry implements IBlockEntry {
     /**
      * Block native ID
      */
-    private final char m_id;
+    private final int m_id;
 
     /**
      * The NBT data
@@ -87,7 +87,7 @@ public class BlockEntry extends VectorEntry implements IBlockEntry {
      * @return
      */
     @Override
-    public char getId() {
+    public int getId() {
         return m_id;
     }
 
@@ -166,7 +166,7 @@ public class BlockEntry extends VectorEntry implements IBlockEntry {
      * @param nbt
      * @param emissionLevel
      */
-    private BlockEntry(char id, int x, int y, int z, CompoundTag nbt, 
+    private BlockEntry(int id, int x, int y, int z, CompoundTag nbt, 
             byte emissionLevel, byte skyLevel, boolean hasBlockData) {
         super(x, y, z);
 
@@ -188,7 +188,7 @@ public class BlockEntry extends VectorEntry implements IBlockEntry {
      * @param nbt
      * @param emissionLevel
      */
-    public BlockEntry(char id, int x, int y, int z, CompoundTag nbt, byte emissionLevel) {
+    public BlockEntry(int id, int x, int y, int z, CompoundTag nbt, byte emissionLevel) {
         this(id, x, y, z, nbt, emissionLevel, (byte)-1, true);
     }
     
@@ -203,7 +203,7 @@ public class BlockEntry extends VectorEntry implements IBlockEntry {
      * @param emissionLevel
      * @param skyLevel
      */
-    public BlockEntry(char id, int x, int y, int z, CompoundTag nbt, byte emissionLevel, byte skyLevel) {
+    public BlockEntry(int id, int x, int y, int z, CompoundTag nbt, byte emissionLevel, byte skyLevel) {
         this(id, x, y, z, nbt, emissionLevel, skyLevel, true);
     }
 
@@ -216,7 +216,7 @@ public class BlockEntry extends VectorEntry implements IBlockEntry {
      * @param z
      * @param nbt
      */
-    public BlockEntry(char id, int x, int y, int z, CompoundTag nbt) {
+    public BlockEntry(int id, int x, int y, int z, CompoundTag nbt) {
         this(id, x, y, z, nbt, (byte)-1, (byte)-1, true);
     }
     

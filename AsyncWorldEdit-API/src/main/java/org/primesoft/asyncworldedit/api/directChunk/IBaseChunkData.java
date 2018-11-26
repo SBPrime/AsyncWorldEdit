@@ -70,7 +70,7 @@ public interface IBaseChunkData extends ISimpleChunkData {
      * @param id Material ID of the tile entitiy
      * @param ct Tile entity NBT data
      */
-    void setTileEntity(int x, int y, int z, char id, CompoundTag ct);
+    void setTileEntity(int x, int y, int z, int id, CompoundTag ct);
     
     
         /**
@@ -95,7 +95,7 @@ public interface IBaseChunkData extends ISimpleChunkData {
      * @param ct Tile entity NBT data
      * @param emission The block emission level
      */
-    void setTileEntityAndEmission(int x, int y, int z, char id, CompoundTag ct, byte emission);
+    void setTileEntityAndEmission(int x, int y, int z, int id, CompoundTag ct, byte emission);
     
 
     /**

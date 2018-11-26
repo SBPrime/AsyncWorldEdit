@@ -51,13 +51,13 @@ public interface IChunkData extends IBaseChunkData {
      * Get the biome data
      * @return 
      */
-    byte[] getBiomeData();
+    int[] getBiomeData();
 
     /**
      * Set the biome data
      * @param data 
      */
-    void setBiomeData(byte[] data);
+    void setBiomeData(int[] data);
 
     /**
      * Get maximum block height
@@ -150,8 +150,7 @@ public interface IChunkData extends IBaseChunkData {
      * Set the chunk gaps
      * @param data 
      */
-    void setGaps(boolean[] data);
-    
+    void setGaps(boolean[] data);    
     
     /**
      * Get block from chunk data
@@ -161,5 +160,5 @@ public interface IChunkData extends IBaseChunkData {
      * @param tileEntity The TileEntity
      * @return
      */
-    char getBlock(int x, int y, int z, IInOutParam<ISerializedTileEntity> tileEntity);
+    int getBlock(int x, int y, int z, IInOutParam<ISerializedTileEntity> tileEntity);
 }

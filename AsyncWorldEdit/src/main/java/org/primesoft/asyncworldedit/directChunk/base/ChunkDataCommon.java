@@ -196,7 +196,7 @@ public abstract class ChunkDataCommon implements IChunkDataCommon {
      * @param id
      * @return 
      */
-    protected byte getLightEmissionLevel(char id) {
+    protected byte getLightEmissionLevel(int id) {
         ConfigDirectChunkApi dcConfig = ConfigProvider.directChunk();
         if (dcConfig == null) {
             return getDirectChunkAPI().getLightEmissionLevel(id);

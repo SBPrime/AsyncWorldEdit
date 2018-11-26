@@ -129,11 +129,11 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
         m_wrappedChunk = wrappedChunk;
         m_chunkCoords = BlockVector2.at(wrappedChunk.getX(), wrappedChunk.getZ());
 
-        m_changedBlocks = new LinkedHashMap<Short, IBlockEntry>();
-        m_changedBiomes = new LinkedHashMap<Byte, IBiomeEntry>();
+        m_changedBlocks = new LinkedHashMap<>();
+        m_changedBiomes = new LinkedHashMap<>();
 
-        m_addedEntity = new LinkedHashMap<UUID, ISerializedEntity>();
-        m_removedEntity = new LinkedHashMap<UUID, ISerializedEntity>();
+        m_addedEntity = new LinkedHashMap<>();
+        m_removedEntity = new LinkedHashMap<>();
     }
 
     /**
@@ -175,7 +175,7 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
     }
 
     @Override
-    public void setBlock(int x, int y, int z, char id) {
+    public void setBlock(int x, int y, int z, int id) {
         setTileEntity(x, y, z, id, null);
     }
 
@@ -195,12 +195,12 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
     }
 
     @Override
-    public void setBlockAndEmission(int x, int y, int z, char id, byte emission) {
+    public void setBlockAndEmission(int x, int y, int z, int id, byte emission) {
         setTileEntityAndEmission(x, y, z, id, null, emission);
     }
 
     @Override
-    public void setTileEntity(int x, int y, int z, char id, CompoundTag ct) {
+    public void setTileEntity(int x, int y, int z, int id, CompoundTag ct) {
         if (isRelightEnabled()) {
             setTileEntityAndEmission(x, y, z, id, ct, (byte)-1);
         } else {
@@ -210,7 +210,7 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
 
     
     @Override
-    public void setTileEntityAndEmission(int x, int y, int z, char id, CompoundTag ct, byte emission) {
+    public void setTileEntityAndEmission(int x, int y, int z, int id, CompoundTag ct, byte emission) {
         if (!isValidPosition(x, y, z)) {
             log(String.format("setBlock: invalid position %1$s,%2$s,%3$s", x, y, z));
             return;
@@ -384,13 +384,12 @@ public abstract class BaseChangesetChunkData extends ChunkDataCommon implements 
 
     @Override
     public int getMaterial(int x, int y, int z) {
-        //TODO: 1.13
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.                
         /*return getBlock(x, y, z).getType();*/
     }
 
     @Override
-    public char getRawBlockData(int x, int y, int z) {
+    public int getRawBlockData(int x, int y, int z) {
         if (!isValidPosition(x, y, z)) {
             log(String.format("getRawBlockData: invalid position %1$s,%2$s,%3$s", x, y, z));
             return 0;

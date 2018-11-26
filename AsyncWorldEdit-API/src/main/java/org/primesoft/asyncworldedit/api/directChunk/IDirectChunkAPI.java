@@ -93,7 +93,7 @@ public interface IDirectChunkAPI {
      * @param data
      * @return
      */
-    char getCombinedId(BlockStateHolder m, int data);
+    int getCombinedId(BlockStateHolder m, int data);
 
     /**
      * Converts type and data to chunk section id
@@ -102,14 +102,14 @@ public interface IDirectChunkAPI {
      * @param data
      * @return
      */
-    char getCombinedId(int type, int data);
+    int getCombinedId(int type, int data);
 
     /**
      * Get material
      * @param type
      * @return 
      */
-    int getMaterial(char type);
+    int getMaterial(int type);
     
     /**
      * Get WorldEdit base blocks
@@ -118,7 +118,7 @@ public interface IDirectChunkAPI {
      * @param nbt
      * @return
      */
-    BlockStateHolder getBaseBlock(char type, CompoundTag nbt);
+    BlockStateHolder getBaseBlock(int type, CompoundTag nbt);
 
     /**
      * Convert combined ID to Material and data
@@ -126,7 +126,7 @@ public interface IDirectChunkAPI {
      * @param combinedId
      * @return
      */
-    BlockStateHolder convertId(char combinedId);
+    BlockStateHolder convertId(int combinedId);
 
     /**
      * Create new instance of serialized entity
@@ -164,7 +164,7 @@ public interface IDirectChunkAPI {
      * @param id
      * @return
      */
-    byte getLightEmissionLevel(char id);
+    byte getLightEmissionLevel(int id);
 
     /**
      * Get the material opacity level (how much it obscures light)
@@ -189,7 +189,7 @@ public interface IDirectChunkAPI {
      * @param id
      * @return
      */
-    short getOpacityLevel(char id);
+    short getOpacityLevel(int id);
     
     
     /**
@@ -218,5 +218,5 @@ public interface IDirectChunkAPI {
      * @param id
      * @return
      */
-    short getOpacityLevelSkyLight(char id);
+    short getOpacityLevelSkyLight(int id);
 }

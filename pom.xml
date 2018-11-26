@@ -25,6 +25,7 @@
         <module>AsyncWorldEdit-spigot_v1_12_R1</module>
         <module>AsyncWorldEdit-spigot_v1_12_R1_12_1</module>-->
         <!--<module>AsyncWorldEdit-spigot_v1_13_R1</module>-->
+        <module>AsyncWorldEdit-spigot_v1_13_R2</module>
         <module>AsyncWorldEdit-ActionBarAPI</module>
         <module>AsyncWorldEdit-BountifulAPI</module>
         <module>AsyncWorldEdit-TitleManager</module>        

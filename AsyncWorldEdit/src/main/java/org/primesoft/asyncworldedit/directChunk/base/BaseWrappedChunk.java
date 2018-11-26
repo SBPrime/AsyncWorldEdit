@@ -328,7 +328,7 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
      * @param oldBiomes
      */
     private void setBiome(IChunkData cData, IBiomeEntry[] dataBiomes, InOutParam<IBiomeEntry[]> oldBiomes) {
-        List<IBiomeEntry> tOldBiome = new ArrayList<IBiomeEntry>();
+        List<IBiomeEntry> tOldBiome = new ArrayList<>();
 
         IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
         BlockVector3 chunkZero = PositionHelper.chunkToPosition(BlockVector2.at(m_cx, m_cz), 0);

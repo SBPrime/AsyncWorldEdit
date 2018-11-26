@@ -76,9 +76,9 @@ public class BlockReligher implements IBlockRelighter {
 
     private interface IRelighterMethods {
 
-        public byte getLightLevel(IDirectChunkData chunk, int x, int y, int z, char id);
+        public byte getLightLevel(IDirectChunkData chunk, int x, int y, int z, int id);
 
-        public int getOpacityLevel(char tBlockType);
+        public int getOpacityLevel(int tBlockType);
 
         public byte getCurrentLight(IDirectChunkData chunk, int x, int y, int z);
 
@@ -110,9 +110,9 @@ public class BlockReligher implements IBlockRelighter {
     /**
      * List of all queued entries
      */
-    private final HashMap<UUID, QueueEntry> m_worlds = new LinkedHashMap<UUID, QueueEntry>();
+    private final HashMap<UUID, QueueEntry> m_worlds = new LinkedHashMap<>();
 
-    private final LinkedList<UUID> m_worldsStack = new LinkedList<UUID>();
+    private final LinkedList<UUID> m_worldsStack = new LinkedList<>();
 
     /**
      * The data mutex
@@ -145,12 +145,12 @@ public class BlockReligher implements IBlockRelighter {
 
         m_relighterEmission = new IRelighterMethods() {
             @Override
-            public byte getLightLevel(IDirectChunkData chunk, int x, int y, int z, char id) {
+            public byte getLightLevel(IDirectChunkData chunk, int x, int y, int z, int id) {
                 return m_dcApi.getLightEmissionLevel(id);
             }
 
             @Override
-            public int getOpacityLevel(char tBlockType) {
+            public int getOpacityLevel(int tBlockType) {
                 return Math.max(1, m_dcApi.getOpacityLevel(tBlockType));
             }
 
@@ -172,7 +172,7 @@ public class BlockReligher implements IBlockRelighter {
 
         m_relighterSky = new IRelighterMethods() {
             @Override
-            public byte getLightLevel(IDirectChunkData chunk, int x, int y, int z, char id) {
+            public byte getLightLevel(IDirectChunkData chunk, int x, int y, int z, int id) {
                 if (chunk == null) {
                     return 0;
                 }
@@ -187,7 +187,7 @@ public class BlockReligher implements IBlockRelighter {
             }
 
             @Override
-            public int getOpacityLevel(char tBlockType) {
+            public int getOpacityLevel(int tBlockType) {
                 return Math.max(1, m_dcApi.getOpacityLevelSkyLight(tBlockType));
             }
 
@@ -240,13 +240,7 @@ public class BlockReligher implements IBlockRelighter {
 
         m_chunkWatcher = platform.getChunkWatcher();
 
-        m_task = scheduler.runTaskAsynchronously(new Runnable() {
-
-            @Override
-            public void run() {
-                relightLoop();
-            }
-        });
+        m_task = scheduler.runTaskAsynchronously(this::relightLoop);
     }
 
     @Override
@@ -432,9 +426,9 @@ public class BlockReligher implements IBlockRelighter {
     private static void relight(IWrappedChunk[] chunks, IDirectChunkData[] chunkData, HashSet<Short> blocks,
             IRelighterMethods relighter) {
         //Move position to center chunk
-        final Set<Integer> diamond = new HashSet<Integer>();
-        final HashMap<Byte, Queue<Integer>> blockQueue = new LinkedHashMap<Byte, Queue<Integer>>();
-        final Set<Integer> blockQueueFlat = new HashSet<Integer>();
+        final Set<Integer> diamond = new HashSet<>();
+        final HashMap<Byte, Queue<Integer>> blockQueue = new LinkedHashMap<>();
+        final Set<Integer> blockQueueFlat = new HashSet<>();
 
         calculateDiamond(blocks, diamond, chunkData, relighter.isFullY());
         queueDiamond(diamond, chunkData, blockQueue, blockQueueFlat, relighter);
@@ -516,7 +510,7 @@ public class BlockReligher implements IBlockRelighter {
             int idx = (x / 16) + (z / 16) * 3;
             IDirectChunkData chunk = chunkData[idx];
             relighter.setCurrentLight(chunk, x & 0xf, y, z & 0xf, (byte) 0);
-            char id = chunk.getRawBlockData(x & 0xf, y, z & 0xf);
+            int id = chunk.getRawBlockData(x & 0xf, y, z & 0xf);
             byte lightLevel = relighter.getLightLevel(chunk, x & 0xf, y, z & 0xf, id);
 
             queueBlock(lightLevel, data, blockQueue, blockQueueFlat);
@@ -608,7 +602,7 @@ public class BlockReligher implements IBlockRelighter {
         }
 
         IDirectChunkData chunk = chunkData[(x / 16) + (z / 16) * 3];
-        char tBlockType = (char) chunk.getRawBlockData(x & 0xf, y, z & 0xf);
+        int tBlockType = chunk.getRawBlockData(x & 0xf, y, z & 0xf);
 
         int tLight = relighter.getLightLevel(chunk, x & 0xf, y, z & 0xf, tBlockType);
         int tOpacity = relighter.getOpacityLevel(tBlockType);
@@ -630,7 +624,7 @@ public class BlockReligher implements IBlockRelighter {
             }
 
             chunk = chunkData[(newX / 16) + (newZ / 16) * 3];
-            tBlockType = (char) chunk.getRawBlockData(newX & 0xf, newY, newZ & 0xf);
+            tBlockType = chunk.getRawBlockData(newX & 0xf, newY, newZ & 0xf);
             tLight = Math.max(tLight, relighter.getCurrentLight(chunk, newX & 0xf, newY, newZ & 0xf) - tOpacity);
         }
 
@@ -648,7 +642,7 @@ public class BlockReligher implements IBlockRelighter {
             HashMap<Byte, Queue<Integer>> blockQueue, Set<Integer> blockQueueFlat) {
         Queue<Integer> entry = blockQueue.get(emission);
         if (entry == null) {
-            entry = new LinkedList<Integer>();
+            entry = new LinkedList<>();
             blockQueue.put(emission, entry);
         }
 

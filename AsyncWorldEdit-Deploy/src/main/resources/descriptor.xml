@@ -42,6 +42,7 @@
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1</include>
                 <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_12_R1_12_1</include>-->
                 <!--<include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_13</include>-->
+                <include>org.primesoft.asyncworldedit:AsyncWorldEdit-spigot_v1_13_R2</include>
             </includes>
         </dependencySet>
     </dependencySets>

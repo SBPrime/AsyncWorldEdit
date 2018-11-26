@@ -56,7 +56,7 @@ import org.primesoft.asyncworldedit.api.directChunk.IChunkSection;
 public class ChunkSectionData implements IChunkSection {
     private final int m_y;
     
-    private final char[] m_blockIds;
+    private final int[] m_blockIds;
     
     private final byte[] m_emittedLight;
     
@@ -68,7 +68,7 @@ public class ChunkSectionData implements IChunkSection {
      * @param blockIds
      * @param skyLight
      */
-    public ChunkSectionData(int y, char[] blockIds, boolean skyLight) {
+    public ChunkSectionData(int y, int[] blockIds, boolean skyLight) {
         this(y, blockIds, null, skyLight ? new byte[2048] : null);
     }
     
@@ -79,7 +79,7 @@ public class ChunkSectionData implements IChunkSection {
      * @param emittedLight
      * @param skylight
      */
-    public ChunkSectionData(int y, char[] blockIds, byte[] emittedLight, byte[] skylight){
+    public ChunkSectionData(int y, int[] blockIds, byte[] emittedLight, byte[] skylight){
         m_y = y;
         
         if (blockIds.length != 4096) {
@@ -104,7 +104,7 @@ public class ChunkSectionData implements IChunkSection {
     }
     
     @Override
-    public char[] getBlockIds() {
+    public int[] getBlockIds() {
         return m_blockIds;
     }
     

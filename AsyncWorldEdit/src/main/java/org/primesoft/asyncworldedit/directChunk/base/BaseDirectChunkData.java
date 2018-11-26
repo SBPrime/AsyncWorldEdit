@@ -72,7 +72,7 @@ public abstract class BaseDirectChunkData extends ChunkDataCommon implements IDi
     }
 
     @Override
-    public void setBlock(int x, int y, int z, char id) {
+    public void setBlock(int x, int y, int z, int id) {
         if (isRelightEnabled()) {
             setBlockAndEmission(x, y, z, id, (byte) -1);
         } else {

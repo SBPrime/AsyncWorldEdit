@@ -83,7 +83,7 @@ public interface ISimpleChunkData extends IChunkDataCommon {
      * @param z
      * @return 
      */
-    char getRawBlockData(int x, int y, int z);
+    int getRawBlockData(int x, int y, int z);
 
     /**
      * Set light emission to chunk data
@@ -113,7 +113,7 @@ public interface ISimpleChunkData extends IChunkDataCommon {
      * @param z Z coordinate inside chunk (0-15)
      * @param id Material ID
      */
-    void setBlock(int x, int y, int z, char id);
+    void setBlock(int x, int y, int z, int id);
 
     /**
      * Set chunk block
@@ -124,7 +124,7 @@ public interface ISimpleChunkData extends IChunkDataCommon {
      * @param id Material ID
      * @param emission The block emission level
      */
-    void setBlockAndEmission(int x, int y, int z, char id, byte emission);
+    void setBlockAndEmission(int x, int y, int z, int id, byte emission);
     
     
     /**
@@ -140,6 +140,7 @@ public interface ISimpleChunkData extends IChunkDataCommon {
      * Set the block biome
      * @param x
      * @param z
+     * @param biome
      */
     void setBiome(int x, int z, int biome);
 }

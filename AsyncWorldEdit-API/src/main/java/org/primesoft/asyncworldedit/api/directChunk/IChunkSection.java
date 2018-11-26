@@ -49,7 +49,7 @@ public interface IChunkSection {
      * Get the chunk section materials
      * @return 
      */
-    char[] getBlockIds();
+    int[] getBlockIds();
 
     /**
      * Get the blocks emmited light
