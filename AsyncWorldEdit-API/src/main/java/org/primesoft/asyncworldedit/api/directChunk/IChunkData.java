@@ -60,18 +60,6 @@ public interface IChunkData extends IBaseChunkData {
     void setBiomeData(int[] data);
 
     /**
-     * Get maximum block height
-     * @return 
-     */
-    int[] getMaxHeight();
-
-    /**
-     * Set the maximum height data
-     * @param data 
-     */
-    void setMaxHeight(int[] data);
-
-    /**
      * Get the chunk height map
      * @return 
      */

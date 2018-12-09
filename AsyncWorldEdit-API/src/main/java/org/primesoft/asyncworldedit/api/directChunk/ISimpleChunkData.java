@@ -74,7 +74,7 @@ public interface ISimpleChunkData extends IChunkDataCommon {
      * @param z
      * @return
      */
-    int getMaterial(int x, int y, int z);
+    String getMaterial(int x, int y, int z);
     
     /**
      * Get the raw block data

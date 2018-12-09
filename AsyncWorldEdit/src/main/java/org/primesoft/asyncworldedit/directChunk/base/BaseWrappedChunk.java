@@ -51,6 +51,8 @@ import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -255,13 +257,10 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
     private void setBlocks(final IChunkData cData,
             final IBlockEntry[] dataBlocks, final IBlocksHubIntegration bh,
             InOutParam<IBlockEntry[]> oldBlocks) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-/*        List<IBlockEntry> tOldBlocks = new ArrayList<IBlockEntry>();
+        List<IBlockEntry> tOldBlocks = new ArrayList<>();
 
         IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
-        Vector3 chunkZero = PositionHelper.chunkToPosition(BlockVector2.at(m_cx, m_cz), 0);
+        BlockVector3 chunkZero = PositionHelper.chunkToPosition(BlockVector2.at(m_cx, m_cz), 0);
 
         for (IBlockEntry block : dataBlocks) {
             int x = block.getX();
@@ -271,17 +270,17 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
             final byte emissionLight = cData.getEmissionLight(x, y, z);
 
             if (block.hasBlock()) {
-                Vector3 pos = chunkZero.add(x, y, z);
+                BlockVector3 pos = chunkZero.add(x, y, z);
 
-                char id = block.getId();
+                int id = block.getId();
                 CompoundTag nbt = block.getNbt();
 
-                BaseBlock old = cData.getBlock(x, y, z);
-                BaseBlock newBlock = dcApi.getBaseBlock(id, nbt);
+                BlockStateHolder old = cData.getBlock(x, y, z);
+                BlockStateHolder newBlock = dcApi.getBaseBlock(id, nbt);
 
                 if (bh == null || m_player == null || bh.canPlace(m_player, m_world, pos, old, newBlock, true)) {
-                    final char oldId = dcApi.getCombinedId(old.getType(), old.getData());
-                    final CompoundTag oldCt = old.getNbtData();
+                    final int oldId = dcApi.getCombinedId(old.getBlockType().getId(), old.getStates());
+                    final CompoundTag oldCt = old instanceof BaseBlock ? ((BaseBlock)old).getNbtData() : null;
 
                     tOldBlocks.add(new BlockEntry(oldId, x, y, z, oldCt, emissionLight));
                     if (bh != null && m_player != null) {
@@ -317,7 +316,7 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
         if (oldBlocks
                 != null) {
             oldBlocks.setValue(tOldBlocks.toArray(new IBlockEntry[0]));
-        }*/
+        }
     }
 
     /**

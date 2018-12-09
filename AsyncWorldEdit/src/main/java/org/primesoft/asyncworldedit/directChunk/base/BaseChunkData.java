@@ -53,19 +53,25 @@ import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
+import com.sk89q.worldedit.registry.state.Property;
 import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.directChunk.IChunkData;
 import org.primesoft.asyncworldedit.api.directChunk.IChunkSection;
+import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
 import org.primesoft.asyncworldedit.api.directChunk.ISerializedEntity;
 import org.primesoft.asyncworldedit.api.directChunk.ISerializedTileEntity;
 import org.primesoft.asyncworldedit.api.utils.IInOutParam;
+import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.directChunk.ChunkSectionData;
+import org.primesoft.asyncworldedit.utils.InOutParam;
 
 /**
  * The basic chunk data implementation
@@ -75,7 +81,6 @@ import org.primesoft.asyncworldedit.directChunk.ChunkSectionData;
 public abstract class BaseChunkData extends ChunkDataCommon implements IChunkData {
 
     private final int[] m_biomeData;
-    private final int[] m_maxHeight;
     private final boolean[] m_gaps;
     private final int[] m_heightMap;
 
@@ -97,20 +102,6 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         }
 
         System.arraycopy(data, 0, m_biomeData, 0, data.length);
-    }
-
-    @Override
-    public int[] getMaxHeight() {
-        return m_maxHeight;
-    }
-
-    @Override
-    public void setMaxHeight(int[] data) {
-        if (data == null || data.length != m_maxHeight.length) {
-            return;
-        }
-
-        System.arraycopy(data, 0, m_maxHeight, 0, m_maxHeight.length);
     }
 
     @Override
@@ -283,14 +274,12 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
         m_tileEntities = new HashMap<>();
         m_entities = new LinkedList<>();
 
-        m_maxHeight = new int[256];
         m_biomeData = new int[256];
         m_gaps = new boolean[256];
         m_heightMap = new int[256];
 
         m_done = false;
         m_chunkSections = new IChunkSection[16];
-        Arrays.fill(m_maxHeight, -999);
     }
 
     @Override
@@ -319,22 +308,19 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public BlockStateHolder getBlock(int x, int y, int z) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    /*
+    public BlockStateHolder getBlock(int x, int y, int z) {    
         BlockVector2 cPos = getChunkCoords();
         InOutParam<ISerializedTileEntity> entity = InOutParam.Out();
 
-        char combinedId = getBlock(x, y, z, entity);
-        BaseBlock block = getDirectChunkAPI().getBaseBlock(combinedId, entity.isSet()
+        int combinedId = getBlock(x, y, z, entity);
+        BlockStateHolder block = getDirectChunkAPI().getBaseBlock(combinedId, entity.isSet()
                 ? entity.getValue().getRawData(cPos.getBlockX(), cPos.getBlockZ()) : null);
 
-        return block;*/
+        return block;
     }
 
     @Override
-    public int getMaterial(int x, int y, int z) {
+    public String getMaterial(int x, int y, int z) {
         return getDirectChunkAPI().getMaterial(getBlock(x, y, z, null));
     }
 
@@ -344,37 +330,33 @@ public abstract class BaseChunkData extends ChunkDataCommon implements IChunkDat
     }
 
     @Override
-    public void setBlockAndEmission(int x, int y, int z, BlockStateHolder b, byte emission) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    /*
-        final int data = b.getData();
-        final int type = b.getType();
-        final char id = getDirectChunkAPI().getCombinedId(type, data);
-        final CompoundTag ct = b.getNbtData();
+    public void setBlockAndEmission(int x, int y, int z, BlockStateHolder b, byte emission) {        
+        final Map<Property<?>, Object> data = b.getStates();
+        final String type = b.getBlockType().getId();
+        final int id = getDirectChunkAPI().getCombinedId(type, data);           
+        final CompoundTag ct = b instanceof BaseBlock ? ((BaseBlock)b).getNbtData() : null;
 
         if (ct != null) {
             setTileEntityAndEmission(x, y, z, id, ct, emission);
         } else {
             setBlockAndEmission(x, y, z, id, emission);
-        }*/
+        }
     }
 
     @Override
     public void setBlock(int x, int y, int z, BlockStateHolder b) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    /*
-        final int data = b.getData();
-        final int type = b.getType();
-        final char id = getDirectChunkAPI().getCombinedId(type, data);
-        final CompoundTag ct = b.getNbtData();
+        final IDirectChunkAPI dcApi = AwePlatform.getInstance().getCore().getDirectChunkAPI();
+        
+        final Map<Property<?>, Object> data = b.getStates();
+        final String type = b.getBlockType().getId();
+        final int id = dcApi.getCombinedId(type, data);           
+        final CompoundTag ct = b instanceof BaseBlock ? ((BaseBlock)b).getNbtData() : null;
 
         if (ct != null) {
             setTileEntity(x, y, z, id, ct);
         } else {
             setBlock(x, y, z, id);
-        }*/
+        }
     }
 
     @Override

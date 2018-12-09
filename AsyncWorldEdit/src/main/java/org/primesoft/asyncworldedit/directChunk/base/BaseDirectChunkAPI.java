@@ -48,9 +48,11 @@
 package org.primesoft.asyncworldedit.directChunk.base;
 
 import com.sk89q.jnbt.CompoundTag;
+import com.sk89q.worldedit.registry.state.Property;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import org.primesoft.asyncworldedit.api.IChunk;
 import org.primesoft.asyncworldedit.api.inner.IBlockRelighter;
 import org.primesoft.asyncworldedit.api.directChunk.IWrappedChunk;
@@ -78,25 +80,24 @@ public abstract class BaseDirectChunkAPI implements IInnerDirectChunkAPI {
     /**
      * Block ID to emission light
      */
-    private final HashMap<Character, Byte> m_idToEmission = new LinkedHashMap<>();
+    private final HashMap<Integer, Byte> m_idToEmission = new LinkedHashMap<>();
     
     
     /**
      * Block ID to opacity
      */
-    private final HashMap<Character, Short> m_idToOpacity = new LinkedHashMap<>();
+    private final HashMap<Integer, Short> m_idToOpacity = new LinkedHashMap<>();
     
     /**
      * Block ID to opacity (sky light)
      */
-    private final HashMap<Character, Short> m_idToOpacitySkyLight = new LinkedHashMap<>();
+    private final HashMap<Integer, Short> m_idToOpacitySkyLight = new LinkedHashMap<>();
     
     
     /**
      * Block ID to BaseBlock
      */
-    //TODO: 1.13        
-    //private final HashMap<Character, BaseBlock> m_idToBlock = new LinkedHashMap<Character, BaseBlock>();
+    private final HashMap<Integer, BlockStateHolder> m_idToBlock = new LinkedHashMap<>();
     
     private final IBlockRelighter m_blockRelighter;
 
@@ -109,12 +110,10 @@ public abstract class BaseDirectChunkAPI implements IInnerDirectChunkAPI {
 
     @Override
     public byte getLightEmissionLevel(int id) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        /*Byte level = m_idToEmission.get(id);
+        Byte level = m_idToEmission.get(id);
 
         if (level == null) {
-            BaseBlock block = convertId(id);
+            BlockStateHolder block = convertId(id);
             if (block == null) {
                 return 0;
             }
@@ -123,29 +122,24 @@ public abstract class BaseDirectChunkAPI implements IInnerDirectChunkAPI {
             m_idToEmission.put(id, level);
         }
 
-        return level;*/
+        return level;
     }
 
     @Override
     public byte getLightEmissionLevel(BlockStateHolder block) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    /*
         if (block == null) {
             throw new IllegalArgumentException("block is null", new NullPointerException());
         }
 
-        return getLightEmissionLevel(block.getType(), block.getData());*/
+        return getLightEmissionLevel(block.getBlockType().getId(), block.getStates());
     } 
     
     @Override   
     public short getOpacityLevel(int id) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        /*Short level = m_idToOpacity.get(id);
+        Short level = m_idToOpacity.get(id);
 
         if (level == null) {
-            BaseBlock block = convertId(id);
+            BlockStateHolder block = convertId(id);
             if (block == null) {
                 return 0;
             }
@@ -154,29 +148,24 @@ public abstract class BaseDirectChunkAPI implements IInnerDirectChunkAPI {
             m_idToOpacity.put(id, level);
         }
 
-        return level;*/
+        return level;
     }
 
     @Override
     public short getOpacityLevel(BlockStateHolder block) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.    
-        /*
         if (block == null) {
             throw new IllegalArgumentException("block is null", new NullPointerException());
         }
 
-        return getOpacityLevel(block.getType(), block.getData());*/
+        return getOpacityLevel(block.getBlockType().getId(), block.getStates());
     }
     
     @Override   
     public short getOpacityLevelSkyLight(int id) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        /*Short level = m_idToOpacitySkyLight.get(id);
+        Short level = m_idToOpacitySkyLight.get(id);
 
         if (level == null) {
-            BaseBlock block = convertId(id);
+            BlockStateHolder block = convertId(id);
             if (block == null) {
                 return 0;
             }
@@ -185,19 +174,16 @@ public abstract class BaseDirectChunkAPI implements IInnerDirectChunkAPI {
             m_idToOpacitySkyLight.put(id, level);
         }
 
-        return level;*/
+        return level;
     }
 
     @Override
     public short getOpacityLevelSkyLight(BlockStateHolder block) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    /*
         if (block == null) {
             throw new IllegalArgumentException("block is null", new NullPointerException());
         }
 
-        return getOpacityLevelSkyLight(block.getType(), block.getData());*/
+        return getOpacityLevelSkyLight(block.getBlockType().getId(), block.getStates());
     }    
 
     @Override
@@ -211,11 +197,8 @@ public abstract class BaseDirectChunkAPI implements IInnerDirectChunkAPI {
     }
 
     @Override
-    public int getCombinedId(BlockStateHolder m, int data) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    /*
-        return getCombinedId(m.getId(), data);*/
+    public int getCombinedId(BlockStateHolder m, Map<Property<?>, Object> data) {
+        return getCombinedId(m.getBlockType().getId(), data);
     }
     
     
@@ -228,13 +211,11 @@ public abstract class BaseDirectChunkAPI implements IInnerDirectChunkAPI {
      */        
     @Override
     public BlockStateHolder getBaseBlock(int type, CompoundTag nbt) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-        /*BaseBlock block = convertId(type);
+        BlockStateHolder block = convertId(type);
         if (nbt != null) {
-            block.setNbtData(nbt);
+            block = block.toBaseBlock(nbt);
         }
 
-        return block;*/
+        return block;
     }
 }

@@ -76,6 +76,12 @@ public class NullBlocksHubIntegration implements IBlocksHubIntegration {
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
         return true;
     }
+    
+    @Override
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location,
+            BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
+        return true;
+    }
 
     @Override
     public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location) {

@@ -42,7 +42,9 @@ package org.primesoft.asyncworldedit.api.directChunk;
 
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.math.Vector3;
+import com.sk89q.worldedit.registry.state.Property;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
+import java.util.Map;
 import java.util.UUID;
 import org.primesoft.asyncworldedit.api.IChunk;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -93,7 +95,7 @@ public interface IDirectChunkAPI {
      * @param data
      * @return
      */
-    int getCombinedId(BlockStateHolder m, int data);
+    int getCombinedId(BlockStateHolder m, Map<Property<?>, Object> data);
 
     /**
      * Converts type and data to chunk section id
@@ -102,14 +104,14 @@ public interface IDirectChunkAPI {
      * @param data
      * @return
      */
-    int getCombinedId(int type, int data);
+    int getCombinedId(String type, Map<Property<?>, Object> data);
 
     /**
      * Get material
      * @param type
      * @return 
      */
-    int getMaterial(int type);
+    String getMaterial(int type);
     
     /**
      * Get WorldEdit base blocks
@@ -148,7 +150,7 @@ public interface IDirectChunkAPI {
      * @param data
      * @return
      */
-    byte getLightEmissionLevel(int type, int data);
+    byte getLightEmissionLevel(String type, Map<Property<?>, Object> data);
 
     /**
      * Return the material light emission level
@@ -173,7 +175,7 @@ public interface IDirectChunkAPI {
      * @param data
      * @return
      */
-    short getOpacityLevel(int type, int data);
+    short getOpacityLevel(String type, Map<Property<?>, Object> data);
 
     /**
      * Get the material opacity level (how much it obscures light)
@@ -200,7 +202,7 @@ public interface IDirectChunkAPI {
      * @param data
      * @return
      */
-    short getOpacityLevelSkyLight(int type, int data);
+    short getOpacityLevelSkyLight(String type, Map<Property<?>, Object> data);
 
     /**
      * Get the material opacity level (how much it obscures light)

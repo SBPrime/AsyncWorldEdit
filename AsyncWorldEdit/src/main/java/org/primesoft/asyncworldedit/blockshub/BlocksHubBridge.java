@@ -376,6 +376,49 @@ public class BlocksHubBridge implements IBlocksHubBridge {
 
         return m_integrator.canPlace(playerEntry, world, location, oldBlock, newBlock, dc);
     }
+    
+    @Override
+    public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
+            BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
+        if (!canPlace(playerEntry, newBlock)) {
+            return false;
+        }
+        
+        if (playerEntry != null && playerEntry.isAllowed(Permission.BYPASS_BLOCKS_HUB)) {
+            return true;
+        }
+
+        ConfigBlocksHub bhConfig = ConfigProvider.blocksHub();
+
+        BHLevel level = bhConfig.getCheckAccess();
+        if (level == BHLevel.Disabled || (dc && level == BHLevel.Regular)) {
+            return true;
+        }
+
+        if (playerEntry == null) {
+            return bhConfig.isAccessAllowed(AccessType.Null);
+        }
+
+        boolean isUnknown = playerEntry.isUnknown()
+                || playerEntry.getName() == null || playerEntry.getName().isEmpty()
+                || playerEntry.getUUID() == null || !playerEntry.isPlayer();
+
+        boolean isConsole = playerEntry.isConsole();
+        boolean isOffline = playerEntry.isPlayer() && playerEntry.isDisposed();
+
+        if (isUnknown) {
+            return bhConfig.isAccessAllowed(AccessType.Unknown);
+        }
+        if (isConsole) {
+            return bhConfig.isAccessAllowed(AccessType.Console);
+        }
+
+        if (isOffline) {
+            return bhConfig.isAccessAllowed(AccessType.Offline);
+        }
+
+        return m_integrator.canPlace(playerEntry, world, location, oldBlock, newBlock, dc);
+    }
 
     @Override
     public void initialize(Object blocksHubPlugin) {

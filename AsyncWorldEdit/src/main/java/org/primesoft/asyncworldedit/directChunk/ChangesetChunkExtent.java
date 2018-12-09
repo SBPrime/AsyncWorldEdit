@@ -49,8 +49,6 @@ package org.primesoft.asyncworldedit.directChunk;
 
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -118,21 +116,14 @@ public class ChangesetChunkExtent implements Extent {
 
     @Override
     public BlockState getBlock(BlockVector3 position) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        /*Vector3 p = position.subtract(m_minPoint);
-        return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ());*/
+        BlockVector3 p = position.subtract(m_minPoint);
+        return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ()).toImmutableState();
     }    
 
     @Override
     public BaseBlock getFullBlock(BlockVector3 position) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-        /*
-        Vector3 p = position.subtract(m_minPoint);
-        return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ());
-        */
+        BlockVector3 p = position.subtract(m_minPoint);
+        return m_data.getBlock(p.getBlockX(), p.getBlockY(), p.getBlockZ()).toBaseBlock();
     }
 
     @Override

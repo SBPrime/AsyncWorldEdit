@@ -96,6 +96,21 @@ public interface IBlocksHubIntegration {
      */
     boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
+    
+    
+    /**
+     * Check if the block can be changed
+     *
+     * @param playerEntry
+     * @param world
+     * @param location
+     * @param oldBlock
+     * @param newBlock
+     * @param dc
+     * @return
+     */
+    boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
+            BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
 
     /**
      * Log block change using BlocksHub

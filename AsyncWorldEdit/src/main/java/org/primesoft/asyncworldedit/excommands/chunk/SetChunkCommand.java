@@ -96,6 +96,8 @@ public class SetChunkCommand extends DCMaskCommand {
 
     @Override
     public Integer task(IAweEditSession editSesstion) throws WorldEditException {
+        final BlockStateHolder t = editSesstion.getFullBlock(BlockVector3.ZERO);
+        
         //Get the chunks in chunk coords
         final Set<BlockVector2> chunks = m_region.getChunks();
         final World weWorld = m_region.getWorld();
@@ -113,19 +115,6 @@ public class SetChunkCommand extends DCMaskCommand {
                     chunk.getData();
                 }, world, BlockVector3.at(0, 0, 0));
         
-        return 0;
-    }
-    
-    /*@Override
-    public Integer task(IAweEditSession editSesstion) throws WorldEditException {
-        //Get the chunks in chunk coords
-        final Set<BlockVector2> chunks = m_region.getChunks();
-        final World weWorld = m_region.getWorld();
-        final IWorld world = m_weIntegrator.getWorld(weWorld);
-
-        if (world == null) {
-            return 0;
-        }
 
         int changedBlocks = 0;
 
@@ -146,7 +135,7 @@ public class SetChunkCommand extends DCMaskCommand {
                         final BlockVector3 yPos = zPos.add(0, py, 0);
 
                         if (maskTest(yPos) && (m_fillChunk || m_region.contains(yPos))) {
-                            final BlockStateHolder block = m_pattern.apply(yPos);
+                            final BlockStateHolder block = t;//m_pattern.apply(yPos);
                             cData.setBlock(x, py, z, block);
                             changedBlocks++;
                         }
@@ -159,7 +148,7 @@ public class SetChunkCommand extends DCMaskCommand {
         }
 
         return changedBlocks;
-    }*
+    }
 
     /**
      * Catche the chunks

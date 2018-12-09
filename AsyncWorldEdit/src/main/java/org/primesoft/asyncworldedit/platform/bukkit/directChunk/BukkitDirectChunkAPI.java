@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit.directChunk;
 
+import com.sk89q.worldedit.registry.state.Property;
+import java.util.Map;
 import org.bukkit.Material;
 import org.primesoft.asyncworldedit.api.inner.IBlocksHubIntegration;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
@@ -203,28 +205,17 @@ public abstract class BukkitDirectChunkAPI extends BaseDirectChunkAPI {
     }
 
     @Override
-    public byte getLightEmissionLevel(int type, int data) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-        //return getLightEmissionLevel(Material.getMaterial(type));
+    public byte getLightEmissionLevel(String type, Map<Property<?>, Object> data) {
+        return getLightEmissionLevel(Material.getMaterial(type));
     }
 
     @Override
-    public short getOpacityLevel(int type, int data) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-        //return getOpacityLevel(Material.getMaterial(type));
+    public short getOpacityLevel(String type, Map<Property<?>, Object> data) {
+        return getOpacityLevel(Material.getMaterial(type));
     }
 
     @Override
-    public short getOpacityLevelSkyLight(int type, int data) {
-        //TODO: 1.13
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        
-        //return getOpacityLevelSkyLight(Material.getMaterial(type));
+    public short getOpacityLevelSkyLight(String type, Map<Property<?>, Object> data) {
+        return getOpacityLevelSkyLight(Material.getMaterial(type));
     }
-    
-    
 }

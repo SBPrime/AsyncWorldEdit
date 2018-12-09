@@ -48,7 +48,6 @@
 package org.primesoft.asyncworldedit.directChunk;
 
 import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.world.World;
 import java.util.Arrays;
 import org.primesoft.asyncworldedit.api.IChunk;
@@ -57,7 +56,6 @@ import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
 import org.primesoft.asyncworldedit.api.directChunk.IWrappedChunk;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
-import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.configuration.ConfigDirectChunkApi;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
@@ -91,13 +89,12 @@ public class DcUtils {
         IWrappedChunk wrappedChunk = taskDispatcher.performSafe(mutex, () -> {
             IChunk chunk = world.getChunkAt(cx, cz);
 
-            if (player == null) {
-                return chunkApi.wrapChunk(chunk);
-            } else {
-                return chunkApi.wrapChunk(chunk, player);
-            }
-        },
-                world, PositionHelper.chunkToPosition(cx, 0, cz)
+                if (player == null) {
+                    return chunkApi.wrapChunk(chunk);
+                } else {
+                    return chunkApi.wrapChunk(chunk, player);
+                }
+            }, world, PositionHelper.chunkToPosition(cx, 0, cz)
         );
 
         return wrappedChunk;
