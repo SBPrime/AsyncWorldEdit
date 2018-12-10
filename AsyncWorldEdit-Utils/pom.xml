@@ -6,7 +6,7 @@
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit-Utils</artifactId>
 
-    <version>3.6.0-rc-01</version>
+    <version>3.6.0-rc-02</version>
 
     <packaging>jar</packaging>
     <properties>
@@ -27,13 +27,13 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-APIInner</artifactId>
-            <version>[3.6.0-rc-01, 3.6.0)</version>
+            <version>[3.6.0-rc-02, 3.6.0)</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-API</artifactId>
-            <version>[2.2.0-rc-01, 2.2.0)</version>
+            <version>[2.2.0-rc-02, 2.2.0)</version>
             <type>jar</type>
         </dependency>
         <dependency>

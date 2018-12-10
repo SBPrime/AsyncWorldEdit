@@ -168,7 +168,8 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
         mv.visitMaxs(1, 1);
         mv.visitEnd();
 
-        processMethods((String name, String descriptor, String clsName, Method m) -> defineInjectableClipboardMethod(cw, name, descriptor, clsName, m));
+        processMethods((String name, String descriptor, String clsName, Method m) -> defineInjectableClipboardMethod(cw, name, descriptor, clsName, m),
+                Clipboard.class);
         cw.visitEnd();
 
         createClass(className, cw);
