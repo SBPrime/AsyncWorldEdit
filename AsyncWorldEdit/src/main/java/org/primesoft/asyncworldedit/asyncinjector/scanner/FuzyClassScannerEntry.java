@@ -62,7 +62,8 @@ public class FuzyClassScannerEntry implements IClassScannerEntry {
     
     @Override
     public boolean isMatch(Class<?> c) {        
-        return m_className.equals(c.getName());
+        String name = c != null ? c.getName() : "";
+        return name != null && name.startsWith(m_className);
     }
 
     @Override

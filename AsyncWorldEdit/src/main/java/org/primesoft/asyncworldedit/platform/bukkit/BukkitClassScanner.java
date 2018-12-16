@@ -71,7 +71,7 @@ class BukkitClassScanner extends ClassScanner {
             new ClassScannerEntry(Server.class),
             new ClassScannerEntry(JavaPlugin.class),
             new FuzyClassScannerEntry("org.bukkit"),
-            new FuzyClassScannerEntry("org.spigotmc"),
+            new FuzyClassScannerEntry("org.spigotmc"),            
             new ClassScannerEntry(BukkitWorld.class)
         });
 
