@@ -268,7 +268,7 @@ public abstract class ClassScanner implements IClassScanner {
      * @return
      */
     private Iterable<ScannerQueueEntry> unpack(Class<?> oClass, Object o) {
-        HashSet<ScannerQueueEntry> result = new HashSet<ScannerQueueEntry>();
+        HashSet<ScannerQueueEntry> result = new HashSet<>();
 
         if (isPrimitive(oClass) || isBlackList(oClass)) {
             return result;
@@ -328,6 +328,7 @@ public abstract class ClassScanner implements IClassScanner {
     protected IClassScannerEntry[] getBlackList() {
         return Stream.of(
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
+            new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", "batches"),
             new ClassScannerEntry("org.primesoft.asyncworldedit.blockshub.BlocksHubBridge"),
             new ClassScannerEntry(ChangeSet.class),
@@ -356,7 +357,8 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry(Player.class),
             new ClassScannerEntry(ChangeSet.class),
             new ClassScannerEntry(Entity.class),
-            new FuzyClassScannerEntry("net.minecraft.")
+            new FuzyClassScannerEntry("net.minecraft."),
+            new FuzyClassScannerEntry("io.netty.")
         ).filter(i -> i.isValid())
          .toArray(IClassScannerEntry[]::new);
     }

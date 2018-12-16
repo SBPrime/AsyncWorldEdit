@@ -47,7 +47,10 @@
  */
 package org.primesoft.asyncworldedit.core;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -180,6 +183,10 @@ public final class Cron implements ICron {
         }
     }
 
+    /**
+     * Cleanup the undo directory
+     * @param startup True if this is running on server startup
+     */
     private void runUndoCleanup(boolean startup) {
         final ConfigUndo undoConfig = ConfigProvider.undo();
 
@@ -220,37 +227,48 @@ public final class Cron implements ICron {
                         return timestamp != null && timestamp <= time;
                     })
                     .filter(i -> !streamProvider.isInUse(i))
-                    .forEach(i -> {
-                try {
-                    if (!i.delete()) {
-                        if (showMessages || showError) {
-                            if (!headerShown.getValue()) {
-                                log("Undo cleanup started...");
-                                headerShown.setValue(true);
-                            }
-                            log(String.format("\t * %1$s...error", i));
-                        }
-                    } else {
-                        if (showMessages) {
-                            log(String.format("\t * %1$s...ok", i));
-                        }
-                    }
-                } catch (Exception ex) {
-                    if (showError) {
-                        if (!headerShown.getValue()) {
-                            log("Undo cleanup started...");
-                            headerShown.setValue(true);
-                        }
-                        log(String.format("\t * %1$s...error", i));
-                    }
-                }
-            });
+                    .forEach(i -> deleteFile(i, showMessages, showError, headerShown));
+            if (startup) {
+                Files.walk(ConfigProvider.getUndoFolder().toPath(), 1, FileVisitOption.FOLLOW_LINKS)
+                        .map(i -> i.toFile())
+                        .filter(i -> i.isDirectory() && i.canWrite())
+                        .filter(i -> i.list().length == 0)
+                        .forEach(i -> deleteFile(i, showMessages, showError, headerShown))  ;
+                        
+            }
         } catch (IOException ex) {
             ExceptionHelper.printException(ex, "Unable to iterate undo files.");
         } finally {
             m_undoCleanupRunning = false;
             if (showMessages) {
                 log("...undo cleanup done.");
+            }
+        }
+    }
+
+    private void deleteFile(File file, boolean showMessages, boolean showError,
+            IInOutParam<Boolean> headerShown) {
+        try {
+            if (!file.delete()) {
+                if (showMessages || showError) {
+                    if (!headerShown.getValue()) {
+                        log("Undo cleanup started...");
+                        headerShown.setValue(true);
+                    }
+                    log(String.format("\t * %1$s...error", file));
+                }
+            } else {
+                if (showMessages) {
+                    log(String.format("\t * %1$s...ok", file));
+                }
+            }
+        } catch (Exception ex) {
+            if (showError) {
+                if (!headerShown.getValue()) {
+                    log("Undo cleanup started...");
+                    headerShown.setValue(true);
+                }
+                log(String.format("\t * %1$s...error", file));
             }
         }
     }
