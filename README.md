@@ -1,7 +1,7 @@
 AsyncWorldEdit
 ==============
 The plugin was split into free and premium version. 
-Want more features? Want more frequent updates? Go to: [AsyncWorldEdit - Premium](https://github.com/SBPrime/AsyncWorldEdit-Premium)
+Want more features? Want more frequent updates? Go to: [AsyncWorldEdit - Premium](https://www.spigotmc.org/resources/asyncworldedit-premium.9661/)
 
 Please read the project license.
 
@@ -18,3 +18,9 @@ original WorldEdit. So basically you get the same commands, same permissions
 and the same experience. In addition to that if WorldEdit team releases a new 
 feature, fixes a bug all you need to do is update WorldEdit and AWE will do its
 job as usual.
+
+For API go to:
+  https://github.com/SBPrime/AsyncWorldEdit/tree/master/AsyncWorldEdit-API
+  
+For API Maven go to:
+  https://github.com/SBPrime/AsyncWorldEdit/tree/maven-artifact
