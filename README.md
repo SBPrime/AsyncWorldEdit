@@ -20,3 +20,13 @@ Maven repository:
   <url>https://raw.githubusercontent.com/SBPrime/AsyncWorldEdit/maven-artifact/</url>            
 </repository>
 ```
+
+Dependency:
+```
+<dependency>
+  <groupId>org.primesoft.asyncworldedit</groupId>
+  <artifactId>AsyncWorldEdit-API</artifactId>
+  <version>[2.2.0-rc-01, 2.2.0)</version>
+  <type>jar</type>
+</dependency>
+```
