@@ -139,7 +139,7 @@ public abstract class ClassScanner implements IClassScanner {
         Queue<ScannerQueueEntry> toScan = new ArrayDeque<ScannerQueueEntry>();
         HashSet<Object> scanned = new HashSet<Object>();
 
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
+        boolean debugOn = ConfigProvider.messages().isDebugOn() && false;
         toScan.add(new ScannerQueueEntry(o, null, null));
 
         if (debugOn) {

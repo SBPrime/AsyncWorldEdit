@@ -125,7 +125,7 @@ public final class Cron implements ICron {
     public void loadConfig() {
         final Cron cron = this;
 
-        long interval = ConfigProvider.TICKS_PER_SECOND * 60;
+        long interval = ConfigProvider.TICKS_PER_SECOND * /*60;*/ 10;
 
         if (m_task != null) {
             m_task.cancel();
@@ -174,7 +174,7 @@ public final class Cron implements ICron {
         }
 
         ConfigUndo undoConfig = ConfigProvider.undo();
-        if (undoConfig != null && ((now - m_lastUndoScann) / 60000) > undoConfig.undoFileCleanupInterval()) {
+        if (undoConfig != null && ((now - m_lastUndoScann) / 60000.0) > undoConfig.undoFileCleanupInterval()) {
             m_lastUndoScann = now;
 
             if (!m_undoCleanupRunning) {

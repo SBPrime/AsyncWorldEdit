@@ -118,7 +118,7 @@ public class StackValidator {
      * @return
      */
     public static boolean isVaild(InOutParam<String> methodName) {
-        final boolean debugOn = ConfigProvider.messages().isDebugOn();
+        final boolean debugOn = ConfigProvider.messages().isDebugOn() && false;
         try {
             if (debugOn) {
                 log("****************************************************************");
@@ -147,7 +147,7 @@ public class StackValidator {
      * @return true - the call originated only from API
      */
     public static boolean isWorldEditApi() {
-        final boolean debugOn = ConfigProvider.messages().isDebugOn();
+        final boolean debugOn = ConfigProvider.messages().isDebugOn() && false;
         try {
             if (debugOn) {
                 log("****************************************************************");
@@ -189,7 +189,7 @@ public class StackValidator {
      * @return
      */
     private static boolean validateStack(InOutParam<String> methodName) {
-        final boolean debugOn = ConfigProvider.messages().isDebugOn();
+        final boolean debugOn = ConfigProvider.messages().isDebugOn() && false;
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         int i = stackTrace.length - 1;
         try {
@@ -264,7 +264,7 @@ public class StackValidator {
      * @return
      */
     private static boolean validateCount() {
-        final boolean debugOn = ConfigProvider.messages().isDebugOn();
+        final boolean debugOn = ConfigProvider.messages().isDebugOn() && false;
         final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         boolean result = true;

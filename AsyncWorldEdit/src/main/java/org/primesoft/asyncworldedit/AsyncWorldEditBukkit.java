@@ -47,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit;
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -59,30 +60,47 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.ILogger;
 import org.primesoft.asyncworldedit.injector.core.IInjectorPlatform;
+import org.primesoft.asyncworldedit.utils.ClassLoaderHelper;
 import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger {
+public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
 
     static {
         s_log = Logger.getLogger("Minecraft.AWE");
 
-        detectFawe();
+        ClassLoader classLoaderPlugin = ClassLoaderHelper.getPluginClassLoader(AsyncWorldEditBukkit.class);
+        if (classLoaderPlugin == null) {
+            throw new RuntimeException("Unable to initialize. Unable to find PluginClassLoader for AsyncWorldEditBukkit.");
+        }
+                
+        try {
+            ClassLoaderHelper.addLoader(classLoaderPlugin);
+            
+            initializeLogger();
+            detectFawe();
+            inject();
+        } finally {
+            ClassLoaderHelper.removeLoader(classLoaderPlugin);
+        }
     }
-
-    private static final String FAWE = "com.boydti.fawe.";
     
+    private static final String FAWE = "com.boydti.fawe.";
+
     private static final String CLS_CORE = "org.primesoft.asyncworldedit.platform.bukkit.core.BukkitAsyncWorldEditCore";
     private static final String CLS_INJECTOR = "org.primesoft.asyncworldedit.injector.InjectorBukkit";
 
@@ -156,19 +174,18 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
             if (canContinue) {
                 List<Plugin> plugins = (List<Plugin>) Reflection.get(pm, List.class, fPlugins, "Getting plugins");
                 Map<String, Plugin> lookupNames = (Map<String, Plugin>) Reflection.get(pm, Map.class, fLookupNames, "Getting lookupNames");
-                
+
                 if (plugins != null && lookupNames != null) {
                     List<Plugin> newPlugins = new ArrayList<>(plugins);
                     Map<String, Plugin> newLookupNames = new ConcurrentHashMap<>(lookupNames);
-                    
-                    canContinue = Reflection.set(pm, fPlugins, newPlugins, "Set plugins") && 
-                            Reflection.set(pm, fLookupNames, newLookupNames, "Set lookupNames");
-                    
-                    
+
+                    canContinue = Reflection.set(pm, fPlugins, newPlugins, "Set plugins")
+                            && Reflection.set(pm, fLookupNames, newLookupNames, "Set lookupNames");
+
                     Optional<Plugin> fawePlugin = plugins.stream()
                             .filter(i -> i.getDescription().getMain().startsWith(FAWE))
                             .findAny();
-                    
+
                     if (fawePlugin.isPresent()) {
                         newPlugins.remove(fawePlugin.get());
                         newLookupNames.remove(fawePlugin.get().getName());
@@ -180,7 +197,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
 
             if (!canContinue) {
                 s_log.log(Level.SEVERE, String.format("%s = Pleas make up your mind.               =", LoggerProvider.PREFIX));
-                s_log.log(Level.SEVERE, String.format("%s = Choose: or the other.                  =", LoggerProvider.PREFIX));
+                s_log.log(Level.SEVERE, String.format("%s = Choose: one or the other               =", LoggerProvider.PREFIX));
 
                 try {
                     Thread.sleep(20000);
@@ -193,72 +210,83 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
         }
     }
 
-    private ConsoleCommandSender m_console;
-
-    private Loader m_loader;
-
-    /**
-     * Send message to the log
-     *
-     * @param msg
-     */
-    @Override
-    public final void log(String msg) {
-        if (s_log == null || msg == null) {
-            return;
+    private static void inject() {
+        PluginManager pm = Bukkit.getPluginManager();
+        if (pm.isPluginEnabled("WorldEdit")) {
+            log("WARNING: WorldEdit plugin detected running. Trying to disable. Plugins that might stop working: " +
+                    Stream.of(pm.getPlugins()).map(i -> i.getName())
+                            .filter(i -> !"WorldEdit".equals(i) && !"AsyncWorldEdit".equals(i))
+                            .collect(Collectors.joining(", "))
+            );            
+            pm.disablePlugin(WorldEditPlugin.getPlugin(WorldEditPlugin.class));            
         }
+        
+        LoaderBukkit loader = new LoaderBukkit(AsyncWorldEditBukkit.class);
 
-        s_log.log(Level.INFO, String.format("%s %s", LoggerProvider.PREFIX, msg));
-    }
-
-    /**
-     * Send message to the console
-     *
-     * @param msg
-     */
-    @Override
-    public void sayConsole(String msg) {
-        m_console.sendRawMessage(msg);
-    }
-
-    @Override
-    public void onLoad() {
-        super.onLoad();
-    
-        LoggerProvider.setLogger(this);
-
-        final Server server = getServer();
-
-        m_console = server.getConsoleSender();
-
-        final Loader loader = new LoaderBukkit(this);
         if (!loader.checkDependencies()) {
             log("ERROR: Missing plugin dependencies. Plugin disabled.");
             return;
         }
 
-        
-        
         IInjectorPlatform injector = createInjector(loader);
         if (injector == null) {
             log("ERROR: Injector not found.");
             return;
         }
-        
+
         if (!injector.onEnable()) {
             log("ERROR: Unable to enable the injector.");
-            return;   
+            return;
+        }
+
+        s_loader = loader;
+    }
+
+    private static void initializeLogger() {
+        final Server server = Bukkit.getServer();
+        final ConsoleCommandSender console = server.getConsoleSender();
+
+        ILogger log = new ILogger() {
+            @Override
+            public void log(String msg) {
+                if (s_log == null || msg == null) {
+                    return;
+                }
+
+                s_log.log(Level.INFO, LoggerProvider.PREFIX + " "+ msg);
+            }
+
+            @Override
+            public void sayConsole(String msg) {
+                console.sendRawMessage(LoggerProvider.PREFIX + " "+ msg);
+            }
+        };
+
+        LoggerProvider.setLogger(log);
+    }
+
+    private static LoaderBukkit s_loader;
+    
+    private Loader m_loader;
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+
+        final LoaderBukkit loader = s_loader;
+        s_loader = null;
+
+        if (loader != null) {
+            loader.init(this);
         }
 
         if (!loader.install()) {
             log("ERROR: Unable to install the plugin.");
             return;
         }
-        
+
         m_loader = loader;
     }
-    
-    
 
     @Override
     public void onEnable() {
@@ -272,7 +300,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
         if (m_api != null) {
             m_api.initialize();
             m_api.onEnable();
-            
+
             getServer().getScheduler().runTaskLater(this, () -> m_loader.loadPlugins(m_api), 0);
         }
 
@@ -286,24 +314,24 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain implements ILogger 
             ctor = Reflection.findConstructor(cls, "Unable to find core constructor", Plugin.class);
         } catch (ClassNotFoundException ex) {
             log("ERROR: Unable to create AWE core, plugin disabled");
-            
+
             return null;
         }
-        
+
         return Reflection.create(IAsyncWorldEditCore.class, ctor, "Unable to create AWE Core", this);
     }
-    
-    private IInjectorPlatform createInjector(final Loader loader) {
+
+    private static IInjectorPlatform createInjector(final Loader loader) {
         Constructor<?> ctor;
         try {
             Class<?> clsAweCore = loader.loadClass(CLS_INJECTOR);
             ctor = Reflection.findConstructor(clsAweCore, "Unable to find ijector constructor");
         } catch (ClassNotFoundException ex) {
             log("ERROR: Unable to create AWE Injector, plugin disabled");
-            
+
             return null;
         }
-        
+
         return Reflection.create(IInjectorPlatform.class, ctor, "Unable to create AWE Injector");
     }
 

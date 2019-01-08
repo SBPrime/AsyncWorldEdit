@@ -55,11 +55,12 @@ import org.primesoft.asyncworldedit.api.inner.ILogger;
  * @author SBPrime
  */
 public class LoggerProvider {
+
     public final static String PREFIX = "[AsyncWorldEdit]";
-    
-    
+
+    private static final ILogger s_nullLogger = new NullLogger();
     private static ILogger s_logger = null;
-    
+
     /**
      * Log the message using current platform
      *
@@ -70,7 +71,7 @@ public class LoggerProvider {
         if (logger != null) {
             logger.log(msg);
         } else {
-            System.out.println(msg);
+            s_nullLogger.log(msg);
         }
     }
 
@@ -84,11 +85,24 @@ public class LoggerProvider {
         if (logger != null) {
             logger.sayConsole(msg);
         } else {
-            System.out.println(msg);
+            s_nullLogger.sayConsole(msg);
         }
     }
-    
+
     public static void setLogger(ILogger logger) {
         s_logger = logger;
+    }
+    
+    private static class NullLogger implements ILogger {
+
+        @Override
+        public void log(String msg) {
+            System.out.println(PREFIX + " " + msg);
+        }
+
+        @Override
+        public void sayConsole(String msg) {
+            System.out.println(PREFIX + " " + msg);
+        }    
     }
 }

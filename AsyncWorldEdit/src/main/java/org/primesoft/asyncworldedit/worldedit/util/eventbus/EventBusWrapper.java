@@ -51,6 +51,7 @@ import com.google.common.collect.Multimap;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.util.eventbus.EventHandler;
 import java.util.Set;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
@@ -97,4 +98,13 @@ public class EventBusWrapper extends EventBus {
     public synchronized void unsubscribeAll(Multimap<Class<?>, EventHandler> handlers) {
         m_target.unsubscribeAll(handlers);
     }
+
+    @Override
+    protected void dispatch(Object event, EventHandler handler) {
+        try {
+            super.dispatch(event, handler);
+        } catch (Throwable ex) {
+            ExceptionHelper.printException(ex, "Unable to dispatch evetn: " + event + " to handler " + handler);
+        }
+    }        
 }

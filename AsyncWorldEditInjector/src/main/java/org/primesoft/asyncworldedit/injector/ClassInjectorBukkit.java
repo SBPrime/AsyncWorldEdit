@@ -56,14 +56,13 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.objectweb.asm.ClassReader;
+import org.primesoft.asyncworldedit.utils.ClassLoaderHelper;
 
 /**
  *
  * @author SBPrime
  */
 final class ClassInjectorBukkit implements IClassInjector {
-
-    private final static String PLUGIN_CLASS_LOADER = "org.bukkit.plugin.java.PluginClassLoader";
 
     private final ClassLoader m_rootClassLoader;
     private final Method m_miDefineClass;
@@ -73,19 +72,8 @@ final class ClassInjectorBukkit implements IClassInjector {
 
     public ClassInjectorBukkit() {
         m_worldEdit = Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
-        ClassLoader worldEditClassLoader = com.sk89q.worldedit.WorldEditException.class.getClassLoader();
-        Class<?> clsPluginClassLoader;
 
-        try {
-            clsPluginClassLoader = worldEditClassLoader.loadClass(PLUGIN_CLASS_LOADER);
-        } catch (ClassNotFoundException ex) {
-            throw new IllegalStateException("Unable to initialize 'ClassInjector'. Unable to get the PluginClassLoader.", ex);
-        }
-
-        while (worldEditClassLoader != null && !clsPluginClassLoader.isInstance(worldEditClassLoader)) {
-            worldEditClassLoader = worldEditClassLoader.getParent();
-        }
-
+        ClassLoader worldEditClassLoader = ClassLoaderHelper.getPluginClassLoader(com.sk89q.worldedit.WorldEditException.class);
         if (worldEditClassLoader == null) {
             throw new IllegalStateException("Unable to initialize 'ClassInjector'. Matching class loader not found.");
         }
@@ -96,7 +84,7 @@ final class ClassInjectorBukkit implements IClassInjector {
             m_miDefineClass = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
             m_miDefineClass.setAccessible(true);
 
-            Field fiClasses = clsPluginClassLoader.getDeclaredField("classes");
+            Field fiClasses = ClassLoaderHelper.getPluginClassLoader().getDeclaredField("classes");
             fiClasses.setAccessible(true);
 
             m_classes = (Map<String, Class<?>>) fiClasses.get(m_rootClassLoader);
@@ -112,13 +100,8 @@ final class ClassInjectorBukkit implements IClassInjector {
             m_classes.put(name, result);
 
             return result;
-        } catch (ClassFormatError ex) {
-            throw ex;
-        } catch (InvocationTargetException ex) {
-            Throwable innerEx = ex.getCause();
-            throw new ClassFormatError("Unable to invoke dynamic method. " + (innerEx != null ? innerEx.getMessage() : ""));
         } catch (Exception ex) {
-            throw new ClassFormatError("Unable to invoke dynamic method. " + ex.getMessage());
+            throw (ClassFormatError) (new ClassFormatError("Unable to inject class.").initCause(ex));
         }
     }
 

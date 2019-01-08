@@ -196,7 +196,11 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         m_physicsWatcher.registerEvents();
         m_chunkWatcher.registerEvents();
 
-        m_plugin.getServer().getPluginManager().registerEvents(this, m_plugin);
+        PluginManager pm = m_plugin.getServer().getPluginManager();
+        pm.registerEvents(this, m_plugin);
+        if (pm.isPluginEnabled("WorldEdit")) {
+            onPluginEnabled(new PluginEnableEvent(pm.getPlugin("WorldEdit")));
+        }
     }
 
     @Override

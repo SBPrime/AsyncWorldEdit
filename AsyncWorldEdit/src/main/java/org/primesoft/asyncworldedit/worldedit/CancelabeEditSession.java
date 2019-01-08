@@ -52,6 +52,8 @@ import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.extension.platform.Actor;
+import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
@@ -64,6 +66,7 @@ import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
@@ -71,6 +74,7 @@ import com.sk89q.worldedit.world.block.BlockType;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
@@ -86,6 +90,7 @@ import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.extent.ExtendedChangeSetExtent;
+import org.primesoft.asyncworldedit.worldedit.extent.SafeDelegateExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.FixedBlockBagExtent;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.FileChangeSet;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.IExtendedChangeSet;
@@ -113,10 +118,18 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     private int m_blocksQueued;
 
     public CancelabeEditSession(IThreadSafeEditSession parent, Mask mask, int jobId) {
-        super(new EventBusESEventCancel(parent.getEventBus()),
+        this(parent, mask, jobId,
+                new EventBusWrapESEvent(parent.getEventBus()),
                 new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
                 parent.getBlockChangeLimit(), parent.getBlockBag(),
                 parent.getEditSessionEvent());
+    }
+
+    private CancelabeEditSession(IThreadSafeEditSession parent, Mask mask, int jobId,
+            EventBus eventBus, CancelableWorld world, int maxBlocks,
+            @Nullable BlockBag blockBag,
+            EditSessionEvent event) {
+        super(eventBus, world, maxBlocks, blockBag, event);
 
         m_jobId = jobId;
         m_parent = parent;
@@ -128,7 +141,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             ((FileChangeSet) tmp).setCancelable(this);
         }
 
-        boolean isDebug = ConfigProvider.messages().isDebugOn();
+        boolean isDebug = ConfigProvider.messages().isDebugOn() && false;
         if (isDebug) {
             ExtentUtils.dumpExtents("Original extents:", this);
         }
@@ -206,7 +219,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
 
         if (undoDisabled) {
             changeSet = new NullChangeSet();
-        } else  if (changeSet instanceof IExtendedChangeSet) {
+        } else if (changeSet instanceof IExtendedChangeSet) {
             IExtendedChangeSet aweChangeSet = (IExtendedChangeSet) changeSet;
 
             ExtendedChangeSetExtent extendedChangeSetExtent = new ExtendedChangeSetExtent(this, afterExtent, aweChangeSet);
@@ -214,7 +227,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         } else {
             log(String.format("Expected changeSet: IExtendedChangeSet but got %1$s, undo broken.",
                     changeSet != null ? changeSet.getClass().getName() : "<null>"));
-            
+
         }
 
         Reflection.set(EditSession.class, this, "changeSet", changeSet,
@@ -232,7 +245,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     public void cancel() {
         m_cWorld.cancel();
     }
-    
+
     @Override
     public int countBlocks(Region region, Set<BlockStateHolder> searchBlocks) {
         return m_parent.countBlocks(region, searchBlocks);
@@ -291,8 +304,10 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         final IBlockPlacer blockPlacer = m_parent.getBlockPlacer();
         final Change safeChange = new BlockPlacerChange(change, blockPlacer, isDemanding);
 
-        final IActionEx<WorldEditException> action = 
-                () -> { change.redo(undoContext); };
+        final IActionEx<WorldEditException> action
+                = () -> {
+                    change.redo(undoContext);
+                };
 
         if (ecs != null) {
             ecs.addExtended(safeChange, this);
@@ -317,7 +332,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     @Override
     public int getBlockChangeCount() {
         return m_parent.getBlockChangeCount();
-    }    
+    }
 
     @Override
     public boolean setBlock(BlockVector3 position, BlockStateHolder block, Stage stage)
@@ -421,19 +436,59 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         }
     }
 
-    private static class EventBusESEventCancel extends EventBusWrapper {
+    private static class EventBusWrapESEvent extends EventBusWrapper {
 
-        public EventBusESEventCancel(EventBus target) {
+        public EventBusWrapESEvent(EventBus target) {
             super(target);
         }
 
         @Override
         public void post(Object event) {
             if (event instanceof EditSessionEvent) {
-                return;
+                event = new WrapEditSessionEvent((EditSessionEvent)event);
             }
             
             super.post(event);
         }
     }
+    
+    private static class WrapEditSessionEvent extends EditSessionEvent {
+        private final EditSessionEvent m_source;
+
+        public WrapEditSessionEvent(EditSessionEvent source) {
+            super(source.getWorld(), source.getActor(), source.getMaxBlocks(), source.getStage());
+            
+            m_source = source;
+        }
+
+        @Override
+        public Actor getActor() {
+            return m_source.getActor();
+        }
+
+        @Override
+        public Extent getExtent() {
+            return m_source.getExtent();
+        }
+
+        @Override
+        public int getMaxBlocks() {
+            return m_source.getMaxBlocks();
+        }
+
+        @Override
+        public Stage getStage() {
+            return m_source.getStage();
+        }
+
+        @Override
+        public World getWorld() {
+            return m_source.getWorld();
+        }
+
+        @Override
+        public void setExtent(Extent extent) {
+            m_source.setExtent(new SafeDelegateExtent(extent, getExtent()));
+        }                
+    }    
 }

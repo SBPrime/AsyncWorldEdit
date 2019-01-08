@@ -238,7 +238,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
      * @return
      */
     private boolean validate(List<IClassScannerResult> sessions) {
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
+        boolean debugOn = ConfigProvider.messages().isDebugOn() && false;
 
         AsyncEditSession session = null;
 
@@ -296,7 +296,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         HashMap<Region, Pair<Region, List<IClassScannerResult>>> regions = new HashMap<>();
 
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
+        boolean debugOn = ConfigProvider.messages().isDebugOn() && false;
         if (debugOn) {
             log("****************************************************************");
             log("* Injecting classes");

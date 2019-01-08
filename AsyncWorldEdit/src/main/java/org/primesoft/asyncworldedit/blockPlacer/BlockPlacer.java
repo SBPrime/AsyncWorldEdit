@@ -471,7 +471,7 @@ public class BlockPlacer implements IBlockPlacer {
             }
         }
 
-        if (ConfigProvider.messages().isDebugOn()) {
+        if (ConfigProvider.messages().isDebugOn() && false) {
             log(String.format("[BP RUN] Blocks: %d\tTime: %d\tDemanding: %s",
                     blocks, (System.currentTimeMillis() - startTime), demanding ? "Y" : "N"));
         }

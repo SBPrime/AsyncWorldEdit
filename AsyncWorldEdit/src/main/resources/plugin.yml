@@ -1,12 +1,13 @@
 name: AsyncWorldEdit
 main: org.primesoft.asyncworldedit.AsyncWorldEditBukkit
-version: 3.6.0-rc-03
+version: 3.6.0-rc-04b
 api-version: 1.13
 website: https://github.com/SBPrime/AsyncWorldEdit/wiki
 dev-url: https://github.com/SBPrime/AsyncWorldEdit/wiki
 description: This plugin attaches into WorldEdit and makes it asynchronous.
 authors: [SBPrime]
-loadbefore: [WorldEdit, WorldGuard]
+loadbefore: [WorldGuard, PlotSquared]
+depend: [WorldEdit]
 load: STARTUP
 commands:
 permissions:

@@ -48,6 +48,7 @@
 package org.primesoft.asyncworldedit;
 
 import java.io.File;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -68,7 +69,7 @@ class LoaderBukkit extends Loader {
     /**
      * The plugin main file
      */
-    private final Plugin m_plugin;
+    private Plugin m_plugin;
 
     /**
      * The bukkit server
@@ -80,12 +81,14 @@ class LoaderBukkit extends Loader {
      */
     private final PluginManager m_pluginManager;
 
-    LoaderBukkit(Plugin plugin) {
-        super(plugin.getClass().getClassLoader());
-
-        m_plugin = plugin;
-        m_server = m_plugin.getServer();
+    LoaderBukkit(Class<?> cls) {
+        super(cls.getClassLoader());        
+        m_server = Bukkit.getServer();
         m_pluginManager = m_server.getPluginManager();
+    }
+    
+    void init(Plugin plugin) {
+        m_plugin = plugin;
     }
 
     @Override
