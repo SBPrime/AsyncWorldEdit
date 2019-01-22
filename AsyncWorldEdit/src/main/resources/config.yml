@@ -10,17 +10,17 @@ awe:
     talk-cooldown: 5
     #maximum size of the blocks queue
     queue-max-size-hard: 10000000
-    #maximum number of blocks on the global queue before unlocing it
+    #maximum number of blocks on the global queue before unlocking it
     queue-max-size-soft: 5000000
   memory:
-    #minumum free memory (in kilobytes)
+    #minimum free memory (in kilobytes)
     #When the server memory runs below this value all operations are going to cancel
     #Use -1 for no limit
     minimumHard: 400000
-    #the minimum free memory (In kulobytes) required to allow
+    #the minimum free memory (In kilobytes) required to allow
     #block queuing after the hard limit is reached (soft > hard)
     minimumSoft: 600000
-    #Force GC to run each X miliseconds (-1 - disable) when memory is low
+    #Force GC to run each X milliseconds (-1 - disable) when memory is low
     #Warning: if this is not handled correctly it can lead to TPS drop and timeouts!
     gcTimeout: 10000
   dispatcher:
@@ -28,7 +28,7 @@ awe:
     max-jobs: 2000
     #maximum number of idle runs before disabling the dispatcher
     max-idle-runs: 200
-    #maximum number of miliseconds the dispatcher can use
+    #maximum number of milliseconds the dispatcher can use
     #This value should be lower than 50% of 1 tick (25ms)
     max-time: 20
   #Maximum number of blocks in que mode before AWE forces block placing.
@@ -46,7 +46,7 @@ awe:
     #Show undo cleanup messages
     #Valid options: 
     # * off - no message (only errors),
-    # * statup - show the message only on statrup
+    # * startup - show the message only on startup
     # * [Default] on - show all undo cleanup messages
     undoCleanup: on
   #Disable async mode for
@@ -60,9 +60,9 @@ awe:
   #Blocks hub plugin options  
   blocksHub:
     log:
-        #Enable block chang loggin
+        #Enable block change logging
         isEnabled: true
-        #Enable block change loggin for Direct Chunk API
+        #Enable block change logging for Direct Chunk API
         isDcEnabled: false
     #The block access control
     access:
@@ -106,8 +106,8 @@ awe:
     #How much time should the WorldEdit session be kept after player logged out
     #Values: -1 Do not remove, 0 - immediately, X - Number of minutes
     keepSessionOnLogoutFor: 0
-    #How long should the undo files be keept on the disk after the undo is no 
-    #logner used in WE.
+    #How long should the undo files be kept on the disk after the undo is no 
+    #logger used in WE.
     #Values: -1 Do not delete, 0 - Delete immediately, X - Number of minutes to store 
     #the file
     keepUndoFileFor: 0
@@ -127,7 +127,7 @@ awe:
     #Warning this causes the negative permissions to not work.
     opHasAll: true
     #Disable the global queue bypass, the player queue bypass works like before
-    #If you do not want to run out of memory you hsould not set
+    #If you do not want to run out of memory you should not set
     #the disableQueueBypass to false and opHasAll to true
     disableQueueBypass: true
   #Player permission groups.
@@ -144,9 +144,9 @@ awe:
       isDefault: true
       #Maximum number of jobs a player can have. -1 = no job limit
       maxJobs: 1
-      #Enable or disable auto job cancelation on player quit
+      #Enable or disable auto job cancellation on player quit
       cleanOnLogout: true
-      #Default AWE status for loging in players 
+      #Default AWE status for logging in players 
       defaultMode: on
       #Disable the WorldEdit undo
       disableUndo: false
@@ -154,7 +154,7 @@ awe:
         #blocks to place (per-interval), this determines the max speed of block placing
         #if you experience lag lower this and the next number (time), use -1 for no limit
         blocks: 10000
-        #Maximum number of miliseconds spend on placing blocks, use -1 for no limit
+        #Maximum number of milliseconds spend on placing blocks, use -1 for no limit
         time: 75
       queue:
         #maximum size of the player block queue
@@ -176,9 +176,9 @@ awe:
         historySize: 15
         #Maximum number of changed blocks
         maxBlockChanged: -1
-        #List of dissallowed block ID
+        #List of disallowed block ID
         disallowedBlocks: [6, 7, 14, 15, 16, 26, 27, 28, 29, 39, 31, 32, 33, 34, 36, 37, 38, 39, 40, 46, 50, 51, 56, 59, 69, 73, 74, 75, 76, 77, 81, 83]
-        #The dissallowed black list handling
+        #The disallowed black list handling
         disallowedBlocksUsage:
           #Use black list in patterns
           patterns: true
