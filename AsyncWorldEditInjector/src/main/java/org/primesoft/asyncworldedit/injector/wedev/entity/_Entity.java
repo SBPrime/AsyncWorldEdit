@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,60 +45,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.extent;
+package org.primesoft.asyncworldedit.injector.wedev.entity;
 
-import com.sk89q.worldedit.history.change.Change;
-import com.sk89q.worldedit.history.changeset.ChangeSet;
-import java.util.Iterator;
-import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
-import org.primesoft.asyncworldedit.worldedit.history.changeset.IExtendedChangeSet;
-import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
+import com.sk89q.worldedit.util.Location;
 
 /**
  *
  * @author SBPrime
  */
-final class ProxyChangeSet implements ChangeSet, _ChangeSet {
-
-    private final IExtendedChangeSet m_changeSet;
-    private final ICancelabeEditSession m_editsession;
-
-    ProxyChangeSet(IExtendedChangeSet changeSet, ICancelabeEditSession editSession) {
-        m_changeSet = changeSet;
-        m_editsession = editSession;
-    }
-
-    @Override
-    public void add(Change change) {
-        try {
-            m_changeSet.addExtended(change, m_editsession);
-        } catch (Exception ex) {
-            //Ignore the error
-        }
-    }
-
-    @Override
-    public Iterator<Change> backwardIterator() {
-        return m_changeSet.backwardIterator();
-    }
-
-    @Override
-    public Iterator<Change> forwardIterator() {
-        return m_changeSet.forwardIterator();
-    }
-
-    @Override
-    public int size() {
-        return m_changeSet.size();
-    }
-
-    @Override
-    public boolean isRecordingChanges() {
-        return m_changeSet.isRecordingChanges();
-    }
-
-    @Override
-    public void setRecordChanges(boolean bln) {
-        m_changeSet.setRecordChanges(bln);
+public interface _Entity {
+    default boolean setLocation(Location lctn) {
+        return true;
     }
 }

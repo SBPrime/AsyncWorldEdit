@@ -69,12 +69,13 @@ import org.primesoft.asyncworldedit.changesetSerializer.iterators.UndoFileForwar
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.ConfigUndo;
 import org.primesoft.asyncworldedit.strings.MessageType;
+import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
 
 /**
  *
  * @author SBPrime
  */
-public class FileChangeSet implements ChangeSet {
+public final class FileChangeSet implements ChangeSet, _ChangeSet {
 
     private final static int MAX_SAVE = 100;
     private final static Iterator<Change> EMPTY_ITERATOR = new Iterator<Change>() {
@@ -103,6 +104,7 @@ public class FileChangeSet implements ChangeSet {
     private final IPlayerEntry m_player;
     private final Object m_saveMutex = new Object();
     private boolean m_savePending = false;
+    private boolean m_isRecording = true;
 
     public FileChangeSet(IAsyncWorldEditCore aweCore, IPlayerEntry player) {
         m_changesetSerializer = aweCore.getInnerChangesetSerializer();
@@ -115,6 +117,9 @@ public class FileChangeSet implements ChangeSet {
 
     @Override
     public void add(Change change) {
+        if (!m_isRecording) {
+            return;
+        }
         if (change == null && !m_isDisposed) {
             return;
         }
@@ -327,5 +332,15 @@ public class FileChangeSet implements ChangeSet {
         }
 
         return fileIterator;
+    }
+
+    @Override
+    public boolean isRecordingChanges() {
+        return m_isRecording;
+    }
+
+    @Override
+    public void setRecordChanges(boolean value) {
+        m_isRecording = value;
     }
 }

@@ -52,12 +52,13 @@ import com.sk89q.worldedit.history.changeset.ChangeSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
 
 /**
  *
  * @author SBPrime
  */
-public class ThreadSafeChangeSet implements ChangeSet {
+public final class ThreadSafeChangeSet implements ChangeSet, _ChangeSet {
     /**
      * If a iterator implements this interface it will be forwarded
      * without any transformation.
@@ -69,6 +70,8 @@ public class ThreadSafeChangeSet implements ChangeSet {
      * The parent change set
      */
     private final ChangeSet m_parent;
+    
+    private final _ChangeSet m_parentDev;
 
     /**
      * The MTA mutex
@@ -81,13 +84,22 @@ public class ThreadSafeChangeSet implements ChangeSet {
         }
 
         m_parent = changeSet;
+        if (changeSet instanceof _ChangeSet) {
+            m_parentDev = (_ChangeSet)changeSet;
+        } else {
+            m_parentDev = null;
+        }
 
         m_mutex = new Object();
     }
 
     @Override
     public void add(Change change) {
-        synchronized (m_mutex) {
+        if (m_parentDev != null && !m_parentDev.isRecordingChanges()) {
+            return;
+        }
+        
+        synchronized (m_mutex) {            
             m_parent.add(change);
         }
     }
@@ -144,4 +156,22 @@ public class ThreadSafeChangeSet implements ChangeSet {
         
         return list.iterator();
     }
+    
+    
+    @Override
+    public boolean isRecordingChanges() {
+        if (m_parentDev != null) {
+            return m_parentDev.isRecordingChanges();
+        }
+        
+        return true;
+    }
+
+    @Override
+    public void setRecordChanges(boolean bln) {
+        if (m_parentDev != null) {
+            m_parentDev.setRecordChanges(bln);
+        }
+    }
+
 }

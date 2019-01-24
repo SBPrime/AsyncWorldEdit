@@ -75,10 +75,18 @@ import org.primesoft.asyncworldedit.injector.utils.OperationAction;
 public final class Helpers {
 
     public static void executeMethod(Operation op, OperationAction method) {
+        if (op == null) {
+            return;
+        }
+        
         InjectorCore.getInstance().getClassFactory().getOperationProcessor().process(op, (OperationAction) method);
     }
 
     public static <T extends WorldEditException> void executeMethodEx(Operation op, ExceptionOperationAction<T> method) throws T {
+        if (op == null) {
+            return;
+        }
+        
         InjectorCore.getInstance().getClassFactory().getOperationProcessor().process(op, (ExceptionOperationAction<T>) method);
     }
 

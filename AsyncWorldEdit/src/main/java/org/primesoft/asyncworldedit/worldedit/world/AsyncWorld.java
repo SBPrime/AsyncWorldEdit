@@ -51,7 +51,6 @@ import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
@@ -779,5 +778,47 @@ public class AsyncWorld extends AbstractWorldWrapper {
     @Override
     public Operation commit() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), m_parent::commit);
+    }
+
+    @Override
+    public boolean notifyAndLightBlock(BlockVector3 position, BlockState block) throws WorldEditException {
+        final DataAsyncParams<BlockState> paramBlock = DataAsyncParams.extract(block);
+        final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
+        
+        final BlockState newBlock = paramBlock.getData();
+        final BlockVector3 v = paramVector.getData();
+        final IPlayerEntry player = getPlayer(paramBlock, paramVector);
+        
+        IFuncEx<Boolean, WorldEditException> func = () -> {
+            final BlockState oldBlock = m_parent.getBlock(v);
+            if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
+                    || isSame(oldBlock, newBlock)) {
+                return false;
+            }
+            
+            final boolean result = m_parent.setBlock(position, newBlock);
+            if (result) {
+                logBlock(position, player, oldBlock, newBlock);
+            }
+            
+            return result;
+        };
+        
+        if (paramBlock.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
+            if (!canPlace(player, m_bukkitWorld, position, getBlock(v), newBlock)) {
+                return false;
+            }
+            
+            return m_blockPlacer.addTasks(player,
+                    new WorldFuncEntryEx(this.getName(), paramBlock.getJobId(), v, func));
+        }
+        
+        return func.execute();
+    }
+
+    @Override
+    public BlockVector3 getSpawnPosition() {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                () -> m_parent.getSpawnPosition());
     }
 }

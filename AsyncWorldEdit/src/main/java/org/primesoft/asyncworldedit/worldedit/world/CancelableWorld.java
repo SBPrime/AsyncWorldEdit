@@ -50,8 +50,6 @@ package org.primesoft.asyncworldedit.worldedit.world;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
@@ -339,4 +337,21 @@ public class CancelableWorld extends AbstractWorldWrapper {
         return m_parent.commit();
     }
 
+    @Override
+    public boolean notifyAndLightBlock(BlockVector3 bv, BlockState bs) throws WorldEditException {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        
+        return m_parent.notifyAndLightBlock(bv, bs);
+    }
+
+    @Override
+    public BlockVector3 getSpawnPosition() {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        
+        return getSpawnPosition();
+    }
 }

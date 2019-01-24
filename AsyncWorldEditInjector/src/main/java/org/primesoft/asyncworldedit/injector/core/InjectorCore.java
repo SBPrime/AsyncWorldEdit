@@ -53,13 +53,10 @@ package org.primesoft.asyncworldedit.injector.core;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.primesoft.asyncworldedit.injector.IClassInjector;
@@ -78,8 +75,12 @@ import org.primesoft.asyncworldedit.injector.core.visitors.FlattenedClipboardTra
 import org.primesoft.asyncworldedit.injector.core.visitors.ForwardExtentCopyClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.IntroduceInterfaceVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.OperationsClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.SnapshotUtilCommandsVisitor;
+import org.primesoft.asyncworldedit.injector.wedev.entity._Entity;
+import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
+import org.primesoft.asyncworldedit.injector.wedev.world._World;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -174,6 +175,10 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.math.BlockVector3", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.math.Vector2", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.math.Vector3", c -> new AsyncWrapperVisitor(c));
+                        
+            modiffyClasses("com.sk89q.worldedit.history.changeset.ChangeSet", c -> new IntroduceInterfaceVisitor(c, _ChangeSet.class));            
+            modiffyClasses("com.sk89q.worldedit.world.World", c -> new IntroduceInterfaceVisitor(c, _World.class));
+            
             modiffyClasses("com.sk89q.worldedit.world.block.BlockStateHolder", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.world.block.BaseBlock", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.world.block.BlockState", c -> new AsyncWrapperVisitor(c));

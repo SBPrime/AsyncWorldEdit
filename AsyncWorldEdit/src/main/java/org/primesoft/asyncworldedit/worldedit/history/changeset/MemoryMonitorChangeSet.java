@@ -61,6 +61,7 @@ import org.primesoft.asyncworldedit.configuration.ConfigUndo;
 import org.primesoft.asyncworldedit.configuration.UndoBehaviour;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.GCUtils;
+import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
 
 /**
  *
@@ -72,6 +73,8 @@ public class MemoryMonitorChangeSet implements IExtendedChangeSet {
      * The parrent change set
      */
     private final ChangeSet m_parent;
+    
+    private final _ChangeSet m_parentDev;
 
     /**
      * The async undo behaviour
@@ -112,6 +115,11 @@ public class MemoryMonitorChangeSet implements IExtendedChangeSet {
         m_player = player;
         m_taskDispatcher = taskDispatcher;
         m_parent = parent;
+        if (parent instanceof _ChangeSet) {
+            m_parentDev = (_ChangeSet)parent;
+        } else {
+            m_parentDev = null;
+        }
 
         ConfigUndo uConfig = ConfigProvider.undo();
         ConfigMemory mConfig = ConfigProvider.memory();
@@ -125,6 +133,10 @@ public class MemoryMonitorChangeSet implements IExtendedChangeSet {
 
     @Override
     public void addExtended(Change change, ICancelabeEditSession editSession) throws WorldEditException {
+        if (m_parentDev != null && !m_parentDev.isRecordingChanges()) {
+            return;
+        }
+        
         UndoBehaviour behaviour = m_taskDispatcher.isMainTask() ? m_behaviourMain : m_behaviourAsync;
         if (editSession != null && editSession.isCanceled()) {
             return;
@@ -179,6 +191,22 @@ public class MemoryMonitorChangeSet implements IExtendedChangeSet {
     @Override
     public int size() {
         return m_parent.size();
+    }
+
+    @Override
+    public boolean isRecordingChanges() {
+        if (m_parentDev != null) {
+            return m_parentDev.isRecordingChanges();
+        }
+        
+        return true;
+    }
+
+    @Override
+    public void setRecordChanges(boolean bln) {
+        if (m_parentDev != null) {
+            m_parentDev.isRecordingChanges();
+        }
     }
 
 }

@@ -51,17 +51,38 @@ import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.util.Location;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.primesoft.asyncworldedit.injector.wedev.entity._Entity;
 
 /**
  *
  * @author SBPrime
  */
-public class EntityLazyWrapper implements Entity {
+public class EntityLazyWrapper implements Entity, _Entity {
+
+    private final static Method s_setLocation;
+
+    static {
+        Class<?> clsEntity = Entity.class;
+        Method m;
+        try {
+            m = clsEntity.getMethod("setLocation", Location.class);
+        } catch (Exception ex) {
+            m = null;
+            // Ignore
+        }
+
+        s_setLocation = m;
+    }
 
     /**
      * The wrapped entity
      */
     private Entity m_entity;
+    private _Entity m_entityDev;
 
     /**
      * Is the entity removed
@@ -80,6 +101,7 @@ public class EntityLazyWrapper implements Entity {
         m_defaultLocation = location;
         m_defaultState = null;
         m_entity = null;
+        m_entityDev = null;
     }
 
     @Override
@@ -123,18 +145,53 @@ public class EntityLazyWrapper implements Entity {
         return entity != null ? entity.getFacet(type) : null;
     }
 
-    
     /**
      * Sets the wrapped entity
-     * @param entity 
+     *
+     * @param entity
      */
     public void setEntity(Entity entity) {
-        if (m_isRemoved)
-        {
+        if (m_isRemoved) {
             entity.remove();
             return;
         }
-        
+
         m_entity = entity;
+        if (m_entity instanceof _Entity) {
+            m_entityDev = (_Entity) entity;
+        } else if (s_setLocation != null) {
+            m_entityDev = new ReflectionEntity(entity, s_setLocation);
+        } else {
+            m_entityDev = null;
+        }
+    }
+
+    @Override
+    public boolean setLocation(Location lctn) {
+        if (m_entityDev == null) {
+            return true;
+        }
+
+        return m_entityDev.setLocation(lctn);
+    }
+
+    private static class ReflectionEntity implements _Entity {
+
+        private final Entity m_target;
+        private final Method m_method;
+
+        public ReflectionEntity(Entity target, Method m) {
+            m_target = target;
+            m_method = m;
+        }
+
+        @Override
+        public boolean setLocation(Location lctn) {
+            try {
+                return (boolean)m_method.invoke(m_target, lctn);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 }

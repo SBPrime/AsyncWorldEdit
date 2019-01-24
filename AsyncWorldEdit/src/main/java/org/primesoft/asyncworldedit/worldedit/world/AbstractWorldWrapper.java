@@ -47,13 +47,17 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.block.BlockState;
+import org.primesoft.asyncworldedit.injector.wedev.world._World;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class AbstractWorldWrapper implements World {
+public abstract class AbstractWorldWrapper implements World, _World {
     /**
      * The parrent world
      */
@@ -85,4 +89,10 @@ public abstract class AbstractWorldWrapper implements World {
     public int hashCode() {
         return m_parent.hashCode();
     }
+
+    @Override
+    public abstract BlockVector3 getSpawnPosition();
+
+    @Override
+    public abstract boolean notifyAndLightBlock(BlockVector3 bv, BlockState bs) throws WorldEditException;
 }

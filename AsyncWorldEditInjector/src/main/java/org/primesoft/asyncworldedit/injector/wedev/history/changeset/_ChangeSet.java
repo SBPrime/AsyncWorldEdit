@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,79 +45,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector;
+package org.primesoft.asyncworldedit.injector.wedev.history.changeset;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-import org.objectweb.asm.ClassReader;
-import org.primesoft.asyncworldedit.utils.ClassLoaderHelper;
+import java.io.Closeable;
 
 /**
  *
  * @author SBPrime
  */
-final class ClassInjectorBukkit implements IClassInjector {
-
-    private final ClassLoader m_rootClassLoader;
-    private final Method m_miDefineClass;
-    private final Plugin m_worldEdit;
-
-    private Map<String, Class<?>> m_classes;
-
-    public ClassInjectorBukkit() {
-        m_worldEdit = Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
-
-        ClassLoader worldEditClassLoader = ClassLoaderHelper.getPluginClassLoader(com.sk89q.worldedit.WorldEditException.class);
-        if (worldEditClassLoader == null) {
-            throw new IllegalStateException("Unable to initialize 'ClassInjector'. Matching class loader not found.");
-        }
-
-        m_rootClassLoader = worldEditClassLoader;
-
-        try {
-            m_miDefineClass = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
-            m_miDefineClass.setAccessible(true);
-
-            Field fiClasses = ClassLoaderHelper.getPluginClassLoader().getDeclaredField("classes");
-            fiClasses.setAccessible(true);
-
-            m_classes = (Map<String, Class<?>>) fiClasses.get(m_rootClassLoader);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Unable to initialize 'ClassInjector'. Unable to initialize method bridge.", ex);
-        }
+public interface _ChangeSet {
+    default boolean isRecordingChanges() {
+        return true;
     }
 
-    @Override
-    public Class<?> injectClass(String name, byte[] bin, int off, int len) throws ClassFormatError {
-        try {
-            Class<?> result = (Class<?>) m_miDefineClass.invoke(m_rootClassLoader, name, bin, off, len);
-            m_classes.put(name, result);
-
-            return result;
-        } catch (Exception ex) {
-                        
-            Class<?> cls;
-            try {
-                cls = m_rootClassLoader.loadClass("com/sk89q/worldedit/entity/Entity");
-                ClassLoader cll = cls.getClassLoader();
-            } catch (ClassNotFoundException ex1) {
-            }            
-            
-            
-            throw (ClassFormatError) (new ClassFormatError("Unable to inject class.").initCause(ex));
-        }
-    }
-
-    @Override
-    public ClassReader getClassReader(String name) throws IOException {
-        String resource = String.format("%1$s.class", name.replace('.', '/'));
-        InputStream is = m_worldEdit.getResource(resource);
-
-        return new ClassReader(is);
+    default void setRecordChanges(boolean value) {
+        
     }
 }
