@@ -2,7 +2,7 @@
 ${licenseFirst}
 </#if>
 ${licensePrefix}AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
-${licensePrefix}Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+${licensePrefix}Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
 ${licensePrefix}Copyright (c) AsyncWorldEdit contributors
 ${licensePrefix?replace(" +$", "", "r")}
 ${licensePrefix}All rights reserved.

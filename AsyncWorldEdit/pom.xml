@@ -5,7 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit-Core</artifactId>
-    <version>3.6.0-rc-04b</version>
+    <version>${global.awe.version}</version>
+    
+    <parent>
+        <groupId>org.primesoft.asyncworldedit</groupId>
+        <artifactId>AsyncWorldEdit_AllInOne</artifactId>
+        <version>${global.awe.version}</version>
+        <relativePath>..</relativePath>    
+    </parent>
 
     <packaging>jar</packaging>
     <properties>
@@ -17,23 +24,20 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
-                        <id>file-backup</id>
-                        <phase>process-sources</phase>
-                        <configuration>
-                            <target>
-                                <copy 
-                                    file="src/main/java/org/primesoft/asyncworldedit/Loader.java" 
-                                    tofile="src/main/java/org/primesoft/asyncworldedit/Loader.java.bak"
-                                />
-                            </target>
-                        </configuration>
+                        <id>filter-src</id>
+                        <phase>initialize</phase>
                         <goals>
-                            <goal>run</goal>
+                            <goal>filter-sources</goal>
                         </goals>
+                        <configuration>
+                            <sourceDirectory>${basedir}/src/main/resources-templates</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/resources-templates</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -43,12 +47,12 @@
                 <executions>
                     <execution>
                         <id>file-restore</id>
-                        <phase>package</phase>
+                        <phase>initialize</phase>
                         <configuration>
                             <target>
-                                <move
-                                    file="src/main/java/org/primesoft/asyncworldedit/Loader.java.bak"
-                                    tofile="src/main/java/org/primesoft/asyncworldedit/Loader.java" 
+                                <copy
+                                    file="src/main/java-templates/org/primesoft/asyncworldedit/Loader.java"
+                                    tofile="target/generated-sources/java-templates/org/primesoft/asyncworldedit/Loader.java" 
                                 />
                             </target>
                         </configuration>
@@ -63,20 +67,60 @@
                 <version>1.2</version>
                 <artifactId>maven-patch-plugin</artifactId>
                 <configuration>
-                    <targetDirectory>${basedir}</targetDirectory>
+                    <targetDirectory>${basedir}/target/generated-sources/java-templates</targetDirectory>
                     <patchDirectory>src/main/patches/</patchDirectory>
                     <naturalOrderProcessing>true</naturalOrderProcessing>
                 </configuration>
                 <executions>
                     <execution>
                         <id>patch</id>
-                        <phase>process-sources</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>apply</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>target/generated-sources/resources-templates</directory>
+                                </resource>                                
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated-sources/java-templates</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>            
         </plugins>
     </build>
 
@@ -104,19 +148,19 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-API</artifactId>
-            <version>[2.2.0-rc-04b, 2.2.0)</version>
+            <version>${global.awe-api.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-APIInner</artifactId>
-            <version>[3.6.0-rc-04b, 3.6.0)</version>
+            <version>${global.awe.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-Utils</artifactId>
-            <version>[3.6.0-rc-04b, 3.6.0)</version>
+            <version>${global.awe.version}</version>
             <type>jar</type>
         </dependency>
         <!--<dependency>
@@ -134,31 +178,23 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-BlocksHub_v3x</artifactId>
-            <version>[3.6.0-rc-04b, 3.6.0)</version>
+            <version>${global.awe.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-Injector</artifactId>
-            <version>[3.6.0-rc-04b, 3.6.0)</version>
+            <version>${global.awe.version}</version>
             <type>jar</type>
         </dependency>
         
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
-            <artifactId>worldedit-core</artifactId>
-            <version>7.0.0-beta-03</version>
+            <artifactId>worldedit</artifactId>
+            <version>7.0.0-dev-3971</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-core-7.0.0-beta-03.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.sk89q.worldedit</groupId>
-            <artifactId>worldedit-bukkit</artifactId>
-            <version>7.0.0-beta-03</version>
-            <type>jar</type>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.0-beta-03.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.0-dev-3971.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>

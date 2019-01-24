@@ -5,7 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit_AllInOne</artifactId>
-    <version>3.6.0-rc-04b</version>
+    <version>${global.awe.version}</version>
+    <properties>        
+        <global.awe.version>3.6.0-rc-05</global.awe.version>
+        <global.awe-api.version>2.2.0-rc-05</global.awe-api.version>
+    </properties>
+    
     <packaging>pom</packaging>
     <name>AsyncWorldEdit_AllInOne</name>
     <modules>
