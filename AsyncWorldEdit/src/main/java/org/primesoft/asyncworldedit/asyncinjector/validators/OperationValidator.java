@@ -85,7 +85,7 @@ public class OperationValidator {
      * @return
      */
     public static boolean isValid(Operation op) {
-        boolean debugOn = ConfigProvider.messages().isDebugOn() && false;
+        boolean debugOn = ConfigProvider.messages().isDebugOn();
         Class c = op.getClass();
         String className = c.getName();
 

@@ -56,6 +56,7 @@ import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.extent.NullExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
 import com.sk89q.worldedit.function.mask.Mask;
@@ -141,7 +142,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             ((FileChangeSet) tmp).setCancelable(this);
         }
 
-        boolean isDebug = ConfigProvider.messages().isDebugOn() && false;
+        boolean isDebug = ConfigProvider.messages().isDebugOn();
         if (isDebug) {
             ExtentUtils.dumpExtents("Original extents:", this);
         }
@@ -167,7 +168,12 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
 
     private void injectExtents(IPlayerEntry playerEntry) {
         List<Extent> extentList = ExtentUtils.getExtentList(this);
-
+        for (Extent e : extentList) {
+            if (e instanceof NullExtent) {
+                return;
+            }
+        }
+        
         injectBlockBagExtent(extentList);
         injectChangeSet(extentList, m_parent.getChangeSet(), playerEntry);
     }

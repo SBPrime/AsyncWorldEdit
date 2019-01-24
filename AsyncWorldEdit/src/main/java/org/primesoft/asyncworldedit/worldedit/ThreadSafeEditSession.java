@@ -60,6 +60,7 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.extent.NullExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
 import com.sk89q.worldedit.function.pattern.Pattern;
@@ -261,7 +262,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         m_asyncForceDisabled = false;
         m_asyncDisabled = false;
 
-        boolean isDebug = ConfigProvider.messages().isDebugOn() && false;
+        boolean isDebug = ConfigProvider.messages().isDebugOn();
         if (isDebug) {
             ExtentUtils.dumpExtents("Original extents:", this);
         }
@@ -277,6 +278,11 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
     private void injectExtents(IPlayerEntry playerEntry, IAsyncWorldEditCore core) {
         List<Extent> extentList = ExtentUtils.getExtentList(this);
+        for (Extent e : extentList) {
+            if (e instanceof NullExtent) {
+                return;
+            }
+        }
 
         injectBlockBagExtent(extentList);
         injectChangeSet(extentList, playerEntry, core);

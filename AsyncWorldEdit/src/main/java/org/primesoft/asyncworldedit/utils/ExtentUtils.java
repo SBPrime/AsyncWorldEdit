@@ -65,7 +65,7 @@ public class ExtentUtils {
             = Reflection.findField(AbstractDelegateExtent.class, "extent", "Unable to get AbstractDelegateExtent extent");
 
     public static List<Extent> getExtentList(EditSession session) {
-        List<Extent> extentList = new ArrayList<Extent>();
+        List<Extent> extentList = new ArrayList<>();
         Extent current = Reflection.get(EditSession.class, Extent.class, session, "bypassNone", "Unable to get extent");
         while (current != null) {
             extentList.add(current);
