@@ -53,7 +53,6 @@ import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extension.platform.Actor;
-import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.NullExtent;
@@ -253,7 +252,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public int countBlocks(Region region, Set<BlockStateHolder> searchBlocks) {
+    public int countBlocks(Region region, Set<BaseBlock> searchBlocks) {
         return m_parent.countBlocks(region, searchBlocks);
     }
 
@@ -425,7 +424,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     public void flushSession() {
         m_blocksQueued = 0;
         super.flushSession();
-    }
+    }        
 
     /**
      * Force block flush when to many has been queued

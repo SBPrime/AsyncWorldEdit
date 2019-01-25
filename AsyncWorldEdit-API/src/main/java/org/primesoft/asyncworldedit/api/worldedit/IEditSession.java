@@ -253,34 +253,37 @@ public interface IEditSession extends Extent {
     /**
      * Set a block, bypassing both history and block re-ordering.
      *
+     * @param <B>
      * @param position the position to set the block at
      * @param block the block
      * @param stage the level
      * @return whether the block changed
      * @throws WorldEditException thrown on a set error
      */
-    public boolean setBlock(BlockVector3 position, BlockStateHolder block, Stage stage) throws WorldEditException;
+    public <B extends BlockStateHolder<B>> boolean setBlock(BlockVector3 position, B block, Stage stage) throws WorldEditException;
 
     /**
      * Set a block, bypassing both history and block re-ordering.
      *
+     * @param <B>
      * @param position the position to set the block at
      * @param block the block
      * @return whether the block changed
      */
-    public boolean rawSetBlock(BlockVector3 position, BlockStateHolder block);
+    public <B extends BlockStateHolder<B>> boolean rawSetBlock(BlockVector3 position, B block);
 
     /**
      * Set a block, bypassing history but still utilizing block re-ordering.
      *
+     * @param <B>
      * @param position the position to set the block at
      * @param block the block
      * @return whether the block changed
      */
-    public boolean smartSetBlock(BlockVector3 position, BlockStateHolder block);
+    public <B extends BlockStateHolder<B>> boolean smartSetBlock(BlockVector3 position, B block);
 
     @Override
-    public boolean setBlock(BlockVector3 vector, BlockStateHolder bsh) throws WorldEditException;
+    public <B extends BlockStateHolder<B>> boolean setBlock(BlockVector3 position, B block) throws MaxChangedBlocksException;
 
     /**
      * Sets the block at a position, subject to both history and block re-ordering.
@@ -351,11 +354,12 @@ public interface IEditSession extends Extent {
      * @param searchBlocks the list of blocks to search
      * @return the number of blocks that matched the pattern
      */
-    public int countBlocks(Region region, Set<BlockStateHolder> searchBlocks);
+    public int countBlocks(Region region, Set<BaseBlock> searchBlocks);
 
     /**
      * Fills an area recursively in the X/Z directions.
      *
+     * @param <B>
      * @param origin the location to start from
      * @param block the block to fill with
      * @param radius the radius of the spherical area to fill
@@ -364,7 +368,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int fillXZ(BlockVector3 origin, BlockStateHolder block, double radius, int depth, boolean recursive) throws MaxChangedBlocksException;
+    public <B extends BlockStateHolder<B>> int fillXZ(BlockVector3 origin, B block, double radius, int depth, boolean recursive) throws MaxChangedBlocksException;
 
     /**
      * Fills an area recursively in the X/Z directions.
@@ -415,13 +419,14 @@ public interface IEditSession extends Extent {
     /**
      * Sets all the blocks inside a region to a given block type.
      *
+     * @param <B>
      * @param region the region
      * @param block the block
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int setBlocks(Region region, BlockStateHolder block) throws MaxChangedBlocksException;
-    
+    public <B extends BlockStateHolder<B>> int setBlocks(Region region, B block) throws MaxChangedBlocksException;
+
     /**
      * Sets all the blocks inside a region to a given pattern.
      *
@@ -431,18 +436,19 @@ public interface IEditSession extends Extent {
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     public int setBlocks(Region region, Pattern pattern) throws MaxChangedBlocksException;
-    
+
     /**
      * Replaces all the blocks matching a given filter, within a given region, to a block
      * returned by a given pattern.
      *
+     * @param <B>
      * @param region the region to replace the blocks within
      * @param filter a list of block types to match, or null to use {@link com.sk89q.worldedit.function.mask.ExistingBlockMask}
      * @param replacement the replacement block
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int replaceBlocks(Region region, Set<BlockStateHolder> filter, BlockStateHolder replacement) throws MaxChangedBlocksException;
+    public <B extends BlockStateHolder<B>> int replaceBlocks(Region region, Set<BaseBlock> filter, B replacement) throws MaxChangedBlocksException;
 
     /**
      * Replaces all the blocks matching a given filter, within a given region, to a block
@@ -454,7 +460,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int replaceBlocks(Region region, Set<BlockStateHolder> filter, Pattern pattern) throws MaxChangedBlocksException;
+    public int replaceBlocks(Region region, Set<BaseBlock> filter, Pattern pattern) throws MaxChangedBlocksException;
 
     /**
      * Replaces all the blocks matching a given mask, within a given region, to a block
@@ -488,7 +494,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makeCuboidFaces(Region region, BlockStateHolder block) throws MaxChangedBlocksException;
+    public <B extends BlockStateHolder<B>> int makeCuboidFaces(Region region, B block) throws MaxChangedBlocksException;
 
     /**
      * Make the faces of the given region as if it was a {@link CuboidRegion}.
@@ -512,17 +518,17 @@ public interface IEditSession extends Extent {
      */
     public int makeFaces(final Region region, Pattern pattern) throws MaxChangedBlocksException;
 
-
     /**
      * Make the walls (all faces but those parallel to the X-Z plane) of the given region
      * as if it was a {@link CuboidRegion}.
      *
+     * @param <B>
      * @param region the region
      * @param block the block to place
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int makeCuboidWalls(Region region, BlockStateHolder block) throws MaxChangedBlocksException;
+    public <B extends BlockStateHolder<B>> int makeCuboidWalls(Region region, B block) throws MaxChangedBlocksException;
 
     /**
      * Make the walls (all faces but those parallel to the X-Z plane) of the given region
@@ -551,12 +557,13 @@ public interface IEditSession extends Extent {
      * Places a layer of blocks on top of ground blocks in the given region
      * (as if it were a cuboid).
      *
+     * @param <B>
      * @param region the region
      * @param block the placed block
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int overlayCuboidBlocks(Region region, BlockStateHolder block) throws MaxChangedBlocksException;
+    public <B extends BlockStateHolder<B>> int overlayCuboidBlocks(Region region, B block) throws MaxChangedBlocksException;
 
     /**
      * Places a layer of blocks on top of ground blocks in the given region
@@ -602,7 +609,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks moved
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int moveRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException;
+    public int moveRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, Pattern replacement) throws MaxChangedBlocksException;
 
     /**
      * Move the blocks in a region a certain direction.
@@ -615,7 +622,7 @@ public interface IEditSession extends Extent {
      * @return number of blocks moved
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int moveCuboidRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException;
+    public int moveCuboidRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, Pattern replacement) throws MaxChangedBlocksException;
 
     /**
      * Drain nearby pools of water or lava.
@@ -762,10 +769,10 @@ public interface IEditSession extends Extent {
      * Get the block distribution inside a region.
      *
      * @param region a region
-     * @param fuzzy
+     * @param separateStates
      * @return the results
      */
-    public List<Countable<BlockStateHolder>> getBlockDistribution(Region region, boolean fuzzy);
+    public List<Countable<BlockState>> getBlockDistribution(Region region, boolean separateStates);
 
     public int makeShape(final Region region, final Vector3 zero, final Vector3 unit, final Pattern pattern, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException;
 

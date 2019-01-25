@@ -69,13 +69,12 @@ import org.primesoft.asyncworldedit.changesetSerializer.iterators.UndoFileForwar
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.ConfigUndo;
 import org.primesoft.asyncworldedit.strings.MessageType;
-import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
 
 /**
  *
  * @author SBPrime
  */
-public final class FileChangeSet implements ChangeSet, _ChangeSet {
+public final class FileChangeSet implements ChangeSet {
 
     private final static int MAX_SAVE = 100;
     private final static Iterator<Change> EMPTY_ITERATOR = new Iterator<Change>() {
@@ -94,7 +93,7 @@ public final class FileChangeSet implements ChangeSet, _ChangeSet {
         }
     };
 
-    private final Queue<Change> m_queuedChanges = new LinkedList<Change>();
+    private final Queue<Change> m_queuedChanges = new LinkedList<>();
     private boolean m_isDisposed = false;
     private int m_size = 0;
     private File m_storageFile;

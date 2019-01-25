@@ -67,7 +67,6 @@ import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -952,16 +951,6 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     @Override
-    public int moveCuboidRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException {
-        return super.moveCuboidRegion(region, dir, distance, copyAir, replacement); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int moveRegion(Region region, BlockVector3 dir, int distance, boolean copyAir, BlockStateHolder replacement) throws MaxChangedBlocksException {
-        return super.moveRegion(region, dir, distance, copyAir, replacement); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public int naturalizeCuboidBlocks(Region region) throws MaxChangedBlocksException {
         return super.naturalizeCuboidBlocks(region); //To change body of generated methods, choose Tools | Templates.
     }
@@ -997,16 +986,6 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     @Override
-    public int replaceBlocks(Region region, Set<BlockStateHolder> filter, BlockStateHolder replacement) throws MaxChangedBlocksException {
-        return super.replaceBlocks(region, filter, replacement); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int replaceBlocks(Region region, Set<BlockStateHolder> filter, Pattern pattern) throws MaxChangedBlocksException {
-        return super.replaceBlocks(region, filter, pattern); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public int setBlocks(Region region, BlockStateHolder block) throws MaxChangedBlocksException {
         return super.setBlocks(region, block); //To change body of generated methods, choose Tools | Templates.
     }
@@ -1020,6 +999,4 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     public int stackCuboidRegion(Region region, BlockVector3 dir, int count, boolean copyAir) throws MaxChangedBlocksException {
         return super.stackCuboidRegion(region, dir, count, copyAir); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
 }

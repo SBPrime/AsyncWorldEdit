@@ -52,13 +52,12 @@ import com.sk89q.worldedit.history.changeset.ChangeSet;
 import java.util.Iterator;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.IExtendedChangeSet;
-import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
 
 /**
  *
  * @author SBPrime
  */
-final class ProxyChangeSet implements ChangeSet, _ChangeSet {
+final class ProxyChangeSet implements ChangeSet {
 
     private final IExtendedChangeSet m_changeSet;
     private final ICancelabeEditSession m_editsession;

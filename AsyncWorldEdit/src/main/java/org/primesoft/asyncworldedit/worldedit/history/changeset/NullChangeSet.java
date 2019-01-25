@@ -51,16 +51,12 @@ import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
 
 /**
  * Null changeset that suppresses WorldEdit from stroing undo data
  * @author SBPrime
  */
-public final class NullChangeSet implements ChangeSet, _ChangeSet {
-    
-    
-    
+public final class NullChangeSet implements ChangeSet {
     @Override
     public void add(Change change) {
     }

@@ -54,6 +54,7 @@ import com.sk89q.worldedit.extension.input.DisallowedUsageException;
 import com.sk89q.worldedit.extension.input.InputParseException;
 import com.sk89q.worldedit.extension.input.ParserContext;
 import com.sk89q.worldedit.extension.platform.Actor;
+import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class ExtendedBlockFactory extends BlockFactory {
     }
 
     @Override
-    public BlockStateHolder parseFromInput(String input, ParserContext context) throws InputParseException {
+    public BaseBlock parseFromInput(String input, ParserContext context) throws InputParseException {
         Actor actor = context.getActor();
         if (actor == null || !actor.isPlayer() || actor.hasPermission("worldedit.anyblock")) {
             return super.parseFromInput(input, context);
@@ -111,7 +112,7 @@ public class ExtendedBlockFactory extends BlockFactory {
         }
 
         ParserContext newContext = cloneContext(context);
-        BlockStateHolder resul = super.parseFromInput(input, newContext);
+        BaseBlock resul = super.parseFromInput(input, newContext);
 
         if (resul == null) {
             return null;
@@ -125,7 +126,7 @@ public class ExtendedBlockFactory extends BlockFactory {
     }
 
     @Override
-    public Set<BlockStateHolder> parseFromListInput(String input, ParserContext context) throws InputParseException {  
+    public Set<BaseBlock> parseFromListInput(String input, ParserContext context) throws InputParseException {
         Actor actor = context.getActor();
         if (actor == null || !actor.isPlayer() || actor.hasPermission("worldedit.anyblock")) {
             return super.parseFromListInput(input, context);
@@ -145,7 +146,7 @@ public class ExtendedBlockFactory extends BlockFactory {
         }
 
         ParserContext newContext = cloneContext(context);
-        Set<BlockStateHolder> result = super.parseFromListInput(input, newContext);
+        Set<BaseBlock> result = super.parseFromListInput(input, newContext);
 
         if (result == null) {
             return null;

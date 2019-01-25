@@ -52,13 +52,12 @@ import com.sk89q.worldedit.history.changeset.ChangeSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
 
 /**
  *
  * @author SBPrime
  */
-public final class ThreadSafeChangeSet implements ChangeSet, _ChangeSet {
+public final class ThreadSafeChangeSet implements ChangeSet {
     /**
      * If a iterator implements this interface it will be forwarded
      * without any transformation.
@@ -70,8 +69,6 @@ public final class ThreadSafeChangeSet implements ChangeSet, _ChangeSet {
      * The parent change set
      */
     private final ChangeSet m_parent;
-    
-    private final _ChangeSet m_parentDev;
 
     /**
      * The MTA mutex
@@ -84,18 +81,13 @@ public final class ThreadSafeChangeSet implements ChangeSet, _ChangeSet {
         }
 
         m_parent = changeSet;
-        if (changeSet instanceof _ChangeSet) {
-            m_parentDev = (_ChangeSet)changeSet;
-        } else {
-            m_parentDev = null;
-        }
 
         m_mutex = new Object();
     }
 
     @Override
     public void add(Change change) {
-        if (m_parentDev != null && !m_parentDev.isRecordingChanges()) {
+        if (!m_parent.isRecordingChanges()) {
             return;
         }
         
@@ -149,7 +141,7 @@ public final class ThreadSafeChangeSet implements ChangeSet, _ChangeSet {
             return iterator;
         }
         
-        List<Change> list = new ArrayList<Change>();
+        List<Change> list = new ArrayList<>();
         while (iterator.hasNext()) {
             list.add((Change) iterator.next());
         }
@@ -160,18 +152,11 @@ public final class ThreadSafeChangeSet implements ChangeSet, _ChangeSet {
     
     @Override
     public boolean isRecordingChanges() {
-        if (m_parentDev != null) {
-            return m_parentDev.isRecordingChanges();
-        }
-        
-        return true;
+        return m_parent.isRecordingChanges();
     }
 
     @Override
     public void setRecordChanges(boolean bln) {
-        if (m_parentDev != null) {
-            m_parentDev.setRecordChanges(bln);
-        }
+        m_parent.setRecordChanges(bln);
     }
-
 }

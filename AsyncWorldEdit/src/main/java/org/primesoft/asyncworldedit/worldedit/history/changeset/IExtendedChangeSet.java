@@ -51,13 +51,12 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
-import org.primesoft.asyncworldedit.injector.wedev.history.changeset._ChangeSet;
 
 /**
  *
  * @author SBPrime
  */
-public interface IExtendedChangeSet extends ChangeSet, _ChangeSet {
+public interface IExtendedChangeSet extends ChangeSet {
     
     /**
      * Add the given change to the history.
@@ -67,10 +66,4 @@ public interface IExtendedChangeSet extends ChangeSet, _ChangeSet {
      * @throws com.sk89q.worldedit.WorldEditException
      */
     void addExtended(Change change, ICancelabeEditSession cancelableEditSession) throws WorldEditException;
-
-    @Override
-    boolean isRecordingChanges();
-
-    @Override
-    void setRecordChanges(boolean value);        
 }
