@@ -191,10 +191,10 @@
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit</artifactId>
-            <version>7.0.0-dev-3971</version>
+            <version>7.0.0-beta-05</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.0-dev-3971.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.0-beta-05.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
