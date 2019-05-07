@@ -52,8 +52,6 @@ import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.AweEditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.math.Vector3;
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -71,13 +69,11 @@ import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
-import com.sk89q.worldedit.world.block.BlockType;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -95,6 +91,7 @@ import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
+import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.events.EditSessionLimitChanged;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
@@ -262,15 +259,15 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         m_asyncForceDisabled = false;
         m_asyncDisabled = false;
 
-        boolean isDebug = ConfigProvider.messages().isDebugOn();
+        boolean isDebug = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.INFO);
         if (isDebug) {
-            ExtentUtils.dumpExtents("Original extents:", this);
+            ExtentUtils.dumpExtents("TSES: ", "Original extents:", this);
         }
 
         injectExtents(player, core);
 
         if (isDebug) {
-            ExtentUtils.dumpExtents("Injected extents:", this);
+            ExtentUtils.dumpExtents("TSES: ", "Injected extents:", this);
         }
 
         m_jobId = -1;

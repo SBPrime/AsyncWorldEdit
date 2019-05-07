@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,50 +45,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.configuration;
+package org.primesoft.asyncworldedit.configuration.update;
 
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
+import org.primesoft.asyncworldedit.configuration.DebugLevel;
+import org.primesoft.asyncworldedit.platform.api.IConfiguration;
 import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
  *
  * @author SBPrime
  */
-public final class ConfigMessages {
-    public final static int UNDO_ON = 0x3;
-    public final static int UNDO_STARTUP = 0x2;
-    public final static int UNDO_ERROR = 0x1;
-    public final static int UNDO_OFF = 0x0;
-    
-    private final DebugLevel m_debugLevel;
-    
-    private final int m_undoMode;
+class ConfigUpdater_v21_v22 extends BaseConfigurationUpdater {
 
-    ConfigMessages(IConfigurationSection section) {
-        if (section == null) {
-            m_debugLevel = DebugLevel.OFF;
-            m_undoMode = UNDO_ON;
-        } else {
-            m_debugLevel = DebugLevel.fromString(section.getString("debugLevel", ""), DebugLevel.OFF);
-            String s = section.getString("undoCleanup", "on");
-            
-            if ("on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s)) {
-                m_undoMode = UNDO_ON;
-            } else if ("startup".equalsIgnoreCase(s)) {
-                m_undoMode = UNDO_STARTUP;
-            } else if ("off".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s)) {
-                m_undoMode = UNDO_ERROR;
-            } else {
-                //For now default to on
-                m_undoMode = UNDO_ON;
-            }
+    public ConfigUpdater_v21_v22() {
+    }
+
+    @Override
+    public int updateConfig(IConfiguration config) {
+        log("Updating configuration v21 --> v22");
+
+        IConfigurationSection mainSection = config.getConfigurationSection("awe");
+        if (mainSection == null) {
+            return -1;
         }
-    }
+        
+        IConfigurationSection messagesSection = mainSection.getConfigurationSection("messages");
+        if (messagesSection == null) {
+            return -1;
+        }
 
-    public DebugLevel debugLevel() {
-        return m_debugLevel;
+        boolean isDebugEnabled = getAndRemoveBoolean(messagesSection, "debug", false);
+        setIfNone(messagesSection, "debugLevel", (isDebugEnabled ? DebugLevel.ALL : DebugLevel.OFF).name());
+        
+        mainSection.set("version", 22);
+
+        return 22;
     }
     
-    public int getUndoMode() {
-        return m_undoMode;
-    }        
 }

@@ -86,6 +86,7 @@ import org.primesoft.asyncworldedit.api.inner.IClassScanner;
 import org.primesoft.asyncworldedit.api.inner.IClassScannerResult;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
@@ -139,10 +140,10 @@ public abstract class ClassScanner implements IClassScanner {
             return result;
         }
 
-        Queue<ScannerQueueEntry> toScan = new ArrayDeque<ScannerQueueEntry>();
-        HashSet<Object> scanned = new HashSet<Object>();
+        Queue<ScannerQueueEntry> toScan = new ArrayDeque<>();
+        HashSet<Object> scanned = new HashSet<>();
 
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
+        boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
         toScan.add(new ScannerQueueEntry(o, null, null));
 
         if (debugOn) {

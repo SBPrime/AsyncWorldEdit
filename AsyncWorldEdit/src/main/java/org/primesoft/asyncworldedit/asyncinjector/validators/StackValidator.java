@@ -51,8 +51,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.utils.InOutParam;
-import org.primesoft.asyncworldedit.worldedit.WrappedLocalSession;
 
 /**
  * Validateif operation call stack allows asyncing of the operation
@@ -118,7 +118,7 @@ public class StackValidator {
      * @return
      */
     public static boolean isVaild(InOutParam<String> methodName) {
-        final boolean debugOn = ConfigProvider.messages().isDebugOn();
+        final boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
         try {
             if (debugOn) {
                 log("****************************************************************");
@@ -147,7 +147,7 @@ public class StackValidator {
      * @return true - the call originated only from API
      */
     public static boolean isWorldEditApi() {
-        final boolean debugOn = ConfigProvider.messages().isDebugOn();
+        final boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
         try {
             if (debugOn) {
                 log("****************************************************************");
@@ -189,7 +189,7 @@ public class StackValidator {
      * @return
      */
     private static boolean validateStack(InOutParam<String> methodName) {
-        final boolean debugOn = ConfigProvider.messages().isDebugOn();
+        final boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         int i = stackTrace.length - 1;
         try {
@@ -264,7 +264,7 @@ public class StackValidator {
      * @return
      */
     private static boolean validateCount() {
-        final boolean debugOn = ConfigProvider.messages().isDebugOn();
+        final boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
         final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         boolean result = true;

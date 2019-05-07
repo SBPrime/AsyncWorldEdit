@@ -51,6 +51,7 @@ import com.sk89q.worldedit.function.operation.Operation;
 import java.util.regex.Pattern;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.DebugLevel;
 
 /**
  * Validate if operation should by asynced
@@ -85,7 +86,7 @@ public class OperationValidator {
      * @return
      */
     public static boolean isValid(Operation op) {
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
+        boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
         Class c = op.getClass();
         String className = c.getName();
 

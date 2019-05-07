@@ -86,6 +86,7 @@ import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
+import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
@@ -141,15 +142,15 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             ((FileChangeSet) tmp).setCancelable(this);
         }
 
-        boolean isDebug = ConfigProvider.messages().isDebugOn();
+        boolean isDebug = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.INFO);
         if (isDebug) {
-            ExtentUtils.dumpExtents("Original extents:", this);
+            ExtentUtils.dumpExtents("CES: ", "Original extents:", this);
         }
 
         injectExtents(parent.getPlayer());
 
         if (isDebug) {
-            ExtentUtils.dumpExtents("Injected extents:", this);
+            ExtentUtils.dumpExtents("CES: ", "Injected extents:", this);
         }
 
         setMask(mask);

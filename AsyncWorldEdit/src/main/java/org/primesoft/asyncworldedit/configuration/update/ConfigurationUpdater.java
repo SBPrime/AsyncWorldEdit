@@ -62,7 +62,7 @@ public class ConfigurationUpdater {
     /**
      * The config file version
      */
-    public static final int CONFIG_VERSION = 21;
+    public static final int CONFIG_VERSION = 22;
 
     
     static {
@@ -87,6 +87,7 @@ public class ConfigurationUpdater {
         s_configurationUpdaters.put(18, new ConfigUpdater_v18_v19());
         s_configurationUpdaters.put(19, new ConfigUpdater_v19_v20());
         s_configurationUpdaters.put(20, new ConfigUpdater_v20_v21());
+        s_configurationUpdaters.put(21, new ConfigUpdater_v21_v22());
     }
     
     public static boolean updateConfig(IConfiguration config, int version) {

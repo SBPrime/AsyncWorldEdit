@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -47,48 +47,51 @@
  */
 package org.primesoft.asyncworldedit.configuration;
 
-import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
 
 /**
  *
- * @author SBPrime
+ * @author Sławomir Belter
  */
-public final class ConfigMessages {
-    public final static int UNDO_ON = 0x3;
-    public final static int UNDO_STARTUP = 0x2;
-    public final static int UNDO_ERROR = 0x1;
-    public final static int UNDO_OFF = 0x0;
-    
-    private final DebugLevel m_debugLevel;
-    
-    private final int m_undoMode;
+public enum DebugLevel {
+    OFF(0),
+    FATAL(1),
+    ERROR(2),
+    WARN(3),
+    INFO(4),
+    DEBUG(5),
+    TRACE(6),
+    ALL(Integer.MAX_VALUE);
 
-    ConfigMessages(IConfigurationSection section) {
-        if (section == null) {
-            m_debugLevel = DebugLevel.OFF;
-            m_undoMode = UNDO_ON;
-        } else {
-            m_debugLevel = DebugLevel.fromString(section.getString("debugLevel", ""), DebugLevel.OFF);
-            String s = section.getString("undoCleanup", "on");
-            
-            if ("on".equalsIgnoreCase(s) || "true".equalsIgnoreCase(s)) {
-                m_undoMode = UNDO_ON;
-            } else if ("startup".equalsIgnoreCase(s)) {
-                m_undoMode = UNDO_STARTUP;
-            } else if ("off".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s)) {
-                m_undoMode = UNDO_ERROR;
-            } else {
-                //For now default to on
-                m_undoMode = UNDO_ON;
-            }
+    private int m_level;
+
+    private DebugLevel(int level) {
+        m_level = level;
+    }
+
+    public final boolean isAtLeast(DebugLevel level) {
+        return m_level >= level.m_level;
+    }
+
+    public final void logIfAtLeast(DebugLevel level, String msg) {
+        if (isAtLeast(level)) {
+            log(msg);
+        }
+    }
+    
+    public final void isAtLeast(DebugLevel level, Runnable operation) {
+        if (isAtLeast(level)) {
+            operation.run();
         }
     }
 
-    public DebugLevel debugLevel() {
-        return m_debugLevel;
+    public static DebugLevel fromString(String s, DebugLevel defaultValue) {
+        for (DebugLevel dl : DebugLevel.values()) {
+            if (dl.name().equalsIgnoreCase(s)) {
+                return dl;
+            }
+        }
+
+        return defaultValue;
     }
-    
-    public int getUndoMode() {
-        return m_undoMode;
-    }        
 }

@@ -388,11 +388,11 @@ public class ConfigProvider {
             try {
                 result.add(WorldeditOperations.valueOf(string));
             } catch (Exception e) {
-                log(String.format("* unknown operation name %1$s", string));
+                log("* unknown operation name " + string);
             }
 
         }
-        if (messages().isDebugOn()) {
+        if (messages().debugLevel().isAtLeast(DebugLevel.INFO)) {
             log("World edit operations:");
             for (WorldeditOperations op : WorldeditOperations.values()) {
                 log("* " + op + "..." + (result.contains(op) ? "regular" : "async"));
@@ -417,7 +417,7 @@ public class ConfigProvider {
         }
 
         IConfigurationSection defaultGroup = null;
-        List<IConfigurationSection> subSections = new ArrayList<IConfigurationSection>();
+        List<IConfigurationSection> subSections = new ArrayList<>();
         String[] groupNames = groupsSection.getSubNodes().toArray(new String[0]);
 
         for (String sectionName : groupNames) {
@@ -442,7 +442,8 @@ public class ConfigProvider {
         }
 
         m_defaultGroup = new PermissionGroup(defaultGroup, true);
-        List<PermissionGroup> groups = new ArrayList<PermissionGroup>(subSections.size());
+        List<PermissionGroup> groups;
+        groups = new ArrayList<>(subSections.size());
         for (IConfigurationSection subSection : subSections) {
             groups.add(new PermissionGroup(subSection, m_defaultGroup, false));
         }

@@ -64,9 +64,8 @@ import org.primesoft.asyncworldedit.api.inner.IClassScannerResult;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
-import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScanner;
-import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScannerResult;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.OperationAction;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
@@ -238,7 +237,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
      * @return
      */
     private boolean validate(List<IClassScannerResult> sessions) {
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
+        boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
 
         AsyncEditSession session = null;
 
@@ -296,7 +295,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         HashMap<Region, Pair<Region, List<IClassScannerResult>>> regions = new HashMap<>();
 
-        boolean debugOn = ConfigProvider.messages().isDebugOn();
+        boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
         if (debugOn) {
             log("****************************************************************");
             log("* Injecting classes");
@@ -327,7 +326,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                 List<IClassScannerResult> entriesList;
                 if (!regions.containsKey(r)) {
                     entriesList = new ArrayList<>();
-                    regions.put(r, new Pair<Region, List<IClassScannerResult>>(r.clone(), entriesList));
+                    regions.put(r, new Pair<>(r.clone(), entriesList));
                 } else {
                     entriesList = regions.get(r).getX2();
                 }

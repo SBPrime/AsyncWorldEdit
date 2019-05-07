@@ -79,6 +79,7 @@ import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.configuration.ConfigMemory;
 import org.primesoft.asyncworldedit.configuration.ConfigRenderer;
+import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.events.JobAddedEvent;
 import org.primesoft.asyncworldedit.events.JobRemovedEvent;
@@ -461,9 +462,9 @@ public class BlockPlacer implements IBlockPlacer {
             }
         }
 
-        if (ConfigProvider.messages().isDebugOn()) {
-            log(String.format("[BP RUN] Blocks: %d\tTime: %d\tDemanding: %s",
-                    blocks, (System.currentTimeMillis() - startTime), demanding ? "Y" : "N"));
+        if (ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.TRACE)) {
+            log("[BP RUN] Blocks placed: " + blocks + "\tTime: " + (System.currentTimeMillis() - startTime) + 
+                    "\tIs demanding task: " + (demanding ? "Y" : "N"));
         }
         return blocks > 0;
     }

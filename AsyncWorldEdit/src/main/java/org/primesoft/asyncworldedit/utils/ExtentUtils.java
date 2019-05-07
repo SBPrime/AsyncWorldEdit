@@ -85,12 +85,12 @@ public class ExtentUtils {
      *
      * @param text
      */
-    public static void dumpExtents(String text, EditSession editSession) {
-        log("-----------------------");
-        log(text);
+    public static void dumpExtents(String prefix, String text, EditSession editSession) {
+        log(prefix + "-----------------------");
+        log(prefix + text);
         Extent current = Reflection.get(EditSession.class, Extent.class, editSession, "bypassNone", "Unable to get extent");
         while (current != null) {
-            log(String.format("...%1$s", current.getClass().getName()));
+            log(prefix + "..." + current.getClass().getName());
 
             if (current instanceof AbstractDelegateExtent) {
                 current = ((AbstractDelegateExtent) current).getExtent();
@@ -98,7 +98,7 @@ public class ExtentUtils {
                 current = null;
             }
         }
-        log("-----------------------");
+        log(prefix + "-----------------------");
     }
     
     public static Extent findBeforer(List<Extent> list, Extent extent) {
