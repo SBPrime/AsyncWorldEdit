@@ -50,6 +50,8 @@ package org.primesoft.asyncworldedit.core;
 import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.api.utils.IAction;
 
@@ -63,12 +65,12 @@ public abstract class ChunkWatch implements IChunkWatch {
     /**
      * Suppressed chunks
      */
-    private final HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>> m_watchedChunks = new HashMap<String, HashMap<Integer, HashMap<Integer, Integer>>>();
+    private final Map<String, Map<Integer, Map<Integer, Integer>>> m_watchedChunks = new HashMap<>();
 
     /**
      * List of all loaded chunks
      */
-    private final HashMap<String, HashMap<Integer, HashSet<Integer>>> m_loadedChunks = new HashMap<String, HashMap<Integer, HashSet<Integer>>>();
+    private final Map<String, Map<Integer, Set<Integer>>> m_loadedChunks = new HashMap<>();
 
     /**
      * The dispatcher
@@ -95,30 +97,11 @@ public abstract class ChunkWatch implements IChunkWatch {
     @Override
     public void add(int cx, int cz, String worldName) {
         synchronized (m_watchedChunks) {
-            HashMap<Integer, HashMap<Integer, Integer>> worldEntry = m_watchedChunks.get(worldName);
-            if (worldEntry == null) {
-                worldEntry = new HashMap<Integer, HashMap<Integer, Integer>>();
-
-                m_watchedChunks.put(worldName, worldEntry);
-            }
-
-            HashMap<Integer, Integer> cxEntry = worldEntry.get(cx);
-            if (cxEntry == null) {
-                cxEntry = new HashMap<Integer, Integer>();
-
-                worldEntry.put(cx, cxEntry);
-            }
-
-            Integer value;
-            if (cxEntry.containsKey(cz)) {
-                value = cxEntry.get(cz);
-            } else {
-                value = 0;
-            }
-
-            value = value + 1;
-
-            cxEntry.put(cz, value);
+            m_watchedChunks.computeIfAbsent(worldName, _wn -> new HashMap<>())
+                .computeIfAbsent(cx, _cx -> new HashMap<>())
+                .compute(cz, (_cz, value) -> 
+                    value == null ? 1 : (value + 1)
+                );
         }
     }
 
@@ -132,12 +115,12 @@ public abstract class ChunkWatch implements IChunkWatch {
     @Override
     public void remove(int cx, int cz, String worldName) {
         synchronized (m_watchedChunks) {
-            HashMap<Integer, HashMap<Integer, Integer>> worldEntry = m_watchedChunks.get(worldName);
+            Map<Integer, Map<Integer, Integer>> worldEntry = m_watchedChunks.get(worldName);
             if (worldEntry == null) {
                 return;
             }
 
-            HashMap<Integer, Integer> cxEntry = worldEntry.get(cx);
+            Map<Integer, Integer> cxEntry = worldEntry.get(cx);
             if (cxEntry == null) {
                 return;
             }
@@ -146,8 +129,12 @@ public abstract class ChunkWatch implements IChunkWatch {
                 return;
             }
 
-            Integer value = cxEntry.get(cz) - 1;
+            Integer value = cxEntry.get(cz);
+            if (value == null) {
+                return;
+            }
 
+            value = value - 1;
             if (value <= 0) {
                 cxEntry.remove(cz);
             } else {
@@ -166,39 +153,22 @@ public abstract class ChunkWatch implements IChunkWatch {
 
     protected void chunkLoaded(String worldName, int cx, int cz) {
         synchronized (m_loadedChunks) {
-            HashMap<Integer, HashSet<Integer>> worldEntry;
-
-            if (m_loadedChunks.containsKey(worldName)) {
-                worldEntry = m_loadedChunks.get(worldName);
-            } else {
-                worldEntry = new HashMap<Integer, HashSet<Integer>>();
-                m_loadedChunks.put(worldName, worldEntry);
-            }
-
-            HashSet<Integer> cxEntry;
-            if (worldEntry.containsKey(cx)) {
-                cxEntry = worldEntry.get(cx);
-            } else {
-                cxEntry = new HashSet<Integer>();
-                worldEntry.put(cx, cxEntry);
-            }
-
-            if (cxEntry.contains(cz)) {
-                return;
-            }
-
-            cxEntry.add(cz);
+            m_loadedChunks
+                    .computeIfAbsent(worldName, _wn -> new HashMap<>())
+                    .computeIfAbsent(cx, _cx -> new HashSet<>())
+                    .add(cz);
         }
     }
 
     public boolean chunkUnloading(String worldName, int cx, int cz) {
         boolean cancel = false;
         synchronized (m_watchedChunks) {
-            HashMap<Integer, HashMap<Integer, Integer>> watchedWorldEntry = m_watchedChunks.get(worldName);
+            Map<Integer, Map<Integer, Integer>> watchedWorldEntry = m_watchedChunks.get(worldName);
             if (watchedWorldEntry != null) {
-                HashMap<Integer, Integer> cxEntry = watchedWorldEntry.get(cx);
+                Map<Integer, Integer> cxEntry = watchedWorldEntry.get(cx);
                 if (cxEntry != null) {
-                    cancel = cxEntry.containsKey(cz) && cxEntry.get(cz) > 0;
+                    Integer value = cxEntry.get(cz);
+                    cancel = value != null && value > 0;
                 }
             }
 
@@ -207,23 +177,20 @@ public abstract class ChunkWatch implements IChunkWatch {
             }
 
             synchronized (m_loadedChunks) {
-                HashMap<Integer, HashSet<Integer>> worldEntry;
-
-                if (!m_loadedChunks.containsKey(worldName)) {
-                    return false;
-                }
-                worldEntry = m_loadedChunks.get(worldName);
-
-                if (!worldEntry.containsKey(cx)) {
+                final Map<Integer, Set<Integer>> worldEntry = m_loadedChunks.get(worldName);
+                if (worldEntry == null) {
                     return false;
                 }
 
-                HashSet<Integer> cxEntry = worldEntry.get(cx);
-                if (!cxEntry.contains(cz)) {
+                final Set<Integer> cxEntry = worldEntry.get(cx);
+                if (cxEntry == null) {
                     return false;
                 }
-
-                cxEntry.remove(cz);
+                
+                boolean removed = cxEntry.remove(cz);
+                if (!removed) {
+                    return false;
+                }
 
                 if (cxEntry.isEmpty()) {
                     worldEntry.remove(cx);
@@ -247,23 +214,20 @@ public abstract class ChunkWatch implements IChunkWatch {
     @Override
     public void setChunkUnloaded(int cx, int cz, String worldName) {
         synchronized (m_loadedChunks) {
-            HashMap<Integer, HashSet<Integer>> worldEntry;
-
-            if (!m_loadedChunks.containsKey(worldName)) {
-                return;
-            }
-            worldEntry = m_loadedChunks.get(worldName);
-
-            if (!worldEntry.containsKey(cx)) {
+            final Map<Integer, Set<Integer>> worldEntry = m_loadedChunks.get(worldName);
+            if (worldEntry == null) {
                 return;
             }
 
-            HashSet<Integer> cxEntry = worldEntry.get(cx);
-            if (!cxEntry.contains(cz)) {
+            final Set<Integer> cxEntry = worldEntry.get(cx);
+            if (cxEntry == null) {
                 return;
             }
-
-            cxEntry.remove(cz);
+            
+            boolean remove = cxEntry.remove(cz);
+            if (!remove) {
+                return;
+            }
 
             if (cxEntry.isEmpty()) {
                 worldEntry.remove(cx);
@@ -289,16 +253,16 @@ public abstract class ChunkWatch implements IChunkWatch {
     @Override
     public boolean isChunkLoaded(int cx, int cz, String worldName) {
         synchronized (m_loadedChunks) {
-            if (!m_loadedChunks.containsKey(worldName)) {
+            final Map<Integer, Set<Integer>> worldEntry = m_loadedChunks.get(worldName);
+            if (worldEntry == null) {
                 return false;
             }
-
-            HashMap<Integer, HashSet<Integer>> worldEntry = m_loadedChunks.get(worldName);
-            if (!worldEntry.containsKey(cx)) {
+            
+            final Set<Integer> cxEntry = worldEntry.get(cx);
+            if (cxEntry == null) {
                 return false;
             }
-
-            HashSet<Integer> cxEntry = worldEntry.get(cx);
+            
             return cxEntry.contains(cz);
         }
     }
@@ -311,13 +275,7 @@ public abstract class ChunkWatch implements IChunkWatch {
                 return;
             }
 
-            m_dispatcher.queueFastOperation(new IAction() {
-
-                @Override
-                public void execute() {
-                    doLoadChunk(cx, cz, worldName);
-                }
-            });
+            m_dispatcher.queueFastOperation(() -> doLoadChunk(cx, cz, worldName));
         } finally {
             remove(cx, cz, worldName);
         }
@@ -334,6 +292,7 @@ public abstract class ChunkWatch implements IChunkWatch {
      * @param cx
      * @param cz
      * @param worldName
+     * @return 
      */
     protected abstract boolean doLoadChunk(int cx, int cz, String worldName);
 

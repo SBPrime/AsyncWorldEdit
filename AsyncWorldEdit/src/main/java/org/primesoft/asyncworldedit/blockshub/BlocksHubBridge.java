@@ -51,9 +51,9 @@ import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
@@ -77,6 +77,7 @@ import org.primesoft.asyncworldedit.platform.api.IPlatform;
  * @author SBPrime
  */
 public class BlocksHubBridge implements IBlocksHubBridge {
+    private final static Object ITEM = new Object();
 
     /**
      * The current integrator
@@ -86,7 +87,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     /**
      * List of all factories
      */
-    private final List<IBlocksHubFactory> m_factories = new ArrayList<>();
+    private final Map<IBlocksHubFactory, Object> m_factories = new ConcurrentHashMap<>();
 
     /**
      * The platform
@@ -116,14 +117,12 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     }
 
     @Override
-    public void addFacroty(IBlocksHubFactory factory) {
-        synchronized (m_factories) {
-            if (factory == null || m_factories.contains(factory)) {
-                return;
-            }
-
-            m_factories.add(factory);
+    public void addFacroty(IBlocksHubFactory factory) {        
+        if (factory == null) {
+            return;
         }
+
+        m_factories.put(factory, ITEM);
     }
 
     @Override
@@ -428,12 +427,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
 
         log(String.format("Initializing BlocksHub using %1$s...", blocksHubPlugin.getClass().getName()));
 
-        IBlocksHubFactory[] factories;
-        synchronized (m_factories) {
-            factories = m_factories.toArray(new IBlocksHubFactory[0]);
-        }
-
-        for (IBlocksHubFactory factory : factories) {
+        for (IBlocksHubFactory factory : m_factories.keySet()) {
             IBlocksHubIntegration integrator = create(factory, blocksHubPlugin);
 
             if (integrator != null) {

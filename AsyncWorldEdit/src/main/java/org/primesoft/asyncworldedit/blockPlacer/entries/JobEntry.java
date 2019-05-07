@@ -49,8 +49,8 @@ package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
@@ -70,6 +70,8 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  * @author SBPrime
  */
 public class JobEntry extends BlockPlacerEntry implements IJobEntry {
+    private final static Object ITEM = new Object();    
+    
     /**
      * Job name
      */
@@ -98,7 +100,7 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
     /**
      * All job state changed events
      */
-    private final List<IJobEntryListener> m_jobStateChanged;
+    private final Map<IJobEntryListener, Object> m_jobStateChanged;
     
     /**
      * The event bus
@@ -128,7 +130,7 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = null;
-        m_jobStateChanged = new ArrayList<IJobEntryListener>();
+        m_jobStateChanged = new ConcurrentHashMap<>();
         
         m_eventBus = AwePlatform.getInstance().getCore().getEventBus();
     }
@@ -150,7 +152,7 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
         m_name = name;
         m_status = JobStatus.Initializing;
         m_cEditSession = cEditSession;
-        m_jobStateChanged = new ArrayList<IJobEntryListener>();
+        m_jobStateChanged = new ConcurrentHashMap<>();
         
         m_eventBus = AwePlatform.getInstance().getCore().getEventBus();
     }
@@ -166,11 +168,7 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
             return;
         }
 
-        synchronized (m_jobStateChanged) {
-            if (!m_jobStateChanged.contains(listener)) {
-                m_jobStateChanged.add(listener);
-            }
-        }
+        m_jobStateChanged.put(listener, ITEM);
     }
 
     /**
@@ -184,11 +182,7 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
             return;
         }
 
-        synchronized (m_jobStateChanged) {
-            if (m_jobStateChanged.contains(listener)) {
-                m_jobStateChanged.remove(listener);
-            }
-        }
+        m_jobStateChanged.remove(listener);
     }
 
     /**
@@ -330,10 +324,8 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
      * Inform the listener of state changed
      */
     private void callStateChangedEvents() {
-        synchronized (m_jobStateChanged) {
-            for (IJobEntryListener listener : m_jobStateChanged) {
-                listener.jobStateChanged(this);
-            }
+        for (IJobEntryListener listener : m_jobStateChanged.keySet()) {
+            listener.jobStateChanged(this);
         }
     }
 }

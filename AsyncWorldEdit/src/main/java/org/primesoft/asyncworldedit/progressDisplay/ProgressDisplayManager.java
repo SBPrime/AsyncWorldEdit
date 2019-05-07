@@ -48,6 +48,8 @@
 package org.primesoft.asyncworldedit.progressDisplay;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.primesoft.asyncworldedit.api.progressDisplay.IProgressDisplay;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.MessageSystem;
@@ -67,7 +69,7 @@ public class ProgressDisplayManager implements IProgressDisplay, IProgressDispla
     /**
      * List of all registered backends
      */
-    private final HashMap<Class<?>, IProgressDisplay> m_registeredProgressBackends = new HashMap<Class<?>, IProgressDisplay>();
+    private final Map<Class<?>, IProgressDisplay> m_registeredProgressBackends = new ConcurrentHashMap<>();
 
     @Override
     public void disableMessage(IPlayerEntry playerEntry) {
@@ -82,13 +84,11 @@ public class ProgressDisplayManager implements IProgressDisplay, IProgressDispla
             return;
         }
 
-        synchronized (m_registeredProgressBackends) {
-            for (IProgressDisplay pd : m_registeredProgressBackends.values()) {
-                try {
-                    pd.disableMessage(playerEntry);
-                } catch (Error e) {
-                    ExceptionHelper.printException(e, String.format("Progress display %1$s thrown an error: ", pd.getName()));
-                }
+        for (IProgressDisplay pd : m_registeredProgressBackends.values()) {
+            try {
+                pd.disableMessage(playerEntry);
+            } catch (Error e) {
+                ExceptionHelper.printException(e, String.format("Progress display %1$s thrown an error: ", pd.getName()));
             }
         }
     }
@@ -114,13 +114,11 @@ public class ProgressDisplayManager implements IProgressDisplay, IProgressDispla
             return;
         }
         
-        synchronized (m_registeredProgressBackends) {
-            for (IProgressDisplay pd : m_registeredProgressBackends.values()) {
-                try {
-                    pd.setMessage(playerEntry, jobsCount, queuedBlocks, maxQueuedBlocks, timeLeft, placingSpeed, percentage);
-                } catch (Error e) {
-                    ExceptionHelper.printException(e, String.format("Progress display %1$s thrown an error:", pd.getName()));
-                }
+        for (IProgressDisplay pd : m_registeredProgressBackends.values()) {
+            try {
+                pd.setMessage(playerEntry, jobsCount, queuedBlocks, maxQueuedBlocks, timeLeft, placingSpeed, percentage);
+            } catch (Error e) {
+                ExceptionHelper.printException(e, String.format("Progress display %1$s thrown an error:", pd.getName()));
             }
         }
     }
@@ -135,17 +133,14 @@ public class ProgressDisplayManager implements IProgressDisplay, IProgressDispla
         if (backend == null) {
             return false;
         }
-        synchronized (m_registeredProgressBackends) {
-            Class<?> cls = backend.getClass();
-            if (m_registeredProgressBackends.containsKey(cls)) {
-                log(String.format("Duplicate display backend %1$s registration.", backend.getName()));
-                return false;
-            }
 
-            m_registeredProgressBackends.put(cls, backend);
-
-            log(String.format("Display backend %1$s registered.", backend.getName()));
+        final Class<?> cls = backend.getClass();
+        if (m_registeredProgressBackends.computeIfAbsent(cls, _cls -> backend) != backend) {
+            log(String.format("Duplicate display backend %1$s registration.", backend.getName()));
+            return false;
         }
+
+        log(String.format("Display backend %1$s registered.", backend.getName()));
 
         return true;
     }
@@ -155,17 +150,13 @@ public class ProgressDisplayManager implements IProgressDisplay, IProgressDispla
         if (backend == null) {
             return false;
         }
-        synchronized (m_registeredProgressBackends) {
-            Class<?> cls = backend.getClass();
-            if (!m_registeredProgressBackends.containsKey(cls)) {
-                return false;
-            }
-
-            m_registeredProgressBackends.remove(cls);
-
-            log(String.format("Display backend %1$s removed.", backend.getName()));
+            
+        final Class<?> cls = backend.getClass();       
+        if (m_registeredProgressBackends.remove(cls) == null) {
+            return false;
         }
 
+        log(String.format("Display backend %1$s removed.", backend.getName()));
         return true;
     }
 

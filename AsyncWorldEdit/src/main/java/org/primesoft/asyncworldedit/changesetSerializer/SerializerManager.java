@@ -64,11 +64,13 @@ import java.io.RandomAccessFile;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IChangesetSerializer;
@@ -94,7 +96,8 @@ import org.primesoft.asyncworldedit.utils.io.VarInt;
  * @author SBPrime
  */
 public final class SerializerManager implements IInnerSerializerManager {
-
+    private final static Object ITEM = new Object();
+    
     /**
      * The Zero UUID
      */
@@ -112,12 +115,12 @@ public final class SerializerManager implements IInnerSerializerManager {
     /**
      * List of all undo descriptors
      */
-    private final Map<File, UndoDescriptor> m_undoDescriptors = new LinkedHashMap<>();
+    private final Map<File, UndoDescriptor> m_undoDescriptors = new HashMap<>();
 
     /**
      * List of all known serializers
      */
-    private final List<IChangesetSerializer> m_serializers = new LinkedList<>();
+    private final Map<IChangesetSerializer, Object> m_serializers = new ConcurrentHashMap<>();
 
     /**
      * The AWE
@@ -130,9 +133,7 @@ public final class SerializerManager implements IInnerSerializerManager {
             return;
         }
 
-        synchronized (m_serializers) {
-            m_serializers.add(serializer);
-        }
+        m_serializers.put(serializer, ITEM);
     }
 
     @Override
@@ -141,9 +142,7 @@ public final class SerializerManager implements IInnerSerializerManager {
             return;
         }
 
-        synchronized (m_serializers) {
-            m_serializers.remove(serializer);
-        }
+        m_serializers.remove(serializer);
     }
 
     /**
@@ -153,11 +152,9 @@ public final class SerializerManager implements IInnerSerializerManager {
      * @return
      */
     private IChangesetSerializer getSerializer(String className) {
-        synchronized (m_serializers) {
-            for (IChangesetSerializer serializer : m_serializers) {
-                if (serializer.canSerialize(className)) {
-                    return serializer;
-                }
+        for (IChangesetSerializer serializer : m_serializers.keySet()) {
+            if (serializer.canSerialize(className)) {
+                return serializer;
             }
         }
         return null;
@@ -207,11 +204,7 @@ public final class SerializerManager implements IInnerSerializerManager {
         }
 
         try {
-            UndoDescriptor ud = new UndoDescriptor(undoFile);
-
-            synchronized (m_undoDescriptors) {
-                m_undoDescriptors.put(undoFile, ud);
-            }
+            m_undoDescriptors.put(undoFile, new UndoDescriptor(undoFile));
 
             return undoFile;
         } catch (IOException ioe) {
@@ -227,13 +220,9 @@ public final class SerializerManager implements IInnerSerializerManager {
             return;
         }
 
-        UndoDescriptor ud;
-        synchronized (m_undoDescriptors) {
-            ud = m_undoDescriptors.get(storageFile);
-            if (ud == null) {
-                return;
-            }
-            m_undoDescriptors.remove(storageFile);
+        final UndoDescriptor ud = m_undoDescriptors.remove(storageFile);
+        if (ud == null) {
+            return;
         }
 
         try {
@@ -249,9 +238,7 @@ public final class SerializerManager implements IInnerSerializerManager {
             return null;
         }
 
-        synchronized (m_undoDescriptors) {
-            return m_undoDescriptors.get(storageFile);
-        }
+        return m_undoDescriptors.get(storageFile);
     }
 
     @Override
@@ -260,12 +247,9 @@ public final class SerializerManager implements IInnerSerializerManager {
             return;
         }
 
-        UndoDescriptor ud;
-        synchronized (m_undoDescriptors) {
-            ud = m_undoDescriptors.get(storageFile);
-            if (ud == null) {
-                return;
-            }
+        final UndoDescriptor ud = m_undoDescriptors.get(storageFile);
+        if (ud == null) {
+            return;
         }
 
         final StreamProvider sp = StreamProvider.getInstance();
@@ -366,7 +350,7 @@ public final class SerializerManager implements IInnerSerializerManager {
     @Override
     public List<Change> load(File storageFile, int entries,
             IPlayerEntry player, ICancelabeEditSession editSession) {
-        final ArrayList<Change> result = new ArrayList<Change>();
+        final ArrayList<Change> result = new ArrayList<>();
         if (storageFile == null || entries == 0) {
             return result;
         }
@@ -377,12 +361,9 @@ public final class SerializerManager implements IInnerSerializerManager {
         long minMemoryHard = mConfig.getMinMemoryHard() * 1000;
         long minMemorySoft = mConfig.getMinMemorySoft() * 1000;
 
-        UndoDescriptor ud;
-        synchronized (m_undoDescriptors) {
-            ud = m_undoDescriptors.get(storageFile);
-            if (ud == null) {
-                return result;
-            }
+        final UndoDescriptor ud = m_undoDescriptors.get(storageFile);
+        if (ud == null) {
+            return result;
         }
 
         final Object mutex = ud.getMutex();

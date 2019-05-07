@@ -48,9 +48,9 @@
 package org.primesoft.asyncworldedit.core;
 
 import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.Vector3;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is responsible for freezing all physics in edited regions
@@ -72,7 +72,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
     /**
      * Locked blocks
      */
-    private final HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> m_locked;
+    private final Map<String, Map<Integer, Map<Integer, Map<Integer, Integer>>>> m_locked;
 
     /**
      * Create new instanc of the class
@@ -118,35 +118,10 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
                 return;
             }
 
-            HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> xhash;
-            if (!m_locked.containsKey(name)) {
-                xhash = new HashMap<>();
-                m_locked.put(name, xhash);
-            } else {
-                xhash = m_locked.get(name);
-            }
-
-            HashMap<Integer, HashMap<Integer, Integer>> yhash;
-            if (!xhash.containsKey(x)) {
-                yhash = new HashMap<>();
-                xhash.put(x, yhash);
-            } else {
-                yhash = xhash.get(x);
-            }
-
-            HashMap<Integer, Integer> zhash;
-            if (!yhash.containsKey(y)) {
-                zhash = new HashMap<>();
-                yhash.put(y, zhash);
-            } else {
-                zhash = yhash.get(y);
-            }
-
-            if (!zhash.containsKey(z)) {
-                zhash.put(z, 1);
-            } else {
-                zhash.put(z, zhash.get(z) + 1);
-            }
+            Map<Integer, Map<Integer, Map<Integer, Integer>>> xhash = m_locked.computeIfAbsent(name, i -> new HashMap<>());
+            Map<Integer, Map<Integer, Integer>> yhash = xhash.computeIfAbsent(x, i -> new HashMap<>());
+            Map<Integer, Integer> zhash = yhash.computeIfAbsent(y, i -> new HashMap<>());
+            zhash.compute(z, (_z, value) -> value == null ? 1 : (value + 1));           
         }
     }
 
@@ -167,31 +142,28 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
                 return;
             }
 
-            if (!m_locked.containsKey(name)) {
-                return;
-            }
-            HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> xhash = m_locked.get(name);
-
-            if (!xhash.containsKey(x)) {
-                return;
-            }
-            HashMap<Integer, HashMap<Integer, Integer>> yhash = xhash.get(x);
-
-            if (!yhash.containsKey(y)) {
-                return;
-            }
-            HashMap<Integer, Integer> zhash = yhash.get(y);
-
-            Integer val = zhash.get(z);
-            if (val == null) {
+            final Map<Integer, Map<Integer, Map<Integer, Integer>>> xhash = m_locked.get(name);
+            if (xhash == null) {
                 return;
             }
 
-            val = val - 1;
-            zhash.remove(z);
-            if (val != 0) {
-                zhash.put(z, val);
+            final Map<Integer, Map<Integer, Integer>> yhash = xhash.get(x);
+            if (yhash == null) {
+                return;
             }
+            
+            final Map<Integer, Integer> zhash = yhash.get(y);
+            if (zhash == null) {
+                return;
+            }
+            
+            zhash.compute(z, (_z, value) -> {
+                if (value == null || value == 1) {
+                    return null;
+                }
+                
+                return value - 1;
+            });
 
             if (zhash.isEmpty()) {
                 yhash.remove(y);
@@ -217,24 +189,26 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
         final int delta = 1;
 
         synchronized (m_mutex) {
-            if (!m_locked.containsKey(name)) {
+            Map<Integer, Map<Integer, Map<Integer, Integer>>> xhash = m_locked.get(name);
+            if (xhash == null) {
                 return false;
             }
 
-            HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> xhash = m_locked.get(name);
             for (int px = x - delta; px <= x + delta; px++) {
-                if (xhash.containsKey(px)) {
-                    HashMap<Integer, HashMap<Integer, Integer>> yhash = xhash.get(px);
+                final Map<Integer, Map<Integer, Integer>> yhash = xhash.get(px);
+                if (yhash == null) {
+                    continue;
+                }
 
-                    for (int py = y - delta; py <= y + delta; py++) {
-                        if (yhash.containsKey(py)) {
-                            HashMap<Integer, Integer> zhash = yhash.get(py);
+                for (int py = y - delta; py <= y + delta; py++) {
+                    final Map<Integer, Integer> zhash = yhash.get(py);
+                    if (zhash == null) {
+                        continue;
+                    }
 
-                            for (int pz = z - delta; pz <= z + delta; pz++) {
-                                if (zhash.containsKey(pz)) {
-                                    return true;
-                                }
-                            }
+                    for (int pz = z - delta; pz <= z + delta; pz++) {
+                        if (zhash.containsKey(pz)) {
+                            return true;
                         }
                     }
                 }

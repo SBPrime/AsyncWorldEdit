@@ -64,8 +64,8 @@ import org.primesoft.asyncworldedit.worldedit.history.changeset.FileChangeSet;
  */
 public class SerializableSessionList extends LinkedList<EditSession> {
 
-    private final Map<EditSession, Integer> m_usedId = new LinkedHashMap<EditSession, Integer>();
-    private final LinkedList<Integer> m_availableIds = new LinkedList<Integer>();
+    private final Map<EditSession, Integer> m_usedId = new LinkedHashMap<>();
+    private final LinkedList<Integer> m_availableIds = new LinkedList<>();
     private final Object m_mutex = new Object();
 
     private int m_id = 0;
@@ -111,12 +111,8 @@ public class SerializableSessionList extends LinkedList<EditSession> {
         }
 
         synchronized (m_mutex) {
-            if (m_usedId.containsKey(session)) {
-                int oldId = m_usedId.get(session);
-                m_usedId.remove(session);
-
-                m_availableIds.add(oldId);
-            }
+            int oldId = m_usedId.remove(session);
+            m_availableIds.add(oldId);
         }
     }
 
@@ -143,7 +139,7 @@ public class SerializableSessionList extends LinkedList<EditSession> {
 
     @Override
     public boolean addAll(Collection<? extends EditSession> c) {
-        List<EditSession> tmp = c == null ? new ArrayList<EditSession>() : new ArrayList<EditSession>(c);
+        List<EditSession> tmp = c == null ? new ArrayList<>() : new ArrayList<>(c);
 
         for (EditSession session : tmp) {
             assignSession(session);
@@ -154,7 +150,7 @@ public class SerializableSessionList extends LinkedList<EditSession> {
 
     @Override
     public boolean addAll(int index, Collection<? extends EditSession> c) {
-        List<EditSession> tmp = c == null ? new ArrayList<EditSession>() : new ArrayList<EditSession>(c);
+        List<EditSession> tmp = c == null ? new ArrayList<>() : new ArrayList<>(c);
 
         for (EditSession session : tmp) {
             assignSession(session);

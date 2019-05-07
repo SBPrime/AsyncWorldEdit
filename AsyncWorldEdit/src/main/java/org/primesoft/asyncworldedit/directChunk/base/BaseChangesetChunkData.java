@@ -70,7 +70,6 @@ import org.primesoft.asyncworldedit.api.directChunk.IDirectChunkAPI;
 import org.primesoft.asyncworldedit.api.directChunk.ISerializedEntity;
 import org.primesoft.asyncworldedit.api.directChunk.IWrappedChunk;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
-import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.directChunk.entries.BiomeEntry;
 import org.primesoft.asyncworldedit.directChunk.entries.BlockEntry;

@@ -57,14 +57,14 @@ import org.primesoft.asyncworldedit.injector.core.InjectorCore;
  * @author SBPrime
  */
 public final class WrappedPlayerData {
-    
+
     private final Object m_mutex = new Object();
 
     private IPlayerEntry m_entry = null;
 
     private World m_world = null;
     private World m_worldAsync = null;
-        
+
     private IPlayerEntry getEntry(Player p) {
         if (m_entry == null) {
             if (m_entry == null) {
@@ -74,21 +74,22 @@ public final class WrappedPlayerData {
         return m_entry;
     }
 
-    
     public World getWorld(Player p, World world) {
-        synchronized (m_mutex) {
-            if (m_world == null || m_world != world) {
-                World aWorld = InjectorCore.getInstance().getClassFactory().wrapWorld(world, getEntry(p));
-                if (aWorld != null) {
-                    m_world = world;
-                    m_worldAsync = aWorld;
-                    
-                    world = aWorld;
+        if (m_world == null || m_world != world) {
+            synchronized (m_mutex) {
+                if (m_world == null || m_world != world) {
+                    World aWorld = InjectorCore.getInstance().getClassFactory().wrapWorld(world, getEntry(p));
+                    if (aWorld != null) {
+                        m_world = world;
+                        m_worldAsync = aWorld;
+
+                        world = aWorld;
+                    } else if (m_world != null) {
+                        m_world = null;
+                    }
                 } else if (m_world != null) {
-                    m_world = null;
+                    world = m_worldAsync;
                 }
-            } else if (m_world != null) {
-                world = m_worldAsync;
             }
         }
 

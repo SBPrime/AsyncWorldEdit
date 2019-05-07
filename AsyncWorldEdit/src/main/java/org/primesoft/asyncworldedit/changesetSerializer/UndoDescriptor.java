@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.primesoft.asyncworldedit.api.changesetSerializer.IMemoryStorage;
 
@@ -68,7 +69,7 @@ public class UndoDescriptor implements IMemoryStorage {
     private final Object m_mutex = new Object();
     private long m_entryIdx;
 
-    private final Map<UUID, Change> m_memoryChanges = new LinkedHashMap<UUID, Change>();
+    private final Map<UUID, Change> m_memoryChanges = new ConcurrentHashMap<UUID, Change>();
 
     /**
      * The current entry IDX
@@ -131,9 +132,7 @@ public class UndoDescriptor implements IMemoryStorage {
         }
 
         UUID result = UUID.randomUUID();
-        synchronized (m_memoryChanges) {
-            m_memoryChanges.put(result, change);
-        }
+        m_memoryChanges.put(result, change);
 
         return result;
     }
@@ -150,13 +149,7 @@ public class UndoDescriptor implements IMemoryStorage {
             return null;
         }
 
-        synchronized (m_memoryChanges) {
-            if (m_memoryChanges.containsKey(uuid)) {
-                return m_memoryChanges.get(uuid);
-            }
-        }
-
-        return null;
+        return m_memoryChanges.get(uuid);
     }
 
     @Override
@@ -165,11 +158,7 @@ public class UndoDescriptor implements IMemoryStorage {
             return;
         }
 
-        synchronized (m_memoryChanges) {
-            if (m_memoryChanges.containsKey(uuid)) {
-                m_memoryChanges.remove(uuid);
-            }
-        }
+        m_memoryChanges.remove(uuid);
     }
 
     void close() throws IOException {

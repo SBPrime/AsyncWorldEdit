@@ -50,7 +50,9 @@ package org.primesoft.asyncworldedit.playerManager;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
@@ -88,26 +90,21 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
     /**
      * List of know players
      */
-    private final HashMap<UUID, IPlayerEntry> m_playersUids;
+    private final Map<UUID, IPlayerEntry> m_playersUids = new ConcurrentHashMap<>();
 
     public PlayerManager(IAsyncWorldEditCore parent) {
-        m_playersUids = new HashMap<UUID, IPlayerEntry>();
         m_parrent = parent;
 
-        synchronized (m_playersUids) {
-            m_playersUids.put(UUID_CONSOLE, CONSOLE);
-            m_playersUids.put(UUID_UNKNOWN, UNKNOWN);
-        }
+        m_playersUids.put(UUID_CONSOLE, CONSOLE);
+        m_playersUids.put(UUID_UNKNOWN, UNKNOWN);
     }
 
     /**
      * Update AWE permission groups
      */
     public void updateGroups() {
-        synchronized (m_playersUids) {
-            for (IPlayerEntry pe : m_playersUids.values()) {
-                pe.updatePermissionGroup();
-            }
+        for (IPlayerEntry pe : m_playersUids.values()) {
+            pe.updatePermissionGroup();
         }
     }
 
@@ -115,37 +112,28 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
     public IPlayerEntry addPlayer(IPlayerEntry player) {
         UUID uuid = player.getUUID();
 
-        synchronized (m_playersUids) {
-            IPlayerEntry wrapper = m_playersUids.get(uuid);
-
-            if (wrapper == null) {
-                IBlockPlacer bp = m_parrent.getBlockPlacer();
-                IPlayerEntry[] players = bp.getAllPlayers();
-                for (IPlayerEntry entry : players) {
-                    if (entry.getUUID().equals(uuid)) {
-                        wrapper = entry;
-                        break;
-                    }
+        final IPlayerEntry wrapper = m_playersUids.computeIfAbsent(uuid, _uuid -> {
+            IBlockPlacer bp = m_parrent.getBlockPlacer();
+            IPlayerEntry[] players = bp.getAllPlayers();
+            for (IPlayerEntry entry : players) {
+                if (entry.getUUID().equals(_uuid)) {
+                    return entry;
                 }
             }
-
-            if (wrapper != null) {
-                wrapper.update(player);
-                return wrapper;
-            }
-
-            m_playersUids.put(uuid, player);
-
+            
             return player;
+        });
+
+        if (wrapper != player) {
+            wrapper.update(player);
         }
+
+        return wrapper;
     }
 
     @Override
     public void removePlayer(UUID uuid) {
-        IPlayerEntry entry;
-        synchronized (m_playersUids) {
-            entry = m_playersUids.remove(uuid);
-        }
+        IPlayerEntry entry = m_playersUids.remove(uuid);
 
         if (entry != null) {
             if (entry.getPermissionGroup().getCleanOnLogout()) {
@@ -250,13 +238,9 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
             return CONSOLE;
         }
 
-        IPlayerEntry result;
-
-        synchronized (m_playersUids) {
-            result = m_playersUids.get(playerUuid);
-            if (result != null) {
-                return result;
-            }
+        IPlayerEntry result = m_playersUids.get(playerUuid);
+        if (result != null) {
+            return result;
         }
 
         /**
@@ -277,11 +261,9 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
             return CONSOLE;
         }
 
-        synchronized (m_playersUids) {
-            for (IPlayerEntry p : m_playersUids.values()) {
-                if (p.getName().equalsIgnoreCase(playerName)) {
-                    return p;
-                }
+        for (IPlayerEntry p : m_playersUids.values()) {
+            if (p.getName().equalsIgnoreCase(playerName)) {
+                return p;
             }
         }
 
@@ -309,16 +291,7 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
             return null;
         }
 
-        IPlayerEntry result;
-
-        synchronized (m_playersUids) {
-            result = m_playersUids.get(playerUuid);
-            if (result != null) {
-                return result;
-            }
-        }
-
-        return null;
+        return m_playersUids.get(playerUuid);
     }
     
     /**

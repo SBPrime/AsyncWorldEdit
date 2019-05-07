@@ -47,11 +47,15 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
+import java.util.Comparator;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerPlayer;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerEntry;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -82,7 +86,8 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
     /**
      * List of jobs
      */
-    private final HashMap<Integer, IJobEntry> m_jobs;
+    private final Map<Integer, IJobEntry> m_jobs;
+    private final AtomicInteger m_jobsCount = new AtomicInteger(0);
 
     /**
      * Is the player informed about queue limit reached
@@ -106,9 +111,9 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     public BlockPlacerPlayer(IPlayerEntry player) {
         m_player = player;
-        m_queue = new LinkedList<IBlockPlacerEntry>();
+        m_queue = new LinkedList<>();
         m_speed = 0;
-        m_jobs = new HashMap<Integer, IJobEntry>();
+        m_jobs = new ConcurrentHashMap<>();
     }
 
     /**
@@ -189,15 +194,9 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public int getNextJobId() {
-        int maxId = -1;
-        synchronized (m_jobs) {
-            for (Integer id : m_jobs.keySet()) {
-                if (maxId < id) {
-                    maxId = id;
-                }
-            }
-        }
-        return maxId + 1;
+        Optional<Integer> maxId = m_jobs.keySet().stream().max(Comparator.comparingInt(i -> i));
+        
+        return maxId.orElse(-1) + 1;
     }
 
     /**
@@ -209,26 +208,33 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public boolean addJob(IJobEntry job, boolean force) {
-        boolean add;
-        int maxJobs = m_player.getPermissionGroup().getMaxJobs();
-        synchronized (m_jobs) {
-            int id = job.getJobId();
-            int count = m_jobs.size();
-            boolean contains = m_jobs.containsKey(id);
-            add = contains || force || 
+        final int maxJobs = m_player.getPermissionGroup().getMaxJobs();
+        final int id = job.getJobId();
+        
+        final int jobCountAfterAdd = m_jobsCount.incrementAndGet();
+        
+        final IJobEntry result = m_jobs.compute(id, (jId, oldJob) -> {
+            final boolean add = oldJob != null || force || 
                     job instanceof UndoJob || job instanceof RedoJob
-                    || (count + 1) <= maxJobs || maxJobs < 0;
-
-            if (contains) {
-                m_jobs.remove(id);
+                    || jobCountAfterAdd <= maxJobs || maxJobs < 0;
+            
+            if (oldJob != null) {
+                m_jobsCount.decrementAndGet();
             }
-
-            if (add) {
-                m_jobs.put(id, job);
+            
+            if (!add) {
+                return null;
             }
+            
+            return job;
+        });
+        
+        if (result == null) {
+            m_jobsCount.decrementAndGet();
+            return false;
         }
-
-        return add;
+        
+        return true;
     }
 
     /**
@@ -241,14 +247,8 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
         if (job == null) {
             return;
         }
-        synchronized (m_jobs) {
-            int id = job.getJobId();
-            if (!m_jobs.containsKey(id)) {
-                return;
-            }
-            m_jobs.get(id).cancel();
-            m_jobs.remove(id);
-        }
+        
+        removeJob(job.getJobId());
     }
 
     /**
@@ -258,13 +258,11 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public void removeJob(int jobId) {
-        synchronized (m_jobs) {
-            if (!m_jobs.containsKey(jobId)) {
-                return;
-            }
-            m_jobs.get(jobId).cancel();
-            m_jobs.remove(jobId);
-        }
+        m_jobs.computeIfPresent(jobId, (id, j) -> {
+            m_jobsCount.decrementAndGet();
+            j.cancel();
+            return null;
+        });
     }
 
     /**
@@ -274,9 +272,7 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public IJobEntry[] getJobs() {
-        synchronized (m_jobs) {
-            return m_jobs.values().toArray(new IJobEntry[0]);
-        }
+        return m_jobs.values().toArray(new IJobEntry[0]);
     }
 
     /**
@@ -286,15 +282,11 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public void printJobs(List<String> lines) {
-        synchronized (m_jobs) {
-            if (m_jobs.isEmpty()) {
-                return;
-            }
-            lines.add(MessageType.CMD_JOBS_HEADER.format());
-            for (IJobEntry job : m_jobs.values()) {
-                lines.add(MessageType.CMD_JOBS_LINE.format(job.toString(), job.getStatusString()));
-            }
-        }
+        lines.add(MessageType.CMD_JOBS_HEADER.format());
+        m_jobs.values().stream()
+                .sorted(Comparator.comparingInt(i -> i.getJobId()))
+                .map(job -> MessageType.CMD_JOBS_LINE.format(job.toString(), job.getStatusString()))
+                .forEach(lines::add);
     }
 
     /**
@@ -304,9 +296,7 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public boolean hasJobs() {
-        synchronized (m_jobs) {
-            return !m_jobs.isEmpty();
-        }
+        return !m_jobs.isEmpty();
     }
 
     /**
@@ -317,9 +307,7 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public IJobEntry getJob(int jobId) {
-        synchronized (m_jobs) {
-            return m_jobs.get(jobId);
-        }
+        return m_jobs.get(jobId);
     }
 
     /**

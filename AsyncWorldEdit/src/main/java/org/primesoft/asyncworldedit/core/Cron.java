@@ -247,7 +247,11 @@ public final class Cron implements ICron {
     }
 
     private void deleteFile(File file, boolean showMessages, boolean showError,
-            IInOutParam<Boolean> headerShown) {
+            IInOutParam<Boolean> headerShown) {    
+        if (file.equals(ConfigProvider.getUndoFolder())) {
+            return;
+        }
+        
         try {
             if (!file.delete()) {
                 if (showMessages || showError) {

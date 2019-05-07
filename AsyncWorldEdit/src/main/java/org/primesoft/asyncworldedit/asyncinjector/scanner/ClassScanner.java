@@ -73,10 +73,11 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
@@ -94,10 +95,12 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
  * @author SBPrime
  */
 public abstract class ClassScanner implements IClassScanner {
+    private static final Object ITEM = new Object();
+    
     /**
      * List of all filters
      */
-    private final List<IClassFilter> m_filters = new LinkedList<>();
+    private final Map<IClassFilter, Object> m_filters = new ConcurrentHashMap<>();
     
     
     private IClassScannerEntry[] m_blackList = new IClassScannerEntry[0];
@@ -370,11 +373,9 @@ public abstract class ClassScanner implements IClassScanner {
             }
         }
 
-        synchronized(m_filters){
-            for(IClassFilter filter : m_filters) {
-                if (!filter.accept(oClass, f)) {
-                    return true;
-                }
+        for(IClassFilter filter : m_filters.keySet()) {
+            if (!filter.accept(oClass, f)) {
+                return true;
             }
         }
         return false;
@@ -403,13 +404,7 @@ public abstract class ClassScanner implements IClassScanner {
             return;
         }
         
-        synchronized(m_filters) {
-            if (m_filters.contains(filter)) {
-                return;
-            }
-            
-            m_filters.add(filter);
-        }
+        m_filters.put(filter, ITEM);
     }
 
     @Override
@@ -418,13 +413,7 @@ public abstract class ClassScanner implements IClassScanner {
             return;
         }
         
-        synchronized(m_filters) {
-            if (!m_filters.contains(filter)) {
-                return;
-            }
-            
-            m_filters.remove(filter);
-        }
+        m_filters.remove(filter);
     }
 
     private boolean isStatic(Field f) {
