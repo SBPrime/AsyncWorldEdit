@@ -47,9 +47,6 @@
  */
 package org.primesoft.asyncworldedit.changesetSerializer;
 
-import org.primesoft.asyncworldedit.changesetSerializer.serializers.SerializerSetChangesetChunkChange;
-import org.primesoft.asyncworldedit.changesetSerializer.serializers.SerializerRelightChange;
-import org.primesoft.asyncworldedit.changesetSerializer.serializers.SerializerChunkFlushChange;
 import org.primesoft.asyncworldedit.changesetSerializer.serializers.SerializerBlockPlacerChange;
 import org.primesoft.asyncworldedit.changesetSerializer.serializers.SerializerBlockChange;
 import com.sk89q.worldedit.history.change.Change;
@@ -65,8 +62,6 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -169,9 +164,6 @@ public final class SerializerManager implements IInnerSerializerManager {
         addSerializer(new SerializerBlockChange());
         addSerializer(new SerializerBiomeChange());
         addSerializer(new SerializerBlockPlacerChange(this, m_awe.getBlockPlacer()));
-        addSerializer(new SerializerChunkFlushChange(m_awe));
-        addSerializer(new SerializerRelightChange(m_awe));
-        addSerializer(new SerializerSetChangesetChunkChange(m_awe));
     }
 
     @Override

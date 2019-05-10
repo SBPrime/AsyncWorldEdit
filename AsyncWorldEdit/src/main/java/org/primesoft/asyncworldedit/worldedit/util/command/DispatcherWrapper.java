@@ -50,12 +50,6 @@ package org.primesoft.asyncworldedit.worldedit.util.command;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandLocals;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.util.command.CommandCallable;
-import com.sk89q.worldedit.util.command.CommandMapping;
-import com.sk89q.worldedit.util.command.Dispatcher;
-import com.sk89q.worldedit.util.command.SimpleCommandMapping;
-import com.sk89q.worldedit.util.command.SimpleDescription;
-import com.sk89q.worldedit.util.command.SimpleDispatcher;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -71,8 +65,8 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  *
  * @author SBPrime
  */
-public class DispatcherWrapper implements Dispatcher {
-
+public class DispatcherWrapper /*implements Dispatcher*/ {
+/*
     private final Dispatcher m_parent;
 
     private final Map<String, CommandMapping> m_commandsOverride = new HashMap<>();
@@ -225,7 +219,7 @@ public class DispatcherWrapper implements Dispatcher {
     public List<String> getSuggestions(String arguments, CommandLocals locals) throws CommandException {
         return m_implementation.getSuggestions(arguments, locals);
     }
-
+*/
     /**
      * Cleanup commands to allow
      *
@@ -233,7 +227,7 @@ public class DispatcherWrapper implements Dispatcher {
      * @param callable
      * @return unique aliases
      */
-    private String[] injectOverride(CommandCallable callable, String[] alias) {
+    /*private String[] injectOverride(CommandCallable callable, String[] alias) {
         HashSet<String> known = new HashSet<>(m_parent.getAliases());
         List<String> result = new ArrayList<>(alias.length);
         List<String> toOverride = new ArrayList<>(alias.length);
@@ -254,5 +248,5 @@ public class DispatcherWrapper implements Dispatcher {
         }
 
         return result.toArray(new String[0]);
-    }
+    }*/
 }

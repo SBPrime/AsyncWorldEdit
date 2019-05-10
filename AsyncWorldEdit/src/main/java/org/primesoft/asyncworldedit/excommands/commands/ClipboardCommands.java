@@ -49,9 +49,6 @@ package org.primesoft.asyncworldedit.excommands.commands;
 
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.minecraft.util.commands.Logging;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.PLACEMENT;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEditException;
@@ -71,8 +68,6 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
 import com.sk89q.worldedit.session.ClipboardHolder;
-import com.sk89q.worldedit.util.command.binding.Switch;
-import com.sk89q.worldedit.util.command.parametric.Optional;
 import org.primesoft.asyncworldedit.injector.injected.function.operation.IForwardExtentCopy;
 
 /**
@@ -80,7 +75,7 @@ import org.primesoft.asyncworldedit.injector.injected.function.operation.IForwar
  * @author SBPrime
  */
 public class ClipboardCommands {
-    @Command(
+/*    @Command(
             aliases = {"/copy"},
             flags = "emb",
             desc = "Copy the selection to the clipboard",
@@ -203,5 +198,5 @@ public class ClipboardCommands {
 }
 
         player.print("The clipboard has been pasted at " + to);
-    }
+    }*/
 }

@@ -55,7 +55,7 @@ import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.history.change.EntityCreate;
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.history.change.BiomeChange;
@@ -79,8 +79,8 @@ public class ExtendedChangeSetExtent extends ChangeSetExtent {
     }
 
     @Override
-    public boolean setBiome(BlockVector2 position, BaseBiome biome) {
-        BaseBiome previous = getBiome(position);
+    public boolean setBiome(BlockVector2 position, BiomeType biome) {
+        BiomeType previous = getBiome(position);
 
         try {
             m_changeSet.addExtended(new BiomeChange(position, previous, biome), m_cancelableEditSession);

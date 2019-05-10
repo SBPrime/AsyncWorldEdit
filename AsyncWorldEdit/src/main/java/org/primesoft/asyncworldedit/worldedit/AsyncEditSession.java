@@ -63,7 +63,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import java.util.List;
@@ -228,7 +228,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
      */
     @Override
     public int makeBiomeShape(final Region region, final Vector3 zero, final Vector3 unit,
-            final BaseBiome biomeType, final String expressionString,
+            final BiomeType biomeType, final String expressionString,
             final boolean hollow)
             throws ExpressionException, MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.makeBiomeShape);
@@ -976,8 +976,8 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     }
 
     @Override
-    public int removeNear(BlockVector3 position, BlockType blockType, int apothem) throws MaxChangedBlocksException {
-        return super.removeNear(position, blockType, apothem); //To change body of generated methods, choose Tools | Templates.
+    public int removeNear(BlockVector3 position, Mask mask, int apothem) throws MaxChangedBlocksException {
+        return super.removeNear(position, mask, apothem); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

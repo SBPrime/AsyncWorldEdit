@@ -49,8 +49,6 @@ package org.primesoft.asyncworldedit.injector.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
-import org.objectweb.asm.AnnotationVisitor;
 
 /**
  *

@@ -50,8 +50,6 @@ package org.primesoft.asyncworldedit.excommands;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.minecraft.util.commands.Logging;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.ALL;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
@@ -59,7 +57,6 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.command.InsufficientArgumentsException;
 import com.sk89q.worldedit.entity.Player;
 import java.io.File;
-import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -69,7 +66,7 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
  * @author SBPrime
  */
 public class ScriptingCommands {
-    private final WorldEdit m_worldEdit;
+/*    private final WorldEdit m_worldEdit;
     
     public ScriptingCommands(WorldEdit worldEdit) {
         m_worldEdit = worldEdit;
@@ -165,5 +162,5 @@ public class ScriptingCommands {
                 }
             }
         });
-    }
+    }*/
 }

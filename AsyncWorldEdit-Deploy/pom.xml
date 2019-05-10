@@ -32,16 +32,6 @@
             <artifactId>AsyncWorldEdit-Utils</artifactId>
             <version>${global.awe.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-BlocksHub_v1x</artifactId>
-            <version>3.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-BlocksHub_v2x</artifactId>
-            <version>3.5.0</version>
-        </dependency>-->
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-BlocksHub_v3x</artifactId>
@@ -78,46 +68,6 @@
         </dependency>
 
         <!-- Direct chunk API -->
-        <!--<dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-spigot_v1_8_R3</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-spigot_v1_9_R1</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-spigot_v1_9_R2</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-spigot_v1_10_R1</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-spigot_v1_11_R1</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-spigot_v1_12_R1</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-spigot_v1_12_R1_12_1</artifactId>
-            <version>3.3.0</version>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-spigot_v1_13</artifactId>
-            <version>${global.awe.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-spigot_v1_13_R2</artifactId>

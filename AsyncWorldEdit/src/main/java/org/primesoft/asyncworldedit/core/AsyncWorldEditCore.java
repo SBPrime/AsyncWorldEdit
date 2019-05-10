@@ -100,7 +100,6 @@ import org.primesoft.asyncworldedit.api.inner.IInitializableAdapter;
 import org.primesoft.asyncworldedit.api.inner.IInnerDirectChunkAPI;
 import org.primesoft.asyncworldedit.api.inner.IMessageProvider;
 import org.primesoft.asyncworldedit.blockshub.BlocksHubBridge;
-import org.primesoft.asyncworldedit.excommands.chunk.DirectChunkCommands;
 import org.primesoft.asyncworldedit.progressDisplay.ProgressDisplayManager;
 import org.primesoft.asyncworldedit.versionChecker.VersionChecker;
 
@@ -344,10 +343,8 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
             if (m_nativeAdapter instanceof IInitializableAdapter) {
                 ((IInitializableAdapter) m_nativeAdapter).initialize(m_dispatcher, m_blocksHubBridge);
             }
-            m_directChunkCommands = new DirectChunkCommands(this);
-        } else {
-            m_directChunkCommands = null;
         }
+        m_directChunkCommands = null;
 
         setPlotMeFix(new NullFix());
 

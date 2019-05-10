@@ -54,21 +54,21 @@
     <dependency>
       <groupId>org.primesoft.asyncworldedit</groupId>
       <artifactId>AsyncWorldEdit-API</artifactId>
-      <version>2.2.0-rc-05</version>
+      <version>2.3.0-rc-06</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.primesoft.asyncworldedit</groupId>
       <artifactId>AsyncWorldEdit-Utils</artifactId>
-      <version>3.6.0-rc-05</version>
+      <version>3.6.0-rc-06</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.sk89q.worldedit</groupId>
       <artifactId>worldedit</artifactId>
-      <version>7.0.0-beta-05</version>
+      <version>7.0.0-dev-4253</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.0-beta-05.jar</systemPath>
+      <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.0-dev-4253.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.bukkit</groupId>

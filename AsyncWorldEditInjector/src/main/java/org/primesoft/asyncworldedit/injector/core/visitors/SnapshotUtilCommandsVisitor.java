@@ -77,8 +77,8 @@ public final class SnapshotUtilCommandsVisitor extends BaseClassVisitor {
 
     static {
         METHODS = new HashMap<>();
-        METHODS.put("restore",
-                Stream.of("(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Lcom/sk89q/worldedit/EditSession;Lcom/sk89q/minecraft/util/commands/CommandContext;)V")
+        METHODS.put("restore",                           
+                Stream.of("(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Lcom/sk89q/worldedit/EditSession;Ljava/lang/String;)V")
                         .collect(Collectors.toMap(i -> i, i -> buildValidator("restore", i)))
         );
     }

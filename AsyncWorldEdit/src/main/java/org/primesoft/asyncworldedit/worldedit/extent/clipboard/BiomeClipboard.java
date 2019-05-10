@@ -56,7 +56,8 @@ import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
+import com.sk89q.worldedit.world.biome.BiomeTypes;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
@@ -68,7 +69,7 @@ import java.util.List;
  */
 public final class BiomeClipboard implements Clipboard {
 
-    private final BaseBiome[][] m_biomes;
+    private final BiomeType[][] m_biomes;
     private final Region m_region;
     private final int m_minY;
     private final int m_minX;
@@ -79,7 +80,7 @@ public final class BiomeClipboard implements Clipboard {
         m_parent = parent;
 
         BlockVector3 dimensions = getDimensions();
-        m_biomes = new BaseBiome[dimensions.getBlockX()][dimensions.getBlockZ()];
+        m_biomes = new BiomeType[dimensions.getBlockX()][dimensions.getBlockZ()];
 
         m_region = region.clone();
         BlockVector3 v = m_region.getMinimumPoint();
@@ -89,26 +90,26 @@ public final class BiomeClipboard implements Clipboard {
     }
 
     @Override
-    public BaseBiome getBiome(BlockVector2 position) {
-        BaseBiome result = null;
+    public BiomeType getBiome(BlockVector2 position) {
+        BiomeType result = null;
         if (m_region.contains(position.toBlockVector3(m_minY))) {
             result = m_biomes[position.getBlockX() - m_minX][position.getBlockZ() - m_minZ];
         }
 
         if (result == null) {
-            return new BaseBiome(0);
+            return BiomeTypes.PLAINS;
         }
 
         return result;
     }
 
     @Override
-    public boolean setBiome(BlockVector2 position, BaseBiome biome) {
+    public boolean setBiome(BlockVector2 position, BiomeType biome) {
         if (!m_region.contains(position.toBlockVector3(m_minY))) {
             return false;
         }
         
-        m_biomes[position.getBlockX() - m_minX][position.getBlockZ() - m_minZ] = new BaseBiome(biome);
+        m_biomes[position.getBlockX() - m_minX][position.getBlockZ() - m_minZ] = biome;
         return true;
     }
 

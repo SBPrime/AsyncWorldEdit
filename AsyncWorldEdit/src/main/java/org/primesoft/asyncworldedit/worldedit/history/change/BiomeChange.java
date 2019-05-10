@@ -52,7 +52,7 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 
 /**
  * Represents a biome change that may be undone or replayed.
@@ -61,8 +61,8 @@ import com.sk89q.worldedit.world.biome.BaseBiome;
  */
 public class BiomeChange implements Change {
     private final BlockVector2 m_position;
-    private final BaseBiome m_previous;
-    private final BaseBiome m_current;
+    private final BiomeType m_previous;
+    private final BiomeType m_current;
 
     /**
      * Create a new block change.
@@ -71,7 +71,7 @@ public class BiomeChange implements Change {
      * @param previous the previous biome
      * @param current the current biome
      */
-    public BiomeChange(BlockVector2 position, BaseBiome previous, BaseBiome current) {
+    public BiomeChange(BlockVector2 position, BiomeType previous, BiomeType current) {
         m_position = position;
         m_previous = previous;
         m_current = current;
@@ -91,7 +91,7 @@ public class BiomeChange implements Change {
      *
      * @return
      */
-    public BaseBiome getPrevious() {
+    public BiomeType getPrevious() {
         return m_previous;
     }
 
@@ -100,7 +100,7 @@ public class BiomeChange implements Change {
      *
      * @return
      */
-    public BaseBiome getCurrent() {
+    public BiomeType getCurrent() {
         return m_current;
     }
 

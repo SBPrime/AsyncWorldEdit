@@ -47,21 +47,13 @@
  */
 package org.primesoft.asyncworldedit.excommands;
 
-import org.primesoft.asyncworldedit.excommands.commands.ChunkCommands;
 import org.primesoft.asyncworldedit.excommands.commands.RegionCommands;
 import org.primesoft.asyncworldedit.excommands.commands.SchematicCommands;
 import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.extension.platform.CommandManager;
 import com.sk89q.worldedit.extension.platform.Platform;
-import com.sk89q.worldedit.util.command.CommandCallable;
-import com.sk89q.worldedit.util.command.CommandMapping;
-import com.sk89q.worldedit.util.command.Dispatcher;
-import com.sk89q.worldedit.util.command.SimpleCommandMapping;
-import com.sk89q.worldedit.util.command.SimpleDescription;
-import com.sk89q.worldedit.util.command.SimpleDispatcher;
-import com.sk89q.worldedit.util.command.parametric.ParametricBuilder;
 import java.lang.reflect.Field;
 import java.util.Set;
+import org.enginehub.piston.CommandManager;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
 import org.primesoft.asyncworldedit.excommands.commands.ClipboardCommands;
@@ -75,9 +67,9 @@ import org.primesoft.asyncworldedit.worldedit.util.command.DispatcherWrapper;
  * @author SBPrime
  */
 public class CommandsInjector {
-    private final static Field s_simpleCommandCallable_callable 
+/*    private final static Field s_simpleCommandCallable_callable 
             = Reflection.findField(SimpleCommandMapping.class, "callable", "Unable to get callable field from SimpleCommandMapping");
-    
+  */  
     
     /**
      * Start injecting new AWE commands to WE
@@ -87,7 +79,7 @@ public class CommandsInjector {
      * @param platform
      * @param commandManager
      */
-    public static void injectCommands(WorldEdit worldEdit, IAsyncWorldEdit api,
+/*    public static void injectCommands(WorldEdit worldEdit, IAsyncWorldEdit api,
             Platform platform, CommandManager commandManager) {
         Dispatcher dispatcher = commandManager.getDispatcher();
 
@@ -137,7 +129,7 @@ public class CommandsInjector {
      * @param commandGroup
      * @param object
      */
-    private static void injectCommmands(ParametricBuilder builder, CommandMapping commandGroup, Object object) {
+/*    private static void injectCommmands(ParametricBuilder builder, CommandMapping commandGroup, Object object) {
         if (commandGroup == null) {
             log("Unable to inject commands: command group not found.");
             return;
@@ -170,7 +162,7 @@ public class CommandsInjector {
      * @param mainCommand
      * @return
      */
-    private static ParametricBuilder findBuilder(Dispatcher dispatcher, CommandMapping mainCommand) {
+  /*  private static ParametricBuilder findBuilder(Dispatcher dispatcher, CommandMapping mainCommand) {
         CommandCallable callable = null;
         boolean loop = false;
         do {
@@ -203,5 +195,5 @@ public class CommandsInjector {
         cmdDescription.setDescription(description);
 
         return command;
-    }
+    }*/
 }

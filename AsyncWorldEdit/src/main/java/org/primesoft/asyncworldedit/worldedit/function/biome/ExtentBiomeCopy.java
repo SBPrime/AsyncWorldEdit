@@ -53,9 +53,10 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.Transform;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  *
@@ -71,7 +72,7 @@ public class ExtentBiomeCopy implements RegionFunction {
 
     private final Transform m_transform;
 
-    private final HashMap<Integer, HashMap<Integer, Integer>> m_biomeCache;
+    private final Map<Integer, Map<Integer, String>> m_biomeCache;
 
     /**
      * Make a new biome copy.
@@ -100,7 +101,7 @@ public class ExtentBiomeCopy implements RegionFunction {
 
     @Override
     public boolean apply(BlockVector3 position) throws WorldEditException {
-        BaseBiome biome = m_source.getBiome(position.toBlockVector2());
+        BiomeType biome = m_source.getBiome(position.toBlockVector2());
         BlockVector3 orig = position.subtract(m_from);
         BlockVector3 transformed = m_transform.apply(orig.toVector3()).toBlockPoint();
 
@@ -112,15 +113,11 @@ public class ExtentBiomeCopy implements RegionFunction {
         Integer x = biomePosition.getBlockX();
         Integer z = biomePosition.getBlockZ();
 
-        HashMap<Integer, Integer> entry = m_biomeCache.get(x);
-        if (entry == null) {
-            entry = new LinkedHashMap<Integer, Integer>();
-            m_biomeCache.put(x, entry);
-        }
+        Map<Integer, String> entry = m_biomeCache.computeIfAbsent(x, _x -> new LinkedHashMap<>());
 
-        Integer oldBiomeId = entry.get(z);
-        int newBiomeId = biome.getId();
-        if (oldBiomeId != null && oldBiomeId == newBiomeId) {
+        String oldBiomeId = entry.get(z);
+        String newBiomeId = biome.getId();
+        if (oldBiomeId != null && oldBiomeId.equals(newBiomeId)) {
             return false;
         }
 

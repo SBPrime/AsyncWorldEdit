@@ -51,6 +51,7 @@
  */
 package org.primesoft.asyncworldedit.injector.core;
 
+import org.primesoft.asyncworldedit.injector.core.visitors.WrapGetWorldVisitor;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -177,13 +178,16 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.world.block.BlockState", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.entity.BaseEntity", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.util.Location", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.world.biome.BaseBiome", c -> new AsyncWrapperVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.world.biome.BiomeType", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.world.weather.WeatherType", c -> new AsyncWrapperVisitor(c));
            
             modiffyClasses("com.sk89q.worldedit.EditSession", c -> new EditSessionClassVisitor(c));
             modiffyClasses("com.sk89q.worldedit.function.operation.Operations", (c, cc) -> new OperationsClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.function.operation.ForwardExtentCopy", c -> new ForwardExtentCopyClassVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
+            modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));            
+            modiffyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
+            
+            // Commands
             modiffyClasses("com.sk89q.worldedit.command.FlattenedClipboardTransform", (c, cc) -> new FlattenedClipboardTransformClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
             

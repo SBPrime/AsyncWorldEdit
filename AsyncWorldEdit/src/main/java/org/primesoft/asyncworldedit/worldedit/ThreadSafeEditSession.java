@@ -70,7 +70,7 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.eventbus.EventBus;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
@@ -421,7 +421,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public boolean setBiome(BlockVector2 position, BaseBiome biome) {
+    public boolean setBiome(BlockVector2 position, BiomeType biome) {
         boolean isAsync = isAsyncEnabled();
         boolean r = super.setBiome(AsyncWrapper.initialize(position, m_jobId, isAsync, m_player),
                 AsyncWrapper.initialize(biome, m_jobId, isAsync, m_player));
@@ -517,7 +517,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     @Override
-    public BaseBiome getBiome(final BlockVector2 position) {
+    public BiomeType getBiome(final BlockVector2 position) {
         final ThreadSafeEditSession es = this;
 
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
@@ -772,7 +772,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         return super.getFullBlock(position);
     }
 
-    public BaseBiome doGetBiome(BlockVector2 position) {
+    public BiomeType doGetBiome(BlockVector2 position) {
         return super.getBiome(position);
     }
 

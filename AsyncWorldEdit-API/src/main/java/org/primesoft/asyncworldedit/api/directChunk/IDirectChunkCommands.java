@@ -47,7 +47,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.utils.IAsyncCommand;
 
@@ -176,7 +176,7 @@ public interface IDirectChunkCommands {
      * @param fullChunk
      * @return 
      */
-    IAsyncCommand createSetBiome(IPlayerEntry playerEntry, Region region, BaseBiome biome, Mask mask, boolean fullChunk);
+    IAsyncCommand createSetBiome(IPlayerEntry playerEntry, Region region, BiomeType biome, Mask mask, boolean fullChunk);
 
     /**
      * Create replace chunk command

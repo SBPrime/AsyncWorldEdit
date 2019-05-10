@@ -53,7 +53,6 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.factory.BlockFactory;
 import com.sk89q.worldedit.extension.platform.Capability;
-import com.sk89q.worldedit.extension.platform.CommandManager;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.extension.platform.PlatformManager;
 import com.sk89q.worldedit.extension.platform.Preference;
@@ -61,7 +60,6 @@ import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.session.SessionOwner;
 import com.sk89q.worldedit.util.auth.AuthorizationException;
-import com.sk89q.worldedit.util.command.Dispatcher;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import java.util.List;
@@ -96,8 +94,8 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
     private EditSessionFactory m_oldEditSessionFactory;
     private SessionManager m_oldSessions;
     private PlatformManager m_platformManager;
-    private CommandManager m_commandManager;
-    private Dispatcher m_oldDispatcher;
+/*    private CommandManager m_commandManager;
+    private Dispatcher m_oldDispatcher;*/
     private BlockFactory m_oldBlockFactory;
     
     /**
@@ -144,18 +142,18 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
         Reflection.set(m_worldEdit, "sessions", new AsyncSessionManager(m_worldEdit, m_aweCore), "Unable to set new sessions manager");
 
         m_platformManager = m_worldEdit.getPlatformManager();
-        m_commandManager = m_platformManager.getCommandManager();
+/*        m_commandManager = m_platformManager.getCommandManager();
 
         m_oldDispatcher = Reflection.get(m_commandManager, Dispatcher.class,
                 "dispatcher", "Unable to get the dispatcher");
         if (m_oldDispatcher != null) {
             Reflection.set(m_commandManager, "dispatcher", new DispatcherWrapper(m_oldDispatcher),
                     "Unable to inject new commands manager");
-        }
+        }*/
         
-        CommandsInjector.injectCommands(m_worldEdit, m_aweCore,
+/*        CommandsInjector.injectCommands(m_worldEdit, m_aweCore,
                 findMostPreferred(Capability.USER_COMMANDS, m_platformManager.getPlatforms()),
-                m_commandManager);
+                m_commandManager);*/
     }
     
     /**
@@ -186,8 +184,8 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
      */
     @Override
     public void queueStop() {
-        Reflection.set(m_commandManager, "dispatcher", m_oldDispatcher,
-                "Unable to restore dispatcher");
+        /*Reflection.set(m_commandManager, "dispatcher", m_oldDispatcher,
+                "Unable to restore dispatcher");*/
 
         Reflection.set(m_worldEdit, "editSessionFactory", m_oldEditSessionFactory, "Unable to restore edit session factory");
         Reflection.set(m_worldEdit, "sessions", m_oldSessions, "Unable to restore sessions");

@@ -49,9 +49,6 @@ package org.primesoft.asyncworldedit.excommands.commands;
 
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.minecraft.util.commands.Logging;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.ORIENTATION_REGION;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
@@ -81,9 +78,6 @@ import com.sk89q.worldedit.math.convolution.HeightMapFilter;
 import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionOperationException;
-import com.sk89q.worldedit.util.command.binding.Range;
-import com.sk89q.worldedit.util.command.binding.Switch;
-import com.sk89q.worldedit.util.command.parametric.Optional;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import java.lang.reflect.Constructor;
@@ -104,7 +98,7 @@ import org.primesoft.asyncworldedit.worldedit.function.mask.SkipDataBlockMask;
  * @author SBPrime
  */
 public class RegionCommands {
-    private final  static Constructor s_ctorHeightMapFilter;
+/*    private final  static Constructor s_ctorHeightMapFilter;
     
     static {
         Class<?> cls = HeightMapFilter.class;
@@ -147,17 +141,17 @@ public class RegionCommands {
     /**
      * Instance of WorldEdit
      */
-    private final WorldEdit m_worldEdit;
+    //private final WorldEdit m_worldEdit;
 
     /**
      * The job processor
      */
-    private final IJobProcessor m_jobProcessor;
+    //private final IJobProcessor m_jobProcessor;
 
     /**
      * The AsyncWorldEdit
      */
-    private final IAsyncWorldEdit m_asyncWorldEdit;
+    //private final IAsyncWorldEdit m_asyncWorldEdit;
 
     /**
      * Create a new instance.
@@ -165,7 +159,7 @@ public class RegionCommands {
      * @param worldEdit reference to WorldEdit
      * @param awe the AsyncWorldEdit
      */
-    public RegionCommands(WorldEdit worldEdit, IAsyncWorldEdit awe) {
+    /*public RegionCommands(WorldEdit worldEdit, IAsyncWorldEdit awe) {
         if (worldEdit == null) {
             throw new NullPointerException("worldEdit");
         }
@@ -385,5 +379,5 @@ public class RegionCommands {
         }
 
         player.print(affected + " blocks moved.");
-    }
+    }*/
 }

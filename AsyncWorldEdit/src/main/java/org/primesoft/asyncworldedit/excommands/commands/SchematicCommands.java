@@ -65,8 +65,6 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.session.ClipboardHolder;
-import com.sk89q.worldedit.util.command.binding.Switch;
-import com.sk89q.worldedit.util.command.parametric.Optional;
 import com.sk89q.worldedit.util.io.Closer;
 import com.sk89q.worldedit.util.io.file.FilenameException;
 import java.io.BufferedInputStream;
@@ -91,23 +89,23 @@ import org.primesoft.asyncworldedit.injector.injected.function.operation.IForwar
  * @author SBPrime
  */
 public class SchematicCommands {
-
+/*
     private static final Logger log = Logger.getLogger(com.sk89q.worldedit.command.SchematicCommands.class.getCanonicalName());
 
     /**
      * Instance of WorldEdit
      */
-    private final WorldEdit m_worldEdit;
+/*    private final WorldEdit m_worldEdit;
 
     /**
      * The job processor
      */
-    private final IJobProcessor m_jobProcessor;
+/*    private final IJobProcessor m_jobProcessor;
 
     /**
      * The AsyncWorldEdit
      */
-    private final IAsyncWorldEdit m_asyncWorldEdit;
+/*    private final IAsyncWorldEdit m_asyncWorldEdit;
 
     /**
      * Create a new instance.
@@ -115,7 +113,7 @@ public class SchematicCommands {
      * @param worldEdit reference to WorldEdit
      * @param awe the AsyncWorldEdit
      */
-    public SchematicCommands(WorldEdit worldEdit, IAsyncWorldEdit awe) {
+/*    public SchematicCommands(WorldEdit worldEdit, IAsyncWorldEdit awe) {
         if (worldEdit == null) {
             throw new NullPointerException("worldEdit");
         }
@@ -260,5 +258,5 @@ public class SchematicCommands {
                 }
             }
         });
-    }
+    }*/
 }

@@ -53,7 +53,6 @@ import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.command.tool.BlockTool;
 import com.sk89q.worldedit.command.tool.BrushTool;
 import com.sk89q.worldedit.command.tool.InvalidToolBindException;
@@ -73,9 +72,9 @@ import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
 import java.lang.reflect.Field;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -278,9 +277,11 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public BlockTool getSuperPickaxe() {
         return m_parrent.getSuperPickaxe();
     }
+    
+    
 
     @Override
-    public TimeZone getTimeZone() {
+    public ZoneId getTimeZone() {
         return m_parrent.getTimeZone();
     }
 
@@ -440,7 +441,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public void setTimezone(TimeZone timezone) {
+    public void setTimezone(ZoneId timezone) {
         m_parrent.setTimezone(timezone);
     }
 
@@ -530,4 +531,21 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public void updateServerCUI(Actor actor) {
         m_parrent.updateServerCUI(actor);
     }
+
+    @Override
+    public EditSession.ReorderMode getReorderMode() {
+        return m_parrent.getReorderMode();
+    }
+
+    @Override
+    public void setReorderMode(EditSession.ReorderMode rm) {
+        m_parrent.setReorderMode(rm);
+    }
+
+    @Override
+    public void setTimeout(int i) {
+        m_parrent.setTimeout(i);
+    }
+    
+    
 }

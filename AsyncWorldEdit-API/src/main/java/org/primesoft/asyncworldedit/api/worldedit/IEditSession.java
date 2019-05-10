@@ -62,7 +62,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
@@ -227,10 +227,10 @@ public interface IEditSession extends Extent {
     public int getBlockChangeCount();
 
     @Override
-    public BaseBiome getBiome(BlockVector2 position);
+    public BiomeType getBiome(BlockVector2 position);
 
     @Override
-    public boolean setBiome(BlockVector2 position, BaseBiome biome);
+    public boolean setBiome(BlockVector2 position, BiomeType biome);
 
     @Override    
     public BlockState getBlock(BlockVector3 vector);
@@ -409,12 +409,12 @@ public interface IEditSession extends Extent {
      * Remove blocks of a certain type nearby a given position.
      *
      * @param position center position of cuboid
-     * @param blockType the block type to match
+     * @param mask
      * @param apothem an apothem of the cuboid, where the minimum is 1
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
-    public int removeNear(BlockVector3 position, BlockType blockType, int apothem) throws MaxChangedBlocksException;
+    public int removeNear(BlockVector3 position, Mask mask, int apothem) throws MaxChangedBlocksException;
 
     /**
      * Sets all the blocks inside a region to a given block type.
@@ -823,5 +823,5 @@ public interface IEditSession extends Extent {
     public int drawSpline(Pattern pattern, List<BlockVector3> nodevectors, double tension, double bias, double continuity, double quality, double radius, boolean filled)
             throws MaxChangedBlocksException;
 
-    public int makeBiomeShape(final Region region, final Vector3 zero, final Vector3 unit, final BaseBiome biomeType, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException;
+    public int makeBiomeShape(final Region region, final Vector3 zero, final Vector3 unit, final BiomeType biomeType, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException;
 }

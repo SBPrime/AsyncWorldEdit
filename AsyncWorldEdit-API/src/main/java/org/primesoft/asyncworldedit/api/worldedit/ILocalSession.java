@@ -57,6 +57,7 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
+import java.time.ZoneId;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -101,14 +102,14 @@ interface ILocalSession {
      *
      * @return the timezone
      */
-    public TimeZone getTimeZone();
+    public ZoneId getTimeZone();
 
     /**
      * Set the session's timezone.
      *
      * @param timezone the user's timezone
      */
-    public void setTimezone(TimeZone timezone);
+    public void setTimezone(ZoneId timezone);
 
     /**
      * Clear history.
@@ -507,4 +508,10 @@ interface ILocalSession {
      * @param mask mask or null
      */
     public void setMask(Mask mask);
+    
+    EditSession.ReorderMode getReorderMode();
+    
+    void setReorderMode(EditSession.ReorderMode rm);
+    
+    void setTimeout(int i);
 }

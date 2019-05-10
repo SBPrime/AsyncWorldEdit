@@ -7,8 +7,8 @@
     <artifactId>AsyncWorldEdit_AllInOne</artifactId>
     <version>${global.awe.version}</version>
     <properties>        
-        <global.awe.version>3.6.0-rc-05</global.awe.version>
-        <global.awe-api.version>2.2.0-rc-05</global.awe-api.version>
+        <global.awe.version>3.6.0-rc-06</global.awe.version>
+        <global.awe-api.version>2.3.0-rc-06</global.awe-api.version>
     </properties>
     
     <packaging>pom</packaging>
@@ -22,14 +22,6 @@
         <module>AsyncWorldEdit</module>
         <module>AsyncWorldEditInjector</module>
         <module>AsyncWorldEdit-BlocksHub_v3x</module>
-        <!--<module>AsyncWorldEdit-spigot_v1_8_R3</module>
-        <module>AsyncWorldEdit-spigot_v1_9_R1</module>
-        <module>AsyncWorldEdit-spigot_v1_9_R2</module>
-        <module>AsyncWorldEdit-spigot_v1_10_R1</module>
-        <module>AsyncWorldEdit-spigot_v1_11_R1</module>
-        <module>AsyncWorldEdit-spigot_v1_12_R1</module>
-        <module>AsyncWorldEdit-spigot_v1_12_R1_12_1</module>-->
-        <!--<module>AsyncWorldEdit-spigot_v1_13_R1</module>-->
         <module>AsyncWorldEdit-spigot_v1_13_R2</module>
         <module>AsyncWorldEdit-ActionBarAPI</module>
         <module>AsyncWorldEdit-BountifulAPI</module>

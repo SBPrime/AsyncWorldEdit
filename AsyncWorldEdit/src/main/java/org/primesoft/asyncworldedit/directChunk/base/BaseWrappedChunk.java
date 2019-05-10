@@ -70,7 +70,6 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.directChunk.entries.BiomeEntry;
 import org.primesoft.asyncworldedit.directChunk.entries.BlockEntry;
-import org.primesoft.asyncworldedit.excommands.chunk.ChunkUndoData;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.PositionHelper;
 
@@ -158,9 +157,7 @@ public abstract class BaseWrappedChunk implements IWrappedChunk {
             return null;
         }
 
-        return new ChunkUndoData(addedEntities.getValue(), dataEntitiesRemove,
-                oldBlocks.getValue(), oldBiomes.getValue()
-        );
+        return null;
     }
 
     /**

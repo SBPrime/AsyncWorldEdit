@@ -47,26 +47,30 @@
  */
 package org.primesoft.asyncworldedit.changesetSerializer.serializers;
 
-import com.sk89q.worldedit.math.Vector2;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
+import com.sk89q.worldedit.world.biome.BiomeTypes;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IChangesetSerializer;
 import org.primesoft.asyncworldedit.api.changesetSerializer.IMemoryStorage;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataInput;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataOutput;
 import org.primesoft.asyncworldedit.worldedit.history.change.BiomeChange;
+import sun.reflect.generics.tree.BaseType;
 
 /**
  *
  * @author SBPrime
  */
 public class SerializerBiomeChange  implements IChangesetSerializer {
+    private final static Charset UTF8 = Charset.forName("UTF8");
+    
     private static final String CLASS_TYPE = BiomeChange.class.getName();
     
-    private static final int DEFAULT = 0;
+    private static final String DEFAULT = BiomeTypes.PLAINS.getId();
 
     @Override
     public boolean canSerialize(String type) {
@@ -86,19 +90,21 @@ public class SerializerBiomeChange  implements IChangesetSerializer {
             return null;
         }
 
-        BaseBiome previous = bChange.getPrevious();
-        BaseBiome current = bChange.getCurrent();
+        BiomeType previous = bChange.getPrevious();
+        BiomeType current = bChange.getCurrent();
 
-        int idPrevious = previous == null ? DEFAULT : previous.getId();
-        int idCurrent = current == null ? DEFAULT : current.getId();        
+        byte[] idPrevious = (previous == null ? DEFAULT : previous.getId()).getBytes(UTF8);
+        byte[] idCurrent = (current == null ? DEFAULT : current.getId()).getBytes(UTF8);
         
         try {
             UnsafeDataOutput stream = new UnsafeDataOutput();
 
             stream.writeDouble(position.getX());
-            stream.writeDouble(position.getZ());
-            stream.writeInt(idPrevious);
-            stream.writeInt(idCurrent);
+            stream.writeDouble(position.getZ());            
+            stream.writeInt(idPrevious.length);
+            stream.write(idPrevious);
+            stream.writeInt(idCurrent.length);
+            stream.write(idCurrent);
 
             return stream.toByteArray();
         } catch (IOException ex) {
@@ -119,8 +125,17 @@ public class SerializerBiomeChange  implements IChangesetSerializer {
             int x = stream.readInt();
             int z = stream.readInt();
             
-            BaseBiome previous = new BaseBiome(stream.readInt());
-            BaseBiome current = new BaseBiome(stream.readInt());
+            int previousL = stream.readInt();
+            byte[] previousData = new byte[previousL];
+            stream.readFully(previousData);
+            
+            int currentL = stream.readInt();
+            byte[] currentData = new byte[currentL];
+            stream.readFully(currentData);
+            
+            
+            BiomeType previous = BiomeTypes.get(new String(previousData, UTF8));
+            BiomeType current = BiomeTypes.get(new String(currentData, UTF8));
             
             return new BiomeChange(BlockVector2.at(x, z), previous, current);
         } catch (IOException ioe) {

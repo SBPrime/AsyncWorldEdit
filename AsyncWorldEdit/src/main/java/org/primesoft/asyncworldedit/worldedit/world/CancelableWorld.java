@@ -65,7 +65,7 @@ import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
@@ -303,7 +303,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public BaseBiome getBiome(BlockVector2 position) {
+    public BiomeType getBiome(BlockVector2 position) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
@@ -322,7 +322,7 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean setBiome(BlockVector2 position, BaseBiome biome) {
+    public boolean setBiome(BlockVector2 position, BiomeType biome) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }

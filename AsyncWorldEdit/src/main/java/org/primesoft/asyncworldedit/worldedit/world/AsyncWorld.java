@@ -66,7 +66,7 @@ import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
@@ -710,7 +710,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public BaseBiome getBiome(BlockVector2 position) {
+    public BiomeType getBiome(BlockVector2 position) {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
                 () -> m_parent.getBiome(position),
                 m_bukkitWorld, BlockVector3.at(position.getX(), 0, position.getZ()));
@@ -753,11 +753,11 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean setBiome(BlockVector2 vector, final BaseBiome biome) {
+    public boolean setBiome(BlockVector2 vector, final BiomeType biome) {
         final DataAsyncParams<BlockVector2> paramVector = DataAsyncParams.extract(vector);
-        final DataAsyncParams<BaseBiome> paramBiome = DataAsyncParams.extract(biome);
+        final DataAsyncParams<BiomeType> paramBiome = DataAsyncParams.extract(biome);
         final BlockVector2 v = paramVector.getData();
-        final BaseBiome b = paramBiome.getData();
+        final BiomeType b = paramBiome.getData();
         final IPlayerEntry player = getPlayer(paramBiome, paramVector);
         final BlockVector3 tmpV = BlockVector3.at(v.getX(), 0, v.getZ());
         
