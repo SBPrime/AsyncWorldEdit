@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,40 +45,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.core.visitors;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 
 /**
  *
  * @author SBPrime
  */
-public final class EditSessionClassVisitor extends BaseClassVisitor {
-    private final static String DESCRIPTOR_CTOR = "(Lcom/sk89q/worldedit/util/eventbus/EventBus;Lcom/sk89q/worldedit/world/World;ILcom/sk89q/worldedit/extent/inventory/BlockBag;Lcom/sk89q/worldedit/event/extent/EditSessionEvent;)V";
+public class SchematicCommandsVisitor extends BaseCommandsVisitor {
 
-    private final SimpleValidator m_vCtor = new SimpleValidator("Constructor not injected");
+    private final static Map<String, String[]> METHODS;
+
+    static {
+        METHODS = new HashMap<>();
+        METHODS.put("load", new String[]{"(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;)V"});
+        METHODS.put("save", new String[]{"(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;Z)V"});
+    }
     
-    public EditSessionClassVisitor(ClassVisitor classVisitor) {
-        super(classVisitor);
-    }
-
-    @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        if (isCtor(name) && isInternal(access) && descriptor.equals(DESCRIPTOR_CTOR)) {
-            m_vCtor.set();
-            
-            return cv.visitMethod(changeVisibility(access, Opcodes.ACC_PROTECTED), 
-                    name, descriptor, signature, exceptions);
-        }
-
-        return super.visitMethod(access, name, descriptor, signature, exceptions);
-    }
-
-    @Override
-    public void validate() throws RuntimeException {
-        m_vCtor.validate();
+    public SchematicCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
+        super(classVisitor, createClass, METHODS);
     }
 }

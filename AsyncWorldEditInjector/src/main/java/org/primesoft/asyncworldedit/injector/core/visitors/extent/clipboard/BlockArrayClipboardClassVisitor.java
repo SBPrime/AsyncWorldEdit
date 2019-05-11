@@ -45,7 +45,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.core.visitors;
+package org.primesoft.asyncworldedit.injector.core.visitors.extent.clipboard;
 
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import java.io.IOException;
@@ -57,6 +57,9 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.Helpers;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 
 /**
  *

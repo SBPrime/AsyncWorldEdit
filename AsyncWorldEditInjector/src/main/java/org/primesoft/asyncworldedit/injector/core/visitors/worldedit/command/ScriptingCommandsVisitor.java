@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,87 +45,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.function.biome;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command;
 
-import com.sk89q.worldedit.math.BlockVector2;
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.transform.Transform;
-import com.sk89q.worldedit.world.biome.BiomeType;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import org.objectweb.asm.ClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 
 /**
  *
  * @author SBPrime
  */
-public class ExtentBiomeCopy implements RegionFunction {
+public class ScriptingCommandsVisitor extends BaseCommandsVisitor {
 
-    private final Extent m_source;
-    private final BlockVector3 m_from;
+    private final static Map<String, String[]> METHODS;
 
-    private final Extent m_destination;
-    private final BlockVector3 m_to;
-
-    private final Transform m_transform;
-
-    private final Map<Integer, Map<Integer, String>> m_biomeCache;
-
-    /**
-     * Make a new biome copy.
-     *
-     * @param source
-     * @param from
-     * @param destination
-     * @param to
-     * @param transform
-     * @param singleSet
-     */
-    public ExtentBiomeCopy(Extent source, BlockVector3 from,
-            Extent destination, BlockVector3 to,
-            Transform transform, boolean singleSet) {
-
-        m_source = source;
-        m_from = from;
-
-        m_destination = destination;
-        m_to = to;
-
-        m_transform = transform;
-
-        m_biomeCache = singleSet ? new LinkedHashMap<>() : null;
+    static {
+        METHODS = new HashMap<>();
+        METHODS.put("execute", new String[]{"(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/util/List;)V"});
+        METHODS.put("executeLast", new String[]{"(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Ljava/util/List;)V"});
     }
 
-    @Override
-    public boolean apply(BlockVector3 position) throws WorldEditException {
-        BiomeType biome = m_source.getBiome(position.toBlockVector2());
-        BlockVector3 orig = position.subtract(m_from);
-        BlockVector3 transformed = m_transform.apply(orig.toVector3()).toBlockPoint();
-
-        BlockVector2 biomePosition = transformed.add(m_to).toBlockVector2();
-        if (m_biomeCache == null) {
-            return m_destination.setBiome(biomePosition, biome);
-        }
-
-        Integer x = biomePosition.getBlockX();
-        Integer z = biomePosition.getBlockZ();
-
-        Map<Integer, String> entry = m_biomeCache.computeIfAbsent(x, _x -> new LinkedHashMap<>());
-
-        String oldBiomeId = entry.get(z);
-        String newBiomeId = biome.getId();
-        if (oldBiomeId != null && oldBiomeId.equals(newBiomeId)) {
-            return false;
-        }
-
-        if (!m_destination.setBiome(biomePosition, biome)) {
-            return false;
-        }
-
-        entry.put(z, newBiomeId);
-        return true;
+    public ScriptingCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
+        super(classVisitor, createClass, METHODS);
     }
 }

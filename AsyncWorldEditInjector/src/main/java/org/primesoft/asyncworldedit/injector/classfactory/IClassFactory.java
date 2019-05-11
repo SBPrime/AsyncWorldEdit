@@ -89,21 +89,6 @@ public interface IClassFactory {
     Clipboard createClipboard(Clipboard parent, Region region);
 
     /**
-     * Add biome copy to region function
-     * @param blockCopy
-     * @param source
-     * @param from
-     * @param destination
-     * @param to
-     * @param currentTransform
-     * @param singleSet
-     * @return 
-     */
-    RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, BlockVector3 from, Extent destination, BlockVector3 to, 
-            Transform currentTransform, boolean singleSet);
-
-    /**
      * Handle the exception from operation
      * @param ex The exception to hanlde 
      * @param name The operation name

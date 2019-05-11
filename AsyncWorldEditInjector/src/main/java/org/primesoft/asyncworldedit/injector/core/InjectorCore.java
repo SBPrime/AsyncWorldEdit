@@ -65,19 +65,20 @@ import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 import org.primesoft.asyncworldedit.injector.core.visitors.AsyncWrapperVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassCreator;
-import org.primesoft.asyncworldedit.injector.core.visitors.BlockArrayClipboardClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.extent.clipboard.BlockArrayClipboardClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.CreateActorFactory;
 import org.primesoft.asyncworldedit.injector.core.visitors.CreateNoPermsActor;
 import org.primesoft.asyncworldedit.injector.core.visitors.CreateNoPermsPlayer;
 import org.primesoft.asyncworldedit.injector.core.visitors.CreatePlayerFactory;
 import org.primesoft.asyncworldedit.injector.core.visitors.CreatePlayerWrapper;
-import org.primesoft.asyncworldedit.injector.core.visitors.EditSessionClassVisitor;
-import org.primesoft.asyncworldedit.injector.core.visitors.FlattenedClipboardTransformClassVisitor;
-import org.primesoft.asyncworldedit.injector.core.visitors.ForwardExtentCopyClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.FlattenedClipboardTransformClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
-import org.primesoft.asyncworldedit.injector.core.visitors.OperationsClassVisitor;
-import org.primesoft.asyncworldedit.injector.core.visitors.SnapshotUtilCommandsVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.function.operation.OperationsClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.EditSessionClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SchematicCommandsVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.ScriptingCommandsVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SnapshotUtilCommandsVisitor;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -183,13 +184,14 @@ public class InjectorCore {
            
             modiffyClasses("com.sk89q.worldedit.EditSession", c -> new EditSessionClassVisitor(c));
             modiffyClasses("com.sk89q.worldedit.function.operation.Operations", (c, cc) -> new OperationsClassVisitor(c, cc));
-            modiffyClasses("com.sk89q.worldedit.function.operation.ForwardExtentCopy", c -> new ForwardExtentCopyClassVisitor(c));
             modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));            
             modiffyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
             
             // Commands
             modiffyClasses("com.sk89q.worldedit.command.FlattenedClipboardTransform", (c, cc) -> new FlattenedClipboardTransformClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
+            modiffyClasses("com.sk89q.worldedit.command.ScriptingCommands", (c, cc) -> new ScriptingCommandsVisitor(c, cc));
+            modiffyClasses("com.sk89q.worldedit.command.SchematicCommands", (c, cc) -> new SchematicCommandsVisitor(c, cc));
             
             crateClass(cc-> new CreatePlayerWrapper(cc));
             crateClass(cc-> new CreateNoPermsPlayer(cc));

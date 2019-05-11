@@ -50,12 +50,8 @@ package org.primesoft.asyncworldedit.injector.core.visitors;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.function.operation.Operation;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -63,7 +59,6 @@ import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
 import org.primesoft.asyncworldedit.injector.injected.IWrapper;
-import org.primesoft.asyncworldedit.injector.injected.function.operation.IForwardExtentCopy;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.MultiArgWorldEditOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.OperationAction;
@@ -113,17 +108,6 @@ public final class Helpers {
                 }
             }
         });
-    }
-
-    public static RegionFunction addBiomeCopy(RegionFunction blockCopy,
-            Extent source, BlockVector3 from, Extent destination, BlockVector3 to, Transform currentTransform,
-            IForwardExtentCopy forwardExtentCopy) {
-
-        if (forwardExtentCopy.isBiomeCopy()) {
-            return InjectorCore.getInstance().getClassFactory().addBiomeCopy(blockCopy, source, from, destination, to, currentTransform, true);
-        }
-
-        return blockCopy;
     }
 
     public static Clipboard createClipboard(Clipboard parent, Region region) {

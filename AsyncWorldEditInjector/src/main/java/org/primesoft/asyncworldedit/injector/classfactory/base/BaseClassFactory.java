@@ -90,14 +90,6 @@ public class BaseClassFactory implements IClassFactory {
     }
 
     @Override
-    public RegionFunction addBiomeCopy(RegionFunction blockCopy, 
-            Extent source, BlockVector3 from, 
-            Extent destination, BlockVector3 to, Transform currentTransform,
-            boolean singleSet) {
-        return blockCopy;
-    }
-
-    @Override
     public void handleError(WorldEditException ex, String name) {
         // No op
     }

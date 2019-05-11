@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,12 +45,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.core.visitors;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -60,94 +59,45 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import static org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor.RANDOM_PREFIX;
+import org.primesoft.asyncworldedit.injector.core.visitors.AnnotationScannerVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.utils.AnnotationEntry;
-import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 import org.primesoft.asyncworldedit.injector.utils.MethodEntry;
+import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 
 /**
  *
- * @author SBPrime
+ * @author prime
  */
-public final class SnapshotUtilCommandsVisitor extends BaseClassVisitor {
+public abstract class BaseCommandsVisitor extends BaseClassVisitor {
 
-    private final static String DESCRIPTOR_CLASS_INNER = "com/sk89q/worldedit/command/SnapshotUtilCommands_InnerForMethod";
-    private final static String DESCRIPTOR_CLASS = "com/sk89q/worldedit/command/SnapshotUtilCommands";
-    private final static Map<String, Map<String, SimpleValidator>> METHODS;
+    protected final List<MethodEntry> m_methodsToWrap = new ArrayList<>();
 
-    static {
-        METHODS = new HashMap<>();
-        METHODS.put("restore",                           
-                Stream.of("(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Lcom/sk89q/worldedit/EditSession;Ljava/lang/String;)V")
-                        .collect(Collectors.toMap(i -> i, i -> buildValidator("restore", i)))
-        );
-    }
+    private String m_descriptorClass;
+    private String m_descriptorClassInner;
+
+    private final Map<String, Map<String, SimpleValidator>> m_methods;
 
     private static SimpleValidator buildValidator(String name, String descriptor) {
-        return new SimpleValidator(String.format("Missing method '%1$s%2$s'", name, descriptor));
+        return new SimpleValidator("Missing method '" + name + descriptor + "'");
     }
 
-    private final List<MethodEntry> m_methodsToWrap = new ArrayList<>();
-
-    public SnapshotUtilCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
+    protected BaseCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass,
+            Map<String, String[]> methods) {
         super(classVisitor, createClass);
+
+        m_methods = methods.entrySet().stream()
+                .collect(Collectors.toMap(i -> i.getKey(), i
+                        -> Stream.of(i.getValue()).collect(Collectors.toMap(j -> j, j -> buildValidator(i.getKey(), j)))));
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        if (!isPublic(access)) {
-            return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        m_descriptorClass = name;
+        m_descriptorClassInner = name + "_" + RANDOM_PREFIX + "_InnerForMethod_";
 
-        Map<String, SimpleValidator> descriptors = METHODS.get(name);
-        if (descriptors == null) {
-            return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
-
-        SimpleValidator validator = descriptors.get(descriptor);
-
-        if (validator == null) {
-            return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
-
-        validator.set();
-        final MethodEntry me = new MethodEntry(access, name, descriptor, signature, exceptions);
-
-        m_methodsToWrap.add(me);
-        return new MethodVisitor(api, cv.visitMethod(changeVisibility(access, Opcodes.ACC_PUBLIC),
-                RANDOM_PREFIX + name, descriptor, signature, exceptions)) {
-            @Override
-            public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-                AnnotationEntry an = new AnnotationEntry(descriptor, visible);
-                me.annotations.add(an);
-
-                return new AnnotationScannerVisitor(an, api,
-                        super.visitAnnotation("Lorg/primesoft/asyncworldedit/injector/utils/FakeAttrib;", false)) {
-                    @Override
-                    protected void doVisit(String name, Object value) {
-                    }
-
-                    @Override
-                    protected AnnotationVisitor doVisitAnnotation(String name, String descriptor) {
-                        return null;
-                    }
-
-                    @Override
-                    protected AnnotationVisitor doVisitArray(String name, Collection<Object> values) {
-                        return new AnnotationVisitor(api, super.doVisitArray("fooArray", values)) {
-                            @Override
-                            public void visit(String name, Object value) {
-                                values.add(value);
-                            }   
-                        };
-                    }
-
-                    @Override
-                    protected void doVisitEnum(String name, String descriptor, String value) {
-                    }
-                };
-            }
-        };
+        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
@@ -164,48 +114,36 @@ public final class SnapshotUtilCommandsVisitor extends BaseClassVisitor {
         super.visitEnd();
     }
 
-    private String getMethodClassName(MethodEntry me) {
-        return DESCRIPTOR_CLASS_INNER + RANDOM_PREFIX + me.name;
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        if (!isPublic(access)) {
+            return super.visitMethod(access, name, descriptor, signature, exceptions);
+        }
+
+        Map<String, SimpleValidator> descriptors = m_methods.get(name);
+        if (descriptors == null) {
+            return super.visitMethod(access, name, descriptor, signature, exceptions);
+        }
+
+        SimpleValidator validator = descriptors.get(descriptor);
+        if (validator == null) {
+            return super.visitMethod(access, name, descriptor, signature, exceptions);
+        }
+
+        validator.set();
+        final MethodEntry me = new MethodEntry(access, name, descriptor, signature, exceptions);
+        m_methodsToWrap.add(me);
+        return new MethodAnnotationRecorderVisitor(api,
+                cv.visitMethod(changeVisibility(access, Opcodes.ACC_PUBLIC),
+                        RANDOM_PREFIX + name, descriptor, signature, exceptions), me);
     }
 
-    private void emitInnerClass(MethodEntry me) throws IOException {
-        if (me.exceptions != null && me.exceptions.length > 1) {
-            throw new IllegalArgumentException("Expected one or non exceptions.");
-        }
-
-        String className = getMethodClassName(me);
-        String exception = me.exceptions[0];
-
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        cw.visit(Opcodes.V1_8, Opcodes.ACC_STATIC | Opcodes.ACC_PRIVATE, className,
-                null, "java/lang/Object",
-                new String[]{
-                    "org/primesoft/asyncworldedit/injector/utils/MultiArgWorldEditOperationAction"
-                });
-        emitEmptyCtor(cw);
-
-        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "execute", "(Ljava/lang/Object;[Ljava/lang/Object;)V",
-                null, new String[]{"com/sk89q/worldedit/WorldEditException"});
-
-        mv.visitCode();
-        String[] args = getArgs(me.descriptor);
-        mv.visitVarInsn(Opcodes.ALOAD, 1);
-        mv.visitTypeInsn(Opcodes.CHECKCAST, DESCRIPTOR_CLASS);
-        for (int i = 0; i < args.length; i++) {
-            mv.visitVarInsn(Opcodes.ALOAD, 2);
-            mv.visitLdcInsn(i);
-            mv.visitInsn(Opcodes.AALOAD);
-            mv.visitTypeInsn(Opcodes.CHECKCAST, args[i].substring(1));
-        }
-
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                DESCRIPTOR_CLASS, RANDOM_PREFIX + me.name, me.descriptor, false);
-        mv.visitInsn(Opcodes.RETURN);
-        mv.visitMaxs(2, 1);
-        mv.visitEnd();
-
-        cw.visitEnd();
-        createClass(className.replace("/", "."), cw);
+    @Override
+    public void validate() throws RuntimeException {
+        m_methods.values().stream()
+                .flatMap(i -> i.values().stream())
+                .filter(i -> i != null)
+                .forEach(SimpleValidator::validate);
     }
 
     private void emitMethod(MethodEntry me) {
@@ -241,11 +179,96 @@ public final class SnapshotUtilCommandsVisitor extends BaseClassVisitor {
         mv.visitEnd();
     }
 
-    @Override
-    public void validate() throws RuntimeException {
-        METHODS.values().stream()
-                .flatMap(i -> i.values().stream())
-                .forEach(SimpleValidator::validate);
+    private String getMethodClassName(MethodEntry me) {
+        return m_descriptorClassInner + me.name;
     }
 
+    private void emitInnerClass(MethodEntry me) throws IOException {
+        if (me.exceptions != null && me.exceptions.length > 1) {
+            throw new IllegalArgumentException("Expected one or non exceptions.");
+        }
+
+        String className = getMethodClassName(me);
+        String exception = me.exceptions[0];
+
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        cw.visit(Opcodes.V1_8, Opcodes.ACC_STATIC | Opcodes.ACC_PRIVATE, className,
+                null, "java/lang/Object",
+                new String[]{
+                    "org/primesoft/asyncworldedit/injector/utils/MultiArgWorldEditOperationAction"
+                });
+        emitEmptyCtor(cw);
+
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "execute", "(Ljava/lang/Object;[Ljava/lang/Object;)V",
+                null, new String[]{"com/sk89q/worldedit/WorldEditException"});
+
+        mv.visitCode();
+        String[] args = getArgs(me.descriptor);
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitTypeInsn(Opcodes.CHECKCAST, m_descriptorClass);
+        for (int i = 0; i < args.length; i++) {
+            mv.visitVarInsn(Opcodes.ALOAD, 2);
+            mv.visitLdcInsn(i);
+            mv.visitInsn(Opcodes.AALOAD);
+            
+            checkCast(mv, args[i]);                        
+        }
+
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                m_descriptorClass, RANDOM_PREFIX + me.name, me.descriptor, false);
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(2, 1);
+        mv.visitEnd();
+
+        cw.visitEnd();
+        createClass(className.replace("/", "."), cw);
+    }    
+
+    private static class MethodAnnotationRecorderVisitor extends MethodVisitor {
+
+        private final MethodEntry m_me;
+
+        public MethodAnnotationRecorderVisitor(int api, MethodVisitor methodVisitor, MethodEntry me) {
+            super(api, methodVisitor);
+            m_me = me;
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+            AnnotationEntry an = new AnnotationEntry(descriptor, visible);
+            m_me.annotations.add(an);
+
+            return new FakeAnnotationVisitor(an, api, super.visitAnnotation("Lorg/primesoft/asyncworldedit/injector/utils/FakeAttrib;", false));
+        }
+    }
+
+    private static class FakeAnnotationVisitor extends AnnotationScannerVisitor {
+
+        public FakeAnnotationVisitor(AnnotationEntry entry, int api, AnnotationVisitor annotationVisitor) {
+            super(entry, api, annotationVisitor);
+        }
+
+        @Override
+        protected void doVisit(String name, Object value) {
+        }
+
+        @Override
+        protected AnnotationVisitor doVisitAnnotation(String name, String descriptor) {
+            return null;
+        }
+
+        @Override
+        protected AnnotationVisitor doVisitArray(String name, Collection<Object> values) {
+            return new AnnotationVisitor(api, super.doVisitArray("fooArray", values)) {
+                @Override
+                public void visit(String name, Object value) {
+                    values.add(value);
+                }
+            };
+        }
+
+        @Override
+        protected void doVisitEnum(String name, String descriptor, String value) {
+        }
+    }
 }

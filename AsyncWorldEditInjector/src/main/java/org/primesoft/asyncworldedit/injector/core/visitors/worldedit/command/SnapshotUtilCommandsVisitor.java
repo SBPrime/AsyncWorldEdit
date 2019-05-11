@@ -45,25 +45,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.injected.function.operation;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command;
+
+import java.util.HashMap;
+import java.util.Map;
+import org.objectweb.asm.ClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 
 /**
  *
- * @author SBprime
+ * @author SBPrime
  */
-public interface IForwardExtentCopy {
+public final class SnapshotUtilCommandsVisitor extends BaseCommandsVisitor {
+    private final static Map<String, String[]> METHODS;
 
-    /**
-     * Set biome copy on/off
-     *
-     * @param status
-     */
-    void setBiomeCopy(boolean status);
+    static {
+        METHODS = new HashMap<>();
+        METHODS.put("restore", new String[]{"(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Lcom/sk89q/worldedit/EditSession;Ljava/lang/String;)V"});
+    }
 
-    /**
-     * Is the biome copy on or off
-     *
-     * @return
-     */
-    boolean isBiomeCopy();
+    public SnapshotUtilCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
+        super(classVisitor, createClass, METHODS);
+    }
 }

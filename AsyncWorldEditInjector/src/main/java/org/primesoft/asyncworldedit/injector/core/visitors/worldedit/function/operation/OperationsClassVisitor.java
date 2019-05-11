@@ -46,7 +46,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.primesoft.asyncworldedit.injector.core.visitors;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.function.operation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,6 +55,8 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.utils.MethodEntry;
 import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 

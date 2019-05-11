@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,64 +45,41 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.asyncinjector.async;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit;
 
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.world.World;
-import java.util.UUID;
-import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.primesoft.asyncworldedit.core.AwePlatform;
-import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
-import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
+import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncClassFactory extends BaseClassFactory {
+public final class EditSessionClassVisitor extends BaseClassVisitor {
+    private final static String DESCRIPTOR_CTOR = "(Lcom/sk89q/worldedit/util/eventbus/EventBus;Lcom/sk89q/worldedit/world/World;ILcom/sk89q/worldedit/extent/inventory/BlockBag;Lcom/sk89q/worldedit/event/extent/EditSessionEvent;)V";
 
-    /**
-     * The operation processor
-     */
-    private final AsyncOperationProcessor m_operationProcessor;
+    private final SimpleValidator m_vCtor = new SimpleValidator("Constructor not injected");
     
-    private final AsyncJobProcessor m_jobProcessor;
-    
-    public AsyncClassFactory(IAsyncWorldEditCore aweCore)
-    {        
-        m_operationProcessor = new AsyncOperationProcessor(aweCore);
-        
-        m_jobProcessor = new AsyncJobProcessor(aweCore);
-    }
-    
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
-    }
-    
-    @Override
-    public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
+    public EditSessionClassVisitor(ClassVisitor classVisitor) {
+        super(classVisitor);
     }
 
     @Override
-    public void handleError(WorldEditException ex, String name) {
-        ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
-    }
-    
-    @Override
-    public IPlayerEntry getPlayer(UUID uniqueId) {
-        IPlayerManager pm = AwePlatform.getInstance().getCore().getPlayerManager();
-        return  pm.getPlayer(uniqueId);
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        if (isCtor(name) && isInternal(access) && descriptor.equals(DESCRIPTOR_CTOR)) {
+            m_vCtor.set();
+            
+            return cv.visitMethod(changeVisibility(access, Opcodes.ACC_PROTECTED), 
+                    name, descriptor, signature, exceptions);
+        }
+
+        return super.visitMethod(access, name, descriptor, signature, exceptions);
     }
 
     @Override
-    public World wrapWorld(World world, IPlayerEntry player) {
-        return AsyncWorld.wrap(world, player);
+    public void validate() throws RuntimeException {
+        m_vCtor.validate();
     }
 }

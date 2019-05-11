@@ -45,7 +45,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.core.visitors;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -56,7 +56,8 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import static org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor.RANDOM_PREFIX;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.injected.command.FlattenedClipboardTransformFactory;
 import org.primesoft.asyncworldedit.injector.injected.command.IFlattenedClipboardTransform;
 import org.primesoft.asyncworldedit.injector.injected.command.IFlattenedClipboardTransformFactory;

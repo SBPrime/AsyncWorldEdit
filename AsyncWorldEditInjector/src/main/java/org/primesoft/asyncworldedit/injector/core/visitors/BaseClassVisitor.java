@@ -68,7 +68,7 @@ import org.objectweb.asm.Type;
  * @author SBPrime
  */
 public abstract class BaseClassVisitor extends InjectorClassVisitor {
-    
+
     @FunctionalInterface
     protected interface MethodFactory {
 
@@ -91,30 +91,30 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
     }
 
     private final static Pattern ARGS_MATCHER = Pattern.compile("\\([^)]+\\)");
-    
-    protected static int getArgsCount(String desc) {        
-        Matcher m = ARGS_MATCHER.matcher(desc);        
+
+    protected static int getArgsCount(String desc) {
+        Matcher m = ARGS_MATCHER.matcher(desc);
         if (!m.find()) {
             return 0;
         }
-        
+
         return (int) m.group(0).chars()
                 .filter(i -> i == ';')
                 .count();
     }
-    
+
     protected static String[] getArgs(String desc) {
-        Matcher m = ARGS_MATCHER.matcher(desc);        
+        Matcher m = ARGS_MATCHER.matcher(desc);
         if (!m.find()) {
             return new String[0];
         }
-        
+
         String args = m.group(0);
         args = args.substring(1, args.length() - 1);
-        
+
         return args.split(";");
     }
-    
+
     /**
      * Check if the method name is a constructor
      *
@@ -172,7 +172,7 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         mv.visitMaxs(1, 1);
         mv.visitEnd();
     }
-    
+
     protected final void processMethods(MethodFactory mf, Class<?>... cls) throws SecurityException {
         Queue<Class<?>> clsInterfaces = new ArrayDeque<>();
         for (Class<?> c : cls) {
@@ -202,8 +202,7 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
             }
         }
     }
-    
-    
+
     protected final void visitReturn(MethodVisitor mv, Class<?> resultType) {
         if (void.class.equals(resultType)) {
             mv.visitInsn(Opcodes.RETURN);
@@ -229,7 +228,7 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
             mv.visitInsn(Opcodes.ARETURN);
         }
     }
-    
+
     protected final void visitArgumemt(MethodVisitor mv, Class<?> type, int id) {
         if (double.class.equals(type)) {
             mv.visitVarInsn(Opcodes.DLOAD, id);
@@ -251,6 +250,55 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
             mv.visitVarInsn(Opcodes.ILOAD, id);
         } else {
             mv.visitVarInsn(Opcodes.ALOAD, id);
+        }
+    }
+
+    protected final void checkCast(MethodVisitor mv, String type) {
+        final String newType;
+        final String metchod;
+        final String descriptor;
+
+        if ("Z".equals(type)) {
+            newType = "java/lang/Boolean";
+            metchod = "booleanValue";
+            descriptor = "()Z";
+        } else if ("B".equals(type)) {
+            newType = "java/lang/Byte";
+            metchod = "byteValue";
+            descriptor = "()B";
+        } else if ("C".equals(type)) {
+            newType = "java/lang/Character";
+            metchod = "charValue";
+            descriptor = "()C";
+        } else if ("D".equals(type)) {
+            newType = "java/lang/Double";
+            metchod = "doubleValue";
+            descriptor = "()D";
+        } else if ("F".equals(type)) {
+            newType = "java/lang/Float";
+            metchod = "floatValue";
+            descriptor = "()F";
+        } else if ("I".equals(type)) {
+            newType = "java/lang/Integer";
+            metchod = "intValue";
+            descriptor = "()I";
+        } else if ("J".equals(type)) {
+            newType = "java/lang/Long";
+            metchod = "longValue";
+            descriptor = "()J";
+        } else if ("S".equals(type)) {
+            newType = "java/lang/Short";
+            metchod = "shortValue";
+            descriptor = "()S";
+        } else {
+            newType = type.substring(1);
+            metchod = null;
+            descriptor = null;
+        }
+
+        mv.visitTypeInsn(Opcodes.CHECKCAST, newType);
+        if (metchod != null) {
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, newType, metchod, descriptor, false);
         }
     }
 }
