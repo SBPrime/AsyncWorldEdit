@@ -157,13 +157,17 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
         mv.visitInsn(Opcodes.DUP);
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, methodClassName, "<init>", "()V", false);
 
-        int args = getArgsCount(me.descriptor);
-        mv.visitLdcInsn(args);
+        final String[] args = getArgs(me.descriptor);
+        
+        mv.visitLdcInsn(args.length);
         mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
-        for (int i = 0; i < args; i++) {
+        for (int i = 0; i < args.length; i++) {
+            final String argumentType = args[i];
+            
             mv.visitInsn(Opcodes.DUP);
             mv.visitLdcInsn(i);
-            mv.visitVarInsn(Opcodes.ALOAD, i + 1);
+            visitArgumemt(mv, argumentType, i + 1);
+            encapsulatePrimitives(mv, argumentType);
             mv.visitInsn(Opcodes.AASTORE);
         }
 
@@ -171,7 +175,15 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
                 "executeMultiArgMethod",
                 "(Ljava/lang/Object;Ljava/lang/String;Lorg/primesoft/asyncworldedit/injector/utils/MultiArgWorldEditOperationAction;[Ljava/lang/Object;)V", false);
 
-        mv.visitInsn(Opcodes.RETURN);
+        if (me.descriptor.endsWith(")I")) {
+            mv.visitInsn(Opcodes.ICONST_1);
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (me.descriptor.endsWith(")V")) {
+            mv.visitInsn(Opcodes.RETURN);
+        } else {
+            new IllegalStateException("Method result not supported for: " + me.name + me.descriptor);
+        }
+
         mv.visitMaxs(2, 1);
 
         me.annotations.forEach(ae -> ae.visit(mv));
@@ -210,19 +222,24 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
             mv.visitVarInsn(Opcodes.ALOAD, 2);
             mv.visitLdcInsn(i);
             mv.visitInsn(Opcodes.AALOAD);
-            
-            checkCast(mv, args[i]);                        
+
+            checkCast(mv, args[i]);
         }
 
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 m_descriptorClass, RANDOM_PREFIX + me.name, me.descriptor, false);
+        
+        if (!me.descriptor.endsWith(")V")) {
+            mv.visitInsn(Opcodes.POP);
+        }
+        
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(2, 1);
         mv.visitEnd();
 
         cw.visitEnd();
         createClass(className.replace("/", "."), cw);
-    }    
+    }
 
     private static class MethodAnnotationRecorderVisitor extends MethodVisitor {
 

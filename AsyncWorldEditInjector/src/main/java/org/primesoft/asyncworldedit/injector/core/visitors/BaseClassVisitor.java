@@ -50,12 +50,17 @@ package org.primesoft.asyncworldedit.injector.core.visitors;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
@@ -68,12 +73,19 @@ import org.objectweb.asm.Type;
  * @author SBPrime
  */
 public abstract class BaseClassVisitor extends InjectorClassVisitor {
-
-    @FunctionalInterface
-    protected interface MethodFactory {
-
-        void define(String name, String descriptor, String clsName, Method m);
-    }
+    private static final Set<Character> PRIMITIVES = "ZBCDFIJS".chars()
+            .mapToObj(i -> (char)i)
+            .collect(Collectors.toCollection(HashSet<Character>::new));
+    private static final Map<String, EncapsulatePrimitive> ENCAPSULATE_PRIMITIVE = Stream.of(
+            new EncapsulatePrimitive("Z", "java/lang/Boolean", "booleanValue", "valueOf", Opcodes.ILOAD),
+            new EncapsulatePrimitive("B", "java/lang/Byte", "byteValue", "valueOf", Opcodes.ILOAD),
+            new EncapsulatePrimitive("C", "java/lang/Character", "charValue", "valueOf", Opcodes.ILOAD),
+            new EncapsulatePrimitive("D", "java/lang/Double", "doubleValue", "valueOf", Opcodes.DLOAD),
+            new EncapsulatePrimitive("F", "java/lang/Float", "floatValue", "valueOf", Opcodes.FLOAD),
+            new EncapsulatePrimitive("I", "java/lang/Integer", "intValue", "valueOf", Opcodes.ILOAD),
+            new EncapsulatePrimitive("J", "java/lang/Long", "longValue", "valueOf", Opcodes.LLOAD),
+            new EncapsulatePrimitive("S", "java/lang/Short", "shortValue", "valueOf", Opcodes.ILOAD))
+            .collect(Collectors.toMap(i -> i.primitive, i -> i));
 
     protected static final Handle BOOTSTRAP_LAMBDA = new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
             "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
@@ -93,14 +105,7 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
     private final static Pattern ARGS_MATCHER = Pattern.compile("\\([^)]+\\)");
 
     protected static int getArgsCount(String desc) {
-        Matcher m = ARGS_MATCHER.matcher(desc);
-        if (!m.find()) {
-            return 0;
-        }
-
-        return (int) m.group(0).chars()
-                .filter(i -> i == ';')
-                .count();
+        return getArgs(desc).length;
     }
 
     protected static String[] getArgs(String desc) {
@@ -110,9 +115,26 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         }
 
         String args = m.group(0);
-        args = args.substring(1, args.length() - 1);
+        char[] chars = args.substring(1, args.length() - 1).toCharArray();
+        int charsPos = 0;        
+        
+        List<String> result = new ArrayList<>(10);
+        while (charsPos < chars.length) {
+            if (!PRIMITIVES.contains(chars[charsPos])) {
+                int pos = charsPos;
+                while (pos < chars.length && chars[pos] != ';') {
+                    pos++;
+                }
+                
+                result.add(new String(chars, charsPos, pos - charsPos));
+                charsPos = pos + (chars[pos] == ';' ? 1 : 0);
+            } else {
+                result.add(Character.toString(chars[charsPos]));
+                charsPos++;
+            }
+        }
 
-        return args.split(";");
+        return result.toArray(new String[result.size()]);
     }
 
     /**
@@ -229,6 +251,16 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         }
     }
 
+    protected final void visitArgumemt(MethodVisitor mv, String type, int id) {
+        final EncapsulatePrimitive entry = ENCAPSULATE_PRIMITIVE.get(type);
+        if (entry == null) {
+            mv.visitVarInsn(Opcodes.ALOAD, id);
+            return;
+        }
+        
+        mv.visitVarInsn(entry.opcodeLoad, id);
+    }
+    
     protected final void visitArgumemt(MethodVisitor mv, Class<?> type, int id) {
         if (double.class.equals(type)) {
             mv.visitVarInsn(Opcodes.DLOAD, id);
@@ -254,51 +286,53 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
     }
 
     protected final void checkCast(MethodVisitor mv, String type) {
-        final String newType;
-        final String metchod;
-        final String descriptor;
+        final EncapsulatePrimitive entry = ENCAPSULATE_PRIMITIVE.get(type);
 
-        if ("Z".equals(type)) {
-            newType = "java/lang/Boolean";
-            metchod = "booleanValue";
-            descriptor = "()Z";
-        } else if ("B".equals(type)) {
-            newType = "java/lang/Byte";
-            metchod = "byteValue";
-            descriptor = "()B";
-        } else if ("C".equals(type)) {
-            newType = "java/lang/Character";
-            metchod = "charValue";
-            descriptor = "()C";
-        } else if ("D".equals(type)) {
-            newType = "java/lang/Double";
-            metchod = "doubleValue";
-            descriptor = "()D";
-        } else if ("F".equals(type)) {
-            newType = "java/lang/Float";
-            metchod = "floatValue";
-            descriptor = "()F";
-        } else if ("I".equals(type)) {
-            newType = "java/lang/Integer";
-            metchod = "intValue";
-            descriptor = "()I";
-        } else if ("J".equals(type)) {
-            newType = "java/lang/Long";
-            metchod = "longValue";
-            descriptor = "()J";
-        } else if ("S".equals(type)) {
-            newType = "java/lang/Short";
-            metchod = "shortValue";
-            descriptor = "()S";
-        } else {
-            newType = type.substring(1);
-            metchod = null;
-            descriptor = null;
+        mv.visitTypeInsn(Opcodes.CHECKCAST, entry == null ? type.substring(1) : entry.refType);
+        if (entry != null) {
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, entry.refType,
+                    entry.toPrimitive,
+                    "()" + entry.primitive,
+                    false);
+        }
+    }
+
+    protected final void encapsulatePrimitives(MethodVisitor mv, String type) {
+        final EncapsulatePrimitive entry = ENCAPSULATE_PRIMITIVE.get(type);
+        if (entry == null) {
+            return;
         }
 
-        mv.visitTypeInsn(Opcodes.CHECKCAST, newType);
-        if (metchod != null) {
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, newType, metchod, descriptor, false);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, entry.refType,
+                entry.toRef, "(" + entry.primitive + ")L" + entry.refType + ";", false);
+    }
+
+    @FunctionalInterface
+    protected interface MethodFactory {
+
+        void define(String name, String descriptor, String clsName, Method m);
+    }
+
+    private static class EncapsulatePrimitive {
+
+        public final String primitive;
+
+        public final String refType;
+        public final String toPrimitive;
+        public final String toRef;
+        
+        public final int opcodeLoad;
+
+        public EncapsulatePrimitive(String primitive, String refType,
+                String toPrimitive, String toRef,
+                int opcodeLoad) {
+            this.primitive = primitive;
+
+            this.refType = refType;
+            this.toPrimitive = toPrimitive;
+            this.toRef = toRef;
+            
+            this.opcodeLoad = opcodeLoad;
         }
     }
 }

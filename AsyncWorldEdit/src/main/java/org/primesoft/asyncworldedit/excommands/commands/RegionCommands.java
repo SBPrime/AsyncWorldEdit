@@ -197,51 +197,6 @@ public class RegionCommands {
                 
         player.print(affected + " block(s) have been replaced.");        
     }
-
-    @Command(
-        aliases = { "/smooth" },
-        usage = "[iterations]",
-        flags = "n",
-        desc = "Smooth the elevation in the selection",
-        help =
-            "Smooths the elevation in the selection.\n" +
-            "The -n flag makes it only consider naturally occuring blocks.",
-        min = 0,
-        max = 1
-    )
-    @CommandPermissions("worldedit.region.smooth")
-    @Logging(REGION)
-    public void smooth(final Player player, EditSession editSession, @Selection final Region region, @Optional("1") final int iterations, @Switch('n') final boolean affectNatural) throws WorldEditException {
-        if (s_ctorHeightMapFilter == null) {   
-            LoggerProvider.log("Error: smooth operation disabled.");
-            return;
-        }
-        
-        InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, editSession, new IEditSessionJob() {
-            @Override
-            public String getName() {
-                return "smooth";
-            }
-
-            @Override
-            public void execute(EditSession es) {
-                try {
-                    HeightMap heightMap = new HeightMap(es, region);
-                    GaussianKernel kernel = new GaussianKernel(5, 1.0);                    
-                                        
-                    HeightMapFilter filter = Reflection.create(HeightMapFilter.class, s_ctorHeightMapFilter, "Unable to create the HeightMapFilter.", kernel);
-
-                    int affected = heightMap.applyFilter(filter, iterations);
-                    player.print("Terrain's height map smoothed. " + affected + " block(s) changed.");
-                    
-                    es.flushSession();
-                } catch (WorldEditException ex) {                    
-                    player.printError("Error while executing smooth.");
-                    ExceptionHelper.printException(ex, String.format("Error while processing async operation smooth"));
-                }
-            }
-        });
-    }
     
     
     @Command(
