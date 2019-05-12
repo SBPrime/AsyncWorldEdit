@@ -100,15 +100,6 @@ final class ClassInjectorBukkit implements IClassInjector {
 
             return result;
         } catch (Exception ex) {
-                        
-            Class<?> cls;
-            try {
-                cls = m_rootClassLoader.loadClass("com/sk89q/worldedit/entity/Entity");
-                ClassLoader cll = cls.getClassLoader();
-            } catch (ClassNotFoundException ex1) {
-            }            
-            
-            
             throw (ClassFormatError) (new ClassFormatError("Unable to inject class.").initCause(ex));
         }
     }

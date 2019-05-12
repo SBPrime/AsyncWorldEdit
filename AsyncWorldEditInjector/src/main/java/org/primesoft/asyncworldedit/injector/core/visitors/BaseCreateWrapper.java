@@ -184,7 +184,7 @@ public abstract class BaseCreateWrapper extends BaseClassCreator {
         mv.visitCode();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/primesoft/asyncworldedit/injector/core/visitors/Helpers",
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, CLASS_HELPERS_DESCRIPTOR,
                 "wrapperEquals",
                 "(Ljava/lang/Object;Ljava/lang/Object;)Z", false);
         mv.visitInsn(Opcodes.IRETURN);

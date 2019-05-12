@@ -53,15 +53,14 @@
 package org.primesoft.asyncworldedit.injector.classfactory;
 
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
 import java.util.UUID;
+import org.enginehub.piston.CommandManager;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
+import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 
 /**
  * Interface for injected WorldEdit classes factory
@@ -98,4 +97,8 @@ public interface IClassFactory {
      IPlayerEntry getPlayer(UUID uniqueId);
      
      World wrapWorld(World world, IPlayerEntry player);
+
+    CommandManager wrapCommandManager(Object sender, CommandManager cm);
+
+    ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent);
 }

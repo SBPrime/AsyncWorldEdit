@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,69 +45,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.classfactory.base;
+package org.primesoft.asyncworldedit.injector.injected.commands;
 
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
-import java.util.UUID;
+import com.sk89q.worldedit.command.util.CommandPermissionsConditionGenerator;
+import java.util.List;
+import java.util.Map;
 import org.enginehub.piston.CommandManager;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
+import org.enginehub.piston.inject.Key;
+import org.enginehub.piston.part.CommandPart;
 
 /**
  *
  * @author SBPrime
  */
-public class BaseClassFactory implements IClassFactory {
-
-    private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();
-    private final IJobProcessor m_jobProcessor = new BaseJobProcessor();
-
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
-    }
-
-    @Override
-    public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
-    }
-
-    @Override
-    public Clipboard createClipboard(Clipboard c, Region region) {
-        return c;
-    }
-
-    @Override
-    public void handleError(WorldEditException ex, String name) {
-        // No op
-    }
-
-    @Override
-    public IPlayerEntry getPlayer(UUID uniqueId) {
-        return null;
-    }
-
-    @Override
-    public World wrapWorld(World world, IPlayerEntry player) {
-        return world;
-    }
-
-    @Override
-    public CommandManager wrapCommandManager(Object sender, CommandManager cm) {
-        return cm;
-    }
-
-    @Override
-    public ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent) {
-        return this::noOpRegisterBuild;
-    }
-    
-    private void noOpRegisterBuild(ICommandsRegistration cr) {}
+public interface ICommandsRegistration {
+   CommandManager getCommandManager();
+   CommandPermissionsConditionGenerator getCommandPermissionsConditionGenerator();
+   List getListeners();
+   
+   Map<String, Key> getKeys();
+   Map<String, CommandPart> getCommandArguments();
+   
+   <T> T getContainerInstance();
 }

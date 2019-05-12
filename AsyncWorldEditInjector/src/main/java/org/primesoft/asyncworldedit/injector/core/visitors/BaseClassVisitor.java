@@ -87,6 +87,8 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
             new EncapsulatePrimitive("S", "java/lang/Short", "shortValue", "valueOf", Opcodes.ILOAD))
             .collect(Collectors.toMap(i -> i.primitive, i -> i));
 
+    protected final static String CLASS_HELPERS_DESCRIPTOR = "org/primesoft/asyncworldedit/injector/core/visitors/Helpers";
+
     protected static final Handle BOOTSTRAP_LAMBDA = new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory",
             "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;",
             false);

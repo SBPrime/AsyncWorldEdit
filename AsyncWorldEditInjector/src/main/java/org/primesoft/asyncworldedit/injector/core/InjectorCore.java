@@ -75,6 +75,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.function.operation.OperationsClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.EditSessionClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.CommandsRegistrationVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.RegionCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SchematicCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.ScriptingCommandsVisitor;
@@ -192,6 +193,9 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.command.ScriptingCommands", (c, cc) -> new ScriptingCommandsVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.SchematicCommands", (c, cc) -> new SchematicCommandsVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.RegionCommands", (c, cc) -> new RegionCommandsVisitor(c, cc));
+            
+            modiffyClasses("com.sk89q.worldedit.command.UtilityCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.command.RegionCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
             
             crateClass(cc-> new CreatePlayerWrapper(cc));
             crateClass(cc-> new CreateNoPermsPlayer(cc));

@@ -55,10 +55,13 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import java.util.Objects;
 import java.util.stream.Stream;
+import org.enginehub.piston.CommandManager;
 import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
 import org.primesoft.asyncworldedit.injector.injected.IWrapper;
+import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
+import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.MultiArgWorldEditOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.OperationAction;
@@ -68,7 +71,6 @@ import org.primesoft.asyncworldedit.injector.utils.OperationAction;
  * @author SBPrime
  */
 public final class Helpers {
-
     public static void executeMethod(Operation op, OperationAction method) {
         if (op == null) {
             return;
@@ -92,7 +94,7 @@ public final class Helpers {
         final Player player = Stream.of(args).filter(i -> i instanceof Player).map(i -> (Player) i)
                 .findFirst().orElse(null);
         final EditSession es = Stream.of(args).filter(i -> i instanceof EditSession).map(i -> (EditSession) i)
-                .findFirst().orElse(null);
+                .findFirst().orElse(null);       
         
         InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, es, new IEditSessionJob() {
             @Override
@@ -130,6 +132,13 @@ public final class Helpers {
         return result;
     }
     
+    public static CommandManager wrapCommandManager(Object sender, CommandManager cm) {
+        return InjectorCore.getInstance().getClassFactory().wrapCommandManager(sender, cm);
+    }
+    
+    public static ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent) {
+        return InjectorCore.getInstance().getClassFactory().createCommandsRegistrationDelegate(parent);
+    }
         
     public static boolean wrapperEquals(Object o1, Object o2) {
         if (o1 == null && o2 == null) {

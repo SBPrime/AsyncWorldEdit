@@ -171,7 +171,7 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
             mv.visitInsn(Opcodes.AASTORE);
         }
 
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/primesoft/asyncworldedit/injector/core/visitors/Helpers",
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, CLASS_HELPERS_DESCRIPTOR,
                 "executeMultiArgMethod",
                 "(Ljava/lang/Object;Ljava/lang/String;Lorg/primesoft/asyncworldedit/injector/utils/MultiArgWorldEditOperationAction;[Ljava/lang/Object;)V", false);
 

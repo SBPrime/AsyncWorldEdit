@@ -161,7 +161,7 @@ public final class OperationsClassVisitor extends BaseClassVisitor {
         
         mv.visitInsn(Opcodes.DUP);
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, methodClassName, "<init>", "()V", false);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/primesoft/asyncworldedit/injector/core/visitors/Helpers", 
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, CLASS_HELPERS_DESCRIPTOR, 
                 exception != null ? "executeMethodEx" : "executeMethod", 
                 "(Lcom/sk89q/worldedit/function/operation/Operation;Lorg/primesoft/asyncworldedit/injector/utils/"
                 + (exception == null ? "OperationAction" : "ExceptionOperationAction") + ";)V", false);
