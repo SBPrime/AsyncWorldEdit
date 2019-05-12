@@ -47,16 +47,24 @@
  */
 package org.primesoft.asyncworldedit.asyncinjector.async;
 
+import org.primesoft.asyncworldedit.excommands.commands.RegionCommandsFilteringCommandManager;
 import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.command.RegionCommandsRegistration;
+import com.sk89q.worldedit.command.UtilityCommandsRegistration;
 import com.sk89q.worldedit.world.World;
 import java.util.UUID;
+import org.enginehub.piston.CommandManager;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.core.AwePlatform;
+import org.primesoft.asyncworldedit.excommands.commands.ExRegionCommandsRegistration;
+import org.primesoft.asyncworldedit.excommands.commands.ExUtilityCommandsRegistration;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
+import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
+import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
@@ -104,5 +112,25 @@ public class AsyncClassFactory extends BaseClassFactory {
     @Override
     public World wrapWorld(World world, IPlayerEntry player) {
         return AsyncWorld.wrap(world, player);
+    }
+
+    @Override
+    public ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent) {
+        if ((Object)parent instanceof UtilityCommandsRegistration) {
+            return new ExUtilityCommandsRegistration();
+        } else if ((Object)parent instanceof RegionCommandsRegistration) {
+            return new ExRegionCommandsRegistration();
+        }
+        
+        return super.createCommandsRegistrationDelegate(parent);
+    }
+
+    @Override
+    public CommandManager wrapCommandManager(Object sender, CommandManager cm) {
+        if (sender instanceof RegionCommandsRegistration) {
+            return new RegionCommandsFilteringCommandManager(cm);
+        }
+        
+        return super.wrapCommandManager(sender, cm);
     }
 }

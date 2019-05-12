@@ -48,7 +48,6 @@
 package org.primesoft.asyncworldedit.excommands;
 
 import org.primesoft.asyncworldedit.excommands.commands.RegionCommands;
-import org.primesoft.asyncworldedit.excommands.commands.SchematicCommands;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.extension.platform.Platform;
 import java.lang.reflect.Field;
@@ -56,10 +55,6 @@ import java.util.Set;
 import org.enginehub.piston.CommandManager;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-import org.primesoft.asyncworldedit.excommands.commands.ClipboardCommands;
-import org.primesoft.asyncworldedit.excommands.commands.FillCommands;
-import org.primesoft.asyncworldedit.utils.Reflection;
-import org.primesoft.asyncworldedit.worldedit.util.command.DispatcherWrapper;
 
 /**
  * The AsyncWorldEdit commands injector
