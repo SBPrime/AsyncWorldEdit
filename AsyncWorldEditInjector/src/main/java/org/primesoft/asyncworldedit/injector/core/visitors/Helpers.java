@@ -88,9 +88,12 @@ public final class Helpers {
     public static void executeMultiArgMethod(Object _this,
             String name, MultiArgWorldEditOperationAction method,
             Object... args) {
-
-        final Player player = Stream.of(args).filter(i -> i instanceof Player).map(i -> (Player) i).findFirst().get();
-        final EditSession es = Stream.of(args).filter(i -> i instanceof EditSession).map(i -> (EditSession) i).findFirst().get();
+        
+        final Player player = Stream.of(args).filter(i -> i instanceof Player).map(i -> (Player) i)
+                .findFirst().orElse(null);
+        final EditSession es = Stream.of(args).filter(i -> i instanceof EditSession).map(i -> (EditSession) i)
+                .findFirst().orElse(null);
+        
         InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, es, new IEditSessionJob() {
             @Override
             public String getName() {

@@ -66,6 +66,7 @@ import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
+import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
 import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 
 /**
@@ -124,6 +125,10 @@ class AsyncJobProcessor implements IJobProcessor {
             return false;
         }
     }
+    
+    private IPlayerEntry getPlayerEntry(Player p) {
+        return p == null ? m_playerManager.getConsolePlayer() : m_playerManager.getPlayer(p.getUniqueId());
+    }
 
     @Override
     public void executeJob(Player player, final IJob job) {
@@ -131,7 +136,7 @@ class AsyncJobProcessor implements IJobProcessor {
             return;
         }
 
-        final IPlayerEntry playerEntry = m_playerManager.getPlayer(player.getUniqueId());
+        final IPlayerEntry playerEntry = getPlayerEntry(player);
         final String name = job.getName();
         boolean async = checkAsync(playerEntry, name);
 
@@ -173,7 +178,7 @@ class AsyncJobProcessor implements IJobProcessor {
             return;
         }
 
-        final IPlayerEntry playerEntry = m_playerManager.getPlayer(player.getUniqueId());
+        final IPlayerEntry playerEntry = getPlayerEntry(player);
         final String name = job.getName();
         boolean async = checkAsync(playerEntry, name);
 
@@ -193,22 +198,18 @@ class AsyncJobProcessor implements IJobProcessor {
         }
 
         //m_blockPlacer.performAsAsyncJob(null, playerEntry, name, null);
-        m_blockPlacer.performAsAsyncJob(itses, playerEntry, name, new IFuncParamEx<Integer, ICancelabeEditSession, MaxChangedBlocksException>() {
-            @Override
-            public Integer execute(ICancelabeEditSession param) throws MaxChangedBlocksException {
-                if (!(param instanceof EditSession)) {
-                    ExceptionHelper.printException(new Exception("Expected " + EditSession.class.getName()), "Unable to process async job");
-                    return 0;
-                }
-
-                try {
-                    job.execute((EditSession) param);
-                } catch (Exception ex) {
-                    ErrorHandler.handleError(playerEntry, name, null, ex);
-                }
+        m_blockPlacer.performAsAsyncJob(itses, playerEntry, name, (ICancelabeEditSession param) -> {
+            if (!(param instanceof EditSession)) {
+                ExceptionHelper.printException(new Exception("Expected " + EditSession.class.getName()), "Unable to process async job");
                 return 0;
             }
 
+            try {
+                job.execute((EditSession) param);
+            } catch (Exception ex) {
+                ErrorHandler.handleError(playerEntry, name, null, ex);
+            }
+            return 0;
         });
     }
 }
