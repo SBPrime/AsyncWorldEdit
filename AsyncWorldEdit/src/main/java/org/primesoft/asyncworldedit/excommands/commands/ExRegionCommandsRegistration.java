@@ -61,7 +61,6 @@ public class ExRegionCommandsRegistration implements ICommandsRegistrationDelega
 
     @Override
     public void build(ICommandsRegistration cr) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

@@ -47,21 +47,154 @@
  */
 package org.primesoft.asyncworldedit.excommands.commands;
 
+import com.google.common.collect.ImmutableList;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.util.formatting.text.TextComponent;
+import com.sk89q.worldedit.util.formatting.text.TranslatableComponent;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.enginehub.piston.Command.Condition;
+import org.enginehub.piston.CommandParameters;
+import org.enginehub.piston.internal.RegistrationUtil;
+import org.enginehub.piston.part.CommandArgument;
+import org.enginehub.piston.part.CommandPart;
+import org.enginehub.piston.part.CommandParts;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 
 /**
  *
  * @author SBPrime
  */
-public class ExUtilityCommandsRegistration implements ICommandsRegistrationDelegate {
+public class ExUtilityCommandsRegistration extends BaseCommandsRegistration {
 
-    public ExUtilityCommandsRegistration() {
+    private final CommandArgument m_partPattern;
+    private final CommandArgument m_partRadius;
+    private final CommandArgument m_partDepth;
+
+    private FillCommands m_fillCommands;
+    private final IAsyncWorldEditCore m_aweCore;
+
+    public ExUtilityCommandsRegistration(IAsyncWorldEditCore aweCore) {
+        m_aweCore = aweCore;
+        
+        m_partPattern = CommandParts.arg(TranslatableComponent.of("pattern"), TextComponent.of("The blocks to fill with")).defaultsTo(ImmutableList.of()).ofTypes(ImmutableList.of(KEY_PATTERN)).build();
+        m_partRadius = CommandParts.arg(TranslatableComponent.of("radius"), TextComponent.of("The radius to fill in")).defaultsTo(ImmutableList.of()).ofTypes(ImmutableList.of(KEY_DOUBLE)).build();
+        m_partDepth = CommandParts.arg(TranslatableComponent.of("depth"), TextComponent.of("The depth to fill")).defaultsTo(ImmutableList.of("1")).ofTypes(ImmutableList.of(KEY_INTEGER)).build();
     }
 
     @Override
     public void build(ICommandsRegistration cr) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        super.build(cr);
+        
+        final FillCommand[] fillCommands = new FillCommand[]{
+            new FillCommand("/fillxz", new String[]{"/fillzx"}, "fillxz", true, false, true),
+            new FillCommand("/fillxy", new String[]{"/fillyx"}, "fillxy", true, true, false),
+            new FillCommand("/fillyz", new String[]{"/fillzy"}, "fillyz", false, true, true),
+            new FillCommand("/fill3d", new String[]{"/fillxyz", "/fillxzy", "/fillyxz", "/fillyzx", "/fillzxy", "/fillzyx"}, "fill3d", true, true, true)
+        };
+
+        final Class[] executorParams = new Class[]{Player.class, LocalSession.class, EditSession.class, Pattern.class, Double.TYPE, Integer.TYPE};
+        for (FillCommand entry : fillCommands) {
+            register(entry.name, entry.aliases, "Fill a hole",
+                    new CommandPart[]{m_partPattern, m_partRadius, m_partDepth},
+                    FillCommands.class, entry.method, executorParams,
+                    parameters -> execFillCommand(parameters, entry)
+            );
+        }
     }
-    
+
+    private int execFillCommand(CommandParameters parameters, FillCommand entry) throws WorldEditException {
+        if (m_fillCommands == null) {
+            m_fillCommands = new FillCommands(m_aweCore.getWorldEditIntegrator().getWE(), m_aweCore);
+        }
+        
+        return m_fillCommands.fill(
+                player(parameters), session(parameters),
+                editSession(parameters), pattern(parameters),
+                radius(parameters), depth(parameters),
+                entry.axisX, entry.axisY, entry.axisZ);
+    }
+
+    private void register(String name, String[] aliases, String description,
+            CommandPart[] params,
+            Class<?> executorCls, String executorMethod, Class[] executorParams,
+            WorldEditFunction toExec) {
+        m_commandManager.register(name, b -> {
+            b.aliases(Collections.unmodifiableCollection(Stream.of(aliases).collect(Collectors.toList())));
+            b.description(TextComponent.of(description));
+            b.parts(Collections.unmodifiableCollection(Stream.of(params).collect(Collectors.toList())));
+
+            final Method commandMethod = RegistrationUtil.getCommandMethod(
+                    executorCls, executorMethod,
+                    executorParams);
+
+            b.action(parameters -> executeMethod(parameters, commandMethod, toExec));
+            Condition condition = m_commandPermissionsConditionGenerator.generateCondition(commandMethod);
+
+            b.condition(condition);
+        });
+    }
+
+    private int executeMethod(CommandParameters parameters, Method cmdMethod,
+            WorldEditFunction toExec) throws WorldEditException {
+
+        RegistrationUtil.listenersBeforeCall(m_listeners, cmdMethod, parameters);
+
+        try {
+            int result = toExec.exec(parameters);
+            RegistrationUtil.listenersAfterCall(m_listeners, cmdMethod, parameters);
+            return result;
+        } catch (Throwable ex) {
+            RegistrationUtil.listenersAfterThrow(m_listeners, cmdMethod, parameters, ex);
+            throw ex;
+        }
+    }
+
+    private Pattern pattern(CommandParameters parameters) {
+        return (Pattern) m_partPattern.value(parameters).asSingle(KEY_PATTERN);
+    }
+
+    private double radius(CommandParameters parameters) {
+        return (Double) m_partRadius.value(parameters).asSingle(KEY_DOUBLE);
+    }
+
+    private int depth(CommandParameters parameters) {
+        return (Integer) m_partDepth.value(parameters).asSingle(KEY_INTEGER);
+    }
+
+    private static class FillCommand {
+
+        public final String name;
+        public final String[] aliases;
+        public final String method;
+        public final boolean axisX;
+        public final boolean axisY;
+        public final boolean axisZ;
+
+        public FillCommand(String name, String[] aliases,
+                String method,
+                boolean axisX, boolean axisY, boolean axisZ) {
+            this.name = name;
+            this.aliases = aliases;
+            this.method = method;
+            this.axisX = axisX;
+            this.axisY = axisY;
+            this.axisZ = axisZ;
+        }
+    }
+
+    @FunctionalInterface
+    private interface WorldEditFunction {
+
+        int exec(CommandParameters parameters) throws WorldEditException;
+    }
 }

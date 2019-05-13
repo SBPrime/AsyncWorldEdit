@@ -48,12 +48,13 @@
 package org.primesoft.asyncworldedit.excommands.commands;
 
 import com.sk89q.minecraft.util.commands.Command;
-import com.sk89q.minecraft.util.commands.CommandContext;
-import com.sk89q.minecraft.util.commands.CommandPermissions;
+import com.sk89q.worldedit.command.util.CommandPermissions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.command.util.Logging;
+import com.sk89q.worldedit.command.util.Logging.LogMode;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.input.ParserContext;
 import com.sk89q.worldedit.function.pattern.Pattern;
@@ -67,10 +68,11 @@ import org.primesoft.asyncworldedit.excommands.FillCommand;
 
 /**
  * The AsyncWorldEdit additional fill commands
+ *
  * @author SBPrime
  */
 public class FillCommands {
-    
+
     /**
      * Instance of WorldEdit
      */
@@ -95,115 +97,72 @@ public class FillCommands {
         m_asyncWorldEdit = awe;
         m_worldEdit = worldEdit;
     }
-    
-    /**
-     *
-     * @param player
-     * @param session
-     * @param editSession
-     * @param args
-     * @throws WorldEditException
-     */
+
     @Command(
             aliases = {"/fillxz", "/fillzx"},
-            usage = "<block> <radius> [width]",
-        desc = "Fill a hole",
-        min = 2,
-        max = 3
+            desc = "Fill a hole"
     )
     @CommandPermissions("worldedit.fill")
-    public void fillxz(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
-        fill(player, session, editSession, args, true, false, true);
-    }
-    
-    /**
-     *
-     * @param player
-     * @param session
-     * @param editSession
-     * @param args
-     * @throws WorldEditException
-     */
-    @Command(
-            aliases = {"/fillxy", "/fillyx"},
-            usage = "<block> <radius> [width]",
-        desc = "Fill a hole",
-        min = 2,
-        max = 3
-    )
-    @CommandPermissions("awe.excommands.fill.fillxy")
-    public void fillxy(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
-        fill(player, session, editSession, args, true, true, false);
-    }
-    
-    /**
-     *
-     * @param player
-     * @param session
-     * @param editSession
-     * @param args
-     * @throws WorldEditException
-     */
-    @Command(
-            aliases = {"/fillzy", "/fillyz"},
-            usage = "<block> <radius> [width]",
-        desc = "Fill a hole",
-        min = 2,
-        max = 3
-    )
-    @CommandPermissions("awe.excommands.fill.fillyz")
-    public void fillyz(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
-        fill(player, session, editSession, args, false, true, true);
-    }
-    
-        /**
-     *
-     * @param player
-     * @param session
-     * @param editSession
-     * @param args
-     * @throws WorldEditException
-     */
-    @Command(
-            aliases = {"/fill3d", "/fillxyz", "/fillxzy", "/fillyxz", "/fillyzx", "/fillzxy", "/fillzyx"},
-            usage = "<block> <radius> [width]",
-        desc = "Fill a hole",
-        min = 2,
-        max = 3
-    )
-    @CommandPermissions("awe.excommands.fill.fillyz")
-    public void fill3d(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
-        fill(player, session, editSession, args, true, true, true);
+    @Logging(LogMode.PLACEMENT)
+    public int fillxz(Player player, LocalSession session, EditSession editSession, Pattern pattern, double radius, int depth) throws WorldEditException {
+        return fill(player, session, editSession, 
+                pattern, radius, depth, 
+                true, false, true);
     }
 
-    /**
-     * 
-     * @param player
-     * @param session
-     * @param editSession
-     * @param args
-     * @param axisX
-     * @param axisY
-     * @param axisZ 
-     */
-    private void fill(Player player, LocalSession session, EditSession editSession, CommandContext args, 
+    @Command(
+            aliases = {"/fillxy", "/fillyx"},
+            desc = "Fill a hole"
+    )
+    @CommandPermissions("worldedit.fill")
+    @Logging(LogMode.PLACEMENT)
+    public int fillxy(Player player, LocalSession session, EditSession editSession, Pattern pattern, double radius, int depth) throws WorldEditException {
+        return fill(player, session, editSession, 
+                pattern, radius, depth, 
+                true, true, false);
+    }
+
+    @Command(
+            aliases = {"/fillzy", "/fillyz"},
+            desc = "Fill a hole"
+    )
+    @CommandPermissions("worldedit.fill")
+    @Logging(LogMode.PLACEMENT)
+    public int fillyz(Player player, LocalSession session, EditSession editSession, Pattern pattern, double radius, int depth) throws WorldEditException {
+        return fill(player, session, editSession, 
+                pattern, radius, depth, 
+                false, true, true);
+    }
+
+    @Command(
+            aliases = {"/fill3d", "/fillxyz", "/fillxzy", "/fillyxz", "/fillyzx", "/fillzxy", "/fillzyx"},
+            desc = "Fill a hole"
+    )
+    @CommandPermissions("worldedit.fill")
+    @Logging(LogMode.PLACEMENT)
+    public int fill3d(Player player, LocalSession session, EditSession editSession, Pattern pattern, double radius, int depth) throws WorldEditException {
+        return fill(player, session, editSession, 
+                pattern, radius, depth, 
+                true, true, true);
+    }
+
+    public int fill(Player player, LocalSession session, EditSession editSession, 
+            Pattern pattern, double radius, int depth,
             boolean axisX, boolean axisY, boolean axisZ) throws WorldEditException {
-        ParserContext context = new ParserContext();
-        context.setActor(player);
-        context.setWorld(player.getWorld());
-        context.setSession(session);
-        Pattern pattern = m_worldEdit.getPatternFactory().parseFromInput(args.getString(0), context);
-        double radius = Math.max(1, args.getDouble(1));
+        radius = Math.max(1.0D, radius);
+        depth = Math.max(1, depth);
+        
         m_worldEdit.checkMaxRadius(radius);
-        int depth = args.argsLength() > 2 ? Math.max(1, args.getInteger(2)) : 1;
 
         BlockVector3 pos = session.getPlacementPosition(player);
 
         IBlockPlacer bp = m_asyncWorldEdit.getBlockPlacer();
-        IPlayerManager pm = m_asyncWorldEdit.getPlayerManager();        
+        IPlayerManager pm = m_asyncWorldEdit.getPlayerManager();
         IPlayerEntry playerEntry = pm.getPlayer(player.getUniqueId());
-        
+
         AsyncCommand.run(new FillCommand(playerEntry, pos, pattern, radius, depth,
                 axisX, axisY, axisZ), playerEntry, bp, editSession);
+        
+        return 1;
     }
 }
