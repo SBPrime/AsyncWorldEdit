@@ -214,4 +214,9 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
     protected final void initializationDone() {
         m_aweCore.onWorldEditEnabled();
     }
+
+    @Override
+    public WorldEdit getWE() {
+        return m_worldEdit;
+    }
 }

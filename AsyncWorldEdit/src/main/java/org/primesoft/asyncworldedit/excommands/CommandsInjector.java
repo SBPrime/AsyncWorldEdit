@@ -47,15 +47,6 @@
  */
 package org.primesoft.asyncworldedit.excommands;
 
-import org.primesoft.asyncworldedit.excommands.commands.RegionCommands;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.extension.platform.Platform;
-import java.lang.reflect.Field;
-import java.util.Set;
-import org.enginehub.piston.CommandManager;
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
-import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-
 /**
  * The AsyncWorldEdit commands injector
  *

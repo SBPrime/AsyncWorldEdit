@@ -94,6 +94,8 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
             initializeLogger();
             detectFawe();
             inject();
+            
+            
         } finally {
             ClassLoaderHelper.removeLoader(classLoaderPlugin);
         }
@@ -239,6 +241,9 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
             return;
         }
 
+        s_api = createCore(loader);
+        s_api.initializeBridge();
+        
         s_loader = loader;
     }
 
@@ -294,31 +299,31 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
 
         if (m_loader == null) {
             return;
-        }
-        m_api = createCore(m_loader);
+        }        
 
-        if (m_api != null) {
-            m_api.initialize();
-            m_api.onEnable();
+        if (s_api != null) {
+            s_api.initializePlatform(this);
+            s_api.initialize();
+            s_api.onEnable();
 
-            getServer().getScheduler().runTaskLater(this, () -> m_loader.loadPlugins(m_api), 0);
+            getServer().getScheduler().runTaskLater(this, () -> m_loader.loadPlugins(s_api), 0);
         }
 
         log("Enabled");
     }
 
-    private IAsyncWorldEditCore createCore(final Loader loader) {
+    private static IAsyncWorldEditCore createCore(final Loader loader) {
         Constructor<?> ctor;
         try {
             Class<?> cls = loader.loadClass(CLS_CORE);
-            ctor = Reflection.findConstructor(cls, "Unable to find core constructor", Plugin.class);
+            ctor = Reflection.findConstructor(cls, "Unable to find core constructor");
         } catch (ClassNotFoundException ex) {
             log("ERROR: Unable to create AWE core, plugin disabled");
 
             return null;
         }
 
-        return Reflection.create(IAsyncWorldEditCore.class, ctor, "Unable to create AWE Core", this);
+        return Reflection.create(IAsyncWorldEditCore.class, ctor, "Unable to create AWE Core");
     }
 
     private static IInjectorPlatform createInjector(final Loader loader) {
@@ -337,9 +342,9 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
 
     @Override
     public void onDisable() {
-        if (m_api != null) {
+        if (s_api != null) {
             m_loader.unloadPlugins();
-            m_api.onDisable();
+            s_api.onDisable();
         }
         log("Disable");
     }

@@ -53,6 +53,8 @@ import com.sk89q.worldedit.command.RegionCommandsRegistration;
 import com.sk89q.worldedit.command.UtilityCommandsRegistration;
 import com.sk89q.worldedit.world.World;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.enginehub.piston.CommandManager;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -61,7 +63,6 @@ import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.excommands.commands.ExRegionCommandsRegistration;
 import org.primesoft.asyncworldedit.excommands.commands.ExUtilityCommandsRegistration;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
@@ -77,36 +78,51 @@ public class AsyncClassFactory extends BaseClassFactory {
     /**
      * The operation processor
      */
-    private final AsyncOperationProcessor m_operationProcessor;
-    
-    private final AsyncJobProcessor m_jobProcessor;
-    
-    public AsyncClassFactory(IAsyncWorldEditCore aweCore)
-    {        
-        m_operationProcessor = new AsyncOperationProcessor(aweCore);
-        
-        m_jobProcessor = new AsyncJobProcessor(aweCore);
+    private AsyncOperationProcessor m_operationProcessor;
+
+    private AsyncJobProcessor m_jobProcessor;
+
+    private final IAsyncWorldEditCore m_aweCore;
+
+    private final Object m_mtaMutex = new Object();
+
+    public AsyncClassFactory(IAsyncWorldEditCore aweCore) {
+        m_aweCore = aweCore;        
     }
     
-    @Override
-    public IOperationProcessor getOperationProcessor() {
-        return m_operationProcessor;
+    private <T> T lazyGet(Supplier<T> suplier, 
+            Supplier<T> fieldGet, Consumer<T> fieldSet) {
+        if (fieldGet.get() == null) {
+            synchronized (m_mtaMutex) {
+                if (fieldGet.get() == null) {
+                    fieldSet.accept(suplier.get());
+                }
+            }
+        }
+
+        return fieldGet.get();
     }
     
+
+    @Override    
+    public AsyncOperationProcessor getOperationProcessor() {
+        return lazyGet(() -> new AsyncOperationProcessor(m_aweCore), () -> m_operationProcessor, i -> m_operationProcessor = i);
+    }
+
     @Override
     public IJobProcessor getJobProcessor() {
-        return m_jobProcessor;
+        return lazyGet(() -> new AsyncJobProcessor(m_aweCore), () -> m_jobProcessor, i -> m_jobProcessor = i);
     }
 
     @Override
     public void handleError(WorldEditException ex, String name) {
         ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
     }
-    
+
     @Override
     public IPlayerEntry getPlayer(UUID uniqueId) {
         IPlayerManager pm = AwePlatform.getInstance().getCore().getPlayerManager();
-        return  pm.getPlayer(uniqueId);
+        return pm.getPlayer(uniqueId);
     }
 
     @Override
@@ -116,12 +132,12 @@ public class AsyncClassFactory extends BaseClassFactory {
 
     @Override
     public ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent) {
-        if ((Object)parent instanceof UtilityCommandsRegistration) {
-            return new ExUtilityCommandsRegistration();
-        } else if ((Object)parent instanceof RegionCommandsRegistration) {
+        if ((Object) parent instanceof UtilityCommandsRegistration) {
+            return new ExUtilityCommandsRegistration(m_aweCore);
+        } else if ((Object) parent instanceof RegionCommandsRegistration) {
             return new ExRegionCommandsRegistration();
         }
-        
+
         return super.createCommandsRegistrationDelegate(parent);
     }
 
@@ -130,7 +146,7 @@ public class AsyncClassFactory extends BaseClassFactory {
         if (sender instanceof RegionCommandsRegistration) {
             return new RegionCommandsFilteringCommandManager(cm);
         }
-        
+
         return super.wrapCommandManager(sender, cm);
     }
 }

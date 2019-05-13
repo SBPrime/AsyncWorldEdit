@@ -76,16 +76,16 @@ public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWor
 
     private static AsyncWorldEditMain s_instance;
 
-    protected IAsyncWorldEditCore m_api;
+    protected static IAsyncWorldEditCore s_api;
 
     @Override
     public double getAPIVersion() {
-        return m_api == null ? -1 : m_api.getAPIVersion();
+        return s_api == null ? -1 : s_api.getAPIVersion();
     }
 
     @Override
     public final byte[] getDetailAPIVersion() {
-        return m_api == null ? null : m_api.getDetailAPIVersion();
+        return s_api == null ? null : s_api.getDetailAPIVersion();
     }
 
     /**
@@ -95,7 +95,7 @@ public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWor
      */
     @Override
     public IAdapter getAdapter() {
-        return m_api == null ? null : m_api.getAdapter();
+        return s_api == null ? null : s_api.getAdapter();
     }
 
     /**
@@ -105,12 +105,12 @@ public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWor
      */
     @Override
     public IDirectChunkAPI getDirectChunkAPI() {
-        return m_api == null ? null : m_api.getDirectChunkAPI();
+        return s_api == null ? null : s_api.getDirectChunkAPI();
     }
 
     @Override
     public IAweOperations getOperations() {
-        return m_api == null ? null : m_api.getOperations();
+        return s_api == null ? null : s_api.getOperations();
     }
 
     /**
@@ -120,52 +120,52 @@ public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWor
      */
     @Override
     public IMapUtils getMapUtils() {
-        return m_api == null ? null : m_api.getMapUtils();
+        return s_api == null ? null : s_api.getMapUtils();
     }
 
     @Override
     public IPlayerManager getPlayerManager() {
-        return m_api == null ? null : m_api.getPlayerManager();
+        return s_api == null ? null : s_api.getPlayerManager();
     }
 
     @Override
     public IPhysicsWatch getPhysicsWatcher() {
-        return m_api == null ? null : m_api.getPhysicsWatcher();
+        return s_api == null ? null : s_api.getPhysicsWatcher();
     }
 
     @Override
     public IBlockPlacer getBlockPlacer() {
-        return m_api == null ? null : m_api.getBlockPlacer();
+        return s_api == null ? null : s_api.getBlockPlacer();
     }
 
     @Override
     public ITaskDispatcher getTaskDispatcher() {
-        return m_api == null ? null : m_api.getTaskDispatcher();
+        return s_api == null ? null : s_api.getTaskDispatcher();
     }
 
     @Override
     public IProgressDisplayManager getProgressDisplayManager() {
-        return m_api == null ? null : m_api.getProgressDisplayManager();
+        return s_api == null ? null : s_api.getProgressDisplayManager();
     }
 
     @Override
     public ISerializerManager getChangesetSerializer() {
-        return m_api == null ? null : m_api.getChangesetSerializer();
+        return s_api == null ? null : s_api.getChangesetSerializer();
     }
 
     @Override
     public IWorldeditIntegrator getWorldEditIntegrator() {
-        return (m_api == null) ? null : m_api.getWorldEditIntegrator();
+        return (s_api == null) ? null : s_api.getWorldEditIntegrator();
     }
 
     @Override
     public IWorld getWorld(UUID worldUUID) {
-        return m_api == null ? null : m_api.getWorld(worldUUID);
+        return s_api == null ? null : s_api.getWorld(worldUUID);
     }
 
     @Override
     public IWorld getWorld(String worldName) {
-        return m_api == null ? null : m_api.getWorld(worldName);
+        return s_api == null ? null : s_api.getWorld(worldName);
     }
 
     @Override
@@ -177,7 +177,7 @@ public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWor
 
     @Override
     public IClassScannerOptions getClassScannerOptions() {
-        return m_api == null ? null : m_api.getClassScannerOptions();
+        return s_api == null ? null : s_api.getClassScannerOptions();
     }
     
     
@@ -187,17 +187,17 @@ public abstract class AsyncWorldEditMain extends JavaPlugin implements IAsyncWor
     }
 
     public IAsyncWorldEdit getAPI() {
-        return m_api;
+        return s_api;
     }
 
     public IPlotMeFix getPlotMeFix() {
-        return m_api == null ? null : m_api.getPlotMeFix();
+        return s_api == null ? null : s_api.getPlotMeFix();
     }
 
     public void setPlotMeFix(IPlotMeFix plotMeFix) {
-        if (m_api == null) {
+        if (s_api == null) {
             return;
         }
-        m_api.setPlotMeFix(plotMeFix);
+        s_api.setPlotMeFix(plotMeFix);
     }
 }

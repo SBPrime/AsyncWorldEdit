@@ -69,6 +69,8 @@ public interface IAsyncWorldEditCore extends IAsyncWorldEdit {
 
     public boolean onCommand(IPlayerEntry player, String commandName, String[] args);
 
+    public void initializePlatform(Object...args);
+    
     public void initialize();
         
     public IInnerSerializerManager getInnerChangesetSerializer();
@@ -76,4 +78,6 @@ public interface IAsyncWorldEditCore extends IAsyncWorldEdit {
     public IInnerDirectChunkAPI getInnerDirectChunkAPI();
     
     public EventBus getEventBus();
+
+    void initializeBridge();
 }

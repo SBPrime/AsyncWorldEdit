@@ -57,8 +57,11 @@ import org.primesoft.asyncworldedit.platform.bukkit.BukkitPlatform;
  */
 public class BukkitAsyncWorldEditCore extends AsyncWorldEditCore {
 
-    public BukkitAsyncWorldEditCore(Plugin plugin) {
-        super(new BukkitPlatform(plugin));
-        
+    public BukkitAsyncWorldEditCore() {        
+    }
+
+    @Override
+    public void initializePlatform(Object... args) {
+        initializePlatform(new BukkitPlatform((Plugin) args[0]));
     }
 }

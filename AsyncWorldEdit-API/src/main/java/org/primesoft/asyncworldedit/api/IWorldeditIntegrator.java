@@ -40,6 +40,7 @@
  */
 package org.primesoft.asyncworldedit.api;
 
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -70,4 +71,10 @@ public interface IWorldeditIntegrator {
      * @return 
      */
     IWorld getWorld(World world);
+    
+    /**
+     * Get the WorldEdit
+     * @return 
+     */
+    WorldEdit getWE();
 }

@@ -108,7 +108,7 @@ import org.primesoft.asyncworldedit.versionChecker.VersionChecker;
  *
  * @author SBPrime
  */
-public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
+public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
 
     private Boolean m_isInitialized = false;
     private BlockPlacer m_blockPlacer;
@@ -121,27 +121,33 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
     private IAdapter m_nativeAdapter;
     private IInnerSerializerManager m_changesetSerializer;
     private IDirectChunkCommands m_directChunkCommands;
-    private final IMessageProvider m_messageProvider;
-    private final IBlocksHubBridge m_blocksHubBridge;
-    
+    private IMessageProvider m_messageProvider;
+    private IBlocksHubBridge m_blocksHubBridge;
+
     /**
      * Current platform
      */
-    private final IPlatform m_platform;
+    private IPlatform m_platform;
 
-    public AsyncWorldEditCore(IPlatform platform) {
+    public AsyncWorldEditCore() {
+    }
+
+    @Override
+    public abstract void initializePlatform(Object...args);
+    
+    protected void initializePlatform(IPlatform platform) {
         m_platform = platform;
         m_messageProvider = m_platform.createMessageProvider();
         m_blocksHubBridge = new BlocksHubBridge(m_platform);
 
         log(String.format("Platform set to %1$s", platform.getName()));
-
-        AwePlatform awePlatform = AwePlatform.getInstance();
-        awePlatform.initialize(this);
     }
 
     @Override
     public void initialize() {
+        AwePlatform awePlatform = AwePlatform.getInstance();
+        awePlatform.initialize(this);
+
         m_platform.initialize(this);
         ICommandManager cm = m_platform.getCommandManager();
         cm.registerCommand("awe", new String[]{"/awe"},
@@ -183,7 +189,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
     public IDirectChunkCommands getChunkOperations() {
         return m_directChunkCommands;
     }
-    
+
     /**
      * Get the direct chunk API
      *
@@ -239,7 +245,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
     public IWorldeditIntegratorInner getWorldEditIntegrator() {
         return m_platform.getWorldEditIntegrator();
     }
-    
+
     @Override
     public EventBus getEventBus() {
         IWorldeditIntegratorInner we = m_platform.getWorldEditIntegrator();
@@ -304,7 +310,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
     @Override
     public ICron getCron() {
         return m_cron;
-    }        
+    }
 
     @Override
     public void onEnable() {
@@ -318,7 +324,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
         log("= Author: SBPrime                                                                 =");
         log("=                                                                                 =");
         log("===================================================================================");
-        
+
         m_isInitialized = false;
         m_platform.onEnable();
 
@@ -346,14 +352,7 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
         }
         m_directChunkCommands = null;
 
-        setPlotMeFix(new NullFix());
-
-        try {
-            m_aweInjector = InjectorBridge.initialize(this);
-        } catch (Error ex) {
-            ExceptionHelper.printException(ex, "AsyncWorldEditInjector not found.");
-            m_aweInjector = null;
-        }
+        setPlotMeFix(new NullFix());        
 
         if (m_aweInjector == null) {
             log("Unable to get instance of AsyncWorldEdit Injector. AsyncWorldEdit disabled.");
@@ -388,7 +387,17 @@ public class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOperations {
 
         m_platform.getPlayerProvider().initialize(m_playerManager);
     }
-    
+
+    @Override
+    public void initializeBridge() {
+        try {
+            m_aweInjector = InjectorBridge.initialize(this);
+        } catch (Error ex) {
+            ExceptionHelper.printException(ex, "AsyncWorldEditInjector not found.");
+            m_aweInjector = null;
+        }
+    }
+
     public void onWorldEditEnabled() {
         //Nothing right now
     }
