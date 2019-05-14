@@ -56,7 +56,6 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.command.util.Logging;
 import com.sk89q.worldedit.command.util.Logging.LogMode;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.extension.input.ParserContext;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.math.BlockVector3;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;

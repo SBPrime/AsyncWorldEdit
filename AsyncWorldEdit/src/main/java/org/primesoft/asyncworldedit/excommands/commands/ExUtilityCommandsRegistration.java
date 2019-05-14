@@ -57,8 +57,6 @@ import com.sk89q.worldedit.util.formatting.text.TextComponent;
 import com.sk89q.worldedit.util.formatting.text.TranslatableComponent;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.enginehub.piston.Command.Condition;
@@ -144,21 +142,6 @@ public class ExUtilityCommandsRegistration extends BaseCommandsRegistration {
         });
     }
 
-    private int executeMethod(CommandParameters parameters, Method cmdMethod,
-            WorldEditFunction toExec) throws WorldEditException {
-
-        RegistrationUtil.listenersBeforeCall(m_listeners, cmdMethod, parameters);
-
-        try {
-            int result = toExec.exec(parameters);
-            RegistrationUtil.listenersAfterCall(m_listeners, cmdMethod, parameters);
-            return result;
-        } catch (Throwable ex) {
-            RegistrationUtil.listenersAfterThrow(m_listeners, cmdMethod, parameters, ex);
-            throw ex;
-        }
-    }
-
     private Pattern pattern(CommandParameters parameters) {
         return (Pattern) m_partPattern.value(parameters).asSingle(KEY_PATTERN);
     }
@@ -190,11 +173,5 @@ public class ExUtilityCommandsRegistration extends BaseCommandsRegistration {
             this.axisY = axisY;
             this.axisZ = axisZ;
         }
-    }
-
-    @FunctionalInterface
-    private interface WorldEditFunction {
-
-        int exec(CommandParameters parameters) throws WorldEditException;
     }
 }
