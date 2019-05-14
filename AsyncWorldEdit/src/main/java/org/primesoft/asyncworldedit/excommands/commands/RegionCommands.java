@@ -48,47 +48,22 @@
 package org.primesoft.asyncworldedit.excommands.commands;
 
 import com.sk89q.minecraft.util.commands.Command;
-import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.command.util.CommandPermissions;
+import com.sk89q.worldedit.command.util.Logging;
+import com.sk89q.worldedit.command.util.Logging.LogMode;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.extent.buffer.ForgetfulExtentBuffer;
 import com.sk89q.worldedit.function.RegionFunction;
-import com.sk89q.worldedit.function.RegionMaskingFilter;
-import com.sk89q.worldedit.function.block.BlockReplace;
 import com.sk89q.worldedit.function.mask.BlockMask;
 import com.sk89q.worldedit.function.mask.ExistingBlockMask;
 import com.sk89q.worldedit.function.mask.Mask;
-import com.sk89q.worldedit.function.mask.MaskUnion;
-import com.sk89q.worldedit.function.mask.RegionMask;
-import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
-import com.sk89q.worldedit.function.operation.OperationQueue;
 import com.sk89q.worldedit.function.operation.Operations;
-import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.function.visitor.RegionVisitor;
-import com.sk89q.worldedit.internal.annotation.Direction;
 import com.sk89q.worldedit.internal.annotation.Selection;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.convolution.GaussianKernel;
-import com.sk89q.worldedit.math.convolution.HeightMap;
-import com.sk89q.worldedit.math.convolution.HeightMapFilter;
-import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.regions.RegionOperationException;
-import com.sk89q.worldedit.world.block.BlockStateHolder;
-import com.sk89q.worldedit.world.block.BlockTypes;
-import java.lang.reflect.Constructor;
-import java.util.Collection;
-import org.primesoft.asyncworldedit.LoggerProvider;
-import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
-import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
-import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import org.primesoft.asyncworldedit.injector.core.InjectorCore;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
-import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.function.RegionMaskingFilterEx;
 import org.primesoft.asyncworldedit.worldedit.function.block.KeepDataBlockReplace;
 import org.primesoft.asyncworldedit.worldedit.function.mask.SkipDataBlockMask;
@@ -167,19 +142,18 @@ public class RegionCommands {
         m_asyncWorldEdit = awe;
         m_jobProcessor = InjectorCore.getInstance().getClassFactory().getJobProcessor();
         m_worldEdit = worldEdit;
-    }
+    }*/
 
+    
     @Command(
-            aliases = {"/replacend", "/rend", "/repnd"},
-            usage = "[from-block] <to-block>",
-            desc = "Replace all blocks in the selection with another and keep the data",
-            flags = "",
-            min = 1,
-            max = 2
+        aliases = { "/replacend", "/rend", "/repnd" },
+        desc = "Replace all blocks in the selection with another and keep the data"
     )
     @CommandPermissions("worldedit.region.replace")
-    @Logging(REGION)
-    public void replaceBlocks(Player player, EditSession editSession, @Selection Region region, @Optional Mask from, Pattern to) throws WorldEditException {
+    @Logging(LogMode.REGION)
+    public int replacend(Player player, EditSession editSession, @Selection Region region,
+                           Mask from, Pattern to) throws WorldEditException {
+
         if (from == null) {
             from = new ExistingBlockMask(editSession);
         }
@@ -195,10 +169,12 @@ public class RegionCommands {
         
         int affected = visitor.getAffected();
                 
-        player.print(affected + " block(s) have been replaced.");        
+        player.print(affected + " block(s) have been replaced.");
+        
+        return affected;
     }
     
-    
+    /*
     @Command(
         aliases = { "/stack" },
         usage = "[count] [direction]",

@@ -47,20 +47,81 @@
  */
 package org.primesoft.asyncworldedit.excommands.commands;
 
+import com.google.common.collect.ImmutableList;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.formatting.text.TextComponent;
+import com.sk89q.worldedit.util.formatting.text.TranslatableComponent;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.enginehub.piston.Command.Condition;
+import org.enginehub.piston.CommandParameters;
+import org.enginehub.piston.internal.RegistrationUtil;
+import org.enginehub.piston.part.CommandArgument;
+import org.enginehub.piston.part.CommandParts;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 
 /**
  *
  * @author SBPrime
  */
-public class ExRegionCommandsRegistration implements ICommandsRegistrationDelegate {
+public class ExRegionCommandsRegistration extends BaseCommandsRegistration {
+
+    private final CommandArgument m_partFrom;
+    private final CommandArgument m_partTo;
+    private RegionCommands m_regionCommands;
 
     public ExRegionCommandsRegistration() {
+        m_partFrom = CommandParts.arg(TranslatableComponent.of("from"), TextComponent.of("The mask representing blocks to replace")).defaultsTo(Collections.singletonList("")).ofTypes(Collections.singletonList(KEY_MASK)).build();
+        m_partTo = CommandParts.arg(TranslatableComponent.of("to"), TextComponent.of("The pattern of blocks to replace with"))
+                .defaultsTo(Collections.singletonList("")).ofTypes(Collections.singletonList(KEY_PATTERN)).build();
+
     }
 
     @Override
     public void build(ICommandsRegistration cr) {
+        super.build(cr);
+
+        m_commandManager.register("/replacend", b -> {
+            b.aliases(Collections.unmodifiableList(Stream.of("/rend", "/repnd").collect(Collectors.toList())));
+            b.description(TextComponent.of("Replace all blocks in the selection with another and keep the data"));
+            b.parts(ImmutableList.of(m_partFrom, m_partTo));
+
+            Method commandMethod = RegistrationUtil.getCommandMethod(RegionCommands.class, "replacend", new Class[]{Player.class, EditSession.class, Region.class, Mask.class, Pattern.class});
+            b.action(parameters -> executeMethod(parameters, commandMethod, this::doReplaceNd));
+
+            Condition condition = m_commandPermissionsConditionGenerator.generateCondition(commandMethod);
+            b.condition(condition);
+        });
     }
-    
+
+    private RegionCommands getRegionCommands() {
+        if (m_regionCommands == null) {
+            m_regionCommands = new RegionCommands();
+        }
+
+        return m_regionCommands;
+    }
+
+    private int doReplaceNd(CommandParameters parameters) throws WorldEditException {
+        return getRegionCommands().replacend(
+                player(parameters), editSession(parameters), region(parameters),
+                from(parameters), to(parameters)
+        );
+    }
+
+    private Mask from(CommandParameters parameters) {
+        return (Mask) m_partFrom.value(parameters).asSingle(KEY_MASK);
+    }
+
+    private Pattern to(CommandParameters parameters) {
+        return (Pattern) m_partTo.value(parameters).asSingle(KEY_PATTERN);
+    }
+
 }
