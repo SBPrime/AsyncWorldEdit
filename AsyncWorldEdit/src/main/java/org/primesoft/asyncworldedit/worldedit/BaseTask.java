@@ -49,6 +49,7 @@ package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.session.request.Request;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.primesoft.asyncworldedit.api.MessageSystem;
@@ -60,6 +61,7 @@ import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.strings.MessageType;
 import org.primesoft.asyncworldedit.utils.BukkitRunnable;
+import org.primesoft.asyncworldedit.utils.RequestCotext;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 
 /**
@@ -107,8 +109,9 @@ public abstract class BaseTask extends BukkitRunnable {
      * The permission group
      */
     protected final IPermissionGroup m_group;
-    
+
     private Function<EditSession, Boolean> m_queueTester;
+    private final Request m_request;
 
     public BaseTask(final EditSession editSession, final IPlayerEntry player,
             final String commandName, IBlockPlacer blocksPlacer, JobEntry job) {
@@ -130,64 +133,68 @@ public abstract class BaseTask extends BukkitRunnable {
         if (m_safeEditSession != null) {
             m_safeEditSession.addAsync(job);
         }
+
+        m_request = Request.request();
     }
 
     @Override
     public void run() {
-        Object result = null;
+        try (RequestCotext rc = new RequestCotext(m_request, m_editSession)) {
+            Object result = null;
 
-        if (m_job.getStatus() == JobStatus.Canceled) {
-            return;
-        }
+            if (m_job.getStatus() == JobStatus.Canceled) {
+                return;
+            }
 
-        m_job.setStatus(JobStatus.Preparing);
-        if (m_player.getMessaging(MessageSystem.TALKATIVE)) {
-            m_player.say(MessageType.BLOCK_PLACER_RUN.format(m_command));
-        }
-        m_blockPlacer.addTasks(m_player, m_job);
+            m_job.setStatus(JobStatus.Preparing);
+            if (m_player.getMessaging(MessageSystem.TALKATIVE)) {
+                m_player.say(MessageType.BLOCK_PLACER_RUN.format(m_command));
+            }
+            m_blockPlacer.addTasks(m_player, m_job);
 
-        if ((m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled())
-                && (m_job.getStatus() != JobStatus.Canceled)) {
-            try {
-                result = doRun();
-            } catch (MaxChangedBlocksException ex) {
-                m_player.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
-            } catch (IllegalArgumentException ex) {
-                if (ex.getCause() instanceof SessionCanceled) {
-                    m_player.say(MessageType.BLOCK_PLACER_CANCELED.format());
+            if ((m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled())
+                    && (m_job.getStatus() != JobStatus.Canceled)) {
+                try {
+                    result = doRun();
+                } catch (MaxChangedBlocksException ex) {
+                    m_player.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
+                } catch (IllegalArgumentException ex) {
+                    if (ex.getCause() instanceof SessionCanceled) {
+                        m_player.say(MessageType.BLOCK_PLACER_CANCELED.format());
+                    }
                 }
             }
-        }
 
-        if (m_editSession != null) {
-            if (m_queueTester == null) {
-                m_queueTester = initializeQT();
+            if (m_editSession != null) {
+                if (m_queueTester == null) {
+                    m_queueTester = initializeQT();
+                }
+
+                if (m_queueTester.apply(m_editSession)) {
+                    m_editSession.flushSession();
+                } else if (m_cancelableEditSession != null) {
+                    m_cancelableEditSession.resetAsync();
+                } else if (m_safeEditSession != null) {
+                    m_safeEditSession.resetAsync();
+                }
             }
-            
-            if (m_queueTester.apply(m_editSession)) {
-                m_editSession.flushSession();
-            } else if (m_cancelableEditSession != null) {
-                m_cancelableEditSession.resetAsync();
+
+            m_job.setStatus(JobStatus.Waiting);
+            m_blockPlacer.addTasks(m_player, m_job);
+            doPostRun(result);
+
+            postProcess();
+
+            m_job.taskDone();
+            if (m_cancelableEditSession != null) {
+                IThreadSafeEditSession parent = m_cancelableEditSession.getParent();
+                parent.removeAsync(m_job);
             } else if (m_safeEditSession != null) {
-                m_safeEditSession.resetAsync();
+                m_safeEditSession.removeAsync(m_job);
             }
+
+            super.run();
         }
-
-        m_job.setStatus(JobStatus.Waiting);
-        m_blockPlacer.addTasks(m_player, m_job);
-        doPostRun(result);
-
-        postProcess();
-
-        m_job.taskDone();
-        if (m_cancelableEditSession != null) {
-            IThreadSafeEditSession parent = m_cancelableEditSession.getParent();
-            parent.removeAsync(m_job);
-        } else if (m_safeEditSession != null) {
-            m_safeEditSession.removeAsync(m_job);
-        }
-
-        super.run();        
     }
 
     protected abstract Object doRun() throws MaxChangedBlocksException, IllegalArgumentException;
@@ -201,15 +208,15 @@ public abstract class BaseTask extends BukkitRunnable {
         boolean batchingSupported = Stream.of(EditSession.class.getDeclaredMethods())
                 .filter(i -> "isBatchingChunks".equals(i.getName()))
                 .findFirst().isPresent();
-        
-        return batchingSupported ? 
-                BaseTask::queueTestBatching : BaseTask::queueTestNoBatching;
+
+        return batchingSupported
+                ? BaseTask::queueTestBatching : BaseTask::queueTestNoBatching;
     }
-    
+
     private static boolean queueTestBatching(EditSession es) {
         return es.isQueueEnabled() || es.isBatchingChunks();
     }
-    
+
     private static boolean queueTestNoBatching(EditSession es) {
         return es.isQueueEnabled();
     }

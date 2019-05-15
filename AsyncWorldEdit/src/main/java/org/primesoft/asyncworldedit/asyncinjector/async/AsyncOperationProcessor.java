@@ -52,6 +52,7 @@ import org.primesoft.asyncworldedit.asyncinjector.validators.OperationValidator;
 import org.primesoft.asyncworldedit.asyncinjector.validators.StackValidator;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.session.request.Request;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,6 +73,7 @@ import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.Pair;
 import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.utils.RequestCotext;
 import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
@@ -133,7 +135,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         final AsyncEditSession asyncSession = getFirst(AsyncEditSession.class, sessions);
         final String name = operationName.getValue();
         final IPlayerEntry playerEntry = asyncSession.getPlayer();
-        
+
         if (!asyncSession.checkAsync(name)) {
             try {
                 action.execute(op);
@@ -143,7 +145,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
             return;
         }
 
-        final WaitFor wait = asyncSession.getWait();        
+        final WaitFor wait = asyncSession.getWait();
         final int jobId = m_blockPlacer.getJobId(playerEntry);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
         final JobEntry job = new JobEntry(playerEntry, cancelableSession, jobId, name);
@@ -152,21 +154,23 @@ public class AsyncOperationProcessor implements IOperationProcessor {
 
         m_blockPlacer.addJob(playerEntry, job);
 
+        final Request r = Request.request();
         SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(cancelableSession, playerEntry,
                 name, m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        try {
-                            wait.checkAndWait(null);
-                            action.execute(op);
+                try {
+                    wait.checkAndWait(null);
 
-                            return session.getChangeSet().size();
-                        } catch (Exception ex) {
-                            return ErrorHandler.handleError(playerEntry, name, session, ex);
-                        }
-                    }
-                });
+                    action.execute(op);
+
+                    return session.getChangeSet().size();
+                } catch (Exception ex) {
+                    return ErrorHandler.handleError(playerEntry, name, session, ex);
+                }
+            }
+        });
     }
 
     @Override
@@ -202,7 +206,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
             return;
         }
 
-        final WaitFor wait = asyncSession.getWait();        
+        final WaitFor wait = asyncSession.getWait();
         final int jobId = m_blockPlacer.getJobId(playerEntry);
         final CancelabeEditSession cancelableSession = new CancelabeEditSession(asyncSession, asyncSession.getMask(), jobId);
         final JobEntry job = new JobEntry(playerEntry, cancelableSession, jobId, name);
@@ -214,19 +218,19 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         SchedulerUtils.runTaskAsynchronously(m_schedule,
                 new AsyncTask(cancelableSession, playerEntry,
                         name, m_blockPlacer, job) {
-                    @Override
-                    public int task(CancelabeEditSession session)
+            @Override
+            public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
-                        try {
-                            wait.checkAndWait(null);
-                            action.execute(op);
+                try {
+                    wait.checkAndWait(null);
+                    action.execute(op);
 
-                            return cancelableSession.getChangeSet().size();
-                        } catch (Exception ex) {
-                            return ErrorHandler.handleError(playerEntry, name, session, ex);
-                        }
-                    }
+                    return cancelableSession.getChangeSet().size();
+                } catch (Exception ex) {
+                    return ErrorHandler.handleError(playerEntry, name, session, ex);
                 }
+            }
+        }
         );
     }
 

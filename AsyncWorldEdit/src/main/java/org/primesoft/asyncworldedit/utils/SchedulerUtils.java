@@ -47,9 +47,9 @@
  */
 package org.primesoft.asyncworldedit.utils;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.platform.api.ITask;
@@ -87,7 +87,7 @@ public class SchedulerUtils {
     /**
      * The task queue
      */
-    private static final HashMap<Object, Queue<BukkitRunnable>> s_taskQueue = new LinkedHashMap<Object, Queue<BukkitRunnable>>();
+    private static final Map<Object, Queue<BukkitRunnable>> s_taskQueue = new LinkedHashMap<>();
     
     /**
      * Run task asynchronously one after another
@@ -120,7 +120,7 @@ public class SchedulerUtils {
                     queue.add(task);
                 }
             } else {
-                final Queue<BukkitRunnable> queue = new LinkedList<BukkitRunnable>();
+                final Queue<BukkitRunnable> queue = new LinkedList<>();
                 queue.add(task);
                 
                 s_taskQueue.put(sequenceKey, queue);

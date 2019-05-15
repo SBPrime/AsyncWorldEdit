@@ -50,6 +50,7 @@ package org.primesoft.asyncworldedit.asyncinjector.async;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.session.request.Request;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -67,6 +68,7 @@ import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.playerManager.PlayerEntry;
+import org.primesoft.asyncworldedit.utils.RequestCotext;
 import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 
 /**
@@ -152,6 +154,7 @@ class AsyncJobProcessor implements IJobProcessor {
         final int jobId = m_blockPlacer.getJobId(playerEntry);
         final JobEntry jobEntry = new JobEntry(playerEntry, jobId, name);
         m_blockPlacer.addJob(playerEntry, jobEntry);
+        
         SchedulerUtils.runTaskAsynchronously(m_schedule, new BaseTask(null, playerEntry,
                 name, m_blockPlacer, jobEntry) {
                     @Override
