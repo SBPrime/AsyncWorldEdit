@@ -59,12 +59,18 @@ import org.enginehub.piston.part.CommandPart;
  * @author SBPrime
  */
 public interface ICommandsRegistration {
-   CommandManager getCommandManager();
-   CommandPermissionsConditionGenerator getCommandPermissionsConditionGenerator();
-   List getListeners();
-   
-   Map<String, Key> getKeys();
-   Map<String, CommandPart> getCommandArguments();
-   
-   <T> T getContainerInstance();
+
+    ICommandsRegistrationDelegate getBuilderDelegate();
+
+    CommandManager getCommandManager();
+
+    CommandPermissionsConditionGenerator getCommandPermissionsConditionGenerator();
+
+    List getListeners();
+
+    Map<String, Key> getKeys();
+
+    Map<String, CommandPart> getCommandArguments();
+
+    <T> T getContainerInstance();
 }

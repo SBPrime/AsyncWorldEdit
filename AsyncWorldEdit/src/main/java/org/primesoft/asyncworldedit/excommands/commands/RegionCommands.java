@@ -56,14 +56,27 @@ import com.sk89q.worldedit.command.util.Logging;
 import com.sk89q.worldedit.command.util.Logging.LogMode;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.function.RegionFunction;
+import com.sk89q.worldedit.function.block.BlockReplace;
 import com.sk89q.worldedit.function.mask.BlockMask;
 import com.sk89q.worldedit.function.mask.ExistingBlockMask;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.function.mask.MaskUnion;
+import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.function.visitor.RegionVisitor;
+import com.sk89q.worldedit.internal.annotation.Direction;
 import com.sk89q.worldedit.internal.annotation.Selection;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.regions.RegionOperationException;
+import com.sk89q.worldedit.extent.buffer.ForgetfulExtentBuffer;
+import com.sk89q.worldedit.function.mask.RegionMask;
+import com.sk89q.worldedit.function.RegionMaskingFilter;
+import com.sk89q.worldedit.function.operation.OperationQueue;
+import org.primesoft.asyncworldedit.worldedit.blocks.BlockStates;
 import org.primesoft.asyncworldedit.worldedit.function.RegionMaskingFilterEx;
 import org.primesoft.asyncworldedit.worldedit.function.block.KeepDataBlockReplace;
 import org.primesoft.asyncworldedit.worldedit.function.mask.SkipDataBlockMask;
@@ -73,138 +86,51 @@ import org.primesoft.asyncworldedit.worldedit.function.mask.SkipDataBlockMask;
  * @author SBPrime
  */
 public class RegionCommands {
-/*    private final  static Constructor s_ctorHeightMapFilter;
-    
-    static {
-        Class<?> cls = HeightMapFilter.class;
-        Constructor[] ctors = cls.getDeclaredConstructors();
-        if (ctors == null) {
-            ctors = new Constructor[0];
-        }
-        
-        final Collection<Class<?>> classes = Reflection.scanHierarchy(GaussianKernel.class);        
-        Constructor foundCtor = null;
-        for (Constructor ctor : ctors) {
-            if (ctor.getParameterCount() != 1) {
-                continue;
-            }
-            
-            Class[] params = ctor.getParameterTypes();
-            if (params == null || params.length != 1) {
-                //Should not happen, but better safe then sorry.
-                continue;
-            }
-
-            for (Class<?> c : classes) {
-                if (params[0] == c) {
-                    foundCtor = ctor;
-                    break;
-                }
-            }
-            
-            if (foundCtor != null) {
-                break;
-            }
-        }
-        
-        s_ctorHeightMapFilter = foundCtor;        
-        if (s_ctorHeightMapFilter == null) {
-            LoggerProvider.log("Error: Unable to find constructor for HeightMapFilter. Smooth operation disabled.");
-        }
-    }    
-
-    /**
-     * Instance of WorldEdit
-     */
-    //private final WorldEdit m_worldEdit;
-
-    /**
-     * The job processor
-     */
-    //private final IJobProcessor m_jobProcessor;
-
-    /**
-     * The AsyncWorldEdit
-     */
-    //private final IAsyncWorldEdit m_asyncWorldEdit;
-
-    /**
-     * Create a new instance.
-     *
-     * @param worldEdit reference to WorldEdit
-     * @param awe the AsyncWorldEdit
-     */
-    /*public RegionCommands(WorldEdit worldEdit, IAsyncWorldEdit awe) {
-        if (worldEdit == null) {
-            throw new NullPointerException("worldEdit");
-        }
-
-        m_asyncWorldEdit = awe;
-        m_jobProcessor = InjectorCore.getInstance().getClassFactory().getJobProcessor();
-        m_worldEdit = worldEdit;
-    }*/
-
-    
     @Command(
-        aliases = { "/replacend", "/rend", "/repnd" },
-        desc = "Replace all blocks in the selection with another and keep the data"
+            aliases = {"/replacend", "/rend", "/repnd"},
+            desc = "Replace all blocks in the selection with another and keep the data"
     )
     @CommandPermissions("worldedit.region.replace")
     @Logging(LogMode.REGION)
     public int replacend(Player player, EditSession editSession, @Selection Region region,
-                           Mask from, Pattern to) throws WorldEditException {
+            Mask from, Pattern to) throws WorldEditException {
 
         if (from == null) {
             from = new ExistingBlockMask(editSession);
+        } else if (from instanceof BlockMask) {
+            from = new SkipDataBlockMask((BlockMask) from);
         }
-        else if (from instanceof BlockMask) {
-            from = new SkipDataBlockMask((BlockMask)from);
-        }
-        
+
         RegionFunction replace = new KeepDataBlockReplace(editSession, to);
         RegionFunction filter = new RegionMaskingFilterEx(from, replace);
         RegionVisitor visitor = new RegionVisitor(region, filter);
-        
+
         Operations.completeLegacy(visitor);
-        
+
         int affected = visitor.getAffected();
-                
+
         player.print(affected + " block(s) have been replaced.");
-        
+
         return affected;
     }
-    
-    /*
+
     @Command(
-        aliases = { "/stack" },
-        usage = "[count] [direction]",
-        flags = "sa",
-        desc = "Repeat the contents of the selection",
-        help =
-            "Repeats the contents of the selection.\n" +
-            "Flags:\n" +
-            "  -s shifts the selection to the last stacked copy\n" +
-            "  -m sets a source mask so that excluded blocks become air\n" +
-            "  -a skips air blocks",
-        min = 0,
-        max = 2
-    )        
-    @CommandPermissions("worldedit.region.stack")
-    @Logging(ORIENTATION_REGION)
-    public void stack(Player player, EditSession editSession, LocalSession session,
-                      @Selection Region region,
-                      @Optional("1") @Range(min = 1) int count,
-                      @Optional(Direction.AIM) @Direction BlockVector3 direction,
-                      @Switch('s') boolean moveSelection,
-                      @Switch('a') boolean ignoreAirBlocks,
-                      @Switch('m') Mask mask) throws WorldEditException {        
+            aliases = {"/stack"},
+            desc = "Repeat the contents of the selection"
+    )
+    @CommandPermissions({"worldedit.region.stack"})
+    @Logging(LogMode.ORIENTATION_REGION)
+    public int stack(Player player, EditSession editSession, LocalSession session,
+            @Selection Region region, int count, @Direction(includeDiagonals = true) BlockVector3 direction,
+            boolean moveSelection, boolean ignoreAirBlocks,
+            Mask mask) throws WorldEditException {
         final BlockVector3 size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
         final BlockVector3 to = region.getMinimumPoint();
-        
+
         final ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, editSession, to);
         copy.setRepetitions(count);
         copy.setTransform(new AffineTransform().translate(direction.multiply(size)));
-        
+
         if (mask != null && ignoreAirBlocks) {
             copy.setSourceMask(new MaskUnion(mask, new ExistingBlockMask(editSession)));
         } else if (mask != null) {
@@ -213,14 +139,12 @@ public class RegionCommands {
             copy.setSourceMask(new ExistingBlockMask(editSession));
         }
         Operations.completeLegacy(copy);
-        
-        
+
         int affected = copy.getAffected();
 
         if (moveSelection) {
             try {
                 final BlockVector3 ss = region.getMaximumPoint().subtract(region.getMinimumPoint());
-
                 final BlockVector3 shiftVector = direction.toVector3().multiply(count * (Math.abs(direction.dot(ss)) + 1)).toBlockPoint();
                 region.shift(shiftVector);
 
@@ -231,55 +155,45 @@ public class RegionCommands {
             }
         }
 
-        player.print(affected + " blocks changed. Undo with //undo");
+        player.print(affected + " block(s) changed. Undo with //undo");
+        return affected;
     }
-    
+
     @Command(
-        aliases = { "/move" },
-        usage = "[count] [direction] [leave-id]",
-        flags = "sa",
-        desc = "Move the contents of the selection",
-        help =
-            "Moves the contents of the selection.\n" +
-            "Flags:\n" +
-            "  -s flag shifts the selection to the target location.\n" +
-            "  -m sets a source mask so that excluded blocks become air\n" +
-            "  -a skips air blocks\n" +
-            "Optionally fills the old location with <leave-id>.",
-        min = 0,
-        max = 3
+            aliases = {"/move"},
+            desc = "Move the contents of the selection"
     )
-    @CommandPermissions("worldedit.region.move")
-    @Logging(ORIENTATION_REGION)
-    public void move(Player player, EditSession editSession, LocalSession session,
-                     @Selection Region region,
-                     @Optional("1") @Range(min = 1) int count,
-                     @Optional(Direction.AIM) @Direction BlockVector3 direction,
-                     @Optional("air") BlockStateHolder replace,
-                     @Switch('s') boolean moveSelection,
-                     @Switch('a') boolean ignoreAirBlocks,
-                     @Switch('m') Mask mask) throws WorldEditException {
+    //            "  -m sets a source mask so that excluded blocks become air\n" +
+    @CommandPermissions({"worldedit.region.move"})
+    @Logging(LogMode.ORIENTATION_REGION)
+    public int move(Player player, EditSession editSession, LocalSession session,
+            @Selection Region region, int count, @Direction(includeDiagonals = true) BlockVector3 direction,
+            Pattern replace, boolean moveSelection, boolean ignoreAirBlocks,
+            Mask mask) throws WorldEditException {
+        if (count < 1) {
+            throw new IllegalArgumentException("Count must be >= 1");
+        }
+
         BlockVector3 to = region.getMinimumPoint();
 
         // Remove the original blocks
-        com.sk89q.worldedit.function.pattern.Pattern pattern = replace != null ?
-                new BlockPattern(replace) :                
-                new BlockPattern(BlockTypes.AIR.getDefaultState());
-        BlockReplace remove = new BlockReplace(editSession, pattern);
+        final Pattern pattern = replace != null ? replace : new BlockPattern(BlockStates.AIR);
+        final BlockReplace remove = new BlockReplace(editSession, pattern);
 
         // Copy to a buffer so we don't destroy our original before we can copy all the blocks from it
         ForgetfulExtentBuffer buffer = new ForgetfulExtentBuffer(editSession, new RegionMask(region));
+        
         ForwardExtentCopy copy = new ForwardExtentCopy(editSession, region, buffer, to);
         copy.setTransform(new AffineTransform().translate(direction.multiply(count)));
-        
+
         if (mask == null) {
             copy.setSourceFunction(remove); // Remove            
         } else {
             copy.setSourceFunction(new RegionMaskingFilter(mask, remove));
         }
-        
+
         copy.setRemovingEntities(true);
-        
+
         if (mask != null && ignoreAirBlocks) {
             copy.setSourceMask(new MaskUnion(mask, new ExistingBlockMask(editSession)));
         } else if (mask != null) {
@@ -287,7 +201,7 @@ public class RegionCommands {
         } else if (ignoreAirBlocks) {
             copy.setSourceMask(new ExistingBlockMask(editSession));
         }
-        
+
         // Then we need to copy the buffer to the world
         BlockReplace bReplace = new BlockReplace(editSession, buffer);
         RegionVisitor visitor = new RegionVisitor(buffer.asRegion(), bReplace);
@@ -296,7 +210,6 @@ public class RegionCommands {
         Operations.completeLegacy(operation);
 
         int affected = copy.getAffected();
-        
 
         if (moveSelection) {
             try {
@@ -310,5 +223,7 @@ public class RegionCommands {
         }
 
         player.print(affected + " blocks moved.");
-    }*/
+        
+        return affected;
+    }
 }

@@ -66,7 +66,7 @@ import org.enginehub.piston.suggestion.Suggestion;
  */
 public abstract class DelegateCommandManager implements CommandManager {
     
-    private final CommandManager m_cm;
+    protected final CommandManager m_cm;
 
     public DelegateCommandManager(CommandManager cm) {
         m_cm = cm;

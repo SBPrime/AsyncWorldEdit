@@ -55,8 +55,11 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.internal.annotation.Direction;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.internal.annotation.Selection;
+import com.sk89q.worldedit.math.BlockVector3;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import org.enginehub.piston.CommandManager;
@@ -82,6 +85,13 @@ public abstract class BaseCommandsRegistration implements ICommandsRegistrationD
     protected static final Key KEY_EDIT_SESSION = Key.of(EditSession.class);
     protected static final Key KEY_ACTOR = Key.of(Actor.class);
     protected static final Key KEY_REGION_SELECTION = Key.of(Region.class, Selection.class);
+    protected static final Key KEY_BLOCK_VECTOR3_DIAGONALS = Key.of(BlockVector3.class,
+            (new Object() {
+                Annotation a(@Direction(includeDiagonals = true) Object ah) {
+                    return this.getClass().getDeclaredMethods()[0].getParameterAnnotations()[0][0];
+                }
+            }).a((Object) null)
+    );
 
     protected CommandManager m_commandManager;
     protected CommandPermissionsConditionGenerator m_commandPermissionsConditionGenerator;
@@ -94,7 +104,7 @@ public abstract class BaseCommandsRegistration implements ICommandsRegistrationD
 
         m_commandPermissionsConditionGenerator = cr.getCommandPermissionsConditionGenerator();
     }
-    
+
     protected int executeMethod(CommandParameters parameters, Method cmdMethod,
             WorldEditFunction toExec) throws WorldEditException {
 
@@ -125,10 +135,10 @@ public abstract class BaseCommandsRegistration implements ICommandsRegistrationD
     protected final EditSession editSession(CommandParameters parameters) {
         return (EditSession) RegistrationUtil.requireOptional(KEY_EDIT_SESSION, "editSession", parameters.injectedValue(KEY_EDIT_SESSION));
     }
-    
+
     protected final Region region(CommandParameters parameters) {
-      return (Region)RegistrationUtil.requireOptional(KEY_REGION_SELECTION, "region", parameters.injectedValue(KEY_REGION_SELECTION));
-   }
+        return (Region) RegistrationUtil.requireOptional(KEY_REGION_SELECTION, "region", parameters.injectedValue(KEY_REGION_SELECTION));
+    }
 
     @FunctionalInterface
     protected interface WorldEditFunction {

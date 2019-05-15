@@ -177,6 +177,7 @@ public class CommandsRegistrationVisitor extends BaseClassVisitor {
         final Map<String, Method> crMethods = Stream.of(ICommandsRegistration.class.getDeclaredMethods())
                 .collect(Collectors.toMap(i -> i.getName(), i -> i));
 
+        visitGetBuilderDelegate(crMethods, "getBuilderDelegate");
         visitSimpleGetMethod(crMethods, "getCommandManager");
         visitSimpleGetMethod(crMethods, "getCommandPermissionsConditionGenerator");
         visitSimpleGetMethod(crMethods, "getListeners", "Lcom/google/common/collect/ImmutableList;");
@@ -367,6 +368,24 @@ public class CommandsRegistrationVisitor extends BaseClassVisitor {
         mv.visitFieldInsn(Opcodes.GETFIELD, m_descriptorClass, sourceField, descriptorMap);
         mv.visitInsn(Opcodes.ARETURN);
 
+        mv.visitMaxs(1, 1);
+        mv.visitEnd();
+    }
+
+    private void visitGetBuilderDelegate(Map<String, Method> methods, String methodName) {
+        final Method im = methods.get(methodName);
+        if (im == null) {
+            throw new IllegalStateException("Method '" + methodName + "' not found in " + ICommandsRegistration.class.getName() + " interface");
+        }
+
+        final String methodDescriptor = Type.getMethodDescriptor(im);        
+        final MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC, im.getName(), methodDescriptor, null, null);
+
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, m_descriptorClass, FIELD_NAME_NEW_BUILDER, Type.getDescriptor(ICommandsRegistrationDelegate.class));
+
+        mv.visitInsn(Opcodes.ARETURN);
         mv.visitMaxs(1, 1);
         mv.visitEnd();
     }

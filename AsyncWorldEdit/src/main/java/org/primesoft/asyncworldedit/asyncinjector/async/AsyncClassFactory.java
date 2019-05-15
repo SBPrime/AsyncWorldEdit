@@ -47,7 +47,6 @@
  */
 package org.primesoft.asyncworldedit.asyncinjector.async;
 
-import org.primesoft.asyncworldedit.excommands.commands.RegionCommandsFilteringCommandManager;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.command.RegionCommandsRegistration;
 import com.sk89q.worldedit.command.UtilityCommandsRegistration;
@@ -143,10 +142,6 @@ public class AsyncClassFactory extends BaseClassFactory {
 
     @Override
     public CommandManager wrapCommandManager(Object sender, CommandManager cm) {
-        if (sender instanceof RegionCommandsRegistration) {
-            return new RegionCommandsFilteringCommandManager(cm);
-        }
-
         return super.wrapCommandManager(sender, cm);
     }
 }

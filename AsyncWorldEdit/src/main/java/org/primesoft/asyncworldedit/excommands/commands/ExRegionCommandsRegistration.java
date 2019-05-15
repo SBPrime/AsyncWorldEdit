@@ -49,10 +49,12 @@ package org.primesoft.asyncworldedit.excommands.commands;
 
 import com.google.common.collect.ImmutableList;
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.formatting.text.TextComponent;
 import com.sk89q.worldedit.util.formatting.text.TranslatableComponent;
@@ -61,10 +63,12 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.enginehub.piston.Command.Condition;
+import org.enginehub.piston.CommandManager;
 import org.enginehub.piston.CommandParameters;
 import org.enginehub.piston.internal.RegistrationUtil;
 import org.enginehub.piston.part.CommandArgument;
 import org.enginehub.piston.part.CommandParts;
+import org.enginehub.piston.part.NoArgCommandFlag;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
 
 /**
@@ -73,19 +77,43 @@ import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistra
  */
 public class ExRegionCommandsRegistration extends BaseCommandsRegistration {
 
+    private RegionCommands m_regionCommands;
+
     private final CommandArgument m_partFrom;
     private final CommandArgument m_partTo;
-    private RegionCommands m_regionCommands;
+    private final CommandArgument m_partCountMove;
+    private final CommandArgument m_partCountStack;
+
+    private final CommandArgument m_partDirectionMove;
+    private final CommandArgument m_partDirectionStack;
+    private final CommandArgument m_partRaplace;
+    private final NoArgCommandFlag m_partMoveSelectionStack;
+    private final NoArgCommandFlag m_partIgnoreAirBlocks;
+    private final CommandArgument m_partMask;
+    private final NoArgCommandFlag m_partMoveSelectionMove;
 
     public ExRegionCommandsRegistration() {
         m_partFrom = CommandParts.arg(TranslatableComponent.of("from"), TextComponent.of("The mask representing blocks to replace")).defaultsTo(Collections.singletonList("")).ofTypes(Collections.singletonList(KEY_MASK)).build();
-        m_partTo = CommandParts.arg(TranslatableComponent.of("to"), TextComponent.of("The pattern of blocks to replace with"))
-                .defaultsTo(Collections.singletonList("")).ofTypes(Collections.singletonList(KEY_PATTERN)).build();
+        m_partTo = CommandParts.arg(TranslatableComponent.of("to"), TextComponent.of("The pattern of blocks to replace with")).defaultsTo(ImmutableList.of()).ofTypes(Collections.singletonList(KEY_PATTERN)).build();
 
+        m_partCountMove = CommandParts.arg(TranslatableComponent.of("count"), TextComponent.of("# of blocks to move")).defaultsTo(Collections.singletonList("1")).ofTypes(Collections.singletonList(KEY_INTEGER)).build();
+        m_partCountStack = CommandParts.arg(TranslatableComponent.of("count"), TextComponent.of("# of copies to stack")).defaultsTo(Collections.singletonList("1")).ofTypes(Collections.singletonList(KEY_INTEGER)).build();
+
+        m_partDirectionMove = CommandParts.arg(TranslatableComponent.of("direction"), TextComponent.of("The direction to move")).defaultsTo(Collections.singletonList("me")).ofTypes(Collections.singletonList(KEY_BLOCK_VECTOR3_DIAGONALS)).build();
+        m_partDirectionStack = CommandParts.arg(TranslatableComponent.of("direction"), TextComponent.of("The direction to stack")).defaultsTo(Collections.singletonList("me")).ofTypes(Collections.singletonList(KEY_BLOCK_VECTOR3_DIAGONALS)).build();
+
+        m_partRaplace = CommandParts.arg(TranslatableComponent.of("replace"), TextComponent.of("The pattern of blocks to leave")).defaultsTo(Collections.singletonList("air")).ofTypes(Collections.singletonList(KEY_PATTERN)).build();
+
+        m_partMoveSelectionMove = CommandParts.flag('s', TextComponent.of("Shift the selection to the target location")).build();
+        m_partMoveSelectionStack = CommandParts.flag('s', TextComponent.of("Shift the selection to the last stacked copy")).build();
+
+        m_partIgnoreAirBlocks = CommandParts.flag('a', TextComponent.of("Ignore air blocks")).build();
+
+        m_partMask = CommandParts.arg(TranslatableComponent.of("mask"), TextComponent.of("Sets a source mask so that excluded blocks become air")).defaultsTo(ImmutableList.of()).ofTypes(Collections.singletonList(KEY_MASK)).build();
     }
 
     @Override
-    public void build(ICommandsRegistration cr) {
+    public final void build(ICommandsRegistration cr) {
         super.build(cr);
 
         m_commandManager.register("/replacend", b -> {
@@ -95,6 +123,36 @@ public class ExRegionCommandsRegistration extends BaseCommandsRegistration {
 
             Method commandMethod = RegistrationUtil.getCommandMethod(RegionCommands.class, "replacend", new Class[]{Player.class, EditSession.class, Region.class, Mask.class, Pattern.class});
             b.action(parameters -> executeMethod(parameters, commandMethod, this::doReplaceNd));
+
+            Condition condition = m_commandPermissionsConditionGenerator.generateCondition(commandMethod);
+            b.condition(condition);
+        });
+
+        m_commandManager.register("/mmove", (b) -> {
+            b.aliases(ImmutableList.of("/maskmove", "/maskedmove", "/movem", "/movemasked"));
+            b.description(TextComponent.of("Move the contents of the selection"));
+            b.parts(ImmutableList.of(m_partMask, m_partCountMove, m_partDirectionMove, m_partRaplace, m_partMoveSelectionMove, m_partIgnoreAirBlocks));
+
+            Method commandMethod = RegistrationUtil.getCommandMethod(RegionCommands.class, "move",
+                    new Class[]{Player.class, EditSession.class, LocalSession.class, Region.class, Integer.TYPE,
+                        BlockVector3.class, Pattern.class, Boolean.TYPE, Boolean.TYPE, Mask.class});
+
+            b.action(parameters -> executeMethod(parameters, commandMethod, this::doMove));
+
+            Condition condition = m_commandPermissionsConditionGenerator.generateCondition(commandMethod);
+            b.condition(condition);
+        });
+    
+
+        m_commandManager.register("/mstack", b -> {
+            b.aliases(ImmutableList.of("/maskstack", "/maskedstack", "/stackm", "/stackmasked"));
+            b.description(TextComponent.of("Repeat the contents of the selection"));
+            b.parts(ImmutableList.of(m_partMask, m_partCountStack, m_partDirectionStack, m_partMoveSelectionStack, m_partIgnoreAirBlocks));
+
+            Method commandMethod = RegistrationUtil.getCommandMethod(RegionCommands.class, "stack",
+                    new Class[]{Player.class, EditSession.class, LocalSession.class, Region.class, Integer.TYPE,
+                        BlockVector3.class, Boolean.TYPE, Boolean.TYPE, Mask.class});
+            b.action(parameters -> executeMethod(parameters, commandMethod, this::doStack));
 
             Condition condition = m_commandPermissionsConditionGenerator.generateCondition(commandMethod);
             b.condition(condition);
@@ -116,6 +174,24 @@ public class ExRegionCommandsRegistration extends BaseCommandsRegistration {
         );
     }
 
+    private int doMove(CommandParameters parameters) throws WorldEditException {
+        return getRegionCommands().move(
+                player(parameters), editSession(parameters), session(parameters),
+                region(parameters), countMove(parameters), directionMove(parameters),
+                replace(parameters), moveSelectionMove(parameters), ignoreAirBlocks(parameters), 
+                mask(parameters)
+        );
+    }
+
+    private int doStack(CommandParameters parameters) throws WorldEditException {
+        return getRegionCommands().stack(
+                player(parameters), editSession(parameters), session(parameters),
+                region(parameters), countStack(parameters), directionStack(parameters),
+                moveSelectionStack(parameters), ignoreAirBlocks(parameters),
+                mask(parameters)
+        );
+    }
+
     private Mask from(CommandParameters parameters) {
         return (Mask) m_partFrom.value(parameters).asSingle(KEY_MASK);
     }
@@ -124,4 +200,39 @@ public class ExRegionCommandsRegistration extends BaseCommandsRegistration {
         return (Pattern) m_partTo.value(parameters).asSingle(KEY_PATTERN);
     }
 
+    private Pattern replace(CommandParameters parameters) {
+        return (Pattern) m_partRaplace.value(parameters).asSingle(KEY_PATTERN);
+    }
+
+    private boolean ignoreAirBlocks(CommandParameters parameters) {
+        return m_partIgnoreAirBlocks.in(parameters);
+    }
+
+    private boolean moveSelectionMove(CommandParameters parameters) {
+        return m_partMoveSelectionMove.in(parameters);
+    }
+
+    private boolean moveSelectionStack(CommandParameters parameters) {
+        return m_partMoveSelectionStack.in(parameters);
+    }
+
+    private int countMove(CommandParameters parameters) {
+        return (Integer) m_partCountMove.value(parameters).asSingle(KEY_INTEGER);
+    }
+
+    private int countStack(CommandParameters parameters) {
+        return (Integer) m_partCountStack.value(parameters).asSingle(KEY_INTEGER);
+    }
+
+    private BlockVector3 directionMove(CommandParameters parameters) {
+        return (BlockVector3) m_partDirectionMove.value(parameters).asSingle(KEY_BLOCK_VECTOR3_DIAGONALS);
+    }
+
+    private BlockVector3 directionStack(CommandParameters parameters) {
+        return (BlockVector3) m_partDirectionStack.value(parameters).asSingle(KEY_BLOCK_VECTOR3_DIAGONALS);
+    }
+
+    private Mask mask(CommandParameters parameters) {
+        return (Mask) m_partMask.value(parameters).asSingle(KEY_MASK);
+    }
 }
