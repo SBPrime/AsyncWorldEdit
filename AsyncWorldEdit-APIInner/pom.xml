@@ -26,10 +26,10 @@
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit</artifactId>
-            <version>7.0.0-dev-4253</version>
+            <version>7.0.0-rc-2</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.0-dev-4253.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.0-rc-2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
