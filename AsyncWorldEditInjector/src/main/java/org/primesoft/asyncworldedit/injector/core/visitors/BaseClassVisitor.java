@@ -67,6 +67,7 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IDispatchableEventBus;
 
 /**
  *
@@ -336,5 +337,10 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
             
             this.opcodeLoad = opcodeLoad;
         }
+    }
+    
+    public static Stream<Method> getMethod(Class<?> cls, String methodName) {
+        return Stream.of(IDispatchableEventBus.class.getMethods()).
+                filter(i -> i.getName().equals(methodName));
     }
 }

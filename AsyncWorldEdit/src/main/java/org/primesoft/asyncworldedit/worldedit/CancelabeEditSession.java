@@ -98,6 +98,8 @@ import org.primesoft.asyncworldedit.worldedit.history.changeset.IExtendedChangeS
 import org.primesoft.asyncworldedit.worldedit.history.changeset.NullChangeSet;
 import org.primesoft.asyncworldedit.worldedit.world.CancelableWorld;
 import org.primesoft.asyncworldedit.worldedit.util.eventbus.EventBusWrapper;
+import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IDispatchableEventBus;
+import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IEventBus;
 
 /**
  *
@@ -120,7 +122,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
 
     public CancelabeEditSession(IThreadSafeEditSession parent, Mask mask, int jobId) {
         this(parent, mask, jobId,
-                new EventBusWrapESEvent(parent.getEventBus()),
+                wrapEventBus(parent.getEventBus()),
                 new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
                 parent.getBlockChangeLimit(), parent.getBlockBag(),
                 parent.getEditSessionEvent());
@@ -173,7 +175,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
                 return;
             }
         }
-        
+
         injectBlockBagExtent(extentList);
         injectChangeSet(extentList, m_parent.getChangeSet(), playerEntry);
     }
@@ -425,7 +427,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     public void flushSession() {
         m_blocksQueued = 0;
         super.flushSession();
-    }        
+    }
 
     /**
      * Force block flush when to many has been queued
@@ -442,28 +444,37 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         }
     }
 
+    private static EventBus wrapEventBus(EventBus eventBus) {
+        final IDispatchableEventBus deb = (IDispatchableEventBus) (Object)eventBus;
+
+        deb.setOverride(new EventBusWrapESEvent(deb));
+        
+        return eventBus;
+    }
+
     private static class EventBusWrapESEvent extends EventBusWrapper {
 
-        public EventBusWrapESEvent(EventBus target) {
+        public EventBusWrapESEvent(IDispatchableEventBus target) {
             super(target);
         }
 
         @Override
         public void post(Object event) {
             if (event instanceof EditSessionEvent) {
-                event = new WrapEditSessionEvent((EditSessionEvent)event);
+                event = new WrapEditSessionEvent((EditSessionEvent) event);
             }
-            
+
             super.post(event);
         }
     }
-    
+
     private static class WrapEditSessionEvent extends EditSessionEvent {
+
         private final EditSessionEvent m_source;
 
         public WrapEditSessionEvent(EditSessionEvent source) {
             super(source.getWorld(), source.getActor(), source.getMaxBlocks(), source.getStage());
-            
+
             m_source = source;
         }
 
@@ -495,6 +506,6 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         @Override
         public void setExtent(Extent extent) {
             m_source.setExtent(new SafeDelegateExtent(extent, getExtent()));
-        }                
-    }    
+        }
+    }
 }

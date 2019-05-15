@@ -80,6 +80,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.Reg
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SchematicCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.ScriptingCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SnapshotUtilCommandsVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.util.eventbus.EventBusVisitor;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
@@ -170,6 +171,8 @@ public class InjectorCore {
 
         log("Injecting WorldEdit classes...");
         try {
+            modiffyClasses("com.sk89q.worldedit.util.eventbus.EventBus", c -> new EventBusVisitor(c));
+            
             modiffyClasses("com.sk89q.worldedit.math.BlockVector2", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.math.BlockVector3", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.math.Vector2", c -> new AsyncWrapperVisitor(c));

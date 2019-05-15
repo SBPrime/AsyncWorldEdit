@@ -48,61 +48,61 @@
 package org.primesoft.asyncworldedit.worldedit.util.eventbus;
 
 import com.google.common.collect.Multimap;
-import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.util.eventbus.EventHandler;
-import java.util.Set;
+import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IDispatchableEventBus;
+import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IEventBus;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
  * @author SBPrime
  */
-public class EventBusWrapper extends EventBus {
-    private final EventBus m_target;
+public class EventBusWrapper implements IEventBus {
+    private final IDispatchableEventBus m_target;
     
-    public EventBusWrapper(EventBus target) {
+    public EventBusWrapper(IDispatchableEventBus target) {
         m_target = target;
     }
 
     @Override
     public void post(Object event) {
-        m_target.post(event);
+        m_target.nonwrapped_post(event);
     }
 
     @Override
     public void register(Object object) {
-        m_target.register(object);
+        m_target.nonwrapped_register(object);
     }
 
     @Override
     public synchronized void subscribe(Class<?> clazz, EventHandler handler) {
-        m_target.subscribe(clazz, handler);
+        m_target.nonwrapped_subscribe(clazz, handler);
     }
 
     @Override
     public synchronized void subscribeAll(Multimap<Class<?>, EventHandler> handlers) {
-        m_target.subscribeAll(handlers);
+        m_target.nonwrapped_subscribeAll(handlers);
     }
 
     @Override
     public void unregister(Object object) {
-        m_target.unregister(object);
+        m_target.nonwrapped_unregister(object);
     }
 
     @Override
     public synchronized void unsubscribe(Class<?> clazz, EventHandler handler) {
-        m_target.unsubscribe(clazz, handler);
+        m_target.nonwrapped_unsubscribe(clazz, handler);
     }
 
     @Override
     public synchronized void unsubscribeAll(Multimap<Class<?>, EventHandler> handlers) {
-        m_target.unsubscribeAll(handlers);
+        m_target.nonwrapped_unsubscribeAll(handlers);
     }
 
     @Override
-    protected void dispatch(Object event, EventHandler handler) {
+    public void dispatch(Object event, EventHandler handler) {
         try {
-            super.dispatch(event, handler);
+            m_target.nonwrapped_dispatch(event, handler);
         } catch (Throwable ex) {
             ExceptionHelper.printException(ex, "Unable to dispatch evetn: " + event + " to handler " + handler);
         }

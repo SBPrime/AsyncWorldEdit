@@ -51,7 +51,6 @@ import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.api.taskdispatcher.IDispatcherEntry;
-import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.regions.Region;
 import java.util.Collection;
 import java.util.HashSet;
@@ -83,7 +82,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * List of thred ID's used to detect if perform safe was already started on
      * that thread
      */
-    private final HashSet<Long> m_threadMarker = new LinkedHashSet<Long>();
+    private final HashSet<Long> m_threadMarker = new LinkedHashSet<>();
 
     /**
      * MTA mutex
