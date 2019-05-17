@@ -104,9 +104,14 @@ public enum WorldeditOperations
     stackRegion,
     moveRegion,
     smooth,
+    restore,
+    execute,
+    executeLast,
     //Schematic commands
     schematicInfo,
     placeSchematic,
+    load,
+    save,
     //Chunk commands
     chunkSet,
     chunkSetBiome,

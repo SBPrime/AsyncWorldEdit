@@ -57,6 +57,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import org.enginehub.piston.CommandManager;
 import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
+import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
 import org.primesoft.asyncworldedit.injector.injected.IWrapper;
@@ -71,11 +72,12 @@ import org.primesoft.asyncworldedit.injector.utils.OperationAction;
  * @author SBPrime
  */
 public final class Helpers {
+
     public static void executeMethod(Operation op, OperationAction method) {
         if (op == null) {
             return;
         }
-        
+
         InjectorCore.getInstance().getClassFactory().getOperationProcessor().process(op, (OperationAction) method);
     }
 
@@ -83,75 +85,105 @@ public final class Helpers {
         if (op == null) {
             return;
         }
-        
+
         InjectorCore.getInstance().getClassFactory().getOperationProcessor().process(op, (ExceptionOperationAction<T>) method);
     }
 
     public static void executeMultiArgMethod(Object _this,
             String name, MultiArgWorldEditOperationAction method,
-            Object... args) {
-        
+            final Object... args) {
+
         final Player player = Stream.of(args).filter(i -> i instanceof Player).map(i -> (Player) i)
                 .findFirst().orElse(null);
         final EditSession es = Stream.of(args).filter(i -> i instanceof EditSession).map(i -> (EditSession) i)
-                .findFirst().orElse(null);       
-        
-        InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, es, new IEditSessionJob() {
-            @Override
-            public String getName() {
-                return name;
-            }
+                .findFirst().orElse(null);
 
-            @Override
-            public void execute(EditSession es) {
-                try {
-                    method.execute(_this, args);
-                } catch (WorldEditException ex) {
-                    player.printError(String.format("Error while executing %1$s", name));
-                    
-                    InjectorCore.getInstance().getClassFactory().handleError(ex, name);                    
+        if (es == null) {
+            InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, new IJob() {
+                @Override
+                public String getName() {
+                    return name;
                 }
-            }
-        });
+
+                @Override
+                public void execute() {
+                    try {
+                        method.execute(_this, args);
+                    } catch (WorldEditException ex) {
+                        player.printError(String.format("Error while executing %1$s", name));
+
+                        InjectorCore.getInstance().getClassFactory().handleError(ex, name);
+                    }
+                }
+
+            });
+        } else {
+            InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, es, new IEditSessionJob() {
+                @Override
+                public String getName() {
+                    return name;
+                }
+
+                @Override
+                public void execute(EditSession es) {
+                    try {
+                        final Object[] argsNew = new Object[args.length];
+                        for (int i = 0; i < args.length; i++) {
+                            if (args[i] instanceof EditSession) {
+                                argsNew[i] = es;
+                            } else {
+                                argsNew[i] = args[i];
+                            }
+                        }
+
+                        method.execute(_this, argsNew);
+                    } catch (WorldEditException ex) {
+                        player.printError(String.format("Error while executing %1$s", name));
+
+                        InjectorCore.getInstance().getClassFactory().handleError(ex, name);
+                    }
+                }
+            });
+        }
     }
 
     public static Clipboard createClipboard(Clipboard parent, Region region) {
         return InjectorCore.getInstance().getClassFactory().createClipboard(parent, region);
     }
-    
+
     public static Object wrapResult(Object result, Object sender) {
         if (result == sender) {
             return result;
         }
-        
+
         if (result instanceof IAsyncWrapper && sender instanceof IAsyncWrapper) {
-            IAsyncWrapper iaw = (IAsyncWrapper)sender;            
-            ((IAsyncWrapper)result).initializeAsyncWrapper(iaw);
+            IAsyncWrapper iaw = (IAsyncWrapper) sender;
+            ((IAsyncWrapper) result).initializeAsyncWrapper(iaw);
         }
-        
+
         return result;
     }
-    
+
     public static CommandManager wrapCommandManager(Object sender, CommandManager cm) {
         return InjectorCore.getInstance().getClassFactory().wrapCommandManager(sender, cm);
     }
-    
+
     public static ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent) {
         return InjectorCore.getInstance().getClassFactory().createCommandsRegistrationDelegate(parent);
     }
-        
+
     public static boolean wrapperEquals(Object o1, Object o2) {
         if (o1 == null && o2 == null) {
             return true;
         }
-        
+
         if (o1 instanceof IWrapper) {
-            o1 = ((IWrapper)o1).getWrappedInstance();
+            o1 = ((IWrapper) o1).getWrappedInstance();
         }
         if (o2 instanceof IWrapper) {
-            o2 = ((IWrapper)o2).getWrappedInstance();
+            o2 = ((IWrapper) o2).getWrappedInstance();
         }
-        
+
         return Objects.equals(o1, o2);
     }
 }
