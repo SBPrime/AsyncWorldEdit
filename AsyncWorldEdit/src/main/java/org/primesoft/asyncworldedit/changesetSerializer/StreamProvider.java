@@ -275,6 +275,7 @@ public class StreamProvider {
             }
 
             StreamDescription sd = new StreamDescription(stream, remove);
+            sd.reserve();
 
             m_streamReferences.put(stream, sd);
 
@@ -366,7 +367,7 @@ public class StreamProvider {
             int cnt = sd.release();
             if (cnt >= 0) {
                 if (debug) {
-                    log(String.format("StreamProvider: removed reference from stream %1$s, number of references: %1$s.", stream, cnt));
+                    log(String.format("StreamProvider: removed reference from stream %1$s, number of references: %2$s.", stream, cnt));
                 }
                 return false;
             }
