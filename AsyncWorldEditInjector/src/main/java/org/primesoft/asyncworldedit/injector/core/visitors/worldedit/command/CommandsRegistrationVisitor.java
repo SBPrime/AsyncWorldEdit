@@ -125,7 +125,7 @@ public class CommandsRegistrationVisitor extends BaseClassVisitor {
         super.visit(version,
                 changeVisibility(access, Opcodes.ACC_PUBLIC),
                 name, signature, superName,
-                Stream.concat(Stream.of(interfaces), Stream.of(Type.getInternalName(ICommandsRegistration.class))).toArray(String[]::new));
+                injectInterface(interfaces, Type.getInternalName(ICommandsRegistration.class)));
     }
 
     @Override

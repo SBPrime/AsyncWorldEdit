@@ -59,28 +59,16 @@ import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
  * @author SBPrime
  */
 public class AsyncWrapperVisitor extends BaseClassVisitor {
-    
-    
+      
     private final static String CLS_IASYNC_WRAPPER = Type.getInternalName(IAsyncWrapper.class);
 
     public AsyncWrapperVisitor(ClassVisitor classVisitor) {
         super(classVisitor);
     }
-
-    private static String[] injectInterface(String[] interfaces) {
-        if (interfaces == null || interfaces.length == 0) {
-            return new String[]{ CLS_IASYNC_WRAPPER };
-        }
-        
-        return Stream.concat(
-                Stream.of(CLS_IASYNC_WRAPPER),
-                Stream.of(interfaces)        
-        ).toArray(String[]::new);
-    }
-
+    
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        super.visit(version, access, name, signature, superName, injectInterface(interfaces));
+        super.visit(version, access, name, signature, superName, injectInterface(interfaces, CLS_IASYNC_WRAPPER));
     }
 
     @Override

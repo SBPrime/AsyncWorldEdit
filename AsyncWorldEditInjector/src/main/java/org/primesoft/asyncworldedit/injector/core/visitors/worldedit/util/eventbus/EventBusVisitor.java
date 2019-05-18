@@ -97,7 +97,7 @@ public class EventBusVisitor extends BaseClassVisitor {
         super.visit(version,
                 access,
                 name, signature, superName,
-                Stream.concat(Stream.of(interfaces), Stream.of(Type.getInternalName(IDispatchableEventBus.class))).toArray(String[]::new));
+                injectInterface(interfaces, Type.getInternalName(IDispatchableEventBus.class)));
     }
 
     @Override
