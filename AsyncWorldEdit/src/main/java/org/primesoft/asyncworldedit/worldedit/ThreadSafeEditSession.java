@@ -193,6 +193,11 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
     private IMultiStageReorder m_multiStageReorder;
 
+    /**
+     * Is the class fully initialized
+     */
+    private boolean m_isInitialized;
+
     @Override
     public Object getMutex() {
         return m_mutex;
@@ -276,6 +281,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         }
 
         m_jobId = -1;
+        m_isInitialized = true;
     }
 
     private void injectExtents(IPlayerEntry playerEntry, IAsyncWorldEditCore core) {
@@ -619,6 +625,10 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
     @Override
     public void flushSession() {
+        if (!m_isInitialized) {
+            return;
+        }
+        
         boolean queued = isQueueEnabled();
         super.flushSession();
 

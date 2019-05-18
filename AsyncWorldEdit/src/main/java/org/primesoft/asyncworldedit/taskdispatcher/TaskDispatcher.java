@@ -78,8 +78,9 @@ import org.primesoft.asyncworldedit.utils.PositionHelper;
  * @author SBPrime
  */
 public class TaskDispatcher implements Runnable, ITaskDispatcher {
+
     private final static Object INSTANCE = new Object();
-            
+
     /**
      * List of thred ID's used to detect if perform safe was already started on
      * that thread
@@ -392,10 +393,10 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
         final InOutParam<Boolean> isSet = InOutParam.Out();
         m_threadMarker.computeIfAbsent(id, i -> {
             isSet.setValue(true);
-            
+
             return INSTANCE;
         });
-        
+
         return isSet.isSet();
     }
 
@@ -420,12 +421,12 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public void performSafeChunk(Object mutex, IAction action, IWorld world, BlockVector2 pos) {
         long id = Thread.currentThread().getId();
-        try {
-            if (!markThread(id)) {
-                action.execute();
-                return;
-            }
+        if (isMainTask() || !markThread(id)) {
+            action.execute();
+            return;
+        }
 
+        try {
             synchronized (mutex) {
                 int cx = pos.getBlockX();
                 int cz = pos.getBlockZ();
@@ -469,11 +470,12 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public void performSafe(Object mutex, IAction action, IWorld world, BlockVector3 pos) {
         long id = Thread.currentThread().getId();
+        if (isMainTask() || !markThread(id)) {
+            action.execute();
+            return;
+        }
+
         try {
-            if (!markThread(id)) {
-                action.execute();
-                return;
-            }
             synchronized (mutex) {
                 int cx = PositionHelper.positionToChunk(pos.getX());
                 int cz = PositionHelper.positionToChunk(pos.getZ());
@@ -517,11 +519,12 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public void performSafe(Object mutex, IAction action, IWorld world, Region region) {
         long id = Thread.currentThread().getId();
+        if (isMainTask() || !markThread(id)) {
+            action.execute();
+            return;
+        }
+
         try {
-            if (!markThread(id)) {
-                action.execute();
-                return;
-            }
             synchronized (mutex) {
                 Set<BlockVector2> chunks = region.getChunks();
                 String worldName = world != null ? world.getName() : null;
@@ -577,10 +580,10 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, Region region) {
         long id = Thread.currentThread().getId();
+        if (isMainTask() || !markThread(id)) {
+            return action.execute();
+        }
         try {
-            if (!markThread(id)) {
-                return action.execute();
-            }
             synchronized (mutex) {
                 Set<BlockVector2> chunks = region.getChunks();
                 String worldName = world != null ? world.getName() : null;
@@ -635,10 +638,10 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public <T> T performSafe(Object mutex, IFunc<T> action, IWorld world, BlockVector3 pos) {
         long id = Thread.currentThread().getId();
+        if (isMainTask() || !markThread(id)) {
+            return action.execute();
+        }
         try {
-            if (!markThread(id)) {
-                return action.execute();
-            }
             synchronized (mutex) {
                 int cx = PositionHelper.positionToChunk(pos.getX());
                 int cz = PositionHelper.positionToChunk(pos.getZ());
@@ -683,10 +686,10 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, BlockVector2 pos) {
         long id = Thread.currentThread().getId();
+        if (isMainTask() || !markThread(id)) {
+            return action.execute();
+        }
         try {
-            if (!markThread(id)) {
-                return action.execute();
-            }
             synchronized (mutex) {
                 int cx = pos.getBlockX();
                 int cz = pos.getBlockZ();
@@ -727,11 +730,11 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public void performSafe(Object mutex, IAction action) {
         long id = Thread.currentThread().getId();
+        if (isMainTask() || !markThread(id)) {
+            action.execute();
+            return;
+        }
         try {
-            if (!markThread(id)) {
-                action.execute();
-                return;
-            }
             synchronized (mutex) {
                 try {
                     action.execute();
@@ -762,10 +765,10 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public <T> T performSafe(Object mutex, IFunc<T> action) {
         long id = Thread.currentThread().getId();
+        if (isMainTask() || !markThread(id)) {
+            return action.execute();
+        }
         try {
-            if (!markThread(id)) {
-                return action.execute();
-            }
             synchronized (mutex) {
                 try {
                     T result = action.execute();
@@ -787,11 +790,11 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public void performSafeChunk(Object mutex, IAction action, IWorld world, Collection<BlockVector2> chunks) {
         long id = Thread.currentThread().getId();
+        if (isMainTask() || !markThread(id)) {
+            action.execute();
+            return;
+        }
         try {
-            if (!markThread(id)) {
-                action.execute();
-                return;
-            }
             synchronized (mutex) {
                 String worldName = world != null ? world.getName() : null;
 
@@ -835,11 +838,11 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
     @Override
     public <T> T performSafeChunk(Object mutex, IFunc<T> action, IWorld world, Collection<BlockVector2> chunks) {
         long id = Thread.currentThread().getId();
-        try {
-            if (!markThread(id)) {
-                return action.execute();
-            }
+        if (isMainTask() || !markThread(id)) {
+            return action.execute();
+        }
 
+        try {
             synchronized (mutex) {
                 String worldName = world != null ? world.getName() : null;
 

@@ -123,6 +123,11 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
      * Number of queued blocks
      */
     private int m_blocksQueued;
+    
+    /**
+     * Is the class fully initialized
+     */
+    private boolean m_isInitialized;
 
     public CancelabeEditSession(IThreadSafeEditSession parent, Mask mask, int jobId) {
         this(parent, mask, jobId,
@@ -160,6 +165,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         }
 
         setMask(mask);
+        
+        m_isInitialized = true;
     }
 
     @Override
@@ -438,6 +445,10 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
 
     @Override
     public void flushSession() {
+        if (!m_isInitialized) {
+            return;
+        }
+        
         m_blocksQueued = 0;
         super.flushSession();
 
