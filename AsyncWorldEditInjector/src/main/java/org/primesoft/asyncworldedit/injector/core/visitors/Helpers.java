@@ -53,6 +53,10 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.collection.LocatedBlockList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.enginehub.piston.CommandManager;
@@ -185,5 +189,25 @@ public final class Helpers {
         }
 
         return Objects.equals(o1, o2);
+    }
+    
+    public static void cleanMapValues(Map<Object, Object> map) {
+        for (Map.Entry<Object, Object> entry : map.entrySet()) {
+            final Object value = entry.getValue();
+            if (value == null) {
+                continue;
+            }
+            
+            final Object key = entry.getKey();
+            Object newValue = null;           
+            if (value instanceof LocatedBlockList) {
+                newValue = new LocatedBlockList();
+            }
+            if (newValue == null) {
+                throw new IllegalArgumentException("Don't know how to clean '" + value.getClass().getName() + "' for key '" + key.toString() + "'");
+            }
+            
+            map.put(key, newValue);
+        }
     }
 }

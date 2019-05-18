@@ -58,6 +58,8 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.NullExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
+import com.sk89q.worldedit.extent.reorder.MultiStageReorder;
+import com.sk89q.worldedit.extent.world.ChunkLoadingExtent;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.UndoContext;
@@ -87,6 +89,7 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
+import org.primesoft.asyncworldedit.injector.injected.extent.reorder.IMultiStageReorder;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
@@ -99,7 +102,6 @@ import org.primesoft.asyncworldedit.worldedit.history.changeset.NullChangeSet;
 import org.primesoft.asyncworldedit.worldedit.world.CancelableWorld;
 import org.primesoft.asyncworldedit.worldedit.util.eventbus.EventBusWrapper;
 import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IDispatchableEventBus;
-import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IEventBus;
 
 /**
  *
@@ -114,6 +116,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     private final int m_jobId;
 
     private final IPlayerEntry m_player;
+
+    private IMultiStageReorder m_multiStageReorder;
 
     /**
      * Number of queued blocks
@@ -178,6 +182,14 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
 
         injectBlockBagExtent(extentList);
         injectChangeSet(extentList, m_parent.getChangeSet(), playerEntry);
+
+        for (Extent e : extentList) {
+            if (e instanceof ChunkLoadingExtent) {
+                Reflection.set(ChunkLoadingExtent.class, e, "enabled", false, "Unable to disable ChunkLoadingExtent");
+            } else if (e instanceof MultiStageReorder) {
+                m_multiStageReorder = (IMultiStageReorder) e;
+            }
+        }
     }
 
     private void injectBlockBagExtent(List<Extent> extentList) {
@@ -348,6 +360,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
+
         forceFlush();
         return super.setBlock(AsyncWrapper.initialize(position, m_jobId, true, m_player),
                 AsyncWrapper.initialize(block, m_jobId, true, m_player), stage);
@@ -427,6 +440,10 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     public void flushSession() {
         m_blocksQueued = 0;
         super.flushSession();
+
+        if (m_multiStageReorder != null) {
+            m_multiStageReorder.reset();
+        }
     }
 
     /**
@@ -440,15 +457,19 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             if (m_blocksQueued > maxBlocks) {
                 m_blocksQueued = 0;
                 super.flushSession();
+
+                if (m_multiStageReorder != null) {
+                    m_multiStageReorder.reset();
+                }
             }
         }
     }
 
     private static EventBus wrapEventBus(EventBus eventBus) {
-        final IDispatchableEventBus deb = (IDispatchableEventBus) (Object)eventBus;
+        final IDispatchableEventBus deb = (IDispatchableEventBus) (Object) eventBus;
 
         deb.setOverride(new EventBusWrapESEvent(deb));
-        
+
         return eventBus;
     }
 

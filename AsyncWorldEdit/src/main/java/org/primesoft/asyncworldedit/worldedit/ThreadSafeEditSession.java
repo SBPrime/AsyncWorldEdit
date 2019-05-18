@@ -61,6 +61,8 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.NullExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
+import com.sk89q.worldedit.extent.reorder.MultiStageReorder;
+import com.sk89q.worldedit.extent.world.ChunkLoadingExtent;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
@@ -93,6 +95,7 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.events.EditSessionLimitChanged;
+import org.primesoft.asyncworldedit.injector.injected.extent.reorder.IMultiStageReorder;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -188,6 +191,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
      */
     protected final IAsyncWorldEditCore m_aweCore;
 
+    private IMultiStageReorder m_multiStageReorder;
+
     @Override
     public Object getMutex() {
         return m_mutex;
@@ -229,8 +234,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     protected boolean isAsyncEnabled() {
-        return m_asyncForced || 
-            (m_player.getAweMode() && !m_asyncDisabled && !m_asyncForceDisabled);
+        return m_asyncForced
+                || (m_player.getAweMode() && !m_asyncDisabled && !m_asyncForceDisabled);
     }
 
     public ThreadSafeEditSession(IAsyncWorldEditCore core,
@@ -283,6 +288,12 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
         injectBlockBagExtent(extentList);
         injectChangeSet(extentList, playerEntry, core);
+
+        for (Extent e : extentList) {
+            if (e instanceof MultiStageReorder) {
+                m_multiStageReorder = (IMultiStageReorder) e;
+            }
+        }
     }
 
     private void injectBlockBagExtent(List<Extent> extentList) {
@@ -313,22 +324,22 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     private void injectChangeSet(List<Extent> extentList, IPlayerEntry playerEntry, IAsyncWorldEditCore core) {
         ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
                 this, "changeSetExtent", "Unable to get the changeset");
-        
+
         ChangeSet changeSet = getChangeSet();
 
         if (changesetExtent == null || changeSet == null) {
             log("Unable to get the changeSet from EditSession, undo and redo broken.");
             return;
         }
-        
+
         Extent beforeExtent = ExtentUtils.findBeforer(extentList, changesetExtent);
         Extent afterExtent = changesetExtent.getExtent();
-        
+
         if (afterExtent == null || beforeExtent == null) {
             log("Unable to get the changesetExtent from EditSession, undo broken.");
             return;
         }
-                
+
         IPermissionGroup pg = playerEntry.getPermissionGroup();
         boolean undoDisabled = pg != null && playerEntry.isUndoOff();
 
@@ -357,22 +368,20 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
                 "Unable to inject changeset to extent, undo and redo broken.");
     }
 
-    
     @Override
     public void setBlockChangeLimit(int limit) {
         int oldLimit = getBlockChangeLimit();
-        
+
         super.setBlockChangeLimit(limit);
-        
+
         m_eventBus.post(new EditSessionLimitChanged(this, m_player, oldLimit, limit));
-    }        
-    
+    }
+
     @Override
     public void setBlockBag(BlockBag blockBag) {
         super.setBlockBag(ThreadSafeBlockBag.warap(blockBag));
     }
 
-    
     @Override
     public boolean setBlock(BlockVector3 position, BlockStateHolder block, Stage stage) throws WorldEditException {
         boolean isAsync = isAsyncEnabled();
@@ -467,7 +476,6 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         m_blockPlacer.addTasks(m_player, entry);
     }
 
-
     @Override
     public boolean setBlock(BlockVector3 position, BlockStateHolder block) throws MaxChangedBlocksException {
         boolean isAsync = isAsyncEnabled();
@@ -520,7 +528,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public BiomeType getBiome(final BlockVector2 position) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> es.doGetBiome(position), m_bukkitWorld, BlockVector3.at(position.getX(), 0, position.getZ()));
     }
 
@@ -528,7 +536,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public int getBlockChangeCount() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(this), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(this),
                 () -> es.doGetBlockChangeCount());
     }
 
@@ -543,7 +551,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public List<? extends Entity> getEntities() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> es.doGetEntities());
     }
 
@@ -551,7 +559,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public List<? extends Entity> getEntities(final Region region) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> es.doGetEntities(region), m_bukkitWorld, region);
     }
 
@@ -559,7 +567,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public int getHighestTerrainBlock(final int x, final int z, final int minY, final int maxY) {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> es.doGetHighestTerrainBlock(x, z, minY, maxY), m_bukkitWorld, BlockVector3.at(x, minY, z));
     }
 
@@ -567,7 +575,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public BlockVector3 getMaximumPoint() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 es::doGetMaximumPoint);
     }
 
@@ -575,7 +583,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public BlockVector3 getMinimumPoint() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 es::doGetMinimumPoint);
     }
 
@@ -613,6 +621,11 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public void flushSession() {
         boolean queued = isQueueEnabled();
         super.flushSession();
+
+        if (m_multiStageReorder != null) {
+            m_multiStageReorder.reset();
+        }
+
         m_blocksQueued = 0;
         if (queued) {
             resetAsync();
@@ -630,6 +643,10 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
             if (m_blocksQueued > maxBlocks) {
                 m_blocksQueued = 0;
                 super.flushSession();
+
+                if (m_multiStageReorder != null) {
+                    m_multiStageReorder.reset();
+                }
             }
         }
     }
@@ -687,9 +704,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
      * @return
      */
     public boolean checkAsync(WorldeditOperations operation) {
-        boolean result = m_asyncForced || 
-                (ConfigProvider.isAsyncAllowed(operation) && 
-                 m_player.getAweMode() && !m_asyncForceDisabled);
+        boolean result = m_asyncForced
+                || (ConfigProvider.isAsyncAllowed(operation)
+                && m_player.getAweMode() && !m_asyncForceDisabled);
 
         m_asyncDisabled = !result;
         return result;
@@ -782,7 +799,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
     public int doGetBlockChangeLimit() {
         return super.getBlockChangeLimit();
-    }  
+    }
 
     public List<? extends Entity> doGetEntities() {
         return super.getEntities();

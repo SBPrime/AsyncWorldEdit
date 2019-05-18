@@ -343,4 +343,16 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         return Stream.of(IDispatchableEventBus.class.getMethods()).
                 filter(i -> i.getName().equals(methodName));
     }
+    
+    protected static String[] injectInterface(String[] interfaces, String...interfacesToAdd) {
+        if (interfaces == null || interfaces.length == 0) {
+            return interfacesToAdd;
+        }
+        
+        return Stream.concat(
+                Stream.of(interfacesToAdd),
+                Stream.of(interfaces)        
+        ).toArray(String[]::new);
+    }
+
 }
