@@ -69,6 +69,18 @@ public class StackValidator {
         new StackValidatorEntry(".*sk89q.*ClipboardCommands", new String[]{"copy", "paste", "cut"}, ""),
         new StackValidatorEntry(".*sk89q.*SchematicCommands", "", ".*"),
         new StackValidatorEntry(".*sk89q.*RegionCommands", new String[]{"forest", "flora"}, ""),
+        new StackValidatorEntry(".*sk89q.*RegionCommandsRegistration", new String[]{"_set",}, "") {
+            @Override
+            public String getOperationName(String name) {
+                return "setBlocks";
+            }
+        },
+        new StackValidatorEntry(".*sk89q.*GenerationCommandsRegistration", new String[]{"_generate",}, "") {
+            @Override
+            public String getOperationName(String name) {
+                return name.substring(1);
+            }
+        },        
         new StackValidatorEntry(".*sk89q.*BiomeCommands", new String[]{"setBiome"}, ""),
         new StackValidatorEntry(".*sk89q.*BrushTool", new String[]{"actPrimary"}, "") {
             @Override
@@ -89,13 +101,12 @@ public class StackValidator {
             public String getOperationName(String name) {
                 if (name.equalsIgnoreCase("stack")) {
                     return "stackCuboidRegion";
-                }
-                else if (name.equalsIgnoreCase("move")) {
+                } else if (name.equalsIgnoreCase("move")) {
                     return "moveRegion";
                 }
-                
+
                 return super.getOperationName(name);
-            }           
+            }
         },
         new StackValidatorEntry(".*primesoft.*ThreadSafeEditSession", "", ".*"),
         new StackValidatorEntry(".*primesoft.*AsyncEditSessionFactory.*", "", ".*"),
@@ -141,9 +152,10 @@ public class StackValidator {
             }
         }
     }
-    
+
     /**
      * Check if the call originated from the LocalSession or API call
+     *
      * @return true - the call originated only from API
      */
     public static boolean isWorldEditApi() {
@@ -165,15 +177,15 @@ public class StackValidator {
                 if (!element.getClassName().equals("org.primesoft.asyncworldedit.worldedit.WrappedLocalSession")) {
                     continue;
                 }
-                
+
                 String method = element.getMethodName();
-                if ("createEditSession".equals(method) ||
-                    "undo".equals(method) ||
-                    "redo".equals(method)) {
+                if ("createEditSession".equals(method)
+                        || "undo".equals(method)
+                        || "redo".equals(method)) {
                     return false;
                 }
             }
-            
+
             return true;
         } finally {
             if (debugOn) {
@@ -286,5 +298,5 @@ public class StackValidator {
         }
 
         return result;
-    }   
+    }
 }

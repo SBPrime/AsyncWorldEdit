@@ -87,6 +87,7 @@ public enum WorldeditOperations
     copy,
     cut,
     regenerate,
+    generate,
     center,
     drawLine,
     drawSpline,
