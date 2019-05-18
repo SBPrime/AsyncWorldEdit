@@ -1,6 +1,7 @@
 /*/nbproject/private/
 /*/build/
 /release/
+/release.free/
 /dist/
 */dist/
 */lib/
@@ -13,7 +14,7 @@ lib/
 *.iml
 *.ipr
 *.iws
-*.path
+*.patch
 
 .idea/
 /AsyncWorldEdit-ActionBarAPI/AsyncWorldEdit-ActionBarAPI/nbproject/private/
