@@ -123,6 +123,8 @@ public class BukkitPlayerEntry extends PlayerEntry {
      */
     @Override
     public void update(IPlayerEntry player) {
+        super.update(player);
+        
         if (!(player instanceof BukkitPlayerEntry)) {
             return;
         }

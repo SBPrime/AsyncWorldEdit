@@ -265,7 +265,9 @@ public abstract class PlayerEntry implements IPlayerEntry {
      * @param player
      */
     @Override
-    public abstract void update(IPlayerEntry player);
+    public void update(IPlayerEntry player) {
+        m_isDisposed = false;
+    }
 
     @Override
     public abstract void updatePermissionGroup();
