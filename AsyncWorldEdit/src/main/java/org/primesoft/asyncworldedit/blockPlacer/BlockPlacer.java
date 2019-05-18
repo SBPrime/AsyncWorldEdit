@@ -842,6 +842,7 @@ public class BlockPlacer implements IBlockPlacer {
             Queue<IBlockPlacerEntry> filtered = new ArrayDeque<>();
             if (queue != null) {
                 synchronized (queue) {
+                    //TODO: Optimize this for undo
                     for (IBlockPlacerEntry entry : queue) {
                         if (entry.getJobId() == jobId) {
                             if (entry instanceof IBlockPlacerLocationEntry) {
