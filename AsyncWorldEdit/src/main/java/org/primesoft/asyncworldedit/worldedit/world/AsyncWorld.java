@@ -75,8 +75,12 @@ import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldedit.world.weather.WeatherType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
@@ -102,6 +106,7 @@ import org.primesoft.asyncworldedit.worldedit.WorldAsyncTask;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.utils.PositionHelper;
+import static org.primesoft.asyncworldedit.utils.PositionHelper.positionToChunk;
 import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.worldedit.entity.EntityLazyWrapper;
 
@@ -165,6 +170,16 @@ public class AsyncWorld extends AbstractWorldWrapper {
      */
     private final IChunkWatch m_chunkWatcher;
 
+    private final static int CACHE_SIZE = 5000;
+    
+    private final Map<UUID, BlockState> m_blockCache = new LinkedHashMap<UUID, BlockState>(CACHE_SIZE + 1, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<UUID, BlockState> entry) {
+            return size() > CACHE_SIZE;
+        }        
+    };
+    
+
     public AsyncWorld(World world, IPlayerEntry player) {
         super(world);
 
@@ -188,7 +203,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     private int getJobId() {
         return m_blockPlacer.getJobId(m_player);
     }
-    
+
     /**
      * Decide on the player UUID
      *
@@ -435,7 +450,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         return true;
     }
-    
+
     /**
      * Perfrom the regen operation
      *
@@ -447,11 +462,11 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final BlockState[] history = new BlockState[16 * 16 * (maxY + 1)];
         final Object wait = new Object();
         final IAction finalizeAction = () -> {
-            synchronized(wait) {
+            synchronized (wait) {
                 wait.notifyAll();
             }
         };
-        
+
         for (BlockVector2 chunk : region.getChunks()) {
             BlockVector3 min = PositionHelper.chunkToPosition(chunk, 0);
 
@@ -461,15 +476,15 @@ public class AsyncWorld extends AbstractWorldWrapper {
             for (int x = 0; x < 16; ++x) {
                 for (int y = 0; y < (maxY + 1); ++y) {
                     for (int z = 0; z < 16; ++z) {
-                        BlockVector3 pt = min.add(x, y, z);                        
+                        BlockVector3 pt = min.add(x, y, z);
                         history[index] = eSession.getBlock(pt);
                         index++;
                     }
                 }
-            }            
+            }
             m_chunkWatcher.remove(chunk.getBlockX(), chunk.getBlockZ(), getName());
-            
-            m_blockPlacer.addTasks(m_player, new RegenerateEntry(jobId, world, chunk, 
+
+            m_blockPlacer.addTasks(m_player, new RegenerateEntry(jobId, world, chunk,
                     finalizeAction, m_chunkWatcher));
 
             synchronized (wait) {
@@ -478,7 +493,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 } catch (InterruptedException ex) {
                 }
             }
-            
+
             m_chunkWatcher.add(chunk.getBlockX(), chunk.getBlockZ(), getName());
             // Then restore
             index = 0;
@@ -506,23 +521,27 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final DataAsyncParams<BlockVector3> param = DataAsyncParams.extract(position);
         final BlockVector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
-        
+
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, v)) {
             return false;
         }
-        
+
         IFuncEx<Boolean, MaxChangedBlocksException> func = () -> m_parent.generateTree(type, editSession, v);
-        
+
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntryEx(this.getName(), param.getJobId(), v, func));
         }
-        
+
         return func.execute();
     }
 
     @Override
     public void checkLoadedChunk(final BlockVector3 position) {
+        if (m_chunkWatcher.isChunkLoaded(positionToChunk((int) position.getX()), positionToChunk((int) position.getZ()), getName())) {
+            return;
+        }
+
         m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> {
             m_parent.checkLoadedChunk(position);
         }, m_bukkitWorld, PositionHelper.positionToChunk(position));
@@ -534,7 +553,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         for (Iterator<BlockVector2> iterator = chunks.iterator(); iterator.hasNext();) {
             tmp.add(iterator.next());
         }
-        
+
         m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> {
             m_parent.fixAfterFastMode(tmp);
         }, m_bukkitWorld, tmp);
@@ -546,7 +565,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         for (Iterator<BlockVector2> iterator = chunks.iterator(); iterator.hasNext();) {
             tmp.add(iterator.next());
         }
-        
+
         m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> {
             m_parent.fixLighting(tmp);
         }, m_bukkitWorld, tmp);
@@ -557,18 +576,18 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final DataAsyncParams<Vector3> param = DataAsyncParams.extract(position);
         final Vector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
-        
+
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, v)) {
             return false;
         }
-        
+
         IFunc<Boolean> func = () -> m_parent.playEffect(v, type, data);
-        
+
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntry(this.getName(), param.getJobId(), v, func));
         }
-        
+
         return func.execute();
     }
 
@@ -577,26 +596,26 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final DataAsyncParams<BlockVector3> param = DataAsyncParams.extract(position);
         final BlockVector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
-        
+
         final BlockStateHolder air = BlockTypes.AIR.getDefaultState();
         IFunc<Boolean> func = () -> {
             BlockStateHolder oldBlock = m_parent.getBlock(v);
             if (!canPlace(player, m_bukkitWorld, v, oldBlock, air) || isSame(oldBlock, air)) {
                 return false;
             }
-            
+
             return m_parent.queueBlockBreakEffect(server, v, blockType, priority);
         };
-        
+
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
             if (!canPlace(player, m_bukkitWorld, v, getBlock(v), air)) {
                 return false;
             }
-            
+
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntry(this.getName(), param.getJobId(), v, func));
         }
-        
+
         return func.execute();
     }
 
@@ -642,19 +661,19 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BlockVector3 getMinimumPoint() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 m_parent::getMinimumPoint);
     }
 
     @Override
     public BlockVector3 getMaximumPoint() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 m_parent::getMaximumPoint);
     }
 
     @Override
     public List<? extends Entity> getEntities(final Region region) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> m_parent.getEntities(region), m_bukkitWorld, region);
     }
 
@@ -670,22 +689,22 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final Location l = paramLocation.getData();
         final BaseEntity e = paramEntity.getData();
         final IPlayerEntry player = getPlayer(paramLocation, paramEntity);
-        
+
         final EntityLazyWrapper entityWrapper = new EntityLazyWrapper(l, this);
-        
+
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, l.toVector())) {
             return entityWrapper; //Return the entity wrapper so WorldEdit does not complain
         }
-        
+
         IFunc<Entity> func = () -> {
             Entity result = m_parent.createEntity(l, e);
-            
+
             if (result != null) {
                 entityWrapper.setEntity(result);
             }
             return result;
         };
-        
+
         if (paramEntity.isAsync() || paramLocation.isAsync() || !m_dispatcher.isMainTask()) {
             if (!m_blockPlacer.addTasks(player,
                     new WorldFuncEntry(this.getName(), paramLocation.getJobId(), l.toVector(), func))) {
@@ -693,62 +712,71 @@ public class AsyncWorld extends AbstractWorldWrapper {
             }
             return entityWrapper;
         }
-        
+
         return func.execute();
+    }
+    
+    private UUID toUUID(BlockVector3 pos) {
+        long p1 = (long)pos.getBlockX() << 32 | pos.getBlockY() & 0xFFFFFFFFL;
+        long p2 = (long)pos.getBlockZ();
+        
+        return new UUID(p1, p2);
     }
 
     @Override
     public BlockState getBlock(final BlockVector3 position) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
-                () -> m_parent.getBlock(position), m_bukkitWorld, position);
+        return m_blockCache.computeIfAbsent(toUUID(position), _p -> m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
+                () -> m_parent.getBlock(position), m_bukkitWorld, position));
     }
 
     @Override
     public BaseBlock getFullBlock(final BlockVector3 position) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> m_parent.getFullBlock(position), m_bukkitWorld, position);
     }
 
     @Override
     public BiomeType getBiome(BlockVector2 position) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> m_parent.getBiome(position),
                 m_bukkitWorld, BlockVector3.at(position.getX(), 0, position.getZ()));
     }
 
     @Override
     public boolean setBlock(final BlockVector3 position, final BlockStateHolder block) throws WorldEditException {
+        m_blockCache.remove(toUUID(position));
+        
         final DataAsyncParams<BlockStateHolder> paramBlock = DataAsyncParams.extract(block);
         final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
-        
+
         final BlockStateHolder newBlock = paramBlock.getData();
         final BlockVector3 v = paramVector.getData();
         final IPlayerEntry player = getPlayer(paramBlock, paramVector);
-        
+
         IFuncEx<Boolean, WorldEditException> func = () -> {
             final BlockState oldBlock = m_parent.getBlock(v);
             if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
                     || isSame(oldBlock, newBlock)) {
                 return false;
             }
-            
+
             final boolean result = m_parent.setBlock(position, newBlock);
             if (result) {
                 logBlock(position, player, oldBlock, newBlock);
             }
-            
+
             return result;
         };
-        
+
         if (paramBlock.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
             if (!canPlace(player, m_bukkitWorld, position, getBlock(v), newBlock)) {
                 return false;
             }
-            
+
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntryEx(this.getName(), paramBlock.getJobId(), v, func));
         }
-        
+
         return func.execute();
     }
 
@@ -760,18 +788,18 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final BiomeType b = paramBiome.getData();
         final IPlayerEntry player = getPlayer(paramBiome, paramVector);
         final BlockVector3 tmpV = BlockVector3.at(v.getX(), 0, v.getZ());
-        
+
         if (!m_blocksHub.hasAccess(player, m_bukkitWorld, tmpV)) {
             return false;
         }
-        
+
         IFunc<Boolean> func = () -> m_parent.setBiome(v, b);
-        
+
         if (paramBiome.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntry(this.getName(), paramBiome.getJobId(), tmpV, func));
         }
-        
+
         return func.execute();
     }
 
@@ -784,41 +812,41 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public boolean notifyAndLightBlock(BlockVector3 position, BlockState block) throws WorldEditException {
         final DataAsyncParams<BlockState> paramBlock = DataAsyncParams.extract(block);
         final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
-        
+
         final BlockState newBlock = paramBlock.getData();
         final BlockVector3 v = paramVector.getData();
         final IPlayerEntry player = getPlayer(paramBlock, paramVector);
-        
+
         IFuncEx<Boolean, WorldEditException> func = () -> {
             final BlockState oldBlock = m_parent.getBlock(v);
             if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
                     || isSame(oldBlock, newBlock)) {
                 return false;
             }
-            
+
             final boolean result = m_parent.setBlock(position, newBlock);
             if (result) {
                 logBlock(position, player, oldBlock, newBlock);
             }
-            
+
             return result;
         };
-        
+
         if (paramBlock.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
             if (!canPlace(player, m_bukkitWorld, position, getBlock(v), newBlock)) {
                 return false;
             }
-            
+
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntryEx(this.getName(), paramBlock.getJobId(), v, func));
         }
-        
+
         return func.execute();
     }
 
     @Override
     public BlockVector3 getSpawnPosition() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> m_parent.getSpawnPosition());
     }
 }

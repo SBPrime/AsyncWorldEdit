@@ -53,11 +53,11 @@ import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.api.taskdispatcher.IDispatcherEntry;
 import com.sk89q.worldedit.regions.Region;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
@@ -68,6 +68,7 @@ import org.primesoft.asyncworldedit.api.utils.IFunc;
 import org.primesoft.asyncworldedit.configuration.ConfigDispatcher;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.platform.api.ITask;
+import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.PositionHelper;
 
 /**
@@ -77,12 +78,13 @@ import org.primesoft.asyncworldedit.utils.PositionHelper;
  * @author SBPrime
  */
 public class TaskDispatcher implements Runnable, ITaskDispatcher {
-
+    private final static Object INSTANCE = new Object();
+            
     /**
      * List of thred ID's used to detect if perform safe was already started on
      * that thread
      */
-    private final HashSet<Long> m_threadMarker = new LinkedHashSet<>();
+    private final Map<Long, Object> m_threadMarker = new ConcurrentHashMap<>();
 
     /**
      * MTA mutex
@@ -118,7 +120,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * List of fast tasks (high priority) Use linked list to overcome memory
      * leakage
      */
-    private final Queue<IDispatcherEntry> m_fastTasks = new LinkedList<IDispatcherEntry>();
+    private final Queue<IDispatcherEntry> m_fastTasks = new LinkedList<>();
 
     /**
      * The main thread
@@ -331,7 +333,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
             return null;
         }
 
-        FuncEntry<T> getBlock = new FuncEntry<T>(action);
+        FuncEntry<T> getBlock = new FuncEntry<>(action);
         if (isMainTask()) {
             return action.execute();
         }
@@ -387,14 +389,14 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * not yet marked.
      */
     private boolean markThread(long id) {
-        synchronized (m_threadMarker) {
-            if (m_threadMarker.contains(id)) {
-                return false;
-            } else {
-                m_threadMarker.add(id);
-                return true;
-            }
-        }
+        final InOutParam<Boolean> isSet = InOutParam.Out();
+        m_threadMarker.computeIfAbsent(id, i -> {
+            isSet.setValue(true);
+            
+            return INSTANCE;
+        });
+        
+        return isSet.isSet();
     }
 
     /**
@@ -403,9 +405,7 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
      * @param id The thread ID
      */
     private void unmarkThread(long id) {
-        synchronized (m_threadMarker) {
-            m_threadMarker.remove(id);
-        }
+        m_threadMarker.remove(id);
     }
 
     /**
