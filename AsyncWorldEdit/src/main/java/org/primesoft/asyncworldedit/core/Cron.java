@@ -79,7 +79,7 @@ public final class Cron implements ICron {
     private final IPlayerManager m_playerManager;
     private final AsyncWorldEditCore m_parrent;
     private boolean m_undoCleanupRunning = false;
-
+    
     private final static class SessionEntry {
 
         public final IPlayerEntry Player;
@@ -119,7 +119,13 @@ public final class Cron implements ICron {
 
         loadConfig();
         
-        new Thread(() -> runUndoCleanup(true)).start();
+        startUndoCleanup(true);        
+    }
+    
+    private void startUndoCleanup(boolean startup) {
+        final Thread th = new Thread(() -> runUndoCleanup(startup));
+        th.setName("AWE:Cron:undoCleanup");
+        th.start();
     }
 
     public void loadConfig() {
@@ -178,7 +184,7 @@ public final class Cron implements ICron {
             m_lastUndoScann = now;
 
             if (!m_undoCleanupRunning) {
-                new Thread(() -> runUndoCleanup(false)).start();
+                startUndoCleanup(false);
             }
         }
     }

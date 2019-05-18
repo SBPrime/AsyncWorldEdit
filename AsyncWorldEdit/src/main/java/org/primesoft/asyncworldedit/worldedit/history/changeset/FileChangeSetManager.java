@@ -82,7 +82,9 @@ public class FileChangeSetManager {
             return;
         }
 
-        new Thread(FileChangeSetManager::saveLoop).start();
+        final Thread th = new Thread(FileChangeSetManager::saveLoop);
+        th.setName("AWE:FileChangeSetManager:saveLoop");
+        th.start();
     }
 
     /**
