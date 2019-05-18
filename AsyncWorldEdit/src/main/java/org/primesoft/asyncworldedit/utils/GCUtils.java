@@ -47,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit.utils;
 
+import java.util.concurrent.atomic.AtomicLong;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 
@@ -56,18 +57,29 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
  */
 public class GCUtils {
 
+    private final static long CHECK = 100;
+
     /**
      * GC last run time
      */
     private static long m_lastRun = 0;
 
-    public static long getTotalAvailableMemory() {
-        Runtime runtime = Runtime.getRuntime();
-        long free = runtime.freeMemory();
-        long total = runtime.totalMemory();
-        long max = runtime.maxMemory();
+    private static final AtomicLong m_lastCheck = new AtomicLong(-1);
+    private static volatile long m_lastFree = -1;
 
-        return free - total + max;
+    public static long getTotalAvailableMemory() {
+        final long now = System.currentTimeMillis();
+        final long previous = m_lastCheck.getAndSet(now);
+        if (now - previous >= CHECK) {
+            Runtime runtime = Runtime.getRuntime();
+            long free = runtime.freeMemory();
+            long total = runtime.totalMemory();
+            long max = runtime.maxMemory();
+
+            m_lastFree = free - total + max;
+        }
+
+        return m_lastFree;
     }
 
     /**
