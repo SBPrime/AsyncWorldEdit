@@ -113,7 +113,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
      * The session owner
      */
     private IPlayerEntry m_sessionOwner;
-    
+
     /**
      * The event bus
      */
@@ -125,7 +125,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
 
     protected WrappedLocalSession(LocalSession parrent) {
         m_parrent = parrent;
-        
+
         m_eventBus = AwePlatform.getInstance().getCore().getEventBus();
     }
 
@@ -277,8 +277,6 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public BlockTool getSuperPickaxe() {
         return m_parrent.getSuperPickaxe();
     }
-    
-    
 
     @Override
     public ZoneId getTimeZone() {
@@ -379,9 +377,9 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     @Override
     public void setBlockChangeLimit(int maxBlocksChanged) {
         int oldLimit = getBlockChangeLimit();
-        
+
         m_parrent.setBlockChangeLimit(maxBlocksChanged);
-        
+
         m_eventBus.post(new LocalSessionLimitChanged(this, m_sessionOwner, oldLimit, maxBlocksChanged));
     }
 
@@ -493,7 +491,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public void setOwner(IPlayerEntry owner) {
         m_sessionOwner = owner;
     }
-    
+
     @Override
     public IPlayerEntry getOwner() {
         return m_sessionOwner;
@@ -513,9 +511,9 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
         if (s_fieldHistoryPointer == null) {
             return null;
         }
-                
-        return Reflection.get(m_parrent, List.class, s_fieldHistory, "Unable to get history");                
-    }    
+
+        return Reflection.get(m_parrent, List.class, s_fieldHistory, "Unable to get history");
+    }
 
     @Override
     public boolean shouldUseServerCUI() {
@@ -546,6 +544,10 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public void setTimeout(int i) {
         m_parrent.setTimeout(i);
     }
-    
-    
+
+    @Override
+    public int getTimeout() {
+        return m_parrent.getTimeout();
+    }
+
 }
