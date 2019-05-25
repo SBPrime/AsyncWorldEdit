@@ -47,6 +47,10 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Chunk;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -55,6 +59,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.primesoft.asyncworldedit.core.ChunkWatch;
 
 /**
@@ -62,12 +67,20 @@ import org.primesoft.asyncworldedit.core.ChunkWatch;
  * @author SBPrime
  */
 class BukkitChunkWatcher extends ChunkWatch implements Listener {
+
     private final Plugin m_plugin;
+
+    private final Map<String, Map<Long, Boolean>> m_forceload = new ConcurrentHashMap<>();
+
+    private final BukkitScheduler m_scheduler;
+    private final Server m_server;
 
     public BukkitChunkWatcher(Plugin plugin) {
         m_plugin = plugin;
+        m_server = plugin.getServer();
+        m_scheduler = m_server.getScheduler();
     }
-           
+
     @EventHandler
     public void onChunkLoadEvent(ChunkLoadEvent event) {
         Chunk chunk = event.getChunk();
@@ -79,7 +92,6 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
         chunkLoaded(worldName, cx, cz);
     }
 
-    
     @EventHandler
     public void onChunkUnloadEvent(ChunkUnloadEvent event) {
         Chunk chunk = event.getChunk();
@@ -87,24 +99,20 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
         int cx = chunk.getX();
         int cz = chunk.getZ();
         String worldName = chunk.getWorld().getName();
-        boolean cancel = chunkUnloading(worldName, cx, cz);
-
-        if (cancel) {
-            event.setCancelled(cancel);
-        }
+        chunkUnloading(worldName, cx, cz);
     }
 
     @Override
     public void registerEvents() {
         Server server = m_plugin.getServer();
-        
+
         server.getPluginManager().registerEvents(this, m_plugin);
         for (World w : server.getWorlds()) {
             for (Chunk c : w.getLoadedChunks()) {
                 chunkLoaded(w.getName(), c.getX(), c.getZ());
             }
         }
-        
+
     }
 
     @Override
@@ -113,7 +121,105 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
         if (w == null) {
             return false;
         }
-        
+
         return w.getChunkAt(cx, cz) != null;
+    }
+
+    @Override
+    protected final boolean supportUnloadCancel() {
+        return false;
+    }
+
+    @Override
+    protected void forceloadOff(String world, int cx, int cz) {
+        Boolean oldValue = m_forceload.get(world).remove(encode(cx, cz));
+
+        if (oldValue != null && oldValue) {
+            m_scheduler.runTask(m_plugin, () -> {
+                World w = m_server.getWorld(world);
+                if (w == null) {
+                    return;
+                }
+
+                Chunk c = w.getChunkAt(cx, cz);
+                if (c == null) {
+                    return;
+                }
+
+                c.setForceLoaded(false);
+            });
+        }
+    }
+
+    @Override
+    protected void forceloadOn(String world, int cx, int cz) {
+        final Map<Long, Boolean> worldEntry = m_forceload.computeIfAbsent(world, _i -> new ConcurrentHashMap<>());
+        worldEntry.computeIfAbsent(encode(cx, cz), _chunk -> {
+            final Boolean[] result = new Boolean[]{null, null};
+            m_scheduler.runTask(m_plugin, () -> {
+                World w = m_server.getWorld(world);
+                Chunk chunk = w != null ? w.getChunkAt(cx, cz) : null;
+                if (chunk == null) {
+                    synchronized (result) {
+                        result[1] = true;
+                        result.notifyAll();
+                    }
+                    return;
+                }
+
+                if (chunk.isForceLoaded()) {
+                    synchronized (result) {
+                        result[0] = false;
+                        result[1] = true;
+                        result.notifyAll();
+                    }
+                    return;
+                }
+
+                chunk.setForceLoaded(true);
+                synchronized (result) {
+                    result[0] = true;
+                    result[1] = true;
+                    result.notifyAll();
+                }
+            });
+
+            synchronized (result) {
+                if (result[1] != null && !result[1]) {
+                    try {
+                        result.wait(5000);
+                    } catch (InterruptedException ex) {
+                    }
+                }
+                return result[0];
+            }
+        });
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+
+        /*
+        for (Map.Entry<String, Map<Long, Boolean>> entry : m_forceload.entrySet()) {
+            final String world = entry.getKey();
+            m_scheduler.runTask(m_plugin, () -> {
+                World w = m_server.getWorld(world);
+                if (w == null) {
+                    return;
+                }
+                for (Map.Entry<Long, Boolean> chunkEntry : entry.getValue().entrySet()) {
+                    if (chunkEntry.getValue()) {
+                        long c = chunkEntry.getKey();
+                        Chunk chunk = w.getChunkAt((int) (c >> 32), (int) c);
+                        if (chunk != null) {
+                            chunk.setForceLoaded(false);
+                        }
+                    }
+                }
+            });
+        }
+         */
+        m_forceload.clear();
     }
 }
