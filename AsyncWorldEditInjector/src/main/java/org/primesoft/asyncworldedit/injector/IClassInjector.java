@@ -49,6 +49,8 @@ package org.primesoft.asyncworldedit.injector;
 
 import java.io.IOException;
 import org.objectweb.asm.ClassReader;
+import org.primesoft.asyncworldedit.injector.core.IClassInjectorBridge;
+import org.primesoft.asyncworldedit.injector.utils.ConsumerException;
 
 /**
  *
@@ -56,8 +58,15 @@ import org.objectweb.asm.ClassReader;
  */
 public interface IClassInjector {
 
-    ClassReader getClassReader(String name) throws IOException;
+    ClassReader getWorldEditClassReader(String name) throws IOException;
 
-    Class<?> injectClass(String name, byte[] bin, int off, int len) throws ClassFormatError;
+    Class<?> injectWorldEditClass(String name, byte[] bin, int off, int len) throws ClassFormatError;
     
+    ClassReader getNMSClassReader(String name) throws IOException;
+
+    Class<?> injectNMSClass(String name, byte[] bin, int off, int len) throws ClassFormatError;
+    
+    String correctNmsName(String name);
+
+    ConsumerException<IClassInjectorBridge, IOException> getNmsInjection();
 }

@@ -52,9 +52,15 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.objectweb.asm.ClassReader;
+import org.primesoft.asyncworldedit.injector.core.IClassInjectorBridge;
+import org.primesoft.asyncworldedit.injector.core.spigot.v1_13_Rx.InjectorNmsCore;
+import org.primesoft.asyncworldedit.injector.utils.ConsumerException;
 import org.primesoft.asyncworldedit.utils.ClassLoaderHelper;
 
 /**
@@ -62,22 +68,32 @@ import org.primesoft.asyncworldedit.utils.ClassLoaderHelper;
  * @author SBPrime
  */
 final class ClassInjectorBukkit implements IClassInjector {
+    private final static Pattern NMS_VERSION = Pattern.compile("(org\\.bukkit\\.craftbukkit\\.)([^.]+)(\\.CraftServer)");
 
-    private final ClassLoader m_rootClassLoader;
+    private final ClassLoader m_classLoaderWe;
+    private final ClassLoader m_classLoaderNms;
     private final Method m_miDefineClass;
     private final Plugin m_worldEdit;
 
-    private Map<String, Class<?>> m_classes;
+    private Map<String, Class<?>> m_classesWe;
+    
+    private final String m_nmsVersion;
 
     public ClassInjectorBukkit() {
-        m_worldEdit = Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
+        final Server server = Bukkit.getServer();
+        final Class<?> serverCls = server.getClass();
+        
+        m_classLoaderNms = serverCls.getClassLoader();
+        m_nmsVersion = getNmsVersion(serverCls);
+        
+        m_worldEdit = server.getPluginManager().getPlugin("WorldEdit");        
 
         ClassLoader worldEditClassLoader = ClassLoaderHelper.getPluginClassLoader(com.sk89q.worldedit.WorldEditException.class);
         if (worldEditClassLoader == null) {
             throw new IllegalStateException("Unable to initialize 'ClassInjector'. Matching class loader not found.");
         }
 
-        m_rootClassLoader = worldEditClassLoader;
+        m_classLoaderWe = worldEditClassLoader;        
 
         try {
             m_miDefineClass = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
@@ -86,29 +102,73 @@ final class ClassInjectorBukkit implements IClassInjector {
             Field fiClasses = ClassLoaderHelper.getPluginClassLoader().getDeclaredField("classes");
             fiClasses.setAccessible(true);
 
-            m_classes = (Map<String, Class<?>>) fiClasses.get(m_rootClassLoader);
+            m_classesWe = (Map<String, Class<?>>) fiClasses.get(m_classLoaderWe);
         } catch (Exception ex) {
             throw new IllegalStateException("Unable to initialize 'ClassInjector'. Unable to initialize method bridge.", ex);
         }
     }
 
-    @Override
-    public Class<?> injectClass(String name, byte[] bin, int off, int len) throws ClassFormatError {
-        try {
-            Class<?> result = (Class<?>) m_miDefineClass.invoke(m_rootClassLoader, name, bin, off, len);
-            m_classes.put(name, result);
+    private static String getNmsVersion(final Class<?> serverCls) {
+        Matcher m = NMS_VERSION.matcher(serverCls.getCanonicalName());
+        m.find();
+        return m.group(2);
+    }
 
-            return result;
+    private Class<?> injectClass(ClassLoader cl, 
+            String name, byte[] bin, int off, int len) throws ClassFormatError {
+        
+        try {
+            return (Class<?>) m_miDefineClass.invoke(cl, name, bin, off, len);            
         } catch (Exception ex) {
             throw (ClassFormatError) (new ClassFormatError("Unable to inject class.").initCause(ex));
         }
+    }        
+    
+    @Override
+    public Class<?> injectNMSClass(String name, byte[] bin, int off, int len) throws ClassFormatError {
+        return injectClass(m_classLoaderNms, 
+                name, bin, off, len);
+        
+    }
+    
+    @Override
+    public Class<?> injectWorldEditClass(String name, byte[] bin, int off, int len) throws ClassFormatError {
+        final Class<?> result = injectClass(m_classLoaderWe, name, bin, off, len);
+        m_classesWe.put(name, result);
+        
+        return result;
     }
 
     @Override
-    public ClassReader getClassReader(String name) throws IOException {
+    public ClassReader getWorldEditClassReader(String name) throws IOException {
         String resource = String.format("%1$s.class", name.replace('.', '/'));
         InputStream is = m_worldEdit.getResource(resource);
 
         return new ClassReader(is);
     }
+
+    @Override
+    public ClassReader getNMSClassReader(String name) throws IOException {        
+        String resource = String.format("%1$s.class", name.replace('.', '/'));
+        InputStream is = m_classLoaderNms.getResourceAsStream(resource);
+
+        return new ClassReader(is);
+    }
+
+    @Override
+    public String correctNmsName(String name) {
+        return String.format(name, m_nmsVersion);
+    }
+    
+    @Override
+    public ConsumerException<IClassInjectorBridge, IOException> getNmsInjection() {
+        if ("v1_13_R1".equals(m_nmsVersion) || 
+            "v1_13_R2".equals(m_nmsVersion)) {
+            return InjectorNmsCore::injectClasses;
+        }
+        
+        return this::noOpInjector;
+    }
+    
+    private void noOpInjector(IClassInjectorBridge ci) throws IOException {}
 }

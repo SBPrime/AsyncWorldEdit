@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -51,15 +47,20 @@
  */
 package org.primesoft.asyncworldedit.injector.core;
 
+import java.io.IOException;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import org.objectweb.asm.ClassWriter;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassCreator;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
+import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
+
 /**
  *
  * @author SBPrime
  */
-public interface IInjectorPlatform {
-
-    String getPlatformName();
-
-    void log(String s);
-
-    boolean onEnable();
+public interface IClassInjectorBridge {
+    void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException;
+    void modiffyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException;
+    void crateClass(Function<ICreateClass, BaseClassCreator> factory);
 }

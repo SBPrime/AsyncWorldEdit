@@ -111,6 +111,10 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         return getArgs(desc).length;
     }
 
+    protected static String getResult(String desc) {        
+        return desc.substring(desc.indexOf(")") + 1);
+    }
+    
     protected static String[] getArgs(String desc) {
         Matcher m = ARGS_MATCHER.matcher(desc);
         if (!m.find()) {

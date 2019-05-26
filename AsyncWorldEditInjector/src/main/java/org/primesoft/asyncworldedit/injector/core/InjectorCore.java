@@ -170,8 +170,15 @@ public class InjectorCore {
             log("Injector platform set to: " + platform.getPlatformName());
         }
 
-        log("Injecting WorldEdit classes...");
+        return injectClasses();
+    }
+
+    private boolean injectClasses() {        
         try {
+            log("Injecting NMS classes...");
+            m_classInjector.getNmsInjection().consume(new NmsClassInjectorBridge());
+            
+            log("Injecting WorldEdit classes...");
             modiffyClasses("com.sk89q.worldedit.util.eventbus.EventBus", c -> new EventBusVisitor(c));
             
             modiffyClasses("com.sk89q.worldedit.math.BlockVector2", c -> new AsyncWrapperVisitor(c));
@@ -259,9 +266,34 @@ public class InjectorCore {
     }
 
     private void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
+        modiffyClasses(className, classVisitor, 
+                cn -> m_classInjector.getWorldEditClassReader(cn),
+                (name, data) -> m_classInjector.injectWorldEditClass(name, data, 0, data.length));
+    }
+    
+    private void modiffyNMSClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
+        modiffyClasses(className, classVisitor, 
+                cn -> m_classInjector.getNMSClassReader(cn),
+                (name, data) -> m_classInjector.injectNMSClass(name, data, 0, data.length));
+    }
+    
+    private void modiffyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
+        modiffyClasses(className, classVisitor, 
+                cn -> m_classInjector.getWorldEditClassReader(cn),
+                (name, data) -> m_classInjector.injectWorldEditClass(name, data, 0, data.length));
+    }
+    
+    private void modiffyNMSClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
+        modiffyClasses(className, classVisitor, 
+                cn -> m_classInjector.getNMSClassReader(cn),
+                (name, data) -> m_classInjector.injectNMSClass(name, data, 0, data.length));
+    }
+    
+    private void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor,
+            IGetClassReader getClassReader, IEmit emit) throws IOException {
         log("Modiffy class " + className);
         
-        ClassReader classReader = m_classInjector.getClassReader(className);
+        ClassReader classReader = getClassReader.get(className);
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 
         InjectorClassVisitor icv = classVisitor.apply(classWriter);
@@ -271,17 +303,17 @@ public class InjectorCore {
 
         byte[] data = classWriter.toByteArray();
         writeData(className , data);
-        m_classInjector.injectClass(className, data, 0, data.length);
+        emit.emit(className, data);        
     }
 
-    private void modiffyClasses(String className,
-            BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
+    private void modiffyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor,
+            IGetClassReader getClassReader, IEmit emit) throws IOException {
         log("Modiffy class " + className);
                 
-        ClassReader classReader = m_classInjector.getClassReader(className);
+        ClassReader classReader = getClassReader.get(className);
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 
-        InjectorClassVisitor icv = classVisitor.apply(classWriter, this::createClasses);
+        InjectorClassVisitor icv = classVisitor.apply(classWriter, (cn, cw) -> createClasses(cn, cw, emit));
         classReader.accept(icv, 0);
        
         icv.validate();
@@ -289,21 +321,31 @@ public class InjectorCore {
         byte[] data = classWriter.toByteArray();
 
         writeData(className , data);
-        m_classInjector.injectClass(className, data, 0, data.length);
+        emit.emit(className, data);
     }
-
+    
     private void crateClass(Function<ICreateClass, BaseClassCreator> factory) {
-        BaseClassCreator bcc = factory.apply(this::createClasses);
+        crateClass(factory, 
+                (name, data) -> m_classInjector.injectWorldEditClass(name, data, 0, data.length));
+    }
+    
+    private void crateNMSClass(Function<ICreateClass, BaseClassCreator> factory) {
+        crateClass(factory, 
+                (name, data) -> m_classInjector.injectNMSClass(name, data, 0, data.length));
+    }
+    
+    private void crateClass(Function<ICreateClass, BaseClassCreator> factory, IEmit emit) {
+        BaseClassCreator bcc = factory.apply((cn, cw) -> createClasses(cn, cw, emit));
         
         log("Creating class " + bcc.getName());
         bcc.run();
     }
     
-    private void createClasses(String className, ClassWriter classWriter) throws IOException {
+    private void createClasses(String className, ClassWriter classWriter, IEmit emit) throws IOException {
         byte[] data = classWriter.toByteArray();
 
         writeData(className , data);
-        m_classInjector.injectClass(className, data, 0, data.length);
+        emit.emit(className, data);
     }
 
     private void writeData(String className, byte[] data) {
@@ -313,4 +355,34 @@ public class InjectorCore {
         }
     }
 
+    @FunctionalInterface
+    private interface IGetClassReader {
+        ClassReader get(String className) throws IOException;
+    }
+    
+    @FunctionalInterface
+    private interface IEmit {
+        void emit(String className, byte[] data) throws IOException;
+    }
+
+    private class NmsClassInjectorBridge implements IClassInjectorBridge {
+
+        public NmsClassInjectorBridge() {
+        }
+
+        @Override
+        public void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
+            modiffyNMSClasses(m_classInjector.correctNmsName(className), classVisitor);
+        }
+
+        @Override
+        public void modiffyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
+            modiffyNMSClasses(m_classInjector.correctNmsName(className), classVisitor);
+        }
+
+        @Override
+        public void crateClass(Function<ICreateClass, BaseClassCreator> factory) {
+            crateNMSClass(factory);
+        }
+    }
 }
