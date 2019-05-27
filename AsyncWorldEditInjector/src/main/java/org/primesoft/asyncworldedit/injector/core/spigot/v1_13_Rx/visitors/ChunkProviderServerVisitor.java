@@ -108,7 +108,7 @@ public class ChunkProviderServerVisitor extends BaseClassVisitor {
                     super.visitMethod(access, name, descriptor, signature, exceptions));
         }
 
-        if ("getChunkAt".equals(name)) {
+        if ("getChunkAt".equals(name) && descriptor.startsWith("(IIZZ)")) {
             m_vMethodGetChunkAt.set();
             m_getChunkAtDescriptor = descriptor;
             m_getChunkAtSignature = signature;
@@ -119,27 +119,6 @@ public class ChunkProviderServerVisitor extends BaseClassVisitor {
         }
 
         return super.visitMethod(access, name, descriptor, signature, exceptions);
-    }
-
-    private final Thread m_tmp = Thread.currentThread();
-
-    private Object m_foo;
-
-    public Object ___tmp(int x, int z, boolean f1, boolean f2) {
-        return null;
-    }
-
-    public Object tmp(int x, int z, boolean f1, boolean f2) {
-        if (Thread.currentThread() == m_tmp) {
-            return ___tmp(x, z, f1, f2);
-        }
-
-        Object result = ((Map<Long, Object>) m_foo).get((long) x & 4294967295L | ((long) z & 4294967295L) << 32);
-        if (result == null) {
-            throw new IllegalStateException("[AWE] Chunk not found for " + x + "," + z + ". Loading from async thread is not supported.");
-        }
-
-        return result;
     }
 
     @Override

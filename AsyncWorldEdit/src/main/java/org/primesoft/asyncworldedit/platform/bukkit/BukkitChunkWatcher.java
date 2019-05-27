@@ -47,10 +47,16 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.function.Predicate;
 import org.bukkit.Chunk;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -68,17 +74,111 @@ import org.primesoft.asyncworldedit.core.ChunkWatch;
  */
 class BukkitChunkWatcher extends ChunkWatch implements Listener {
 
+    private final static int HOLD_CHUNK = 5000;
+
     private final Plugin m_plugin;
 
-    private final Map<String, Map<Long, Boolean>> m_forceload = new ConcurrentHashMap<>();
+    private final Map<String, Map<Long, Long>> m_forceload = new HashMap<>();
+
+    private final Queue<ForceLoadEntry> m_forceLoadQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<ForceLoadEntry> m_forceUnLoadQueue = new ConcurrentLinkedQueue<>();
 
     private final BukkitScheduler m_scheduler;
     private final Server m_server;
+
+    private long m_lastAccess;
 
     public BukkitChunkWatcher(Plugin plugin) {
         m_plugin = plugin;
         m_server = plugin.getServer();
         m_scheduler = m_server.getScheduler();
+
+        m_scheduler.runTaskTimer(plugin, this::forceLoadProcessor, 1, 1);
+    }
+
+    private void forceLoadProcessor() {
+        long now = System.currentTimeMillis();
+        long minTime = now - HOLD_CHUNK;
+        /*final Predicate<ForceLoadEntry> test = t -> t.timestamp <= minTime || !t.unloadChunk;
+        while (!m_forceLoadQueue.isEmpty() && test.test(m_forceLoadQueue.peek())) {
+            final ForceLoadEntry e = m_forceLoadQueue.poll();
+            final World world = m_server.getWorld(e.world);
+            if (world == null) {
+                continue;
+            }
+
+            final Chunk chunk = world.getChunkAt(e.cx, e.cz);
+            final long coords = encode(e.cx, e.cz);            
+            
+            if (!e.unloadChunk && !chunk.isForceLoaded() && e.timestamp >= m_lastAccess) {
+                chunk.setForceLoaded(true);
+                m_forceload.computeIfAbsent(e.world, i -> new HashSet<>()).add(coords);
+            } else if (e.unloadChunk) {
+                final Set<Long> entries = m_forceload.get(e.world);
+                if (!entries.contains(coords) || getReferences(e.world, e.cx, e.cz) > 0) {
+                    continue;
+                }
+                
+                entries.remove(coords);
+                chunk.setForceLoaded(false);
+            }
+            
+            m_lastAccess = e.timestamp;
+        }*/
+        while (!m_forceLoadQueue.isEmpty()) {
+            final ForceLoadEntry e = m_forceLoadQueue.poll();
+
+            final World world = m_server.getWorld(e.world);
+            if (world == null) {
+                continue;
+            }
+
+            final Chunk chunk = world.getChunkAt(e.cx, e.cz);
+            final long coords = encode(e.cx, e.cz);
+            
+            Map<Long, Long> chunkEntry = m_forceload.computeIfAbsent(e.world, i -> new HashMap<>());
+            if (!chunk.isForceLoaded()) {
+                chunkEntry.put(coords, now);
+                chunk.setForceLoaded(true);
+            } else if (chunkEntry.containsKey(coords)) {
+                chunkEntry.put(coords, now);
+            }
+        }
+        
+        while (!m_forceUnLoadQueue.isEmpty()) {
+            final ForceLoadEntry e = m_forceUnLoadQueue.peek();            
+            
+            Map<Long, Long> chunkEntry = m_forceload.get(e.world);
+            if (chunkEntry == null) {
+                m_forceUnLoadQueue.poll();
+                continue;
+            }
+            
+            final long coords = encode(e.cx, e.cz);
+            Long value = chunkEntry.get(coords);
+            if (value == null) {
+                m_forceUnLoadQueue.poll();
+                continue;
+            }
+            
+            if (value >= now - HOLD_CHUNK) {
+                break;
+            }
+            
+            m_forceUnLoadQueue.poll();
+            chunkEntry.remove(coords);
+            
+            final World world = m_server.getWorld(e.world);
+            if (world == null) {
+                continue;
+            }
+
+            final Chunk chunk = world.getChunkAt(e.cx, e.cz);
+            if (chunk == null) {
+                continue;
+            }
+            chunk.setForceLoaded(false);
+        }
     }
 
     @EventHandler
@@ -132,68 +232,12 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
 
     @Override
     protected void forceloadOff(String world, int cx, int cz) {
-        Boolean oldValue = m_forceload.get(world).remove(encode(cx, cz));
-
-        if (oldValue != null && oldValue) {
-            m_scheduler.runTask(m_plugin, () -> {
-                World w = m_server.getWorld(world);
-                if (w == null) {
-                    return;
-                }
-
-                Chunk c = w.getChunkAt(cx, cz);
-                if (c == null) {
-                    return;
-                }
-
-                c.setForceLoaded(false);
-            });
-        }
+        m_forceUnLoadQueue.add(new ForceLoadEntry(world, cx, cz));
     }
 
     @Override
     protected void forceloadOn(String world, int cx, int cz) {
-        final Map<Long, Boolean> worldEntry = m_forceload.computeIfAbsent(world, _i -> new ConcurrentHashMap<>());
-        worldEntry.computeIfAbsent(encode(cx, cz), _chunk -> {
-            final Boolean[] result = new Boolean[]{null, null};
-            m_scheduler.runTask(m_plugin, () -> {
-                World w = m_server.getWorld(world);
-                Chunk chunk = w != null ? w.getChunkAt(cx, cz) : null;
-                if (chunk == null) {
-                    synchronized (result) {
-                        result[1] = true;
-                        result.notifyAll();
-                    }
-                    return;
-                }
-
-                if (chunk.isForceLoaded()) {
-                    synchronized (result) {
-                        result[0] = false;
-                        result[1] = true;
-                        result.notifyAll();
-                    }
-                    return;
-                }
-
-                chunk.setForceLoaded(true);
-                synchronized (result) {
-                    result[0] = true;
-                    result[1] = true;
-                    result.notifyAll();
-                }
-            });
-
-            synchronized (result) {
-                if (result[1] != null && !result[1]) {
-                    try {
-                        result.wait(5000);
-                    } catch (InterruptedException ex) {
-                    }
-                }
-                return result[0];
-            }
-        });
+        m_forceLoadQueue.add(new ForceLoadEntry(world, cx, cz));
     }
 
     @Override
@@ -221,5 +265,20 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
         }
          */
         m_forceload.clear();
+    }
+
+    private static class ForceLoadEntry {
+
+        public final String world;
+        public final int cx;
+        public final int cz;
+        public final long timestamp;
+
+        ForceLoadEntry(String world, int cx, int cz) {
+            this.world = world;
+            this.cx = cx;
+            this.cz = cz;
+            this.timestamp = System.currentTimeMillis();
+        }
     }
 }

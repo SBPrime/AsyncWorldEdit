@@ -148,6 +148,22 @@ public abstract class ChunkWatch implements IChunkWatch {
         }
     }
 
+    protected final int getReferences(String worldName, int cx, int cz) {
+        synchronized (m_watchedChunks) {
+            Map<Long, Integer> worldEntry = m_watchedChunks.get(worldName);
+            if (worldEntry == null) {
+                return 0;
+            }
+
+            long chunk = encode(cx, cz);
+            Integer value = worldEntry.get(chunk);
+            if (value == null) {
+                return 0;
+            }
+            return value;
+        }
+    }
+
     protected void chunkLoaded(String worldName, int cx, int cz) {
         synchronized (m_loadedChunks) {
             m_loadedChunks
