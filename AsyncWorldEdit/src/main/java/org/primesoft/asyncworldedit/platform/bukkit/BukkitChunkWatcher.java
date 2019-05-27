@@ -74,7 +74,7 @@ import org.primesoft.asyncworldedit.core.ChunkWatch;
  */
 class BukkitChunkWatcher extends ChunkWatch implements Listener {
 
-    private final static int HOLD_CHUNK = 5000;
+    private final static int HOLD_CHUNK = 1000;
 
     private final Plugin m_plugin;
 
