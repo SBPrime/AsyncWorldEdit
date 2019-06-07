@@ -47,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit.changesetSerializer.serializers;
 
+import com.sk89q.worldedit.history.change.BiomeChange;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.world.biome.BiomeType;
@@ -58,8 +59,6 @@ import org.primesoft.asyncworldedit.api.changesetSerializer.IMemoryStorage;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataInput;
 import org.primesoft.asyncworldedit.utils.io.UnsafeDataOutput;
-import org.primesoft.asyncworldedit.worldedit.history.change.BiomeChange;
-import sun.reflect.generics.tree.BaseType;
 
 /**
  *
@@ -70,7 +69,9 @@ public class SerializerBiomeChange  implements IChangesetSerializer {
     
     private static final String CLASS_TYPE = BiomeChange.class.getName();
     
-    private static final String DEFAULT = BiomeTypes.PLAINS.getId();
+    private static String getDefault() {
+        return BiomeTypes.PLAINS.getId();
+    }
 
     @Override
     public boolean canSerialize(String type) {
@@ -93,8 +94,8 @@ public class SerializerBiomeChange  implements IChangesetSerializer {
         BiomeType previous = bChange.getPrevious();
         BiomeType current = bChange.getCurrent();
 
-        byte[] idPrevious = (previous == null ? DEFAULT : previous.getId()).getBytes(UTF8);
-        byte[] idCurrent = (current == null ? DEFAULT : current.getId()).getBytes(UTF8);
+        byte[] idPrevious = (previous == null ? getDefault() : previous.getId()).getBytes(UTF8);
+        byte[] idCurrent = (current == null ? getDefault() : current.getId()).getBytes(UTF8);
         
         try {
             UnsafeDataOutput stream = new UnsafeDataOutput();

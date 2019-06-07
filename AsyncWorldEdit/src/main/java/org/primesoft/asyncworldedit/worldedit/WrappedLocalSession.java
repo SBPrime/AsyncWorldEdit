@@ -289,8 +289,8 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     }
 
     @Override
-    public void handleCUIInitializationMessage(String text) {
-        m_parrent.handleCUIInitializationMessage(text);
+    public void handleCUIInitializationMessage(String text, Actor actor) {
+        m_parrent.handleCUIInitializationMessage(text, actor);
     }
 
     @Override

@@ -60,7 +60,6 @@ import com.sk89q.worldedit.world.snapshot.Snapshot;
 import java.time.ZoneId;
 
 import java.util.Calendar;
-import java.util.TimeZone;
 
 import javax.annotation.Nullable;
 
@@ -434,7 +433,7 @@ interface ILocalSession {
      *
      * @param text the message
      */
-    public void handleCUIInitializationMessage(String text);
+    public void handleCUIInitializationMessage(String text, Actor actor);
 
     /**
      * Gets the status of CUI support.

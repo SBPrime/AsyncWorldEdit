@@ -53,12 +53,12 @@ import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.history.change.BiomeChange;
 import com.sk89q.worldedit.history.change.EntityCreate;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
-import org.primesoft.asyncworldedit.worldedit.history.change.BiomeChange;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.IExtendedChangeSet;
 
 /**
