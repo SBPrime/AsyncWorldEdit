@@ -48,15 +48,9 @@
 package org.primesoft.asyncworldedit.platform.bukkit;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.function.Predicate;
 import org.bukkit.Chunk;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -99,32 +93,7 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
     private void forceLoadProcessor() {
         long now = System.currentTimeMillis();
         long minTime = now - HOLD_CHUNK;
-        /*final Predicate<ForceLoadEntry> test = t -> t.timestamp <= minTime || !t.unloadChunk;
-        while (!m_forceLoadQueue.isEmpty() && test.test(m_forceLoadQueue.peek())) {
-            final ForceLoadEntry e = m_forceLoadQueue.poll();
-            final World world = m_server.getWorld(e.world);
-            if (world == null) {
-                continue;
-            }
 
-            final Chunk chunk = world.getChunkAt(e.cx, e.cz);
-            final long coords = encode(e.cx, e.cz);            
-            
-            if (!e.unloadChunk && !chunk.isForceLoaded() && e.timestamp >= m_lastAccess) {
-                chunk.setForceLoaded(true);
-                m_forceload.computeIfAbsent(e.world, i -> new HashSet<>()).add(coords);
-            } else if (e.unloadChunk) {
-                final Set<Long> entries = m_forceload.get(e.world);
-                if (!entries.contains(coords) || getReferences(e.world, e.cx, e.cz) > 0) {
-                    continue;
-                }
-                
-                entries.remove(coords);
-                chunk.setForceLoaded(false);
-            }
-            
-            m_lastAccess = e.timestamp;
-        }*/
         while (!m_forceLoadQueue.isEmpty()) {
             final ForceLoadEntry e = m_forceLoadQueue.poll();
 

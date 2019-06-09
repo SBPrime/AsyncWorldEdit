@@ -47,10 +47,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.block.BlockState;
 
 /**
  *

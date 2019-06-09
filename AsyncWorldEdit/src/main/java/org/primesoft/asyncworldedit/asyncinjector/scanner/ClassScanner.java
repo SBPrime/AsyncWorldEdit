@@ -55,6 +55,7 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.world.FastModeExtent;
+import com.sk89q.worldedit.function.mask.BlockMask;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.ClipboardPattern;
 import com.sk89q.worldedit.function.pattern.RandomPattern;
@@ -75,6 +76,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -208,7 +210,8 @@ public abstract class ClassScanner implements IClassScanner {
                             if (isPrimitive(ct) || 
                                 isBlackList(ct) ||
                                 isStatic(f.getField()) ||
-                                isBlackList(cClass, f.getField()))
+                                isBlackList(cClass, f.getField()) ||
+                                Objects.equals(t, entry.getParent()))
                             {
                                 if (debugOn) {
                                     log(String.format("* - %1$s", classMsg));
@@ -331,6 +334,7 @@ public abstract class ClassScanner implements IClassScanner {
      */
     protected IClassScannerEntry[] getBlackList() {
         return Stream.of(
+            new ClassScannerEntry(BlockMask.class, "blocks"),
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", "batches"),

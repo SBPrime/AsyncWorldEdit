@@ -348,15 +348,6 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
             m_blocksHub.initialize(plugin);
         }
     }
-        
-    /*private class EventTest {
-        @Subscribe
-        public void EventTest(IEvent event) {
-            System.out.println("Event "+ event.getClass().getCanonicalName());
-        }
-    }
-    
-    private EventTest m_eventTest;*/
     
     /**
      * Initialize the WorldEdit
