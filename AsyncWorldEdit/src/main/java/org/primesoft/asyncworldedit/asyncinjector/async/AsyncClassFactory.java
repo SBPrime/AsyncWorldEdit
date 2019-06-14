@@ -50,7 +50,10 @@ package org.primesoft.asyncworldedit.asyncinjector.async;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.command.RegionCommandsRegistration;
 import com.sk89q.worldedit.command.UtilityCommandsRegistration;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -66,6 +69,7 @@ import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.worldedit.regions.RegionIteratorFactory;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
 /**
@@ -144,4 +148,9 @@ public class AsyncClassFactory extends BaseClassFactory {
     public CommandManager wrapCommandManager(Object sender, CommandManager cm) {
         return super.wrapCommandManager(sender, cm);
     }
+
+    @Override
+    public Iterator<BlockVector3> getRegionIterator(Region region) {
+        return RegionIteratorFactory.getIterator(region);
+    }        
 }

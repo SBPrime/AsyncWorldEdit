@@ -52,9 +52,11 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.collection.LocatedBlockList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
@@ -209,5 +211,9 @@ public final class Helpers {
             
             map.put(key, newValue);
         }
+    }
+    
+    public static Iterator<BlockVector3> getRegionIterator(Region region) {
+        return InjectorCore.getInstance().getClassFactory().getRegionIterator(region);
     }
 }

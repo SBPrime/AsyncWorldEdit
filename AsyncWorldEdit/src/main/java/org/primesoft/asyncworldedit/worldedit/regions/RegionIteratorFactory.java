@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,60 +45,51 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.worldedit.regions;
 
-package org.primesoft.asyncworldedit.injector.classfactory;
-
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.AbstractRegion;
+import com.sk89q.worldedit.regions.ConvexPolyhedralRegion;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.CylinderRegion;
+import com.sk89q.worldedit.regions.EllipsoidRegion;
+import com.sk89q.worldedit.regions.NullRegion;
+import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.regions.RegionIntersection;
+import com.sk89q.worldedit.regions.TransformRegion;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.UUID;
-import org.enginehub.piston.CommandManager;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
-    /**
-     * Get the operation processor
-     * @return 
-     */
-    IOperationProcessor getOperationProcessor();
+public final class RegionIteratorFactory {
+    private RegionIteratorFactory() {}
     
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
-    
-    /**
-     * Create new instance of the clipboard
-     * @param parent
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Clipboard parent, Region region);
-
-    /**
-     * Handle the exception from operation
-     * @param ex The exception to hanlde 
-     * @param name The operation name
-     */
-    void handleError(WorldEditException ex, String name);
-
-     IPlayerEntry getPlayer(UUID uniqueId);
-     
-     World wrapWorld(World world, IPlayerEntry player);
-
-    CommandManager wrapCommandManager(Object sender, CommandManager cm);
-
-    ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent);
-
-    Iterator<BlockVector3> getRegionIterator(Region region);
+    public static Iterator<BlockVector3> getIterator(Region region) {
+        if ((region == null) || (region instanceof NullRegion)) {
+            return Collections.emptyIterator();
+        }
+        
+        if (region instanceof CuboidRegion) {
+            return new ChunkCuboidRegionIterator((CuboidRegion)region);
+        }
+        
+        if (region instanceof CylinderRegion ||
+            region instanceof Polygonal2DRegion ||
+            region instanceof RegionIntersection ||
+            region instanceof TransformRegion) {
+            //TODO: add in the future
+            return null;
+        }
+        
+        if (region instanceof ConvexPolyhedralRegion ||
+            region instanceof EllipsoidRegion) {
+            return new ChunkBaseRegionIterator((AbstractRegion)region);
+        }
+        
+        return null;
+    }
 }

@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,60 +45,90 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.worldedit.regions;
 
-package org.primesoft.asyncworldedit.injector.classfactory;
-
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Iterator;
-import java.util.UUID;
-import org.enginehub.piston.CommandManager;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
+import java.util.NoSuchElementException;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
-    /**
-     * Get the operation processor
-     * @return 
-     */
-    IOperationProcessor getOperationProcessor();
-    
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
-    
-    /**
-     * Create new instance of the clipboard
-     * @param parent
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Clipboard parent, Region region);
+public final class ChunkCuboidRegionIterator implements Iterator<BlockVector3> {
 
-    /**
-     * Handle the exception from operation
-     * @param ex The exception to hanlde 
-     * @param name The operation name
-     */
-    void handleError(WorldEditException ex, String name);
+    private final int m_minX, m_minY, m_minZ;
+    private final int m_maxX, m_maxY, m_maxZ;
+    private int m_x, m_y, m_z;    
+    private int m_xChunk, m_zChunk;
 
-     IPlayerEntry getPlayer(UUID uniqueId);
-     
-     World wrapWorld(World world, IPlayerEntry player);
+    public ChunkCuboidRegionIterator(CuboidRegion region) {
+        BlockVector3  min = region.getMinimumPoint();
+        BlockVector3  max = region.getMaximumPoint();
+        
+        m_minX = min.getBlockX();
+        m_minY = min.getBlockY();
+        m_minZ = min.getBlockZ();
+        
+        m_x = min.getBlockX();
+        m_y = min.getBlockY();
+        m_z = min.getBlockZ();
+        
+        m_xChunk = getChunk(m_x);
+        m_zChunk = getChunk(m_z);
 
-    CommandManager wrapCommandManager(Object sender, CommandManager cm);
+        m_maxX = max.getBlockX();
+        m_maxY = max.getBlockY();
+        m_maxZ = max.getBlockZ();
+    }    
 
-    ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent);
+    @Override
+    public boolean hasNext() {
+        return m_z <= m_maxZ;
+    }
 
-    Iterator<BlockVector3> getRegionIterator(Region region);
+    @Override
+    public BlockVector3 next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+        
+        final BlockVector3 result = BlockVector3.at(m_x, m_y, m_z);
+        
+        m_y ++;
+        if (m_y > m_maxY) {
+            m_y = m_minY;
+            
+            incXZ();
+        }
+        
+        return result;
+    }
+
+    private void incXZ() {
+        m_x++;
+        if (m_x > m_maxX || m_x >= m_xChunk + 16) {
+            m_x = Math.max(m_xChunk, m_minX);
+            m_z++;
+        }
+        
+        if (m_z > m_maxZ || m_z >= m_zChunk + 16) {
+            m_z = Math.max(m_zChunk, m_minZ);
+            m_xChunk += 16;
+            m_x = m_xChunk;
+        }
+        
+        if (m_xChunk > m_maxX) {
+            m_x = m_minX;
+            m_xChunk = getChunk(m_x);
+            
+            m_zChunk += 16;
+            m_z = m_zChunk;
+        }
+    }
+
+    private int getChunk(int i) {
+        return (i >> 4) << 4;
+    }
 }

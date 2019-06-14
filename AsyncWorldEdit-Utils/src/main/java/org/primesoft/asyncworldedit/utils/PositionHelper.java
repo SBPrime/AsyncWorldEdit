@@ -95,9 +95,17 @@ public class PositionHelper {
         final int floor = (int) a;
         final int i = floor == a ? floor : floor - (int) (Double.doubleToRawLongBits(a) >>> 63);
         return i >> 4;
-        //return (int) (a / CHUNK_SIZE) + (a % CHUNK_SIZE < 0 ? -1 : 0);
     }
-
+    
+    /**
+     * Convert the block position to chunk coords
+     *
+     * @param a
+     * @return
+     */
+    public static int positionToChunk(int a) {    
+        return a >> 4;
+    }
 
     public static double chunkToPosition(int c) {
         return (double) c * CHUNK_SIZE;

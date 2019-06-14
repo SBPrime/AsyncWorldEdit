@@ -81,6 +81,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.Sch
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.ScriptingCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SnapshotUtilCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.reorder.MultiStageReorderVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.regions.RegionVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.util.eventbus.EventBusVisitor;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
@@ -200,6 +201,17 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
             
             modiffyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", c -> new MultiStageReorderVisitor(c));
+            
+            // Regions
+            modiffyClasses("com.sk89q.worldedit.regions.AbstractRegion", c -> new RegionVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.regions.EllipsoidRegion", c -> new RegionVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.regions.ConvexPolyhedralRegion", c -> new RegionVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.regions.TransformRegion", c -> new RegionVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.regions.RegionIntersection", c -> new RegionVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.regions.NullRegion", c -> new RegionVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.regions.Polygonal2DRegion", c -> new RegionVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.regions.CylinderRegion", c -> new RegionVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.regions.CuboidRegion", c -> new RegionVisitor(c));
             
             // Commands
             modiffyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
