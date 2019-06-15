@@ -986,7 +986,7 @@ public class BlockPlacer implements IBlockPlacer {
 
         boolean bypass = player.isAllowed(Permission.QUEUE_BYPASS);
         IPermissionGroup group = player.getPermissionGroup();
-        return getPlayerMessage(entry, group, bypass);
+        return getPlayerMessage(entry, entry == null ? 0 : entry.getOperationCount(), group, bypass);
     }
 
     /**
@@ -995,13 +995,13 @@ public class BlockPlacer implements IBlockPlacer {
      * @param player player login
      * @return
      */
-    private String getPlayerMessage(BlockPlacerPlayer player, IPermissionGroup group, boolean bypass) {
+    private String getPlayerMessage(BlockPlacerPlayer player, int operations, IPermissionGroup group, boolean bypass) {
         int blocks = 0;
         double speed = 0;
         double time = 0;
 
         if (player != null) {
-            blocks = player.getQueue().size();
+            blocks = operations;
             speed = player.getSpeed();
         }
         if (speed > 0) {
@@ -1056,7 +1056,7 @@ public class BlockPlacer implements IBlockPlacer {
      * @param entry
      * @param bypass
      */
-    private void setBar(IPlayerEntry player, BlockPlacerPlayer entry, boolean bypass) {
+    private void setBar(IPlayerEntry player, int operations, BlockPlacerPlayer entry, boolean bypass) {
         int blocks = 0;
         int maxBlocks = 0;
         int jobs = 0;
@@ -1066,7 +1066,7 @@ public class BlockPlacer implements IBlockPlacer {
 
         if (entry != null) {
             jobs = entry.getJobs().length;
-            blocks = entry.getQueue().size();
+            blocks = operations;
             maxBlocks = entry.getMaxQueueBlocks();
             speed = entry.getSpeed();
         }
@@ -1108,21 +1108,22 @@ public class BlockPlacer implements IBlockPlacer {
     private void showProgress(IPlayerEntry playerEntry, BlockPlacerPlayer entry,
             int placedBlocks, final long timeDelte,
             final boolean talk) {
-        entry.updateSpeed(placedBlocks, timeDelte);
+        entry.updateSpeed(placedBlocks + (entry == null ? 0 : entry.getAndResetCounterDelta()), timeDelte);
 
         final IPermissionGroup group = playerEntry.getPermissionGroup();
         boolean bypass = playerEntry.isAllowed(Permission.QUEUE_BYPASS);
-        if (entry.getQueue().isEmpty()) {
+        if (!entry.hasBlocks()) {
             if (playerEntry.getMessaging(MessageSystem.BAR)) {
                 hideProgressBar(playerEntry, entry);
             }
         } else {
+            int operations = entry.getOperationCount();
             if (talk && playerEntry.getMessaging(MessageSystem.CHAT)) {
-                playerEntry.say(MessageType.CMD_JOBS_PROGRESS_MSG.format(getPlayerMessage(entry, group, bypass)));
+                playerEntry.say(MessageType.CMD_JOBS_PROGRESS_MSG.format(getPlayerMessage(entry, operations, group, bypass)));
             }
 
             if (playerEntry.getMessaging(MessageSystem.BAR)) {
-                setBar(playerEntry, entry, bypass);
+                setBar(playerEntry, operations, entry, bypass);
             }
         }
     }

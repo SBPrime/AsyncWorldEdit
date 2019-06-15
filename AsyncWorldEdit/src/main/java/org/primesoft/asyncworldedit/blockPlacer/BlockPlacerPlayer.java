@@ -57,6 +57,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerEntry;
+import org.primesoft.asyncworldedit.api.blockPlacer.ICountProvider;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RedoJob;
@@ -69,6 +70,8 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  * @author SBPrime
  */
 public class BlockPlacerPlayer implements IBlockPlacerPlayer {
+    private final static Object ITEM = new Object();
+    private final Map<ICountProvider, Object> m_otherCountSources = new ConcurrentHashMap<>();
 
     /**
      * Number of samples used in AVG count
@@ -328,5 +331,30 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
     @Override
     public void setInformed(boolean state) {
         m_isInformed = state;
+    }
+
+    @Override
+    public boolean hasBlocks() {
+        return !m_queue.isEmpty() || m_otherCountSources.keySet().stream().anyMatch(i -> i.getCount() > 0);
+    }
+
+    @Override
+    public int getOperationCount() {
+        return m_queue.size() + m_otherCountSources.keySet().stream().mapToInt(ICountProvider::getCount).sum();
+    }
+
+    @Override
+    public void addCounterProvider(ICountProvider cp) {
+        m_otherCountSources.put(cp, ITEM);
+    }
+
+    @Override
+    public void removeCounterProvider(ICountProvider cp) {
+        m_otherCountSources.remove(cp);
+    }
+    
+    @Override
+    public int getAndResetCounterDelta() {
+        return m_otherCountSources.keySet().stream().mapToInt(ICountProvider::getAndResetDelta).sum();
     }
 }

@@ -45,123 +45,68 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.regions;
+package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.AbstractRegion;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.primesoft.asyncworldedit.api.blockPlacer.ICountProvider;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
- * @author prime
+ * @author SBPrime
  */
-public class ChunkBaseRegionIterator implements Iterator<BlockVector3>, ICountProvider {
+public final class TaskContext implements ITaskContext {
+    private final static ThreadLocal<ITaskContext> m_contexts = new ThreadLocal<>();
+    
+    private final static ITaskContext NULL =  new ITaskContext() {
+        @Override
+        public IPlayerEntry getPlayer() { return null; }
 
-    private final int m_minX, m_minY, m_minZ;
-    private final int m_maxX, m_maxY, m_maxZ;
-    private int m_x, m_y, m_z;
-    private int m_xChunk, m_zChunk;
-    private final AbstractRegion m_region;
-    private int m_count;
-    private AtomicInteger m_delta = new AtomicInteger(0);
-
-    public ChunkBaseRegionIterator(AbstractRegion region) {
-        BlockVector3 min = region.getMinimumPoint();
-        BlockVector3 max = region.getMaximumPoint();
-
-        m_minX = min.getBlockX();
-        m_minY = min.getBlockY();
-        m_minZ = min.getBlockZ();
-
-        m_x = min.getBlockX();
-        m_y = min.getBlockY();
-        m_z = min.getBlockZ();
-
-        m_xChunk = getChunk(m_x);
-        m_zChunk = getChunk(m_z);
-
-        m_maxX = min.getBlockX();
-        m_maxY = min.getBlockY();
-        m_maxZ = min.getBlockZ();
+        @Override
+        public String getCommand() { return ""; }
+     
+        @Override
+        public IBlockPlacer getBlockPlacer() { return null; }
+    };
+    
+    private final BaseTask m_task;
+    
+    private TaskContext(BaseTask task) {
+        m_task = task;
+    }
+    
+    public static ITaskContext get() {
+        final ITaskContext result = m_contexts.get();
         
-        m_region = region;
-    
-        m_count = (m_maxX - m_minX + 1) * (m_maxY - m_minY + 1) * (m_maxZ - m_minZ + 1);
-        forward();
-    }
-    
-    private void forward() {
-        while (hasNext() && !m_region.contains(BlockVector3.at(m_x, m_y, m_z))) {
-            forwardOne();
-        }
-    }
-    
-    private void forwardOne() {
-        m_y++;
-        if (m_y > m_maxY) {
-            m_y = m_minY;
-
-            incXZ();
+        if (result == null) {
+            return NULL;
         }
         
-        m_count--;
-        m_delta.incrementAndGet();
-    }
-
-    @Override
-    public boolean hasNext() {
-        return m_z <= m_maxZ;
-    }
-
-    @Override
-    public BlockVector3 next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException();
-        }
-
-        final BlockVector3 result = BlockVector3.at(m_x, m_y, m_z);
-        forwardOne();
-        forward();
-
         return result;
     }
     
-    private void incXZ() {
-        m_x++;
-        if (m_x > m_maxX || m_x >= m_xChunk + 16) {
-            m_x = Math.max(m_xChunk, m_minX);
-            m_z++;
-        }
-
-        if (m_z > m_maxZ || m_z >= m_zChunk + 16) {
-            m_z = Math.max(m_zChunk, m_minZ);
-            m_xChunk += 16;
-            m_x = m_xChunk;
-        }
-
-        if (m_xChunk > m_maxX) {
-            m_x = m_minX;
-            m_xChunk = getChunk(m_x);
-
-            m_zChunk += 16;
-            m_z = m_zChunk;
-        }
+    public static ITaskContext init(BaseTask task) {
+        final TaskContext tc = new TaskContext(task);
+        m_contexts.set(tc);
+        
+        return tc;
     }
-
-    private int getChunk(int i) {
-        return (i >> 4) << 4;
+    
+    public static void remove() {
+        m_contexts.remove();
     }
 
     @Override
-    public int getCount() {
-        return m_count;
+    public IPlayerEntry getPlayer() {
+        return m_task.getPlayer();
     }
 
     @Override
-    public int getAndResetDelta() {
-        return m_delta.getAndSet(0);
+    public String getCommand() {
+        return m_task.getCommand();
+    }
+
+    @Override
+    public IBlockPlacer getBlockPlacer() {
+        return m_task.getBlockPlacer();
     }
 }

@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,49 +45,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit;
-
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import org.primesoft.asyncworldedit.api.IWorld;
-import org.primesoft.asyncworldedit.api.MessageSystem;
-import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
-import org.primesoft.asyncworldedit.strings.MessageType;
+package org.primesoft.asyncworldedit.api.blockPlacer;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class WorldAsyncTask extends BaseTask {
-
-    /**
-     * The world
-     */
-    private final IWorld m_world;
-
-    public WorldAsyncTask(final IWorld world, final EditSession editSession, final IPlayerEntry player,
-            final String commandName, IBlockPlacer blocksPlacer, JobEntry job) {
-        super(editSession, player, commandName, blocksPlacer, job);
-
-        m_world = world;
-    }
-
-    @Override
-    protected Object doRun() throws MaxChangedBlocksException {
-        task(m_editSession, m_world);
-
-        return null;
-    }
-
-    @Override
-    protected void doPostRun(Object result) {
-        if (getPlayer().getMessaging(MessageSystem.TALKATIVE)) {
-            getPlayer().say(MessageType.BLOCK_PLACER_DONE_WORLD.format());
-        }
-    }
-
-    public abstract void task(EditSession editSession, IWorld world)
-            throws MaxChangedBlocksException;
+public interface ICountProvider {
+    int getCount();
+    
+    int getAndResetDelta();
 }

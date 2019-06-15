@@ -51,17 +51,21 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.primesoft.asyncworldedit.api.blockPlacer.ICountProvider;
 
 /**
  *
  * @author SBPrime
  */
-public final class ChunkCuboidRegionIterator implements Iterator<BlockVector3> {
+public final class ChunkCuboidRegionIterator implements Iterator<BlockVector3>, ICountProvider {
 
     private final int m_minX, m_minY, m_minZ;
     private final int m_maxX, m_maxY, m_maxZ;
     private int m_x, m_y, m_z;    
     private int m_xChunk, m_zChunk;
+    private int m_count;
+    private AtomicInteger m_delta = new AtomicInteger(0);
 
     public ChunkCuboidRegionIterator(CuboidRegion region) {
         BlockVector3  min = region.getMinimumPoint();
@@ -81,6 +85,8 @@ public final class ChunkCuboidRegionIterator implements Iterator<BlockVector3> {
         m_maxX = max.getBlockX();
         m_maxY = max.getBlockY();
         m_maxZ = max.getBlockZ();
+        
+        m_count = (m_maxX - m_minX + 1) * (m_maxY - m_minY + 1) * (m_maxZ - m_minZ + 1);
     }    
 
     @Override
@@ -102,6 +108,9 @@ public final class ChunkCuboidRegionIterator implements Iterator<BlockVector3> {
             
             incXZ();
         }
+        
+        m_count--;
+        m_delta.incrementAndGet();
         
         return result;
     }
@@ -130,5 +139,15 @@ public final class ChunkCuboidRegionIterator implements Iterator<BlockVector3> {
 
     private int getChunk(int i) {
         return (i >> 4) << 4;
+    }
+
+    @Override
+    public int getCount() {
+        return m_count;
+    }
+
+    @Override
+    public int getAndResetDelta() {
+        return m_delta.getAndSet(0);
     }
 }

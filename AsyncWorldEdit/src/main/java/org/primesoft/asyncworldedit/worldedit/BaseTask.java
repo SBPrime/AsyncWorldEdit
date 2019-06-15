@@ -73,12 +73,12 @@ public abstract class BaseTask extends BukkitRunnable {
     /**
      * Command name
      */
-    protected final String m_command;
+    private final String m_command;
 
     /**
      * The player
      */
-    protected final IPlayerEntry m_player;
+    private final IPlayerEntry m_player;
 
     /**
      * Cancelable edit session
@@ -98,7 +98,7 @@ public abstract class BaseTask extends BukkitRunnable {
     /**
      * The blocks placer
      */
-    protected final IBlockPlacer m_blockPlacer;
+    private final IBlockPlacer m_blockPlacer;
 
     /**
      * Job instance
@@ -140,6 +140,8 @@ public abstract class BaseTask extends BukkitRunnable {
     @Override
     public void run() {
         try (RequestCotext rc = new RequestCotext(m_request, m_editSession)) {
+            TaskContext.init(this);
+            
             Object result = null;
 
             if (m_job.getStatus() == JobStatus.Canceled) {
@@ -147,20 +149,20 @@ public abstract class BaseTask extends BukkitRunnable {
             }
 
             m_job.setStatus(JobStatus.Preparing);
-            if (m_player.getMessaging(MessageSystem.TALKATIVE)) {
-                m_player.say(MessageType.BLOCK_PLACER_RUN.format(m_command));
+            if (getPlayer().getMessaging(MessageSystem.TALKATIVE)) {
+                getPlayer().say(MessageType.BLOCK_PLACER_RUN.format(getCommand()));
             }
-            m_blockPlacer.addTasks(m_player, m_job);
+            getBlockPlacer().addTasks(getPlayer(), m_job);
 
             if ((m_cancelableEditSession == null || !m_cancelableEditSession.isCanceled())
                     && (m_job.getStatus() != JobStatus.Canceled)) {
                 try {
                     result = doRun();
                 } catch (MaxChangedBlocksException ex) {
-                    m_player.say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
+                    getPlayer().say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
                 } catch (IllegalArgumentException ex) {
                     if (ex.getCause() instanceof SessionCanceled) {
-                        m_player.say(MessageType.BLOCK_PLACER_CANCELED.format());
+                        getPlayer().say(MessageType.BLOCK_PLACER_CANCELED.format());
                     }
                 }
             }
@@ -180,7 +182,7 @@ public abstract class BaseTask extends BukkitRunnable {
             }
 
             m_job.setStatus(JobStatus.Waiting);
-            m_blockPlacer.addTasks(m_player, m_job);
+            getBlockPlacer().addTasks(getPlayer(), m_job);
             doPostRun(result);
 
             postProcess();
@@ -194,6 +196,9 @@ public abstract class BaseTask extends BukkitRunnable {
             }
 
             super.run();
+        }
+        finally {
+            TaskContext.remove();
         }
     }
 
@@ -219,5 +224,26 @@ public abstract class BaseTask extends BukkitRunnable {
 
     private static boolean queueTestNoBatching(EditSession es) {
         return es.isQueueEnabled();
+    }
+
+    /**
+     * @return the m_command
+     */
+    public String getCommand() {
+        return m_command;
+    }
+
+    /**
+     * @return the m_player
+     */
+    public IPlayerEntry getPlayer() {
+        return m_player;
+    }
+
+    /**
+     * @return the m_blockPlacer
+     */
+    public IBlockPlacer getBlockPlacer() {
+        return m_blockPlacer;
     }
 }

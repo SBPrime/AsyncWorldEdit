@@ -73,8 +73,8 @@ public abstract class AsyncTask extends BaseTask {
 
     @Override
     protected void doPostRun(Object result) {
-        if (m_player.getMessaging(MessageSystem.TALKATIVE)) {
-            m_player.say(MessageType.BLOCK_PLACER_DONE.format((Integer) result));
+        if (getPlayer().getMessaging(MessageSystem.TALKATIVE)) {
+            getPlayer().say(MessageType.BLOCK_PLACER_DONE.format((Integer) result));
         }
     }
 

@@ -60,15 +60,32 @@ import com.sk89q.worldedit.regions.RegionIntersection;
 import com.sk89q.worldedit.regions.TransformRegion;
 import java.util.Collections;
 import java.util.Iterator;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
+import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacerPlayer;
+import org.primesoft.asyncworldedit.api.blockPlacer.ICountProvider;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.worldedit.ITaskContext;
+import org.primesoft.asyncworldedit.worldedit.TaskContext;
 
 /**
  *
  * @author SBPrime
  */
 public final class RegionIteratorFactory {
+    
     private RegionIteratorFactory() {}
     
     public static Iterator<BlockVector3> getIterator(Region region) {
+        final Iterator<BlockVector3> result = createIterator(region);
+        
+        if (result instanceof ICountProvider) {
+            initializeCountProvider((ICountProvider)result);            
+        }
+        
+        return result;
+    }
+
+    private static Iterator<BlockVector3> createIterator(Region region) {
         if ((region == null) || (region instanceof NullRegion)) {
             return Collections.emptyIterator();
         }
@@ -78,18 +95,35 @@ public final class RegionIteratorFactory {
         }
         
         if (region instanceof CylinderRegion ||
-            region instanceof Polygonal2DRegion ||
-            region instanceof RegionIntersection ||
-            region instanceof TransformRegion) {
+                region instanceof Polygonal2DRegion ||
+                region instanceof RegionIntersection ||
+                region instanceof TransformRegion) {
             //TODO: add in the future
             return null;
         }
         
         if (region instanceof ConvexPolyhedralRegion ||
-            region instanceof EllipsoidRegion) {
+                region instanceof EllipsoidRegion) {
             return new ChunkBaseRegionIterator((AbstractRegion)region);
         }
         
         return null;
+    }
+    
+    private static void initializeCountProvider(ICountProvider cp) {
+        final ITaskContext tc = TaskContext.get();
+        final IBlockPlacer bp = tc.getBlockPlacer();
+        final IPlayerEntry player = tc.getPlayer();
+        
+        if (bp == null || player == null) {
+            return;
+        }
+        
+        final IBlockPlacerPlayer bpp = bp.getPlayerEvents(player);
+        if (bpp == null) {
+            return;
+        }
+        
+        bpp.addCounterProvider(cp);
     }
 }

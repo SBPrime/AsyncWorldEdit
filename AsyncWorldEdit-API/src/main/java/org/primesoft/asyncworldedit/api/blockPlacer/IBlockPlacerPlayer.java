@@ -164,5 +164,22 @@ public interface IBlockPlacerPlayer {
      * @param timeDelta time spend
      */
     void updateSpeed(double blocks, long timeDelta);
+
+    /**
+     * Checks if the entry has any block operations queued
+     * @return 
+     */
+    boolean hasBlocks();
     
+    /**
+     * Gets the number of queued operations
+     * @return 
+     */
+    int getOperationCount();
+
+    void addCounterProvider(ICountProvider cp);
+
+    void removeCounterProvider(ICountProvider cp);
+    
+    int getAndResetCounterDelta();
 }
