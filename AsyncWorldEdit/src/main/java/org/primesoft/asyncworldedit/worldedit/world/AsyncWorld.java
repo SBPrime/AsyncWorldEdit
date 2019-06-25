@@ -171,14 +171,10 @@ public class AsyncWorld extends AbstractWorldWrapper {
     private final IChunkWatch m_chunkWatcher;
 
     private final static int CACHE_SIZE = 5000;
-    
-    private final Map<UUID, BlockState> m_blockCache = new LinkedHashMap<UUID, BlockState>(CACHE_SIZE + 1, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<UUID, BlockState> entry) {
-            return size() > CACHE_SIZE;
-        }        
-    };
-    
+
+    private final Map<UUID, BlockState> m_blockCache = new LruMap<>(CACHE_SIZE);
+
+    private volatile ChunkCache m_fullBlockCache = null;
 
     public AsyncWorld(World world, IPlayerEntry player) {
         super(world);
@@ -715,11 +711,15 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         return func.execute();
     }
-    
+
     private UUID toUUID(BlockVector3 pos) {
-        long p1 = (long)pos.getBlockX() << 32 | pos.getBlockY() & 0xFFFFFFFFL;
-        long p2 = (long)pos.getBlockZ();
-        
+        return toUUID(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+    }
+
+    private UUID toUUID(int x, int y, int z) {
+        long p1 = (long) x << 32 | y & 0xFFFFFFFFL;
+        long p2 = (long) z;
+
         return new UUID(p1, p2);
     }
 
@@ -731,8 +731,34 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BaseBlock getFullBlock(final BlockVector3 position) {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
-                () -> m_parent.getFullBlock(position), m_bukkitWorld, position);
+        int x = position.getBlockX();
+        int y = position.getBlockY();
+        int z = position.getBlockZ();
+
+        int cx = positionToChunk(x);
+        int cz = positionToChunk(z);
+
+        ChunkCache cc = m_fullBlockCache;
+        if (cc == null || !cc.isMatch(cx, cz)) {
+            cc = m_fullBlockCache = m_dispatcher.queueFastOperation(() -> {
+                int sx = positionToChunk(position.getBlockX()) * 16;
+                int sy = 0;
+                int sz = positionToChunk(position.getBlockZ()) * 16;
+
+                final BaseBlock[][][] data = new BaseBlock[16][256][16];
+                for (int xx = sx, i = 0; i < 16; i++, xx++) {
+                    for (int zz = sz, j = 0; j < 16; j++, zz++) {
+                        for (int yy = sy, k = 0; k < 256; k++, yy++) {
+                            data[i][k][j] = m_parent.getFullBlock(BlockVector3.at(xx, yy, zz));
+                        }
+                    }
+                }
+
+                return new ChunkCache(cx, cz, data);
+            });
+        }
+
+        return cc.getBlock(x, y, z);
     }
 
     @Override
@@ -745,7 +771,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
     @Override
     public boolean setBlock(final BlockVector3 position, final BlockStateHolder block) throws WorldEditException {
         m_blockCache.remove(toUUID(position));
-        
+
         final DataAsyncParams<BlockStateHolder> paramBlock = DataAsyncParams.extract(block);
         final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
 
@@ -848,5 +874,47 @@ public class AsyncWorld extends AbstractWorldWrapper {
     public BlockVector3 getSpawnPosition() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
                 () -> m_parent.getSpawnPosition());
+    }
+
+    private static class LruMap<TKey, TValue> extends LinkedHashMap<TKey, TValue> {
+
+        private final int m_size;
+
+        public LruMap(int size) {
+            super(size + 1, 0.75f, true);
+
+            m_size = size;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<TKey, TValue> entry) {
+            return size() > m_size;
+        }
+    };
+
+    private static class ChunkCache {
+
+        private final int m_cx;
+        private final int m_cz;
+
+        private final BaseBlock[][][] m_blocks;
+
+        public ChunkCache(int cx, int cz, BaseBlock[][][] blocks) {
+            m_cx = cx;
+            m_cz = cz;
+            m_blocks = blocks;
+        }
+
+        public boolean isMatch(int cx, int cz) {
+            return cx == m_cx && cz == m_cz;
+        }
+
+        public BaseBlock getBlock(int x, int y, int z) {
+            if (y < 0 || y > 255) {
+                return null;
+            }
+
+            return m_blocks[x - m_cx * 16][y][z - m_cz * 16];
+        }
     }
 }
