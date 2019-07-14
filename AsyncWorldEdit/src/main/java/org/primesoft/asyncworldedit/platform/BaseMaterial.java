@@ -60,5 +60,7 @@ public abstract class BaseMaterial implements IMaterial {
 
     @Override
     public abstract BlockStateHolder getBaseBlock();
-    
+
+    @Override
+    public abstract boolean isTileEntity();
 }

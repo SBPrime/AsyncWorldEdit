@@ -47,7 +47,10 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.primesoft.asyncworldedit.platform.api.IMaterial;
 import org.primesoft.asyncworldedit.platform.api.IMaterialLibrary;
 
@@ -57,6 +60,8 @@ import org.primesoft.asyncworldedit.platform.api.IMaterialLibrary;
  */
 public class BukkitMaterialLibrary implements IMaterialLibrary {
     private final static IMaterial AIR = new BukkitMaterial(Material.AIR);
+    
+    private final Map<String, IMaterial> m_cache = new ConcurrentHashMap<>();
 
     @Override
     public IMaterial getAIR() {
@@ -65,7 +70,23 @@ public class BukkitMaterialLibrary implements IMaterialLibrary {
 
     @Override
     public IMaterial getMaterial(String name) {
-        Material m = Material.getMaterial(name);
+        return m_cache.computeIfAbsent(name, this::createWrapper);
+    }
+    
+    private IMaterial createWrapper(String name) {
+        if (name == null) {
+            return AIR;
+        }
+                
+        if (name.contains(":")) {
+            if (!name.startsWith(NamespacedKey.MINECRAFT + ":")) {
+                throw new IllegalArgumentException("Expected '" + NamespacedKey.MINECRAFT + ":...' got '" + name + "'" );
+            }
+            
+            name = name.substring(10);
+        }
+        
+        Material m = Material.getMaterial(name.toUpperCase());
         if (m == null) {
             return null;
         }

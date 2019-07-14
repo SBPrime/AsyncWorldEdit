@@ -65,4 +65,10 @@ public interface IMaterial {
      * @return 
      */
     BlockStateHolder getBaseBlock();
+    
+    /**
+     * Is this a tile entity
+     * @return 
+     */
+    boolean isTileEntity();
 }

@@ -59,6 +59,8 @@ import org.primesoft.asyncworldedit.platform.BaseMaterial;
 public class BukkitMaterial extends BaseMaterial {
     private final Material m_material;
     
+    private Boolean m_isTileEntity;
+    
     public BukkitMaterial(Material material) {
         m_material = material;
     }
@@ -71,5 +73,14 @@ public class BukkitMaterial extends BaseMaterial {
     @Override
     public BlockStateHolder getBaseBlock() {
         return BukkitAdapter.adapt(m_material.createBlockData());
+    }
+
+    @Override
+    public boolean isTileEntity() {
+        if (m_isTileEntity == null) {
+            m_isTileEntity = TileEntityUtils.isTileEntity(m_material);
+        }
+        
+        return m_isTileEntity;
     }
 }

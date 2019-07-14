@@ -150,29 +150,13 @@ public class Reflection {
             Method method, String message, Object... args) {
         try {
             method.setAccessible(true);
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-
-            boolean accessible = modifiersField.isAccessible();
-            if (!accessible) {
-                modifiersField.setAccessible(true);
-            }
-
-            try {
-                method.invoke(instance, args);
-                return true;
-            } finally {
-                if (!accessible) {
-                    modifiersField.setAccessible(false);
-                }
-            }
+            method.invoke(instance, args);
         } catch (InvocationTargetException ex) {
             ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalArgumentException ex) {
             ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
             ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
-        } catch (NoSuchFieldException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (SecurityException ex) {
             ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (ClassCastException ex) {
