@@ -68,7 +68,7 @@ public class VersionChecker {
     /**
      * AWE plugin ID
      */
-    private static final int PLUGIN_ID = 9661;
+    private static final int PLUGIN_ID = 327;
 
     /**
      * Spigo API url
