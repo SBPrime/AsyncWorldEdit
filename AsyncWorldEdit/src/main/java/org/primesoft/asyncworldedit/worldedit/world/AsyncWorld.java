@@ -73,6 +73,7 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldedit.world.weather.WeatherType;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -103,7 +104,6 @@ import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.WorldAsyncTask;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.core.AsyncWorldEditCore;
 import org.primesoft.asyncworldedit.platform.api.IMaterial;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.utils.PositionHelper;
@@ -311,7 +311,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntryEx(this.getName(), paramBlock.getJobId(), v, func));
         }
-
+        
         return func.execute();
     }
 
@@ -867,6 +867,11 @@ public class AsyncWorld extends AbstractWorldWrapper {
         
         final IMaterial m = AwePlatform.getInstance().getPlatform().getMaterialLibrary().getMaterial(blockType.getId());
         return m != null && m.isTileEntity();
+    }
+
+    @Override
+    public Path getStoragePath() {
+        return m_parent.getStoragePath();
     }
 
     private static class LruMap<TKey, TValue> extends LinkedHashMap<TKey, TValue> {

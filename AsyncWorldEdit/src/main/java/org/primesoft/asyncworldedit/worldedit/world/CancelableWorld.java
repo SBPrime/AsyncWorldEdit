@@ -71,6 +71,7 @@ import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import com.sk89q.worldedit.world.weather.WeatherType;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -353,5 +354,10 @@ public class CancelableWorld extends AbstractWorldWrapper {
         }
         
         return getSpawnPosition();
+    }
+
+    @Override
+    public Path getStoragePath() {
+        return m_parent.getStoragePath();
     }
 }

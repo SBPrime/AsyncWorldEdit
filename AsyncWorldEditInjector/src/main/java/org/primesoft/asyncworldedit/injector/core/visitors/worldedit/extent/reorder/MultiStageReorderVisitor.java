@@ -47,8 +47,11 @@
  */
 package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.reorder;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -64,6 +67,7 @@ public class MultiStageReorderVisitor extends BaseClassVisitor {
     private final static String INTERFACE = Type.getInternalName(IMultiStageReorder.class);
 
     private String m_className;
+    private Set<String> m_fields = new HashSet<>();
 
     public MultiStageReorderVisitor(ClassVisitor classVisitor) {
         super(classVisitor);
@@ -78,6 +82,13 @@ public class MultiStageReorderVisitor extends BaseClassVisitor {
     }
 
     @Override
+    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        m_fields.add(name);
+        
+        return super.visitField(access, name, descriptor, signature, value);
+    }
+
+    @Override
     public void visitEnd() {
         MethodVisitor mv = super.visitMethod(Opcodes.ACC_PUBLIC, "reset", "()V", null, null);
         mv.visitCode();
@@ -88,6 +99,13 @@ public class MultiStageReorderVisitor extends BaseClassVisitor {
         mv.visitFieldInsn(Opcodes.GETFIELD, m_className, "stages", mapDescriptor);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, CLASS_HELPERS_DESCRIPTOR, "cleanMapValues", "(" + mapDescriptor + ")V", false);
 
+        if (m_fields.contains("containedBlocks")) {
+            // containedBlocks.clear();
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitFieldInsn(Opcodes.GETFIELD, m_className, "containedBlocks", Type.getDescriptor(Set.class));
+            mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, Type.getInternalName(Set.class), "clear", "()V", true);
+        }
+        
         // return;
         mv.visitInsn(Opcodes.RETURN);
 
