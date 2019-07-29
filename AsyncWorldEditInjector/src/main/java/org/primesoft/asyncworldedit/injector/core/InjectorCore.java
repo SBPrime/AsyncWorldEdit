@@ -82,6 +82,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.Scr
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SnapshotUtilCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.reorder.MultiStageReorderVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.regions.RegionVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.util.collection.LocatedBlockListVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.util.eventbus.EventBusVisitor;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
@@ -200,6 +201,7 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
             
+            modiffyClasses("com.sk89q.worldedit.util.collection.LocatedBlockList", c -> new LocatedBlockListVisitor(c));
             modiffyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", c -> new MultiStageReorderVisitor(c));
             
             // Regions

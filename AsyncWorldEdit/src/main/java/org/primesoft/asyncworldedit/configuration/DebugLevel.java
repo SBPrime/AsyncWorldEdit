@@ -51,7 +51,7 @@ import static org.primesoft.asyncworldedit.LoggerProvider.log;
 
 /**
  *
- * @author Sławomir Belter
+ * @author SBPrime
  */
 public enum DebugLevel {
     OFF(0),
