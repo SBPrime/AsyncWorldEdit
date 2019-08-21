@@ -65,7 +65,17 @@ public class StackValidator {
      * Operations entry
      */
     private static final StackValidatorEntry[] s_data = new StackValidatorEntry[]{
-        new StackValidatorEntry(".*sk89q.*EditSession", "", ".*"),
+        new StackValidatorEntry(".*sk89q.*EditSession", new String[] {
+            "center", "drainArea", "fillXZ", "fixLiquid", "makeCuboidFaces", "makeCuboidWalls",
+            "naturalizeCuboidBlocks", "overlayCuboidBlocks", "removeAbove", "removeBelow",
+            "removeNear", "replaceBlocks", "setBlocks", "stackCuboidRegion", "replaceBlocks",
+            "moveCuboidRegion", "moveRegion", "makeForest"
+        }, ".*") {
+            @Override
+            protected StackValidatorEntry.ProcessList[] getLists() {
+                return new ProcessList[]{ this::processMethodWhiteList, this::processMethodBlackList };
+            }            
+        },
         new StackValidatorEntry(".*sk89q.*ClipboardCommands", new String[]{"copy", "paste", "cut"}, ""),
         new StackValidatorEntry(".*sk89q.*SchematicCommands", "", ".*"),
         new StackValidatorEntry(".*sk89q.*RegionCommands", new String[]{"forest", "flora"}, ""),
@@ -212,42 +222,17 @@ public class StackValidator {
                 }
 
                 for (StackValidatorEntry entry : s_data) {
-                    Matcher m = entry.getClassPattern().matcher(element.getClassName());
-                    if (!m.matches()) {
-                        //No class match
-                        continue;
-                    }
-
-                    String name = element.getMethodName();
-                    for (Pattern pattern : entry.getMethodBlackList()) {
-                        m = pattern.matcher(name);
-                        if (m.matches()) {
-                            if (debugOn) {
-                                log("*");
-                                log("* Found on blacklist");
-                                log(String.format("* Class:\t\t%1$s", element.getClassName()));
-                                log(String.format("* Method:\t\t%1$s", name));
-                                log(String.format("* Class pattern:\t%1$s", entry.getClassPattern().pattern()));
-                                log(String.format("* Method pattern:\t%1$s", pattern.pattern()));
-                            }
-                            return false;
+                    Boolean result = entry.process(
+                            () -> element.getClassName(), 
+                            () -> element.getMethodName(),
+                            debugOn ? s -> log(s) : null);
+                    
+                    if (result != null) {
+                        if (result) {
+                            methodName.setValue(entry.getOperationName(element.getMethodName()));
                         }
-                    }
-
-                    for (Pattern pattern : entry.getMethodWhiteList()) {
-                        m = pattern.matcher(name);
-                        if (m.matches()) {
-                            methodName.setValue(entry.getOperationName(name));
-                            if (debugOn) {
-                                log("*");
-                                log("* Found on whitelist");
-                                log(String.format("* Class:\t\t%1$s", element.getClassName()));
-                                log(String.format("* Method:\t\t%1$s", name));
-                                log(String.format("* Class pattern:\t%1$s", entry.getClassPattern().pattern()));
-                                log(String.format("* Method pattern:\t%1$s", pattern.pattern()));
-                            }
-                            return true;
-                        }
+                        
+                        return result;
                     }
                 }
             }

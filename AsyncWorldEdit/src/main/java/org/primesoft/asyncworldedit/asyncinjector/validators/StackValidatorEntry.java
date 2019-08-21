@@ -47,7 +47,12 @@
  */
 package org.primesoft.asyncworldedit.asyncinjector.validators;
 
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
 
 /**
  * Stack trace validator entry
@@ -121,5 +126,79 @@ public class StackValidatorEntry {
 
     public StackValidatorEntry(String classRegexp) {
         this(classRegexp, new String[0], new String[0]);
+    }
+    
+    public Boolean process(
+            Supplier<String> className, 
+            Supplier<String> methodName,
+            Consumer<String> log) {
+        
+        final String cName = className.get();
+        final Matcher m = getClassPattern().matcher(cName);
+        if (!m.matches()) {
+            //No class match
+            return null;
+        }
+
+        String mName = methodName.get();
+        for (ProcessList entry : getLists()) {
+            Boolean r = entry.process(cName, mName, log);
+            if (r != null) {
+                return r;
+            }
+        }
+        
+        return null;
+        
+    }
+    
+    protected Boolean processMethodBlackList(
+            String className, 
+            String methodName, 
+            Consumer<String> l) {
+        return processMethodList(getMethodBlackList(), "Found on blacklist", false, 
+                className, methodName, l);
+    }
+    
+    protected Boolean processMethodWhiteList(
+            String className, 
+            String methodName, 
+            Consumer<String> l) {
+        return processMethodList(getMethodWhiteList(), "Found on whitelist", true, 
+                className, methodName, l);
+    }
+    
+    protected Boolean processMethodList(
+            Pattern[] patterns, 
+            String debugMsg, 
+            boolean result, 
+            String className,
+            String methodName,
+            Consumer<String> l) {
+        
+        for (Pattern pattern : patterns) {
+            Matcher m = pattern.matcher(methodName);
+            if (m.matches()) {
+                if (l != null) {
+                    l.accept("*");
+                    l.accept("* " + debugMsg);
+                    l.accept("* Class:\t\t" + className);
+                    l.accept("* Method:\t\t" + methodName);
+                    l.accept("* Class pattern:\t" + getClassPattern().pattern());
+                    l.accept("* Method pattern:\t" + pattern.pattern());
+                }
+                return result;
+            }
+        }
+        return null;
+    }
+
+    protected ProcessList[] getLists() {
+        return new ProcessList[]{ this::processMethodBlackList, this::processMethodWhiteList };
+    }
+    
+    @FunctionalInterface
+    public interface ProcessList {
+        Boolean process(String className, String methodName, Consumer<String> log);
     }
 }

@@ -64,9 +64,11 @@ import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BiomeType;
+import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -900,103 +902,5 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         });
 
         return 0;
-    }
-
-    //--------------------------------------------------------------------------//
-    //-- ASYNCED OPERATIONS USING OPERATIONS -----------------------------------//
-    //--------------------------------------------------------------------------//
-    @Override
-    public int center(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return super.center(region, pattern); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int drainArea(BlockVector3 origin, double radius) throws MaxChangedBlocksException {
-        return super.drainArea(origin, radius); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int fillXZ(BlockVector3 origin, BlockStateHolder block, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
-        return super.fillXZ(origin, block, radius, depth, recursive); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int fillXZ(BlockVector3 origin, Pattern pattern, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
-        return super.fillXZ(origin, pattern, radius, depth, recursive); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int fixLiquid(BlockVector3 origin, double radius, BlockType fluid) throws MaxChangedBlocksException {
-        return super.fixLiquid(origin, radius, fluid); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int makeCuboidFaces(Region region, BlockStateHolder block) throws MaxChangedBlocksException {
-        return super.makeCuboidFaces(region, block); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int makeCuboidFaces(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return super.makeCuboidFaces(region, pattern); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int makeCuboidWalls(Region region, BlockStateHolder block) throws MaxChangedBlocksException {
-        return super.makeCuboidWalls(region, block); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int makeCuboidWalls(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return super.makeCuboidWalls(region, pattern); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int naturalizeCuboidBlocks(Region region) throws MaxChangedBlocksException {
-        return super.naturalizeCuboidBlocks(region); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int overlayCuboidBlocks(Region region, BlockStateHolder block) throws MaxChangedBlocksException {
-        return super.overlayCuboidBlocks(region, block); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int overlayCuboidBlocks(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return super.overlayCuboidBlocks(region, pattern); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int removeAbove(BlockVector3 position, int apothem, int height) throws MaxChangedBlocksException {
-        return super.removeAbove(position, apothem, height); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int removeBelow(BlockVector3 position, int apothem, int height) throws MaxChangedBlocksException {
-        return super.removeBelow(position, apothem, height); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int removeNear(BlockVector3 position, Mask mask, int apothem) throws MaxChangedBlocksException {
-        return super.removeNear(position, mask, apothem); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int replaceBlocks(Region region, Mask mask, Pattern pattern) throws MaxChangedBlocksException {
-        return super.replaceBlocks(region, mask, pattern); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int setBlocks(Region region, BlockStateHolder block) throws MaxChangedBlocksException {
-        return super.setBlocks(region, block); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int setBlocks(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        return super.setBlocks(region, pattern); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int stackCuboidRegion(Region region, BlockVector3 dir, int count, boolean copyAir) throws MaxChangedBlocksException {
-        return super.stackCuboidRegion(region, dir, count, copyAir); //To change body of generated methods, choose Tools | Templates.
     }
 }
