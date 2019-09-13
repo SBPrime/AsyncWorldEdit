@@ -61,7 +61,6 @@ import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
  * @author SBPrime
  */
 public class LocatedBlockListVisitor extends BaseClassVisitor {
-    private final SimpleValidator m_getMethod = new SimpleValidator("get not found");
     private String m_getSignature;
     private String[] m_getExceptions;
     private String m_cls;
@@ -84,7 +83,6 @@ public class LocatedBlockListVisitor extends BaseClassVisitor {
             
             m_getSignature = signature;
             m_getExceptions = exceptions;
-            m_getMethod.set();
             
             return null;
         }
@@ -103,7 +101,6 @@ public class LocatedBlockListVisitor extends BaseClassVisitor {
     
     @Override
     public void validate() throws RuntimeException {
-        m_getMethod.validate();
     }
 
     private void overrideGet() {

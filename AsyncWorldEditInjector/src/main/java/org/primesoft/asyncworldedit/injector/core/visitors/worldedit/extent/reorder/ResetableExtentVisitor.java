@@ -45,12 +45,80 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.injected.extent.reorder;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.reorder;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
+import org.primesoft.asyncworldedit.injector.injected.extent.reorder.IResetable;
 
 /**
  *
  * @author SBPrime
  */
-public interface IMultiStageReorder {
-    void reset();
+public class ResetableExtentVisitor extends BaseClassVisitor {
+
+    private final static String INTERFACE = Type.getInternalName(IResetable.class);
+
+    private String m_className;
+    private Set<String> m_fields = new HashSet<>();
+
+    public ResetableExtentVisitor(ClassVisitor classVisitor) {
+        super(classVisitor);
+    }
+
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        m_className = name;
+
+        super.visit(version, access, name, signature, superName, 
+                injectInterface(interfaces, INTERFACE));
+    }
+
+    @Override
+    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        m_fields.add(name);
+        
+        return super.visitField(access, name, descriptor, signature, value);
+    }
+
+    @Override
+    public void visitEnd() {
+        MethodVisitor mv = super.visitMethod(Opcodes.ACC_PUBLIC, "reset", "()V", null, null);
+        mv.visitCode();
+
+        if (m_fields.contains("containedBlocks")) {
+            // containedBlocks.clear();
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitFieldInsn(Opcodes.GETFIELD, m_className, "containedBlocks", Type.getDescriptor(Set.class));
+            mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, Type.getInternalName(Set.class), "clear", "()V", true);
+        }
+        
+        if (m_fields.contains("stages")) {
+            // Helpers.cleanMapValues(stages);
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            final String mapDescriptor = Type.getDescriptor(Map.class);
+            mv.visitFieldInsn(Opcodes.GETFIELD, m_className, "stages", mapDescriptor);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, CLASS_HELPERS_DESCRIPTOR, "cleanMapValues", "(" + mapDescriptor + ")V", false);
+        }
+        
+        // return;
+        mv.visitInsn(Opcodes.RETURN);
+
+        mv.visitMaxs(1, 1);
+        mv.visitEnd();
+
+        super.visitEnd();
+    }
+
+    @Override
+    public void validate() throws RuntimeException {
+    }
+
 }

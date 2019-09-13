@@ -78,6 +78,7 @@ import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import javax.annotation.Nullable;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
@@ -95,7 +96,6 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.events.EditSessionLimitChanged;
-import org.primesoft.asyncworldedit.injector.injected.extent.reorder.IMultiStageReorder;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -108,6 +108,7 @@ import org.primesoft.asyncworldedit.worldedit.history.changeset.MemoryMonitorCha
 import org.primesoft.asyncworldedit.worldedit.history.changeset.NullChangeSet;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.ThreadSafeChangeSet;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
+import org.primesoft.asyncworldedit.injector.injected.extent.reorder.IResetable;
 
 /**
  *
@@ -191,7 +192,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
      */
     protected final IAsyncWorldEditCore m_aweCore;
 
-    private IMultiStageReorder m_multiStageReorder;
+    private final List<IResetable> m_resetable = new LinkedList<>();
 
     /**
      * Is the class fully initialized
@@ -296,8 +297,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         injectChangeSet(extentList, playerEntry, core);
 
         for (Extent e : extentList) {
-            if (e instanceof MultiStageReorder) {
-                m_multiStageReorder = (IMultiStageReorder) e;
+            if (e instanceof IResetable) {
+                m_resetable.add((IResetable) e);
             }
         }
     }
@@ -632,9 +633,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         boolean queued = isQueueEnabled();
         super.flushSession();
 
-        if (m_multiStageReorder != null) {
-            m_multiStageReorder.reset();
-        }
+        m_resetable.forEach(IResetable::reset);
 
         m_blocksQueued = 0;
         if (queued) {
@@ -654,9 +653,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
                 m_blocksQueued = 0;
                 super.flushSession();
 
-                if (m_multiStageReorder != null) {
-                    m_multiStageReorder.reset();
-                }
+                m_resetable.forEach(IResetable::reset);
             }
         }
     }

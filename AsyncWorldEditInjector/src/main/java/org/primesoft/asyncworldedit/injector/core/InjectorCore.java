@@ -80,7 +80,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.Reg
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SchematicCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.ScriptingCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SnapshotUtilCommandsVisitor;
-import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.reorder.MultiStageReorderVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.reorder.ResetableExtentVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.regions.RegionVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.util.collection.LocatedBlockListVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.util.eventbus.EventBusVisitor;
@@ -202,7 +202,8 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
             
             modiffyClasses("com.sk89q.worldedit.util.collection.LocatedBlockList", c -> new LocatedBlockListVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", c -> new MultiStageReorderVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", c -> new ResetableExtentVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", c -> new ResetableExtentVisitor(c));
             
             // Regions
             modiffyClasses("com.sk89q.worldedit.regions.AbstractRegion", c -> new RegionVisitor(c));
