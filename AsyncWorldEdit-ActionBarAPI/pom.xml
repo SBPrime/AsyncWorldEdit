@@ -7,12 +7,12 @@
     <artifactId>AsyncWorldEdit-ActionBarAPI</artifactId>
 
     <version>${global.awe.version}</version>
-    
+
     <parent>
         <groupId>org.primesoft.asyncworldedit</groupId>
         <artifactId>AsyncWorldEdit_AllInOne</artifactId>
         <version>${global.awe.version}</version>
-        <relativePath>..</relativePath>    
+        <relativePath>..</relativePath>
     </parent>
 
     <packaging>jar</packaging>
@@ -21,6 +21,50 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>filter-src</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${basedir}/src/main/resources-templates</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/resources-templates</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>target/generated-sources/resources-templates</directory>
+                                </resource>                                
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>
