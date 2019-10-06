@@ -485,6 +485,8 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
         } else if (name.equalsIgnoreCase(Commands.COMMAND_MESSAGES)) {
             doMessages(player, args);
             return true;
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_DEBUG) && doDebug(player, args)) {
+            return true;
         }
 
         return Help.ShowHelp(player, null);
@@ -561,7 +563,7 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
             return;
         }
 
-        MessagesCommand.Execte(this, player, args);
+        MessagesCommand.execte(this, player, args);
     }
 
     /**
@@ -576,7 +578,7 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
             return;
         }
 
-        ToggleCommand.Execte(this, player, args);
+        ToggleCommand.execte(this, player, args);
     }
 
     /**
@@ -591,7 +593,7 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
             return;
         }
 
-        UndoCommand.Execte(this, player, args);
+        UndoCommand.execte(this, player, args);
     }
 
     /**
@@ -606,7 +608,7 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
             return;
         }
 
-        SpeedCommand.Execte(this, player, args);
+        SpeedCommand.execte(this, player, args);
     }
 
     /**
@@ -621,7 +623,7 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
             return;
         }
 
-        PurgeCommand.Execte(this, player, args);
+        PurgeCommand.execte(this, player, args);
     }
 
     /**
@@ -636,7 +638,7 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
             return;
         }
 
-        JobsCommand.Execte(this, player, args);
+        JobsCommand.execte(this, player, args);
     }
 
     /**
@@ -651,6 +653,16 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
             return;
         }
 
-        CancelCommand.Execte(this, player, args);
+        CancelCommand.execte(this, player, args);
+    }
+    
+    /**
+     * Perform the debug command
+     *
+     * @param player
+     * @param args
+     */
+    private boolean doDebug(IPlayerEntry player, String[] args) {
+        return DebugCommand.execte(this, player, args);
     }
 }

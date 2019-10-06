@@ -72,8 +72,8 @@ public class JobsCommand {
      * @param player
      * @param args
      */
-    public static void Execte(IAsyncWorldEditCore sender, IPlayerEntry player, String[] args) {
-        final List<String> lines = new ArrayList<String>();
+    public static void execte(IAsyncWorldEditCore sender, IPlayerEntry player, String[] args) {
+        final List<String> lines = new ArrayList<>();
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_JOBS);
             return;

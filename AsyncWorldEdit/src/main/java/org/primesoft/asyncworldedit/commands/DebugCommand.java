@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -47,21 +47,15 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
-import org.primesoft.asyncworldedit.core.Help;
-import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.permissions.Permission;
-import org.primesoft.asyncworldedit.platform.api.IScheduler;
-import org.primesoft.asyncworldedit.strings.MessageType;
-import org.primesoft.asyncworldedit.utils.BukkitRunnable;
-import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 
 /**
+ * Debug and diagnosis command
  *
  * @author SBPrime
  */
-public class PurgeCommand {
+public class DebugCommand {
 
     /**
      * Execute the command
@@ -69,65 +63,9 @@ public class PurgeCommand {
      * @param sender
      * @param player
      * @param args
+     * @return 
      */
-    public static void execte(IAsyncWorldEditCore sender, final IPlayerEntry player, String[] args) {
-        if (args.length < 1 || args.length > 2) {
-            Help.ShowHelp(player, Commands.COMMAND_PURGE);
-            return;
-        }
-
-        final IPlayerEntry playerEntry;
-        if (args.length == 1) {
-            if (!player.isInGame()) {
-                player.say(MessageType.INGAME.format());
-                return;
-            }
-            if (!player.isAllowed(Permission.PURGE_SELF)) {
-                player.say(MessageType.NO_PERMS.format());
-                return;
-            }
-
-            playerEntry = player;
-        } else {
-            String arg = args[1];
-            if (arg.startsWith("u:")) {
-                if (!player.isAllowed(Permission.PURGE_OTHER)) {
-                    player.say(MessageType.NO_PERMS.format());
-                    return;
-                }
-
-                String name = arg.substring(2);
-                playerEntry = sender.getPlayerManager().getPlayer(name);
-                if (!playerEntry.isPlayer()) {
-                    player.say(MessageType.PLAYER_NOT_FOUND.format());
-                    return;
-                }
-            } else {
-                if (!arg.equalsIgnoreCase("all")) {
-                    Help.ShowHelp(player, Commands.COMMAND_PURGE);
-                    return;
-                }
-
-                if (!player.isAllowed(Permission.PURGE_ALL)) {
-                    player.say(MessageType.NO_PERMS.format());
-                    return;
-                }
-
-                playerEntry = null;
-            }
-        }
-
-        final IBlockPlacer bp = sender.getBlockPlacer();
-        final IScheduler scheduler = sender.getPlatform().getScheduler();
-
-        SchedulerUtils.runTaskAsynchronously(scheduler, new BukkitRunnable() {
-            @Override
-            public void run() {
-                int size = playerEntry != null ? bp.purge(playerEntry) : bp.purgeAll();
-                player.say(MessageType.CMD_PURGE_REMOVED.format(Integer.toString(size)));
-                super.run();
-            }
-
-        });
+    public static boolean execte(IAsyncWorldEditCore sender, final IPlayerEntry player, String[] args) {
+        return false;        
     }
 }

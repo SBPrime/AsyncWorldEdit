@@ -48,7 +48,6 @@
 package org.primesoft.asyncworldedit.commands;
 
 import org.primesoft.asyncworldedit.core.Help;
-import org.primesoft.asyncworldedit.*;
 import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
@@ -63,7 +62,7 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  */
 public class MessagesCommand {
 
-    public static void Execte(IAsyncWorldEditCore sender, IPlayerEntry player, String[] args) {
+    public static void execte(IAsyncWorldEditCore sender, IPlayerEntry player, String[] args) {
         if (args.length < 3 || args.length > 4) {
             Help.ShowHelp(player, Commands.COMMAND_MESSAGES);
             return;

@@ -62,4 +62,5 @@ public final class Commands {
     public final static String COMMAND_UNDO = "Undo";
     public final static String COMMAND_MESSAGES = "Messages";
     public final static String COMMAND_SPEED = "Speed";
+    public final static String COMMAND_DEBUG = "Debug";
 }

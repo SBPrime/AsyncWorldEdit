@@ -48,7 +48,6 @@
 package org.primesoft.asyncworldedit.commands;
 
 import org.primesoft.asyncworldedit.core.Help;
-import org.primesoft.asyncworldedit.*;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
@@ -63,7 +62,7 @@ import org.primesoft.asyncworldedit.utils.IntUtils;
  */
 public class SpeedCommand {
 
-    public static void Execte(IAsyncWorldEditCore sender, IPlayerEntry player, String[] args) {
+    public static void execte(IAsyncWorldEditCore sender, IPlayerEntry player, String[] args) {
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_SPEED);
             return;

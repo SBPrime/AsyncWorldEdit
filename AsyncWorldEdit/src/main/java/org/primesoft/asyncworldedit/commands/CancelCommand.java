@@ -71,7 +71,7 @@ public class CancelCommand {
      * @param player
      * @param args
      */
-    public static void Execte(IAsyncWorldEditCore sender, final IPlayerEntry player, String[] args) {
+    public static void execte(IAsyncWorldEditCore sender, final IPlayerEntry player, String[] args) {
         if (args.length < 2 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_CANCEL);
             return;

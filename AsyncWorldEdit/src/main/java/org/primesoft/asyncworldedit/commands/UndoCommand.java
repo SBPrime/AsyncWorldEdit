@@ -60,7 +60,7 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  */
 public class UndoCommand {
 
-    public static void Execte(IAsyncWorldEditCore sender, IPlayerEntry player, String[] args) {
+    public static void execte(IAsyncWorldEditCore sender, IPlayerEntry player, String[] args) {
         if (args.length < 1 || args.length > 3) {
             Help.ShowHelp(player, Commands.COMMAND_UNDO);
             return;
