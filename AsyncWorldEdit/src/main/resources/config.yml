@@ -12,6 +12,8 @@ awe:
     queue-max-size-hard: 10000000
     #maximum number of blocks on the global queue before unlocking it
     queue-max-size-soft: 5000000
+    #how many datapoints should be included in the BPS calculation (default: 5)
+    bps-avg-data-points: 5
   memory:
     #minimum free memory (in kilobytes)
     #When the server memory runs below this value all operations are going to cancel

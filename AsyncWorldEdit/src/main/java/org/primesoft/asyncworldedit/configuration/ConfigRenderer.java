@@ -65,6 +65,8 @@ public class ConfigRenderer {
     private final int m_queueTalkInterval;
 
     private final int m_cooldown;
+    
+    private final int m_bpsAverage;
 
     /**
      * Get maximum size of the queue
@@ -95,6 +97,10 @@ public class ConfigRenderer {
     public  int getQueueTalkCooldown() {
         return m_cooldown;
     }
+    
+    public int bpsAveragePoints() {
+        return m_bpsAverage;
+    }
 
     public ConfigRenderer(IConfigurationSection renderSection) {
         if (renderSection == null) {
@@ -103,13 +109,18 @@ public class ConfigRenderer {
             m_cooldown = 5 * 1000;
             m_queueMaxSizeHard = 10000000;
             m_queueMaxSizeSoft = 5000000;
+            m_bpsAverage = 5;
         } else {
             m_interval = renderSection.getInt("interval", 15);
             m_queueTalkInterval = renderSection.getInt("talk-interval", 10);
             m_cooldown = renderSection.getInt("talk-cooldown", 5) * 1000;
             m_queueMaxSizeHard = renderSection.getInt("queue-max-size-hard", 10000000);
             m_queueMaxSizeSoft = renderSection.getInt("queue-max-size-soft", 5000000);
+            m_bpsAverage = renderSection.getInt("bps-avg-data-points", 5);
 
+            if (m_bpsAverage < 2) {
+                log("Warinig: Not enough data points to properly calculate the BPS. Value: " + m_bpsAverage + " minimum: 2");
+            }
             if (m_queueMaxSizeHard <= 0) {
                 log("Warinig: Block queue is disabled!");
             }

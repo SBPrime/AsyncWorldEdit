@@ -48,7 +48,6 @@
 package org.primesoft.asyncworldedit.configuration.update;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -74,9 +73,10 @@ class ConfigUpdater_v22_v23 extends BaseConfigurationUpdater {
             return -1;
         }
         
-        updateClassScanner(mainSection);
-        
+        updateClassScanner(mainSection);        
         updatePhysicsFreeze(mainSection);
+        setIfNone(getOrCreate(mainSection, "rendering"), "bps-avg-data-points", 5);
+        
         mainSection.set("version", 23);
 
         return 23;
@@ -140,6 +140,5 @@ class ConfigUpdater_v22_v23 extends BaseConfigurationUpdater {
         }                
         
         physicsFreeze.set("blackList", entries);
-    }
-    
+    }    
 }

@@ -62,6 +62,7 @@ import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RedoJob;
 import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.strings.MessageType;
 
 /**
@@ -73,10 +74,6 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
     private final static Object ITEM = new Object();
     private final Map<ICountProvider, Object> m_otherCountSources = new ConcurrentHashMap<>();
 
-    /**
-     * Number of samples used in AVG count
-     */
-    private final int AVG_SAMPLES = 5;
     /**
      * The queue
      */
@@ -177,17 +174,21 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public void updateSpeed(double blocks, long timeDelta) {
+        int samples = ConfigProvider.renderer().bpsAveragePoints();
+        if (samples < 1) {
+            return;
+        }
         if (timeDelta == 0) {
             if (blocks > 0) {
                 return;
             }
             
-            m_speed = (m_speed * (AVG_SAMPLES - 1)) / AVG_SAMPLES;
+            m_speed = (m_speed * (samples - 1)) / samples;
             
             return;
         }
         double delta = timeDelta / 1000.0;
-        m_speed = (m_speed * (AVG_SAMPLES - 1) + (blocks / delta)) / AVG_SAMPLES;
+        m_speed = (m_speed * (samples - 1) + (blocks / delta)) / samples;
     }
 
     /**
