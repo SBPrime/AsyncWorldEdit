@@ -79,8 +79,6 @@ public class ConfigProvider {
 
     private static EnumSet<WorldeditOperations> m_disabledOperations;
 
-    private static boolean m_physicsFreez;
-
     private static File m_pluginFolder;
 
     private static String m_stringsFile;
@@ -151,6 +149,11 @@ public class ConfigProvider {
      * The overrides for AWE mode
      */
     private static ConfigOverrides m_overrides;
+    
+    /**
+     * The physics freeze configuration
+     */
+    private static ConfigPhysicsFreeze m_physicsFreeze;
         
     /**
      * Get the undo configuration
@@ -175,6 +178,14 @@ public class ConfigProvider {
      */
     public static ConfigOverrides overrides() {
         return m_overrides;
+    }
+    
+    /**
+     * Get the physics freeze configuration
+     * @return 
+     */
+    public static ConfigPhysicsFreeze physicsFreeze() {
+        return m_physicsFreeze;
     }
     
     /**
@@ -284,11 +295,6 @@ public class ConfigProvider {
         return m_isConfigUpdate;
     }
 
-
-    public static boolean isPhysicsFreezEnabled() {
-        return m_physicsFreez;
-    }
-
     public static String getStringsFile() {
         return m_stringsFile;
     }
@@ -342,11 +348,11 @@ public class ConfigProvider {
 
         m_configVersion = mainSection.getString("version", "?");
         m_checkUpdate = mainSection.getBoolean("checkVersion", true);
-        m_isConfigUpdate = configVersion == ConfigurationUpdater.CONFIG_VERSION;
-        m_physicsFreez = mainSection.getBoolean("physicsFreez", true);
+        m_isConfigUpdate = configVersion == ConfigurationUpdater.CONFIG_VERSION;        
         m_stringsFile = mainSection.getString("strings", "");
         m_forceFlushBlockCount = mainSection.getInt("forceFlushBlocks", 1000);
 
+        m_physicsFreeze = new ConfigPhysicsFreeze(mainSection.getConfigurationSection("physicsFreeze"));
         m_overrides = new ConfigOverrides(mainSection.getConfigurationSection("overrides"));
         m_configMemory = new ConfigMemory(mainSection.getConfigurationSection("memory"));
         m_configRenderer = new ConfigRenderer(mainSection.getConfigurationSection("rendering"));

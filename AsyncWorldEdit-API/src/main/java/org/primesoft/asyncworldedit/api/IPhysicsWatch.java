@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit.api;
 
 import com.sk89q.worldedit.math.BlockVector3;
+import java.util.function.Function;
 
 /**
  * This class is responsible for freezing all physics in edited regions
@@ -69,7 +70,14 @@ public interface IPhysicsWatch {
     /**
      * Enable the physics watcher
      */
+    @Deprecated
     void enable();
+    
+    /**
+     * Enable the physics watcher
+     * @param check
+     */
+    void enable(Function<String, Boolean> check);
 
     /**
      * Disable the physics watcher

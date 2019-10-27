@@ -408,8 +408,8 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
     private void initializeConfig() {
         m_blockPlacer.loadConfig();
         m_cron.loadConfig();
-        if (ConfigProvider.isPhysicsFreezEnabled()) {
-            m_platform.getPhysicsWatcher().enable();
+        if (ConfigProvider.physicsFreeze().isEnabled()) {
+            m_platform.getPhysicsWatcher().enable(ConfigProvider.physicsFreeze()::shouldFreeze);
         } else {
             m_platform.getPhysicsWatcher().disable();
         }

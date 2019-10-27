@@ -51,6 +51,7 @@ import com.sk89q.worldedit.math.BlockVector3;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * This class is responsible for freezing all physics in edited regions
@@ -63,6 +64,8 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      * Is physics watch enabled
      */
     protected boolean m_isEnabled;
+    
+    protected Function<String, Boolean> m_check = i -> true;
 
     /**
      * MTA mutex
@@ -87,8 +90,16 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      */
     @Override
     public void enable() {
-        m_isEnabled = true;
+        enable(i -> true);        
     }
+
+    @Override
+    public void enable(Function<String, Boolean> check) {
+        m_isEnabled = true;
+        m_check = check;
+    }
+    
+    
 
     /**
      * disable the physics freeze
@@ -183,9 +194,10 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      * @param x
      * @param y
      * @param z
+     * @param material
      * @return 
      */
-    protected boolean cancelEvent(String name, int x, int y, int z) {        
+    protected boolean cancelEvent(String name, int x, int y, int z, String material) {        
         final int delta = 1;
 
         synchronized (m_mutex) {
@@ -208,7 +220,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
 
                     for (int pz = z - delta; pz <= z + delta; pz++) {
                         if (zhash.containsKey(pz)) {
-                            return true;
+                            return m_check.apply(material);
                         }
                     }
                 }

@@ -48,6 +48,7 @@
 package org.primesoft.asyncworldedit.platform.bukkit;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -165,13 +166,14 @@ class BykkitPhysicsWatch extends PhysicsWatch implements IPhysicsWatch, Listener
             return;
         }
         
+        String material = block.getType().getKey().toString();
         Location location = block.getLocation();
         String name = location.getWorld().getName();
         int x = location.getBlockX();
         int y = location.getBlockY();
         int z = location.getBlockZ();
         
-        if (cancelEvent(name, x, y, z)) {
+        if (cancelEvent(name, x, y, z, material)) {
             event.setCancelled(true);
         }
     }
