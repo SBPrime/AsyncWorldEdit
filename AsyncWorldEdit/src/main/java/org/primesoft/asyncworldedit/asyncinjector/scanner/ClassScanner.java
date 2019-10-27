@@ -104,7 +104,8 @@ public abstract class ClassScanner implements IClassScanner {
      * List of all filters
      */
     private final Map<IClassFilter, Object> m_filters = new ConcurrentHashMap<>();
-    
+
+    private final ConfigurableClassFilter m_configurableFilter = new ConfigurableClassFilter();
     
     private IClassScannerEntry[] m_blackList = new IClassScannerEntry[0];
     
@@ -383,6 +384,11 @@ public abstract class ClassScanner implements IClassScanner {
                 return true;
             }
         }
+        
+        if (!m_configurableFilter.accept(oClass, f)) {
+            return true;
+        }
+        
         return false;
     }
 
@@ -428,5 +434,9 @@ public abstract class ClassScanner implements IClassScanner {
         
         return (f.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
     }
-    
+
+    @Override
+    public void loadConfig() {
+        m_configurableFilter.loadConfig();
+    }    
 }

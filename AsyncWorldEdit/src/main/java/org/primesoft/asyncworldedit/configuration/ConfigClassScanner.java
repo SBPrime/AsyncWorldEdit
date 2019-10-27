@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,31 +45,35 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.api.inner;
+package org.primesoft.asyncworldedit.configuration;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import org.primesoft.asyncworldedit.api.classScanner.IClassScannerOptions;
+import java.util.Map;
+import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
  *
- * @author SBPrime
+ * @author Sławomir Belter
  */
-public interface IClassScanner extends IClassScannerOptions {
-    /**
-     * Initialize the class scanner
-     * @return
-     */
-    IClassScanner initialize();
-
-    /**
-     * Scan object (and all fields) for T
-     *
-     * @param types The types of classes to find
-     * @param o Object to find
-     * @return
-     */
-    List<IClassScannerResult> scan(Class<?>[] types, Object o);
-
-    void loadConfig();
+public class ConfigClassScanner {
+    private Map<String, String[]> m_blackList = new HashMap<>();
     
+    ConfigClassScanner(IConfigurationSection section) {
+        IConfigurationSection blackList = section.getConfigurationSection("blackList");
+        if (blackList != null) {
+            loadBlackList(blackList);
+        }
+    }
+    
+    public Map<String, String[]> getBlackList() { return Collections.unmodifiableMap(m_blackList); }
+
+    private void loadBlackList(IConfigurationSection section) {
+        for (String className : section.getSubNodes()) {
+            List<String> entries = section.getStringList(className);
+            
+            m_blackList.put(className, entries == null ? new String[0] : entries.toArray(new String[0]));
+        }
+    }
 }

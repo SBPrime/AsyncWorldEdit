@@ -154,6 +154,8 @@ public class ConfigProvider {
      * The physics freeze configuration
      */
     private static ConfigPhysicsFreeze m_physicsFreeze;
+    
+    private static ConfigClassScanner m_classScanner;
         
     /**
      * Get the undo configuration
@@ -178,6 +180,10 @@ public class ConfigProvider {
      */
     public static ConfigOverrides overrides() {
         return m_overrides;
+    }
+    
+    public static ConfigClassScanner classScanner() {
+        return m_classScanner;
     }
     
     /**
@@ -354,6 +360,7 @@ public class ConfigProvider {
 
         m_physicsFreeze = new ConfigPhysicsFreeze(mainSection.getConfigurationSection("physicsFreeze"));
         m_overrides = new ConfigOverrides(mainSection.getConfigurationSection("overrides"));
+        m_classScanner = new ConfigClassScanner(mainSection.getConfigurationSection("classScanner"));
         m_configMemory = new ConfigMemory(mainSection.getConfigurationSection("memory"));
         m_configRenderer = new ConfigRenderer(mainSection.getConfigurationSection("rendering"));
         m_configBlocksHub = new ConfigBlocksHub(mainSection.getConfigurationSection("blocksHub"));

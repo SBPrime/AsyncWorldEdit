@@ -413,6 +413,8 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
         } else {
             m_platform.getPhysicsWatcher().disable();
         }
+        
+        m_platform.getClassScanner().loadConfig();
     }
 
     /**
