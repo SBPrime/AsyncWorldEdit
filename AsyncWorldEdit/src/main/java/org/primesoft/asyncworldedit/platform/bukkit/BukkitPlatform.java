@@ -319,6 +319,7 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         }
 
         configuration.setDefaults(new MemoryConfiguration());
+        configuration.options().pathSeparator('•');
 
         return new BukkitConfiguration(m_plugin, configuration);
     }

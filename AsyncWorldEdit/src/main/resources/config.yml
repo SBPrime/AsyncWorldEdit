@@ -1,6 +1,6 @@
 awe:
   #Do not change
-  version: 22
+  version: 23
   rendering:
     #amount of time (in ticks) the server will place a chunk of blocks
     interval: 1
@@ -35,9 +35,57 @@ awe:
   #Use -1 to disable force flush.
   forceFlushBlocks: 10000
   #Check for updates
-  checkVersion: true
-  #Disable or enable blocks physics freeze when placing blocks
-  physicsFreez: true
+  checkVersion: true  
+  physicsFreeze:
+    #Disable or enable blocks physics freeze when placing blocks  
+    enabled: true
+    #List of block for witch the physics freeze will be disabled
+    blackList:
+    - "minecraft:acacia_stairs"
+    - "minecraft:andesite_stairs"
+    - "minecraft:birch_stairs"
+    - "minecraft:brick_stairs"
+    - "minecraft:cobblestone_stairs"
+    - "minecraft:dark_oak_stairs"
+    - "minecraft:dark_prismarine_stairs"
+    - "minecraft:diorite_stairs"
+    - "minecraft:end_stone_brick_stairs"
+    - "minecraft:granite_stairs"
+    - "minecraft:jungle_stairs"
+    - "minecraft:mossy_stone_brick_stairs"
+    - "minecraft:nether_brick_stairs"
+    - "minecraft:oak_stairs"
+    - "minecraft:polished_andesite_stairs"
+    - "minecraft:polished_diorite_stairs"
+    - "minecraft:polished_granite_stairs"
+    - "minecraft:prismarine_brick_stairs"
+    - "minecraft:prismarine_stairs"
+    - "minecraft:purpur_stairs"
+    - "minecraft:quartz_stairs"
+    - "minecraft:red_nether_brick_stairs"
+    - "minecraft:red_sandstone_stairs"
+    - "minecraft:sandstone_stairs"
+    - "minecraft:smooth_quartz_stairs"
+    - "minecraft:smooth_red_sandstone_stairs"
+    - "minecraft:smooth_sandstone_stairs"
+    - "minecraft:spruce_stairs"
+    - "minecraft:stone_brick_stairs"
+    - "minecraft:stone_stairs"
+  # The class scanner configuration
+  classScanner:
+    # List of classes that should be skipped by the class scanner
+    # Each entry is a regexp and it represents a single class that should be ignored.
+    blackList:
+        # If the entry contains no items (empty list) the entire class will be ignored (all fields)
+        net\.minecraft\..*: {}
+        org\.bukkit\..*: {}
+        org\.spigotmc\..*: {}
+        io\.netty\..*: {}
+        com\.sk89q\.worldedit\.function\.mask\.BlockMask:
+            # The list of fields (regexp) that will be ignored by the class scanner
+            - "blocks"
+        com\.sk89q\.worldedit\.extent\.reorder\.ChunkBatchingExtent:
+            - "batches"
   #File containing all the messages
   strings: "english.yml"
   messages:
