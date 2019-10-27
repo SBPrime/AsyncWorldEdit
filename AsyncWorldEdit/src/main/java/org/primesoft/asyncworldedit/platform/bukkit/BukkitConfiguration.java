@@ -75,6 +75,7 @@ class BukkitConfiguration extends BukkitConfigurationSection implements IConfigu
         ConfigurationOptions options = m_config.options();
         if (options instanceof FileConfigurationOptions) {
             FileConfigurationOptions fOptions = (FileConfigurationOptions) options;
+            fOptions.pathSeparator('•');
             fOptions.header(null);
             fOptions.copyHeader(true);
         }

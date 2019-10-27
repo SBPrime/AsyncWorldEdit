@@ -49,6 +49,7 @@ package org.primesoft.asyncworldedit.platform.bukkit;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -56,7 +57,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -312,14 +315,13 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
     @Override
     public IConfiguration getConfig() {
         m_plugin.saveDefaultConfig();
-
-        Configuration configuration = m_plugin.getConfig();
+               
+        Configuration configuration = loadConfig();
         if (configuration == null) {
             return null;
         }
 
         configuration.setDefaults(new MemoryConfiguration());
-        configuration.options().pathSeparator('•');
 
         return new BukkitConfiguration(m_plugin, configuration);
     }
@@ -399,5 +401,20 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
     @Override
     public void reloadConfig() {
         m_plugin.reloadConfig();
+    }
+
+    private Configuration loadConfig() {        
+        try {
+            YamlConfiguration config = new YamlConfiguration();
+            config.options().pathSeparator('•');
+            config.load(new InputStreamReader(m_plugin.getResource("config.yml"), "UTF-8"));
+            return config;
+        } catch (IOException ex) {
+            ExceptionHelper.printException(ex, "Unable to load configuration,");
+        } catch (InvalidConfigurationException ex) {
+            ExceptionHelper.printException(ex, "Unable to load configuration,");
+        }
+        
+        return null;
     }
 }
