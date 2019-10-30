@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,66 +45,60 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.asyncinjector.async;
 
-package org.primesoft.asyncworldedit.injector.classfactory;
-
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
-import java.util.Iterator;
-import java.util.UUID;
-import org.enginehub.piston.CommandManager;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
+import org.primesoft.asyncworldedit.api.utils.IActionEx;
+import org.primesoft.asyncworldedit.api.utils.IFuncEx;
+import org.primesoft.asyncworldedit.injector.classfactory.IDispatcher;
+import org.primesoft.asyncworldedit.utils.InOutParam;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
-    /**
-     * Get the operation processor
-     * @return 
-     */
-    IOperationProcessor getOperationProcessor();
+public class AsyncDispatcher implements IDispatcher {
+
+    private final IAsyncWorldEditCore m_aweCore;
     
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
-    
-    /**
-     * Get the dispather
-     * @return 
-     */
-    IDispatcher getDisatcher();
-    
-    /**
-     * Create new instance of the clipboard
-     * @param parent
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Clipboard parent, Region region);
+    AsyncDispatcher(IAsyncWorldEditCore aweCore) {
+        m_aweCore = aweCore;
+        
+    }
+   
+    @Override
+    public <TEx extends Exception> void execute(IActionEx<TEx> a) throws TEx {
+        InOutParam<TEx> ex = InOutParam.Out();        
+        m_aweCore.getTaskDispatcher().queueFastOperation(() -> {
+            try {
+                a.execute();
+            } catch (Exception e) {
+                ex.setValue((TEx)e);
+            }
+        });
+        
+        if (ex.isSet()) {
+            throw ex.getValue();
+        }
+    }
 
-    /**
-     * Handle the exception from operation
-     * @param ex The exception to hanlde 
-     * @param name The operation name
-     */
-    void handleError(WorldEditException ex, String name);
+    @Override
+    public <TEx extends Exception, R> R execute(IFuncEx<R, TEx> a) throws TEx {
+        InOutParam<TEx> ex = InOutParam.Out();
+        R result = m_aweCore.getTaskDispatcher().queueFastOperation(() -> {
+            try {
+                return a.execute();
+            } catch (Exception e) {
+                ex.setValue((TEx)e);
+                return null;
+            }
+        });
+        
+        if (ex.isSet()) {
+            throw ex.getValue();
+        }
+        
+        return result;
+    }
 
-     IPlayerEntry getPlayer(UUID uniqueId);
-     
-     World wrapWorld(World world, IPlayerEntry player);
-
-    CommandManager wrapCommandManager(Object sender, CommandManager cm);
-
-    ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent);
-
-    Iterator<BlockVector3> getRegionIterator(Region region);
 }

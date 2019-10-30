@@ -45,6 +45,7 @@ package org.primesoft.asyncworldedit.api.utils;
  * @author SBPrime
  * @param <T> Function result type
  */
+@FunctionalInterface
 public interface IFunc<T> {
     T execute();
 }

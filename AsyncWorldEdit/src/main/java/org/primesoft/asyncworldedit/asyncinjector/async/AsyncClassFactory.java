@@ -64,6 +64,7 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.excommands.commands.ExRegionCommandsRegistration;
 import org.primesoft.asyncworldedit.excommands.commands.ExUtilityCommandsRegistration;
+import org.primesoft.asyncworldedit.injector.classfactory.IDispatcher;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
@@ -84,10 +85,13 @@ public class AsyncClassFactory extends BaseClassFactory {
     private AsyncOperationProcessor m_operationProcessor;
 
     private AsyncJobProcessor m_jobProcessor;
+    
+    private AsyncDispatcher m_dispatcher;
 
     private final IAsyncWorldEditCore m_aweCore;
 
     private final Object m_mtaMutex = new Object();
+        
 
     public AsyncClassFactory(IAsyncWorldEditCore aweCore) {
         m_aweCore = aweCore;        
@@ -116,6 +120,11 @@ public class AsyncClassFactory extends BaseClassFactory {
     public IJobProcessor getJobProcessor() {
         return lazyGet(() -> new AsyncJobProcessor(m_aweCore), () -> m_jobProcessor, i -> m_jobProcessor = i);
     }
+    
+    @Override
+    public IDispatcher getDisatcher() {
+        return lazyGet(() -> new AsyncDispatcher(m_aweCore), () -> m_dispatcher, i -> m_dispatcher = i);
+    }        
 
     @Override
     public void handleError(WorldEditException ex, String name) {
@@ -152,5 +161,5 @@ public class AsyncClassFactory extends BaseClassFactory {
     @Override
     public Iterator<BlockVector3> getRegionIterator(Region region) {
         return RegionIteratorFactory.getIterator(region);
-    }        
+    }
 }

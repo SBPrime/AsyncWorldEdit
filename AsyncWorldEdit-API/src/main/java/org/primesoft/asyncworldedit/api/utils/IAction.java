@@ -45,6 +45,7 @@ package org.primesoft.asyncworldedit.api.utils;
  *
  * @author SBPrime
  */
+@FunctionalInterface
 public interface IAction {
     void execute();
 }

@@ -73,7 +73,6 @@ import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.utils.InOutParam;
 import org.primesoft.asyncworldedit.utils.Pair;
 import org.primesoft.asyncworldedit.utils.Reflection;
-import org.primesoft.asyncworldedit.utils.RequestCotext;
 import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.utils.WaitFor;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;

@@ -60,6 +60,7 @@ import com.sk89q.worldedit.command.tool.DistanceWand;
 import com.sk89q.worldedit.command.tool.FloatingTreeRemover;
 import com.sk89q.worldedit.command.tool.FloodFillTool;
 import com.sk89q.worldedit.command.tool.LongRangeBuildTool;
+import com.sk89q.worldedit.command.tool.NavigationWand;
 import com.sk89q.worldedit.command.tool.QueryTool;
 import com.sk89q.worldedit.command.tool.RecursivePickaxe;
 import com.sk89q.worldedit.command.tool.SinglePickaxe;
@@ -94,7 +95,7 @@ public class ToolWrapper {
         if (tool == null) {
             return null;
         }
-        
+                
         if (tool instanceof IAsyncTool ||
             tool instanceof DistanceWand || 
             tool instanceof QueryTool ||
@@ -123,7 +124,7 @@ public class ToolWrapper {
         if (tool instanceof BrushTool) {
             return new WrappedBrushTool((BrushTool)tool);
         }
-        
+
         log(String.format("WARNING: The tool %1$s is not supported.", tool.getClass().getName()));
         return tool;
     }

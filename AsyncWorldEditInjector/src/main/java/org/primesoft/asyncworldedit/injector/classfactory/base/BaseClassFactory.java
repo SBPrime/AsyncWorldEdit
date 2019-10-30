@@ -63,6 +63,7 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.IClassFactory;
+import org.primesoft.asyncworldedit.injector.classfactory.IDispatcher;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 
@@ -74,6 +75,7 @@ public class BaseClassFactory implements IClassFactory {
 
     private final IOperationProcessor m_operationProcessor = new BaseOperationProcessor();
     private final IJobProcessor m_jobProcessor = new BaseJobProcessor();
+    private final IDispatcher m_dispatcher = new BaseDispatcher();
 
     @Override
     public IOperationProcessor getOperationProcessor() {
@@ -122,4 +124,9 @@ public class BaseClassFactory implements IClassFactory {
     }
     
     private void noOpRegisterBuild(ICommandsRegistration cr) {}
+
+    @Override
+    public IDispatcher getDisatcher() {
+        return m_dispatcher;
+    }
 }

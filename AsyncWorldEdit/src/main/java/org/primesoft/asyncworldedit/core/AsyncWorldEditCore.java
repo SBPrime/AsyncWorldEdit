@@ -360,12 +360,8 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
         }
 
         if (ConfigProvider.getCheckUpdate()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    log(VersionChecker.checkVersion(m_platform.getVersion()).getMessage());
-
-                }
+            new Thread(() -> {
+                log(VersionChecker.checkVersion(m_platform.getVersion()).getMessage());
             }).start();
         }
 

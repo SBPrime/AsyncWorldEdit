@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,66 +45,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.primesoft.asyncworldedit.injector.classfactory;
 
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
-import java.util.Iterator;
-import java.util.UUID;
-import org.enginehub.piston.CommandManager;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
+import org.primesoft.asyncworldedit.api.utils.IActionEx;
+import org.primesoft.asyncworldedit.api.utils.IFuncEx;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
-    /**
-     * Get the operation processor
-     * @return 
-     */
-    IOperationProcessor getOperationProcessor();
-    
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
-    
-    /**
-     * Get the dispather
-     * @return 
-     */
-    IDispatcher getDisatcher();
-    
-    /**
-     * Create new instance of the clipboard
-     * @param parent
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Clipboard parent, Region region);
-
-    /**
-     * Handle the exception from operation
-     * @param ex The exception to hanlde 
-     * @param name The operation name
-     */
-    void handleError(WorldEditException ex, String name);
-
-     IPlayerEntry getPlayer(UUID uniqueId);
-     
-     World wrapWorld(World world, IPlayerEntry player);
-
-    CommandManager wrapCommandManager(Object sender, CommandManager cm);
-
-    ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent);
-
-    Iterator<BlockVector3> getRegionIterator(Region region);
+public interface IDispatcher {
+    <TEx extends Exception> void execute(IActionEx<TEx> a) throws TEx;
+    <TEx extends Exception, R> R execute(IFuncEx<R, TEx> a) throws TEx;
 }
