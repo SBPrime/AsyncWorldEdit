@@ -65,7 +65,7 @@ public abstract class BaseCreateWrapper extends BaseClassCreator {
     private final String m_clsDescriptor;
     protected final String m_targetName;
     private final Class<?> m_clsToWrapp;
-    private final String m_clsName;
+    protected final String m_clsName;
 
     @Override
     public String getName() {
@@ -104,6 +104,8 @@ public abstract class BaseCreateWrapper extends BaseClassCreator {
         processMethods((String name, String descriptor, String clsName, Method m) -> defineMethod(cw, name, descriptor, clsName, m),
                 m_clsToWrapp);
 
+        processEnd(cw);
+        
         cw.visitEnd();
         try {
             createClass(className, cw);
@@ -111,6 +113,8 @@ public abstract class BaseCreateWrapper extends BaseClassCreator {
             throw new IllegalStateException("Unable to create " + m_targetName + ".", ex);
         }
     }
+    
+    protected void processEnd(ClassWriter cw) {}
 
     protected void processFields(ClassWriter cw) {
         cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "m_injected",

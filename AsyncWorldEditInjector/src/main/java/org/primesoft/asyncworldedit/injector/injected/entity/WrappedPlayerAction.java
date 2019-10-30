@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -48,59 +48,17 @@
 package org.primesoft.asyncworldedit.injector.injected.entity;
 
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.world.World;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.injector.core.InjectorCore;
 
 /**
  *
  * @author SBPrime
  */
-public final class WrappedPlayerData {
-
-    private final Object m_mutex = new Object();
-
-    private IPlayerEntry m_entry = null;
-
-    private World m_world = null;
-    private World m_worldAsync = null;
-
-    private IPlayerEntry getEntry(Player p) {
-        if (m_entry == null) {
-            if (m_entry == null) {
-                m_entry = InjectorCore.getInstance().getClassFactory().getPlayer(p.getUniqueId());
-            }
-        }
-        return m_entry;
-    }
-
-    public World getWorld(Player p, World world) {
-        if (m_world == null || m_world != world) {
-            synchronized (m_mutex) {
-                if (m_world == null || m_world != world) {
-                    World aWorld = InjectorCore.getInstance().getClassFactory().wrapWorld(world, getEntry(p));
-                    if (aWorld != null) {
-                        m_world = world;
-                        m_worldAsync = aWorld;
-
-                        world = aWorld;
-                    } else if (m_world != null) {
-                        m_world = null;
-                    }
-                } else if (m_world != null) {
-                    world = m_worldAsync;
-                }
-            }
-        }
-
-        return world;
+public class WrappedPlayerAction {
+    public void action(Player p) throws Exception {
+        throw new Exception();
     }
     
-    public void executeAction(Player p, WrappedPlayerAction a) throws Exception {
-        InjectorCore.getInstance().getClassFactory().getDisatcher().execute(() -> a.action(p));
-    }
-    
-    public Object executeFunction(Player p, WrappedPlayerAction a) throws Exception {
-        return InjectorCore.getInstance().getClassFactory().getDisatcher().execute(() -> a.function(p));
+    public Object function(Player p) throws Exception {
+        throw new Exception();
     }
 }

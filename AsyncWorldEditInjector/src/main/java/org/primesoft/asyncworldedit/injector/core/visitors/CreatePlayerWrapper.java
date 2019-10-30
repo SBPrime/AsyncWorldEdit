@@ -49,11 +49,16 @@ package org.primesoft.asyncworldedit.injector.core.visitors;
 
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.world.World;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.primesoft.asyncworldedit.injector.injected.entity.WrappedPlayerAction;
 import org.primesoft.asyncworldedit.injector.injected.entity.WrappedPlayerData;
 
 /**
@@ -63,7 +68,11 @@ import org.primesoft.asyncworldedit.injector.injected.entity.WrappedPlayerData;
 public class CreatePlayerWrapper extends BaseCreateWrapper {
 
     private static final String DESCRIPTOR_WRAPPER_DATA = Type.getDescriptor(WrappedPlayerData.class);
+    private static final String DESCRIPTOR_WRAPPER_ACTION = Type.getDescriptor(WrappedPlayerAction.class);
+    
     public final static String IC_DESCRIPTOR = "org/primesoft/asyncworldedit/worldedit/entity/PlayerWrapper";
+    
+    private final List<MethodEntry> m_knownMethods = new LinkedList<>();
 
     public CreatePlayerWrapper(ICreateClass createClass) {
         super(createClass, Player.class, IC_DESCRIPTOR);
@@ -97,11 +106,23 @@ public class CreatePlayerWrapper extends BaseCreateWrapper {
 
     @Override
     protected void methodBody(MethodVisitor mv, String name, String descriptor, Method m) {
-        if (!"getWorld".equals(name)) {
-            super.methodBody(mv, name, descriptor, m);
-            return;
+        if ("getWorld".equals(name)) {
+            methodGetWorld(mv, name, descriptor, m);
+        } else {
+            safeExecute(mv, name, descriptor, m);
+        }                
+    }
+
+    @Override
+    protected void processEnd(ClassWriter cw) {
+        for (MethodEntry me : m_knownMethods) {
+            wrapperClass(me);
         }
         
+        super.processEnd(cw);
+    }        
+
+    private void methodGetWorld(MethodVisitor mv, String name, String descriptor, Method m) {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, m_targetName, "m_data", DESCRIPTOR_WRAPPER_DATA);
 
@@ -113,11 +134,159 @@ public class CreatePlayerWrapper extends BaseCreateWrapper {
                 Type.getInternalName(WrappedPlayerData.class),
                 "getWorld",
                 "("
-                + Type.getDescriptor(Player.class)
-                + Type.getDescriptor(World.class)
-                + ")" + Type.getDescriptor(World.class),
+                        + Type.getDescriptor(Player.class)
+                        + Type.getDescriptor(World.class)
+                        + ")" + Type.getDescriptor(World.class),
                 false);
         
         mv.visitInsn(Opcodes.ARETURN);
+    }
+
+    private void safeExecute(MethodVisitor mv, String name, String descriptor, Method m) {
+        UUID uuid = UUID.randomUUID();
+        String id = String.format("__%016x%016x__", uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+        MethodEntry me = new MethodEntry(id, mv, name, descriptor, m);
+        m_knownMethods.add(me);                
+        
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, m_targetName, "m_data", DESCRIPTOR_WRAPPER_DATA);
+        
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, m_targetName, "m_injected", Type.getDescriptor(Player.class));
+        
+        mv.visitTypeInsn(Opcodes.NEW, me.className());
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, me.className(),
+                "<init>",
+                "()V",
+                false);
+        
+        Class<?>[] params = m.getParameterTypes();
+        for (int i = 0; i < params.length; i++) {
+            visitArgumemt(mv, params[i], i + 1);
+        }
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                me.className(),
+                name, me.DescriptorSimple,
+                false);
+        
+        Class<?> resultType = m.getReturnType();
+        boolean hasResult = !void.class.equals(resultType);
+        
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                Type.getInternalName(WrappedPlayerData.class),
+                hasResult ? "executeAction" : "executeFunction",
+                "("
+                        + Type.getDescriptor(Player.class)
+                        + Type.getDescriptor(WrappedPlayerAction.class)
+                        + ")" + (hasResult ? Type.getDescriptor(Object.class) : "V"),
+                false);
+        if (hasResult) {            
+            checkCast(mv, Type.getDescriptor(resultType));
+        }
+        
+        visitReturn(mv, m.getReturnType());
+    }
+
+    private void wrapperClass(MethodEntry me) {
+        String classDescriptor = me.className();
+        String className = classDescriptor.replace("/", ".");
+
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, classDescriptor,
+                null, Type.getInternalName(WrappedPlayerAction.class),
+                new String[0]);
+        
+        
+        emitEmptyCtor(cw, WrappedPlayerAction.class);
+        Method m = me.Method;
+        Class<?>[] params = m.getParameterTypes();
+        Class<?> resultType = m.getReturnType();
+        
+        for (int i = 0;i < params.length; i++) {            
+            cw.visitField(Opcodes.ACC_PRIVATE, "m_field_" + i, Type.getDescriptor(params[i]), null, null);
+        }
+        
+        wrapperClassInit(cw, me, params, classDescriptor);                 
+        wrapperClassExecute(cw, classDescriptor, me, params, resultType);
+        cw.visitEnd();
+        try {
+            createClass(className, cw);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to create " + m_targetName + ".", ex);
+        }
+    }
+
+    private void wrapperClassInit(ClassWriter cw, MethodEntry me, Class<?>[] params, String classDescriptor) {
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC,
+                me.Name, me.DescriptorSimple,
+                null, new String[] { "java/lang/Exception" }
+        );
+        for (int i = 0; i < params.length; i++) {
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            visitArgumemt(mv, params[i], i + 1);
+            mv.visitFieldInsn(Opcodes.PUTFIELD, classDescriptor, "m_field_" + i, Type.getDescriptor(params[i]));
+        }
+        mv.visitInsn(Opcodes.RETURN);
+        
+        mv.visitEnd();
+    }
+
+    private void wrapperClassExecute(ClassWriter cw, String classDescriptor, MethodEntry me, Class<?>[] params, Class<?> resultType) {
+        boolean hasResult = !void.class.equals(resultType);
+        
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, 
+                hasResult ? "function" : "action",
+                "(Lcom/sk89q/worldedit/entity/Player;)" + (hasResult ? "Ljava/lang/Object;" : "V"),
+                null, new String[] { "java/lang/Exception" }
+        );
+        mv.visitVarInsn(Opcodes.ALOAD, 1);        
+        for (int i = 0; i < params.length; i++) {
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitFieldInsn(Opcodes.GETFIELD, classDescriptor, "m_field_" + i, Type.getDescriptor(params[i]));
+        }
+        mv.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                m_clsName,
+                me.Name, me.Descriptor,
+                true);
+        if (!hasResult) {
+            mv.visitInsn(Opcodes.RETURN);
+        } else {
+            encapsulatePrimitives(mv, Type.getDescriptor(resultType));
+            mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Object");
+            mv.visitInsn(Opcodes.ARETURN);
+        }
+                
+        mv.visitEnd();
+    }
+    
+    private static class MethodEntry {
+        public final String Id;
+        
+        public final MethodVisitor Mv;
+        
+        public final String Name;
+        
+        public final String Descriptor;
+        
+        public final Method Method;
+        
+        private String DescriptorSimple;
+        
+        MethodEntry(String id, MethodVisitor mv, String name, String descriptor, Method method) {
+            Id = id;
+            Mv = mv;
+            Name = name;
+            Descriptor = descriptor;
+            
+            int idx = Descriptor.indexOf(")");
+            DescriptorSimple = Descriptor.substring(0, idx + 1) + "V";
+            Method = method;
+        }
+        
+        private String className() {
+            return IC_DESCRIPTOR + "_WrappedMethod_" + Name + "_" + Id;
+        }
     }
 }

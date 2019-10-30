@@ -192,14 +192,18 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         m_createClass.create(name, cw);
     }
 
-    protected final void emitEmptyCtor(ClassWriter cw) {
+    protected final void emitEmptyCtor(ClassWriter cw, Class<?> superClass) {
         MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
         mv.visitCode();
         mv.visitVarInsn(Opcodes.ALOAD, 0); // push `this` to the operand stack
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, Type.getInternalName(Object.class), "<init>", "()V", false);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, Type.getInternalName(superClass), "<init>", "()V", false);
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(1, 1);
         mv.visitEnd();
+    }
+    
+    protected final void emitEmptyCtor(ClassWriter cw) {
+        emitEmptyCtor(cw, Object.class);
     }
 
     protected final void processMethods(MethodFactory mf, Class<?>... cls) throws SecurityException {
@@ -295,7 +299,13 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
     protected final void checkCast(MethodVisitor mv, String type) {
         final EncapsulatePrimitive entry = ENCAPSULATE_PRIMITIVE.get(type);
 
-        mv.visitTypeInsn(Opcodes.CHECKCAST, entry == null ? type.substring(1) : entry.refType);
+        String castTo;
+        if (entry == null) {
+            castTo = type.substring(1, type.length() - (type.endsWith(";") ? 1 : 0));
+        } else {
+            castTo = entry.refType;
+        }
+        mv.visitTypeInsn(Opcodes.CHECKCAST, castTo);
         if (entry != null) {
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, entry.refType,
                     entry.toPrimitive,
@@ -303,7 +313,7 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
                     false);
         }
     }
-
+    
     protected final void encapsulatePrimitives(MethodVisitor mv, String type) {
         final EncapsulatePrimitive entry = ENCAPSULATE_PRIMITIVE.get(type);
         if (entry == null) {
