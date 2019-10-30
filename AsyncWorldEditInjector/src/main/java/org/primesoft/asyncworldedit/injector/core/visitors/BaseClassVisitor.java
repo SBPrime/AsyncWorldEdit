@@ -314,6 +314,24 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         }
     }
     
+    protected final void checkCast(MethodVisitor mv, Class<?> type) {        
+        final EncapsulatePrimitive entry = ENCAPSULATE_PRIMITIVE.get(Type.getDescriptor(type));
+
+        String castTo;
+        if (entry == null) {            
+            castTo = Type.getInternalName(type);
+        } else {
+            castTo = entry.refType;
+        }
+        mv.visitTypeInsn(Opcodes.CHECKCAST, castTo);
+        if (entry != null) {
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, entry.refType,
+                    entry.toPrimitive,
+                    "()" + entry.primitive,
+                    false);
+        }
+    }
+    
     protected final void encapsulatePrimitives(MethodVisitor mv, String type) {
         final EncapsulatePrimitive entry = ENCAPSULATE_PRIMITIVE.get(type);
         if (entry == null) {

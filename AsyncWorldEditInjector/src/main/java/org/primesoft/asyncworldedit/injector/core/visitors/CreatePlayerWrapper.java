@@ -176,14 +176,14 @@ public class CreatePlayerWrapper extends BaseCreateWrapper {
         
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 Type.getInternalName(WrappedPlayerData.class),
-                hasResult ? "executeAction" : "executeFunction",
+                !hasResult ? "executeAction" : "executeFunction",
                 "("
                         + Type.getDescriptor(Player.class)
                         + Type.getDescriptor(WrappedPlayerAction.class)
                         + ")" + (hasResult ? Type.getDescriptor(Object.class) : "V"),
                 false);
         if (hasResult) {            
-            checkCast(mv, Type.getDescriptor(resultType));
+            checkCast(mv, resultType);
         }
         
         visitReturn(mv, m.getReturnType());
@@ -230,6 +230,8 @@ public class CreatePlayerWrapper extends BaseCreateWrapper {
         }
         mv.visitInsn(Opcodes.RETURN);
         
+        mv.visitCode();
+        mv.visitMaxs(1, 1);
         mv.visitEnd();
     }
 
@@ -257,7 +259,9 @@ public class CreatePlayerWrapper extends BaseCreateWrapper {
             mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Object");
             mv.visitInsn(Opcodes.ARETURN);
         }
-                
+        
+        mv.visitCode();
+        mv.visitMaxs(1, 1);        
         mv.visitEnd();
     }
     
