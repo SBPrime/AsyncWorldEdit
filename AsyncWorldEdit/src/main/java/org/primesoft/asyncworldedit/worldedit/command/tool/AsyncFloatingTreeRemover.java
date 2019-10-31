@@ -69,7 +69,7 @@ public class AsyncFloatingTreeRemover extends FloatingTreeRemover implements IAs
     @Override
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
         return ToolWrapper.performAction(server, config, player, session, clicked, 
-                new ToolAction() {
+                new LocationToolAction() {
 
             @Override
             public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {

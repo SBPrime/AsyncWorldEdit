@@ -54,7 +54,7 @@ import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
  *
- * @author Sławomir Belter
+ * @author SBPrime
  */
 public class ConfigPhysicsFreeze {
 

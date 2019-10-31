@@ -61,7 +61,7 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 
 /**
  *
- * @author Sławomir Belter
+ * @author SBPrime
  */
 class ConfigurableClassFilter implements IClassFilter {
     private static final CacheEntry ALWAYS_FALSE = i -> false;

@@ -51,7 +51,6 @@ import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.command.tool.AreaPickaxe;
 import com.sk89q.worldedit.command.tool.BlockTool;
-import com.sk89q.worldedit.command.tool.RecursivePickaxe;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.util.Location;
@@ -83,7 +82,7 @@ public class AsyncAreaPickaxe extends AreaPickaxe implements IAsyncTool {
     @Override
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
         return ToolWrapper.performAction(server, config, player, session, clicked, 
-                new ToolAction() {
+                new LocationToolAction() {
 
             @Override
             public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {

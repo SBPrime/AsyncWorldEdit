@@ -51,7 +51,6 @@ import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
-import com.sk89q.worldedit.util.Location;
 
 /**
  *
@@ -68,8 +67,7 @@ public abstract class ToolAction {
      * @param config
      * @param player
      * @param session
-     * @param clicked
      * @return 
      */
-    public abstract boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked);
+    public abstract boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session);
 }

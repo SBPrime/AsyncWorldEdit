@@ -53,7 +53,7 @@ import org.primesoft.asyncworldedit.injector.classfactory.IDispatcher;
 
 /**
  *
- * @author Sławomir Belter
+ * @author SBPrime
  */
 public class BaseDispatcher implements IDispatcher {
 

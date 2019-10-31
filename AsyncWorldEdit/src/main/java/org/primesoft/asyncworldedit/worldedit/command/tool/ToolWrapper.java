@@ -124,6 +124,9 @@ public class ToolWrapper {
         if (tool instanceof BrushTool) {
             return new WrappedBrushTool((BrushTool)tool);
         }
+        if (tool instanceof NavigationWand) {
+            return AsyncNavigationWand.wrap((NavigationWand)tool);
+        }
 
         log(String.format("WARNING: The tool %1$s is not supported.", tool.getClass().getName()));
         return tool;
@@ -168,7 +171,7 @@ public class ToolWrapper {
      */
     public static boolean performAction(final Platform server, final LocalConfiguration config, final Player player, 
             final LocalSession session, Location clicked, 
-            final ToolAction toolAction, String jobName, WorldeditOperations worldeditOperations) {
+            final LocationToolAction toolAction, String jobName, WorldeditOperations worldeditOperations) {
         
         if (toolAction == null) {
             return false;
@@ -214,6 +217,72 @@ public class ToolWrapper {
                         waitFor.checkAndWait(null);
                         
                         toolAction.execute(server, config, player, fakeSession, clickedWrapped);
+                        return 0;
+                    }
+                });
+
+        session.remember(aEditSession);
+        return true;
+    }
+    
+    
+    /**
+     * Perform tool action as async job
+     * @param server
+     * @param config
+     * @param player
+     * @param session
+     * @param toolAction
+     * @param jobName
+     * @param worldeditOperations 
+     * @return  
+     */
+    public static boolean performAction(final Platform server, final LocalConfiguration config, final Player player, 
+            final LocalSession session, 
+            final ToolAction toolAction, String jobName, WorldeditOperations worldeditOperations) {
+        
+        if (toolAction == null) {
+            return false;
+        }
+        
+        EditSession editSession = session.createEditSession(player);
+        if (!(editSession instanceof AsyncEditSession)) {
+            return toolAction.execute(server, config, player, session);
+        }
+
+        final IAsyncWorldEditCore aweCore = AwePlatform.getInstance().getCore();
+        final IBlockPlacer blockPlacer = aweCore.getBlockPlacer();
+        final IPlayerManager playerManager = aweCore.getPlayerManager();
+        final IScheduler scheduler = aweCore.getPlatform().getScheduler();
+        
+        
+        final AsyncEditSession aEditSession = (AsyncEditSession) editSession;
+        final WaitFor waitFor = aEditSession.getWait();
+        final IPlayerEntry playerEntry = playerManager.getPlayer(player.getUniqueId());
+        
+        
+        boolean isAsync = aEditSession.checkAsync(WorldeditOperations.tool) && aEditSession.checkAsync(worldeditOperations);
+
+        if (!isAsync) {
+            return toolAction.execute(server, config, player, session);
+        }
+
+        final int jobId = blockPlacer.getJobId(playerEntry);
+        final CancelabeEditSession cSession = new CancelabeEditSession(aEditSession, editSession.getMask(), jobId);
+
+        final JobEntry job = new JobEntry(playerEntry, cSession, jobId, jobName);
+        blockPlacer.addJob(playerEntry, job);
+
+        SchedulerUtils.runTaskAsynchronously(scheduler, new AsyncTask(cSession, playerEntry, jobName,
+                blockPlacer, job) {
+                    @Override
+                    public int task(CancelabeEditSession cSession)
+                    throws MaxChangedBlocksException {
+                        FakeLocalSession fakeSession = new FakeLocalSession(cSession, session);
+
+                        waitFor.checkAndWait(null);
+                        
+                        toolAction.execute(server, config, player, fakeSession);
                         return 0;
                     }
                 });

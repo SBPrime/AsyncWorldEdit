@@ -49,57 +49,27 @@ package org.primesoft.asyncworldedit.worldedit.command.tool;
 
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.command.tool.FloodFillTool;
-import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
-import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.util.Location;
-import java.lang.reflect.Field;
-import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.utils.Reflection;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncFloodFillTool extends FloodFillTool implements IAsyncTool {
-    private static final Field s_floodFillToolRange = Reflection.findField(FloodFillTool.class, "range", "Unable to get range field from FloodFillTool");
-    private static final Field s_floodFillToolPattern = Reflection.findField(FloodFillTool.class, "pattern", "Unable to get pattern field from FloodFillTool");;
-    
-    
-    public static Tool wrap(FloodFillTool floodFillTool) {
-        if (floodFillTool == null || s_floodFillToolPattern == null || s_floodFillToolRange == null) {
-            return null;
-        }
-        
-        Object oRange = Reflection.get(floodFillTool, s_floodFillToolRange, "Unable to get range from FloodFilTool");
-        Pattern pattern = Reflection.get(floodFillTool, Pattern.class, s_floodFillToolPattern, "Unable to get pattern from FloodFilTool");
-        
-        return new AsyncFloodFillTool((oRange instanceof Integer) ? ((Integer)oRange) : 0, pattern);
-    }
+public abstract class LocationToolAction {
 
-    public AsyncFloodFillTool(int range, Pattern pattern) {
-        super(range, pattern);
-    }
-
-    @Override
-    public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return ToolWrapper.performAction(server, config, player, session, clicked, 
-                new LocationToolAction() {
-
-            @Override
-            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-                return doActPrimary(server, config, player, session, clicked);
-            }
-        }, "floodFill", WorldeditOperations.fillXZ);
-    }
-
-    
-    
-    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return super.actPrimary(server, config, player, session, clicked);
+    public LocationToolAction() {
     }
     
-    
+    /**
+     * The action to perform
+     * @param server
+     * @param config
+     * @param player
+     * @param session
+     * @param clicked
+     * @return 
+     */
+    public abstract boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked);
 }

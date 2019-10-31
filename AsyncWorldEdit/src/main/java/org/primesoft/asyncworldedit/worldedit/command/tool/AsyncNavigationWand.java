@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -49,57 +49,52 @@ package org.primesoft.asyncworldedit.worldedit.command.tool;
 
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.command.tool.FloodFillTool;
+import com.sk89q.worldedit.command.tool.NavigationWand;
 import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
-import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.util.Location;
-import java.lang.reflect.Field;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.injector.injected.entity.PlayerFactory;
 
 /**
  *
  * @author SBPrime
  */
-public class AsyncFloodFillTool extends FloodFillTool implements IAsyncTool {
-    private static final Field s_floodFillToolRange = Reflection.findField(FloodFillTool.class, "range", "Unable to get range field from FloodFillTool");
-    private static final Field s_floodFillToolPattern = Reflection.findField(FloodFillTool.class, "pattern", "Unable to get pattern field from FloodFillTool");;
-    
-    
-    public static Tool wrap(FloodFillTool floodFillTool) {
-        if (floodFillTool == null || s_floodFillToolPattern == null || s_floodFillToolRange == null) {
-            return null;
-        }
-        
-        Object oRange = Reflection.get(floodFillTool, s_floodFillToolRange, "Unable to get range from FloodFilTool");
-        Pattern pattern = Reflection.get(floodFillTool, Pattern.class, s_floodFillToolPattern, "Unable to get pattern from FloodFilTool");
-        
-        return new AsyncFloodFillTool((oRange instanceof Integer) ? ((Integer)oRange) : 0, pattern);
+public class AsyncNavigationWand extends NavigationWand {
+
+    static Tool wrap(NavigationWand tool) {
+        return new AsyncNavigationWand();
     }
 
-    public AsyncFloodFillTool(int range, Pattern pattern) {
-        super(range, pattern);
+    private AsyncNavigationWand() {
     }
 
     @Override
-    public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return ToolWrapper.performAction(server, config, player, session, clicked, 
-                new LocationToolAction() {
-
+    public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
+        return ToolWrapper.performAction(server, config, player, session, new ToolAction() {
             @Override
-            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-                return doActPrimary(server, config, player, session, clicked);
+            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session) {
+                return doActPrimary(server, config, player, session);
             }
-        }, "floodFill", WorldeditOperations.fillXZ);
+        }, "navigationWand", WorldeditOperations.tool);
     }
 
-    
-    
-    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return super.actPrimary(server, config, player, session, clicked);
+    @Override
+    public boolean actSecondary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
+        return ToolWrapper.performAction(server, config, player, session, new ToolAction() {
+            @Override
+            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session) {
+                return doActSecondary(server, config, player, session);
+            }
+        }, "navigationWand", WorldeditOperations.tool);
     }
     
-    
+    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
+        return super.actPrimary(server, config, PlayerFactory.createPlayerWrapper(player), session);
+    }
+
+    private boolean doActSecondary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
+        return super.actSecondary(server, config, PlayerFactory.createPlayerWrapper(player), session);
+    }
 }

@@ -55,7 +55,7 @@ import org.primesoft.asyncworldedit.platform.api.IConfigurationSection;
 
 /**
  *
- * @author Sławomir Belter
+ * @author SBPrime
  */
 public class ConfigClassScanner {
     private Map<String, String[]> m_blackList = new HashMap<>();
