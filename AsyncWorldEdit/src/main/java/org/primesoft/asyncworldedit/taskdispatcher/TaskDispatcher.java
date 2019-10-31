@@ -350,7 +350,8 @@ public class TaskDispatcher implements Runnable, ITaskDispatcher {
                 }
             }
         }
-        return getBlock.getResult();
+        
+        return getBlock.getResult().orElse(null);
     }
 
     /**

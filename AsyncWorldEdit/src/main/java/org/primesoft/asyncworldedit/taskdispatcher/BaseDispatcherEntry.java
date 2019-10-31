@@ -49,6 +49,7 @@
 package org.primesoft.asyncworldedit.taskdispatcher;
 
 import org.primesoft.asyncworldedit.api.taskdispatcher.IDispatcherEntry;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
@@ -73,7 +74,11 @@ public abstract class BaseDispatcherEntry implements IDispatcherEntry {
     @Override
     public boolean Process() {
         synchronized (m_mutex) {
-            Execute();            
+            try {
+                Execute();
+            } catch (Exception ex) {
+                ExceptionHelper.printException(ex, "Error while executing dispatcher task");
+            }
             m_mutex.notifyAll();
         }
         

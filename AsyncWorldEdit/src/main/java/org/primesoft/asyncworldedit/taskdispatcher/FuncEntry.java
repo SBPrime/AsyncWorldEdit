@@ -47,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit.taskdispatcher;
 
+import java.util.Optional;
 import org.primesoft.asyncworldedit.api.utils.IFunc;
 
 /**
@@ -57,13 +58,13 @@ import org.primesoft.asyncworldedit.api.utils.IFunc;
 public class FuncEntry<T> extends BaseDispatcherEntry {
 
     private final IFunc<T> m_action;
-    private T m_result = null;
+    private Optional<T> m_result = null;
 
     public IFunc<T> getAction() {
         return m_action;
     }
 
-    public T getResult() {
+    public Optional<T> getResult() {
         return m_result;
     }
 
@@ -73,6 +74,7 @@ public class FuncEntry<T> extends BaseDispatcherEntry {
 
     @Override
     public void Execute() {
-        m_result = m_action.execute();
+        T result = m_action.execute();
+        m_result = result == null ? Optional.empty() : Optional.of(result);
     }
 }
