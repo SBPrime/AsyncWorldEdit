@@ -336,8 +336,6 @@ public abstract class ClassScanner implements IClassScanner {
     protected IClassScannerEntry[] getBlackList() {
         return Stream.of(
             new ClassScannerEntry(BlockMask.class, "blocks"),
-            new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
-            new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$Stage3Committer"),
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", "batches"),
             new ClassScannerEntry("org.primesoft.asyncworldedit.blockshub.BlocksHubBridge"),
             new ClassScannerEntry(ChangeSet.class),

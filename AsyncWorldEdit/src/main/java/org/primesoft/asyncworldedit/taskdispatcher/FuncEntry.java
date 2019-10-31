@@ -58,7 +58,7 @@ import org.primesoft.asyncworldedit.api.utils.IFunc;
 public class FuncEntry<T> extends BaseDispatcherEntry {
 
     private final IFunc<T> m_action;
-    private Optional<T> m_result = null;
+    private volatile Optional<T> m_result = null;
 
     public IFunc<T> getAction() {
         return m_action;

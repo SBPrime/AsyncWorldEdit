@@ -63,6 +63,7 @@ import com.sk89q.worldedit.command.tool.LongRangeBuildTool;
 import com.sk89q.worldedit.command.tool.NavigationWand;
 import com.sk89q.worldedit.command.tool.QueryTool;
 import com.sk89q.worldedit.command.tool.RecursivePickaxe;
+import com.sk89q.worldedit.command.tool.SelectionWand;
 import com.sk89q.worldedit.command.tool.SinglePickaxe;
 import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.command.tool.TreePlanter;
@@ -100,7 +101,8 @@ public class ToolWrapper {
             tool instanceof DistanceWand || 
             tool instanceof QueryTool ||
             tool instanceof LongRangeBuildTool ||
-            tool instanceof WrappedBrushTool) {
+            tool instanceof WrappedBrushTool ||
+            tool instanceof SelectionWand) {            
             return tool;
         }
         
