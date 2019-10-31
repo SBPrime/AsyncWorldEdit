@@ -75,6 +75,7 @@ import java.lang.reflect.Field;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -125,6 +126,10 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
 
     protected WrappedLocalSession(LocalSession parrent) {
         m_parrent = parrent;
+        
+        if (!(parrent instanceof WrappedLocalSession)) {
+            wrapTools(Reflection.get(parrent, Map.class, "tools", "Unable to wrap preselected tools and wands"));
+        }
 
         m_eventBus = AwePlatform.getInstance().getCore().getEventBus();
     }
@@ -548,6 +553,23 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     @Override
     public int getTimeout() {
         return m_parrent.getTimeout();
+    }
+
+    private void wrapTools(Map<ItemType, Tool> tools) {
+        if (tools == null) {
+            return;
+        }
+        
+        ItemType[] items = tools.keySet().toArray(new ItemType[0]);
+        for (ItemType item : items) {
+            Tool tool = tools.get(item);
+            
+            if (tool == null) {
+                continue;
+            }
+            
+            tools.put(item, ToolWrapper.wrapTool(tool));
+        }
     }
 
 }
