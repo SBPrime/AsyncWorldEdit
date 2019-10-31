@@ -48,6 +48,7 @@
 package org.primesoft.asyncworldedit.platform.bukkit;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.UUID;
@@ -407,7 +408,8 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         try {
             YamlConfiguration config = new YamlConfiguration();
             config.options().pathSeparator('•');
-            config.load(new InputStreamReader(m_plugin.getResource("config.yml"), "UTF-8"));
+            File configFile = new File(m_plugin.getDataFolder(), "config.yml");
+            config.load(configFile);
             return config;
         } catch (IOException ex) {
             ExceptionHelper.printException(ex, "Unable to load configuration,");
