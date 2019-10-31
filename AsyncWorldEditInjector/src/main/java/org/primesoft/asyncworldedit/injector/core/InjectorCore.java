@@ -175,19 +175,19 @@ public class InjectorCore {
         return injectClasses();
     }
 
-    private boolean injectClasses() {        
+    private boolean injectClasses() {
         try {
             log("Injecting NMS classes...");
             m_classInjector.getNmsInjection().consume(new NmsClassInjectorBridge());
-            
+
             log("Injecting WorldEdit classes...");
             modiffyClasses("com.sk89q.worldedit.util.eventbus.EventBus", c -> new EventBusVisitor(c));
-            
+
             modiffyClasses("com.sk89q.worldedit.math.BlockVector2", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.math.BlockVector3", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.math.Vector2", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.math.Vector3", c -> new AsyncWrapperVisitor(c));
-            
+
             modiffyClasses("com.sk89q.worldedit.world.block.BlockStateHolder", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.world.block.BaseBlock", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.world.block.BlockState", c -> new AsyncWrapperVisitor(c));
@@ -195,16 +195,16 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.util.Location", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.world.biome.BiomeType", c -> new AsyncWrapperVisitor(c));
             modiffyClasses("com.sk89q.worldedit.world.weather.WeatherType", c -> new AsyncWrapperVisitor(c));
-           
+
             modiffyClasses("com.sk89q.worldedit.EditSession", c -> new EditSessionClassVisitor(c));
             modiffyClasses("com.sk89q.worldedit.function.operation.Operations", (c, cc) -> new OperationsClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
-            
+
             modiffyClasses("com.sk89q.worldedit.util.collection.LocatedBlockList", c -> new LocatedBlockListVisitor(c));
             modiffyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", c -> new ResetableExtentVisitor(c));
             modiffyClasses("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", c -> new ResetableExtentVisitor(c));
-            
+
             // Regions
             modiffyClasses("com.sk89q.worldedit.regions.AbstractRegion", c -> new RegionVisitor(c));
             modiffyClasses("com.sk89q.worldedit.regions.EllipsoidRegion", c -> new RegionVisitor(c));
@@ -215,31 +215,34 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.regions.Polygonal2DRegion", c -> new RegionVisitor(c));
             modiffyClasses("com.sk89q.worldedit.regions.CylinderRegion", c -> new RegionVisitor(c));
             modiffyClasses("com.sk89q.worldedit.regions.CuboidRegion", c -> new RegionVisitor(c));
-            
+
             // Commands
             modiffyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.ScriptingCommands", (c, cc) -> new ScriptingCommandsVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.SchematicCommands", (c, cc) -> new SchematicCommandsVisitor(c, cc));
             modiffyClasses("com.sk89q.worldedit.command.RegionCommands", (c, cc) -> new RegionCommandsVisitor(c, cc));
-            
+
             modiffyClasses("com.sk89q.worldedit.command.UtilityCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
             modiffyClasses("com.sk89q.worldedit.command.RegionCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
-            
+
             crateClass(cc-> new CreatePlayerWrapper(cc));
             crateClass(cc-> new CreateNoPermsPlayer(cc));
             crateClass(cc-> new CreateNoPermsActor(cc));
             crateClass(cc-> new CreatePlayerFactory(cc));
             crateClass(cc-> new CreateActorFactory(cc));
-                        
+
             return true;
         } catch (Throwable ex) {
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");
             log("****************************");
-            log("* AsyncWorldEdit won't work properly.");            
+            log("* AsyncWorldEdit won't work properly.");
+            log("*");
+            log("* >>>> Please make sure that you are using a supported version of world edit <<<< ");
+            log("*");
             ExceptionHelper.printException(ex);
             log("****************************");
-            
+
             return false;
         }
     }
