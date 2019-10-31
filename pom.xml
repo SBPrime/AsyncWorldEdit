@@ -6,15 +6,15 @@
     <groupId>org.primesoft.asyncworldedit</groupId>
     <artifactId>AsyncWorldEdit_AllInOne</artifactId>
     <version>${global.awe.version}</version>
-    <properties>        
-        <global.awe.version>3.6.10</global.awe.version>
+    <properties>
+        <global.awe.version>3.6.12</global.awe.version>
         <global.awe-api.version>2.3.1</global.awe-api.version>
     </properties>
-    
+
     <packaging>pom</packaging>
     <name>AsyncWorldEdit_AllInOne</name>
     <modules>
-        <module>JarProcessor</module>        
+        <module>JarProcessor</module>
         <module>AsyncWorldEdit-API</module>
         <module>AsyncWorldEdit-APIInner</module>
         <module>AsyncWorldEdit-Deploy</module>
@@ -25,6 +25,6 @@
         <module>AsyncWorldEdit-spigot_v1_13_R2</module>
         <module>AsyncWorldEdit-ActionBarAPI</module>
         <module>AsyncWorldEdit-BountifulAPI</module>
-        <module>AsyncWorldEdit-TitleManager</module>        
+        <module>AsyncWorldEdit-TitleManager</module>
     </modules>
 </project>
