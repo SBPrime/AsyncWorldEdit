@@ -283,9 +283,12 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
 
         if (loader != null) {
             loader.init(this);
-        }
-
-        if (!loader.install()) {
+            
+            if (!loader.install()) {
+                log("ERROR: Unable to install the plugin.");
+                return;
+            }
+        } else {
             log("ERROR: Unable to install the plugin.");
             return;
         }

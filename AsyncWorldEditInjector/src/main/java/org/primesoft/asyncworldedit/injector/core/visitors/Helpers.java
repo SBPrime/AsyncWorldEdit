@@ -49,12 +49,17 @@ package org.primesoft.asyncworldedit.injector.core.visitors;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.collection.BlockMap;
 import com.sk89q.worldedit.util.collection.LocatedBlockList;
+import com.sk89q.worldedit.util.formatting.WorldEditText;
+import com.sk89q.worldedit.util.formatting.text.AbstractComponent;
+import com.sk89q.worldedit.util.formatting.text.Component;
+import com.sk89q.worldedit.util.formatting.text.TextComponent;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -97,13 +102,13 @@ public final class Helpers {
             String name, MultiArgWorldEditOperationAction method,
             final Object... args) {
 
-        final Player player = Stream.of(args).filter(i -> i instanceof Player).map(i -> (Player) i)
+        final Actor actor = Stream.of(args).filter(i -> i instanceof Actor).map(i -> (Actor) i)
                 .findFirst().orElse(null);
         final EditSession es = Stream.of(args).filter(i -> i instanceof EditSession).map(i -> (EditSession) i)
                 .findFirst().orElse(null);
 
         if (es == null) {
-            InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, new IJob() {
+            InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(actor, new IJob() {
                 @Override
                 public String getName() {
                     return name;
@@ -114,15 +119,14 @@ public final class Helpers {
                     try {
                         method.execute(_this, args);
                     } catch (WorldEditException ex) {
-                        player.printError(String.format("Error while executing %1$s", name));
-
+                        actor.printError(TextComponent.of("Error while executing " + name));
                         InjectorCore.getInstance().getClassFactory().handleError(ex, name);
                     }
                 }
 
             });
         } else {
-            InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(player, es, new IEditSessionJob() {
+            InjectorCore.getInstance().getClassFactory().getJobProcessor().executeJob(actor, es, new IEditSessionJob() {
                 @Override
                 public String getName() {
                     return name;
@@ -142,8 +146,7 @@ public final class Helpers {
 
                         method.execute(_this, argsNew);
                     } catch (WorldEditException ex) {
-                        player.printError(String.format("Error while executing %1$s", name));
-
+                        actor.printError(TextComponent.of("Error while executing " + name));
                         InjectorCore.getInstance().getClassFactory().handleError(ex, name);
                     }
                 }
@@ -202,7 +205,10 @@ public final class Helpers {
             Object newValue = null;           
             if (value instanceof LocatedBlockList) {
                 newValue = new LocatedBlockList();
+            } else if (value instanceof BlockMap) {
+                newValue = BlockMap.create();
             }
+            
             if (newValue == null) {
                 throw new IllegalArgumentException("Don't know how to clean '" + value.getClass().getName() + "' for key '" + key.toString() + "'");
             }

@@ -58,6 +58,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.primesoft.asyncworldedit.injector.IClassInjector;
@@ -243,6 +245,10 @@ public class InjectorCore {
             ExceptionHelper.printException(ex);
             log("****************************");
 
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException ex1) {
+            }
             return false;
         }
     }

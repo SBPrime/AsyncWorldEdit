@@ -54,7 +54,7 @@ package org.primesoft.asyncworldedit.injector.classfactory.base;
 import com.sk89q.worldedit.EditSession;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
-import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extension.platform.Actor;
 import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 
 /**
@@ -62,16 +62,15 @@ import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
  * @author SBPrime
  */
 public class BaseJobProcessor implements IJobProcessor {
-
     @Override
-    public void executeJob(Player player, IJob job) {
+    public void executeJob(Actor player, IJob job) {
         if (job != null) {
             job.execute();
         }
     }
 
     @Override
-    public void executeJob(Player player, EditSession editSession, IEditSessionJob job) {
+    public void executeJob(Actor player, EditSession editSession, IEditSessionJob job) {
         if (job != null) {
             job.execute(editSession);
         }

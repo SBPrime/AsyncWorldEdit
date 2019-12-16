@@ -64,11 +64,7 @@ import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BiomeType;
-import com.sk89q.worldedit.world.block.BaseBlock;
-import com.sk89q.worldedit.world.block.BlockStateHolder;
-import com.sk89q.worldedit.world.block.BlockType;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -111,7 +107,6 @@ public class AsyncEditSession extends ThreadSafeEditSession {
             IPlayerEntry player, EventBus eventBus, com.sk89q.worldedit.world.World world,
             int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
 
-        //super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, blockBag, event);
         super(aweCore, player, eventBus, world, maxBlocks, blockBag, event);
 
         m_schedule = aweCore.getPlatform().getScheduler();
@@ -839,7 +834,8 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     @Override
     public int deformRegion(final Region region, final Vector3 zero,
             final Vector3 unit,
-            final String expressionString)
+            final String expressionString,
+            final int timeout)
             throws ExpressionException, MaxChangedBlocksException {
         boolean isAsync = checkAsync(WorldeditOperations.deformRegion);
         if (!isAsync) {
@@ -858,7 +854,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                     throws MaxChangedBlocksException {
                 m_wait.checkAndWait(null);
                 try {
-                    return session.deformRegion(region, zero, unit, expressionString);
+                    return session.deformRegion(region, zero, unit, expressionString, timeout);
                 } catch (ExpressionException ex) {
                     return 0;
                 }
@@ -898,6 +894,32 @@ public class AsyncEditSession extends ThreadSafeEditSession {
                     throws MaxChangedBlocksException {
                 m_wait.checkAndWait(null);
                 return session.hollowOutRegion(region, thickness, pattern);
+            }
+        });
+
+        return 0;
+    }
+
+    @Override
+    public int drainArea(final BlockVector3 origin, final double radius, 
+            final boolean waterlogged) throws MaxChangedBlocksException {
+        boolean isAsync = checkAsync(WorldeditOperations.drainArea);
+        if (!isAsync) {
+            return super.drainArea(origin, radius, waterlogged);
+        }
+
+        final int jobId = getJobId();
+        final CancelabeEditSession session = new CancelabeEditSession(this, getMask(), jobId);
+        final JobEntry job = new JobEntry(m_player, session, jobId, "drainArea");
+        m_blockPlacer.addJob(m_player, job);
+
+        SchedulerUtils.runTaskAsynchronously(m_schedule, new AsyncTask(session, m_player, "hollowOutRegion",
+                m_blockPlacer, job) {
+            @Override
+            public int task(CancelabeEditSession session)
+                    throws MaxChangedBlocksException {
+                m_wait.checkAndWait(null);
+                return session.drainArea(origin, radius, waterlogged);
             }
         });
 

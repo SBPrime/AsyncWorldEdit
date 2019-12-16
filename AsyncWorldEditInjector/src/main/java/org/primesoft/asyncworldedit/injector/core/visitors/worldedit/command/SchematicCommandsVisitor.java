@@ -62,8 +62,8 @@ public class SchematicCommandsVisitor extends BaseCommandsVisitor {
 
     static {
         METHODS = new HashMap<>();
-        METHODS.put("load", new String[]{"(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;)V"});
-        METHODS.put("save", new String[]{"(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;Z)V"});
+        METHODS.put("load", new String[]{"(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;)V"});
+        METHODS.put("save", new String[]{"(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;Z)V"});
     }
     
     public SchematicCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass) {

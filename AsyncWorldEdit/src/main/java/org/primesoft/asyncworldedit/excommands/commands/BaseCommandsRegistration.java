@@ -80,7 +80,7 @@ public abstract class BaseCommandsRegistration implements ICommandsRegistrationD
     protected static final Key KEY_INTEGER = Key.of(Integer.class);
     protected static final Key KEY_MASK = Key.of(Mask.class);
     protected static final Key KEY_STRING = Key.of(String.class);
-    protected static final Key KEY_PLAYER = Key.of(Player.class);
+    protected static final Key KEY_PLAYER = Key.of(Player.class);    
     protected static final Key KEY_LOCAL_SESSION = Key.of(LocalSession.class);
     protected static final Key KEY_EDIT_SESSION = Key.of(EditSession.class);
     protected static final Key KEY_ACTOR = Key.of(Actor.class);

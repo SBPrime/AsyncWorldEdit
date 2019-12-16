@@ -353,11 +353,16 @@ public class CancelableWorld extends AbstractWorldWrapper {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
-        return getSpawnPosition();
+        return m_parent.getSpawnPosition();
     }
 
     @Override
     public Path getStoragePath() {
         return m_parent.getStoragePath();
+    }
+
+    @Override
+    public String getId() {
+        return m_parent.getId();
     }
 }

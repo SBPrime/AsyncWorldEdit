@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.utils;
 
+import com.google.common.base.Objects;
+import com.sk89q.worldedit.extent.Extent;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -145,5 +147,15 @@ public class ArrayHelpers {
         }
 
         return ints;
+    }
+
+    public static <T> int indexOf(T[] array, T item) {
+        for (int i = 0;i < array.length; i++) {
+            if (Objects.equal(array[i], item)) {
+                return i;
+            }
+        }
+        
+        return -1;
     }
 }

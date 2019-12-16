@@ -155,6 +155,11 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public EditSession createEditSession(Player player) {
         return m_parrent.createEditSession(player);
     }
+    
+    @Override
+    public EditSession createEditSession(Actor actor) {
+        return m_parrent.createEditSession(actor);
+    }
 
     @Override
     public void describeCUI(Actor actor) {
@@ -257,6 +262,11 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public BlockVector3 getPlacementPosition(Player player) throws IncompleteRegionException {
         return m_parrent.getPlacementPosition(player);
     }
+    
+    @Override
+    public BlockVector3 getPlacementPosition(Actor actor) throws IncompleteRegionException {
+        return m_parrent.getPlacementPosition(actor);
+    }
 
     @Override
     public RegionSelector getRegionSelector(World world) {
@@ -346,6 +356,11 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     @Override
     public EditSession redo(BlockBag newBlockBag, Player player) {
         return m_parrent.redo(newBlockBag, player);
+    }
+    
+    @Override
+    public EditSession redo(BlockBag newBlockBag, Actor actor) {
+        return m_parrent.redo(newBlockBag, actor);
     }
 
     @Override
@@ -482,6 +497,12 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public EditSession undo(BlockBag newBlockBag, Player player) {
         return m_parrent.undo(newBlockBag, player);
     }
+    
+    @Override
+    public EditSession undo(BlockBag newBlockBag, Actor actor) {
+        return m_parrent.undo(newBlockBag, actor);
+    }
+
 
     @Override
     public String toString() {
@@ -553,7 +574,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     @Override
     public int getTimeout() {
         return m_parrent.getTimeout();
-    }
+    }        
 
     private void wrapTools(Map<ItemType, Tool> tools) {
         if (tools == null) {

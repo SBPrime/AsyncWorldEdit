@@ -42,6 +42,7 @@ package org.primesoft.asyncworldedit.api;
 
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.world.World;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
@@ -57,6 +58,13 @@ public interface IWorldeditIntegrator {
      * @return
      */
     Player wrapPlayer(IPlayerEntry player);
+    
+    /**
+     * Get the WorldEdit player wrapper
+     * @param player
+     * @return
+     */
+    Actor wrapActor(IPlayerEntry player);
 
     /**
      * Get the WorldEdit world wrapper

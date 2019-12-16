@@ -39,7 +39,6 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalConfiguration;
-import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.command.tool.BlockTool;
 import com.sk89q.worldedit.command.tool.BrushTool;
 import com.sk89q.worldedit.command.tool.InvalidToolBindException;
@@ -127,11 +126,29 @@ interface ILocalSession {
      * Performs an undo.
      *
      * @param newBlockBag a new block bag
+     * @param actor the actor
+     * @return whether anything was undone
+     */
+    public EditSession undo(@Nullable BlockBag newBlockBag, Actor actor);
+
+    /**
+     * Performs an undo.
+     *
+     * @param newBlockBag a new block bag
      * @param player the player
      * @return whether anything was undone
      */
     public EditSession undo(@Nullable BlockBag newBlockBag, Player player);
 
+    /**
+     * Performs a redo
+     *
+     * @param newBlockBag a new block bag
+     * @param actor the actor
+     * @return whether anything was redone
+     */
+    public EditSession redo(@Nullable BlockBag newBlockBag, Actor actor);
+    
     /**
      * Performs a redo
      *
@@ -277,6 +294,16 @@ interface ILocalSession {
      * @throws IncompleteRegionException thrown if a region is not fully selected
      */
     public BlockVector3 getPlacementPosition(Player player) throws IncompleteRegionException;
+    
+    /**
+     * Get the position use for commands that take a center point
+     * (i.e. //forestgen, etc.).
+     *
+     * @param actor the actor
+     * @return the position to use
+     * @throws IncompleteRegionException thrown if a region is not fully selected
+     */
+    public BlockVector3 getPlacementPosition(Actor actor) throws IncompleteRegionException;
 
     /**
      * Toggle placement position.
@@ -479,6 +506,14 @@ interface ILocalSession {
      * @return an edit session
      */
     public EditSession createEditSession(Player player);
+    
+    /**
+     * Construct a new edit session.
+     *
+     * @param actor the actor
+     * @return an edit session
+     */
+    public EditSession createEditSession(Actor actor);
 
     /**
      * Checks if the session has fast mode enabled.

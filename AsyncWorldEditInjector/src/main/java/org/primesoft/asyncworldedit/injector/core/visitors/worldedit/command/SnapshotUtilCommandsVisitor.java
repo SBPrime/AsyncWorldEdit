@@ -61,7 +61,7 @@ public final class SnapshotUtilCommandsVisitor extends BaseCommandsVisitor {
 
     static {
         METHODS = new HashMap<>();
-        METHODS.put("restore", new String[]{"(Lcom/sk89q/worldedit/entity/Player;Lcom/sk89q/worldedit/LocalSession;Lcom/sk89q/worldedit/EditSession;Ljava/lang/String;)V"});
+        METHODS.put("restore", new String[]{"(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/world/World;Lcom/sk89q/worldedit/LocalSession;Lcom/sk89q/worldedit/EditSession;Ljava/lang/String;)V"});
     }
 
     public SnapshotUtilCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass) {

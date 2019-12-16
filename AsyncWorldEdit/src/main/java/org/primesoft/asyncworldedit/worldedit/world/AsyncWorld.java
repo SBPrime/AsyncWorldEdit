@@ -874,6 +874,11 @@ public class AsyncWorld extends AbstractWorldWrapper {
         return m_parent.getStoragePath();
     }
 
+    @Override
+    public String getId() {
+        return m_parent.getId();
+    }
+
     private static class LruMap<TKey, TValue> extends LinkedHashMap<TKey, TValue> {
 
         private final int m_size;

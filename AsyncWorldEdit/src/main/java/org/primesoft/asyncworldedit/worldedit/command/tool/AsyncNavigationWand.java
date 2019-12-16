@@ -53,7 +53,6 @@ import com.sk89q.worldedit.command.tool.NavigationWand;
 import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
-import com.sk89q.worldedit.util.Location;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import org.primesoft.asyncworldedit.injector.injected.entity.PlayerFactory;
 

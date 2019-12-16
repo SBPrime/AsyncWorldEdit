@@ -317,7 +317,7 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
     public IConfiguration getConfig() {
         m_plugin.saveDefaultConfig();
                
-        Configuration configuration = loadConfig();
+        YamlConfiguration configuration = loadConfig();
         if (configuration == null) {
             return null;
         }
@@ -404,7 +404,7 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         m_plugin.reloadConfig();
     }
 
-    private Configuration loadConfig() {        
+    private YamlConfiguration loadConfig() {        
         try {
             YamlConfiguration config = new YamlConfiguration();
             config.options().pathSeparator('•');

@@ -181,7 +181,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     private void injectExtents(IPlayerEntry playerEntry) {
-        List<Extent> extentList = ExtentUtils.getExtentList(this);
+        Extent[] extentList = ExtentUtils.getExtentList(this).toArray(new Extent[0]);
         for (Extent e : extentList) {
             if (e instanceof NullExtent) {
                 return;
@@ -200,7 +200,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         }
     }
 
-    private void injectBlockBagExtent(List<Extent> extentList) {
+    private void injectBlockBagExtent(Extent[] extentList) {
         BlockBagExtent blockBagExtent = Reflection.get(EditSession.class, BlockBagExtent.class,
                 this, "blockBagExtent", "Unable to get the blockBagExtent");
         Extent beforeExtent = ExtentUtils.findBeforer(extentList, blockBagExtent);
@@ -227,41 +227,41 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
                 "Unable to set the blockBagExtent from EditSession, block bag broken.");
     }
 
-    private void injectChangeSet(List<Extent> extentList, ChangeSet changeSet, IPlayerEntry playerEntry) {
-        ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
-                this, "changeSetExtent", "Unable to get the changeset");
-        if (changesetExtent == null) {
-            log("Unable to get the changeSet from EditSession, undo and redo broken.");
-            return;
+    private void injectChangeSet(Extent[] extentList, ChangeSet changeSet, IPlayerEntry playerEntry) {
+        Extent beforeExtent = null;
+        for (int i = 0; i < extentList.length; i++) {
+            Extent current = extentList[i];
+            if (current instanceof ChangeSetExtent) {
+                ChangeSetExtent changesetExtent = (ChangeSetExtent)current;
+                Extent afterExtent = changesetExtent.getExtent();
+                if (afterExtent == null || beforeExtent == null) {
+                    log("Unable to get the changesetExtent from EditSession, undo broken.");
+                    continue;
+                }
+
+                IPermissionGroup pg = playerEntry.getPermissionGroup();
+                boolean undoDisabled = playerEntry.isUndoOff();
+
+                if (undoDisabled) {
+                    changeSet = new NullChangeSet();
+                } else if (changeSet instanceof IExtendedChangeSet) {
+                    IExtendedChangeSet aweChangeSet = (IExtendedChangeSet) changeSet;
+
+                    ExtendedChangeSetExtent extendedChangeSetExtent = new ExtendedChangeSetExtent(this, afterExtent, aweChangeSet);
+                    ExtentUtils.setExtent(beforeExtent, extendedChangeSetExtent);
+                } else {
+                    log(String.format("Expected changeSet: IExtendedChangeSet but got %1$s, undo broken.",
+                            changeSet != null ? changeSet.getClass().getName() : "<null>"));
+
+                }
+
+                Reflection.set(EditSession.class, this, "changeSet", changeSet,
+                        "Unable to inject ChangeSet, undo and redo broken.");
+                Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", changeSet,
+                        "Unable to inject changeset to extent, undo and redo broken.");
+            }
+            beforeExtent = current;
         }
-
-        Extent beforeExtent = ExtentUtils.findBeforer(extentList, changesetExtent);
-        Extent afterExtent = changesetExtent.getExtent();
-        if (afterExtent == null || beforeExtent == null) {
-            log("Unable to get the changesetExtent from EditSession, undo broken.");
-            return;
-        }
-
-        IPermissionGroup pg = playerEntry.getPermissionGroup();
-        boolean undoDisabled = playerEntry.isUndoOff();
-
-        if (undoDisabled) {
-            changeSet = new NullChangeSet();
-        } else if (changeSet instanceof IExtendedChangeSet) {
-            IExtendedChangeSet aweChangeSet = (IExtendedChangeSet) changeSet;
-
-            ExtendedChangeSetExtent extendedChangeSetExtent = new ExtendedChangeSetExtent(this, afterExtent, aweChangeSet);
-            ExtentUtils.setExtent(beforeExtent, extendedChangeSetExtent);
-        } else {
-            log(String.format("Expected changeSet: IExtendedChangeSet but got %1$s, undo broken.",
-                    changeSet != null ? changeSet.getClass().getName() : "<null>"));
-
-        }
-
-        Reflection.set(EditSession.class, this, "changeSet", changeSet,
-                "Unable to inject ChangeSet, undo and redo broken.");
-        Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", changeSet,
-                "Unable to inject changeset to extent, undo and redo broken.");
     }
 
     @Override

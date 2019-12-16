@@ -286,7 +286,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     private void injectExtents(IPlayerEntry playerEntry, IAsyncWorldEditCore core) {
-        List<Extent> extentList = ExtentUtils.getExtentList(this);
+        Extent[] extentList = ExtentUtils.getExtentList(this).toArray(new Extent[0]);
         for (Extent e : extentList) {
             if (e instanceof NullExtent) {
                 return;
@@ -303,7 +303,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         }
     }
 
-    private void injectBlockBagExtent(List<Extent> extentList) {
+    private void injectBlockBagExtent(Extent[] extentList) {
         BlockBagExtent blockBagExtent = Reflection.get(EditSession.class, BlockBagExtent.class,
                 this, "blockBagExtent", "Unable to get the blockBagExtent");
         Extent beforeExtent = ExtentUtils.findBeforer(extentList, blockBagExtent);
@@ -328,51 +328,54 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
                 "Unable to set the blockBagExtent from EditSession, block bag broken.");
     }
 
-    private void injectChangeSet(List<Extent> extentList, IPlayerEntry playerEntry, IAsyncWorldEditCore core) {
-        ChangeSetExtent changesetExtent = Reflection.get(EditSession.class, ChangeSetExtent.class,
-                this, "changeSetExtent", "Unable to get the changeset");
-
+    private void injectChangeSet(Extent[] extentList, IPlayerEntry playerEntry, IAsyncWorldEditCore core) {
+        Extent beforeExtent = null;
         ChangeSet changeSet = getChangeSet();
-
-        if (changesetExtent == null || changeSet == null) {
+        if (changeSet == null) {
             log("Unable to get the changeSet from EditSession, undo and redo broken.");
             return;
         }
 
-        Extent beforeExtent = ExtentUtils.findBeforer(extentList, changesetExtent);
-        Extent afterExtent = changesetExtent.getExtent();
+        for (int i = 0; i < extentList.length; i++) {
+            Extent current = extentList[i];
+            if (current instanceof ChangeSetExtent) {
+                ChangeSetExtent changesetExtent = (ChangeSetExtent)current;                
+                Extent afterExtent = changesetExtent.getExtent();
 
-        if (afterExtent == null || beforeExtent == null) {
-            log("Unable to get the changesetExtent from EditSession, undo broken.");
-            return;
-        }
+                if (afterExtent == null || beforeExtent == null) {
+                    log("Unable to get the changesetExtent from EditSession, undo broken.");
+                    continue;
+                }
 
-        IPermissionGroup pg = playerEntry.getPermissionGroup();
-        boolean undoDisabled = pg != null && playerEntry.isUndoOff();
+                IPermissionGroup pg = playerEntry.getPermissionGroup();
+                boolean undoDisabled = pg != null && playerEntry.isUndoOff();
 
-        ChangeSet newChangeSet;
+                ChangeSet newChangeSet;
 
-        if (undoDisabled) {
-            newChangeSet = new NullChangeSet();
-            m_rootChangeSet = newChangeSet;
-        } else {
-            if (ConfigProvider.undo().storeOnDisk()) {
-                changeSet = new FileChangeSet(core, playerEntry);
+                if (undoDisabled) {
+                    newChangeSet = new NullChangeSet();
+                    m_rootChangeSet = newChangeSet;
+                } else {
+                    if (ConfigProvider.undo().storeOnDisk()) {
+                        changeSet = new FileChangeSet(core, playerEntry);
+                    }
+
+                    IExtendedChangeSet aweChangeSet = new MemoryMonitorChangeSet(playerEntry, m_dispatcher, new ThreadSafeChangeSet(changeSet));
+
+                    ExtendedChangeSetExtent extendedChangeSetExtent = new ExtendedChangeSetExtent(null, afterExtent, aweChangeSet);
+                    ExtentUtils.setExtent(beforeExtent, extendedChangeSetExtent);
+
+                    newChangeSet = aweChangeSet;
+                    m_rootChangeSet = changeSet;
+                }
+
+                Reflection.set(EditSession.class, this, "changeSet", newChangeSet,
+                        "Unable to inject ChangeSet, undo and redo broken.");
+                Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", newChangeSet,
+                        "Unable to inject changeset to extent, undo and redo broken.");
             }
-
-            IExtendedChangeSet aweChangeSet = new MemoryMonitorChangeSet(playerEntry, m_dispatcher, new ThreadSafeChangeSet(changeSet));
-
-            ExtendedChangeSetExtent extendedChangeSetExtent = new ExtendedChangeSetExtent(null, afterExtent, aweChangeSet);
-            ExtentUtils.setExtent(beforeExtent, extendedChangeSetExtent);
-
-            newChangeSet = aweChangeSet;
-            m_rootChangeSet = changeSet;
+            beforeExtent = current;
         }
-
-        Reflection.set(EditSession.class, this, "changeSet", newChangeSet,
-                "Unable to inject ChangeSet, undo and redo broken.");
-        Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", newChangeSet,
-                "Unable to inject changeset to extent, undo and redo broken.");
     }
 
     @Override
@@ -836,5 +839,5 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     @Override
     public Iterator<Change> doRedo() {
         return getChangeSet().forwardIterator();
-    }
+    }        
 }

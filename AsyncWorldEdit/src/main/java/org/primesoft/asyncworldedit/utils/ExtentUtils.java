@@ -52,6 +52,7 @@ import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.Extent;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 
@@ -112,6 +113,20 @@ public class ExtentUtils {
         }
 
         return list.get(idx - 1);
+    }
+    
+    public static Extent findBeforer(Extent[] list, Extent extent) {
+        if (list == null || extent == null) {
+            return null;
+        }
+
+        
+        int idx = ArrayHelpers.indexOf(list, extent);
+        if (idx <= 0) {
+            return null;
+        }
+
+        return list[idx - 1];
     }
 
     public static boolean setExtent(Extent delegateExtent, Extent childExtent) {

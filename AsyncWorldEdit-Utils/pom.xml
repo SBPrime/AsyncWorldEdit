@@ -46,10 +46,10 @@
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit</artifactId>
-            <version>7.0.0</version>
+            <version>7.1.0-SNAPSHOT-4787</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.0.1-rc1-dist.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.1.0-SNAPSHOT-4787.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

@@ -53,6 +53,7 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.world.FastModeExtent;
 import com.sk89q.worldedit.function.mask.BlockMask;
@@ -362,6 +363,7 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry("com.sk89q.wepif.PermissionsResolver"),
             new ClassScannerEntry(Logger.class),
             new ClassScannerEntry(Player.class),
+            new ClassScannerEntry(Actor.class),
             new ClassScannerEntry(ChangeSet.class),
             new ClassScannerEntry(Entity.class),
             new FuzyClassScannerEntry("net.minecraft."),

@@ -48,10 +48,9 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.block.BlockStateHolder;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
@@ -108,6 +107,21 @@ public class BukkitWorldeditIntegrator extends WorldEditIntegrator {
      */
     @Override
     public com.sk89q.worldedit.entity.Player wrapPlayer(IPlayerEntry player) {
+        if (!(player instanceof BukkitPlayerEntry)) {
+            return null;
+        }
+
+        Player bPlayer = ((BukkitPlayerEntry) player).getPlayer();
+        if (bPlayer == null) {
+            return null;
+        }
+
+        return m_worldEditPlugin.wrapPlayer(bPlayer);
+    }
+    
+    
+    @Override
+    public Actor wrapActor(IPlayerEntry player) {
         if (!(player instanceof BukkitPlayerEntry)) {
             return null;
         }

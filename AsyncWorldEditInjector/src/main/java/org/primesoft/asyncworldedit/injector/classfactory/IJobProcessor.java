@@ -52,15 +52,14 @@
 package org.primesoft.asyncworldedit.injector.classfactory;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extension.platform.Actor;
 
 /**
  *
  * @author SBPrime
  */
 public interface IJobProcessor {
-    void executeJob(Player player, IJob job);
+    void executeJob(Actor player, IJob job);    
     
-    
-    void executeJob(Player player, EditSession editSession, IEditSessionJob job);
+    void executeJob(Actor player, EditSession editSession, IEditSessionJob job);
 }

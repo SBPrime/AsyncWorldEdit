@@ -48,9 +48,13 @@
 package org.primesoft.asyncworldedit.platform.bukkit;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationOptions;
 import org.bukkit.configuration.file.FileConfigurationOptions;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.primesoft.asyncworldedit.platform.api.IConfiguration;
 
@@ -60,10 +64,10 @@ import org.primesoft.asyncworldedit.platform.api.IConfiguration;
  */
 class BukkitConfiguration extends BukkitConfigurationSection implements IConfiguration {
 
-    private final Configuration m_config;
+    private final YamlConfiguration m_config;
     private final Plugin m_plugin;
 
-    public BukkitConfiguration(Plugin plugin, Configuration configuration) {
+    public BukkitConfiguration(Plugin plugin, YamlConfiguration configuration) {
         super(configuration);
 
         m_plugin = plugin;
@@ -80,7 +84,12 @@ class BukkitConfiguration extends BukkitConfigurationSection implements IConfigu
             fOptions.copyHeader(true);
         }
         
-        m_plugin.saveConfig();
+        File configFile = new File(m_plugin.getDataFolder(), "config.yml");
+        try {
+            m_config.save(configFile);
+        } catch (IOException ex) {
+            throw new RuntimeException("Unable to save confi.", ex);
+        }
     }
 
     @Override
