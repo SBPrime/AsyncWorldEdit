@@ -7,8 +7,8 @@
     <artifactId>AsyncWorldEdit_AllInOne</artifactId>
     <version>${global.awe.version}</version>
     <properties>
-        <global.awe.version>3.6.13</global.awe.version>
-        <global.awe-api.version>2.3.1</global.awe-api.version>
+        <global.awe.version>3.6.15-BETA-01</global.awe.version>
+        <global.awe-api.version>2.4.0</global.awe-api.version>
     </properties>
 
     <packaging>pom</packaging>
@@ -26,5 +26,5 @@
         <module>AsyncWorldEdit-ActionBarAPI</module>
         <module>AsyncWorldEdit-BountifulAPI</module>
         <module>AsyncWorldEdit-TitleManager</module>
-    </modules>
+    </modules>        
 </project>
