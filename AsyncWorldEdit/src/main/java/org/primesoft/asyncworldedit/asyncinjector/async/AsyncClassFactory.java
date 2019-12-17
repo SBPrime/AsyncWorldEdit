@@ -127,7 +127,7 @@ public class AsyncClassFactory extends BaseClassFactory {
     }        
 
     @Override
-    public void handleError(WorldEditException ex, String name) {
+    public void handleError(Exception ex, String name) {
         ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
     }
 

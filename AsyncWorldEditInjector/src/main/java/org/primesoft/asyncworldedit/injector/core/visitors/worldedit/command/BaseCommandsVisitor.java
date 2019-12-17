@@ -196,12 +196,7 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
     }
 
     private void emitInnerClass(MethodEntry me) throws IOException {
-        if (me.exceptions != null && me.exceptions.length > 1) {
-            throw new IllegalArgumentException("Expected one or non exceptions.");
-        }
-
         String className = getMethodClassName(me);
-        String exception = me.exceptions[0];
 
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         cw.visit(Opcodes.V1_8, Opcodes.ACC_STATIC | Opcodes.ACC_PRIVATE, className,
@@ -212,7 +207,7 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
         emitEmptyCtor(cw);
 
         MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "execute", "(Ljava/lang/Object;[Ljava/lang/Object;)V",
-                null, new String[]{"com/sk89q/worldedit/WorldEditException"});
+                null, new String[]{"java/lang/Exception"});
 
         mv.visitCode();
         String[] args = getArgs(me.descriptor);

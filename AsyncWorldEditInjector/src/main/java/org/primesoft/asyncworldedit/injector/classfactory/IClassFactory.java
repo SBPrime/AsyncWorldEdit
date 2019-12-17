@@ -100,7 +100,7 @@ public interface IClassFactory {
      * @param ex The exception to hanlde 
      * @param name The operation name
      */
-    void handleError(WorldEditException ex, String name);
+    void handleError(Exception ex, String name);
 
      IPlayerEntry getPlayer(UUID uniqueId);
      

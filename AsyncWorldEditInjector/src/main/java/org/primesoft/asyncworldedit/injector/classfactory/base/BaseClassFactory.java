@@ -93,7 +93,7 @@ public class BaseClassFactory implements IClassFactory {
     }
 
     @Override
-    public void handleError(WorldEditException ex, String name) {
+    public void handleError(Exception ex, String name) {
         // No op
     }
 

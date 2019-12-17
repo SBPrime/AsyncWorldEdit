@@ -47,12 +47,10 @@
  */
 package org.primesoft.asyncworldedit.injector.utils;
 
-import com.sk89q.worldedit.WorldEditException;
-
 /**
  *
  * @author SBPrime
  */
 public interface MultiArgWorldEditOperationAction {
-    void execute(Object _this, Object[] args) throws WorldEditException;
+    void execute(Object _this, Object[] args) throws Exception;
 }

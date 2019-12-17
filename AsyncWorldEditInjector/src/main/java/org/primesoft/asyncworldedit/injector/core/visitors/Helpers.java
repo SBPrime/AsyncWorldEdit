@@ -118,7 +118,7 @@ public final class Helpers {
                 public void execute() {
                     try {
                         method.execute(_this, args);
-                    } catch (WorldEditException ex) {
+                    } catch (Exception ex) {
                         actor.printError(TextComponent.of("Error while executing " + name));
                         InjectorCore.getInstance().getClassFactory().handleError(ex, name);
                     }
@@ -145,7 +145,7 @@ public final class Helpers {
                         }
 
                         method.execute(_this, argsNew);
-                    } catch (WorldEditException ex) {
+                    } catch (Exception ex) {
                         actor.printError(TextComponent.of("Error while executing " + name));
                         InjectorCore.getInstance().getClassFactory().handleError(ex, name);
                     }
