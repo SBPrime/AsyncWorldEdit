@@ -77,10 +77,10 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.14.1-03bd4b0-17da342</version>
+            <version>1.15.1-2ee05fe-90ef74e</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/spigot/spigot-1.14.1-03bd4b0-17da342.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/spigot/spigot-1.15.1-2ee05fe-90ef74e.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>

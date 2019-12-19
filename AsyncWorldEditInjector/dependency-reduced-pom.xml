@@ -60,22 +60,22 @@
     <dependency>
       <groupId>org.primesoft.asyncworldedit</groupId>
       <artifactId>AsyncWorldEdit-Utils</artifactId>
-      <version>3.6.15-BETA-02</version>
+      <version>3.6.15</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.sk89q.worldedit</groupId>
       <artifactId>worldedit</artifactId>
-      <version>7.1.0-SNAPSHOT-4789</version>
+      <version>7.1.0-beta-1</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.1.0-SNAPSHOT-4789.jar</systemPath>
+      <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.1.0-beta-1.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
-      <version>1.14.1-03bd4b0-17da342</version>
+      <version>1.15.1-2ee05fe-90ef74e</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../libs/spigot/spigot-1.14.1-03bd4b0-17da342.jar</systemPath>
+      <systemPath>${project.basedir}/../libs/spigot/spigot-1.15.1-2ee05fe-90ef74e.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>net.minecraftforge</groupId>
