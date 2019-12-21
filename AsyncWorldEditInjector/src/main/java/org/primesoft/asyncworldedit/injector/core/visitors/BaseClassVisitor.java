@@ -74,6 +74,8 @@ import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IDispatchabl
  * @author SBPrime
  */
 public abstract class BaseClassVisitor extends InjectorClassVisitor {
+    protected String m_cls;
+    
     private static final Set<Character> PRIMITIVES = "ZBCDFIJS".chars()
             .mapToObj(i -> (char)i)
             .collect(Collectors.toCollection(HashSet<Character>::new));
@@ -387,4 +389,10 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         ).toArray(String[]::new);
     }
 
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        m_cls = name;
+        
+        super.visit(version, access, name, signature, superName, interfaces);
+    }    
 }

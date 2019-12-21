@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -47,86 +47,53 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
  * @author SBPrime
  */
-public class BlockPlacerGroup {
-    private static final int INFINITE = -10;
-
-    private final Map<IPlayerEntry, Integer> m_players;
-    private final IPermissionGroup m_permGroup;
-
-    private int m_seqNumber = 0;
-
-    public BlockPlacerGroup(IPermissionGroup group, IPlayerEntry[] players) {
-        m_players = new HashMap<>();
-
-        for (IPlayerEntry p : players) {
-            int cnt = p.getRenderBlocks();
-            m_players.put(p, cnt < 0 ? INFINITE : cnt);
-        }
-
-        m_permGroup = group;
-    }
-
-    /**
-     * Get the players
-     *
-     * @return
-     */
-    public IPlayerEntry[] getPlayers() {
-        return m_players.keySet().toArray(new IPlayerEntry[0]);
-    }
-
-    /**
-     * Get the sequence number
-     *
-     * @return
-     */
-    public int getSeqNumber() {
-        return m_seqNumber;
-    }
-
-    /**
-     * Set new sequence number and update player blocks left
-     *
-     * @param keyPos
-     * @param pe
-     */
-    public void updateProgress(int keyPos, IPlayerEntry pe) {
-        m_seqNumber = keyPos;
-        if (pe == null) {
-            return;
-        }
-
-        Integer cnt = m_players.getOrDefault(pe, 0);
-        if (cnt == INFINITE) {
-            return;
-        }
+public class BlockPlacerGroupTest {
+    @Test
+    public void shouldNotRemovePlayerWithInfiniteBlockCount() {
+        // Given
+        IPlayerEntry pe = Mockito.mock(IPlayerEntry.class);
+        Mockito.when(pe.getRenderBlocks()).thenReturn(-1);        
+        BlockPlacerGroup bpg = new BlockPlacerGroup(null, new IPlayerEntry[]{ pe });
         
-        cnt--;
-        if (cnt <= 0) {
-            m_players.remove(pe);            
-        } else {
-            m_players.put(pe, cnt);
-        }
-    }
+        // When
+        bpg.updateProgress(-1, pe);
+        IPlayerEntry[] peResult = bpg.getPlayers();
 
-    public int getQueueSoftLimit() {
-        return m_permGroup.getQueueSoftLimit();
+        // Then        
+        Assert.assertNotNull("Get players", peResult);
+        Assert.assertEquals("Number of players", 1, peResult.length);
+        Assert.assertEquals("Player", pe, peResult[0]);
     }
-
-    public int getRendererBlocks() {
-        return m_permGroup.getRendererBlocks();
-    }
-
-    public int getRendererTime() {
-        return m_permGroup.getRendererTime();
+    
+    @Test
+    public void shouldRemovePlayerBlockCountRunsOut() {
+        // Given
+        IPlayerEntry pe = Mockito.mock(IPlayerEntry.class);
+        Mockito.when(pe.getRenderBlocks()).thenReturn(2);
+        BlockPlacerGroup bpg = new BlockPlacerGroup(null, new IPlayerEntry[]{ pe });
+        
+        // When
+        bpg.updateProgress(-1, pe);
+        IPlayerEntry[] peResult1 = bpg.getPlayers();
+        
+        bpg.updateProgress(-1, pe);
+        IPlayerEntry[] peResult2 = bpg.getPlayers();
+        
+        // Then
+        Assert.assertNotNull("Step 1: Get players", peResult1);
+        Assert.assertEquals("Step 1: Number of players", 1, peResult1.length);
+        Assert.assertEquals("Step 1: Player", pe, peResult1[0]);
+        
+        Assert.assertNotNull("Step 2: Get players", peResult2);
+        Assert.assertEquals("Step 2: Number of players", 0, peResult2.length);
     }
 }

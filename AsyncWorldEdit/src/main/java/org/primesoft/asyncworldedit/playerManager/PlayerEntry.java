@@ -320,10 +320,21 @@ public abstract class PlayerEntry implements IPlayerEntry {
     public void setRenderBlocks(Integer b) {
         Integer old = m_rendererBlocks;
         
-        if (b == null || b > m_group.getRendererBlocks()) {
+        if (b == null) {
             m_rendererBlocks = null;
         } else {
-            m_rendererBlocks = b;
+            int limit = m_group.getRendererBlocks();
+            if (limit > 0) {
+                if (b > limit || b < 1) {                    
+                    m_rendererBlocks = null;
+                } else {
+                    m_rendererBlocks = b;
+                }
+            } else if (b < 1) {
+                m_rendererBlocks = null;
+            } else {
+                m_rendererBlocks = b;
+            }
         }
         
         AwePlatform.getInstance().getCore().getEventBus().post(new BlockRenderCountEvent(this, old, b));

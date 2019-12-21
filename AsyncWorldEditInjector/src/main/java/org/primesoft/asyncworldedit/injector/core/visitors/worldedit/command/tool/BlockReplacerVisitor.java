@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2015, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,88 +45,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.blockPlacer;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Opcodes;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseFieldAccessorVisitor;
+import org.primesoft.asyncworldedit.injector.injected.commands.tool.IBlockReplacerAccessor;
 
 /**
  *
  * @author SBPrime
  */
-public class BlockPlacerGroup {
-    private static final int INFINITE = -10;
-
-    private final Map<IPlayerEntry, Integer> m_players;
-    private final IPermissionGroup m_permGroup;
-
-    private int m_seqNumber = 0;
-
-    public BlockPlacerGroup(IPermissionGroup group, IPlayerEntry[] players) {
-        m_players = new HashMap<>();
-
-        for (IPlayerEntry p : players) {
-            int cnt = p.getRenderBlocks();
-            m_players.put(p, cnt < 0 ? INFINITE : cnt);
-        }
-
-        m_permGroup = group;
-    }
-
-    /**
-     * Get the players
-     *
-     * @return
-     */
-    public IPlayerEntry[] getPlayers() {
-        return m_players.keySet().toArray(new IPlayerEntry[0]);
-    }
-
-    /**
-     * Get the sequence number
-     *
-     * @return
-     */
-    public int getSeqNumber() {
-        return m_seqNumber;
-    }
-
-    /**
-     * Set new sequence number and update player blocks left
-     *
-     * @param keyPos
-     * @param pe
-     */
-    public void updateProgress(int keyPos, IPlayerEntry pe) {
-        m_seqNumber = keyPos;
-        if (pe == null) {
-            return;
-        }
-
-        Integer cnt = m_players.getOrDefault(pe, 0);
-        if (cnt == INFINITE) {
-            return;
-        }
-        
-        cnt--;
-        if (cnt <= 0) {
-            m_players.remove(pe);            
-        } else {
-            m_players.put(pe, cnt);
-        }
-    }
-
-    public int getQueueSoftLimit() {
-        return m_permGroup.getQueueSoftLimit();
-    }
-
-    public int getRendererBlocks() {
-        return m_permGroup.getRendererBlocks();
-    }
-
-    public int getRendererTime() {
-        return m_permGroup.getRendererTime();
+public class BlockReplacerVisitor extends BaseFieldAccessorVisitor {
+    public BlockReplacerVisitor(ClassVisitor classVisitor) {
+        super(IBlockReplacerAccessor.class, new FieldEntry[] {
+            new FieldEntry(Opcodes.ACC_PRIVATE, "pattern", "Lcom/sk89q/worldedit/function/pattern/Pattern;", "getPattern", null)
+        }, classVisitor);
     }
 }

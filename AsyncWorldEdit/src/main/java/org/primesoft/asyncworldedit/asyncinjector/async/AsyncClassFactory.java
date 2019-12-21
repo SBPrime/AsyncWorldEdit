@@ -47,7 +47,6 @@
  */
 package org.primesoft.asyncworldedit.asyncinjector.async;
 
-import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.command.RegionCommandsRegistration;
 import com.sk89q.worldedit.command.UtilityCommandsRegistration;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -66,6 +65,7 @@ import org.primesoft.asyncworldedit.excommands.commands.ExRegionCommandsRegistra
 import org.primesoft.asyncworldedit.excommands.commands.ExUtilityCommandsRegistration;
 import org.primesoft.asyncworldedit.injector.classfactory.IDispatcher;
 import org.primesoft.asyncworldedit.injector.classfactory.IJobProcessor;
+import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
 import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
@@ -82,7 +82,7 @@ public class AsyncClassFactory extends BaseClassFactory {
     /**
      * The operation processor
      */
-    private AsyncOperationProcessor m_operationProcessor;
+    private IOperationProcessor m_operationProcessor;
 
     private AsyncJobProcessor m_jobProcessor;
     
@@ -97,7 +97,7 @@ public class AsyncClassFactory extends BaseClassFactory {
         m_aweCore = aweCore;        
     }
     
-    private <T> T lazyGet(Supplier<T> suplier, 
+    private <T> T lazyGet(Supplier<? extends T> suplier, 
             Supplier<T> fieldGet, Consumer<T> fieldSet) {
         if (fieldGet.get() == null) {
             synchronized (m_mtaMutex) {
@@ -112,7 +112,7 @@ public class AsyncClassFactory extends BaseClassFactory {
     
 
     @Override    
-    public AsyncOperationProcessor getOperationProcessor() {
+    public IOperationProcessor getOperationProcessor() {
         return lazyGet(() -> new AsyncOperationProcessor(m_aweCore), () -> m_operationProcessor, i -> m_operationProcessor = i);
     }
 

@@ -53,7 +53,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.platform.api.IConfiguration;
@@ -77,7 +79,7 @@ public class ConfigProvider {
 
     private static String m_configVersion;
 
-    private static EnumSet<WorldeditOperations> m_disabledOperations;
+    private static Set<WorldeditOperations> m_disabledOperations;
 
     private static File m_pluginFolder;
 
@@ -393,23 +395,28 @@ public class ConfigProvider {
      * @param mainSection
      * @return
      */
-    private static EnumSet<WorldeditOperations> parseOperationsSection(
+    private static Set<WorldeditOperations> parseOperationsSection(
             IConfigurationSection mainSection) {
-        EnumSet<WorldeditOperations> result = EnumSet.noneOf(WorldeditOperations.class);
+        Set<WorldeditOperations> result = new HashSet();
 
         for (String string : mainSection.getStringList("disabledOperations")) {
-            try {
-                result.add(WorldeditOperations.valueOf(string));
-            } catch (Exception e) {
-                log("* unknown operation name " + string);
+            WorldeditOperations operation = WorldeditOperations.valueOf(string);
+            
+            if (operation == null) {
+                if (messages().debugLevel().isAtLeast(DebugLevel.INFO)) {
+                    log(" * custom WorldeditOperations: " + string);
+                }
+                
+                operation = WorldeditOperations.create(string);
             }
-
+            
+            if (!result.add(operation) && messages().debugLevel().isAtLeast(DebugLevel.WARN)) {
+                log(" * duplicate WorldeditOperations: " + string);
+            }
         }
         if (messages().debugLevel().isAtLeast(DebugLevel.INFO)) {
             log("World edit operations:");
-            for (WorldeditOperations op : WorldeditOperations.values()) {
-                log("* " + op + "..." + (result.contains(op) ? "regular" : "async"));
-            }
+            WorldeditOperations.values().forEach(op -> log("* " + op + "..." + (result.contains(op) ? "regular" : "async")));
         }
 
         return result;

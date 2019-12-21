@@ -58,8 +58,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.primesoft.asyncworldedit.injector.IClassInjector;
@@ -82,6 +80,8 @@ import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.Reg
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SchematicCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.ScriptingCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SnapshotUtilCommandsVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.BlockReplacerVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.BrushToolVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.reorder.ResetableExtentVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.regions.RegionVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.util.collection.LocatedBlockListVisitor;
@@ -226,6 +226,10 @@ public class InjectorCore {
 
             modiffyClasses("com.sk89q.worldedit.command.UtilityCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
             modiffyClasses("com.sk89q.worldedit.command.RegionCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
+            
+            // Reflection
+            modiffyClasses("com.sk89q.worldedit.command.tool.BrushTool", c -> new BrushToolVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.command.tool.BlockReplacer", c -> new BlockReplacerVisitor(c));
 
             crateClass(cc-> new CreatePlayerWrapper(cc));
             crateClass(cc-> new CreateNoPermsPlayer(cc));

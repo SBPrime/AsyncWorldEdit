@@ -64,9 +64,7 @@ import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 public class ChunkProviderServerVisitor extends BaseClassVisitor {
 
     private final SimpleValidator m_vFieldChunks = new SimpleValidator("Fields chunks not found");
-    private final SimpleValidator m_vMethodGetChunkAt = new SimpleValidator("Method getChunkAt not found");
-
-    private String m_cls;
+    private final SimpleValidator m_vMethodGetChunkAt = new SimpleValidator("Method getChunkAt not found");    
 
     private String m_chunksDescriptor;
 
@@ -82,13 +80,6 @@ public class ChunkProviderServerVisitor extends BaseClassVisitor {
     public void validate() throws RuntimeException {
         m_vFieldChunks.validate();
         m_vMethodGetChunkAt.validate();
-    }
-
-    @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        m_cls = name;
-
-        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override

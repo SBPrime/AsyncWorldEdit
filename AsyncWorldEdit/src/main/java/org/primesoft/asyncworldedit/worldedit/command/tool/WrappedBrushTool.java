@@ -59,6 +59,7 @@ import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import java.lang.reflect.Field;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
+import org.primesoft.asyncworldedit.injector.injected.commands.tool.IBrushToolAccessor;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.command.tool.brush.AsyncGravityBrush;
 
@@ -90,8 +91,7 @@ public final class WrappedBrushTool extends BrushTool {
         String permissions = null;
         
         if (s_fieldPermission != null) {
-            permissions = Reflection.get(m_parrent, String.class, 
-                    s_fieldPermission, "Unable to get permissions from BrushTOol");                
+            permissions = ((IBrushToolAccessor)m_parrent).getPermission();
         }
         
         if (permissions == null) {

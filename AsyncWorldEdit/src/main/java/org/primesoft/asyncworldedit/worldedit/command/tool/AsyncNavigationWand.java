@@ -86,7 +86,7 @@ public class AsyncNavigationWand extends NavigationWand {
             public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session) {
                 return doActSecondary(server, config, player, session);
             }
-        }, "navigationWand", WorldeditOperations.tool);
+        }, "navigationWand", WorldeditOperations.navigationWand);
     }
     
     private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session) {

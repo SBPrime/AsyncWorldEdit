@@ -71,6 +71,7 @@ import org.primesoft.asyncworldedit.strings.MessageType;
  * @author SBPrime
  */
 public class BlockPlacerPlayer implements IBlockPlacerPlayer {
+    private final static double MIN_SPEED = 0.01;
     private final static Object ITEM = new Object();
     private final Map<ICountProvider, Object> m_otherCountSources = new ConcurrentHashMap<>();
 
@@ -163,7 +164,7 @@ public class BlockPlacerPlayer implements IBlockPlacerPlayer {
      */
     @Override
     public double getSpeed() {
-        return m_speed;
+        return Math.max(m_speed, MIN_SPEED);
     }
 
     /**

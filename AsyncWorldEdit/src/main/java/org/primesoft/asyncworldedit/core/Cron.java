@@ -204,7 +204,7 @@ public final class Cron implements ICron {
         if (keepUndoFor < 0) {
             return;
         }
-        
+
         final int undoMode = ConfigProvider.messages().getUndoMode();        
         boolean showMessages = undoMode >= (startup ? ConfigMessages.UNDO_STARTUP : ConfigMessages.UNDO_ON);
         boolean showError = undoMode >= ConfigMessages.UNDO_ERROR;

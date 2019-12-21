@@ -79,7 +79,7 @@ public class StackValidator {
         new StackValidatorEntry(".*sk89q.*ClipboardCommands", new String[]{"copy", "paste", "cut"}, ""),
         new StackValidatorEntry(".*sk89q.*SchematicCommands", "", ".*"),
         new StackValidatorEntry(".*sk89q.*RegionCommands", new String[]{"forest", "flora"}, ""),
-        new StackValidatorEntry(".*sk89q.*RegionCommandsRegistration", new String[]{"_set",}, "") {
+        new StackValidatorEntry(".*sk89q.*RegionCommandsRegistration", new String[]{".*_set",}, "") {
             @Override
             public String getOperationName(String name) {
                 return "setBlocks";

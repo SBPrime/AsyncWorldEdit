@@ -55,9 +55,8 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.util.Location;
-import java.lang.reflect.Field;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.injector.injected.commands.tool.IBlockReplacerAccessor;
 
 /**
  *
@@ -65,14 +64,12 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  */
 public class AsyncBlockReplacer extends BlockReplacer implements IAsyncTool {
 
-    private static final Field s_blockReplacerPattern = Reflection.findField(BlockReplacer.class, "pattern", "Unable to get pattern field from BlockReplacer");
-
     public static Tool wrap(BlockReplacer blockReplacer) {
-        if (blockReplacer == null || s_blockReplacerPattern == null) {
+        if (blockReplacer == null) {
             return null;
         }
 
-        Pattern pattern = Reflection.get(blockReplacer, Pattern.class, s_blockReplacerPattern, "Unable to get targetBlock from BlockReplacer");
+        Pattern pattern = ((IBlockReplacerAccessor)blockReplacer).getPattern();
 
         if (pattern == null) {
             return null;

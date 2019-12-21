@@ -427,7 +427,7 @@ public class BlockPlacer implements IBlockPlacer {
         boolean demanding = false;
 
         int pos = 0;
-        while (!groups.isEmpty()) {
+        while (! groups.isEmpty()) {
             BlockPlacerGroup group = groups.get(pos);
             int maxTime = group.getRendererTime();
             int maxBlocksCount = group.getRendererBlocks();
@@ -447,9 +447,11 @@ public class BlockPlacer implements IBlockPlacer {
                 boolean isDemanding = entry.isDemanding();
                 demanding |= isDemanding;
                 
+                long now = System.currentTimeMillis();
                 if (isDemanding) {
                     groups.clear();
-                } else if ((maxTime != -1 && (System.currentTimeMillis() - startTime) >= maxTime) ||
+                } 
+                else if ((maxTime != -1 && (now - startTime) >= maxTime) ||
                         (maxBlocksCount != -1 && blocks > maxBlocksCount))
                 {
                     groups.remove(group);
@@ -463,8 +465,9 @@ public class BlockPlacer implements IBlockPlacer {
         }
 
         if (ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.TRACE)) {
-            log("[BP RUN] Blocks placed: " + blocks + "\tTime: " + (System.currentTimeMillis() - startTime) + 
-                    "\tIs demanding task: " + (demanding ? "Y" : "N"));
+            log("[BP RUN] Blocks placed: " + blocks + 
+                "\tTime: " + (System.currentTimeMillis() - startTime) + 
+                "\tIs demanding task: " + (demanding ? "Y" : "N"));
         }
         return blocks > 0;
     }
