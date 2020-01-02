@@ -67,8 +67,19 @@ public class WorldEditConfig implements IPremiumWorldEditConfig {
         }
 
         HashSet<String> disallowedBlocks;
+        String entryName;                
         if (config.contains("disallowedBlocks")) {
-            List<String> tmp = config.getStringList("disallowedBlocks");
+            entryName = "disallowedBlocks";
+        } 
+        else if (config.contains("disallowed-blocks")) {
+            entryName = "disallowed-blocks";
+        }
+        else {
+            entryName = null;
+        }
+        
+        if (entryName != null) {        
+            List<String> tmp = config.getStringList(entryName);
             disallowedBlocks = new HashSet<>();
 
             if (tmp != null) {
