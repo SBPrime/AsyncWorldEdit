@@ -111,8 +111,10 @@ public class SerializableSessionList extends LinkedList<EditSession> {
         }
 
         synchronized (m_mutex) {
-            int oldId = m_usedId.remove(session);
-            m_availableIds.add(oldId);
+            Integer oldId = m_usedId.remove(session);
+            if (oldId != null) {
+                m_availableIds.add(oldId);
+            }
         }
     }
 

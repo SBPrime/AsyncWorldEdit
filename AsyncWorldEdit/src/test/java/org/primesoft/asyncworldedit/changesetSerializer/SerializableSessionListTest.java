@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2020, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,85 +45,45 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.util.eventbus;
+package org.primesoft.asyncworldedit.changesetSerializer;
 
-import com.google.common.collect.Multimap;
-import com.sk89q.worldedit.util.eventbus.EventHandler;
-import com.sk89q.worldedit.util.eventbus.MethodEventHandler;
-import java.lang.reflect.Method;
-import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IDispatchableEventBus;
-import org.primesoft.asyncworldedit.injector.injected.util.eventbus.IEventBus;
-import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import com.sk89q.worldedit.EditSession;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  *
  * @author SBPrime
  */
-public class EventBusWrapper implements IEventBus {
-    private final IDispatchableEventBus m_target;
+public class SerializableSessionListTest {
+    private SerializableSessionList m_sessionList;
     
-    public EventBusWrapper(IDispatchableEventBus target) {
-        m_target = target;
-    }
-
-    @Override
-    public void post(Object event) {
-        m_target.nonwrapped_post(event);
-    }
-
-    @Override
-    public void register(Object object) {
-        m_target.nonwrapped_register(object);
-    }
-
-    @Override
-    public synchronized void subscribe(Class<?> clazz, EventHandler handler) {
-        m_target.nonwrapped_subscribe(clazz, handler);
-    }
-
-    @Override
-    public synchronized void subscribeAll(Multimap<Class<?>, EventHandler> handlers) {
-        m_target.nonwrapped_subscribeAll(handlers);
-    }
-
-    @Override
-    public void unregister(Object object) {
-        m_target.nonwrapped_unregister(object);
-    }
-
-    @Override
-    public synchronized void unsubscribe(Class<?> clazz, EventHandler handler) {
-        m_target.nonwrapped_unsubscribe(clazz, handler);
-    }
-
-    @Override
-    public synchronized void unsubscribeAll(Multimap<Class<?>, EventHandler> handlers) {
-        m_target.nonwrapped_unsubscribeAll(handlers);
-    }
-
-    @Override
-    public void dispatch(Object event, EventHandler handler) {
-        try {
-            m_target.nonwrapped_dispatch(event, handler);
-        } catch (Throwable ex) {            
-            ExceptionHelper.printException(ex, "Unable to dispatch evetn: " + event + " to handler " + toString(handler));
-        }
+    @Before
+    public void init() {
+        m_sessionList = new SerializableSessionList();
     }
     
-    private String toString(EventHandler eh) {
-        if (eh == null) {
-            return "NULL";
-        }
+    @Test
+    public void shouldNotThrowNullPtrOnClearAfterAddingNullSession() {
+        // Given
         
-        if (eh instanceof MethodEventHandler) {
-            MethodEventHandler meh = (MethodEventHandler)eh;            
-            Method method = meh.getMethod();
-            
-            return "MethodEventHandler { method = " + 
-                    (method != null ? method.toGenericString() : "NULL")
-                    + "}";
-        }
+        // When
+        m_sessionList.add(null);
+        m_sessionList.clear();
         
-        return "Unknown { " + eh.getClass().getName() + " }";
+        // Then
+        // No error thrown
+    }
+    
+    @Test
+    public void shouldNotThrowNullPtrOnRemoveAfterAddingNullSession() {
+        // Given
+        
+        // When
+        m_sessionList.add(null);
+        m_sessionList.remove(0);
+        
+        // Then
+        // No error thrown
     }
 }
