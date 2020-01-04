@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2020, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,65 +45,61 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.injector.core.visitors;
 
-package org.primesoft.asyncworldedit.injector.classfactory;
-
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
-import java.util.Iterator;
-import java.util.UUID;
-import org.enginehub.piston.CommandManager;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
+import java.util.Collection;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.primesoft.asyncworldedit.injector.utils.AnnotationEntry;
+import org.primesoft.asyncworldedit.injector.utils.MethodEntry;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
-    /**
-     * Get the operation processor
-     * @return 
-     */
-    IOperationProcessor getOperationProcessor();
-    
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
-    
-    /**
-     * Get the dispather
-     * @return 
-     */
-    IDispatcher getDisatcher();
-    
-    /**
-     * Create new instance of the clipboard
-     * @param parent
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Clipboard parent, Region region);
+public class MethodAnnotationRecorderVisitor extends MethodVisitor {
+    private final MethodEntry m_me;
 
-    /**
-     * Handle the exception from operation
-     * @param ex The exception to hanlde 
-     * @param name The operation name
-     */
-    void handleError(Exception ex, String name);
+    public MethodAnnotationRecorderVisitor(int api, MethodVisitor methodVisitor, MethodEntry me) {
+        super(api, methodVisitor);
+        m_me = me;
+    }
 
-     IPlayerEntry getPlayer(UUID uniqueId);
-     
-     World wrapWorld(World world, IPlayerEntry player);
+    @Override
+    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+        AnnotationEntry an = new AnnotationEntry(descriptor, visible);
+        m_me.annotations.add(an);
 
-    CommandManager wrapCommandManager(Object sender, CommandManager cm);
+        return new FakeAnnotationVisitor(an, api, super.visitAnnotation("Lorg/primesoft/asyncworldedit/injector/utils/FakeAttrib;", false));
+    }
 
-    ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent);
+    private static class FakeAnnotationVisitor extends AnnotationScannerVisitor {
 
-    Iterator<BlockVector3> getRegionIterator(Region region);
+        public FakeAnnotationVisitor(AnnotationEntry entry, int api, AnnotationVisitor annotationVisitor) {
+            super(entry, api, annotationVisitor);
+        }
+
+        @Override
+        protected void doVisit(String name, Object value) {
+        }
+
+        @Override
+        protected AnnotationVisitor doVisitAnnotation(String name, String descriptor) {
+            return null;
+        }
+
+        @Override
+        protected AnnotationVisitor doVisitArray(String name, Collection<Object> values) {
+            return new AnnotationVisitor(api, super.doVisitArray("fooArray", values)) {
+                @Override
+                public void visit(String name, Object value) {
+                    values.add(value);
+                }
+            };
+        }
+
+        @Override
+        protected void doVisitEnum(String name, String descriptor, String value) {
+        }
+    }
 }

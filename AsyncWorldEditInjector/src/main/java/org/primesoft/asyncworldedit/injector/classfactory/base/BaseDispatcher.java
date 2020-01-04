@@ -69,7 +69,4 @@ public class BaseDispatcher implements IDispatcher {
     public <TEx extends Exception, R> R execute(IFuncEx<R, TEx> a) throws TEx {
         return a.execute();
     }
-
-    
-    
 }

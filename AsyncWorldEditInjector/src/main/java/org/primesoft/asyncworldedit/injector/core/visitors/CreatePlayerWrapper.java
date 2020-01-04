@@ -146,7 +146,7 @@ public class CreatePlayerWrapper extends BaseCreateWrapper {
         UUID uuid = UUID.randomUUID();
         String id = String.format("__%016x%016x__", uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
         MethodEntry me = new MethodEntry(id, mv, name, descriptor, m);
-        m_knownMethods.add(me);                
+        m_knownMethods.add(me);
         
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, m_targetName, "m_data", DESCRIPTOR_WRAPPER_DATA);

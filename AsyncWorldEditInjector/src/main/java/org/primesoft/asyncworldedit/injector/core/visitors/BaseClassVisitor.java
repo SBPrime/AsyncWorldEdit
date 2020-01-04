@@ -238,6 +238,30 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         }
     }
 
+    protected final void visitReturn(MethodVisitor mv, String resultType) {
+        if ("V".equals(resultType)) {
+            mv.visitInsn(Opcodes.RETURN);
+        } else if ("D".equals(resultType)) {
+            mv.visitInsn(Opcodes.DRETURN);
+        } else if ("F".equals(resultType)) {
+            mv.visitInsn(Opcodes.FRETURN);
+        } else if ("I".equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if ("J".equals(resultType)) {
+            mv.visitInsn(Opcodes.LRETURN);
+        } else if ("Z".equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if ("B".equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if ("C".equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if ("S".equals(resultType)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else {
+            mv.visitInsn(Opcodes.ARETURN);
+        }
+    }
+    
     protected final void visitReturn(MethodVisitor mv, Class<?> resultType) {
         if (void.class.equals(resultType)) {
             mv.visitInsn(Opcodes.RETURN);

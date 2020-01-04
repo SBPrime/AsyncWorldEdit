@@ -52,5 +52,11 @@ package org.primesoft.asyncworldedit.injector.utils;
  * @author SBPrime
  */
 public interface MultiArgWorldEditOperationAction {
-    void execute(Object _this, Object[] args) throws Exception;
+    default void execute(Object _this, Object[] args) throws Exception {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+    
+    default Object executeFunction(Object _this, Object[] args) throws Exception {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 }

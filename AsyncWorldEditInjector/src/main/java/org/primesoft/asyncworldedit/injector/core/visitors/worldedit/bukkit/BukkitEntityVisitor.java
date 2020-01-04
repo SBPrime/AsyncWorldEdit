@@ -1,16 +1,12 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * AsyncWorldEdit Injector a hack plugin that allows AsyncWorldEdit to integrate with
- * the WorldEdit plugin.
- *
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2020, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
- * Copyright (c) AsyncWorldEdit injector contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following
+ * modification, are permitted free of charge provided that the following 
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
@@ -49,65 +45,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.bukkit;
 
-package org.primesoft.asyncworldedit.injector.classfactory;
-
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
-import java.util.Iterator;
-import java.util.UUID;
-import org.enginehub.piston.CommandManager;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
-import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
+import org.objectweb.asm.ClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseDispatchExecutor;
+import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 
 /**
- * Interface for injected WorldEdit classes factory
+ *
  * @author SBPrime
  */
-public interface IClassFactory {
-    /**
-     * Get the operation processor
-     * @return 
-     */
-    IOperationProcessor getOperationProcessor();
+public class BukkitEntityVisitor extends BaseDispatchExecutor {
     
-    /**
-     * Get the job processor
-     * @return 
-     */
-    IJobProcessor getJobProcessor();
-    
-    /**
-     * Get the dispather
-     * @return 
-     */
-    IDispatcher getDisatcher();
-    
-    /**
-     * Create new instance of the clipboard
-     * @param parent
-     * @param region
-     * @return 
-     */
-    Clipboard createClipboard(Clipboard parent, Region region);
-
-    /**
-     * Handle the exception from operation
-     * @param ex The exception to hanlde 
-     * @param name The operation name
-     */
-    void handleError(Exception ex, String name);
-
-     IPlayerEntry getPlayer(UUID uniqueId);
-     
-     World wrapWorld(World world, IPlayerEntry player);
-
-    CommandManager wrapCommandManager(Object sender, CommandManager cm);
-
-    ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent);
-
-    Iterator<BlockVector3> getRegionIterator(Region region);
+    public BukkitEntityVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
+        super(classVisitor, createClass);
+    }    
 }

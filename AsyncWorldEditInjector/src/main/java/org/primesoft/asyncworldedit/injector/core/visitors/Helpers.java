@@ -56,9 +56,6 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.collection.BlockMap;
 import com.sk89q.worldedit.util.collection.LocatedBlockList;
-import com.sk89q.worldedit.util.formatting.WorldEditText;
-import com.sk89q.worldedit.util.formatting.text.AbstractComponent;
-import com.sk89q.worldedit.util.formatting.text.Component;
 import com.sk89q.worldedit.util.formatting.text.TextComponent;
 import java.util.Iterator;
 import java.util.Map;
@@ -152,6 +149,35 @@ public final class Helpers {
                 }
             });
         }
+    }
+    
+    public static void dispatchMultiArgMethod(Object _this,
+            String name, MultiArgWorldEditOperationAction method,
+            final Object... args) {
+
+        InjectorCore.getInstance().getClassFactory().getDisatcher().execute(() -> {
+                try {
+                    method.execute(_this, args);
+                } catch (Exception ex) {
+                    InjectorCore.getInstance().getClassFactory().handleError(ex, name);
+                }
+            }
+        );
+    }
+    
+    public static Object dispatchMultiArgFunction(Object _this,
+            String name, MultiArgWorldEditOperationAction method,
+            final Object... args) {
+
+        return InjectorCore.getInstance().getClassFactory().getDisatcher().execute(() -> {
+                try {
+                    return method.executeFunction(_this, args);
+                } catch (Exception ex) {
+                    InjectorCore.getInstance().getClassFactory().handleError(ex, name);
+                    return null;
+                }
+            }
+        );
     }
 
     public static Clipboard createClipboard(Clipboard parent, Region region) {

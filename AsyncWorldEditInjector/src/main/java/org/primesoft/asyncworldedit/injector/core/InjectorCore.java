@@ -75,6 +75,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.function.operation.OperationsClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.EditSessionClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.bukkit.BukkitEntityVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.CommandsRegistrationVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.RegionCommandsVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.SchematicCommandsVisitor;
@@ -225,6 +226,9 @@ public class InjectorCore {
             modiffyClasses("com.sk89q.worldedit.command.RegionCommands", (c, cc) -> new RegionCommandsVisitor(c, cc));
 
             modiffyClasses("com.sk89q.worldedit.command.UtilityCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
+            modiffyClasses("com.sk89q.worldedit.bukkit.BukkitEntity", (c, cc) -> new BukkitEntityVisitor(c, cc));
+            
+            // Bukkit
             modiffyClasses("com.sk89q.worldedit.command.RegionCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
             
             // Reflection

@@ -1,6 +1,6 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2019, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2020, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
@@ -45,64 +45,62 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command;
+package org.primesoft.asyncworldedit.injector.core.visitors;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
-import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
-import org.primesoft.asyncworldedit.injector.core.visitors.MethodAnnotationRecorderVisitor;
+import static org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor.isPublic;
 import org.primesoft.asyncworldedit.injector.utils.MethodEntry;
-import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 
 /**
  *
- * @author prime
+ * @author SBPrime
  */
-public abstract class BaseCommandsVisitor extends BaseClassVisitor {
+public abstract class BaseDispatchExecutor extends BaseClassVisitor {
+    
+    private final Map<MethodEntry, WrapType> m_methodsToWrap = new HashMap<>();
+    
+    protected String m_descriptorClass;
+    protected String m_descriptorClassInner;
 
-    protected final List<MethodEntry> m_methodsToWrap = new ArrayList<>();
-
-    private String m_descriptorClass;
-    private String m_descriptorClassInner;
-
-    private final Map<String, Map<String, SimpleValidator>> m_methods;
-
-    private static SimpleValidator buildValidator(String name, String descriptor) {
-        return new SimpleValidator("Missing method '" + name + descriptor + "'");
-    }
-
-    protected BaseCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass,
-            Map<String, String[]> methods) {
+    public BaseDispatchExecutor(ClassVisitor classVisitor, ICreateClass createClass) {
         super(classVisitor, createClass);
-
-        m_methods = methods.entrySet().stream()
-                .collect(Collectors.toMap(i -> i.getKey(), i
-                        -> Stream.of(i.getValue()).collect(Collectors.toMap(j -> j, j -> buildValidator(i.getKey(), j)))));
     }
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        super.visit(version, access, name, signature, superName, interfaces);
+        
         m_descriptorClass = name;
         m_descriptorClassInner = name + "_" + RANDOM_PREFIX + "_InnerForMethod_";
-
-        super.visit(version, access, name, signature, superName, interfaces);
     }
-
+    
+    
     @Override
     public void visitEnd() {
         try {
-            for (MethodEntry me : m_methodsToWrap) {
-                emitInnerClass(me);
-                emitMethod(me);
+            for (Map.Entry<MethodEntry, WrapType> entry : m_methodsToWrap.entrySet()) {
+                MethodEntry method = entry.getKey();                
+                emitInnerClass(method);
+                
+                switch (entry.getValue()) {
+                    default:
+                        throw new IllegalStateException("Unknown dispatch type: '" + entry.getValue() + "' for " + method.name + method.descriptor);
+                    case DISPATCH:
+                        emitMethodDispatch(method);
+                        break;
+                    case EXECUTE:
+                        emitMethodExecute(method);
+                        break;
+                    case CUSTOM:
+                        emitMethodCustom(method);
+                        break;
+                }                
             }
         } catch (IOException ex) {
             throw new IllegalStateException("Unable to create inner class.", ex);
@@ -110,52 +108,47 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
 
         super.visitEnd();
     }
+        
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        if (!isPublic(access)) {
+        if (!isPublic(access) || isCtor(name)) {
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
 
-        Map<String, SimpleValidator> descriptors = m_methods.get(name);
-        if (descriptors == null) {
+        WrapType wrapType = getWrapType(name, descriptor);
+        if (WrapType.NONE.equals(wrapType) || wrapType == null) {
             return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
-
-        SimpleValidator validator = descriptors.get(descriptor);
-        if (validator == null) {
-            return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
-
-        validator.set();
+        }        
+        
         final MethodEntry me = new MethodEntry(access, name, descriptor, signature, exceptions);
-        m_methodsToWrap.add(me);
+        m_methodsToWrap.put(me, wrapType);
+        
         return new MethodAnnotationRecorderVisitor(api,
                 cv.visitMethod(changeVisibility(access, Opcodes.ACC_PUBLIC),
                         RANDOM_PREFIX + name, descriptor, signature, exceptions), me);
+    }    
+    
+    protected WrapType getWrapType(String name, String descriptor) {
+        return WrapType.DISPATCH;
     }
-
+    
     @Override
-    public void validate() throws RuntimeException {
-        m_methods.values().stream()
-                .flatMap(i -> i.values().stream())
-                .filter(i -> i != null)
-                .forEach(SimpleValidator::validate);
+    public void validate() throws RuntimeException { }
+    
+    protected final String getMethodClassName(MethodEntry me) {
+        return m_descriptorClassInner + me.name;
     }
-
-    private void emitMethod(MethodEntry me) {
-        MethodVisitor mv = cv.visitMethod(me.access, me.name, me.descriptor, me.signature, me.exceptions);
-
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitLdcInsn(me.name);
-
+        
+    protected final void newInnerClass(MethodEntry me, MethodVisitor mv) {
         String methodClassName = getMethodClassName(me);
         mv.visitTypeInsn(Opcodes.NEW, methodClassName);
         mv.visitInsn(Opcodes.DUP);
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, methodClassName, "<init>", "()V", false);
-
+    }
+    
+    protected final void prepareArguments(MethodEntry me, MethodVisitor mv) {
         final String[] args = getArgs(me.descriptor);
-        
         mv.visitLdcInsn(args.length);
         mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
         for (int i = 0; i < args.length; i++) {
@@ -167,16 +160,34 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
             encapsulatePrimitives(mv, argumentType);
             mv.visitInsn(Opcodes.AASTORE);
         }
+    }
+    
+
+    protected void emitMethodCustom(MethodEntry me) {
+        throw new IllegalStateException("Custom dispatch type for " + me.name + me.descriptor + " not implemented.");
+    }
+    
+    protected final void emitMethodExecute(MethodEntry me) {
+        MethodVisitor mv = cv.visitMethod(me.access, me.name, me.descriptor, me.signature, me.exceptions);
+
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitLdcInsn(me.name);
+
+        newInnerClass(me, mv);        
+        prepareArguments(me, mv);
+        
+        String resultDescriptor = getResult(me.descriptor);
+        boolean hasResult = !"V".equals(resultDescriptor);
 
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, CLASS_HELPERS_DESCRIPTOR,
                 "executeMultiArgMethod",
                 "(Ljava/lang/Object;Ljava/lang/String;Lorg/primesoft/asyncworldedit/injector/utils/MultiArgWorldEditOperationAction;[Ljava/lang/Object;)V", false);
 
-        if (me.descriptor.endsWith(")I")) {
+        if (!hasResult) {
+            mv.visitInsn(Opcodes.RETURN);
+        } else if ("I".equals(resultDescriptor)) {            
             mv.visitInsn(Opcodes.ICONST_1);
             mv.visitInsn(Opcodes.IRETURN);
-        } else if (me.descriptor.endsWith(")V")) {
-            mv.visitInsn(Opcodes.RETURN);
         } else {
             new IllegalStateException("Method result not supported for: " + me.name + me.descriptor);
         }
@@ -188,11 +199,36 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
         mv.visitEnd();
     }
 
-    private String getMethodClassName(MethodEntry me) {
-        return m_descriptorClassInner + me.name;
-    }
+    protected final void emitMethodDispatch(MethodEntry me) {
+        MethodVisitor mv = cv.visitMethod(me.access, me.name, me.descriptor, me.signature, me.exceptions);
 
-    private void emitInnerClass(MethodEntry me) throws IOException {
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitLdcInsn(me.name);
+
+        newInnerClass(me, mv);
+        prepareArguments(me, mv);
+        
+        String resultTypeDescriptor = getResult(me.descriptor);
+        boolean hasResult = !"V".equals(resultTypeDescriptor);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, CLASS_HELPERS_DESCRIPTOR,
+                hasResult ? "dispatchMultiArgFunction" : "dispatchMultiArgMethod",
+                "(Ljava/lang/Object;Ljava/lang/String;Lorg/primesoft/asyncworldedit/injector/utils/MultiArgWorldEditOperationAction;[Ljava/lang/Object;)" + (hasResult? "Ljava/lang/Object;" : "V"),
+                false);
+
+
+        if (hasResult) {            
+            checkCast(mv, resultTypeDescriptor);
+        }        
+        visitReturn(mv, resultTypeDescriptor);
+
+        mv.visitMaxs(2, 1);
+
+        me.annotations.forEach(ae -> ae.visit(mv));
+
+        mv.visitEnd();
+    }
+    
+    protected void emitInnerClass(MethodEntry me) throws IOException {
         String className = getMethodClassName(me);
 
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
@@ -202,8 +238,13 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
                     "org/primesoft/asyncworldedit/injector/utils/MultiArgWorldEditOperationAction"
                 });
         emitEmptyCtor(cw);
-
-        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "execute", "(Ljava/lang/Object;[Ljava/lang/Object;)V",
+       
+        String resultTypeDescriptor = getResult(me.descriptor);
+        boolean hasResult = !"V".equals(resultTypeDescriptor);
+        
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, 
+                hasResult ? "executeFunction" : "execute",
+                "(Ljava/lang/Object;[Ljava/lang/Object;)" + (hasResult ? "Ljava/lang/Object;" : "V"),
                 null, new String[]{"java/lang/Exception"});
 
         mv.visitCode();
@@ -221,15 +262,21 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 m_descriptorClass, RANDOM_PREFIX + me.name, me.descriptor, false);
         
-        if (!me.descriptor.endsWith(")V")) {
-            mv.visitInsn(Opcodes.POP);
+        if (hasResult) {
+            encapsulatePrimitives(mv, resultTypeDescriptor);
+            mv.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Object");
+            mv.visitInsn(Opcodes.ARETURN);
+        } 
+        else {
+            mv.visitInsn(Opcodes.RETURN);
         }
         
-        mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(2, 1);
         mv.visitEnd();
 
         cw.visitEnd();
         createClass(className.replace("/", "."), cw);
     }
+
+    protected enum WrapType { NONE, DISPATCH, EXECUTE, CUSTOM }
 }
