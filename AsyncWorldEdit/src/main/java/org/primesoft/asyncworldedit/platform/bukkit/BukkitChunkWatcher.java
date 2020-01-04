@@ -47,10 +47,8 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Chunk;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -72,15 +70,10 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
 
     private final Plugin m_plugin;
 
-    private final Map<String, Map<Long, Long>> m_forceload = new HashMap<>();
-
-    private final Queue<ForceLoadEntry> m_forceLoadQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<ForceLoadEntry> m_forceUnLoadQueue = new ConcurrentLinkedQueue<>();
+    private final Map<String, Map<Long, ChunkEntry>> m_forceload = new ConcurrentHashMap<>();
 
     private final BukkitScheduler m_scheduler;
     private final Server m_server;
-
-    private long m_lastAccess;
 
     public BukkitChunkWatcher(Plugin plugin) {
         m_plugin = plugin;
@@ -94,59 +87,34 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
         long now = System.currentTimeMillis();
         long minTime = now - HOLD_CHUNK;
 
-        while (!m_forceLoadQueue.isEmpty()) {
-            final ForceLoadEntry e = m_forceLoadQueue.poll();
-
-            final World world = m_server.getWorld(e.world);
+        for (String worldName : m_forceload.keySet()) {
+            final World world = m_server.getWorld(worldName);
             if (world == null) {
                 continue;
             }
+            
+            final Map<Long, ChunkEntry> chunks = m_forceload.get(worldName);
+            for (Long coords : chunks.keySet()) {
+                chunks.computeIfPresent(coords, (_coords, chunkEntry) -> {
+                   final Chunk chunk = world.getChunkAt(chunkEntry.cx, chunkEntry.cz);
+                    if (chunk == null) {
+                        return null;
+                    }
 
-            final Chunk chunk = world.getChunkAt(e.cx, e.cz);
-            final long coords = encode(e.cx, e.cz);
-            
-            Map<Long, Long> chunkEntry = m_forceload.computeIfAbsent(e.world, i -> new HashMap<>());
-            if (!chunk.isForceLoaded()) {
-                chunkEntry.put(coords, now);
-                chunk.setForceLoaded(true);
-            } else if (chunkEntry.containsKey(coords)) {
-                chunkEntry.put(coords, now);
-            }
-        }
-        
-        while (!m_forceUnLoadQueue.isEmpty()) {
-            final ForceLoadEntry e = m_forceUnLoadQueue.peek();            
-            
-            Map<Long, Long> chunkEntry = m_forceload.get(e.world);
-            if (chunkEntry == null) {
-                m_forceUnLoadQueue.poll();
-                continue;
-            }
-            
-            final long coords = encode(e.cx, e.cz);
-            Long value = chunkEntry.get(coords);
-            if (value == null) {
-                m_forceUnLoadQueue.poll();
-                continue;
-            }
-            
-            if (value >= now - HOLD_CHUNK) {
-                break;
-            }
-            
-            m_forceUnLoadQueue.poll();
-            chunkEntry.remove(coords);
-            
-            final World world = m_server.getWorld(e.world);
-            if (world == null) {
-                continue;
-            }
+                    final boolean forceLoadCurrent = chunk.isForceLoaded();
+                    final boolean forceLoadDesired = chunkEntry.timestamp < 0 && -chunkEntry.timestamp < minTime;
 
-            final Chunk chunk = world.getChunkAt(e.cx, e.cz);
-            if (chunk == null) {
-                continue;
+                    if (forceLoadCurrent != forceLoadDesired) {
+                        chunk.setForceLoaded(forceLoadDesired);
+                    }
+
+                    if (!forceLoadDesired) {
+                        return null;
+                    }
+                    
+                    return chunkEntry;
+                });
             }
-            chunk.setForceLoaded(false);
         }
     }
 
@@ -201,12 +169,36 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
 
     @Override
     protected void forceloadOff(String world, int cx, int cz) {
-        m_forceUnLoadQueue.add(new ForceLoadEntry(world, cx, cz));
+        final long now = System.currentTimeMillis();
+        
+        m_forceload.computeIfAbsent(world, _w -> new ConcurrentHashMap<>())
+            .computeIfPresent(encode(cx, cz), (_coords, value) -> {
+                if ((value.timestamp < 0 && -value.timestamp < now) || 
+                    (value.timestamp >= 0 && value.timestamp < now)) {
+                    value.timestamp = -now;
+                }
+
+                return value;
+            });
     }
 
     @Override
     protected void forceloadOn(String world, int cx, int cz) {
-        m_forceLoadQueue.add(new ForceLoadEntry(world, cx, cz));
+        final long now = System.currentTimeMillis();
+        
+        m_forceload.computeIfAbsent(world, _w -> new ConcurrentHashMap<>())
+            .compute(encode(cx, cz), (_coords, value) -> {
+                if (value == null) {
+                    return new ChunkEntry(cx, cz, now);
+                }
+
+                if ((value.timestamp < 0 && -value.timestamp < now) || 
+                    (value.timestamp >= 0 && value.timestamp < now)) {
+                    value.timestamp = now;
+                }
+
+                return value;
+            });
     }
 
     @Override
@@ -236,18 +228,16 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
         m_forceload.clear();
     }
 
-    private static class ForceLoadEntry {
-
-        public final String world;
+    private static class ChunkEntry {
+        public volatile long timestamp;
+        
         public final int cx;
         public final int cz;
-        public final long timestamp;
-
-        ForceLoadEntry(String world, int cx, int cz) {
-            this.world = world;
+        
+        public ChunkEntry(int cx, int cz, long timestamp) {
             this.cx = cx;
             this.cz = cz;
-            this.timestamp = System.currentTimeMillis();
+            this.timestamp = timestamp;
         }
     }
 }

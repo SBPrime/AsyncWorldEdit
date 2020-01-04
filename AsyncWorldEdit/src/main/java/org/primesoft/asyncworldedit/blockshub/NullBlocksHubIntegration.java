@@ -97,4 +97,9 @@ public class NullBlocksHubIntegration implements IBlocksHubIntegration {
     public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, BlockVector3 location) {
         return true;
     }
+
+    @Override
+    public boolean isReal() {
+        return false;
+    }
 }

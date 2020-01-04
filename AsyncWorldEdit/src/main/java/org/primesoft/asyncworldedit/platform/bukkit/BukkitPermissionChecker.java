@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.entity.Player;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.platform.api.IPermissionProvider;
@@ -56,7 +58,10 @@ import org.primesoft.asyncworldedit.platform.api.IPermissionProvider;
  * @author SBPrime
  */
 class BukkitPermissionChecker implements IPermissionProvider {
-
+    private final static long CHECK_INTERVAL = 1000;
+    
+    private final Map<String, PermEntry> m_cachedPerms = new ConcurrentHashMap<>();
+            
     private final Player m_player;
 
     public BukkitPermissionChecker(Player p) {
@@ -65,12 +70,28 @@ class BukkitPermissionChecker implements IPermissionProvider {
 
     @Override
     public boolean hasPermission(String permissionNode) {
-        Player player = m_player;
-
-        if (player == null || (player.isOp() && ConfigProvider.permission().opHasAll())) {
+        if (m_player == null) {
             return true;
         }
-
-        return player.hasPermission(permissionNode);
+        
+        final PermEntry pe = m_cachedPerms.computeIfAbsent(permissionNode, _pn -> new PermEntry());
+        final long now = System.currentTimeMillis();
+        
+        if (now - pe.LastCheck < CHECK_INTERVAL) {
+            return pe.Value;
+        }
+        
+        boolean newState = (m_player.isOp() && ConfigProvider.permission().opHasAll()) |
+                m_player.hasPermission(permissionNode);
+        
+        pe.LastCheck = now;
+        pe.Value = newState;
+        
+        return newState;
+    }
+    
+    private static class PermEntry {
+        public boolean Value;
+        public long LastCheck = -1;
     }
 }

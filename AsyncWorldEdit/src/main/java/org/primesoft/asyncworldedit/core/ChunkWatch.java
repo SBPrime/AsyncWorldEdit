@@ -48,11 +48,10 @@
 package org.primesoft.asyncworldedit.core;
 
 import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
+import org.primesoft.asyncworldedit.utils.InOutParam;
 
 /**
  * This class suppresses chunk unloading
@@ -60,16 +59,9 @@ import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
  * @author SBPrime
  */
 public abstract class ChunkWatch implements IChunkWatch {
-
-    /**
-     * Suppressed chunks
-     */
-    private final Map<String, Map<Long, Integer>> m_watchedChunks = new HashMap<>();
-
-    /**
-     * List of all loaded chunks
-     */
-    private final Map<String, Set<Long>> m_loadedChunks = new HashMap<>();
+    private final static Object INSTANCE = new Object();
+   
+    private final Map<String, WorldEntry> m_entries = new ConcurrentHashMap<>();
 
     /**
      * The dispatcher
@@ -79,16 +71,18 @@ public abstract class ChunkWatch implements IChunkWatch {
     protected long encode(int x, int z) {
         return (long) x << 32 | z & 0xFFFFFFFFL;
     }
+    
+    private WorldEntry getEntry(String world) {
+        return m_entries.computeIfAbsent(world, _wn -> new WorldEntry());
+    }
 
     /**
      * Remove all chunk unload queues
      */
     @Override
     public void clear() {
-        synchronized (m_watchedChunks) {
-            m_watchedChunks.clear();
-        }
-    }
+        m_entries.values().forEach(i -> i.Watched.clear());        
+    }        
 
     /**
      * Add chunk to suppress chunk unload queue
@@ -98,19 +92,17 @@ public abstract class ChunkWatch implements IChunkWatch {
      * @param worldName
      */
     @Override
-    public void add(int cx, int cz, String worldName) {
-        synchronized (m_watchedChunks) {
-            long chunk = encode(cx, cz);
-            m_watchedChunks.computeIfAbsent(worldName, _wn -> new HashMap<>())
-                    .compute(chunk, (_chunk, value) -> {
-                        if (value == null) {
-                            forceloadOn(worldName, cx, cz);
-                            return 1;
-                        }
+    public void add(int cx, int cz, String worldName) {        
+        final long chunk = encode(cx, cz);
+        final WorldEntry worldEntry = getEntry(worldName);
+        worldEntry.Watched.compute(chunk, (_chunk, value) -> {
+            if (value == null) {
+                forceloadOn(worldName, cx, cz);
+                return 1;
+            }
 
-                        return value + 1;
-                    });
-        }
+            return value + 1;
+        });
     }
 
     /**
@@ -122,87 +114,58 @@ public abstract class ChunkWatch implements IChunkWatch {
      */
     @Override
     public void remove(int cx, int cz, String worldName) {
-        synchronized (m_watchedChunks) {
-            Map<Long, Integer> worldEntry = m_watchedChunks.get(worldName);
-            if (worldEntry == null) {
-                return;
-            }
-
-            long chunk = encode(cx, cz);
-            Integer value = worldEntry.get(chunk);
+        final WorldEntry worldEntry = getEntry(worldName);
+        final long chunk = encode(cx, cz);
+        
+        worldEntry.Watched.computeIfPresent(chunk, (_chunk, value) -> {            
             if (value == null) {
-                return;
+                return null;
             }
 
             value = value - 1;
-            if (value <= 0) {
-                worldEntry.remove(chunk);
-                forceloadOff(worldName, cx, cz);
-            } else {
-                worldEntry.put(chunk, value);
+            try {
+                return value <= 0 ? null : value;
+            } finally {
+                if (value <= 0) {
+                    forceloadOff(worldName, cx, cz);
+                }
             }
-
-            if (worldEntry.isEmpty()) {
-                m_watchedChunks.remove(worldName);
-            }
-        }
+        });        
     }
 
     protected final int getReferences(String worldName, int cx, int cz) {
-        synchronized (m_watchedChunks) {
-            Map<Long, Integer> worldEntry = m_watchedChunks.get(worldName);
-            if (worldEntry == null) {
-                return 0;
-            }
-
-            long chunk = encode(cx, cz);
-            Integer value = worldEntry.get(chunk);
-            if (value == null) {
-                return 0;
-            }
-            return value;
+        final WorldEntry worldEntry = getEntry(worldName);
+        final long chunk = encode(cx, cz);
+                
+        Integer value = worldEntry.Watched.get(chunk);
+        if (value == null) {
+            return 0;
         }
+        return value;
     }
 
     protected void chunkLoaded(String worldName, int cx, int cz) {
-        synchronized (m_loadedChunks) {
-            m_loadedChunks
-                    .computeIfAbsent(worldName, _wn -> new HashSet<>())
-                    .add(encode(cx, cz));
-        }
+        getEntry(worldName).Loaded.put(encode(cx, cz), INSTANCE);
     }
 
     public boolean chunkUnloading(String worldName, int cx, int cz) {
-        boolean cancel = false;
-        synchronized (m_watchedChunks) {
-            Map<Long, Integer> watchedWorldEntry = m_watchedChunks.get(worldName);
-            if (watchedWorldEntry != null) {
-                Integer value = watchedWorldEntry.get(encode(cx, cz));
-                cancel = value != null && value > 0;
-            }
-
+        final WorldEntry worldEntry = getEntry(worldName);
+        final long chunk = encode(cx, cz);
+        final InOutParam<Boolean> result = InOutParam.Ref(false);
+        
+        worldEntry.Watched.computeIfPresent(chunk, (_chunk, value) -> {
+            boolean cancel = value != null && value > 0;
+            
             if (cancel && supportUnloadCancel()) {
-                return true;
+                result.setValue(true);
+            } else {
+                worldEntry.Loaded.remove(chunk);
             }
 
-            synchronized (m_loadedChunks) {
-                final Set<Long> worldEntry = m_loadedChunks.get(worldName);
-                if (worldEntry == null) {
-                    return false;
-                }
+            return value;
+        });
 
-                boolean removed = worldEntry.remove(encode(cx, cz));
-                if (!removed) {
-                    return false;
-                }
-
-                if (worldEntry.isEmpty()) {
-                    m_loadedChunks.remove(worldName);
-                }
-            }
-        }
-
-        return false;
+        return result.getValue();
     }
 
     /**
@@ -214,21 +177,7 @@ public abstract class ChunkWatch implements IChunkWatch {
      */
     @Override
     public void setChunkUnloaded(int cx, int cz, String worldName) {
-        synchronized (m_loadedChunks) {
-            final Set<Long> worldEntry = m_loadedChunks.get(worldName);
-            if (worldEntry == null) {
-                return;
-            }
-
-            boolean remove = worldEntry.remove(encode(cx, cz));
-            if (!remove) {
-                return;
-            }
-
-            if (worldEntry.isEmpty()) {
-                m_loadedChunks.remove(worldName);
-            }
-        }
+        getEntry(worldName).Loaded.remove(encode(cx, cz));
     }
 
     /**
@@ -245,14 +194,7 @@ public abstract class ChunkWatch implements IChunkWatch {
 
     @Override
     public boolean isChunkLoaded(int cx, int cz, String worldName) {
-        synchronized (m_loadedChunks) {
-            final Set<Long> worldEntry = m_loadedChunks.get(worldName);
-            if (worldEntry == null) {
-                return false;
-            }
-
-            return worldEntry.contains(encode(cx, cz));
-        }
+        return getEntry(worldName).Loaded.containsKey(encode(cx, cz));
     }
 
     @Override
@@ -294,4 +236,16 @@ public abstract class ChunkWatch implements IChunkWatch {
     protected abstract void forceloadOn(String world, int cx, int cz);
 
     protected abstract boolean supportUnloadCancel();
+    
+    private static class WorldEntry {
+        /**
+         * List of all loaded chunks
+         */
+        public final Map<Long, Object> Loaded = new ConcurrentHashMap<>();
+    
+        /**
+         * Suppressed chunks
+         */
+        public final Map<Long, Integer> Watched = new ConcurrentHashMap<>();
+    }
 }

@@ -83,6 +83,11 @@ public class BlocksHubBridge implements IBlocksHubBridge {
      * The current integrator
      */
     private IBlocksHubIntegration m_integrator = new NullBlocksHubIntegration();
+    
+    /**
+     * This flag helps in speeding up the checks
+     */
+    private boolean m_shouldProcess = false;
 
     /**
      * List of all factories
@@ -101,6 +106,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     @Override
     public void logBlock(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
+        if (!m_shouldProcess) { return; }
+        
         BHLevel level = ConfigProvider.blocksHub().getLogBlocks();
         if (level == BHLevel.Disabled || (dc && level == BHLevel.Regular)) {
             return;
@@ -127,6 +134,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
 
     @Override
     public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location) {
+        if (!m_shouldProcess) { return true; }
+        
         ConfigBlocksHub bhConfig = ConfigProvider.blocksHub();
 
         BHLevel level = bhConfig.getCheckAccess();
@@ -162,6 +171,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     
     @Override
     public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, BlockVector3 location) {
+        if (!m_shouldProcess) { return true; }
+        
         ConfigBlocksHub bhConfig = ConfigProvider.blocksHub();
 
         BHLevel level = bhConfig.getCheckAccess();
@@ -196,6 +207,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
 
     @Override
     public boolean hasAccess(IPlayerEntry playerEntry, IWorld world, Vector3 location, boolean dc) {
+        if (!m_shouldProcess) { return true; }
+        
         ConfigBlocksHub bhConfig = ConfigProvider.blocksHub();
 
         BHLevel level = bhConfig.getCheckAccess();
@@ -236,6 +249,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
      * @return
      */
     private boolean canPlace(IPlayerEntry playerEntry, BlockStateHolder newBlock) {
+        if (!m_shouldProcess) { return true; }
+        
         if (playerEntry == null || newBlock == null || playerEntry.isAllowed(Permission.BYPASS_WHITELIST)) {
             return true;
         }
@@ -291,7 +306,9 @@ public class BlocksHubBridge implements IBlocksHubBridge {
 
     @Override
     public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
-            BlockStateHolder oldBlock, BlockStateHolder newBlock) {        
+            BlockStateHolder oldBlock, BlockStateHolder newBlock) {
+        if (!m_shouldProcess) { return true; }
+        
         if (!canPlace(playerEntry, newBlock)) {
             return false;
         }
@@ -336,6 +353,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     @Override
     public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
+        if (!m_shouldProcess) { return true; }
+        
         if (!canPlace(playerEntry, newBlock)) {
             return false;
         }
@@ -379,6 +398,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     @Override
     public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
+        if (!m_shouldProcess) { return true; }
+        
         if (!canPlace(playerEntry, newBlock)) {
             return false;
         }
@@ -427,11 +448,13 @@ public class BlocksHubBridge implements IBlocksHubBridge {
 
         log(String.format("Initializing BlocksHub using %1$s...", blocksHubPlugin.getClass().getName()));
 
+        m_shouldProcess = false;
         for (IBlocksHubFactory factory : m_factories.keySet()) {
             IBlocksHubIntegration integrator = create(factory, blocksHubPlugin);
 
             if (integrator != null) {
                 m_integrator = integrator;
+                m_shouldProcess = integrator.isReal();
                 log(String.format("BlocksHub integrator set to %1$s", factory.getName()));
                 return;
             }
@@ -457,5 +480,10 @@ public class BlocksHubBridge implements IBlocksHubBridge {
             //We can ignore this error.
             return null;
         }
+    }
+
+    @Override
+    public boolean isReal() {
+        return true;
     }
 }

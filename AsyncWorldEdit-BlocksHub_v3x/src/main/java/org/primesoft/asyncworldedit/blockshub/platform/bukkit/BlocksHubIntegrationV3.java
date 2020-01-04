@@ -148,6 +148,7 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
      * @param newBlock
      * @return
      */
+    @Override
     public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location,
             BlockStateHolder oldBlock, BlockStateHolder newBlock,
             boolean dc) {
@@ -285,5 +286,10 @@ public class BlocksHubIntegrationV3 implements IBlocksHubIntegration {
         }
         
         return new BukkitBlockData(BukkitAdapter.adapt(bsh));
+    }
+
+    @Override
+    public boolean isReal() {
+        return true;
     }
 }

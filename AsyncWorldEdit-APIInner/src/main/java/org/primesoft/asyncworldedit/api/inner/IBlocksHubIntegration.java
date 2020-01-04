@@ -43,7 +43,7 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
  *
- * @author prime
+ * @author SBPrime
  */
 public interface IBlocksHubIntegration {
     /**
@@ -123,4 +123,10 @@ public interface IBlocksHubIntegration {
      * @param dc
      */
     void logBlock(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc);
+
+    /**
+     * Is this a real thing
+     * @return 
+     */
+    boolean isReal();
 }

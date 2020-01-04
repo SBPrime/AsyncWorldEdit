@@ -61,6 +61,7 @@ import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
@@ -117,6 +118,8 @@ public class BlockPlacer implements IBlockPlacer {
      * Logged events queue (per player)
      */
     private final HashMap<IPlayerEntry, BlockPlacerPlayer> m_blocks;
+        
+    private final AtomicInteger m_blocksCount = new AtomicInteger(0);
 
     /**
      * All locked queues
@@ -194,6 +197,10 @@ public class BlockPlacer implements IBlockPlacer {
      * The blocks placer interval
      */
     private long m_interval;
+    
+    private long addPerSecond = 0;
+    private long addPerSecondAvg = 0;
+    private long addPerSecondLast = 0;
     
     /**
      * Is the blocks placer paused
@@ -359,14 +366,7 @@ public class BlockPlacer implements IBlockPlacer {
             boolean unlock = GCUtils.getTotalAvailableMemory() >= m_minMemorySoft;
 
             if (blockPlaced) {
-                int globalSize = 0;
-
-                synchronized (m_mutex) {
-                    for (Map.Entry<IPlayerEntry, BlockPlacerPlayer> queueEntry : m_blocks.entrySet()) {
-                        globalSize += queueEntry.getValue().getQueue().size();
-                    }
-                }
-
+                int globalSize = m_blocksCount.get();
                 unlock &= (globalSize < m_queueMaxSizeSoft);
             }
 
@@ -506,6 +506,8 @@ public class BlockPlacer implements IBlockPlacer {
                 synchronized (queue) {
                     if (!queue.isEmpty()) {
                         IBlockPlacerEntry entry = queue.poll();
+                        m_blocksCount.decrementAndGet();
+                        
                         if (entry != null) {
                             result = entry;
                             resultPlayer = player;
@@ -637,7 +639,21 @@ public class BlockPlacer implements IBlockPlacer {
 
         return result;
     }
-
+    
+    private void updateQueueSpeed() {
+        addPerSecond++;
+        long now = System.currentTimeMillis();
+        int cnt = (int)((now - addPerSecondLast) / 1000);
+        if (cnt <= 0) {
+            return;
+        }
+        addPerSecond /= cnt;
+        addPerSecondAvg = (addPerSecondAvg * 9 + addPerSecond) / 10;
+        addPerSecond = 0;
+        addPerSecondLast = now;
+        log("[BP QUEUE] Queue block speed: " + addPerSecondAvg + "bps");
+    }
+    
     /**
      * Add task to perform in async mode
      *
@@ -650,7 +666,7 @@ public class BlockPlacer implements IBlockPlacer {
         if (player == null) {
             return false;
         }
-
+        
         boolean isMain = m_taskDispatcher.isMainTask();
 
         boolean retry = false;
@@ -695,11 +711,8 @@ public class BlockPlacer implements IBlockPlacer {
                         || entry instanceof JobEntry;
                 final boolean bypass = player.isAllowed(Permission.QUEUE_BYPASS) || entry instanceof JobEntry;
                 final IPermissionGroup group = player.getPermissionGroup();
-                int globalSize = 0;
-                for (Map.Entry<IPlayerEntry, BlockPlacerPlayer> queueEntry : m_blocks.entrySet()) {
-                    globalSize += queueEntry.getValue().getQueue().size();
-                }
-
+                
+                int globalSize = m_blocksCount.get();
                 long memAvailable = GCUtils.getTotalAvailableMemory();
 
                 boolean queueFull = m_queueMaxSizeHard > 0 && globalSize > m_queueMaxSizeHard;
@@ -733,6 +746,8 @@ public class BlockPlacer implements IBlockPlacer {
                         wait = true;
                     } else {
                         queue.add(entry);
+                        m_blocksCount.incrementAndGet();
+                        
                         wait = false;
                     }
                 }
@@ -747,7 +762,7 @@ public class BlockPlacer implements IBlockPlacer {
                     retry = true;
                     continue;
                 }
-
+                
                 if (entry instanceof IBlockPlacerLocationEntry) {
                     IBlockPlacerLocationEntry bpEntry = (IBlockPlacerLocationEntry) entry;
                     String worldName = bpEntry.getWorldName();
@@ -758,10 +773,10 @@ public class BlockPlacer implements IBlockPlacer {
                 if (entry instanceof JobEntry) {
                     playerEntry.addJob((JobEntry) entry, true);
                 }
-
             }
         } while (retry);
 
+        ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.TRACE, this::updateQueueSpeed);
         return true;
     }
 
@@ -842,7 +857,7 @@ public class BlockPlacer implements IBlockPlacer {
         waitForJob(job);
 
         synchronized (m_mutex) {
-            Queue<IBlockPlacerEntry> filtered = new ArrayDeque<>();
+            Queue<IBlockPlacerEntry> filtered = new LinkedList<>();
             if (queue != null) {
                 synchronized (queue) {
                     //TODO: Optimize this for undo
@@ -872,6 +887,7 @@ public class BlockPlacer implements IBlockPlacer {
                 result = 0;
             }
             IPermissionGroup group = player.getPermissionGroup();
+            m_blocksCount.addAndGet(-result);
             if (newSize > 0) {
                 playerEntry.updateQueue(filtered);
             } else if (newSize == 0) {
@@ -926,6 +942,8 @@ public class BlockPlacer implements IBlockPlacer {
                 if (player.getMessaging(MessageSystem.BAR)) {
                     hideProgressBar(player, playerEntry);
                 }
+                
+                m_blocksCount.addAndGet(-result);
             }
             unlockQueue(player, false);
         }

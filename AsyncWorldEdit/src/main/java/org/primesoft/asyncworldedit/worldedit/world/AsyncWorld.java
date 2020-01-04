@@ -81,6 +81,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
@@ -109,6 +110,7 @@ import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.utils.PositionHelper;
 import static org.primesoft.asyncworldedit.utils.PositionHelper.positionToChunk;
 import org.primesoft.asyncworldedit.utils.SchedulerUtils;
+import org.primesoft.asyncworldedit.worldedit.blocks.BlockStates;
 import org.primesoft.asyncworldedit.worldedit.entity.EntityLazyWrapper;
 
 /**
@@ -173,7 +175,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     private final static int CACHE_SIZE = 5000;
 
-    private final Map<UUID, BlockState> m_blockCache = new LruMap<>(CACHE_SIZE);
+    private final Map<BlockVector3, BlockCacheEntry> m_blockCache = new LruMap<>(CACHE_SIZE);
 
     public AsyncWorld(World world, IPlayerEntry player) {
         super(world);
@@ -388,18 +390,17 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final DataAsyncParams<BlockVector3> param = DataAsyncParams.extract(position);
         final BlockVector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
-
-        final BlockStateHolder air = BlockTypes.AIR.getDefaultState();
+        
         IAction func = () -> {
             BlockState oldBlock = m_parent.getBlock(v);
-            if (!canPlace(player, m_bukkitWorld, v, oldBlock, air) || isSame(oldBlock, air)) {
+            if (!canPlace(player, m_bukkitWorld, v, oldBlock, BlockStates.AIR) || isSame(oldBlock, BlockStates.AIR)) {
                 return;
             }
             m_parent.simulateBlockMine(v);
         };
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
-            if (!canPlace(player, m_bukkitWorld, v, getBlock(v), air)) {
+            if (!canPlace(player, m_bukkitWorld, v, getBlock(v), BlockStates.AIR)) {
                 return;
             }
 
@@ -592,10 +593,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final BlockVector3 v = param.getData();
         final IPlayerEntry player = getPlayer(param);
 
-        final BlockStateHolder air = BlockTypes.AIR.getDefaultState();
         IFunc<Boolean> func = () -> {
             BlockStateHolder oldBlock = m_parent.getBlock(v);
-            if (!canPlace(player, m_bukkitWorld, v, oldBlock, air) || isSame(oldBlock, air)) {
+            if (!canPlace(player, m_bukkitWorld, v, oldBlock, BlockStates.AIR) || isSame(oldBlock, BlockStates.AIR)) {
                 return false;
             }
 
@@ -603,7 +603,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         };
 
         if (param.isAsync() || !m_dispatcher.isMainTask()) {
-            if (!canPlace(player, m_bukkitWorld, v, getBlock(v), air)) {
+            if (!canPlace(player, m_bukkitWorld, v, getBlock(v), BlockStates.AIR)) {
                 return false;
             }
 
@@ -710,39 +710,49 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
         return func.execute();
     }
+    
+    private BaseBlock getFullBlockDispatcher(final BlockVector3 position) {        
+        BaseBlock result = m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), 
+                () -> m_parent.getFullBlock(position),
+            m_bukkitWorld, position);
 
-    private UUID toUUID(BlockVector3 pos) {
-        return toUUID(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+        if (result != null && !result.hasNbtData()) {
+            final BlockType bType = result.getBlockType();
+            final boolean isTile = isTileEntity(bType);
+
+            if (isTile) {
+                result = m_dispatcher.queueFastOperation(() -> m_parent.getFullBlock(position));
+            }
+        }
+        
+        return result;
     }
-
-    private UUID toUUID(int x, int y, int z) {
-        long p1 = (long) x << 32 | y & 0xFFFFFFFFL;
-        long p2 = (long) z;
-
-        return new UUID(p1, p2);
+            
+    private <T> T getBlockEntry(final BlockVector3 position, final Function<BlockCacheEntry, T> get) {
+        BlockCacheEntry result = m_blockCache.computeIfAbsent(position, _p -> {
+            BaseBlock block = getFullBlockDispatcher(position);
+            if (block == null) {
+                return null;
+            }
+            
+            return new BlockCacheEntry(block);
+        });
+        
+        if (result == null) {
+            return null;
+        }
+        
+        return get.apply(result);
     }
-
+    
     @Override
-    public BlockState getBlock(final BlockVector3 position) {
-        return m_blockCache.computeIfAbsent(toUUID(position), _p -> m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
-                () -> m_parent.getBlock(position), m_bukkitWorld, position));
+    public BlockState getBlock(final BlockVector3 position) {        
+        return getBlockEntry(position, BlockCacheEntry::state);
     }
 
     @Override
     public BaseBlock getFullBlock(final BlockVector3 position) {
-        BaseBlock result = m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
-            () -> m_parent.getFullBlock(position), m_bukkitWorld, position);
-
-        if (result != null && !result.hasNbtData()) {
-            final BlockType bType = result.getBlockType();
-
-            boolean isTile = isTileEntity(bType);            
-            if (isTile) {
-                result = m_dispatcher.queueFastOperation(() -> m_parent.getFullBlock(position));
-            }
-        }        
-        
-        return result;
+        return getBlockEntry(position, BlockCacheEntry::block);
     }
 
     @Override
@@ -754,7 +764,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public boolean setBlock(final BlockVector3 position, final BlockStateHolder block) throws WorldEditException {
-        m_blockCache.remove(toUUID(position));
+        m_blockCache.remove(position);
 
         final DataAsyncParams<BlockStateHolder> paramBlock = DataAsyncParams.extract(block);
         final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
@@ -879,6 +889,25 @@ public class AsyncWorld extends AbstractWorldWrapper {
         return m_parent.getId();
     }
 
+    private static class BlockCacheEntry {
+        private final BaseBlock m_block;
+        
+        private volatile BlockState m_state;
+        
+        public BaseBlock block() { return m_block; }
+        public BlockState state() {
+            if (m_state == null) {
+                m_state = m_block.toImmutableState();
+            }
+            
+            return m_state;
+        }
+        
+        public BlockCacheEntry(BaseBlock block) {
+            m_block = block;
+        }
+    }
+    
     private static class LruMap<TKey, TValue> extends LinkedHashMap<TKey, TValue> {
 
         private final int m_size;
