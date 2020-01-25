@@ -50,14 +50,13 @@ package org.primesoft.asyncworldedit.platform.bukkit;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -195,7 +194,7 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         IPlayerProvider playerProvider = getPlayerProvider();
 
         playerProvider.registerEvents();
-        //playerProvider.initialize(m_aweCore.getPlayerStorage());
+        TileEntityUtils.isTileEntity(Material.AIR);
 
         m_physicsWatcher.registerEvents();
         m_chunkWatcher.registerEvents();

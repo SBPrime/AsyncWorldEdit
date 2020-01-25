@@ -89,12 +89,11 @@ public final class TileEntityUtils {
 
         final Map<Material, Boolean> result = new HashMap<>();
         for (Material m : Material.values()) {
-            boolean isTilleEntity = false;
-            
-            if (m.isBlock()) {
+            boolean isTilleEntity = false;            
+            if (m.isBlock() && !m.isLegacy()) {
                 BlockData bd;
                 try {
-                    bd = m.createBlockData();                    
+                    bd = m.createBlockData();
                 } catch (Exception ex) {
                     ExceptionHelper.printException(ex, "Unable to create block data for '" + m + "'.");
                     bd = null;
