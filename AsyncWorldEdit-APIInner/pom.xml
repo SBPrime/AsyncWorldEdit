@@ -26,10 +26,10 @@
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit</artifactId>
-            <version>7.1.0-beta-1</version>
+            <version>7.1.0-SNAPSHOT-4825</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.1.0-beta-1.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.1.0-SNAPSHOT-4825.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
@@ -39,10 +39,10 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.15.1-2ee05fe-90ef74e</version>
+            <version>1.15.2-800b93f-e911c70</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/spigot/spigot-1.15.1-2ee05fe-90ef74e.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/spigot/spigot-1.15.2-800b93f-e911c70.jar</systemPath>
         </dependency>
     </dependencies>
 </project>
