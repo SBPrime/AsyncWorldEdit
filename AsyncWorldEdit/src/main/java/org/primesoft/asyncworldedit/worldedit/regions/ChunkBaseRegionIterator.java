@@ -83,9 +83,9 @@ public class ChunkBaseRegionIterator implements Iterator<BlockVector3>, ICountPr
         m_xChunk = getChunk(m_x);
         m_zChunk = getChunk(m_z);
 
-        m_maxX = min.getBlockX();
-        m_maxY = min.getBlockY();
-        m_maxZ = min.getBlockZ();
+        m_maxX = max.getBlockX();
+        m_maxY = max.getBlockY();
+        m_maxZ = max.getBlockZ();
         
         m_region = region;
     
