@@ -63,6 +63,7 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 import java.util.List;
 import java.util.function.Function;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.utils.SessionCanceled;
 
 /**
  *
@@ -89,6 +90,10 @@ public class SafeDelegateExtent extends AbstractDelegateExtent {
             try {
                 return action.apply(getExtent());
             } catch (Throwable ex) {
+                if ((ex instanceof IllegalArgumentException) && (ex.getCause() instanceof SessionCanceled)) {
+                    throw ex;
+                }
+                
                 ExceptionHelper.printException(ex, "Unable to delegate extent action.");
                 
                 if (m_falback != null) {
@@ -109,6 +114,10 @@ public class SafeDelegateExtent extends AbstractDelegateExtent {
             } catch (WorldEditException ex) {
                 throw ex;
             } catch (Throwable ex) {
+                if ((ex instanceof IllegalArgumentException) && (ex.getCause() instanceof SessionCanceled)) {
+                    throw ex;
+                }
+                
                 ExceptionHelper.printException(ex, "Unable to delegate extent action.");
                 
                 if (m_falback != null) {

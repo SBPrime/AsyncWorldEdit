@@ -52,6 +52,7 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.session.request.Request;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import org.primesoft.asyncworldedit.LoggerProvider;
 import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.JobStatus;
@@ -161,9 +162,11 @@ public abstract class BaseTask extends BukkitRunnable {
                 } catch (MaxChangedBlocksException ex) {
                     getPlayer().say(MessageType.BLOCK_PLACER_MAX_CHANGED.format());
                 } catch (IllegalArgumentException ex) {
-                    if (ex.getCause() instanceof SessionCanceled) {
-                        getPlayer().say(MessageType.BLOCK_PLACER_CANCELED.format());
+                    if (!(ex.getCause() instanceof SessionCanceled)) {
+                        throw ex;
                     }
+                    
+                    printSessionCancelled();
                 }
             }
 
@@ -173,7 +176,15 @@ public abstract class BaseTask extends BukkitRunnable {
                 }
 
                 if (m_queueTester.apply(m_editSession)) {
-                    m_editSession.flushSession();
+                    try {
+                        m_editSession.flushSession();
+                    }  catch (IllegalArgumentException ex) {
+                        if (!(ex.getCause() instanceof SessionCanceled)) {
+                            throw ex;
+                        }
+                        
+                        printSessionCancelled();
+                    }
                 } else if (m_cancelableEditSession != null) {
                     m_cancelableEditSession.resetAsync();
                 } else if (m_safeEditSession != null) {
@@ -200,6 +211,19 @@ public abstract class BaseTask extends BukkitRunnable {
         finally {
             TaskContext.remove();
         }
+    }
+
+    private static void log(String m) {
+        LoggerProvider.log(m);
+    }
+    
+    private void printSessionCancelled() {
+        getPlayer().say(MessageType.BLOCK_PLACER_CANCELED.format());
+        
+        log("*************************************************");
+        log("* WARNING: Operation was cancelled by the user. *");
+        log("* This is not an error this is normal operation *");
+        log("*************************************************");
     }
 
     protected abstract Object doRun() throws MaxChangedBlocksException, IllegalArgumentException;
