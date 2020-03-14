@@ -1,0 +1,14 @@
+According to our agreement I removed the encryption from my plugin. Although I did 
+not remove the file rename. This is not obfuscation, this is only file raname. 
+I need this to properly load classes while the plugin is running. Without this 
+approach I would not be able to use external libraries. I'm also planing to use 
+this feature in the future to support multiple server software in the same jar.
+
+Whats you will find inside the res directory:
+* external libraries (jar files),
+* AWE bridge plugins (jar files),
+* the plugin classes (without obfuscation),
+* license file
+
+How to get the full name of the classes:
+find . -type f -exec bash -c 'mv "{}" "tmp.class"; file=$(javap -c ./tmp.class | grep "class\|interface" | head -n1 | sed -e "s/.*\(class\|interface\) \([a-zA-Z0-9_.$]*\).*/\2/g"); if [ "$file" == "" ]; then mv tmp.class "{}.jar"; else mv tmp.class "$file.class"; fi' \;
