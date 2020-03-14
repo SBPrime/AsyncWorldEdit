@@ -168,4 +168,9 @@ public final class WrappedBrushTool extends BrushTool {
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
         return m_parrent.actPrimary(server, config, player, session);
     }
+
+    @Override
+    public void setTraceMask(Mask traceMask) {
+        m_parrent.setTraceMask(traceMask);
+    }        
 }
