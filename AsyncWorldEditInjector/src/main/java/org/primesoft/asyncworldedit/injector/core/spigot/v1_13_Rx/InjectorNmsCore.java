@@ -61,6 +61,6 @@ public final class InjectorNmsCore {
     }
 
     public static void injectClasses(IClassInjectorBridge ci) throws IOException {
-        ci.modiffyClasses("net.minecraft.server.%1$s.ChunkProviderServer", c -> new ChunkProviderServerVisitor(c));
+        ci.modifyClasses("net.minecraft.server.%1$s.ChunkProviderServer", c -> new ChunkProviderServerVisitor(c));
     }
 }

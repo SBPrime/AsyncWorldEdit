@@ -184,56 +184,56 @@ public class InjectorCore {
             m_classInjector.getNmsInjection().consume(new NmsClassInjectorBridge());
 
             log("Injecting WorldEdit classes...");
-            modiffyClasses("com.sk89q.worldedit.util.eventbus.EventBus", c -> new EventBusVisitor(c));
+            modifyClasses("com.sk89q.worldedit.util.eventbus.EventBus", c -> new EventBusVisitor(c));
 
-            modiffyClasses("com.sk89q.worldedit.math.BlockVector2", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.math.BlockVector3", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.math.Vector2", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.math.Vector3", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.math.BlockVector2", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.math.BlockVector3", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.math.Vector2", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.math.Vector3", c -> new AsyncWrapperVisitor(c));
 
-            modiffyClasses("com.sk89q.worldedit.world.block.BlockStateHolder", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.world.block.BaseBlock", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.world.block.BlockState", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.entity.BaseEntity", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.util.Location", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.world.biome.BiomeType", c -> new AsyncWrapperVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.world.weather.WeatherType", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.world.block.BlockStateHolder", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.world.block.BaseBlock", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.world.block.BlockState", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.entity.BaseEntity", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.util.Location", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.world.biome.BiomeType", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.world.weather.WeatherType", c -> new AsyncWrapperVisitor(c));
 
-            modiffyClasses("com.sk89q.worldedit.EditSession", c -> new EditSessionClassVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.function.operation.Operations", (c, cc) -> new OperationsClassVisitor(c, cc));
-            modiffyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
-            modiffyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
+            modifyClasses("com.sk89q.worldedit.EditSession", c -> new EditSessionClassVisitor(c));
+            modifyClasses("com.sk89q.worldedit.function.operation.Operations", (c, cc) -> new OperationsClassVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
 
-            modiffyClasses("com.sk89q.worldedit.util.collection.LocatedBlockList", c -> new LocatedBlockListVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", c -> new ResetableExtentVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", c -> new ResetableExtentVisitor(c));
+            modifyClasses("com.sk89q.worldedit.util.collection.LocatedBlockList", c -> new LocatedBlockListVisitor(c));
+            modifyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", c -> new ResetableExtentVisitor(c));
+            modifyClasses("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", c -> new ResetableExtentVisitor(c));
 
             // Regions
-            modiffyClasses("com.sk89q.worldedit.regions.AbstractRegion", c -> new RegionVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.regions.EllipsoidRegion", c -> new RegionVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.regions.ConvexPolyhedralRegion", c -> new RegionVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.regions.TransformRegion", c -> new RegionVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.regions.RegionIntersection", c -> new RegionVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.regions.NullRegion", c -> new RegionVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.regions.Polygonal2DRegion", c -> new RegionVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.regions.CylinderRegion", c -> new RegionVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.regions.CuboidRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.AbstractRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.EllipsoidRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.ConvexPolyhedralRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.TransformRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.RegionIntersection", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.NullRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.Polygonal2DRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.CylinderRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.CuboidRegion", c -> new RegionVisitor(c));
 
             // Commands
-            modiffyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
-            modiffyClasses("com.sk89q.worldedit.command.ScriptingCommands", (c, cc) -> new ScriptingCommandsVisitor(c, cc));
-            modiffyClasses("com.sk89q.worldedit.command.SchematicCommands", (c, cc) -> new SchematicCommandsVisitor(c, cc));
-            modiffyClasses("com.sk89q.worldedit.command.RegionCommands", (c, cc) -> new RegionCommandsVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.command.ScriptingCommands", (c, cc) -> new ScriptingCommandsVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.command.SchematicCommands", (c, cc) -> new SchematicCommandsVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.command.RegionCommands", (c, cc) -> new RegionCommandsVisitor(c, cc));
 
-            modiffyClasses("com.sk89q.worldedit.command.UtilityCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.bukkit.BukkitEntity", (c, cc) -> new BukkitEntityVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.command.UtilityCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
+            modifyClasses("com.sk89q.worldedit.bukkit.BukkitEntity", (c, cc) -> new BukkitEntityVisitor(c, cc));
             
             // Bukkit
-            modiffyClasses("com.sk89q.worldedit.command.RegionCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
+            modifyClasses("com.sk89q.worldedit.command.RegionCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
             
             // Reflection
-            modiffyClasses("com.sk89q.worldedit.command.tool.BrushTool", c -> new BrushToolVisitor(c));
-            modiffyClasses("com.sk89q.worldedit.command.tool.BlockReplacer", c -> new BlockReplacerVisitor(c));
+            modifyClasses("com.sk89q.worldedit.command.tool.BrushTool", c -> new BrushToolVisitor(c));
+            modifyClasses("com.sk89q.worldedit.command.tool.BlockReplacer", c -> new BlockReplacerVisitor(c));
 
             crateClass(cc-> new CreatePlayerWrapper(cc));
             crateClass(cc-> new CreateNoPermsPlayer(cc));
@@ -297,33 +297,33 @@ public class InjectorCore {
         return 2.0000;
     }
 
-    private void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
-        modiffyClasses(className, classVisitor, 
+    private void modifyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
+        modifyClasses(className, classVisitor, 
                 cn -> m_classInjector.getWorldEditClassReader(cn),
                 (name, data) -> m_classInjector.injectWorldEditClass(name, data, 0, data.length));
     }
     
-    private void modiffyNMSClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
-        modiffyClasses(className, classVisitor, 
+    private void modifyNMSClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
+        modifyClasses(className, classVisitor, 
                 cn -> m_classInjector.getNMSClassReader(cn),
                 (name, data) -> m_classInjector.injectNMSClass(name, data, 0, data.length));
     }
     
-    private void modiffyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
-        modiffyClasses(className, classVisitor, 
+    private void modifyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
+        modifyClasses(className, classVisitor, 
                 cn -> m_classInjector.getWorldEditClassReader(cn),
                 (name, data) -> m_classInjector.injectWorldEditClass(name, data, 0, data.length));
     }
     
-    private void modiffyNMSClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
-        modiffyClasses(className, classVisitor, 
+    private void modifyNMSClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
+        modifyClasses(className, classVisitor, 
                 cn -> m_classInjector.getNMSClassReader(cn),
                 (name, data) -> m_classInjector.injectNMSClass(name, data, 0, data.length));
     }
     
-    private void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor,
+    private void modifyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor,
             IGetClassReader getClassReader, IEmit emit) throws IOException {
-        log("Modiffy class " + className);
+        log("Modify class " + className);
         
         ClassReader classReader = getClassReader.get(className);
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
@@ -338,9 +338,9 @@ public class InjectorCore {
         emit.emit(className, data);        
     }
 
-    private void modiffyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor,
+    private void modifyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor,
             IGetClassReader getClassReader, IEmit emit) throws IOException {
-        log("Modiffy class " + className);
+        log("Modify class " + className);
                 
         ClassReader classReader = getClassReader.get(className);
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
@@ -403,13 +403,13 @@ public class InjectorCore {
         }
 
         @Override
-        public void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
-            modiffyNMSClasses(m_classInjector.correctNmsName(className), classVisitor);
+        public void modifyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {
+            modifyNMSClasses(m_classInjector.correctNmsName(className), classVisitor);
         }
 
         @Override
-        public void modiffyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
-            modiffyNMSClasses(m_classInjector.correctNmsName(className), classVisitor);
+        public void modifyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException {
+            modifyNMSClasses(m_classInjector.correctNmsName(className), classVisitor);
         }
 
         @Override

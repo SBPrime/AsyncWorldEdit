@@ -60,7 +60,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
  * @author SBPrime
  */
 public interface IClassInjectorBridge {
-    void modiffyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException;
-    void modiffyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException;
+    void modifyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException;
+    void modifyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor) throws IOException;
     void crateClass(Function<ICreateClass, BaseClassCreator> factory);
 }
