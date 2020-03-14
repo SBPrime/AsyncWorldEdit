@@ -57,6 +57,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.collection.BlockMap;
 import com.sk89q.worldedit.util.collection.LocatedBlockList;
 import com.sk89q.worldedit.util.formatting.text.TextComponent;
+import com.sk89q.worldedit.world.World;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -116,8 +117,9 @@ public final class Helpers {
                     try {
                         method.execute(_this, args);
                     } catch (Exception ex) {
-                        actor.printError(TextComponent.of("Error while executing " + name));
-                        InjectorCore.getInstance().getClassFactory().handleError(ex, name);
+                        if (!InjectorCore.getInstance().getClassFactory().handleError(ex, name)) {
+                            actor.printError(TextComponent.of("Error while executing " + name));
+                        }
                     }
                 }
 
@@ -136,15 +138,20 @@ public final class Helpers {
                         for (int i = 0; i < args.length; i++) {
                             if (args[i] instanceof EditSession) {
                                 argsNew[i] = es;
-                            } else {
+                            } 
+                            else if (args[i] instanceof World) {
+                                argsNew[i] = es.getWorld();
+                            }
+                            else {
                                 argsNew[i] = args[i];
                             }
                         }
 
                         method.execute(_this, argsNew);
                     } catch (Exception ex) {
-                        actor.printError(TextComponent.of("Error while executing " + name));
-                        InjectorCore.getInstance().getClassFactory().handleError(ex, name);
+                        if (!InjectorCore.getInstance().getClassFactory().handleError(ex, name)) {
+                            actor.printError(TextComponent.of("Error while executing " + name));
+                        }
                     }
                 }
             });

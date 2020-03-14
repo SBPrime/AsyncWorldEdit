@@ -61,6 +61,7 @@ import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
@@ -413,7 +414,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean regenerate(final Region region, EditSession editSession) {
+    public boolean regenerate(final Region region, EditSession editSession) {        
+        if (editSession instanceof CancelabeEditSession) {
+            CancelabeEditSession ces = (CancelabeEditSession)editSession;
+            doRegen(editSession, region, m_bukkitWorld, ces.getJobId());
+            return true;
+        }
+        
         boolean isAsync = checkAsync(WorldeditOperations.regenerate);
         if (!isAsync) {
             return m_parent.regenerate(region, editSession);
@@ -422,7 +429,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
         final int jobId = getJobId();
         final EditSession session;
         final JobEntry job;
-
+        
         if (editSession instanceof AsyncEditSession) {
             AsyncEditSession aSession = (AsyncEditSession) editSession;
             session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
@@ -433,13 +440,12 @@ public class AsyncWorld extends AbstractWorldWrapper {
         }
 
         m_blockPlacer.addJob(m_player, job);
-
-        final int maxY = getMaxY();
+        
         SchedulerUtils.runTaskAsynchronously(m_schedule, new WorldAsyncTask(m_bukkitWorld, session,
                 m_player, "regenerate", m_blockPlacer, job) {
             @Override
             public void task(EditSession editSession, IWorld world) throws MaxChangedBlocksException {
-                doRegen(editSession, region, maxY, world, jobId);
+                doRegen(editSession, region, world, jobId);
             }
 
         });
@@ -454,8 +460,12 @@ public class AsyncWorld extends AbstractWorldWrapper {
      * @param region
      * @param world
      */
-    private void doRegen(EditSession eSession, Region region, int maxY, IWorld world, int jobId) {
-        final BlockState[] history = new BlockState[16 * 16 * (maxY + 1)];
+    private void doRegen(EditSession eSession, Region region, IWorld world, int jobId) {        
+        int yMin = region.getMinimumPoint().getBlockY();        
+        int ySize = region.getHeight();
+        
+        
+        final BlockState[] history = new BlockState[16 * 16 * ySize];
         final Object wait = new Object();
         final IAction finalizeAction = () -> {
             synchronized (wait) {
@@ -464,13 +474,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
         };
 
         for (BlockVector2 chunk : region.getChunks()) {
-            BlockVector3 min = PositionHelper.chunkToPosition(chunk, 0);
+            BlockVector3 min = PositionHelper.chunkToPosition(chunk, yMin);
 
             m_chunkWatcher.add(chunk.getBlockX(), chunk.getBlockZ(), getName());
             // First save all the blocks inside
             int index = 0;
             for (int x = 0; x < 16; ++x) {
-                for (int y = 0; y < (maxY + 1); ++y) {
+                for (int y = 0; y < ySize; ++y) {
                     for (int z = 0; z < 16; ++z) {
                         BlockVector3 pt = min.add(x, y, z);
                         history[index] = eSession.getBlock(pt);
@@ -480,8 +490,9 @@ public class AsyncWorld extends AbstractWorldWrapper {
             }
             m_chunkWatcher.remove(chunk.getBlockX(), chunk.getBlockZ(), getName());
 
-            m_blockPlacer.addTasks(m_player, new RegenerateEntry(jobId, world, chunk,
-                    finalizeAction, m_chunkWatcher));
+            CuboidRegion cRegion = new CuboidRegion(min, min.add(15, ySize - 1, 15));
+            m_blockPlacer.addTasks(m_player, new RegenerateEntry(jobId, getWorld(), cRegion,
+                    finalizeAction, eSession));
 
             synchronized (wait) {
                 try {
@@ -494,15 +505,12 @@ public class AsyncWorld extends AbstractWorldWrapper {
             // Then restore
             index = 0;
             for (int x = 0; x < 16; ++x) {
-                for (int y = 0; y < (maxY + 1); ++y) {
+                for (int y = 0; y < ySize; ++y) {
                     for (int z = 0; z < 16; ++z) {
                         BlockVector3 pt = min.add(x, y, z);
                         // We have to restore the block if it was outside
                         if (!region.contains(pt)) {
                             eSession.smartSetBlock(pt, history[index]);
-                        } else { // Otherwise fool with history
-                            eSession.getChangeSet().add(
-                                    new BlockChange(pt, history[index], eSession.getFullBlock(pt)));
                         }
                         index++;
                     }

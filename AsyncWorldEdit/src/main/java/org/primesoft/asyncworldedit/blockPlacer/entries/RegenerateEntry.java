@@ -47,10 +47,10 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import com.sk89q.worldedit.math.BlockVector2;
-import org.primesoft.asyncworldedit.api.IWorld;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.world.World;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
 import org.primesoft.asyncworldedit.api.utils.IAction;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
@@ -61,48 +61,35 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
  */
 public class RegenerateEntry extends BlockPlacerEntry {
 
-    private final IWorld m_world;
-    private final BlockVector2 m_chunk;
-    private final IChunkWatch m_chunkWatcher;
+    private final World m_world;
+    private final CuboidRegion m_region;
     private final IAction m_finalize;
+    private final EditSession m_editSession;
 
     /**
      *
      * @param jobId
      * @param world
-     * @param chunk
+     * @param region
      * @param finalizeAction
+     * @param es
      * @param cw
      */
-    public RegenerateEntry(int jobId, IWorld world, BlockVector2 chunk, 
-            IAction finalizeAction, IChunkWatch cw) {
+    public RegenerateEntry(int jobId, World world, CuboidRegion region, 
+            IAction finalizeAction, EditSession es) {
         super(jobId, true);
-
-        m_chunk = chunk;
-        m_world = world;
         
-        m_chunkWatcher = cw;
+        m_region = region;
+        m_editSession = es;
+        m_world = world;
         
         m_finalize = finalizeAction;
     }
 
     @Override
     public boolean process(IBlockPlacer bp) {
-        String worldName =  m_world.getName();
-        int x = m_chunk.getBlockX();
-        int z = m_chunk.getBlockZ();
-        
         try {
-            m_chunkWatcher.loadChunk(x, z, worldName);
-            m_chunkWatcher.setChunkUnloaded(x, z, worldName);
-            
-            m_world.regenerateChunk(x, z);
-            
-            m_chunkWatcher.setChunkUnloaded(x, z, worldName);            
-            m_chunkWatcher.loadChunk(x, z, worldName);
-            m_chunkWatcher.setChunkLoaded(x, z, worldName);
-
-            return true;
+            return m_world.regenerate(m_region, m_editSession);
             
         } catch (Throwable t) {
             ExceptionHelper.printException(t, "Error while regenerating chunk.");

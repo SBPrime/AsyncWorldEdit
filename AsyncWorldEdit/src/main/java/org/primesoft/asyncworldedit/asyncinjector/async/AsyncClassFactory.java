@@ -70,6 +70,7 @@ import org.primesoft.asyncworldedit.injector.classfactory.base.BaseClassFactory;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistration;
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.regions.RegionIteratorFactory;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
@@ -127,8 +128,13 @@ public class AsyncClassFactory extends BaseClassFactory {
     }        
 
     @Override
-    public void handleError(Exception ex, String name) {
+    public boolean handleError(Exception ex, String name) {
+        if (ex instanceof SessionCanceled || (ex != null && ex.getCause() instanceof SessionCanceled)) {
+            return false;
+        }
+        
         ExceptionHelper.printException(ex, String.format("Error while processing async operation %1$s", name));
+        return true;
     }
 
     @Override

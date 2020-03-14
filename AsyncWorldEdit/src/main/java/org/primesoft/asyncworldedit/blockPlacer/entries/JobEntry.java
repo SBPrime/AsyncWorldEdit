@@ -297,10 +297,6 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
         final IPlayerEntry player = m_player;
 
         switch (m_status) {
-            case Canceled:
-            case Done:
-                bp.removeJob(player, this);
-                return true;
             case PlacingBlocks:
                 setStatus(JobStatus.Done);
                 bp.removeJob(player, this);
@@ -317,6 +313,13 @@ public class JobEntry extends BlockPlacerEntry implements IJobEntry {
             player.say(MessageType.CMD_JOBS_STATUS.format(toString(), getStatusString()));
         }
 
+        switch (m_status) {
+            case Canceled:
+            case Done:
+                bp.removeJob(player, this);
+                break;
+        }
+        
         return true;
     }
 

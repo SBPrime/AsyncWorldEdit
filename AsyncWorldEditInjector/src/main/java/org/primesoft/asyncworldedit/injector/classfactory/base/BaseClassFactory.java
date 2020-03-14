@@ -93,8 +93,9 @@ public class BaseClassFactory implements IClassFactory {
     }
 
     @Override
-    public void handleError(Exception ex, String name) {
+    public boolean handleError(Exception ex, String name) {
         // No op
+        return true;
     }
 
     @Override
