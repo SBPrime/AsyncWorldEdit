@@ -58,13 +58,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -72,11 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.IAwePlugin;
@@ -89,7 +79,7 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  */
 public abstract class Loader extends ClassLoader implements ILibraryLoader {
     protected final static String PLUGIN_INJECTOR = "AsyncWorldEditInjector";
-    
+
     private final static String PREFIX = "org.primesoft.asyncworldedit";
     private final static String API = ".api.";
     private final static int BUF_SIZE = 0x10000;
@@ -145,11 +135,6 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
     private final Class<?> m_thisClass;
 
     /**
-     * The encryption key
-     */
-    private SecretKeySpec m_key;
-
-    /**
      * The SHA256 algorith
      */
     private final MessageDigest m_sha;
@@ -183,7 +168,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
      * @return 
      */
     abstract boolean checkDependencies();
-    
+
     @Override
     protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         Class<?> cls = findLoadedClass(m_classLoader, name);
@@ -211,96 +196,8 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
             }
 
             byte[] data = readFully(is);
-            SecretKeySpec key = m_key;
-            if (key == null) {
-                try {
-                    String aes = "AES cipher here";
-                    String pub = "PUB Key 1"
-                            + "PUB Key 2"
-                            + "PUB Key 3"
-                            + "PUB Key 4"
-                            + "PUB Key 5";
-                    int len = pub.length() / 5;
-                    int pos = pub.indexOf('=');
-                    String part1 = pub.substring(len * 0, len * 1);
-                    String part2 = pub.substring(len * 1, len * 2);
-                    String part3 = pub.substring(len * 2, len * 3);
-                    String part4 = pub.substring(len * 3, len * 4);
-                    String part5 = pos < 0 ? "" : pub.substring(len * 4, pos);
-
-                    boolean hasMatch = true;
-                    int iMatch = 0;
-                    int iSkip = 0;
-
-                    for (int match = 1; match < len && hasMatch; match++) {
-                        final String toMatch = part1.substring(len - match);
-
-                        hasMatch = false;
-                        for (int skip = iSkip; skip < len - match; skip++) {
-                            final String txt = part2.substring(len - match - skip, len - skip);
-
-                            if (txt.equals(toMatch)) {
-                                hasMatch = true;
-                                iMatch = match;
-                                iSkip = skip;
-                                break;
-                            }
-                        }
-                    }
-
-                    String sSkip = part2.substring(len - iSkip);
-                    String sUser = part1.substring(len - iMatch);
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(part1.replaceAll(sUser, "").replaceAll(sSkip, ""));
-                    sb.append(part2.replaceAll(sUser, "").replaceAll(sSkip, ""));
-                    sb.append(part3.replaceAll(sUser, "").replaceAll(sSkip, ""));
-                    sb.append(part4.replaceAll(sUser, "").replaceAll(sSkip, ""));
-                    sb.append(part5.replaceAll(sUser, "").replaceAll(sSkip, ""));
-
-                    KeyFactory factory = KeyFactory.getInstance("RSA");                    
-                    PublicKey publicKey = factory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(sb.toString())));
-
-                    Cipher cipher = Cipher.getInstance("RSA");
-                    cipher.init(Cipher.DECRYPT_MODE, publicKey);
-
-                    byte[] keyData = cipher.doFinal(Base64.getDecoder().decode(aes));
-                    byte[] aesKey = new byte[keyData.length / 2];
-                    for (int i = 0; i < aesKey.length; i++) {
-                        aesKey[i] = (byte) (keyData[i * 2 + 0] ^ keyData[i * 2 + 1]);
-                    }
-                    m_key = new SecretKeySpec(aesKey, "AES");
-                } catch (NoSuchAlgorithmException ex) {                    
-                    return null;
-                } catch (InvalidKeySpecException ex) {
-                    return null;
-                } catch (NoSuchPaddingException ex) {
-                    return null;
-                } catch (InvalidKeyException ex) {
-                    return null;
-                } catch (IllegalBlockSizeException ex) {
-                    return null;
-                } catch (BadPaddingException ex) {
-                    return null;
-                }
-
-                key = m_key;
-            }
-
             if (data == null) {
                 return null;
-            }
-
-            try {
-                Cipher cipher = Cipher.getInstance("AES");
-                cipher.init(Cipher.DECRYPT_MODE, key);
-
-                data = cipher.doFinal(data);
-            } catch (NoSuchAlgorithmException ex) {
-            } catch (NoSuchPaddingException ex) {
-            } catch (InvalidKeyException ex) {
-            } catch (IllegalBlockSizeException ex) {
-            } catch (BadPaddingException ex) {
             }
 
             cls = super.defineClass(name, data, 0, data.length);
@@ -361,19 +258,19 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
      * @return 
      */
     protected abstract File getPluginFolder();
-    
+
     /**
      * Get the configuration folder
      * @return 
      */
     protected abstract File getDataFolder();
-    
+
     /**
      * Install the AWE plugins
      * @return 
      */
     protected abstract boolean installPlugins();
-    
+
     /**
      * Install the AWE plugin
      *
@@ -399,9 +296,9 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
             log("Plugin installed");
             return true;
         }
-        
+
         extract(LICENSE, dataFolder, LICENSE);
-        
+
         if (!installPlugins()) {
             return false;
         }
@@ -465,7 +362,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
             if (part1l < 5 || part2l < 5) {
                 return null;
             }
-            
+
             boolean hasMatch = true;
             int iMatch = 0;
             int iSkip = 0;
@@ -545,7 +442,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
      * @return  
      */
     protected abstract IAwePlugin loadPlugin(File pluginFile);
-    
+
     /**
      * Load the AWE plugins
      */
@@ -570,7 +467,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
             IAwePlugin plugin = loadPlugin(pluginFile);
             if (plugin != null) {
                 m_loadedPlugins.add(plugin);
-                
+
                 plugin.initialize(api);
             }
         }
@@ -581,7 +478,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
      * @param plugin 
      */
     protected abstract void unloadPlugin(IAwePlugin plugin);
-    
+
     /**
      * Unload the plugins
      */

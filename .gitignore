@@ -20,3 +20,6 @@ lib/
 /AsyncWorldEdit-ActionBarAPI/AsyncWorldEdit-ActionBarAPI/nbproject/private/
 /AsyncWorldEdit/src/*.jar
 /*/target/
+/tmp/AsyncWorldEdit/nbproject/
+/tmp/AsyncWorldEdit/target/
+/tmp/JarProcessor/target/
