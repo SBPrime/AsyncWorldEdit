@@ -113,6 +113,7 @@ import static org.primesoft.asyncworldedit.utils.PositionHelper.positionToChunk;
 import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.worldedit.blocks.BlockStates;
 import org.primesoft.asyncworldedit.worldedit.entity.EntityLazyWrapper;
+import org.primesoft.asyncworldedit.worldedit.regions.ChunkBaseRegionIterator;
 
 /**
  *
@@ -461,36 +462,54 @@ public class AsyncWorld extends AbstractWorldWrapper {
      * @param world
      */
     private void doRegen(EditSession eSession, Region region, IWorld world, int jobId) {        
-        int yMin = region.getMinimumPoint().getBlockY();        
+        int yMin = region.getMinimumPoint().getBlockY();
         int ySize = region.getHeight();
-        
-        
-        final BlockState[] history = new BlockState[16 * 16 * ySize];
+
         final Object wait = new Object();
         final IAction finalizeAction = () -> {
             synchronized (wait) {
                 wait.notifyAll();
             }
         };
-
+        
+        
         for (BlockVector2 chunk : region.getChunks()) {
-            BlockVector3 min = PositionHelper.chunkToPosition(chunk, yMin);
+            final BlockVector3 min = PositionHelper.chunkToPosition(chunk, yMin);
+            final boolean[] isInRegion = new boolean[16 * 16 * ySize];
 
-            m_chunkWatcher.add(chunk.getBlockX(), chunk.getBlockZ(), getName());
             // First save all the blocks inside
-            int index = 0;
-            for (int x = 0; x < 16; ++x) {
-                for (int y = 0; y < ySize; ++y) {
+            int index = 0;                    
+            for (int y = 0; y < ySize; ++y) {
+                for (int x = 0; x < 16; ++x) {
                     for (int z = 0; z < 16; ++z) {
-                        BlockVector3 pt = min.add(x, y, z);
-                        history[index] = eSession.getBlock(pt);
+                        BlockVector3 pt = min.add(x, y, z);                        
+                        isInRegion[index] = region.contains(pt);
                         index++;
                     }
                 }
             }
-            m_chunkWatcher.remove(chunk.getBlockX(), chunk.getBlockZ(), getName());
 
-            CuboidRegion cRegion = new CuboidRegion(min, min.add(15, ySize - 1, 15));
+            Region cRegion = new CuboidRegion(min, min.add(15, ySize - 1, 15)) {
+                @Override
+                public Iterator<BlockVector3> iterator() {
+                    return new ChunkBaseRegionIterator(this);
+                }
+                
+                
+                @Override
+                public boolean contains(BlockVector3 position) {
+                    if (!super.contains(position)) {
+                        return false;
+                    }
+                    
+                    int x = position.getX() - min.getX();
+                    int y = position.getY() - min.getY();
+                    int z = position.getZ() - min.getZ();
+                    
+                    int index = (y << 8) | (x << 4) | z;
+                    return isInRegion[index];
+                }
+            };
             m_blockPlacer.addTasks(m_player, new RegenerateEntry(jobId, getWorld(), cRegion,
                     finalizeAction, eSession));
 
@@ -500,23 +519,6 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 } catch (InterruptedException ex) {
                 }
             }
-
-            m_chunkWatcher.add(chunk.getBlockX(), chunk.getBlockZ(), getName());
-            // Then restore
-            index = 0;
-            for (int x = 0; x < 16; ++x) {
-                for (int y = 0; y < ySize; ++y) {
-                    for (int z = 0; z < 16; ++z) {
-                        BlockVector3 pt = min.add(x, y, z);
-                        // We have to restore the block if it was outside
-                        if (!region.contains(pt)) {
-                            eSession.smartSetBlock(pt, history[index]);
-                        }
-                        index++;
-                    }
-                }
-            }
-            m_chunkWatcher.remove(chunk.getBlockX(), chunk.getBlockZ(), getName());
         }
     }
 

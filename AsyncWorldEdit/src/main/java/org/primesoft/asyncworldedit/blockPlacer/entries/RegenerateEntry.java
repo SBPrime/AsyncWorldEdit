@@ -48,7 +48,7 @@
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.utils.IAction;
@@ -62,7 +62,7 @@ import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 public class RegenerateEntry extends BlockPlacerEntry {
 
     private final World m_world;
-    private final CuboidRegion m_region;
+    private final Region m_region;
     private final IAction m_finalize;
     private final EditSession m_editSession;
 
@@ -73,9 +73,8 @@ public class RegenerateEntry extends BlockPlacerEntry {
      * @param region
      * @param finalizeAction
      * @param es
-     * @param cw
      */
-    public RegenerateEntry(int jobId, World world, CuboidRegion region, 
+    public RegenerateEntry(int jobId, World world, Region region, 
             IAction finalizeAction, EditSession es) {
         super(jobId, true);
         
