@@ -74,31 +74,31 @@ public class UndoProcessor implements Operation {
 
     public static void processUndo(IThreadSafeEditSession parent,
             AweEditSession sender,
-            EditSession session) {
+            EditSession targetSession) {
 
         Iterator<Change> changes = parent.doUndo();
-        Mask oldMask = session.getMask();
-        session.setMask(sender.getMask());
+        Mask oldMask = targetSession.getMask();
+        targetSession.setMask(sender.getMask());
 
         try {
             Operations.completeBlindly(new UndoProcessor(
-                    sender, session, changes));
+                    sender, targetSession, changes));
 
         } finally {
-            session.flushSession();
-            session.setMask(oldMask);            
+            targetSession.flushSession();
+            targetSession.setMask(oldMask);            
         }
     }
 
     private final EditSession m_sender;
-    private final EditSession m_session;
+    private final EditSession m_targetSession;
     private final Iterator<Change> m_changes;
     
-    private UndoProcessor(EditSession sender, EditSession session,
+    private UndoProcessor(EditSession sender, EditSession targetSession,
             Iterator<Change> changes) {
         
         m_sender = sender;
-        m_session = session;
+        m_targetSession = targetSession;
         m_changes = changes;
     }
 
@@ -106,7 +106,7 @@ public class UndoProcessor implements Operation {
     public Operation resume(RunContext rc) throws WorldEditException {
         UndoContext uc = new ExtendedUndoContext(m_sender);
         
-        Extent bypassHistory = Reflection.get(EditSession.class, Extent.class, m_session, "bypassHistory",
+        Extent bypassHistory = Reflection.get(EditSession.class, Extent.class, m_targetSession, "bypassHistory",
                 "Unable to get history");
 
         if (bypassHistory == null) {
@@ -114,10 +114,10 @@ public class UndoProcessor implements Operation {
         }
         
         if (m_sender instanceof CancelabeEditSession) {
-            bypassHistory = new FlushingExtent(bypassHistory, (CancelabeEditSession)m_sender, m_session);
+            bypassHistory = new FlushingExtent(bypassHistory, (CancelabeEditSession)m_sender, m_targetSession);
         }
         else if (m_sender instanceof AsyncEditSession) {
-            bypassHistory = new FlushingExtent(bypassHistory, (AsyncEditSession)m_sender, m_session);
+            bypassHistory = new FlushingExtent(bypassHistory, (AsyncEditSession)m_sender, m_targetSession);
         }
         uc.setExtent(bypassHistory);
 

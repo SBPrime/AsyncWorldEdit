@@ -51,8 +51,6 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.function.operation.Operation;
-import com.sk89q.worldedit.function.operation.RunContext;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.biome.BiomeType;
@@ -69,7 +67,7 @@ import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
  */
 public class FlushingExtent extends AbstractDelegateExtent {
 
-    private final EditSession m_editSession;
+    private final EditSession m_targetEs;
     
     /**
      * Number of queued blocks
@@ -80,22 +78,22 @@ public class FlushingExtent extends AbstractDelegateExtent {
     private final boolean m_isAsync;
     
     public FlushingExtent(Extent extent, 
-            CancelabeEditSession editSession, 
+            CancelabeEditSession sender, 
             EditSession target) {
         super(extent);
         
-        m_editSession = target;
-        m_player = editSession.getPlayer();
-        m_jobId = editSession.getJobId();
+        m_targetEs = target;
+        m_player = sender.getPlayer();
+        m_jobId = sender.getJobId();
         m_isAsync = true;
     }
     
     public FlushingExtent(Extent extent, 
-            ThreadSafeEditSession editSession, EditSession target) {
+            ThreadSafeEditSession sender, EditSession target) {
         super(extent);
         
-        m_editSession = target;
-        m_player = editSession.getPlayer();
+        m_targetEs = target;
+        m_player = sender.getPlayer();
         m_jobId = -1;
         m_isAsync = false;        
     }
@@ -123,12 +121,12 @@ public class FlushingExtent extends AbstractDelegateExtent {
     private void forceFlush() {
         int maxBlocks = ConfigProvider.getForceFlushBlocks();
 
-        if (m_editSession.isQueueEnabled() && (maxBlocks != -1)) {
+        if (m_targetEs.isQueueEnabled() && (maxBlocks != -1)) {
             m_blocksQueued++;
             if (m_blocksQueued > maxBlocks) {
                 m_blocksQueued = 0;
                 
-                m_editSession.flushSession();
+                m_targetEs.flushSession();
             }
         }
     }
