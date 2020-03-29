@@ -42,7 +42,7 @@ CMD_HELP_UNDO: "[YELLOW]Undo[WHITE] - toggle undo on/off\n[BLUE] Undo[WHITE] - t
 CMD_HELP_PURGE: "[YELLOW]Purge[WHITE] - remove all queued block operations\n[BLUE] Purge[WHITE] - purges your operations\n[BLUE] Purge <u:playerName>[WHITE] - purges other player operations\n[BLUE] Purge all[WHITE] - purges all operations"
 CMD_HELP_MESSAGE: "[YELLOW]Messages[WHITE] - configure the messaging system\n[BLUE] Messages <message> <on|off>[WHITE] - change your message status\n[BLUE] Messages <u:PlayerName> <message> <on|off>[WHITE] - change player message status\n[WHITE] Messages: [BLUE]TALKATIVE[WHITE], [BLUE]BAR[WHITE], [BLUE]CHAT"
 CMD_HELP_JOBS: "[YELLOW]Jobs[WHITE] - display queued block operations\n[BLUE] Jobs \\[page][WHITE] - displays your operations\n[BLUE] Jobs <u:playerName> \\[page][WHITE] - displays other player operations\n[BLUE] Jobs all [page][WHITE] - displays all queued operations"
-CMD_HELP_CANCEL: "[YELLOW]Cancel[WHITE] - cancel queued job\n[BLUE] Cancel #id[WHITE] - cancel your job\n[BLUE] Cancel <u:playerName> #id[WHITE] - cancel other player job"
+CMD_HELP_CANCEL: "[YELLOW]Cancel[WHITE] - cancel queued job\n[BLUE] Cancel #id[WHITE] - cancel your job\n[BLUE] Cancel <u:playerName|all> #id[WHITE] - cancel other player job, -1 for all jobs"
 CMD_HELP_RELOAD: "[YELLOW]Reload[WHITE] - Reload AWE configuration file\n[BLUE] Reload All[WHITE] - reload configuration entries and update groups\n[BLUE] Reload Config[WHITE] - reload only the configuration\n[BLUE] Reload Groups[WHITE] - update only the player groups"
 #The message configuration
 CMD_MESSAGE_OK: "[YELLOW]Message [BLUE]%1$s[YELLOW] is now [BLUE]%2$s"

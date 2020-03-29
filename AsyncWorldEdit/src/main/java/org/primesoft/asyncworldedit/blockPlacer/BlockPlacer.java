@@ -63,6 +63,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import org.primesoft.asyncworldedit.api.MessageSystem;
@@ -834,27 +835,42 @@ public class BlockPlacer implements IBlockPlacer {
         int newSize, result;
         final BlockPlacerPlayer playerEntry;
         Queue<IBlockPlacerEntry> queue = null;
-        IJobEntry job = null;
+        IJobEntry[] jobs = null;
         synchronized (m_mutex) {
             playerEntry = m_blocks.get(player);
             if (playerEntry == null) {
                 return 0;
             }
-            job = playerEntry.getJob(jobId);
-            if (job instanceof UndoJob) {
-                player.say(MessageType.BLOCK_PLACER_CANCEL_UNDO.format());
-                return 0;
-            }
-
+            if (jobId < 0) {
+                jobs = Stream.of(playerEntry.getJobs()).filter(j -> !(j instanceof UndoJob)).toArray(IJobEntry[]::new);
+            } else {
+                IJobEntry job = playerEntry.getJob(jobId);
+                if (job == null) {
+                    return 0;
+                }
+                if (job instanceof UndoJob) {
+                    player.say(MessageType.BLOCK_PLACER_CANCEL_UNDO.format());
+                    return 0;
+                }            
+                
+                jobs = new IJobEntry[]{job};
+            }        
+            
             queue = playerEntry.getQueue();
 
-            if (job != null) {
+            for (IJobEntry job : jobs)
+            {
                 playerEntry.removeJob(job);
                 onJobRemoved(job);
             }
         }
-
-        waitForJob(job);
+        
+        Set<Integer> jobIds = new HashSet<>();
+        for (IJobEntry job : jobs)
+        {
+            waitForJob(job);
+            jobIds.add(job.getJobId());
+        }
 
         synchronized (m_mutex) {
             Queue<IBlockPlacerEntry> filtered = new LinkedList<>();
@@ -862,7 +878,7 @@ public class BlockPlacer implements IBlockPlacer {
                 synchronized (queue) {
                     //TODO: Optimize this for undo
                     for (IBlockPlacerEntry entry : queue) {
-                        if (entry.getJobId() == jobId) {
+                        if (jobIds.contains(entry.getJobId())) {
                             if (entry instanceof IBlockPlacerLocationEntry) {
                                 IBlockPlacerLocationEntry bpEntry = (IBlockPlacerLocationEntry) entry;
                                 String worldName = bpEntry.getWorldName();

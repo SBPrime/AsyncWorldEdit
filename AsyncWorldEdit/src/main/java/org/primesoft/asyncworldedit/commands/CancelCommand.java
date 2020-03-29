@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.commands;
 
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.primesoft.asyncworldedit.core.Help;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
@@ -78,8 +80,8 @@ public class CancelCommand {
         }
 
         IBlockPlacer bPlacer = sender.getBlockPlacer();
-        final int id;
-        final IPlayerEntry entry;
+        final Integer id;
+        final Stream<IPlayerEntry> entry;
 
         if (args.length == 2) {
             if (!player.isInGame()) {
@@ -90,32 +92,38 @@ public class CancelCommand {
                 player.say(MessageType.NO_PERMS.format());
                 return;
             }
-            try {
-                id = Integer.parseInt(args[1]);
-            } catch (NumberFormatException ex) {
-                player.say(MessageType.NUMBER_EXPECTED.format());
+            
+            id = parseIds(player, args[1]);
+            if (id == null) {
                 return;
             }
-
-            entry = player;
+            entry = Stream.of(player);
         } else {
             String arg = args[1];
-            if (arg.startsWith("u:")) {
+            if (arg.startsWith("u:") || "all".equalsIgnoreCase(arg)) {
                 if (!player.isAllowed(Permission.CANCEL_OTHER)) {
                     player.say(MessageType.NO_PERMS.format());
                     return;
                 }
 
                 String name = arg.substring(2);
-                entry = sender.getPlayerManager().getPlayer(name);
-                if (!entry.isPlayer()) {
-                    player.say(MessageType.PLAYER_NOT_FOUND.format());
-                    return;
+                if (arg.startsWith("u:")) {
+                    IPlayerEntry pEntry = sender.getPlayerManager().getPlayer(name);                    
+                    if (!pEntry.isPlayer()) {
+                        player.say(MessageType.PLAYER_NOT_FOUND.format());
+                        return;
+                    }
+                    
+                    entry = Stream.of(pEntry);
                 }
-                try {
-                    id = Integer.parseInt(args[2]);
-                } catch (NumberFormatException ex) {
-                    player.say(MessageType.NUMBER_EXPECTED.format());
+                else {
+                    entry = Stream.of(sender.getBlockPlacer().getAllPlayers())
+                            .map(i -> sender.getPlayerManager().getPlayer(i.getUUID()))
+                            .filter(i -> i.isPlayer());
+                }
+                
+                id = parseIds(player, args[1]);
+                if (id == null) {
                     return;
                 }
             } else {
@@ -131,9 +139,21 @@ public class CancelCommand {
         SchedulerUtils.runTaskAsynchronously(scheduler, new BukkitRunnable() {
             @Override
             public void run() {
-                int size = bp.cancelJob(entry, id);
-                player.say(MessageType.CMD_CANCEL_REMOVED.format(Integer.toString(size)));
+                int size = entry.mapToInt(pEntry -> bp.cancelJob(pEntry, id)).sum();
+                player.say(MessageType.CMD_CANCEL_REMOVED.format(Integer.toString(size))); 
             }
         });
+    }
+
+    private static Integer parseIds(IPlayerEntry player, String arg) {
+        if ("all".equalsIgnoreCase(arg)) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(arg);
+        } catch (NumberFormatException ex) {
+            player.say(MessageType.NUMBER_EXPECTED.format());
+            return null;
+        }
     }
 }
