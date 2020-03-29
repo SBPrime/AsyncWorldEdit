@@ -114,10 +114,10 @@ public class UndoProcessor implements Operation {
         }
         
         if (m_sender instanceof CancelabeEditSession) {
-            bypassHistory = new FlushingExtent(bypassHistory, (CancelabeEditSession)m_sender);
+            bypassHistory = new FlushingExtent(bypassHistory, (CancelabeEditSession)m_sender, m_session);
         }
         else if (m_sender instanceof AsyncEditSession) {
-            bypassHistory = new FlushingExtent(bypassHistory, (AsyncEditSession)m_sender);
+            bypassHistory = new FlushingExtent(bypassHistory, (AsyncEditSession)m_sender, m_session);
         }
         uc.setExtent(bypassHistory);
 

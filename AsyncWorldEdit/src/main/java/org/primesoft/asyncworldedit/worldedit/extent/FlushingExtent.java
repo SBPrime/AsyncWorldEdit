@@ -51,6 +51,8 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.function.operation.RunContext;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.biome.BiomeType;
@@ -78,23 +80,24 @@ public class FlushingExtent extends AbstractDelegateExtent {
     private final boolean m_isAsync;
     
     public FlushingExtent(Extent extent, 
-            CancelabeEditSession editSession) {
+            CancelabeEditSession editSession, 
+            EditSession target) {
         super(extent);
         
-        m_editSession = editSession;
+        m_editSession = target;
         m_player = editSession.getPlayer();
         m_jobId = editSession.getJobId();
         m_isAsync = true;
     }
     
     public FlushingExtent(Extent extent, 
-            ThreadSafeEditSession editSession) {
+            ThreadSafeEditSession editSession, EditSession target) {
         super(extent);
         
-        m_editSession = editSession;
+        m_editSession = target;
         m_player = editSession.getPlayer();
         m_jobId = -1;
-        m_isAsync = false;
+        m_isAsync = false;        
     }
 
     @Override
@@ -124,9 +127,9 @@ public class FlushingExtent extends AbstractDelegateExtent {
             m_blocksQueued++;
             if (m_blocksQueued > maxBlocks) {
                 m_blocksQueued = 0;
+                
                 m_editSession.flushSession();
             }
         }
     }
-    
 }
