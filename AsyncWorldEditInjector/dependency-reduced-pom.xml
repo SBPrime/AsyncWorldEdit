@@ -60,7 +60,7 @@
     <dependency>
       <groupId>org.primesoft.asyncworldedit</groupId>
       <artifactId>AsyncWorldEdit-Utils</artifactId>
-      <version>3.6.19</version>
+      <version>3.6.20</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
