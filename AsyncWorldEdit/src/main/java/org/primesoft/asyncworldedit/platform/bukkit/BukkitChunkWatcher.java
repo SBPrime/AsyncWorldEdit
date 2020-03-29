@@ -95,8 +95,10 @@ class BukkitChunkWatcher extends ChunkWatch implements Listener {
             
             final Map<Long, ChunkEntry> chunks = m_forceload.get(worldName);
             for (Long coords : chunks.keySet()) {
-                chunks.computeIfPresent(coords, (_coords, chunkEntry) -> {
-                   final Chunk chunk = world.getChunkAt(chunkEntry.cx, chunkEntry.cz);
+                ChunkEntry ce = chunks.get(coords);
+                final Chunk chunk = world.getChunkAt(ce.cx, ce.cz);
+                
+                chunks.computeIfPresent(coords, (_coords, chunkEntry) -> {                   
                     if (chunk == null) {
                         return null;
                     }
