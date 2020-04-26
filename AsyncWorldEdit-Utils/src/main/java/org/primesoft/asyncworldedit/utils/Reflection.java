@@ -62,16 +62,20 @@ import java.util.Stack;
  * @author SBPrime
  */
 public class Reflection {
+    private static final Field modifiersField;
 
-    public static Class<?> classFromName(String p, String name, String message) {
-        final String pattern = "%s.%s";
+    static {
+        Field mf;
+
         try {
-            return Class.forName(String.format(pattern, p, name));
-        } catch (ClassNotFoundException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, class %2$s not found.", message, name));
+            mf = Field.class.getDeclaredField("modifiers");
+            mf.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            mf = null;
         }
 
-        return null;
+        modifiersField = mf;
+
     }
 
     public static <T> T create(Class<T> resultClass,
@@ -264,16 +268,14 @@ public class Reflection {
         return null;
     }
 
+//    /*
     public static void set(Object instance, String fieldName, Object value,
             String message) {
         set(instance.getClass(), instance, fieldName, value, message);
     }
+//*/
 
-    public static void set(Class<?> sourceClass, String fieldName, Object value,
-            String message) {
-        set(sourceClass, null, fieldName, value, message);
-    }
-
+//    /*
     public static void set(Class<?> sourceClass,
             Object instance, String fieldName, Object value,
             String message) {
@@ -313,48 +315,45 @@ public class Reflection {
             ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         }
     }
+//*/
 
-    public static boolean set(Object instance, Field field, Object value,
-            String message) {
+    public static boolean safeSet(Object instance, Field field, Object value,
+                              String message) {
         try {
             boolean accessible = field.isAccessible();
-
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-
-            int modifiers = modifiersField.getModifiers();
-            boolean isFinal = (modifiers & Modifier.FINAL) == Modifier.FINAL;
 
             if (!accessible) {
                 field.setAccessible(true);
             }
+
+            int modifiers = field.getModifiers();
+            boolean isFinal = (modifiers & Modifier.FINAL) == Modifier.FINAL;
+
             if (isFinal) {
-                modifiersField.setAccessible(true);
-                modifiersField.setInt(field, modifiers & ~Modifier.FINAL);
-            }
-            try {
-                field.set(instance, value);
-                return true;
-            } finally {
-                if (isFinal) {
-                    modifiersField.setInt(field, modifiers | Modifier.FINAL);
+                if (modifiersField == null) {
+                    throw new IllegalAccessException("Field '" + field.getName() + "' is FINAL. Set not supported on this platform.");
                 }
-                if (!accessible) {
-                    field.setAccessible(false);
-                }                
+
+                try {
+                    modifiersField.setInt(field, modifiers | Modifier.FINAL);
+                } catch (IllegalAccessException e) {
+                    throw new IllegalAccessException("Field '" + field.getName() + "' is FINAL. Unable to to modify FINAL flag.");
+                }
             }
+
+            field.set(instance, value);
+            return true;
         } catch (IllegalArgumentException ex) {
             ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
         } catch (IllegalAccessException ex) {
             ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
-        } catch (NoSuchFieldException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field modifiers not found.", message));
         } catch (SecurityException ex) {
             ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         }
-        
+
         return false;
     }
-
+    
     public static Method findMethod(Class<?> c, String methodName, String message, Class<?>... paramTypes) {
         try {
             return c.getDeclaredMethod(methodName, paramTypes);
@@ -362,34 +361,6 @@ public class Reflection {
             ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
         } catch (NoSuchMethodException ex) {
             ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, method %2$s not found.", message, methodName));
-        }
-
-        return null;
-    }
-
-    public static Field findField(Class<?> c, String fieldName, String message) {
-        try {
-            return c.getDeclaredField(fieldName);
-        } catch (SecurityException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
-        } catch (NoSuchFieldException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
-        }
-
-        return null;
-    }
-
-    public static Field findTypedField(Class<?> c, Class<?> fieldType, String fieldName, String message) {
-        try {
-            Field f = c.getDeclaredField(fieldName);
-            if (f == null || !f.getType().equals(fieldType)) {
-                return null;
-            }
-            return f;
-        } catch (SecurityException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
-        } catch (NoSuchFieldException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
         }
 
         return null;
@@ -405,43 +376,5 @@ public class Reflection {
         }
 
         return null;
-    }
-    
-    /**
-     * Scan the class hierarchy and returns all base classes and interfaces.
-     * @param cls
-     * @return 
-     */
-    public static Collection<Class<?>> scanHierarchy(Class<?> cls) {
-        
-        final Stack<Class<?>> toScan = new Stack<>();
-        final Stack<Class<?>> classes = new Stack<>();
-        
-        toScan.add(cls);
-        while (!toScan.isEmpty()) {
-            Class<?> c = toScan.pop();
-            if (c == null) {
-                continue;
-            }
-            
-            if (classes.contains(c)) {
-                continue;
-            }
-            classes.add(c);
-            
-            Class<?> sClass = c.getSuperclass();
-            if (sClass != null) {
-                toScan.add(sClass);
-            }
-            
-            Class<?>[] interfaces = c.getInterfaces();
-            if (interfaces != null) {
-                for (Class<?> i : interfaces) {
-                    toScan.push(i);
-                }                
-            }
-        }
-        
-        return Collections.unmodifiableCollection(classes);
     }
 }

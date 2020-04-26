@@ -90,6 +90,9 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
+import org.primesoft.asyncworldedit.injector.injected.IEditSession;
+import org.primesoft.asyncworldedit.injector.injected.extent.IChangeSetExtent;
+import org.primesoft.asyncworldedit.injector.injected.extent.world.IChunkLoadingExtent;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
@@ -193,7 +196,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
 
         for (Extent e : extentList) {
             if (e instanceof ChunkLoadingExtent) {
-                Reflection.set(ChunkLoadingExtent.class, e, "enabled", false, "Unable to disable ChunkLoadingExtent");
+                ((IChunkLoadingExtent)e).setEnabled(false);
             } else if (e instanceof IResetable) {
                 m_resetable.add((IResetable) e);
             }
@@ -201,8 +204,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     private void injectBlockBagExtent(Extent[] extentList) {
-        BlockBagExtent blockBagExtent = Reflection.get(EditSession.class, BlockBagExtent.class,
-                this, "blockBagExtent", "Unable to get the blockBagExtent");
+
+        BlockBagExtent blockBagExtent = ((IEditSession)this).getBlockBagExtent();
         Extent beforeExtent = ExtentUtils.findBeforer(extentList, blockBagExtent);
         Extent afterExtent = blockBagExtent != null ? blockBagExtent.getExtent() : null;
 
@@ -223,8 +226,7 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             return;
         }
 
-        Reflection.set(EditSession.class, this, "blockBagExtent", newBlockBag,
-                "Unable to set the blockBagExtent from EditSession, block bag broken.");
+        ((IEditSession)this).setBlockBagExtent(newBlockBag);
     }
 
     private void injectChangeSet(Extent[] extentList, ChangeSet changeSet, IPlayerEntry playerEntry) {
@@ -255,10 +257,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
 
                 }
 
-                Reflection.set(EditSession.class, this, "changeSet", changeSet,
-                        "Unable to inject ChangeSet, undo and redo broken.");
-                Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", changeSet,
-                        "Unable to inject changeset to extent, undo and redo broken.");
+                ((IEditSession)this).setChangeSet(changeSet);
+                ((IChangeSetExtent)changesetExtent).setChangeSet(changeSet);
             }
             beforeExtent = current;
         }

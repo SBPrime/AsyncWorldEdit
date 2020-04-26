@@ -52,7 +52,6 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.session.SessionKey;
 import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.session.SessionOwner;
-import java.lang.reflect.Field;
 import java.util.Map;
 import org.primesoft.asyncworldedit.api.IAsyncWorldEdit;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
@@ -60,7 +59,8 @@ import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 import org.primesoft.asyncworldedit.changesetSerializer.SerializableSessionList;
-import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.injector.injected.ILocalSession;
+import org.primesoft.asyncworldedit.injector.injected.session.ISessionManager;
 import org.primesoft.asyncworldedit.worldedit.WrappedLocalSession;
 
 /**
@@ -68,17 +68,6 @@ import org.primesoft.asyncworldedit.worldedit.WrappedLocalSession;
  * @author SBPrime
  */
 public class AsyncSessionManager extends SessionManager {
-
-    /**
-     * The history field
-     */
-    private static final Field s_fieldHistory = Reflection.findField(LocalSession.class, "history", "Unable to get LocalSession history field");
-    
-    /**
-     * The stored local sessions
-     */
-    private static final Field s_fieldSessions = Reflection.findField(SessionManager.class, "sessions", "Unable to get SessionManager sessions field");
-    
     /**
      * The player manager
      */
@@ -147,7 +136,7 @@ public class AsyncSessionManager extends SessionManager {
 
     @Override
     public synchronized void clear() {
-        Map map = Reflection.get(this, Map.class, s_fieldSessions, "Unable to get SessionManager storage");
+        Map map = ((ISessionManager)this).getSessions();
         Object[] values;
         
         if (map != null) {
@@ -167,11 +156,10 @@ public class AsyncSessionManager extends SessionManager {
         
 
     /**
-     * Initialize the localSession
+     * Initialize the localSession by setting the history
      *
-     * @param localSession
+     * @param localSession session to initialize
      * @param owner The session owner
-     * @return
      */
     private LocalSession initializeSession(LocalSession localSession, IPlayerEntry owner) {
         if (localSession == null) {
@@ -181,7 +169,7 @@ public class AsyncSessionManager extends SessionManager {
         LocalSession result = localSession;
         
         if (localSession instanceof WrappedLocalSession) {
-            localSession = ((WrappedLocalSession)localSession).getParrent();
+            localSession = ((WrappedLocalSession)localSession).getParent();
         }
         
         if (!(result instanceof WrappedLocalSession)) {
@@ -189,14 +177,14 @@ public class AsyncSessionManager extends SessionManager {
             newSession.setOwner(owner);
             result = newSession;
         }
-        
-        final Object current = Reflection.get(localSession, s_fieldHistory, "Unable to get history value");
+
+        final Object current = ((ILocalSession)localSession).getHistory();
 
         if (current instanceof SerializableSessionList) {
             return result;
         }
 
-        Reflection.set(localSession, s_fieldHistory, new SerializableSessionList(), "Unable to inject history serializer");
+        ((ILocalSession)localSession).setHistory(new SerializableSessionList());
         
         return result;
     }
@@ -204,7 +192,7 @@ public class AsyncSessionManager extends SessionManager {
     
     /**
      * Cleanup the removed local session data
-     * @param localSession 
+     * @param localSession session to cleanup
      */
     private void cleanupSession(LocalSession localSession) {
         if (localSession == null) {
@@ -212,11 +200,10 @@ public class AsyncSessionManager extends SessionManager {
         }
         
         if (localSession instanceof WrappedLocalSession) {
-            localSession = ((WrappedLocalSession)localSession).getParrent();
+            localSession = ((WrappedLocalSession)localSession).getParent();
         }
         
-        final Object current = Reflection.get(localSession, s_fieldHistory, "Unable to get history value");
-
+        final Object current = ((ILocalSession)localSession).getHistory();
         if (!(current instanceof SerializableSessionList)) {
             return;
         }
@@ -227,8 +214,6 @@ public class AsyncSessionManager extends SessionManager {
     
     /**
      * Get player from session owner
-     * @param owner
-     * @return 
      */
     private IPlayerEntry getPlayer(SessionOwner owner) {
         if (owner == null) {

@@ -105,7 +105,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
      */
     private final IClassScanner m_classScanner;
 
-    public AsyncOperationProcessor(IAsyncWorldEditCore aweCore) {
+    AsyncOperationProcessor(IAsyncWorldEditCore aweCore) {
         m_aweCore = aweCore;
         m_schedule = aweCore.getPlatform().getScheduler();
         m_blockPlacer = m_aweCore.getBlockPlacer();
@@ -236,8 +236,6 @@ public class AsyncOperationProcessor implements IOperationProcessor {
     /**
      * Validate the edit sessions
      *
-     * @param sessions
-     * @return
      */
     private boolean validate(List<IClassScannerResult> sessions) {
         boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
@@ -289,8 +287,6 @@ public class AsyncOperationProcessor implements IOperationProcessor {
     /**
      * Inject scanner results to operation
      *
-     * @param entries
-     * @param value
      */
     private void injectEditSession(List<IClassScannerResult> entries, Object value) {
         final Class<AsyncEditSession> aesClass = AsyncEditSession.class;
@@ -319,7 +315,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     log(String.format("* Injecting EditSession to %1$s %2$s", parent.getClass().getName(), field.getName()));
                 }
 
-                Reflection.set(parent, field, value, "edit session");
+                Reflection.safeSet(parent, field, value, "edit session");
             } else if (regionClass.isAssignableFrom(type)) {
                 if (debugOn) {
                     log("* Stored region entry ");
@@ -342,7 +338,6 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                 : regions.values()) {
             Region region = rEntry.getX1();
             for (IClassScannerResult entry : rEntry.getX2()) {
-                Class<?> type = entry.getType();
                 Field field = entry.getField();
                 Object parent = entry.getOwner();
                 if (field == null || parent == null) {
@@ -352,7 +347,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     log(String.format("* Injecting Region to %1$s %2$s", parent.getClass().getName(), field.getName()));
                 }
 
-                Reflection.set(parent, field, region, "region");
+                Reflection.safeSet(parent, field, region, "region");
             }
         }
     }
@@ -363,7 +358,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
         }
 
         for (IClassScannerResult entry : list) {
-            if (entry.getType() == type) {
+            if (type.isAssignableFrom(entry.getType())) {
                 return (T) entry.getValue();
             }
         }

@@ -50,9 +50,10 @@ package org.primesoft.asyncworldedit.utils;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.Extent;
-import java.lang.reflect.Field;
+import org.primesoft.asyncworldedit.injector.injected.IEditSession;
+import org.primesoft.asyncworldedit.injector.injected.extent.IAbstractDelegateExtent;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 
@@ -61,13 +62,9 @@ import static org.primesoft.asyncworldedit.LoggerProvider.log;
  * @author SBPrime
  */
 public class ExtentUtils {
-
-    private final static Field s_abstractDelegateExtent_extent
-            = Reflection.findField(AbstractDelegateExtent.class, "extent", "Unable to get AbstractDelegateExtent extent");
-
     public static List<Extent> getExtentList(EditSession session) {
         List<Extent> extentList = new ArrayList<>();
-        Extent current = Reflection.get(EditSession.class, Extent.class, session, "bypassNone", "Unable to get extent");
+        Extent current = ((IEditSession)session).getBypassNone();
         while (current != null) {
             extentList.add(current);
 
@@ -89,7 +86,7 @@ public class ExtentUtils {
     public static void dumpExtents(String prefix, String text, EditSession editSession) {
         log(prefix + "-----------------------");
         log(prefix + text);
-        Extent current = Reflection.get(EditSession.class, Extent.class, editSession, "bypassNone", "Unable to get extent");
+        Extent current = ((IEditSession)editSession).getBypassNone();
         while (current != null) {
             log(prefix + "..." + current.getClass().getName());
 
@@ -130,14 +127,12 @@ public class ExtentUtils {
     }
 
     public static boolean setExtent(Extent delegateExtent, Extent childExtent) {
-        if (s_abstractDelegateExtent_extent == null) {
+        if (delegateExtent == null ||
+                !(delegateExtent instanceof AbstractDelegateExtent) || !(delegateExtent instanceof IAbstractDelegateExtent)) {
             return false;
         }
 
-        if (delegateExtent == null || !(delegateExtent instanceof AbstractDelegateExtent)) {
-            return false;
-        }
-
-        return Reflection.set(delegateExtent, s_abstractDelegateExtent_extent, childExtent, "Unable to set extent");
+        ((IAbstractDelegateExtent)delegateExtent).setExtent(childExtent);
+        return true;
     }
 }

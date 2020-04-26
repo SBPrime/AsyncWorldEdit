@@ -96,6 +96,8 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.events.EditSessionLimitChanged;
+import org.primesoft.asyncworldedit.injector.injected.IEditSession;
+import org.primesoft.asyncworldedit.injector.injected.extent.IChangeSetExtent;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
 import org.primesoft.asyncworldedit.utils.Reflection;
@@ -232,7 +234,6 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     /**
      * Get the root changeset entry
      *
-     * @return
      */
     @Override
     public ChangeSet getRootChangeSet() {
@@ -304,8 +305,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     }
 
     private void injectBlockBagExtent(Extent[] extentList) {
-        BlockBagExtent blockBagExtent = Reflection.get(EditSession.class, BlockBagExtent.class,
-                this, "blockBagExtent", "Unable to get the blockBagExtent");
+        BlockBagExtent blockBagExtent = ((IEditSession)this).getBlockBagExtent();
         Extent beforeExtent = ExtentUtils.findBeforer(extentList, blockBagExtent);
         Extent afterExtent = blockBagExtent != null ? blockBagExtent.getExtent() : null;
 
@@ -324,8 +324,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
             return;
         }
 
-        Reflection.set(EditSession.class, this, "blockBagExtent", newBlockBag,
-                "Unable to set the blockBagExtent from EditSession, block bag broken.");
+        ((IEditSession)this).setBlockBagExtent(newBlockBag);
     }
 
     private void injectChangeSet(Extent[] extentList, IPlayerEntry playerEntry, IAsyncWorldEditCore core) {
@@ -369,10 +368,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
                     m_rootChangeSet = changeSet;
                 }
 
-                Reflection.set(EditSession.class, this, "changeSet", newChangeSet,
-                        "Unable to inject ChangeSet, undo and redo broken.");
-                Reflection.set(ChangeSetExtent.class, changesetExtent, "changeSet", newChangeSet,
-                        "Unable to inject changeset to extent, undo and redo broken.");
+                ((IEditSession)this).setChangeSet(newChangeSet);
+                ((IChangeSetExtent)changesetExtent).setChangeSet(newChangeSet);
             }
             beforeExtent = current;
         }

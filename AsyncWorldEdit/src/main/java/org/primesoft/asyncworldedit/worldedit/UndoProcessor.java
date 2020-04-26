@@ -47,8 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import com.sk89q.worldedit.EditSession;
+import java.util.Iterator;
+import java.util.List;
+
 import com.sk89q.worldedit.AweEditSession;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.Mask;
@@ -57,12 +60,10 @@ import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.function.operation.RunContext;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
-import java.util.Iterator;
-import java.util.List;
 import org.primesoft.asyncworldedit.api.utils.IDisposable;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
+import org.primesoft.asyncworldedit.injector.injected.IEditSession;
 import org.primesoft.asyncworldedit.utils.InjectionException;
-import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.extent.FlushingExtent;
 import org.primesoft.asyncworldedit.worldedit.history.ExtendedUndoContext;
 
@@ -72,9 +73,9 @@ import org.primesoft.asyncworldedit.worldedit.history.ExtendedUndoContext;
  */
 public class UndoProcessor implements Operation {
 
-    public static void processUndo(IThreadSafeEditSession parent,
-            AweEditSession sender,
-            EditSession targetSession) {
+    static void processUndo(IThreadSafeEditSession parent,
+                            AweEditSession sender,
+                            EditSession targetSession) {
 
         Iterator<Change> changes = parent.doUndo();
         Mask oldMask = targetSession.getMask();
@@ -105,14 +106,12 @@ public class UndoProcessor implements Operation {
     @Override
     public Operation resume(RunContext rc) throws WorldEditException {
         UndoContext uc = new ExtendedUndoContext(m_sender);
-        
-        Extent bypassHistory = Reflection.get(EditSession.class, Extent.class, m_targetSession, "bypassHistory",
-                "Unable to get history");
 
+        Extent bypassHistory = ((IEditSession)m_targetSession).getBypassHistory();
         if (bypassHistory == null) {
             throw new InjectionException("Unable to perform redo operation. Unable to get bypassHistory field");
         }
-        
+
         if (m_sender instanceof CancelabeEditSession) {
             bypassHistory = new FlushingExtent(bypassHistory, (CancelabeEditSession)m_sender, m_targetSession);
         }

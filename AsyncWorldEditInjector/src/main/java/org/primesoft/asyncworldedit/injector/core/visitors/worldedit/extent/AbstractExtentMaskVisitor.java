@@ -1,19 +1,19 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2016, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2020, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following 
+ * modification, are permitted free of charge provided that the following
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
  *     list of conditions and the following disclaimer.
  * 2.  Redistributions of source code, with or without modification, in any form
  *     other then free of charge is not allowed,
- * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the
  *     software is not allowed,
  * 4.  Redistributions of source code, with information on how to compile the software
  *     is not allowed,
@@ -45,48 +45,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.worldedit.command.tool;
 
-import com.sk89q.worldedit.LocalConfiguration;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.command.tool.AreaPickaxe;
-import com.sk89q.worldedit.command.tool.BlockTool;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.extension.platform.Platform;
-import com.sk89q.worldedit.util.Location;
-import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.injector.injected.commands.tool.IAreaPickaxe;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent;
 
-/**
- *
- * @author SBPrime
- */
-public class AsyncAreaPickaxe extends AreaPickaxe implements IAsyncTool {
-    public static BlockTool wrap(AreaPickaxe areaPickaxe) {
-        if (areaPickaxe == null) {
-            return null;
-        }
+import org.objectweb.asm.ClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseFieldAccessorVisitor;
+import org.primesoft.asyncworldedit.injector.injected.extent.IExtentSeter;
 
-        return new AsyncAreaPickaxe(((IAreaPickaxe)areaPickaxe).getRange());
+public class AbstractExtentMaskVisitor extends BaseFieldAccessorVisitor {
+
+    public AbstractExtentMaskVisitor(final ClassVisitor classVisitor) {
+
+        super(IExtentSeter.class, new FieldEntry[] {}, classVisitor);
     }
-
-    private AsyncAreaPickaxe(int range) {
-        super(range);
-    }
-
-    @Override
-    public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return ToolWrapper.performAction(server, config, player, session, clicked, 
-                new LocationToolAction() {
-
-            @Override
-            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-                return doActPrimary(server, config, player, session, clicked);
-            }
-        }, "areaPickaxe", WorldeditOperations.pickaxe);
-    }
-
-    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return super.actPrimary(server, config, player, session, clicked);
-    }    
 }

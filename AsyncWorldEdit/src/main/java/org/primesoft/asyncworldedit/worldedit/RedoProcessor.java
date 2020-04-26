@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.primesoft.asyncworldedit.api.utils.IDisposable;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
+import org.primesoft.asyncworldedit.injector.injected.IEditSession;
 import org.primesoft.asyncworldedit.utils.InjectionException;
 import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.extent.FlushingExtent;
@@ -105,13 +106,11 @@ public class RedoProcessor implements Operation {
     public Operation resume(RunContext rc) throws WorldEditException {
         UndoContext uc = new ExtendedUndoContext(m_sender);
 
-        Extent bypassHistory = Reflection.get(EditSession.class, Extent.class, m_targetSession, "bypassHistory",
-                "Unable to get history");
-
+        Extent bypassHistory = ((IEditSession)m_targetSession).getBypassHistory();
         if (bypassHistory == null) {
             throw new InjectionException("Unable to perform redo operation. Unable to get bypassHistory field");
         }
-        
+
         if (m_sender instanceof CancelabeEditSession) {
             bypassHistory = new FlushingExtent(bypassHistory, (CancelabeEditSession)m_sender, m_targetSession);
         }

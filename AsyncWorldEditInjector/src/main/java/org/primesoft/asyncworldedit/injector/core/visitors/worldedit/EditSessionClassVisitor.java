@@ -51,19 +51,26 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.BaseFieldAccessorVisitor;
+import org.primesoft.asyncworldedit.injector.injected.IEditSession;
 import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 
 /**
  *
  * @author SBPrime
  */
-public final class EditSessionClassVisitor extends BaseClassVisitor {
+public final class EditSessionClassVisitor extends BaseFieldAccessorVisitor {
     private final static String DESCRIPTOR_CTOR = "(Lcom/sk89q/worldedit/util/eventbus/EventBus;Lcom/sk89q/worldedit/world/World;ILcom/sk89q/worldedit/extent/inventory/BlockBag;Lcom/sk89q/worldedit/event/extent/EditSessionEvent;)V";
 
     private final SimpleValidator m_vCtor = new SimpleValidator("Constructor not injected");
     
     public EditSessionClassVisitor(ClassVisitor classVisitor) {
-        super(classVisitor);
+        super(IEditSession.class, new FieldEntry[] {
+                new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "bypassNone", "Lcom/sk89q/worldedit/extent/Extent;", "getBypassNone", null),
+                new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "bypassHistory", "Lcom/sk89q/worldedit/extent/Extent;", "getBypassHistory", null),
+                new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "blockBagExtent", "Lcom/sk89q/worldedit/extent/inventory/BlockBagExtent;", i -> i & (~Opcodes.ACC_FINAL), "getBlockBagExtent", "setBlockBagExtent"),
+                new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "changeSet", "Lcom/sk89q/worldedit/history/changeset/ChangeSet;", i -> i & (~Opcodes.ACC_FINAL), null, "setChangeSet"),
+        }, classVisitor);
     }
 
     @Override
@@ -81,5 +88,7 @@ public final class EditSessionClassVisitor extends BaseClassVisitor {
     @Override
     public void validate() throws RuntimeException {
         m_vCtor.validate();
+
+        super.validate();
     }
 }

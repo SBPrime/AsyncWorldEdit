@@ -54,35 +54,24 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator;
-import java.lang.reflect.Field;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.injector.injected.commands.tool.ITreePlanter;
 
 /**
  *
  * @author SBPrime
  */
 public class AsyncTreePlanter extends TreePlanter implements IAsyncTool {
-
-    private final static Field s_treePlanterTreeType = Reflection.findField(TreePlanter.class, "treeType", "Unable to get TreePlanter treeType field");
-
     /**
      * Wrap the TreePlanter
      *
-     * @param parrent
-     * @return
      */
-    public static TreePlanter wrap(TreePlanter parrent) {
-        if (parrent == null || s_treePlanterTreeType == null) {
-            return parrent;
+    public static TreePlanter wrap(TreePlanter parent) {
+        if (parent == null) {
+            return null;
         }
 
-        TreeGenerator.TreeType treeType = Reflection.get(parrent, TreeGenerator.TreeType.class, s_treePlanterTreeType, "Unable to TreePlanter treeType");
-        if (treeType == null) {
-            return parrent;
-        }
-
-        return new AsyncTreePlanter(treeType);
+        return new AsyncTreePlanter(((ITreePlanter)parent).getTreeType());
     }
 
     private AsyncTreePlanter(TreeGenerator.TreeType treeType) {

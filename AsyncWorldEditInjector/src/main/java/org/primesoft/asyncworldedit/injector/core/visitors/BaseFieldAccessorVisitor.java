@@ -113,7 +113,7 @@ public class BaseFieldAccessorVisitor extends BaseClassVisitor {
         mv.visitCode();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, m_cls, f.Name, f.Descriptor);
-        mv.visitInsn(Opcodes.ARETURN);
+        visitReturn(mv, f.Descriptor);
         
         mv.visitMaxs(1, 1);
         mv.visitEnd();
@@ -124,7 +124,7 @@ public class BaseFieldAccessorVisitor extends BaseClassVisitor {
         MethodVisitor mv = super.visitMethod(Opcodes.ACC_PUBLIC, f.Setter, "(" + f.Descriptor + ")V", null, null);
         mv.visitCode();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        visitArgumemt(mv, f.Descriptor, 1);
         mv.visitFieldInsn(Opcodes.PUTFIELD, m_cls, f.Name, f.Descriptor);
         mv.visitInsn(Opcodes.RETURN);
         
@@ -142,12 +142,29 @@ public class BaseFieldAccessorVisitor extends BaseClassVisitor {
         
         private final SimpleValidator m_validator;
         private final AccessChanger m_accessChanger;
-        
+
+        /**
+         * Create new instance of the field entry
+         * @param access The accessor pattern to match
+         * @param name The field name to match
+         * @param descriptor The field descriptor to match
+         * @param getter The getter name in the interface, null if no getter
+         * @param setter The setter name in the interface, null if not setter
+         */
         public FieldEntry(int access, String name, String descriptor,
                 String getter, String setter) {
             this(access, name, descriptor, i -> i, getter, setter);
         }
-        
+
+        /**
+         * Create new instance of the field entry
+         * @param access The accessor pattern to match
+         * @param name The field name to match
+         * @param descriptor The field descriptor to match
+         * @param getter The getter name in the interface, null if no getter
+         * @param setter The setter name in the interface, null if not setter
+         * @param ac Function to change the accessor
+         */
         public FieldEntry(int access, String name, String descriptor,
                 AccessChanger ac, String getter, String setter) {
             Access = access;
@@ -172,7 +189,7 @@ public class BaseFieldAccessorVisitor extends BaseClassVisitor {
     }
     
     @FunctionalInterface
-    private interface AccessChanger {
+    protected interface AccessChanger {
         int process(int current);
     }
 }

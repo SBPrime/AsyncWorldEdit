@@ -55,11 +55,11 @@ import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockTypes;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.primesoft.asyncworldedit.utils.Reflection;
+
+import org.primesoft.asyncworldedit.injector.injected.commands.tool.brush.IGravityBrush;
 
 /**
  * This code is based mostly on GravityBrush from WorldEdit.
@@ -67,18 +67,11 @@ import org.primesoft.asyncworldedit.utils.Reflection;
  * @author SBPrime
  */
 public class AsyncGravityBrush extends GravityBrush {
-
-    private static final Field s_gravityBrushFullHeight
-            = Reflection.findField(GravityBrush.class, "fullHeight", "Unable to get fullHeight field from GravityBrush");
-
     public static Brush wrap(GravityBrush brush) {
-        if (brush == null || s_gravityBrushFullHeight == null) {
-            return brush;
+        if (brush == null) {
+            return null;
         }
-
-        Boolean fullHeight = Reflection.get(brush, Boolean.class, s_gravityBrushFullHeight, "Unable to get fullHeight from GravityBrush");
-
-        return new AsyncGravityBrush(fullHeight == null ? false : fullHeight);
+        return new AsyncGravityBrush(((IGravityBrush)brush).isFullHeight());
     }
 
     private final boolean m_fullHeight;

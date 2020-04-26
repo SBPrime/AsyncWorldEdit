@@ -51,6 +51,7 @@
  */
 package org.primesoft.asyncworldedit.injector.core;
 
+import org.primesoft.asyncworldedit.injector.core.visitors.LocalSessionVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.WrapGetWorldVisitor;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -73,6 +74,16 @@ import org.primesoft.asyncworldedit.injector.core.visitors.CreatePlayerFactory;
 import org.primesoft.asyncworldedit.injector.core.visitors.CreatePlayerWrapper;
 import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.session.SessionManagerVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.AreaPickaxeVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.FloodFillToolVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.RecursivePickaxeVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.TreePlanterVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.brush.GravityBrushVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.AbstractDelegateExtentVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.AbstractExtentMaskVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.ChangeSetExtentVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.world.ChunkLoadingExtentVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.function.operation.OperationsClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.EditSessionClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.bukkit.BukkitEntityVisitor;
@@ -108,7 +119,6 @@ public class InjectorCore {
     /**
      * Get the static instance
      *
-     * @return
      */
     public static InjectorCore getInstance() {
         if (s_instance == null) {
@@ -142,7 +152,6 @@ public class InjectorCore {
     /**
      * Log a console message
      *
-     * @param message
      */
     private void log(String message) {
         IInjectorPlatform platform = m_platform;
@@ -156,9 +165,6 @@ public class InjectorCore {
     /**
      * Initialize the injector core
      *
-     * @param platform
-     * @param classInjector
-     * @return 
      */
     public boolean initialize(IInjectorPlatform platform, IClassInjector classInjector) {
         synchronized (m_mutex) {
@@ -184,62 +190,74 @@ public class InjectorCore {
             m_classInjector.getNmsInjection().consume(new NmsClassInjectorBridge());
 
             log("Injecting WorldEdit classes...");
-            modifyClasses("com.sk89q.worldedit.util.eventbus.EventBus", c -> new EventBusVisitor(c));
+            modifyClasses("com.sk89q.worldedit.util.eventbus.EventBus", EventBusVisitor::new);
 
-            modifyClasses("com.sk89q.worldedit.math.BlockVector2", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.math.BlockVector3", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.math.Vector2", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.math.Vector3", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.math.BlockVector2", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.math.BlockVector3", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.math.Vector2", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.math.Vector3", AsyncWrapperVisitor::new);
 
-            modifyClasses("com.sk89q.worldedit.world.block.BlockStateHolder", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.world.block.BaseBlock", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.world.block.BlockState", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.entity.BaseEntity", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.util.Location", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.world.biome.BiomeType", c -> new AsyncWrapperVisitor(c));
-            modifyClasses("com.sk89q.worldedit.world.weather.WeatherType", c -> new AsyncWrapperVisitor(c));
+            modifyClasses("com.sk89q.worldedit.world.block.BlockStateHolder", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.world.block.BaseBlock", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.world.block.BlockState", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.entity.BaseEntity", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.util.Location", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.world.biome.BiomeType", AsyncWrapperVisitor::new);
+            modifyClasses("com.sk89q.worldedit.world.weather.WeatherType", AsyncWrapperVisitor::new);
 
-            modifyClasses("com.sk89q.worldedit.EditSession", c -> new EditSessionClassVisitor(c));
-            modifyClasses("com.sk89q.worldedit.function.operation.Operations", (c, cc) -> new OperationsClassVisitor(c, cc));
-            modifyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", (c, cc) -> new BlockArrayClipboardClassVisitor(c, cc));
-            modifyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", c -> new WrapGetWorldVisitor(c));
+            modifyClasses("com.sk89q.worldedit.EditSession", EditSessionClassVisitor::new);
+            modifyClasses("com.sk89q.worldedit.extent.AbstractDelegateExtent", AbstractDelegateExtentVisitor::new);
 
-            modifyClasses("com.sk89q.worldedit.util.collection.LocatedBlockList", c -> new LocatedBlockListVisitor(c));
-            modifyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", c -> new ResetableExtentVisitor(c));
-            modifyClasses("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", c -> new ResetableExtentVisitor(c));
+            modifyClasses("com.sk89q.worldedit.function.operation.Operations", OperationsClassVisitor::new);
+            modifyClasses("com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard", BlockArrayClipboardClassVisitor::new);
+            modifyClasses("com.sk89q.worldedit.extension.platform.PlayerProxy", WrapGetWorldVisitor::new);
+
+            modifyClasses("com.sk89q.worldedit.util.collection.LocatedBlockList", LocatedBlockListVisitor::new);
+            modifyClasses("com.sk89q.worldedit.extent.reorder.MultiStageReorder", ResetableExtentVisitor::new);
+            modifyClasses("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", ResetableExtentVisitor::new);
 
             // Regions
-            modifyClasses("com.sk89q.worldedit.regions.AbstractRegion", c -> new RegionVisitor(c));
-            modifyClasses("com.sk89q.worldedit.regions.EllipsoidRegion", c -> new RegionVisitor(c));
-            modifyClasses("com.sk89q.worldedit.regions.ConvexPolyhedralRegion", c -> new RegionVisitor(c));
-            modifyClasses("com.sk89q.worldedit.regions.TransformRegion", c -> new RegionVisitor(c));
-            modifyClasses("com.sk89q.worldedit.regions.RegionIntersection", c -> new RegionVisitor(c));
-            modifyClasses("com.sk89q.worldedit.regions.NullRegion", c -> new RegionVisitor(c));
-            modifyClasses("com.sk89q.worldedit.regions.Polygonal2DRegion", c -> new RegionVisitor(c));
-            modifyClasses("com.sk89q.worldedit.regions.CylinderRegion", c -> new RegionVisitor(c));
-            modifyClasses("com.sk89q.worldedit.regions.CuboidRegion", c -> new RegionVisitor(c));
+            modifyClasses("com.sk89q.worldedit.regions.AbstractRegion", RegionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.regions.EllipsoidRegion", RegionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.regions.ConvexPolyhedralRegion", RegionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.regions.TransformRegion", RegionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.regions.RegionIntersection", RegionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.regions.NullRegion", RegionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.regions.Polygonal2DRegion", RegionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.regions.CylinderRegion", RegionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.regions.CuboidRegion", RegionVisitor::new);
 
             // Commands
-            modifyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", (c, cc) -> new SnapshotUtilCommandsVisitor(c, cc));
-            modifyClasses("com.sk89q.worldedit.command.ScriptingCommands", (c, cc) -> new ScriptingCommandsVisitor(c, cc));
-            modifyClasses("com.sk89q.worldedit.command.SchematicCommands", (c, cc) -> new SchematicCommandsVisitor(c, cc));
-            modifyClasses("com.sk89q.worldedit.command.RegionCommands", (c, cc) -> new RegionCommandsVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.command.SnapshotUtilCommands", SnapshotUtilCommandsVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.ScriptingCommands", ScriptingCommandsVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.SchematicCommands", SchematicCommandsVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.RegionCommands", RegionCommandsVisitor::new);
 
-            modifyClasses("com.sk89q.worldedit.command.UtilityCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
-            modifyClasses("com.sk89q.worldedit.bukkit.BukkitEntity", (c, cc) -> new BukkitEntityVisitor(c, cc));
+            modifyClasses("com.sk89q.worldedit.command.UtilityCommandsRegistration", CommandsRegistrationVisitor::new);
+            modifyClasses("com.sk89q.worldedit.bukkit.BukkitEntity", BukkitEntityVisitor::new);
             
             // Bukkit
-            modifyClasses("com.sk89q.worldedit.command.RegionCommandsRegistration", c -> new CommandsRegistrationVisitor(c));
+            modifyClasses("com.sk89q.worldedit.command.RegionCommandsRegistration", CommandsRegistrationVisitor::new);
             
             // Reflection
-            modifyClasses("com.sk89q.worldedit.command.tool.BrushTool", c -> new BrushToolVisitor(c));
-            modifyClasses("com.sk89q.worldedit.command.tool.BlockReplacer", c -> new BlockReplacerVisitor(c));
+            modifyClasses("com.sk89q.worldedit.function.mask.AbstractExtentMask", AbstractExtentMaskVisitor::new);
+            modifyClasses("com.sk89q.worldedit.LocalSession", LocalSessionVisitor::new);
+            modifyClasses("com.sk89q.worldedit.session.SessionManager", SessionManagerVisitor::new);
+            modifyClasses("com.sk89q.worldedit.extent.ChangeSetExtent", ChangeSetExtentVisitor::new);
+            modifyClasses("com.sk89q.worldedit.extent.world.ChunkLoadingExtent", ChunkLoadingExtentVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.tool.BrushTool", BrushToolVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.tool.BlockReplacer", BlockReplacerVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.tool.FloodFillTool", FloodFillToolVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.tool.brush.GravityBrush", GravityBrushVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.tool.TreePlanter", TreePlanterVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.tool.AreaPickaxe", AreaPickaxeVisitor::new);
+            modifyClasses("com.sk89q.worldedit.command.tool.RecursivePickaxe", RecursivePickaxeVisitor::new);
 
-            crateClass(cc-> new CreatePlayerWrapper(cc));
-            crateClass(cc-> new CreateNoPermsPlayer(cc));
-            crateClass(cc-> new CreateNoPermsActor(cc));
-            crateClass(cc-> new CreatePlayerFactory(cc));
-            crateClass(cc-> new CreateActorFactory(cc));
+            crateClass(CreatePlayerWrapper::new);
+            crateClass(CreateNoPermsPlayer::new);
+            crateClass(CreateNoPermsActor::new);
+            crateClass(CreatePlayerFactory::new);
+            crateClass(CreateActorFactory::new);
 
             return true;
         } catch (Throwable ex) {
@@ -256,7 +274,9 @@ public class InjectorCore {
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException ex1) {
+                // Ignore
             }
+
             return false;
         }
     }
@@ -264,7 +284,6 @@ public class InjectorCore {
     /**
      * Set new class factory
      *
-     * @param factory
      */
     public void setClassFactory(IClassFactory factory) {
         synchronized (m_mutex) {
@@ -282,7 +301,6 @@ public class InjectorCore {
     /**
      * Get the class factory
      *
-     * @return
      */
     public IClassFactory getClassFactory() {
         return m_classFactory;
@@ -291,7 +309,6 @@ public class InjectorCore {
     /**
      * getInjectorVersion The injector version
      *
-     * @return
      */
     public double getVersion() {
         return 2.0000;
@@ -383,7 +400,8 @@ public class InjectorCore {
     private void writeData(String className, byte[] data) {
         try (DataOutputStream dout = new DataOutputStream(new FileOutputStream(new File("./classes/" + className + ".class")))) {
             dout.write(data);
-        } catch (IOException ex) {            
+        } catch (IOException ex) {
+            // Ignore this is only for debug :)
         }
     }
 
@@ -399,8 +417,7 @@ public class InjectorCore {
 
     private class NmsClassInjectorBridge implements IClassInjectorBridge {
 
-        public NmsClassInjectorBridge() {
-        }
+        NmsClassInjectorBridge() { }
 
         @Override
         public void modifyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor) throws IOException {

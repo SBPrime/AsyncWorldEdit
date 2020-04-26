@@ -54,28 +54,23 @@ import com.sk89q.worldedit.command.tool.RecursivePickaxe;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.util.Location;
-import java.lang.reflect.Field;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.injector.injected.commands.tool.IRecursivePickaxe;
 
 /**
  *
  * @author SBPrime
  */
 public class AsyncRecursivePickaxe extends RecursivePickaxe implements IAsyncTool {
-    private final static Field s_range = Reflection.findField(RecursivePickaxe.class, "range", "Unable te get range field from RecursivePickaxe");
-    
-    
     public static BlockTool wrap(RecursivePickaxe recursivePickaxe) {
-        if (recursivePickaxe == null || s_range == null) {
+        if (recursivePickaxe == null) {
             return null;
         }
         
-        Object oRange = Reflection.get(recursivePickaxe, s_range, "Unable to get range from RecursivePickaxe");
-        return new AsyncRecursivePickaxe((oRange instanceof Double) ? ((Double)oRange).doubleValue() : 0.0);
+        return new AsyncRecursivePickaxe(((IRecursivePickaxe)recursivePickaxe).getRange());
     }
 
-    public AsyncRecursivePickaxe(double range) {
+    private AsyncRecursivePickaxe(double range) {
         super(range);
     }
 

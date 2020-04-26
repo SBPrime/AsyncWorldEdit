@@ -56,6 +56,7 @@ import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IClassScanner;
 import org.primesoft.asyncworldedit.api.inner.IClassScannerResult;
 import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScannerResult;
+import org.primesoft.asyncworldedit.injector.injected.extent.IExtentSeter;
 import org.primesoft.asyncworldedit.worldedit.extent.MultiThreadExtent;
 
 /**
@@ -106,7 +107,11 @@ public class MaskUtils {
                 continue;
             }
 
-            Reflection.set(parent, field, extent, "extent");
+            if (parent instanceof IExtentSeter) {
+                ((IExtentSeter)parent).setExtent(extent);
+            } else {
+                Reflection.safeSet(parent, field, extent, "extent");
+            }
         }
         
         return maskExtent;
@@ -154,7 +159,11 @@ public class MaskUtils {
                 continue;
             }
 
-            Reflection.set(parent, field, extent, "extent");
+            if (parent instanceof IExtentSeter) {
+                ((IExtentSeter)parent).setExtent(extent);
+            } else {
+                Reflection.safeSet(parent, field, extent, "extent");
+            }
         }
         
         return maskExtent;

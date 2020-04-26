@@ -57,10 +57,7 @@ import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.pattern.Pattern;
-import java.lang.reflect.Field;
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.injector.injected.commands.tool.IBrushToolAccessor;
-import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.command.tool.brush.AsyncGravityBrush;
 
 /**
@@ -68,54 +65,40 @@ import org.primesoft.asyncworldedit.worldedit.command.tool.brush.AsyncGravityBru
  * @author SBPrime
  */
 public final class WrappedBrushTool extends BrushTool {
-    private final static Field s_fieldPermission;
-
-    static {
-        s_fieldPermission = Reflection.findField(BrushTool.class, "permission", "Unable to get brush field");
-        
-        if (s_fieldPermission == null) {
-            log("WARNING: failed to obtain permission field from BrushTool. Tha initial brush permissions will be incorrect.");
-        }
-    }
-    
     /**
-     * The parrent brush
+     * The parent brush
      */
-    private final BrushTool m_parrent;        
+    private final BrushTool m_parent;
             
-    public WrappedBrushTool(BrushTool brushTool) {
+    WrappedBrushTool(BrushTool brushTool) {
         super("");
         
-        m_parrent = brushTool;
+        m_parent = brushTool;
         
-        String permissions = null;
-        
-        if (s_fieldPermission != null) {
-            permissions = ((IBrushToolAccessor)m_parrent).getPermission();
-        }
-        
+        String permissions = ((IBrushToolAccessor)m_parent).getPermission();
+
         if (permissions == null) {
             permissions = "worldedit.brush.sphere";
         }
         
         
         //Set brush to current brush to wrap the current brush if needed.
-        setBrush(m_parrent.getBrush(), permissions);
+        setBrush(m_parent.getBrush(), permissions);
     }
 
     @Override
     public boolean canUse(Actor player) {
-        return m_parrent.canUse(player);
+        return m_parent.canUse(player);
     }
 
     @Override
     public Mask getMask() {
-        return m_parrent.getMask();
+        return m_parent.getMask();
     }
 
     @Override
     public void setMask(Mask filter) {
-        m_parrent.setMask(filter);
+        m_parent.setMask(filter);
     }
 
     @Override
@@ -124,53 +107,53 @@ public final class WrappedBrushTool extends BrushTool {
             brush = AsyncGravityBrush.wrap((GravityBrush)brush);
         }
         
-        m_parrent.setBrush(brush, permission);
+        m_parent.setBrush(brush, permission);
     }
 
     @Override
     public Brush getBrush() {
-        return m_parrent.getBrush();
+        return m_parent.getBrush();
     }
 
     @Override
     public void setFill(Pattern material) {
-        m_parrent.setFill(material);
+        m_parent.setFill(material);
     }
 
     @Override
     public Pattern getMaterial() {
-        return m_parrent.getMaterial();
+        return m_parent.getMaterial();
     }
 
     @Override
     public double getSize() {
-        return m_parrent.getSize();
+        return m_parent.getSize();
     }
 
     @Override
     public void setSize(double radius) {
-        m_parrent.setSize(radius);
+        m_parent.setSize(radius);
     }
 
     @Override
     public int getRange() {
-        return m_parrent.getRange();
+        return m_parent.getRange();
     }
 
     
     @Override
     public void setRange(int range) {
-        m_parrent.setRange(range);
+        m_parent.setRange(range);
     }
     
     
     @Override
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
-        return m_parrent.actPrimary(server, config, player, session);
+        return m_parent.actPrimary(server, config, player, session);
     }
 
     @Override
     public void setTraceMask(Mask traceMask) {
-        m_parrent.setTraceMask(traceMask);
+        m_parent.setTraceMask(traceMask);
     }        
 }

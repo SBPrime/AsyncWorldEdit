@@ -47,7 +47,11 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import org.primesoft.asyncworldedit.events.LocalSessionLimitChanged;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EmptyClipboardException;
 import com.sk89q.worldedit.IncompleteRegionException;
@@ -71,17 +75,13 @@ import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.item.ItemType;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
-import java.lang.reflect.Field;
-import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.configuration.IWorldEditConfig;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.worldedit.IExtendedLocalSession;
 import org.primesoft.asyncworldedit.core.AwePlatform;
-import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.events.LocalSessionLimitChanged;
+import org.primesoft.asyncworldedit.injector.injected.ILocalSession;
 import org.primesoft.asyncworldedit.worldedit.command.tool.ToolWrapper;
 
 /**
@@ -89,18 +89,7 @@ import org.primesoft.asyncworldedit.worldedit.command.tool.ToolWrapper;
  * @author SBPrime
  */
 public class WrappedLocalSession extends LocalSession implements IExtendedLocalSession {
-
-    /**
-     * The history field
-     */
-    private static final Field s_fieldHistory = Reflection.findField(LocalSession.class, "history", "Unable to get LocalSession history field");
-
-    /**
-     * The history field
-     */
-    private static final Field s_fieldHistoryPointer = Reflection.findField(LocalSession.class, "historyPointer", "Unable to get LocalSession historyPointer field");
-
-    private final LocalSession m_parrent;
+    private final LocalSession m_parent;
 
     public static WrappedLocalSession wrap(LocalSession localSession) {
         if (localSession == null) {
@@ -120,15 +109,15 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
      */
     private final EventBus m_eventBus;
 
-    public LocalSession getParrent() {
-        return m_parrent;
+    public LocalSession getParent() {
+        return m_parent;
     }
 
-    protected WrappedLocalSession(LocalSession parrent) {
-        m_parrent = parrent;
+    protected WrappedLocalSession(LocalSession parent) {
+        m_parent = parent;
         
-        if (!(parrent instanceof WrappedLocalSession)) {
-            wrapTools(Reflection.get(parrent, Map.class, "tools", "Unable to wrap preselected tools and wands"));
+        if (!(parent instanceof WrappedLocalSession)) {
+            wrapTools(((ILocalSession)parent).getTools());
         }
 
         m_eventBus = AwePlatform.getInstance().getCore().getEventBus();
@@ -136,64 +125,64 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
 
     @Override
     public void clearHistory() {
-        m_parrent.clearHistory();
+        m_parent.clearHistory();
     }
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
-        WrappedLocalSession result = wrap(m_parrent);
+        WrappedLocalSession result = wrap(m_parent);
         result.setOwner(m_sessionOwner);
         return result;
     }
 
     @Override
     public boolean compareAndResetDirty() {
-        return m_parrent.compareAndResetDirty();
+        return m_parent.compareAndResetDirty();
     }
 
     @Override
     public EditSession createEditSession(Player player) {
-        return m_parrent.createEditSession(player);
+        return m_parent.createEditSession(player);
     }
     
     @Override
     public EditSession createEditSession(Actor actor) {
-        return m_parrent.createEditSession(actor);
+        return m_parent.createEditSession(actor);
     }
 
     @Override
     public void describeCUI(Actor actor) {
-        m_parrent.describeCUI(actor);
+        m_parent.describeCUI(actor);
     }
 
     @Override
     public Calendar detectDate(String input) {
-        return m_parrent.detectDate(input);
+        return m_parent.detectDate(input);
     }
 
     @Override
     public void disableSuperPickAxe() {
-        m_parrent.disableSuperPickAxe();
+        m_parent.disableSuperPickAxe();
     }
 
     @Override
     public void dispatchCUIEvent(Actor actor, CUIEvent event) {
-        m_parrent.dispatchCUIEvent(actor, event);
+        m_parent.dispatchCUIEvent(actor, event);
     }
 
     @Override
     public void dispatchCUISelection(Actor actor) {
-        m_parrent.dispatchCUISelection(actor);
+        m_parent.dispatchCUISelection(actor);
     }
 
     @Override
     public void dispatchCUISetup(Actor actor) {
-        m_parrent.dispatchCUISetup(actor);
+        m_parent.dispatchCUISetup(actor);
     }
 
     @Override
     public void enableSuperPickAxe() {
-        m_parrent.enableSuperPickAxe();
+        m_parent.enableSuperPickAxe();
     }
 
     @Override
@@ -201,24 +190,24 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
         LocalSession other;
 
         if (obj instanceof WrappedLocalSession) {
-            other = ((WrappedLocalSession) obj).m_parrent;
+            other = ((WrappedLocalSession) obj).m_parent;
         } else if (obj instanceof LocalSession) {
             other = (LocalSession) obj;
         } else {
             return false;
         }
 
-        return m_parrent.equals(other);
+        return m_parent.equals(other);
     }
 
     @Override
     public BlockBag getBlockBag(Player player) {
-        return m_parrent.getBlockBag(player);
+        return m_parent.getBlockBag(player);
     }
 
     @Override
     public int getBlockChangeLimit() {
-        return m_parrent.getBlockChangeLimit();
+        return m_parent.getBlockChangeLimit();
     }
 
     @Override
@@ -235,132 +224,130 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
 
     @Override
     public int getCUIVersion() {
-        return m_parrent.getCUIVersion();
+        return m_parent.getCUIVersion();
     }
 
     @Override
     public ClipboardHolder getClipboard() throws EmptyClipboardException {
-        return m_parrent.getClipboard();
+        return m_parent.getClipboard();
     }
 
     @Override
     public RegionSelectorType getDefaultRegionSelector() {
-        return m_parrent.getDefaultRegionSelector();
+        return m_parent.getDefaultRegionSelector();
     }
 
     @Override
     public String getLastScript() {
-        return m_parrent.getLastScript();
+        return m_parent.getLastScript();
     }
 
     @Override
     public Mask getMask() {
-        return m_parrent.getMask();
+        return m_parent.getMask();
     }
 
     @Override
     public BlockVector3 getPlacementPosition(Player player) throws IncompleteRegionException {
-        return m_parrent.getPlacementPosition(player);
+        return m_parent.getPlacementPosition(player);
     }
     
     @Override
     public BlockVector3 getPlacementPosition(Actor actor) throws IncompleteRegionException {
-        return m_parrent.getPlacementPosition(actor);
+        return m_parent.getPlacementPosition(actor);
     }
 
     @Override
     public RegionSelector getRegionSelector(World world) {
-        return m_parrent.getRegionSelector(world);
+        return m_parent.getRegionSelector(world);
     }
 
     @Override
     public Region getSelection(World world) throws IncompleteRegionException {
-        return m_parrent.getSelection(world);
+        return m_parent.getSelection(world);
     }
 
     @Override
     public World getSelectionWorld() {
-        return m_parrent.getSelectionWorld();
+        return m_parent.getSelectionWorld();
     }
 
     @Override
     public Snapshot getSnapshot() {
-        return m_parrent.getSnapshot();
+        return m_parent.getSnapshot();
     }
 
     @Override
     public BlockTool getSuperPickaxe() {
-        return m_parrent.getSuperPickaxe();
+        return m_parent.getSuperPickaxe();
     }
 
     @Override
     public ZoneId getTimeZone() {
-        return m_parrent.getTimeZone();
+        return m_parent.getTimeZone();
     }
 
     @Override
     public Tool getTool(ItemType item) {
-        return m_parrent.getTool(item);
+        return m_parent.getTool(item);
     }
 
     @Override
     public void handleCUIInitializationMessage(String text, Actor actor) {
-        m_parrent.handleCUIInitializationMessage(text, actor);
+        m_parent.handleCUIInitializationMessage(text, actor);
     }
 
     @Override
     public boolean hasCUISupport() {
-        return m_parrent.hasCUISupport();
+        return m_parent.hasCUISupport();
     }
 
     @Override
     public boolean hasFastMode() {
-        return m_parrent.hasFastMode();
+        return m_parent.hasFastMode();
     }
 
     @Override
     public boolean hasSuperPickAxe() {
-        return m_parrent.hasSuperPickAxe();
+        return m_parent.hasSuperPickAxe();
     }
 
     @Override
     public int hashCode() {
-        return m_parrent.hashCode();
+        return m_parent.hashCode();
     }
 
     @Override
     public boolean isDirty() {
-        return m_parrent.isDirty();
+        return m_parent.isDirty();
     }
 
     @Override
     public boolean isSelectionDefined(World world) {
-        return m_parrent.isSelectionDefined(world);
+        return m_parent.isSelectionDefined(world);
     }
 
     @Override
-    public boolean isToolControlEnabled() {
-        return m_parrent.isToolControlEnabled();
-    }
+    public boolean isToolControlEnabled() { return m_parent.isToolControlEnabled(); }
 
     @Override
     public boolean isUsingInventory() {
-        return m_parrent.isUsingInventory();
+        return m_parent.isUsingInventory();
     }
 
     @Override
     public void postLoad() {
-        m_parrent.postLoad();
+        m_parent.postLoad();
     }
 
     @Override
     public EditSession redo(BlockBag newBlockBag, Player player) {
-        return m_parrent.redo(newBlockBag, player);
+        return m_parent.redo(newBlockBag, player);
     }
     
     @Override
     public EditSession redo(BlockBag newBlockBag, Actor actor) {
-        return m_parrent.redo(newBlockBag, actor);
+        return m_parent.redo(newBlockBag, actor);
     }
 
     @Override
@@ -370,17 +357,17 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
         IPermissionGroup permGroup = owner != null ? owner.getPermissionGroup() : null;
         IWorldEditConfig weConfig = permGroup != null ? permGroup.getWorldEditConfig() : null;
 
-        if (weConfig == null || s_fieldHistory == null || s_fieldHistoryPointer == null) {
-            m_parrent.remember(editSession);
+        if (weConfig == null) {
+            m_parent.remember(editSession);
             return;
         }
 
         LocalSession.MAX_HISTORY_SIZE = Integer.MAX_VALUE;
 
-        m_parrent.remember(editSession);
+        m_parent.remember(editSession);
 
         int maxHistory = weConfig.getHistorySize();
-        List<EditSession> history = Reflection.get(m_parrent, List.class, s_fieldHistory, "Unable to get history");
+        List<EditSession> history = ((ILocalSession)m_parent).getHistory();
         if (history == null) {
             return;
         }
@@ -390,7 +377,7 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
                 history.remove(0);
             }
 
-            Reflection.set(m_parrent, s_fieldHistoryPointer, history.size(), "Unable to set history pointer, history corrupted!");
+            ((ILocalSession)m_parent).setHistoryPointer(history.size());
         }
     }
 
@@ -398,121 +385,119 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
     public void setBlockChangeLimit(int maxBlocksChanged) {
         int oldLimit = getBlockChangeLimit();
 
-        m_parrent.setBlockChangeLimit(maxBlocksChanged);
+        m_parent.setBlockChangeLimit(maxBlocksChanged);
 
         m_eventBus.post(new LocalSessionLimitChanged(this, m_sessionOwner, oldLimit, maxBlocksChanged));
     }
 
     @Override
     public void setCUISupport(boolean support) {
-        m_parrent.setCUISupport(support);
+        m_parent.setCUISupport(support);
     }
 
     @Override
     public void setCUIVersion(int cuiVersion) {
-        m_parrent.setCUIVersion(cuiVersion);
+        m_parent.setCUIVersion(cuiVersion);
     }
 
     @Override
     public void setClipboard(ClipboardHolder clipboard) {
-        m_parrent.setClipboard(clipboard);
+        m_parent.setClipboard(clipboard);
     }
 
     @Override
     public void setConfiguration(LocalConfiguration config) {
-        m_parrent.setConfiguration(config);
+        m_parent.setConfiguration(config);
     }
 
     @Override
     public void setDefaultRegionSelector(RegionSelectorType defaultSelector) {
-        m_parrent.setDefaultRegionSelector(defaultSelector);
+        m_parent.setDefaultRegionSelector(defaultSelector);
     }
 
     @Override
     public void setFastMode(boolean fastMode) {
-        m_parrent.setFastMode(fastMode);
+        m_parent.setFastMode(fastMode);
     }
 
     @Override
     public void setLastScript(String lastScript) {
-        m_parrent.setLastScript(lastScript);
+        m_parent.setLastScript(lastScript);
     }
 
     @Override
     public void setMask(Mask mask) {
-        m_parrent.setMask(mask);
+        m_parent.setMask(mask);
     }
 
     @Override
     public void setRegionSelector(World world, RegionSelector selector) {
-        m_parrent.setRegionSelector(world, selector);
+        m_parent.setRegionSelector(world, selector);
     }
 
     @Override
     public void setSnapshot(Snapshot snapshot) {
-        m_parrent.setSnapshot(snapshot);
+        m_parent.setSnapshot(snapshot);
     }
 
     @Override
     public void setSuperPickaxe(BlockTool tool) {
-        m_parrent.setSuperPickaxe(ToolWrapper.wrapPickaxe(tool));
+        m_parent.setSuperPickaxe(ToolWrapper.wrapPickaxe(tool));
     }
 
     @Override
     public void setTimezone(ZoneId timezone) {
-        m_parrent.setTimezone(timezone);
+        m_parent.setTimezone(timezone);
     }
 
     @Override
     public void setTool(ItemType item, Tool tool) throws InvalidToolBindException {
-        m_parrent.setTool(item, ToolWrapper.wrapTool(tool));
+        m_parent.setTool(item, ToolWrapper.wrapTool(tool));
     }
 
     @Override
     public void setToolControl(boolean toolControl) {
-        m_parrent.setToolControl(toolControl);
+        m_parent.setToolControl(toolControl);
     }
 
     @Override
     public void setUseInventory(boolean useInventory) {
-        m_parrent.setUseInventory(useInventory);
+        m_parent.setUseInventory(useInventory);
     }
 
     @Override
     public void tellVersion(Actor player) {
-        m_parrent.tellVersion(player);
+        m_parent.tellVersion(player);
     }
 
     @Override
     public boolean togglePlacementPosition() {
-        return m_parrent.togglePlacementPosition();
+        return m_parent.togglePlacementPosition();
     }
 
     @Override
     public boolean toggleSuperPickAxe() {
-        return m_parrent.toggleSuperPickAxe();
+        return m_parent.toggleSuperPickAxe();
     }
 
     @Override
     public EditSession undo(BlockBag newBlockBag, Player player) {
-        return m_parrent.undo(newBlockBag, player);
+        return m_parent.undo(newBlockBag, player);
     }
     
     @Override
     public EditSession undo(BlockBag newBlockBag, Actor actor) {
-        return m_parrent.undo(newBlockBag, actor);
+        return m_parent.undo(newBlockBag, actor);
     }
 
 
     @Override
     public String toString() {
-        return m_parrent.toString();
+        return m_parent.toString();
     }
 
     /**
      * Set the session owner
-     *
-     * @param owner
      */
     public void setOwner(IPlayerEntry owner) {
         m_sessionOwner = owner;
@@ -525,55 +510,47 @@ public class WrappedLocalSession extends LocalSession implements IExtendedLocalS
 
     @Override
     public int getHistoryPointer() {
-        if (s_fieldHistoryPointer == null) {
-            return -1;
-        }
-
-        return Reflection.get(m_parrent, int.class, s_fieldHistoryPointer, "Unable to get history pointer.");
+        return ((ILocalSession)m_parent).getHistoryPointer();
     }
 
     @Override
     public List<EditSession> getHistory() {
-        if (s_fieldHistoryPointer == null) {
-            return null;
-        }
-
-        return Reflection.get(m_parrent, List.class, s_fieldHistory, "Unable to get history");
+        return ((ILocalSession)m_parent).getHistory();
     }
 
     @Override
     public boolean shouldUseServerCUI() {
-        return m_parrent.shouldUseServerCUI();
+        return m_parent.shouldUseServerCUI();
     }
 
     @Override
     public void setUseServerCUI(boolean useServerCUI) {
-        m_parrent.setUseServerCUI(useServerCUI);
+        m_parent.setUseServerCUI(useServerCUI);
     }
 
     @Override
     public void updateServerCUI(Actor actor) {
-        m_parrent.updateServerCUI(actor);
+        m_parent.updateServerCUI(actor);
     }
 
     @Override
     public EditSession.ReorderMode getReorderMode() {
-        return m_parrent.getReorderMode();
+        return m_parent.getReorderMode();
     }
 
     @Override
     public void setReorderMode(EditSession.ReorderMode rm) {
-        m_parrent.setReorderMode(rm);
+        m_parent.setReorderMode(rm);
     }
 
     @Override
     public void setTimeout(int i) {
-        m_parrent.setTimeout(i);
+        m_parent.setTimeout(i);
     }
 
     @Override
     public int getTimeout() {
-        return m_parrent.getTimeout();
+        return m_parent.getTimeout();
     }        
 
     private void wrapTools(Map<ItemType, Tool> tools) {
