@@ -62,7 +62,7 @@ import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
  */
 public class AsyncBlockDataCyler extends BlockDataCyler implements IAsyncTool {
 
-    public static Tool wrap(BlockDataCyler parrent) {
+    public static Tool wrap(BlockDataCyler parent) {
         return new AsyncBlockDataCyler();
     }
 

@@ -85,7 +85,7 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
         }
     };
 
-    private final IAsyncWorldEditCore m_parrent;
+    private final IAsyncWorldEditCore m_parent;
 
     /**
      * List of know players
@@ -93,7 +93,7 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
     private final Map<UUID, IPlayerEntry> m_playersUids = new ConcurrentHashMap<>();
 
     public PlayerManager(IAsyncWorldEditCore parent) {
-        m_parrent = parent;
+        m_parent = parent;
 
         m_playersUids.put(UUID_CONSOLE, CONSOLE);
         m_playersUids.put(UUID_UNKNOWN, UNKNOWN);
@@ -113,7 +113,7 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
         UUID uuid = player.getUUID();
 
         final IPlayerEntry wrapper = m_playersUids.computeIfAbsent(uuid, _uuid -> {
-            IBlockPlacer bp = m_parrent.getBlockPlacer();
+            IBlockPlacer bp = m_parent.getBlockPlacer();
             IPlayerEntry[] players = bp.getAllPlayers();
             for (IPlayerEntry entry : players) {
                 if (entry.getUUID().equals(_uuid)) {
@@ -137,7 +137,7 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
 
         if (entry != null) {
             if (entry.getPermissionGroup().getCleanOnLogout()) {
-                m_parrent.getBlockPlacer().purge(entry);
+                m_parent.getBlockPlacer().purge(entry);
             }
 
             entry.dispose();
@@ -148,12 +148,12 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
             int keepSessionOnLogoutFor = undoConfig.keepSessionOnLogoutFor();
 
             if (keepSessionOnLogoutFor == 0) {
-                IWorldeditIntegratorInner integrator = m_parrent.getWorldEditIntegrator();
+                IWorldeditIntegratorInner integrator = m_parent.getWorldEditIntegrator();
                 if (integrator != null) {
                     integrator.removeSession(entry);
                 }
             } else if (keepSessionOnLogoutFor > 0) {
-                ICron cron = m_parrent.getCron();
+                ICron cron = m_parent.getCron();
                 if (cron!= null) {
                     cron.scheduleSessionForRemoval(entry, keepSessionOnLogoutFor);
                 }
@@ -306,7 +306,7 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
             return UNKNOWN;
         }
 
-        IBlockPlacer bp = m_parrent.getBlockPlacer();
+        IBlockPlacer bp = m_parent.getBlockPlacer();
         IPlayerEntry[] queuedEntries = bp.getAllPlayers();
         if (queuedEntries == null) {
             return UNKNOWN;

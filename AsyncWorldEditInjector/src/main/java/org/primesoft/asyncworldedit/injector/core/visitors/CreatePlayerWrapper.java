@@ -129,7 +129,7 @@ public class CreatePlayerWrapper extends BaseCreateWrapper {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, m_targetName, "m_injected", Type.getDescriptor(Player.class));
         
-        callParrent(mv, name, descriptor, m);
+        callParent(mv, name, descriptor, m);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 Type.getInternalName(WrappedPlayerData.class),
                 "getWorld",

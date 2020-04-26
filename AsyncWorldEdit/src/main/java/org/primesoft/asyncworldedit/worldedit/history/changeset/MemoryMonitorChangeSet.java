@@ -69,7 +69,7 @@ import org.primesoft.asyncworldedit.utils.GCUtils;
 public class MemoryMonitorChangeSet implements IExtendedChangeSet {
 
     /**
-     * The parrent change set
+     * The parent change set
      */
     private final ChangeSet m_parent;
 

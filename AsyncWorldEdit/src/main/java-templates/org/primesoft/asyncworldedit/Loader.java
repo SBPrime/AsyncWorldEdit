@@ -50,7 +50,6 @@ package org.primesoft.asyncworldedit;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -120,7 +119,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
     private final List<IAwePlugin> m_loadedPlugins;
 
     /**
-     * Parrent class loader
+     * Parent class loader
      */
     private final ClassLoader m_classLoader;
 
@@ -149,9 +148,9 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
 
         m_classLoader = classLoader;
         m_thisClass = Loader.class;
-        m_classHash = new LinkedHashMap<String, Class<?>>();
-        m_libraries = new LinkedHashMap<String, Map<String, byte[]>>();
-        m_loadedPlugins = new LinkedList<IAwePlugin>();
+        m_classHash = new LinkedHashMap<>();
+        m_libraries = new LinkedHashMap<>();
+        m_loadedPlugins = new LinkedList<>();
 
         MessageDigest sha;
         try {
@@ -329,17 +328,16 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
         }
 
         try {
-            FileOutputStream os = new FileOutputStream(new File(targetDir, targetName));
-
-            int nRead;
-            byte[] data = new byte[BUF_SIZE];
-
-            while ((nRead = is.read(data, 0, data.length)) != -1) {
-                os.write(data, 0, nRead);
+            try (FileOutputStream os = new FileOutputStream(new File(targetDir, targetName))) {
+                int nRead;
+                byte[] data = new byte[BUF_SIZE];
+                
+                while ((nRead = is.read(data, 0, data.length)) != -1) {
+                    os.write(data, 0, nRead);
+                }
+                
+                os.flush();
             }
-
-            os.flush();
-            os.close();
 
             return true;
         } catch (IOException ex) {
@@ -456,12 +454,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
             return;
         }
 
-        File[] enabledPlugins = pluginDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name != null && name.toLowerCase().endsWith(".jar");
-            }
-        });
+        File[] enabledPlugins = pluginDir.listFiles((File dir, String name) -> name != null && name.toLowerCase().endsWith(".jar"));
 
         for (File pluginFile : enabledPlugins) {
             IAwePlugin plugin = loadPlugin(pluginFile);
@@ -485,9 +478,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
     void unloadPlugins() {
         log("Unloading plugins...");
 
-        for (IAwePlugin plugin : m_loadedPlugins) {
-            unloadPlugin(plugin);
-        }
+        m_loadedPlugins.forEach(this::unloadPlugin);
 
         m_loadedPlugins.clear();
     }
@@ -527,7 +518,7 @@ public abstract class Loader extends ClassLoader implements ILibraryLoader {
             return false;
         }
 
-        Map<String, byte[]> files = new LinkedHashMap<String, byte[]>();
+        Map<String, byte[]> files = new LinkedHashMap<>();
 
         try {
             JarInputStream jarStream = new JarInputStream(is);

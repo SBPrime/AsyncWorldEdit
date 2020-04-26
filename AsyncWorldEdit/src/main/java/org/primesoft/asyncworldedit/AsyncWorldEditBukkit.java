@@ -53,11 +53,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.security.CodeSource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -164,7 +162,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
                         File jarFile = new File(fileName);
                         jarDeleted = jarFile.renameTo(new File(fileName + ".disabled"));
                     } catch (Exception ex) {
-
+                        // Ignored
                     }
                 }
             }
@@ -178,19 +176,13 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
                 Map<String, Plugin> lookupNames = (Map<String, Plugin>) Reflection.get(pm, Map.class, fLookupNames, "Getting lookupNames");
 
                 if (plugins != null && lookupNames != null) {
-                    List<Plugin> newPlugins = new ArrayList<>(plugins);
-                    Map<String, Plugin> newLookupNames = new ConcurrentHashMap<>(lookupNames);
-
-                    canContinue = Reflection.set(pm, fPlugins, newPlugins, "Set plugins")
-                            && Reflection.set(pm, fLookupNames, newLookupNames, "Set lookupNames");
-
                     Optional<Plugin> fawePlugin = plugins.stream()
                             .filter(i -> i.getDescription().getMain().startsWith(FAWE))
                             .findAny();
 
                     if (fawePlugin.isPresent()) {
-                        newPlugins.remove(fawePlugin.get());
-                        newLookupNames.remove(fawePlugin.get().getName());
+                        plugins.remove(fawePlugin.get());
+                        lookupNames.remove(fawePlugin.get().getName());
                     }
                 } else {
                     canContinue = false;
@@ -204,6 +196,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
                 try {
                     Thread.sleep(20000);
                 } catch (InterruptedException ex) {
+                    // Ignored
                 }
             }
 
@@ -216,7 +209,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
         PluginManager pm = Bukkit.getPluginManager();
         if (pm.isPluginEnabled("WorldEdit")) {
             log("WARNING: WorldEdit plugin detected running. Trying to disable. Plugins that might stop working: " +
-                    Stream.of(pm.getPlugins()).map(i -> i.getName())
+                    Stream.of(pm.getPlugins()).map(Plugin::getName)
                             .filter(i -> !"WorldEdit".equals(i) && !"AsyncWorldEdit".equals(i))
                             .collect(Collectors.joining(", "))
             );            
@@ -242,6 +235,9 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
         }
 
         s_api = createCore(loader);
+        if (s_api == null) {
+            return;
+        }
         s_api.initializeBridge();
         
         s_loader = loader;
@@ -258,7 +254,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
                     return;
                 }
 
-                s_log.log(Level.INFO, LoggerProvider.PREFIX + " "+ msg);
+                s_log.log(Level.INFO, LoggerProvider.PREFIX+ " {0}", msg);
             }
 
             @Override
@@ -320,6 +316,11 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
         try {
             Class<?> cls = loader.loadClass(CLS_CORE);
             ctor = Reflection.findConstructor(cls, "Unable to find core constructor");
+
+            if (ctor == null) {
+                log("ERROR: Unable to find core constructor");
+                return null;
+            }
         } catch (ClassNotFoundException ex) {
             log("ERROR: Unable to create AWE core, plugin disabled");
 
@@ -333,7 +334,12 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
         Constructor<?> ctor;
         try {
             Class<?> clsAweCore = loader.loadClass(CLS_INJECTOR);
-            ctor = Reflection.findConstructor(clsAweCore, "Unable to find ijector constructor");
+            ctor = Reflection.findConstructor(clsAweCore, "Unable to find injector constructor");
+
+            if (ctor == null) {
+                log("ERROR: Unable to find injector constructor");
+                return null;
+            }
         } catch (ClassNotFoundException ex) {
             log("ERROR: Unable to create AWE Injector, plugin disabled");
 

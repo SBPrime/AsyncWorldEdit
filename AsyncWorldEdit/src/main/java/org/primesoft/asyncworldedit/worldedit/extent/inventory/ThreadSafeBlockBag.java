@@ -61,23 +61,23 @@ public class ThreadSafeBlockBag extends BlockBag {
     /**
      * Wrap the block bag
      *
-     * @param parrent
+     * @param parent
      * @return
      */
-    public static BlockBag warap(BlockBag parrent) {
-        if (parrent == null) {
+    public static BlockBag warap(BlockBag parent) {
+        if (parent == null) {
             return null;
         }
 
-        return new ThreadSafeBlockBag(parrent);
+        return new ThreadSafeBlockBag(parent);
     }
 
-    private final BlockBag m_parrent;
+    private final BlockBag m_parent;
 
     private final Object m_mutex = new Object();
 
-    private ThreadSafeBlockBag(BlockBag parrent) {
-        m_parrent = parrent;
+    private ThreadSafeBlockBag(BlockBag parent) {
+        m_parent = parent;
     }
 
     @Override
@@ -87,63 +87,63 @@ public class ThreadSafeBlockBag extends BlockBag {
     @Override
     public void addSourcePosition(Location pos) {
         synchronized (m_mutex) {
-            m_parrent.addSourcePosition(pos);
-            m_parrent.flushChanges();
+            m_parent.addSourcePosition(pos);
+            m_parent.flushChanges();
         }
     }
 
     @Override
     public void addSingleSourcePosition(Location pos) {
         synchronized (m_mutex) {
-            m_parrent.addSingleSourcePosition(pos);
-            m_parrent.flushChanges();
+            m_parent.addSingleSourcePosition(pos);
+            m_parent.flushChanges();
         }
     }
 
     @Override
     public void fetchBlock(BlockState blockState) throws BlockBagException {
         synchronized (m_mutex) {
-            m_parrent.fetchBlock(blockState);
-            m_parrent.flushChanges();
+            m_parent.fetchBlock(blockState);
+            m_parent.flushChanges();
         }
     }
 
     @Override
     public void fetchPlacedBlock(BlockState blockState) throws BlockBagException {
         synchronized (m_mutex) {
-            m_parrent.fetchPlacedBlock(blockState);
-            m_parrent.flushChanges();
+            m_parent.fetchPlacedBlock(blockState);
+            m_parent.flushChanges();
         }
     }
 
     @Override
     public boolean peekBlock(BlockState blockState) {
         synchronized (m_mutex) {
-            return m_parrent.peekBlock(blockState);
+            return m_parent.peekBlock(blockState);
         }
     }
 
     @Override
     public void storeBlock(BlockState blockState) throws BlockBagException {
         synchronized (m_mutex) {
-            m_parrent.storeBlock(blockState);
-            m_parrent.flushChanges();
+            m_parent.storeBlock(blockState);
+            m_parent.flushChanges();
         }
     }
 
     @Override
     public void storeBlock(BlockState blockState, int amount) throws BlockBagException {
         synchronized (m_mutex) {
-            m_parrent.storeBlock(blockState, amount);
-            m_parrent.flushChanges();
+            m_parent.storeBlock(blockState, amount);
+            m_parent.flushChanges();
         }
     }
 
     @Override
     public void storeDroppedBlock(BlockState blockState) throws BlockBagException {
         synchronized (m_mutex) {
-            m_parrent.storeDroppedBlock(blockState);
-            m_parrent.flushChanges();
+            m_parent.storeDroppedBlock(blockState);
+            m_parent.flushChanges();
         }
     }
 }

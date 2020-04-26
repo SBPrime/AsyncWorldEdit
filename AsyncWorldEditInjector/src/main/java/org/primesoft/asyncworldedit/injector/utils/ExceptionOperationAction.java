@@ -58,6 +58,7 @@ import com.sk89q.worldedit.function.operation.Operation;
  * @author SBPrime
  * @param <TException>
  */
+@FunctionalInterface
 public interface ExceptionOperationAction<TException extends Exception> {
 
     void execute(Operation op) throws TException;

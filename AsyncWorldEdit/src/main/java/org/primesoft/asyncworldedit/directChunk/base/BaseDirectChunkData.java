@@ -60,15 +60,15 @@ public abstract class BaseDirectChunkData extends ChunkDataCommon implements IDi
     /**
      * The wrapped chunk
      */
-    protected final IWrappedChunk m_parrent;
+    protected final IWrappedChunk m_parent;
 
-    protected BaseDirectChunkData(IWrappedChunk parrent) {
-        m_parrent = parrent;
+    protected BaseDirectChunkData(IWrappedChunk parent) {
+        m_parent = parent;
     }
 
     @Override
     public IWrappedChunk getChunk() {
-        return m_parrent;
+        return m_parent;
     }
 
     @Override
@@ -82,7 +82,7 @@ public abstract class BaseDirectChunkData extends ChunkDataCommon implements IDi
 
     @Override
     public BlockVector2 getChunkCoords() {
-        return BlockVector2.at(m_parrent.getX(), m_parrent.getZ());
+        return BlockVector2.at(m_parent.getX(), m_parent.getZ());
     }
 
     @Override

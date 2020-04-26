@@ -60,8 +60,8 @@ public class FakeLocalSession extends WrappedLocalSession {
     
     private final CancelabeEditSession m_editSession;
 
-    public FakeLocalSession(CancelabeEditSession editSession, LocalSession parrent) {
-        super(parrent);
+    public FakeLocalSession(CancelabeEditSession editSession, LocalSession parent) {
+        super(parent);
         
         m_editSession = editSession;
     }

@@ -55,7 +55,7 @@ import com.sk89q.worldedit.world.World;
  */
 public abstract class AbstractWorldWrapper implements World {
     /**
-     * The parrent world
+     * The parent world
      */
     protected final World m_parent;
     
@@ -64,21 +64,20 @@ public abstract class AbstractWorldWrapper implements World {
     }
     
     
-    protected AbstractWorldWrapper(World parent)
+    AbstractWorldWrapper(World parent)
     {
         m_parent = parent;
     }
     
     @Override
     public boolean equals(Object obj) {
-        World parent = m_parent;
-        
+
         if (obj instanceof AbstractWorldWrapper)
         {
             obj = ((AbstractWorldWrapper)obj).m_parent;
         }
         
-        return parent.equals(obj);
+        return m_parent.equals(obj);
     }
 
     @Override

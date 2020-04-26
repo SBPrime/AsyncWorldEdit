@@ -77,7 +77,7 @@ import org.primesoft.asyncworldedit.utils.InOutParam;
 public final class Cron implements ICron {
 
     private final IPlayerManager m_playerManager;
-    private final AsyncWorldEditCore m_parrent;
+    private final AsyncWorldEditCore m_parent;
     private boolean m_undoCleanupRunning = false;
     
     private final static class SessionEntry {
@@ -114,7 +114,7 @@ public final class Cron implements ICron {
     public Cron(AsyncWorldEditCore aweCore) {
         m_scheduler = aweCore.getPlatform().getScheduler();
         m_playerManager = aweCore.getPlayerManager();
-        m_parrent = aweCore;
+        m_parent = aweCore;
         m_lastUndoScann = System.currentTimeMillis();
 
         loadConfig();
@@ -163,7 +163,7 @@ public final class Cron implements ICron {
     }
 
     private void onTime() {
-        IWorldeditIntegratorInner integrator = m_parrent.getWorldEditIntegrator();
+        IWorldeditIntegratorInner integrator = m_parent.getWorldEditIntegrator();
         final long now = System.currentTimeMillis();
 
         if (integrator != null) {
@@ -220,7 +220,7 @@ public final class Cron implements ICron {
         m_undoCleanupRunning = true;
 
         try {
-            IInnerSerializerManager sm = m_parrent.getInnerChangesetSerializer();
+            IInnerSerializerManager sm = m_parent.getInnerChangesetSerializer();
             StreamProvider streamProvider = StreamProvider.getInstance();
             if (sm == null || streamProvider == null) {
                 return;

@@ -153,11 +153,11 @@ public abstract class BaseCreateWrapper extends BaseClassCreator {
     }
 
     protected void methodBody(MethodVisitor mv, String name, String descriptor, Method m) {
-        callParrent(mv, name, descriptor, m);
+        callParent(mv, name, descriptor, m);
         visitReturn(mv, m.getReturnType());
     }
 
-    protected final void callParrent(MethodVisitor mv, String name, String descriptor, Method m) {
+    protected final void callParent(MethodVisitor mv, String name, String descriptor, Method m) {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, m_targetName, "m_injected", m_clsDescriptor);
 
