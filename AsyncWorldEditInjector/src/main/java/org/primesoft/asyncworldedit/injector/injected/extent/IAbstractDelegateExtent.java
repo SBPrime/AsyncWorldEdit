@@ -48,5 +48,5 @@
 
 package org.primesoft.asyncworldedit.injector.injected.extent;
 
-public interface IAbstractDelegateExtent extends IExtentSeter {
+public interface IAbstractDelegateExtent extends IExtentSetter {
 }

@@ -47,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit.asyncinjector.async;
 
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import org.primesoft.asyncworldedit.asyncinjector.validators.OperationValidator;
 import org.primesoft.asyncworldedit.asyncinjector.validators.StackValidator;
@@ -67,6 +68,9 @@ import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.injector.classfactory.IOperationProcessor;
+import org.primesoft.asyncworldedit.injector.injected.extent.IExtentFieldSetter;
+import org.primesoft.asyncworldedit.injector.injected.extent.IExtentSetter;
+import org.primesoft.asyncworldedit.injector.injected.regions.IRegionSetter;
 import org.primesoft.asyncworldedit.injector.utils.ExceptionOperationAction;
 import org.primesoft.asyncworldedit.injector.utils.OperationAction;
 import org.primesoft.asyncworldedit.platform.api.IScheduler;
@@ -288,7 +292,7 @@ public class AsyncOperationProcessor implements IOperationProcessor {
      * Inject scanner results to operation
      *
      */
-    private void injectEditSession(List<IClassScannerResult> entries, Object value) {
+    private void injectEditSession(List<IClassScannerResult> entries, EditSession value) {
         final Class<AsyncEditSession> aesClass = AsyncEditSession.class;
         final Class<Region> regionClass = Region.class;
 
@@ -315,22 +319,22 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     log(String.format("* Injecting EditSession to %1$s %2$s", parent.getClass().getName(), field.getName()));
                 }
 
-                Reflection.safeSet(parent, field, value, "edit session");
+                if (parent instanceof IExtentFieldSetter) {
+                    ((IExtentFieldSetter)parent).setExtentAweInjected(value, field.getName());
+                }
+                else if (parent instanceof IExtentSetter) {
+                    ((IExtentSetter)parent).setExtentAweInjected(value);
+                }
+                else if (!Reflection.safeSet(parent, field, value, "edit session")) {
+                    log(String.format("Please report: Injection of EditSession to %1$s.%2$s failed", parent.getClass().getName(), field.getName()));
+                }
             } else if (regionClass.isAssignableFrom(type)) {
                 if (debugOn) {
                     log("* Stored region entry ");
                 }
 
                 Region r = (Region) entry.getValue();
-                List<IClassScannerResult> entriesList;
-                if (!regions.containsKey(r)) {
-                    entriesList = new ArrayList<>();
-                    regions.put(r, new Pair<>(r.clone(), entriesList));
-                } else {
-                    entriesList = regions.get(r).getX2();
-                }
-
-                entriesList.add(entry);
+                regions.computeIfAbsent(r, i -> new Pair<>(i.clone(), new ArrayList<>())).getX2().add(entry);
             }
         }
 
@@ -347,7 +351,12 @@ public class AsyncOperationProcessor implements IOperationProcessor {
                     log(String.format("* Injecting Region to %1$s %2$s", parent.getClass().getName(), field.getName()));
                 }
 
-                Reflection.safeSet(parent, field, region, "region");
+                if (parent instanceof IRegionSetter) {
+                    ((IRegionSetter)parent).setRegionAweInjected(region);
+                }
+                else if (!Reflection.safeSet(parent, field, region, "region")) {
+                    log(String.format("Please report: Injection of Region to %1$s.%2$s failed", parent.getClass().getName(), field.getName()));
+                }
             }
         }
     }

@@ -46,19 +46,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent;
+package org.primesoft.asyncworldedit.injector.injected.extent;
 
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
-import org.primesoft.asyncworldedit.injector.core.visitors.BaseFieldAccessorVisitor;
-import org.primesoft.asyncworldedit.injector.injected.extent.IAbstractDelegateExtent;
+import java.util.function.Predicate;
 
-public class AbstractDelegateExtentVisitor extends BaseFieldAccessorVisitor {
+import com.sk89q.worldedit.extent.Extent;
 
-    public AbstractDelegateExtentVisitor(final ClassVisitor classVisitor) {
-
-        super(IAbstractDelegateExtent.class, new FieldEntry[] {
-                new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "extent", "Lcom/sk89q/worldedit/extent/Extent;", i -> i & (~Opcodes.ACC_FINAL), null, "setExtentAweInjected")
-        }, classVisitor);
-    }
+public interface IExtentFieldSetter {
+    void setExtentAweInjected(Extent extent, String fieldName);
 }

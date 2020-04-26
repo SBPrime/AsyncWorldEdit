@@ -52,12 +52,13 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.primesoft.asyncworldedit.injector.core.visitors.BaseClassVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.BaseRegionExtentSetter;
 
 /**
  *
  * @author SBPrime
  */
-public class RegionVisitor extends BaseClassVisitor {
+public class RegionVisitor extends BaseRegionExtentSetter {
     private String m_cls;
     private String m_iteratorDescriptor;
     private String m_iteratorSignature;

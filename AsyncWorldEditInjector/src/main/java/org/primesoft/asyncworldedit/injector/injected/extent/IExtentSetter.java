@@ -50,6 +50,6 @@ package org.primesoft.asyncworldedit.injector.injected.extent;
 
 import com.sk89q.worldedit.extent.Extent;
 
-public interface IExtentSeter {
-    void setExtent(Extent extent);
+public interface IExtentSetter {
+    void setExtentAweInjected(Extent extent);
 }

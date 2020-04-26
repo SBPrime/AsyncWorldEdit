@@ -45,20 +45,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.primesoft.asyncworldedit.injector.injected.regions;
 
-package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent;
+import com.sk89q.worldedit.regions.Region;
 
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
-import org.primesoft.asyncworldedit.injector.core.visitors.BaseFieldAccessorVisitor;
-import org.primesoft.asyncworldedit.injector.injected.extent.IAbstractDelegateExtent;
-
-public class AbstractDelegateExtentVisitor extends BaseFieldAccessorVisitor {
-
-    public AbstractDelegateExtentVisitor(final ClassVisitor classVisitor) {
-
-        super(IAbstractDelegateExtent.class, new FieldEntry[] {
-                new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "extent", "Lcom/sk89q/worldedit/extent/Extent;", i -> i & (~Opcodes.ACC_FINAL), null, "setExtentAweInjected")
-        }, classVisitor);
-    }
+public interface IRegionSetter {
+    void setRegionAweInjected(Region region);
 }

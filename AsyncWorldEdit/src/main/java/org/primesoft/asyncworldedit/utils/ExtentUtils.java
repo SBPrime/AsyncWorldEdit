@@ -132,7 +132,7 @@ public class ExtentUtils {
             return false;
         }
 
-        ((IAbstractDelegateExtent)delegateExtent).setExtent(childExtent);
+        ((IAbstractDelegateExtent)delegateExtent).setExtentAweInjected(childExtent);
         return true;
     }
 }

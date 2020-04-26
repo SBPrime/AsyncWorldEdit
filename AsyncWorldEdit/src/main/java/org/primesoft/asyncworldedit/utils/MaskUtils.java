@@ -55,8 +55,8 @@ import java.util.List;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.inner.IClassScanner;
 import org.primesoft.asyncworldedit.api.inner.IClassScannerResult;
-import org.primesoft.asyncworldedit.asyncinjector.scanner.ClassScannerResult;
-import org.primesoft.asyncworldedit.injector.injected.extent.IExtentSeter;
+import org.primesoft.asyncworldedit.injector.injected.extent.IExtentFieldSetter;
+import org.primesoft.asyncworldedit.injector.injected.extent.IExtentSetter;
 import org.primesoft.asyncworldedit.worldedit.extent.MultiThreadExtent;
 
 /**
@@ -107,10 +107,12 @@ public class MaskUtils {
                 continue;
             }
 
-            if (parent instanceof IExtentSeter) {
-                ((IExtentSeter)parent).setExtent(extent);
-            } else {
-                Reflection.safeSet(parent, field, extent, "extent");
+            if (parent instanceof IExtentFieldSetter) {
+                ((IExtentFieldSetter)parent).setExtentAweInjected(extent, field.getName());
+            } else if (parent instanceof IExtentSetter) {
+                ((IExtentSetter)parent).setExtentAweInjected(extent);
+            } else if (!Reflection.safeSet(parent, field, extent, "extent")) {
+                log(String.format("Please report: Injection of Extent to %1$s.%2$s failed", parent.getClass().getName(), field.getName()));
             }
         }
         
@@ -159,10 +161,12 @@ public class MaskUtils {
                 continue;
             }
 
-            if (parent instanceof IExtentSeter) {
-                ((IExtentSeter)parent).setExtent(extent);
-            } else {
-                Reflection.safeSet(parent, field, extent, "extent");
+            if (parent instanceof IExtentFieldSetter) {
+                ((IExtentFieldSetter)parent).setExtentAweInjected(extent, field.getName());
+            } else if (parent instanceof IExtentSetter) {
+                ((IExtentSetter)parent).setExtentAweInjected(extent);
+            } else if (!Reflection.safeSet(parent, field, extent, "extent")) {
+                log(String.format("Please report: Injection of Extent to %1$s.%2$s failed", parent.getClass().getName(), field.getName()));
             }
         }
         

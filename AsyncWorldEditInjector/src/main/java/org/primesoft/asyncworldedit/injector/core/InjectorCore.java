@@ -59,6 +59,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.primesoft.asyncworldedit.injector.IClassInjector;
@@ -75,6 +76,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.CreatePlayerWrapper;
 import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.session.SessionManagerVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.BaseRegionExtentSetter;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.WorldEditVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.AreaPickaxeVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.FloodFillToolVisitor;
@@ -255,6 +257,25 @@ public class InjectorCore {
             modifyClasses("com.sk89q.worldedit.command.tool.RecursivePickaxe", RecursivePickaxeVisitor::new);
 
             modifyClasses("com.sk89q.worldedit.WorldEdit", WorldEditVisitor::new);
+
+            for (String n : new String[]{
+                "com.sk89q.worldedit.function.entity.ExtentEntityCopy",
+                "com.sk89q.worldedit.function.block.ExtentBlockCopy",
+                "com.sk89q.worldedit.function.block.BlockReplace",
+                "com.sk89q.worldedit.function.operation.ForwardExtentCopy",
+                "com.sk89q.worldedit.function.operation.SetLocatedBlocks",
+                "com.sk89q.worldedit.function.biome.BiomeReplace",
+                "com.sk89q.worldedit.function.biome.ExtentBiomeCopy",
+                "com.sk89q.worldedit.function.factory.Deform$DeformOperation",
+                "com.sk89q.worldedit.function.factory.Paint",
+                "com.sk89q.worldedit.function.mask.BiomeMask2D",
+                "com.sk89q.worldedit.function.pattern.AbstractExtentPattern",
+                "com.sk89q.worldedit.regions.iterator.RegionIterator",
+                "com.sk89q.worldedit.regions.shape.ArbitraryShape",
+                "com.sk89q.worldedit.function.factory.Apply",
+                "com.sk89q.worldedit.function.visitor.RegionVisitor"}) {
+                modifyClasses(n, BaseRegionExtentSetter::new);
+            }
 
             crateClass(CreatePlayerWrapper::new);
             crateClass(CreateNoPermsPlayer::new);
