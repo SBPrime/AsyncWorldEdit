@@ -70,8 +70,8 @@ public class DirectChunkData extends BaseDirectChunkData {
      */
     private final Chunk m_chunk;
 
-    DirectChunkData(IWrappedChunk parrent, Chunk chunk) {
-        super(parrent);
+    DirectChunkData(IWrappedChunk parent, Chunk chunk) {
+        super(parent);
         m_chunk = chunk;
 
     }
