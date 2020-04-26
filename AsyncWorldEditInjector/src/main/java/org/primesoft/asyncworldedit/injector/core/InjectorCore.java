@@ -75,6 +75,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.CreatePlayerWrapper;
 import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.session.SessionManagerVisitor;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.WorldEditVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.AreaPickaxeVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.FloodFillToolVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.RecursivePickaxeVisitor;
@@ -252,6 +253,8 @@ public class InjectorCore {
             modifyClasses("com.sk89q.worldedit.command.tool.TreePlanter", TreePlanterVisitor::new);
             modifyClasses("com.sk89q.worldedit.command.tool.AreaPickaxe", AreaPickaxeVisitor::new);
             modifyClasses("com.sk89q.worldedit.command.tool.RecursivePickaxe", RecursivePickaxeVisitor::new);
+
+            modifyClasses("com.sk89q.worldedit.WorldEdit", WorldEditVisitor::new);
 
             crateClass(CreatePlayerWrapper::new);
             crateClass(CreateNoPermsPlayer::new);

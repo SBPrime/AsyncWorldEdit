@@ -63,7 +63,7 @@ import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.inner.IWorldeditIntegratorInner;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.utils.Reflection;
+import org.primesoft.asyncworldedit.injector.injected.IWorldEdit;
 import org.primesoft.asyncworldedit.worldedit.extension.factory.ExtendedBlockFactory;
 import org.primesoft.asyncworldedit.worldedit.session.AsyncSessionManager;
 
@@ -89,7 +89,6 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
     
     /**
      * Get the world edit event bus
-     * @return 
      */
     @Override
     public EventBus getEventBus() {
@@ -103,7 +102,6 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
     
     /**
      * Get the WorldEdit configuration
-     * @return 
      */
     @Override
     public LocalConfiguration getConfiguration() {
@@ -121,13 +119,11 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
         m_oldEditSessionFactory = m_worldEdit.getEditSessionFactory();
         m_oldSessions = m_worldEdit.getSessionManager();
 
-        Reflection.set(m_worldEdit, "blockFactory", new ExtendedBlockFactory(m_aweCore.getPlatform(), m_worldEdit, m_aweCore.getPlayerManager()),
-                "Unable to set new block factory");
+        IWorldEdit we = (IWorldEdit)(Object)m_worldEdit; // Force caste
 
-        Reflection.set(m_worldEdit, "editSessionFactory", new AsyncEditSessionFactory(m_aweCore, m_worldEdit.getEventBus()),
-                "Unable to inject edit session factory");
-
-        Reflection.set(m_worldEdit, "sessions", new AsyncSessionManager(m_worldEdit, m_aweCore), "Unable to set new sessions manager");
+        we.setBlockFactory(new ExtendedBlockFactory(m_aweCore.getPlatform(), m_worldEdit, m_aweCore.getPlayerManager()));
+        we.setEditSessionFactory(new AsyncEditSessionFactory(m_aweCore, m_worldEdit.getEventBus()));
+        we.setSessionManager(new AsyncSessionManager(m_worldEdit, m_aweCore));
     }
     
     /**
@@ -135,9 +131,11 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
      */
     @Override
     public void queueStop() {
-        Reflection.set(m_worldEdit, "editSessionFactory", m_oldEditSessionFactory, "Unable to restore edit session factory");
-        Reflection.set(m_worldEdit, "sessions", m_oldSessions, "Unable to restore sessions");
-        Reflection.set(m_worldEdit, "blockFactory", m_oldBlockFactory, "Unable to restore block factory");
+        IWorldEdit we = (IWorldEdit) (Object) m_worldEdit; // Force caste
+
+        we.setEditSessionFactory(m_oldEditSessionFactory);
+        we.setSessionManager(m_oldSessions);
+        we.setBlockFactory(m_oldBlockFactory);
     }
     
     @Override

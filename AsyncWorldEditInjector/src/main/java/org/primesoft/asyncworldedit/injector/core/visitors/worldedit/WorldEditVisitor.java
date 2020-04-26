@@ -45,19 +45,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.core.visitors.session;
+package org.primesoft.asyncworldedit.injector.core.visitors.worldedit;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.primesoft.asyncworldedit.injector.core.visitors.BaseFieldAccessorVisitor;
-import org.primesoft.asyncworldedit.injector.injected.session.ISessionManager;
+import org.primesoft.asyncworldedit.injector.injected.IWorldEdit;
 
-public class SessionManagerVisitor extends BaseFieldAccessorVisitor {
-    public SessionManagerVisitor(final ClassVisitor classVisitor) {
-        super(ISessionManager.class,
+public class WorldEditVisitor extends BaseFieldAccessorVisitor {
+    public WorldEditVisitor(final ClassVisitor classVisitor) {
+        super(IWorldEdit.class,
                 new FieldEntry[]{
-                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "sessions", "Ljava/util/Map;", i -> i & (~Opcodes.ACC_FINAL), "getSessions", "setSessions")
-                },
-                classVisitor);
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "blockFactory", "Lcom/sk89q/worldedit/extension/factory/BlockFactory;", i -> i & (~Opcodes.ACC_FINAL), null,  "setBlockFactory"),
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "editSessionFactory", "Lcom/sk89q/worldedit/EditSessionFactory;", i -> i & (~Opcodes.ACC_FINAL), null,  "setEditSessionFactory"),
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "sessions", "Lcom/sk89q/worldedit/session/SessionManager;", i -> i & (~Opcodes.ACC_FINAL), null,  "setSessionManager")
+                }, classVisitor);
     }
 }

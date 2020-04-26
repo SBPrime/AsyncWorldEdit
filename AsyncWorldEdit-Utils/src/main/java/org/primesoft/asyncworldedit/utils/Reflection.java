@@ -268,55 +268,6 @@ public class Reflection {
         return null;
     }
 
-//    /*
-    public static void set(Object instance, String fieldName, Object value,
-            String message) {
-        set(instance.getClass(), instance, fieldName, value, message);
-    }
-//*/
-
-//    /*
-    public static void set(Class<?> sourceClass,
-            Object instance, String fieldName, Object value,
-            String message) {
-        try {
-            Field field = sourceClass.getDeclaredField(fieldName);
-            boolean accessible = field.isAccessible();
-
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-
-            int modifiers = modifiersField.getModifiers();
-            boolean isFinal = (modifiers & Modifier.FINAL) == Modifier.FINAL;
-
-            if (!accessible) {
-                field.setAccessible(true);
-            }
-            if (isFinal) {
-                modifiersField.setAccessible(true);
-                modifiersField.setInt(field, modifiers & ~Modifier.FINAL);
-            }
-            try {
-                field.set(instance, value);
-            } finally {
-                if (isFinal) {
-                    modifiersField.setInt(field, modifiers | Modifier.FINAL);
-                }
-                if (!accessible) {
-                    field.setAccessible(false);
-                }
-            }
-        } catch (IllegalArgumentException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version.", message));
-        } catch (IllegalAccessException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
-        } catch (NoSuchFieldException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: unsupported version, field %2$s not found.", message, fieldName));
-        } catch (SecurityException ex) {
-            ExceptionHelper.printException(ex, String.format("%1$s: security exception.", message));
-        }
-    }
-//*/
-
     public static boolean safeSet(Object instance, Field field, Object value,
                               String message) {
         try {

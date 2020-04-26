@@ -45,19 +45,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.primesoft.asyncworldedit.injector.core.visitors.session;
+package org.primesoft.asyncworldedit.injector.injected;
 
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
-import org.primesoft.asyncworldedit.injector.core.visitors.BaseFieldAccessorVisitor;
-import org.primesoft.asyncworldedit.injector.injected.session.ISessionManager;
+import com.sk89q.worldedit.EditSessionFactory;
+import com.sk89q.worldedit.extension.factory.BlockFactory;
+import com.sk89q.worldedit.session.SessionManager;
 
-public class SessionManagerVisitor extends BaseFieldAccessorVisitor {
-    public SessionManagerVisitor(final ClassVisitor classVisitor) {
-        super(ISessionManager.class,
-                new FieldEntry[]{
-                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "sessions", "Ljava/util/Map;", i -> i & (~Opcodes.ACC_FINAL), "getSessions", "setSessions")
-                },
-                classVisitor);
-    }
+public interface IWorldEdit {
+    void setBlockFactory(BlockFactory bf);
+
+    void setEditSessionFactory(EditSessionFactory factory);
+
+    void setSessionManager(SessionManager session);
 }
