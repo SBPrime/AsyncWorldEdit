@@ -59,12 +59,12 @@
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-BountifulAPI</artifactId>
-            <version>3.3.0</version>
+            <version>${global.awe.version}</version>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-TitleManager</artifactId>
-            <version>3.3.0</version>
+            <version>${global.awe.version}</version>
         </dependency>
 
         <!-- Direct chunk API -->
