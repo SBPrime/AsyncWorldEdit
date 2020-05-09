@@ -79,6 +79,9 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
      * @return
      */
     private IPlayerEntry getIPlayerEntry(Actor player) {
+        if (player == null) {
+            return m_playerManager.getUnknownPlayer();
+        }
         return m_playerManager.getPlayer(player.getUniqueId());
     }
 
