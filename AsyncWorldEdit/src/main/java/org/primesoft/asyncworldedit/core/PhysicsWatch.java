@@ -59,7 +59,8 @@ import java.util.function.Function;
  * @author SBPrime
  */
 public abstract class PhysicsWatch implements IPhysicsWatch {
-
+    private final int TEST_DELTA = 1;
+    
     /**
      * Is physics watch enabled
      */
@@ -75,7 +76,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
     /**
      * Locked blocks
      */
-    private final Map<String, Map<Integer, Map<Integer, Map<Integer, Integer>>>> m_locked;
+    private final Map<String, Map<Integer, Map<Integer, Integer>>> m_locked;
 
     /**
      * Create new instanc of the class
@@ -120,18 +121,17 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      */
     @Override
     public void addLocation(String name, BlockVector3 location) {
-        int x = location.getBlockX();
-        int y = location.getBlockY();
-        int z = location.getBlockZ();
+        int x = location.getBlockX() / 16;
+        //int y = location.getBlockY();
+        int z = location.getBlockZ() / 16;
 
         synchronized (m_mutex) {
             if (!m_isEnabled) {
                 return;
             }
 
-            Map<Integer, Map<Integer, Map<Integer, Integer>>> xhash = m_locked.computeIfAbsent(name, i -> new HashMap<>());
-            Map<Integer, Map<Integer, Integer>> yhash = xhash.computeIfAbsent(x, i -> new HashMap<>());
-            Map<Integer, Integer> zhash = yhash.computeIfAbsent(y, i -> new HashMap<>());
+            Map<Integer, Map<Integer, Integer>> xhash = m_locked.computeIfAbsent(name, i -> new HashMap<>());
+            Map<Integer, Integer> zhash = xhash.computeIfAbsent(x, i -> new HashMap<>());
             zhash.compute(z, (_z, value) -> value == null ? 1 : (value + 1));           
         }
     }
@@ -144,26 +144,21 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      */
     @Override
     public void removeLocation(String name, BlockVector3 location) {
-        int x = location.getBlockX();
-        int y = location.getBlockY();
-        int z = location.getBlockZ();
+        int x = location.getBlockX() / 16;
+        //int y = location.getBlockY();
+        int z = location.getBlockZ() / 16;
 
         synchronized (m_mutex) {
             if (!m_isEnabled) {
                 return;
             }
 
-            final Map<Integer, Map<Integer, Map<Integer, Integer>>> xhash = m_locked.get(name);
+            final Map<Integer, Map<Integer, Integer>> xhash = m_locked.get(name);
             if (xhash == null) {
                 return;
             }
 
-            final Map<Integer, Map<Integer, Integer>> yhash = xhash.get(x);
-            if (yhash == null) {
-                return;
-            }
-            
-            final Map<Integer, Integer> zhash = yhash.get(y);
+            final Map<Integer, Integer> zhash = xhash.get(x);
             if (zhash == null) {
                 return;
             }
@@ -177,9 +172,6 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
             });
 
             if (zhash.isEmpty()) {
-                yhash.remove(y);
-            }
-            if (yhash.isEmpty()) {
                 xhash.remove(x);
             }
             if (xhash.isEmpty()) {
@@ -190,38 +182,26 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
     
     /**
      * Perform test if block event shuld by canceled
-     * @param name
-     * @param x
-     * @param y
-     * @param z
-     * @param material
-     * @return 
      */
-    protected boolean cancelEvent(String name, int x, int y, int z, String material) {        
-        final int delta = 1;
+    protected boolean cancelEvent(String name, int x, int y, int z, String material) {
+        x = x / 16;
+        z = z / 16;
 
         synchronized (m_mutex) {
-            Map<Integer, Map<Integer, Map<Integer, Integer>>> xhash = m_locked.get(name);
+            Map<Integer, Map<Integer, Integer>> xhash = m_locked.get(name);
             if (xhash == null) {
                 return false;
             }
 
-            for (int px = x - delta; px <= x + delta; px++) {
-                final Map<Integer, Map<Integer, Integer>> yhash = xhash.get(px);
-                if (yhash == null) {
+            for (int px = x - TEST_DELTA; px <= x + TEST_DELTA; px++) {
+                final Map<Integer, Integer> zhash = xhash.get(px);
+                if (zhash == null) {
                     continue;
                 }
 
-                for (int py = y - delta; py <= y + delta; py++) {
-                    final Map<Integer, Integer> zhash = yhash.get(py);
-                    if (zhash == null) {
-                        continue;
-                    }
-
-                    for (int pz = z - delta; pz <= z + delta; pz++) {
-                        if (zhash.containsKey(pz)) {
-                            return m_check.apply(material);
-                        }
+                for (int pz = z - TEST_DELTA; pz <= z + TEST_DELTA; pz++) {
+                    if (zhash.containsKey(pz)) {
+                        return m_check.apply(material);
                     }
                 }
             }
