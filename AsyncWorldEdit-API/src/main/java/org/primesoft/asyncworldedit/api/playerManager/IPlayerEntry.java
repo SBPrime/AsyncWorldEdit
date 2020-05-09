@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit.api.playerManager;
 
 import java.util.UUID;
+
 import org.primesoft.asyncworldedit.api.MessageSystem;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.permissions.IPermission;
@@ -52,50 +53,43 @@ import org.primesoft.asyncworldedit.api.permissions.IPermission;
 public interface IPlayerEntry {
 
     /**
-     * DIspose the player entry
+     * Dispose the player entry
      */
     void dispose();
 
     /**
      * Is AWE enabled
-     * @return 
      */
     boolean getAweMode();
     
     /**
      * Is undo disabled
-     * @return 
      */
     boolean isUndoOff();
 
     /**
      * Get the player name
-     * @return 
      */
     String getName();
 
     /**
      * Get the permission group
-     * @return
      */
     IPermissionGroup getPermissionGroup();
 
     /**
      * Get the player UUID
-     * @return 
      */
     UUID getUUID();
 
     /**
      * Get the wait mutex
-     *
-     * @return
      */
     Object getWaitMutex();
     
     /**
-     * Get the 
-     * @param permission
+     * Check if permission is allowed
+     * @param permission permission to check
      * @return is the player allowed this permission
      */
     boolean isAllowed(IPermission permission);
@@ -103,58 +97,47 @@ public interface IPlayerEntry {
 
     /**
      * Is this the console
-     *
-     * @return
      */
     boolean isConsole();
 
     /**
      * Is the entry disposed
-     *
-     * @return
      */
     boolean isDisposed();
 
     /**
      * Is the player in game
-     * @return 
      */
     boolean isInGame();
 
     /**
      * Is this a player
-     * @return 
      */
     boolean isPlayer();
 
     /**
      * Is this unknown
-     * @return 
      */
     boolean isUnknown();
 
     /**
      * Sand message to the player chat
-     * @param msg 
      */
     void say(String msg);
 
     /**
      * Set player AWE mode
-     * @param mode 
      */
     void setAweMode(boolean mode);
     
     /**
      * Set player Undo mode
-     * @param mode 
      */
     void setUndoMode(boolean mode);
 
     
     /**
      * Update the player after relogin
-     * @param player 
      */
     void update(IPlayerEntry player);
     
@@ -166,21 +149,16 @@ public interface IPlayerEntry {
     
     /**
      * Update the messaging system
-     * @param system
-     * @param state 
      */
     void setMessaging(MessageSystem system, boolean state);
     
     /**
      * Get the messaging system status
-     * @param system
-     * @return 
      */
     boolean getMessaging(MessageSystem system);
 
     /**
      * Get the number of blocks rendered each run
-     * @return 
      */
     int getRenderBlocks();
     
@@ -193,7 +171,6 @@ public interface IPlayerEntry {
     
     /**
      * Is this a fake player entry
-     * @return 
      */
-    boolean isFake();    
+    boolean isFake();
 }

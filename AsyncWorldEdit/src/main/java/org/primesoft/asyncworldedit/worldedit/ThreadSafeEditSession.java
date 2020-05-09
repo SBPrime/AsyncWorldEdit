@@ -47,10 +47,14 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
-import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import com.sk89q.worldedit.EditSession;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import com.sk89q.worldedit.AweEditSession;
+import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
@@ -61,8 +65,6 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.NullExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
-import com.sk89q.worldedit.extent.reorder.MultiStageReorder;
-import com.sk89q.worldedit.extent.world.ChunkLoadingExtent;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.Change;
@@ -76,31 +78,29 @@ import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import javax.annotation.Nullable;
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
-import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
-import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
-import org.primesoft.asyncworldedit.blockPlacer.*;
-import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
 import org.primesoft.asyncworldedit.api.blockPlacer.entries.IJobEntry;
 import org.primesoft.asyncworldedit.api.configuration.IPermissionGroup;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
-import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
 import org.primesoft.asyncworldedit.api.utils.IActionEx;
+import org.primesoft.asyncworldedit.api.utils.IFunc;
+import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerChange;
+import org.primesoft.asyncworldedit.blockPlacer.BlockPlacerEntry;
+import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntryEx;
+import org.primesoft.asyncworldedit.blockPlacer.entries.UndoJob;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
+import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import org.primesoft.asyncworldedit.events.EditSessionLimitChanged;
 import org.primesoft.asyncworldedit.injector.injected.IEditSession;
 import org.primesoft.asyncworldedit.injector.injected.extent.IChangeSetExtent;
+import org.primesoft.asyncworldedit.injector.injected.extent.reorder.IResetable;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
-import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.worldedit.extent.ExtendedChangeSetExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.FixedBlockBagExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.ThreadSafeBlockBag;
@@ -110,7 +110,8 @@ import org.primesoft.asyncworldedit.worldedit.history.changeset.MemoryMonitorCha
 import org.primesoft.asyncworldedit.worldedit.history.changeset.NullChangeSet;
 import org.primesoft.asyncworldedit.worldedit.history.changeset.ThreadSafeChangeSet;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
-import org.primesoft.asyncworldedit.injector.injected.extent.reorder.IResetable;
+
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
 
 /**
  *
@@ -335,10 +336,9 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
             return;
         }
 
-        for (int i = 0; i < extentList.length; i++) {
-            Extent current = extentList[i];
+        for (Extent current : extentList) {
             if (current instanceof ChangeSetExtent) {
-                ChangeSetExtent changesetExtent = (ChangeSetExtent)current;                
+                ChangeSetExtent changesetExtent = (ChangeSetExtent) current;
                 Extent afterExtent = changesetExtent.getExtent();
 
                 if (afterExtent == null || beforeExtent == null) {
@@ -355,7 +355,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
                     newChangeSet = new NullChangeSet();
                     m_rootChangeSet = newChangeSet;
                 } else {
-                    if (ConfigProvider.undo().storeOnDisk()) {
+                    if (ConfigProvider.undo().storeOnDisk() && !playerEntry.isFake()) {
                         changeSet = new FileChangeSet(core, playerEntry);
                     }
 
@@ -368,8 +368,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
                     m_rootChangeSet = changeSet;
                 }
 
-                ((IEditSession)this).setChangeSet(newChangeSet);
-                ((IChangeSetExtent)changesetExtent).setChangeSet(newChangeSet);
+                ((IEditSession) this).setChangeSet(newChangeSet);
+                ((IChangeSetExtent) changesetExtent).setChangeSet(newChangeSet);
             }
             beforeExtent = current;
         }
@@ -543,8 +543,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public int getBlockChangeCount() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(this),
-                () -> es.doGetBlockChangeCount());
+        return m_dispatcher.performSafe(MutexProvider.getMutex(this), es::doGetBlockChangeCount);
     }
 
     @Override
@@ -558,8 +557,7 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public List<? extends Entity> getEntities() {
         final ThreadSafeEditSession es = this;
 
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
-                () -> es.doGetEntities());
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), (IFunc<? extends List<? extends Entity>>) es::doGetEntities);
     }
 
     @Override
@@ -596,8 +594,6 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
     /**
      * Do not change! Requires special processing
-     *
-     * @param sess
      */
     @Override
     public void undo(final EditSession sess) {

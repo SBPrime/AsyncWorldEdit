@@ -60,6 +60,7 @@ import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.events.BlockRenderCountEvent;
 import org.primesoft.asyncworldedit.strings.MessageType;
+import org.primesoft.asyncworldedit.worldedit.history.changeset.FileChangeSet;
 
 /**
  *
@@ -341,6 +342,5 @@ public abstract class PlayerEntry implements IPlayerEntry {
     }
 
     @Override
-    public abstract boolean isFake();    
-    
+    public abstract boolean isFake();
 }
