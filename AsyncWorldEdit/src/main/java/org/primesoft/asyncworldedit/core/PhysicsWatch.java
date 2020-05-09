@@ -60,7 +60,7 @@ import java.util.function.Function;
  */
 public abstract class PhysicsWatch implements IPhysicsWatch {
     private final int TEST_DELTA = 1;
-    
+
     /**
      * Is physics watch enabled
      */

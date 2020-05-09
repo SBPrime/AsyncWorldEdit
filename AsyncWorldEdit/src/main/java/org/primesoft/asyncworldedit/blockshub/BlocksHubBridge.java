@@ -243,14 +243,8 @@ public class BlocksHubBridge implements IBlocksHubBridge {
 
     /**
      * Check if player can place a block using WorldEdit black list
-     *
-     * @param playerEntry
-     * @param newBlock
-     * @return
      */
     private boolean canPlace(IPlayerEntry playerEntry, BlockStateHolder newBlock) {
-        if (!m_shouldProcess) { return true; }
-        
         if (playerEntry == null || newBlock == null || playerEntry.isAllowed(Permission.BYPASS_WHITELIST)) {
             return true;
         }
@@ -307,11 +301,11 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     @Override
     public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock) {
-        if (!m_shouldProcess) { return true; }
-        
         if (!canPlace(playerEntry, newBlock)) {
             return false;
         }
+
+        if (!m_shouldProcess) { return true; }
         
         if (playerEntry != null && playerEntry.isAllowed(Permission.BYPASS_BLOCKS_HUB)) {
             return true;
@@ -353,12 +347,12 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     @Override
     public boolean canPlace(IPlayerEntry playerEntry, IWorld world, Vector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
-        if (!m_shouldProcess) { return true; }
-        
         if (!canPlace(playerEntry, newBlock)) {
             return false;
         }
-        
+
+        if (!m_shouldProcess) { return true; }
+
         if (playerEntry != null && playerEntry.isAllowed(Permission.BYPASS_BLOCKS_HUB)) {
             return true;
         }
@@ -398,12 +392,12 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     @Override
     public boolean canPlace(IPlayerEntry playerEntry, IWorld world, BlockVector3 location, 
             BlockStateHolder oldBlock, BlockStateHolder newBlock, boolean dc) {
-        if (!m_shouldProcess) { return true; }
-        
         if (!canPlace(playerEntry, newBlock)) {
             return false;
         }
-        
+
+        if (!m_shouldProcess) { return true; }
+
         if (playerEntry != null && playerEntry.isAllowed(Permission.BYPASS_BLOCKS_HUB)) {
             return true;
         }
@@ -463,10 +457,6 @@ public class BlocksHubBridge implements IBlocksHubBridge {
 
     /**
      * Try to create a new new bridge
-     *
-     * @param factory
-     * @param blocksHubPlugin
-     * @return
      */
     private IBlocksHubIntegration create(IBlocksHubFactory factory, Object blocksHubPlugin) {
         if (factory == null || blocksHubPlugin == null) {
