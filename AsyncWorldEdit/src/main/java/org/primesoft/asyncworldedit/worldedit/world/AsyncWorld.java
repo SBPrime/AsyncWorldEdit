@@ -47,10 +47,17 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
-import com.sk89q.worldedit.math.BlockVector2;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BaseItemStack;
@@ -59,8 +66,9 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
-import com.sk89q.worldedit.history.change.BlockChange;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Direction;
@@ -72,18 +80,7 @@ import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 import com.sk89q.worldedit.world.block.BlockType;
-import com.sk89q.worldedit.world.block.BlockTypes;
 import com.sk89q.worldedit.world.weather.WeatherType;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import org.primesoft.asyncworldedit.core.AwePlatform;
 import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
@@ -91,29 +88,31 @@ import org.primesoft.asyncworldedit.api.inner.IBlocksHubIntegration;
 import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.taskdispatcher.ITaskDispatcher;
-import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.api.utils.IAction;
+import org.primesoft.asyncworldedit.api.utils.IFunc;
+import org.primesoft.asyncworldedit.api.utils.IFuncEx;
+import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.JobEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.RegenerateEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldActionEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldFuncEntry;
 import org.primesoft.asyncworldedit.blockPlacer.entries.WorldFuncEntryEx;
-import org.primesoft.asyncworldedit.api.utils.IAction;
-import org.primesoft.asyncworldedit.api.utils.IFunc;
-import org.primesoft.asyncworldedit.api.utils.IFuncEx;
-import org.primesoft.asyncworldedit.blockPlacer.entries.ActionEntry;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
+import org.primesoft.asyncworldedit.core.AwePlatform;
+import org.primesoft.asyncworldedit.platform.api.IMaterial;
+import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.utils.MutexProvider;
+import org.primesoft.asyncworldedit.utils.PositionHelper;
+import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
 import org.primesoft.asyncworldedit.worldedit.CancelabeEditSession;
 import org.primesoft.asyncworldedit.worldedit.WorldAsyncTask;
-import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
-import org.primesoft.asyncworldedit.platform.api.IMaterial;
-import org.primesoft.asyncworldedit.platform.api.IScheduler;
-import org.primesoft.asyncworldedit.utils.PositionHelper;
-import static org.primesoft.asyncworldedit.utils.PositionHelper.positionToChunk;
-import org.primesoft.asyncworldedit.utils.SchedulerUtils;
 import org.primesoft.asyncworldedit.worldedit.blocks.BlockStates;
 import org.primesoft.asyncworldedit.worldedit.entity.EntityLazyWrapper;
 import org.primesoft.asyncworldedit.worldedit.regions.ChunkBaseRegionIterator;
+
+import static org.primesoft.asyncworldedit.utils.PositionHelper.positionToChunk;
 
 /**
  *
@@ -124,9 +123,6 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * Wrap the world (if needed)
      *
-     * @param world
-     * @param player
-     * @return
      */
     public static AsyncWorld wrap(World world, IPlayerEntry player) {
         if (world == null) {
@@ -206,8 +202,6 @@ public class AsyncWorld extends AbstractWorldWrapper {
     /**
      * Decide on the player UUID
      *
-     * @param asyncParams
-     * @return
      */
     private IPlayerEntry getPlayer(BaseAsyncParams... asyncParams) {
         IPlayerEntry result = m_player;
@@ -225,8 +219,6 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     /**
      * This function checks if async mode is enabled for specific command
-     *
-     * @param operation
      */
     private boolean checkAsync(WorldeditOperations operation) {
         return ConfigProvider.isAsyncAllowed(operation) && m_player.getAweMode();
@@ -238,7 +230,14 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     private boolean isSame(BlockStateHolder oldBlock, BlockStateHolder newBlock) {
-        return oldBlock.equalsFuzzy(newBlock);
+        if (oldBlock == null && newBlock == null) {
+            return true;
+        }
+        if ((oldBlock == null) || !oldBlock.equalsFuzzy(newBlock)) {
+            return false;
+        }
+
+        return !isTileEntity(oldBlock.getBlockType());
     }
 
     /**
@@ -455,11 +454,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     /**
-     * Perfrom the regen operation
+     * Perform the regen operation
      *
-     * @param eSession
-     * @param region
-     * @param world
      */
     private void doRegen(EditSession eSession, Region region, IWorld world, int jobId) {        
         int yMin = region.getMinimumPoint().getBlockY();
@@ -516,7 +512,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
             synchronized (wait) {
                 try {
                     wait.wait();
-                } catch (InterruptedException ex) {
+                } catch (InterruptedException ignore) {
                 }
             }
         }
@@ -548,9 +544,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
             return;
         }
 
-        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> {
-            m_parent.checkLoadedChunk(position);
-        }, m_bukkitWorld, PositionHelper.positionToChunk(position));
+        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> m_parent.checkLoadedChunk(position),
+                m_bukkitWorld, PositionHelper.positionToChunk(position));
     }
 
     @Override
@@ -560,21 +555,17 @@ public class AsyncWorld extends AbstractWorldWrapper {
             tmp.add(iterator.next());
         }
 
-        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> {
-            m_parent.fixAfterFastMode(tmp);
-        }, m_bukkitWorld, tmp);
+        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> m_parent.fixAfterFastMode(tmp), m_bukkitWorld, tmp);
     }
 
     @Override
     public void fixLighting(final Iterable<BlockVector2> chunks) {
         final Collection<BlockVector2> tmp = new ArrayList<>();
-        for (Iterator<BlockVector2> iterator = chunks.iterator(); iterator.hasNext();) {
-            tmp.add(iterator.next());
+        for (final BlockVector2 chunk : chunks) {
+            tmp.add(chunk);
         }
 
-        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> {
-            m_parent.fixLighting(tmp);
-        }, m_bukkitWorld, tmp);
+        m_dispatcher.performSafeChunk(MutexProvider.getMutex(getWorld()), () -> m_parent.fixLighting(tmp), m_bukkitWorld, tmp);
     }
 
     @Override
@@ -684,7 +675,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public List<? extends Entity> getEntities() {
-        return m_dispatcher.queueFastOperation(() -> m_parent.getEntities());
+        return m_dispatcher.queueFastOperation((IFunc<? extends List<? extends Entity>>) m_parent::getEntities);
     }
 
     @Override
@@ -876,8 +867,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
     @Override
     public BlockVector3 getSpawnPosition() {
-        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
-                () -> m_parent.getSpawnPosition());
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), m_parent::getSpawnPosition);
     }
 
     private boolean isTileEntity(BlockType blockType) {
@@ -932,5 +922,5 @@ public class AsyncWorld extends AbstractWorldWrapper {
         protected boolean removeEldestEntry(Map.Entry<TKey, TValue> entry) {
             return size() > m_size;
         }
-    };
+    }
 }
