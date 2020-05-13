@@ -49,6 +49,7 @@
 package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent;
 
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Opcodes;
 import org.primesoft.asyncworldedit.injector.core.visitors.BaseFieldAccessorVisitor;
 import org.primesoft.asyncworldedit.injector.injected.extent.IExtentSetter;
 
@@ -56,6 +57,8 @@ public class AbstractExtentMaskVisitor extends BaseFieldAccessorVisitor {
 
     public AbstractExtentMaskVisitor(final ClassVisitor classVisitor) {
 
-        super(IExtentSetter.class, new FieldEntry[] {}, classVisitor);
+        super(IExtentSetter.class, new FieldEntry[] {
+                new FieldEntry(Opcodes.ACC_PRIVATE, "extent", "Lcom/sk89q/worldedit/extent/Extent;", null, "setExtentAweInjected")
+        }, classVisitor);
     }
 }
