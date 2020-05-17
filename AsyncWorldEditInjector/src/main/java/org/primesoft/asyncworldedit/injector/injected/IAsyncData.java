@@ -1,19 +1,19 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2018, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2020, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following 
+ * modification, are permitted free of charge provided that the following
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
  *     list of conditions and the following disclaimer.
  * 2.  Redistributions of source code, with or without modification, in any form
  *     other then free of charge is not allowed,
- * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the
  *     software is not allowed,
  * 4.  Redistributions of source code, with information on how to compile the software
  *     is not allowed,
@@ -45,86 +45,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.primesoft.asyncworldedit.injector.injected;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.function.Function;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
-/**
- *
- * @author SBPrime
- */
-final class AsyncWrapperStorage {
-
-    private final static Map<IAsyncWrapper, Data> m_storage = new WeakHashMap<>();
-
-    private AsyncWrapperStorage() {
-    }
-    
-    private static <T> T process(IAsyncWrapper key, Function<Data, T> getter, T defaultValue) {
-        final Data data = m_storage.get(key);
-        if (data == null) {
-            return defaultValue;
-        }
-        return getter.apply(data);
-    }
-    
-    public static int getJob(IAsyncWrapper key) {
-        return process(key, i -> i.jobId, -1);
-    }
-    
-    public static boolean isAsync(IAsyncWrapper key) {
-        return process(key, i -> i.isAsync, false);
-    }
-    
-    public static IPlayerEntry getPlayerEntry(IAsyncWrapper key) {
-        return process(key, i -> i.player, null);
-    }
-    
-    public static void setData(IAsyncWrapper key, int jobId, boolean isAsync, IPlayerEntry playerEntry) {
-        m_storage.put(key, new Data(jobId, isAsync, playerEntry));
-    }
-    
-    public static void setData(IAsyncWrapper key, IAsyncData asyncData) {
-        if (asyncData == null) {
-            return;
-        }
-
-        key.initializeAsyncWrapper(asyncData.getJobId(), asyncData.isAsync(), asyncData.getPlayer());
-    }
-
-    public static IAsyncData getAsyncData(IAsyncWrapper key) {
-        return m_storage.get(key);
-    }
-
-
-    private static class Data implements IAsyncData {
-
-        public final boolean isAsync;
-        public final int jobId;
-        public final IPlayerEntry player;
-
-        public Data(int jobId, boolean isAsync, IPlayerEntry player) {
-            this.isAsync = isAsync;
-            this.jobId = jobId;
-            this.player = player;
-        }
-
-        @Override
-        public int getJobId() {
-            return this.jobId;
-        }
-
-        @Override
-        public boolean isAsync() {
-            return this.isAsync;
-        }
-
-        @Override
-        public IPlayerEntry getPlayer() {
-            return this.player;
-        }
-    }
+public interface IAsyncData {
+    int getJobId();
+    boolean isAsync();
+    IPlayerEntry getPlayer();
 }

@@ -47,7 +47,6 @@
  */
 package org.primesoft.asyncworldedit.injector.core.visitors;
 
-import java.util.stream.Stream;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -59,27 +58,35 @@ import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
  * @author SBPrime
  */
 public class AsyncWrapperVisitor extends BaseClassVisitor {
-      
+
     private final static String CLS_IASYNC_WRAPPER = Type.getInternalName(IAsyncWrapper.class);
+
+    private final static String D_PLAYER_ENTRY = "Lorg/primesoft/asyncworldedit/api/playerManager/IPlayerEntry;";
+    private final static String D_ASYNC_DATA = "Lorg/primesoft/asyncworldedit/injector/injected/IAsyncData;";
+
+    private boolean isClass;
 
     public AsyncWrapperVisitor(ClassVisitor classVisitor) {
         super(classVisitor);
     }
-    
+
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        isClass = (access & Opcodes.ACC_INTERFACE) != Opcodes.ACC_INTERFACE;
+        
         super.visit(version, access, name, signature, superName, injectInterface(interfaces, CLS_IASYNC_WRAPPER));
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         final MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+
         if (isStatic(access)) {
             return mv;
         }
-        
+
         final String result = Type.getReturnType(descriptor).getClassName().replace(".", "/");
-        
+
         return new MethodVisitor(api, mv) {
             @Override
             public void visitInsn(int opcode) {
@@ -94,10 +101,66 @@ public class AsyncWrapperVisitor extends BaseClassVisitor {
                 }
                 super.visitInsn(opcode);
             }
-            
+
         };
     }
-    
+
+    @Override
+    public void visitEnd() {
+        if (isClass) {
+            super.visitField(Opcodes.ACC_PRIVATE, "m_asyncData", D_ASYNC_DATA, null, null);
+            super.visitField(Opcodes.ACC_PRIVATE, "m_isAsync", "Z", null, null);
+            super.visitField(Opcodes.ACC_PRIVATE, "m_jobId", "I", null, null);
+            super.visitField(Opcodes.ACC_PRIVATE, "m_player", D_PLAYER_ENTRY, null, null);
+
+            visitMethod("getAsyncData", "m_asyncData", D_ASYNC_DATA);
+            visitMethod("isAsync", "m_isAsync", "Z");
+            visitMethod("getJobId", "m_jobId", "I");
+            visitMethod("getPlayer", "m_player", D_PLAYER_ENTRY);
+
+            visitInitializeMethod();
+        }
+
+        super.visitEnd();
+    }
+
+    private void visitInitializeMethod() {
+        MethodVisitor mv = super.visitMethod(Opcodes.ACC_PUBLIC, "initializeAsyncWrapper", "(IZLorg/primesoft/asyncworldedit/api/playerManager/IPlayerEntry;)V", null, null);
+        mv.visitCode();
+
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        visitArgumemt(mv, "I", 1);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, m_cls, "m_jobId", "I");
+
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        visitArgumemt(mv, "Z", 2);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, m_cls, "m_isAsync", "Z");
+
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        visitArgumemt(mv, D_PLAYER_ENTRY, 3);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, m_cls, "m_player", D_PLAYER_ENTRY);
+
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.PUTFIELD, m_cls, "m_asyncData", D_ASYNC_DATA);
+
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(1, 1);
+        mv.visitEnd();
+    }
+
+    private void visitMethod(final String methodName, final String fieldName, final String descriptor) {
+        MethodVisitor mv = super.visitMethod(Opcodes.ACC_PUBLIC, methodName, "()" + descriptor, null, null);
+
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, m_cls, fieldName, descriptor);
+        super.visitReturn(mv, descriptor);
+
+        mv.visitMaxs(1, 1);
+        mv.visitEnd();
+    }
+
     @Override
     public void validate() throws RuntimeException {
     }

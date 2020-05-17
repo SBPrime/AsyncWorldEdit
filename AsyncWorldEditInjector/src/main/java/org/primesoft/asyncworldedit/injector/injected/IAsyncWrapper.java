@@ -6,14 +6,14 @@
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following 
+ * modification, are permitted free of charge provided that the following
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
  *     list of conditions and the following disclaimer.
  * 2.  Redistributions of source code, with or without modification, in any form
  *     other then free of charge is not allowed,
- * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the
  *     software is not allowed,
  * 4.  Redistributions of source code, with information on how to compile the software
  *     is not allowed,
@@ -51,10 +51,13 @@ package org.primesoft.asyncworldedit.injector.injected;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
 /**
- *
  * @author SBPrime
  */
-public interface IAsyncWrapper {
+public interface IAsyncWrapper extends IAsyncData {
+    default IAsyncData getAsyncData() {
+        return AsyncWrapperStorage.getAsyncData(this);
+    }
+
     default int getJobId() {
         return AsyncWrapperStorage.getJob(this);
     }
@@ -66,12 +69,12 @@ public interface IAsyncWrapper {
     default IPlayerEntry getPlayer() {
         return AsyncWrapperStorage.getPlayerEntry(this);
     }
-    
+
     default void initializeAsyncWrapper(int jobId, boolean isAsync, IPlayerEntry playerEntry) {
         AsyncWrapperStorage.setData(this, jobId, isAsync, playerEntry);
     }
-    
+
     default void initializeAsyncWrapper(IAsyncWrapper source) {
-        AsyncWrapperStorage.setData(this, source);
+        AsyncWrapperStorage.setData(this, source.getAsyncData());
     }
 }

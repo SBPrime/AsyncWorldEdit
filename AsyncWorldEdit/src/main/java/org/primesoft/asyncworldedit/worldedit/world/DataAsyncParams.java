@@ -48,6 +48,7 @@
 package org.primesoft.asyncworldedit.worldedit.world;
 
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+import org.primesoft.asyncworldedit.injector.injected.IAsyncData;
 import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
 
 /**
@@ -58,9 +59,6 @@ import org.primesoft.asyncworldedit.injector.injected.IAsyncWrapper;
 public class DataAsyncParams<T> extends BaseAsyncParams {
     /**
      * Extract parameters
-     * @param <T>
-     * @param data
-     * @return
      */
     public static <T> DataAsyncParams<T> extract(T data) {
         int jobId = -1;
@@ -69,11 +67,14 @@ public class DataAsyncParams<T> extends BaseAsyncParams {
         IPlayerEntry player = null;
 
         if (data instanceof IAsyncWrapper) {
-            IAsyncWrapper wrapper = (IAsyncWrapper) data;
-            jobId = wrapper.getJobId();
-            isAsync = wrapper.isAsync();
-            player = wrapper.getPlayer();
-            empty = false;
+            IAsyncData aData = ((IAsyncWrapper) data).getAsyncData();
+
+            if (aData != null) {
+                jobId = aData.getJobId();
+                isAsync = aData.isAsync();
+                player = aData.getPlayer();
+                empty = false;
+            }
         }
 
         return new DataAsyncParams(data, isAsync, jobId, empty, player);
