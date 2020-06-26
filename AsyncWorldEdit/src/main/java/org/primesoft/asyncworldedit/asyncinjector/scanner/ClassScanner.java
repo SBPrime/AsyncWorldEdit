@@ -48,6 +48,7 @@
 package org.primesoft.asyncworldedit.asyncinjector.scanner;
 
 import com.sk89q.util.yaml.YAMLNode;
+import com.sk89q.worldedit.extent.world.WatchdogTickingExtent;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.math.Vector3;
@@ -336,6 +337,8 @@ public abstract class ClassScanner implements IClassScanner {
      */
     protected IClassScannerEntry[] getBlackList() {
         return Stream.of(
+            new ClassScannerEntry(WatchdogTickingExtent.class, "watchdog"),
+            new FuzyClassScannerEntry("com.sk89q.worldedit.bukkit.adapter.impl.Spigot"),
             new ClassScannerEntry(BlockMask.class, "blocks"),
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", "batches"),
             new ClassScannerEntry("org.primesoft.asyncworldedit.blockshub.BlocksHubBridge"),
@@ -396,7 +399,6 @@ public abstract class ClassScanner implements IClassScanner {
      * Get all fields for class (including supper)
      *
      * @param oClass
-     * @param fields
      * @return
      */
     private static List<Field> getAllFields(Class<?> oClass) {
