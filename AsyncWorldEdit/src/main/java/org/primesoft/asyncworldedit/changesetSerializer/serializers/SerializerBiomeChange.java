@@ -100,8 +100,8 @@ public class SerializerBiomeChange  implements IChangesetSerializer {
         try {
             UnsafeDataOutput stream = new UnsafeDataOutput();
 
-            stream.writeDouble(position.getX());
-            stream.writeDouble(position.getZ());            
+            stream.writeInt(position.getX());
+            stream.writeInt(position.getZ());
             stream.writeInt(idPrevious.length);
             stream.write(idPrevious);
             stream.writeInt(idCurrent.length);
