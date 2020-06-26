@@ -47,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit.changesetSerializer;
 
+import org.primesoft.asyncworldedit.changesetSerializer.serializers.SerializerBiomeChange3D;
 import org.primesoft.asyncworldedit.changesetSerializer.serializers.SerializerBlockPlacerChange;
 import org.primesoft.asyncworldedit.changesetSerializer.serializers.SerializerBlockChange;
 import com.sk89q.worldedit.history.change.Change;
@@ -163,6 +164,7 @@ public final class SerializerManager implements IInnerSerializerManager {
     private void initialize() {
         addSerializer(new SerializerBlockChange());
         addSerializer(new SerializerBiomeChange());
+        addSerializer(new SerializerBiomeChange3D());
         addSerializer(new SerializerBlockPlacerChange(this, m_awe.getBlockPlacer()));
     }
 
