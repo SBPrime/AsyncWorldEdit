@@ -103,10 +103,6 @@ public final class WrappedBrushTool extends BrushTool {
 
     @Override
     public void setBrush(Brush brush, String permission) {
-        if (brush instanceof GravityBrush) {
-            brush = AsyncGravityBrush.wrap((GravityBrush)brush);
-        }
-        
         m_parent.setBrush(brush, permission);
     }
 
