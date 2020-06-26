@@ -56,7 +56,6 @@ import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.world.FastModeExtent;
 import com.sk89q.worldedit.function.mask.BlockMask;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.ClipboardPattern;
@@ -347,7 +346,6 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry(Region.class),
             new ClassScannerEntry(BlockVector3.class),
             new ClassScannerEntry(World.class),
-            new ClassScannerEntry(FastModeExtent.class),
             new ClassScannerEntry(Change.class),
             new ClassScannerEntry(Vector3.class),
             new ClassScannerEntry(BlockStateHolder.class),

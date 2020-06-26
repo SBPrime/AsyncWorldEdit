@@ -63,6 +63,8 @@ import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.util.SideEffect;
+import com.sk89q.worldedit.util.SideEffectSet;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BiomeType;
@@ -75,6 +77,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.AsyncWrapper;
@@ -135,6 +139,28 @@ public class CancelableWorld extends AbstractWorldWrapper {
         }
 
         return m_parent.useItem(position, item, face);
+    }
+
+    @Override
+    public boolean fullySupports3DBiomes() {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return m_parent.fullySupports3DBiomes();
+    }
+
+    @Override
+    public <B extends BlockStateHolder<B>> boolean setBlock(
+            final BlockVector3 position,
+            final B block,
+            final SideEffectSet sideEffectSet) throws WorldEditException {
+
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return m_parent.setBlock(position, block, sideEffectSet);
     }
 
     @Override
@@ -348,6 +374,15 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
+    public Set<SideEffect> applySideEffects(final BlockVector3 blockVector3, final BlockState blockState, final SideEffectSet sideEffectSet) throws WorldEditException {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return m_parent.applySideEffects(blockVector3, blockState, sideEffectSet);
+    }
+
+    @Override
     public BlockVector3 getSpawnPosition() {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
@@ -359,6 +394,11 @@ public class CancelableWorld extends AbstractWorldWrapper {
     @Override
     public Path getStoragePath() {
         return m_parent.getStoragePath();
+    }
+
+    @Override
+    public int getMinY() {
+        return m_parent.getMinY();
     }
 
     @Override

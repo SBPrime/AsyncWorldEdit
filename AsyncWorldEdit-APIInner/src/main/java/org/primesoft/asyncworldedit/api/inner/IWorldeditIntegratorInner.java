@@ -35,7 +35,10 @@
  */
 package org.primesoft.asyncworldedit.api.inner;
 
+import java.util.Set;
+
 import com.sk89q.worldedit.LocalConfiguration;
+import com.sk89q.worldedit.util.SideEffect;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import org.primesoft.asyncworldedit.api.IWorldeditIntegrator;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -45,19 +48,19 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
  * @author SBPrime
  */
 public interface IWorldeditIntegratorInner extends IWorldeditIntegrator {
-    public void queueStop();
+    void queueStop();
     
-    public void removeSession(IPlayerEntry player);
+    void removeSession(IPlayerEntry player);
     
     /**
      * Get the WorldEdit configuration
-     * @return 
      */
-    public LocalConfiguration getConfiguration();
+    LocalConfiguration getConfiguration();
     
     /**
      * Get the world edit event bus
-     * @return 
      */
-    public EventBus getEventBus();
+    EventBus getEventBus();
+
+    Set<SideEffect> getSupportedSideEffects();
 }

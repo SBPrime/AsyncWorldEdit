@@ -48,9 +48,14 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
+import java.util.Set;
+
+import com.sk89q.worldedit.bukkit.BukkitServerInterface;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.extension.platform.Actor;
+import com.sk89q.worldedit.util.SideEffect;
 import com.sk89q.worldedit.world.World;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
@@ -68,6 +73,7 @@ public class BukkitWorldeditIntegrator extends WorldEditIntegrator {
     private static final BlockData AIR = Material.AIR.createBlockData();
     
     private WorldEditPlugin m_worldEditPlugin;
+    private BukkitServerInterface m_bukkitServerInterface;
 
     /**
      * Create new instance of world edit integration checker and start it
@@ -77,7 +83,8 @@ public class BukkitWorldeditIntegrator extends WorldEditIntegrator {
      */
     public BukkitWorldeditIntegrator(IAsyncWorldEditCore aweCore, WorldEditPlugin worldEdit) {
         super(aweCore);
-        
+
+        m_bukkitServerInterface = new BukkitServerInterface(worldEdit, Bukkit.getServer());
         initialize(worldEdit);
         
         initializationDone();
@@ -157,5 +164,10 @@ public class BukkitWorldeditIntegrator extends WorldEditIntegrator {
         com.sk89q.worldedit.bukkit.BukkitWorld bWorld = (com.sk89q.worldedit.bukkit.BukkitWorld)world;
         
         return new BukkitWorld(bWorld.getWorld());
+    }
+
+    @Override
+    public Set<SideEffect> getSupportedSideEffects() {
+        return m_bukkitServerInterface.getSupportedSideEffects();
     }
 }

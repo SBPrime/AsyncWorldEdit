@@ -50,12 +50,15 @@ package org.primesoft.asyncworldedit.worldedit.world;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
+import com.google.common.collect.Sets;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.WorldEditException;
@@ -73,6 +76,8 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.util.SideEffect;
+import com.sk89q.worldedit.util.SideEffectSet;
 import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BiomeType;
@@ -283,7 +288,56 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean setBlock(BlockVector3 position, BlockStateHolder block, boolean notifyAndLight) throws WorldEditException {
+    public boolean fullySupports3DBiomes() {
+        return m_parent.fullySupports3DBiomes();
+    }
+
+    @Override
+    public <B extends BlockStateHolder<B>> boolean setBlock(
+            final BlockVector3 position,
+            final B block,
+            final SideEffectSet sideEffectSet) throws WorldEditException {
+
+        final DataAsyncParams<B> paramBlock = DataAsyncParams.extract(block);
+        final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
+
+        final B newBlock = paramBlock.getData();
+        final BlockVector3 v = paramVector.getData();
+        final IPlayerEntry player = getPlayer(paramBlock, paramVector);
+
+        IFuncEx<Boolean, WorldEditException> func = () -> {
+            final BlockStateHolder oldBlock = m_parent.getBlock(v);
+            if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
+                    || isSame(oldBlock, newBlock)) {
+                return false;
+            }
+
+            final boolean result = m_parent.setBlock(v, newBlock, sideEffectSet);
+            if (result) {
+                logBlock(v, player, oldBlock, newBlock);
+            }
+
+            return result;
+        };
+
+        if (paramBlock.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
+            if (!canPlace(player, m_bukkitWorld, position, getBlock(v), newBlock)) {
+                return false;
+            }
+
+            return m_blockPlacer.addTasks(player,
+                    new WorldFuncEntryEx(this.getName(), paramBlock.getJobId(), v, func));
+        }
+
+        return func.execute();
+    }
+
+    @Override
+    public boolean setBlock(
+            final BlockVector3 position,
+            final BlockStateHolder block,
+            final boolean notifyAndLight) throws WorldEditException {
+
         final DataAsyncParams<BlockStateHolder> paramBlock = DataAsyncParams.extract(block);
         final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
 
@@ -845,7 +899,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 return false;
             }
 
-            final boolean result = m_parent.setBlock(position, newBlock);
+            final boolean result = m_parent.notifyAndLightBlock(position, newBlock);
             if (result) {
                 logBlock(position, player, oldBlock, newBlock);
             }
@@ -860,6 +914,42 @@ public class AsyncWorld extends AbstractWorldWrapper {
 
             return m_blockPlacer.addTasks(player,
                     new WorldFuncEntryEx(this.getName(), paramBlock.getJobId(), v, func));
+        }
+
+        return func.execute();
+    }
+
+    @Override
+    public Set<SideEffect> applySideEffects(
+            final BlockVector3 position,
+            final BlockState block,
+            final SideEffectSet sideEffectSet) throws WorldEditException {
+
+        final DataAsyncParams<BlockState> paramBlock = DataAsyncParams.extract(block);
+        final DataAsyncParams<BlockVector3> paramVector = DataAsyncParams.extract(position);
+
+        final BlockState newBlock = paramBlock.getData();
+        final BlockVector3 v = paramVector.getData();
+        final IPlayerEntry player = getPlayer(paramBlock, paramVector);
+
+        IFuncEx<Set<SideEffect>, WorldEditException> func = () -> {
+            final BlockState oldBlock = m_parent.getBlock(v);
+            if (!canPlace(player, m_bukkitWorld, v, oldBlock, newBlock)
+                    || isSame(oldBlock, newBlock)) {
+                return Collections.EMPTY_SET;
+            }
+
+            return m_parent.applySideEffects(position, newBlock, sideEffectSet);
+        };
+
+        if (paramBlock.isAsync() || paramVector.isAsync() || !m_dispatcher.isMainTask()) {
+            if (!canPlace(player, m_bukkitWorld, position, getBlock(v), newBlock)) {
+                return Collections.EMPTY_SET;
+            }
+
+            return m_blockPlacer.addTasks(player, new WorldFuncEntryEx(this.getName(), paramBlock.getJobId(), v, func)) ?
+                    Sets.intersection(AwePlatform.getInstance().getPlatform().getWorldEditIntegrator().getSupportedSideEffects(),
+                            sideEffectSet.getSideEffectsToApply()) : Collections.EMPTY_SET;
         }
 
         return func.execute();
@@ -882,6 +972,11 @@ public class AsyncWorld extends AbstractWorldWrapper {
     @Override
     public Path getStoragePath() {
         return m_parent.getStoragePath();
+    }
+
+    @Override
+    public int getMinY() {
+        return m_parent.getMinY();
     }
 
     @Override

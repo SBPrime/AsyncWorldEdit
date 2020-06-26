@@ -51,14 +51,12 @@ import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.command.tool.BrushTool;
 import com.sk89q.worldedit.command.tool.brush.Brush;
-import com.sk89q.worldedit.command.tool.brush.GravityBrush;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import org.primesoft.asyncworldedit.injector.injected.commands.tool.IBrushToolAccessor;
-import org.primesoft.asyncworldedit.worldedit.command.tool.brush.AsyncGravityBrush;
 
 /**
  *

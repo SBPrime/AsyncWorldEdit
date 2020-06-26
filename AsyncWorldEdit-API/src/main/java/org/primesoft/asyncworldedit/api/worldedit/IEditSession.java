@@ -227,10 +227,10 @@ public interface IEditSession extends Extent {
     public int getBlockChangeCount();
 
     @Override
-    public BiomeType getBiome(BlockVector2 position);
+    public BiomeType getBiome(BlockVector3 position);
 
     @Override
-    public boolean setBiome(BlockVector2 position, BiomeType biome);
+    public boolean setBiome(BlockVector3 position, BiomeType biome);
 
     @Override    
     public BlockState getBlock(BlockVector3 vector);

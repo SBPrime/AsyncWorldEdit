@@ -48,6 +48,8 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.extent.world.SurvivalModeExtent;
+import com.sk89q.worldedit.math.BlockVector2;
+import com.sk89q.worldedit.world.biome.BiomeType;
 import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import com.sk89q.worldedit.*;
