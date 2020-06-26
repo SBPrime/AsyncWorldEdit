@@ -50,6 +50,9 @@ package org.primesoft.asyncworldedit.worldedit.history.changeset;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -69,6 +72,7 @@ import org.primesoft.asyncworldedit.changesetSerializer.iterators.UndoFileForwar
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.ConfigUndo;
 import org.primesoft.asyncworldedit.strings.MessageType;
+import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 
 /**
  *
@@ -157,6 +161,13 @@ public final class FileChangeSet implements ChangeSet {
     public void initialize(IPlayerEntry player, int newId) {
         m_storageFile = m_changesetSerializer.open(player, newId, true);
 
+        try {
+            ensureExists(m_storageFile);
+            ensureExists(new File(m_storageFile.getPath() + ".idx"));
+        } catch (IOException ioe) {
+            ExceptionHelper.printException(ioe, String.format("Unable to initialize save undo data. Data might be corrupted"));
+        }
+
         ConfigUndo undoConfig = ConfigProvider.undo();
         boolean removeFile = undoConfig != null && undoConfig.keepUndoFileFor() == 0;
         
@@ -167,6 +178,14 @@ public final class FileChangeSet implements ChangeSet {
         }
 
         FileChangeSetManager.start(this);
+    }
+
+    private void ensureExists(final File file) throws IOException {
+        if (file.exists()) {
+            return;
+        }
+
+        new FileOutputStream(file, true).close();
     }
 
     public void close() {
@@ -193,7 +212,7 @@ public final class FileChangeSet implements ChangeSet {
      * @return
      */
     boolean save() {
-        List<Change> dataToSave = new ArrayList<>();
+        List<Change> dataToSave = new LinkedList<>();
 
         synchronized (m_saveMutex) {
             m_savePending = true;
