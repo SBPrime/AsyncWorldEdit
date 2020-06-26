@@ -82,7 +82,6 @@ import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.too
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.FloodFillToolVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.RecursivePickaxeVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.TreePlanterVisitor;
-import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.brush.GravityBrushVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.AbstractDelegateExtentVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.AbstractExtentMaskVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.extent.ChangeSetExtentVisitor;
@@ -251,7 +250,6 @@ public class InjectorCore {
             modifyClasses("com.sk89q.worldedit.command.tool.BrushTool", BrushToolVisitor::new);
             modifyClasses("com.sk89q.worldedit.command.tool.BlockReplacer", BlockReplacerVisitor::new);
             modifyClasses("com.sk89q.worldedit.command.tool.FloodFillTool", FloodFillToolVisitor::new);
-            modifyClasses("com.sk89q.worldedit.command.tool.brush.GravityBrush", GravityBrushVisitor::new);
             modifyClasses("com.sk89q.worldedit.command.tool.TreePlanter", TreePlanterVisitor::new);
             modifyClasses("com.sk89q.worldedit.command.tool.AreaPickaxe", AreaPickaxeVisitor::new);
             modifyClasses("com.sk89q.worldedit.command.tool.RecursivePickaxe", RecursivePickaxeVisitor::new);
