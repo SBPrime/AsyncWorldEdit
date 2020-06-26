@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import com.sk89q.worldedit.extent.world.SurvivalModeExtent;
+import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
 import org.primesoft.asyncworldedit.api.worldedit.ICancelabeEditSession;
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.entity.BaseEntity;
@@ -171,6 +173,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
         setMask(mask);
         
         m_isInitialized = true;
+
+        copyProperties(parent, this);
     }
 
     @Override
@@ -537,4 +541,19 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
             m_source.setExtent(new SafeDelegateExtent(extent, getExtent()));
         }
     }
+
+
+    private static void copyProperties(final IAweEditSession source, final IAweEditSession target) {
+        copyProperties(source.getSurvivalExtent(), target.getSurvivalExtent());
+    }
+
+    private static void copyProperties(final SurvivalModeExtent source, final SurvivalModeExtent target) {
+        if (source == null || target == null) {
+            return;
+        }
+
+        target.setToolUse(source.hasToolUse());
+        target.setStripNbt(source.hasStripNbt());
+    }
+
 }
