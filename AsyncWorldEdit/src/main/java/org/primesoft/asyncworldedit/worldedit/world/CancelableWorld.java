@@ -357,6 +357,14 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
+    public boolean setBiome(final BlockVector3 position, final BiomeType biome) {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+        return m_parent.setBiome(AsyncWrapper.initialize(position, m_jobId, true, m_player), biome);
+    }
+
+    @Override
     public Operation commit() {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());

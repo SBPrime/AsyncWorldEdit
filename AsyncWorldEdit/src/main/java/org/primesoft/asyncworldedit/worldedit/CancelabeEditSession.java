@@ -404,6 +404,24 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
+    public boolean setBiome(final BlockVector2 position, final BiomeType biome) {
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return super.setBiome(AsyncWrapper.initialize(position, m_jobId, true, m_player), biome);
+    }
+
+    @Override
+    public boolean setBiome(final BlockVector3 position, final BiomeType biome) {
+        if (m_cWorld.isCanceled()) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return super.setBiome(AsyncWrapper.initialize(position, m_jobId, true, m_player), biome);
+    }
+
+    @Override
     public Entity createEntity(com.sk89q.worldedit.util.Location location, BaseEntity entity) {
         if (m_cWorld.isCanceled()) {
             throw new IllegalArgumentException(new SessionCanceled());

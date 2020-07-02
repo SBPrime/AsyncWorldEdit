@@ -879,6 +879,29 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
+    public boolean setBiome(final BlockVector3 position, final BiomeType biome) {
+        final DataAsyncParams<BlockVector3> paramPosition = DataAsyncParams.extract(position);
+        final DataAsyncParams<BiomeType> paramBiome = DataAsyncParams.extract(biome);
+        final BlockVector3 p = paramPosition.getData();
+        final BiomeType b = paramBiome.getData();
+        final IPlayerEntry player = getPlayer(paramBiome, paramPosition);
+        final BlockVector3 tmpV = BlockVector3.at(p.getX(), 0, p.getZ());
+
+        if (!m_blocksHub.hasAccess(player, m_bukkitWorld, tmpV)) {
+            return false;
+        }
+
+        IFunc<Boolean> func = () -> m_parent.setBiome(p, b);
+
+        if (paramBiome.isAsync() || paramPosition.isAsync() || !m_dispatcher.isMainTask()) {
+            return m_blockPlacer.addTasks(player,
+                    new WorldFuncEntry(this.getName(), paramBiome.getJobId(), tmpV, func));
+        }
+
+        return func.execute();
+    }
+
+    @Override
     public Operation commit() {
         return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()), m_parent::commit);
     }

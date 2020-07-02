@@ -447,6 +447,17 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         return r;
     }
 
+    @Override
+    public boolean setBiome(final BlockVector3 position, final BiomeType biome) {
+        boolean isAsync = isAsyncEnabled();
+        boolean r = super.setBiome(AsyncWrapper.initialize(position, m_jobId, isAsync, m_player),
+                AsyncWrapper.initialize(biome, m_jobId, isAsync, m_player));
+        if (r) {
+            forceFlush();
+        }
+        return r;
+    }
+
     /**
      * Perform a custom action
      *
