@@ -50,6 +50,8 @@ package org.primesoft.asyncworldedit.injector.core.visitors.extent.clipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -67,6 +69,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
  */
 public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
     private final static String IC_DESCRIPTOR = "com/sk89q/worldedit/extent/clipboard/InjectableClipboard";
+    private final Set<String> m_knownMethods = new HashSet<>();
     private String m_clsDescriptor;
 
     public BlockArrayClipboardClassVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
@@ -88,34 +91,10 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         if (isCtor(name)) {
-            return new MethodVisitor(api, super.visitMethod(access, name, descriptor, signature, exceptions)) {
-                @Override
-                public void visitInsn(int opcode) {
-                    if (opcode == Opcodes.RETURN) {
-                        super.visitVarInsn(Opcodes.ALOAD, 0);
-                        super.visitTypeInsn(Opcodes.NEW, IC_DESCRIPTOR);
-                        super.visitInsn(Opcodes.DUP);
-                        super.visitVarInsn(Opcodes.ALOAD, 0);
-                        super.visitMethodInsn(Opcodes.INVOKESPECIAL,
-                                IC_DESCRIPTOR,
-                                "<init>",
-                                "(L" + m_clsDescriptor + ";)V",
-                                false);
-                        super.visitVarInsn(Opcodes.ALOAD, 1);
-                        super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                                Type.getInternalName(Helpers.class),
-                                "createClipboard",
-                                "(Lcom/sk89q/worldedit/extent/clipboard/Clipboard;Lcom/sk89q/worldedit/regions/Region;)Lcom/sk89q/worldedit/extent/clipboard/Clipboard;",
-                                false);
-
-                        super.visitFieldInsn(Opcodes.PUTFIELD, m_clsDescriptor, "m_injected", Type.getDescriptor(Clipboard.class));
-                    }
-
-                    super.visitInsn(opcode);
-                }
-            };
+            return new MethodVisitorCtor(api, super.visitMethod(access, name, descriptor, signature, exceptions));
         }
 
+        m_knownMethods.add(name + descriptor);
         if (isPublic(access)) {
             return super.visitMethod(access, RANDOM_PREFIX + name, descriptor, signature, exceptions);
         } else {
@@ -127,7 +106,8 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
     public void visitEnd() {
         addFields();
 
-        processMethods((String name, String descriptor, String clsName, Method m) -> defineClipboardMethod(name, descriptor, clsName, m),
+        processMethods(this::defineClipboardMethod,
+                (name, descriptor) -> m_knownMethods.contains(name + descriptor),
                 Clipboard.class);
         super.visitEnd();
 
@@ -172,6 +152,7 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
         mv.visitEnd();
 
         processMethods((String name, String descriptor, String clsName, Method m) -> defineInjectableClipboardMethod(cw, name, descriptor, clsName, m),
+                (name, descriptor) -> m_knownMethods.contains(name + descriptor),
                 Clipboard.class);
         cw.visitEnd();
 
@@ -185,7 +166,7 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
                 name, descriptor,
                 null, exceptions == null || exceptions.length == 0 ? null
                         : Stream.of(exceptions)
-                                .map(i -> Type.getInternalName(i))
+                                .map(Type::getInternalName)
                                 .toArray(String[]::new));
 
         mv.visitVarInsn(Opcodes.ALOAD, 0);
@@ -215,7 +196,7 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
                 name, descriptor,
                 null, exceptions == null || exceptions.length == 0 ? null
                         : Stream.of(exceptions)
-                                .map(i -> Type.getInternalName(i))
+                                .map(Type::getInternalName)
                                 .toArray(String[]::new));
 
         mv.visitVarInsn(Opcodes.ALOAD, 0);
@@ -259,5 +240,37 @@ public class BlockArrayClipboardClassVisitor extends BaseClassVisitor {
 
     @Override
     public void validate() throws RuntimeException {
+    }
+
+    private class MethodVisitorCtor extends MethodVisitor {
+
+        private MethodVisitorCtor(final int api, final MethodVisitor methodVisitor) {
+            super(api, methodVisitor);
+        }
+
+        @Override
+        public void visitInsn(int opcode) {
+            if (opcode == Opcodes.RETURN) {
+                super.visitVarInsn(Opcodes.ALOAD, 0);
+                super.visitTypeInsn(Opcodes.NEW, IC_DESCRIPTOR);
+                super.visitInsn(Opcodes.DUP);
+                super.visitVarInsn(Opcodes.ALOAD, 0);
+                super.visitMethodInsn(Opcodes.INVOKESPECIAL,
+                        IC_DESCRIPTOR,
+                        "<init>",
+                        "(L" + m_clsDescriptor + ";)V",
+                        false);
+                super.visitVarInsn(Opcodes.ALOAD, 1);
+                super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                        Type.getInternalName(Helpers.class),
+                        "createClipboard",
+                        "(Lcom/sk89q/worldedit/extent/clipboard/Clipboard;Lcom/sk89q/worldedit/regions/Region;)Lcom/sk89q/worldedit/extent/clipboard/Clipboard;",
+                        false);
+
+                super.visitFieldInsn(Opcodes.PUTFIELD, m_clsDescriptor, "m_injected", Type.getDescriptor(Clipboard.class));
+            }
+
+            super.visitInsn(opcode);
+        }
     }
 }

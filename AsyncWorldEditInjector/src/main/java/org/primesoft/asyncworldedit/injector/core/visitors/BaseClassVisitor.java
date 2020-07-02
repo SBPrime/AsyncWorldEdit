@@ -57,6 +57,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -208,7 +210,17 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
         emitEmptyCtor(cw, Object.class);
     }
 
-    protected final void processMethods(MethodFactory mf, Class<?>... cls) throws SecurityException {
+    protected final void processMethods(
+            final MethodFactory mf,
+            final Class<?>... cls) throws SecurityException {
+        processMethods(mf, (a, b) -> true, cls);
+    }
+
+    protected final void processMethods(
+            final MethodFactory mf,
+            final BiPredicate<String, String> shouldOverride,
+            final Class<?>... cls) throws SecurityException {
+
         Queue<Class<?>> clsInterfaces = new ArrayDeque<>();
         for (Class<?> c : cls) {
             clsInterfaces.add(c);
@@ -226,6 +238,10 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
                 }
 
                 definedMethods.add(name + descriptor);
+                if (!shouldOverride.test(name, descriptor)) {
+                    continue;
+                }
+
                 mf.define(name, descriptor, clsName, m);
             }
 
