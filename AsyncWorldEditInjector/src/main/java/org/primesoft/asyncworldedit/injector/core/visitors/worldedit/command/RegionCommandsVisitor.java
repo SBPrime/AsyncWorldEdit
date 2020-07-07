@@ -63,9 +63,9 @@ public class RegionCommandsVisitor extends BaseCommandsVisitor {
     static {
         METHODS = new HashMap<>();
         METHODS.put("smooth", new String[]{"(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/EditSession;Lcom/sk89q/worldedit/regions/Region;ILcom/sk89q/worldedit/function/mask/Mask;)I"});
-        METHODS.put("regenerateChunk", new String[]{"(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/world/World;Lcom/sk89q/worldedit/LocalSession;Lcom/sk89q/worldedit/EditSession;Lcom/sk89q/worldedit/regions/Region;)V"});
+        METHODS.put("regenerate", new String[]{"(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/world/World;Lcom/sk89q/worldedit/LocalSession;Lcom/sk89q/worldedit/EditSession;Lcom/sk89q/worldedit/regions/Region;Ljava/lang/Long;Z)V"});
     }
-    
+
     public RegionCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
         super(classVisitor, createClass, METHODS);
     }

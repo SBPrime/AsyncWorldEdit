@@ -47,12 +47,15 @@
  */
 package org.primesoft.asyncworldedit.worldedit.command.tool;
 
+import javax.annotation.Nullable;
+
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.command.tool.BlockDataCyler;
 import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 
@@ -67,32 +70,50 @@ public class AsyncBlockDataCyler extends BlockDataCyler implements IAsyncTool {
     }
 
     @Override
-    public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return ToolWrapper.performAction(server, config, player, session, clicked,
-                new LocationToolAction() {
-            @Override
-            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-                return doActPrimary(server, config, player, session, clicked);
-            }
-        }, "blockDataCyler", WorldeditOperations.replaceBlocks);
+    public boolean actPrimary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            @Nullable final Direction face) {
+
+        return ToolWrapper.performAction(server, config, player, session, clicked, face,
+                this::doActPrimary, "blockDataCyler", WorldeditOperations.replaceBlocks);
     }
 
     @Override
-    public boolean actSecondary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return ToolWrapper.performAction(server, config, player, session, clicked,
-                new LocationToolAction() {
-            @Override
-            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-                return doActSecondary(server, config, player, session, clicked);
-            }
-        }, "blockDataCyler", WorldeditOperations.replaceBlocks);
+    public boolean actSecondary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            @Nullable final Direction face) {
+
+        return ToolWrapper.performAction(server, config, player, session, clicked, face,
+                this::doActSecondary, "blockDataCyler", WorldeditOperations.replaceBlocks);
     }
 
-    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return super.actPrimary(server, config, player, session, clicked);
+    private boolean doActPrimary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            final Direction face) {
+
+        return super.actPrimary(server, config, player, session, clicked, face);
     }
 
-    private boolean doActSecondary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return super.actSecondary(server, config, player, session, clicked);
+    private boolean doActSecondary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            final Direction face) {
+
+        return super.actSecondary(server, config, player, session, clicked, face);
     }
 }

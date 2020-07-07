@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.worldedit.command.tool;
 
+import javax.annotation.Nullable;
+
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.command.tool.FloodFillTool;
@@ -54,6 +56,7 @@ import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import org.primesoft.asyncworldedit.injector.injected.commands.tool.IFloodFillTool;
@@ -78,20 +81,26 @@ public class AsyncFloodFillTool extends FloodFillTool implements IAsyncTool {
     }
 
     @Override
-    public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return ToolWrapper.performAction(server, config, player, session, clicked, 
-                new LocationToolAction() {
-            @Override
-            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-                return doActPrimary(server, config, player, session, clicked);
-            }
-        }, "floodFill", WorldeditOperations.fillXZ);
+    public boolean actPrimary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            @Nullable final Direction face) {
+
+        return ToolWrapper.performAction(server, config, player, session, clicked, face,
+                this::doActPrimary, "floodFill", WorldeditOperations.fillXZ);
     }
 
-    
-    
-    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return super.actPrimary(server, config, player, session, clicked);
+    private boolean doActPrimary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            final Direction face) {
+        return super.actPrimary(server, config, player, session, clicked, face);
     }
     
     

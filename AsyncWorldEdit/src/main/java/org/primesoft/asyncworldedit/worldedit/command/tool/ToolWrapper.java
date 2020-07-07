@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.worldedit.command.tool;
 
+import javax.annotation.Nullable;
+
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
@@ -69,6 +71,7 @@ import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.command.tool.TreePlanter;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import org.primesoft.asyncworldedit.core.AwePlatform;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
@@ -161,18 +164,9 @@ public class ToolWrapper {
     
     /**
      * Perform tool action as async job
-     * @param server
-     * @param config
-     * @param player
-     * @param session
-     * @param clicked
-     * @param toolAction
-     * @param jobName
-     * @param worldeditOperations 
-     * @return  
      */
     public static boolean performAction(final Platform server, final LocalConfiguration config, final Player player, 
-            final LocalSession session, Location clicked, 
+            final LocalSession session, final Location clicked, @Nullable final Direction face,
             final LocationToolAction toolAction, String jobName, WorldeditOperations worldeditOperations) {
         
         if (toolAction == null) {
@@ -181,7 +175,7 @@ public class ToolWrapper {
         
         EditSession editSession = session.createEditSession(player);
         if (!(editSession instanceof AsyncEditSession)) {
-            return toolAction.execute(server, config, player, session, clicked);
+            return toolAction.execute(server, config, player, session, clicked, face);
         }
 
         final IAsyncWorldEditCore aweCore = AwePlatform.getInstance().getCore();
@@ -198,7 +192,9 @@ public class ToolWrapper {
         boolean isAsync = aEditSession.checkAsync(WorldeditOperations.tool) && aEditSession.checkAsync(worldeditOperations);
 
         if (!isAsync) {
-            return toolAction.execute(server, config, player, session, AsyncWrapper.initialize(clicked, -1, false, playerEntry));
+            return toolAction.execute(server, config, player, session,
+                    AsyncWrapper.initialize(clicked, -1, false, playerEntry),
+                    face);
         }
 
         final int jobId = blockPlacer.getJobId(playerEntry);
@@ -207,7 +203,7 @@ public class ToolWrapper {
         final JobEntry job = new JobEntry(playerEntry, cSession, jobId, jobName);
         blockPlacer.addJob(playerEntry, job);
 
-        final Location clickedWrapped = AsyncWrapper.initialize(clicked, jobId, isAsync, playerEntry);
+        final Location clickedWrapped = AsyncWrapper.initialize(clicked, jobId, true, playerEntry);
 
         SchedulerUtils.runTaskAsynchronously(scheduler, new AsyncTask(cSession, playerEntry, jobName,
                 blockPlacer, job) {
@@ -218,7 +214,7 @@ public class ToolWrapper {
 
                         waitFor.checkAndWait(null);
                         
-                        toolAction.execute(server, config, player, fakeSession, clickedWrapped);
+                        toolAction.execute(server, config, player, fakeSession, clickedWrapped, face);
                         return 0;
                     }
                 });
@@ -230,14 +226,6 @@ public class ToolWrapper {
     
     /**
      * Perform tool action as async job
-     * @param server
-     * @param config
-     * @param player
-     * @param session
-     * @param toolAction
-     * @param jobName
-     * @param worldeditOperations 
-     * @return  
      */
     public static boolean performAction(final Platform server, final LocalConfiguration config, final Player player, 
             final LocalSession session, 

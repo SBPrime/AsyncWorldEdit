@@ -47,12 +47,15 @@
  */
 package org.primesoft.asyncworldedit.worldedit.command.tool;
 
+import javax.annotation.Nullable;
+
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.command.tool.FloatingTreeRemover;
 import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 
@@ -67,18 +70,26 @@ public class AsyncFloatingTreeRemover extends FloatingTreeRemover implements IAs
     }
 
     @Override
-    public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return ToolWrapper.performAction(server, config, player, session, clicked, 
-                new LocationToolAction() {
+    public boolean actPrimary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            @Nullable final Direction face) {
 
-            @Override
-            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-                return doActPrimary(server, config, player, session, clicked);
-            }
-        }, "floatingTreeRemover", WorldeditOperations.tree);
+        return ToolWrapper.performAction(server, config, player, session, clicked, face,
+                this::doActPrimary, "floatingTreeRemover", WorldeditOperations.tree);
     }
     
-    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return super.actPrimary(server, config, player, session, clicked);
+    private boolean doActPrimary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            final Direction face) {
+
+        return super.actPrimary(server, config, player, session, clicked, face);
     }
 }

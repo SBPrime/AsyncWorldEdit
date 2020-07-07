@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.objectweb.asm.ClassVisitor;
@@ -69,7 +70,7 @@ import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
  */
 public abstract class BaseCommandsVisitor extends BaseClassVisitor {
 
-    protected final List<MethodEntry> m_methodsToWrap = new ArrayList<>();
+    private final List<MethodEntry> m_methodsToWrap = new ArrayList<>();
 
     private String m_descriptorClass;
     private String m_descriptorClassInner;
@@ -85,7 +86,7 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
         super(classVisitor, createClass);
 
         m_methods = methods.entrySet().stream()
-                .collect(Collectors.toMap(i -> i.getKey(), i
+                .collect(Collectors.toMap(Map.Entry::getKey, i
                         -> Stream.of(i.getValue()).collect(Collectors.toMap(j -> j, j -> buildValidator(i.getKey(), j)))));
     }
 
@@ -113,7 +114,7 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        if (!isPublic(access)) {
+        if (checkFlag(access, Opcodes.ACC_PRIVATE) || checkFlag(access, Opcodes.ACC_PROTECTED)) {
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
 
@@ -139,7 +140,7 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
     public void validate() throws RuntimeException {
         m_methods.values().stream()
                 .flatMap(i -> i.values().stream())
-                .filter(i -> i != null)
+                .filter(Objects::nonNull)
                 .forEach(SimpleValidator::validate);
     }
 
@@ -178,7 +179,7 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
         } else if (me.descriptor.endsWith(")V")) {
             mv.visitInsn(Opcodes.RETURN);
         } else {
-            new IllegalStateException("Method result not supported for: " + me.name + me.descriptor);
+            throw new IllegalStateException("Method result not supported for: " + me.name + me.descriptor);
         }
 
         mv.visitMaxs(2, 1);

@@ -47,6 +47,8 @@
  */
 package org.primesoft.asyncworldedit.worldedit.command.tool;
 
+import javax.annotation.Nullable;
+
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.command.tool.BlockReplacer;
@@ -54,6 +56,7 @@ import com.sk89q.worldedit.command.tool.Tool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import org.primesoft.asyncworldedit.injector.injected.commands.tool.IBlockReplacerAccessor;
@@ -78,24 +81,26 @@ public class AsyncBlockReplacer extends BlockReplacer implements IAsyncTool {
         return new AsyncBlockReplacer(pattern);
     }
 
-    public AsyncBlockReplacer(Pattern pattern) {
+    private AsyncBlockReplacer(Pattern pattern) {
         super(pattern);
     }
 
     @Override
-    public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return ToolWrapper.performAction(server, config, player, session, clicked, 
-                new LocationToolAction() {
-            @Override
-            public boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-                return doActPrimary(server, config, player, session, clicked);
-            }
-        }, "BlockReplacer", WorldeditOperations.replaceBlocks);
+    public boolean actPrimary(
+            final Platform server,
+            final LocalConfiguration config,
+            final Player player,
+            final LocalSession session,
+            final Location clicked,
+            @Nullable final Direction face) {
+
+        return ToolWrapper.performAction(server, config, player, session, clicked, face,
+                this::doActPrimary, "BlockReplacer", WorldeditOperations.replaceBlocks);
     }
     
     
-    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
-        return super.actPrimary(server, config, player, session, clicked); //To change body of generated methods, choose Tools | Templates.
+    private boolean doActPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked, final Direction face) {
+        return super.actPrimary(server, config, player, session, clicked, face);
     }
 
 }

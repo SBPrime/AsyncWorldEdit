@@ -66,6 +66,7 @@ import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.SideEffect;
 import com.sk89q.worldedit.util.SideEffectSet;
 import com.sk89q.worldedit.util.TreeGenerator;
+import com.sk89q.worldedit.world.RegenOptions;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.block.BaseBlock;
@@ -211,6 +212,15 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
+    public boolean regenerate(Region region, EditSession editSession, RegenOptions options) {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return m_parent.regenerate(region, editSession, options);
+    }
+
+    @Override
     public boolean generateTree(TreeGenerator.TreeType type, EditSession editSession, BlockVector3 position) throws MaxChangedBlocksException {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
@@ -335,6 +345,15 @@ public class CancelableWorld extends AbstractWorldWrapper {
             throw new IllegalArgumentException(new SessionCanceled());
         }
         
+        return m_parent.getBiome(position);
+    }
+
+    @Override
+    public BiomeType getBiome(final BlockVector3 position) {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
         return m_parent.getBiome(position);
     }
 

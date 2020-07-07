@@ -57,7 +57,7 @@ public class AreaPickaxeVisitor extends BaseFieldAccessorVisitor {
 
         super(IAreaPickaxe.class,
                 new FieldEntry[]{
-                        new FieldEntry(Opcodes.ACC_PRIVATE, "range", "I", "getRange", null)
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "range", "I", "getRange", null)
                 },
                 classVisitor);
     }

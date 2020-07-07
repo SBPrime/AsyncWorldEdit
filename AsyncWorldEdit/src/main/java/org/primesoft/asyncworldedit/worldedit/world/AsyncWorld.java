@@ -79,6 +79,7 @@ import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.SideEffect;
 import com.sk89q.worldedit.util.SideEffectSet;
 import com.sk89q.worldedit.util.TreeGenerator;
+import com.sk89q.worldedit.world.RegenOptions;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import com.sk89q.worldedit.world.block.BaseBlock;
@@ -468,16 +469,21 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean regenerate(final Region region, EditSession editSession) {        
+    public boolean regenerate(final Region region, EditSession editSession) {
+        return this.regenerate(region, editSession, RegenOptions.builder().build());
+    }
+
+    @Override
+    public boolean regenerate(final Region region, final EditSession editSession, final RegenOptions options) {
         if (editSession instanceof CancelabeEditSession) {
             CancelabeEditSession ces = (CancelabeEditSession)editSession;
-            doRegen(editSession, region, m_bukkitWorld, ces.getJobId());
+            doRegen(region, editSession, options, m_bukkitWorld, ces.getJobId());
             return true;
         }
         
         boolean isAsync = checkAsync(WorldeditOperations.regenerate);
         if (!isAsync) {
-            return m_parent.regenerate(region, editSession);
+            return m_parent.regenerate(region, editSession, options);
         }
 
         final int jobId = getJobId();
@@ -499,7 +505,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 m_player, "regenerate", m_blockPlacer, job) {
             @Override
             public void task(EditSession editSession, IWorld world) throws MaxChangedBlocksException {
-                doRegen(editSession, region, world, jobId);
+                doRegen(region, editSession, options, world, jobId);
             }
 
         });
@@ -511,7 +517,13 @@ public class AsyncWorld extends AbstractWorldWrapper {
      * Perform the regen operation
      *
      */
-    private void doRegen(EditSession eSession, Region region, IWorld world, int jobId) {        
+    private void doRegen(
+            final Region region,
+            final EditSession eSession,
+            final RegenOptions options,
+            final IWorld world,
+            final int jobId) {
+
         int yMin = region.getMinimumPoint().getBlockY();
         int ySize = region.getHeight();
 
@@ -521,8 +533,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 wait.notifyAll();
             }
         };
-        
-        
+
         for (BlockVector2 chunk : region.getChunks()) {
             final BlockVector3 min = PositionHelper.chunkToPosition(chunk, yMin);
             final boolean[] isInRegion = new boolean[16 * 16 * ySize];
@@ -539,7 +550,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 }
             }
 
-            Region cRegion = new CuboidRegion(min, min.add(15, ySize - 1, 15)) {
+            final Region cRegion = new CuboidRegion(min, min.add(15, ySize - 1, 15)) {
                 @Override
                 public Iterator<BlockVector3> iterator() {
                     return new ChunkBaseRegionIterator(this);
@@ -561,7 +572,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 }
             };
             m_blockPlacer.addTasks(m_player, new RegenerateEntry(jobId, getWorld(), cRegion,
-                    finalizeAction, eSession));
+                    finalizeAction, eSession, options));
 
             synchronized (wait) {
                 try {
@@ -816,6 +827,16 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 () -> m_parent.getBiome(position),
                 m_bukkitWorld, BlockVector3.at(position.getX(), 0, position.getZ()));
     }
+
+
+    @Override
+    public BiomeType getBiome(final BlockVector3 position) {
+        return m_dispatcher.performSafe(MutexProvider.getMutex(getWorld()),
+                () -> m_parent.getBiome(position),
+                m_bukkitWorld, position);
+    }
+
+
 
     @Override
     public boolean setBlock(final BlockVector3 position, final BlockStateHolder block) throws WorldEditException {

@@ -47,29 +47,24 @@
  */
 package org.primesoft.asyncworldedit.worldedit.command.tool;
 
+import javax.annotation.Nullable;
+
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.Location;
 
 /**
  *
  * @author SBPrime
  */
-public abstract class LocationToolAction {
+@FunctionalInterface
+public interface LocationToolAction {
 
-    public LocationToolAction() {
-    }
-    
     /**
      * The action to perform
-     * @param server
-     * @param config
-     * @param player
-     * @param session
-     * @param clicked
-     * @return 
      */
-    public abstract boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked);
+    boolean execute(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked, Direction face);
 }
