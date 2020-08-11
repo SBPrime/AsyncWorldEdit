@@ -56,8 +56,8 @@ public class FloodFillToolVisitor extends BaseFieldAccessorVisitor {
     public FloodFillToolVisitor(final ClassVisitor classVisitor) {
         super(IFloodFillTool.class,
                 new FieldEntry[]{
-                        new FieldEntry(Opcodes.ACC_PRIVATE, "range", "I", "getRange", null),
-                        new FieldEntry(Opcodes.ACC_PRIVATE, "pattern", "Lcom/sk89q/worldedit/function/pattern/Pattern;", "getPattern", null),
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "range", "I", "getRange", null),
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "pattern", "Lcom/sk89q/worldedit/function/pattern/Pattern;", "getPattern", null),
                 },
                 classVisitor);
     }

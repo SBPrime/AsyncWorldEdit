@@ -56,7 +56,7 @@ public class TreePlanterVisitor extends BaseFieldAccessorVisitor {
     public TreePlanterVisitor(final ClassVisitor classVisitor) {
         super(ITreePlanter.class,
                 new FieldEntry[]{
-                        new FieldEntry(Opcodes.ACC_PRIVATE, "treeType", "Lcom/sk89q/worldedit/util/TreeGenerator$TreeType;", "getTreeType", null)
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "treeType", "Lcom/sk89q/worldedit/util/TreeGenerator$TreeType;", "getTreeType", null)
                 }
                 , classVisitor);
     }

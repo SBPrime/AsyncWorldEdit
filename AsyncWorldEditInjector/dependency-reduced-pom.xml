@@ -60,15 +60,15 @@
     <dependency>
       <groupId>org.primesoft.asyncworldedit</groupId>
       <artifactId>AsyncWorldEdit-Utils</artifactId>
-      <version>3.7.5</version>
+      <version>3.7.6</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.sk89q.worldedit</groupId>
       <artifactId>worldedit</artifactId>
-      <version>7.2.0-beta-02</version>
+      <version>7.2.0-beta-03</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.2.0-beta-02.jar</systemPath>
+      <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.2.0-beta-03.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.bukkit</groupId>

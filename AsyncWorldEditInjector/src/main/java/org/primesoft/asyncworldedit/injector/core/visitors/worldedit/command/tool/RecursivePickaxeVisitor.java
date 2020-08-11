@@ -57,7 +57,7 @@ public class RecursivePickaxeVisitor extends BaseFieldAccessorVisitor {
 
         super(IRecursivePickaxe.class,
                 new FieldEntry[]{
-                        new FieldEntry(Opcodes.ACC_PRIVATE, "range", "D", "getRange", null)
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "range", "D", "getRange", null)
                 },
                 classVisitor);
     }

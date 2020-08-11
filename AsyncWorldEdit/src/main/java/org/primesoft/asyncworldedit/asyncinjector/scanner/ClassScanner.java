@@ -63,6 +63,7 @@ import com.sk89q.worldedit.function.pattern.RandomPattern;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.collection.BlockMap;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockState;
@@ -92,6 +93,7 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.worldedit.extent.inventory.FixedBlockBagExtent;
 
 /**
  * The class scanner
@@ -341,6 +343,11 @@ public abstract class ClassScanner implements IClassScanner {
             new ClassScannerEntry(BlockMask.class, "blocks"),
             new ClassScannerEntry("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent", "batches"),
             new ClassScannerEntry("org.primesoft.asyncworldedit.blockshub.BlocksHubBridge"),
+            new FuzyClassScannerEntry("com.sk89q.worldedit.extent.reorder.MultiStageReorder$"),
+            new FuzyClassScannerEntry("com.sk89q.worldedit.extent.reorder.ChunkBatchingExtent$"),
+            new ClassScannerEntry(FixedBlockBagExtent.class, "missingBlocks"),
+            new ClassScannerEntry(com.sk89q.worldedit.internal.expression.Expression.class),
+            new ClassScannerEntry(BlockMap.class),
             new ClassScannerEntry(ChangeSet.class),
             new ClassScannerEntry(EditSession.class),
             new ClassScannerEntry(Region.class),

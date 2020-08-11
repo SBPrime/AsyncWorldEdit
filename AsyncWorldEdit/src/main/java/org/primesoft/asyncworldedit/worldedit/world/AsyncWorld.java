@@ -67,6 +67,7 @@ import com.sk89q.worldedit.blocks.BaseItemStack;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.math.BlockVector2;
@@ -469,33 +470,45 @@ public class AsyncWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean regenerate(final Region region, EditSession editSession) {
+    public boolean regenerate(
+            final Region region,
+            final EditSession editSession) {
+
         return this.regenerate(region, editSession, RegenOptions.builder().build());
     }
 
     @Override
-    public boolean regenerate(final Region region, final EditSession editSession, final RegenOptions options) {
-        if (editSession instanceof CancelabeEditSession) {
-            CancelabeEditSession ces = (CancelabeEditSession)editSession;
-            doRegen(region, editSession, options, m_bukkitWorld, ces.getJobId());
+    public boolean regenerate(
+            final Region region,
+            final Extent extent) {
+
+        return this.regenerate(region, extent, RegenOptions.builder().build());
+    }
+
+    @Override
+    public boolean regenerate(final Region region, final Extent extent, final RegenOptions options) {
+        if (extent instanceof CancelabeEditSession) {
+            CancelabeEditSession ces = (CancelabeEditSession)extent;
+            doRegen(region, extent, options, m_bukkitWorld, ces.getJobId());
             return true;
         }
         
         boolean isAsync = checkAsync(WorldeditOperations.regenerate);
         if (!isAsync) {
-            return m_parent.regenerate(region, editSession, options);
+            return m_parent.regenerate(region, extent, options);
         }
 
         final int jobId = getJobId();
         final EditSession session;
+        final Extent jobExtent = extent;
         final JobEntry job;
         
-        if (editSession instanceof AsyncEditSession) {
-            AsyncEditSession aSession = (AsyncEditSession) editSession;
+        if (extent instanceof AsyncEditSession) {
+            AsyncEditSession aSession = (AsyncEditSession) extent;
             session = new CancelabeEditSession(aSession, aSession.getMask(), jobId);
             job = new JobEntry(m_player, (CancelabeEditSession) session, jobId, "regenerate");
         } else {
-            session = editSession;
+            session = null;
             job = new JobEntry(m_player, jobId, "regenerate");
         }
 
@@ -505,7 +518,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 m_player, "regenerate", m_blockPlacer, job) {
             @Override
             public void task(EditSession editSession, IWorld world) throws MaxChangedBlocksException {
-                doRegen(region, editSession, options, world, jobId);
+                doRegen(region, editSession == null ? jobExtent : editSession, options, world, jobId);
             }
 
         });
@@ -519,7 +532,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
      */
     private void doRegen(
             final Region region,
-            final EditSession eSession,
+            final Extent extent,
             final RegenOptions options,
             final IWorld world,
             final int jobId) {
@@ -572,7 +585,7 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 }
             };
             m_blockPlacer.addTasks(m_player, new RegenerateEntry(jobId, getWorld(), cRegion,
-                    finalizeAction, eSession, options));
+                    finalizeAction, extent, options));
 
             synchronized (wait) {
                 try {

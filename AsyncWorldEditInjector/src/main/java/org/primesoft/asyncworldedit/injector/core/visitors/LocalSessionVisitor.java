@@ -56,9 +56,9 @@ public class LocalSessionVisitor extends BaseFieldAccessorVisitor {
     public LocalSessionVisitor(final ClassVisitor classVisitor) {
         super(ILocalSession.class,
                 new FieldEntry[] {
-                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "history", "Ljava/util/LinkedList;", "getHistory", "setHistory"),
+                        new FinalFieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "history", "Ljava/util/LinkedList;", "getHistory", "setHistory"),
                         new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "historyPointer", "I", "getHistoryPointer", "setHistoryPointer"),
-                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "tools", "Ljava/util/Map;", "getTools", "setTools")
+                        new FinalFieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_TRANSIENT, "tools", "Ljava/util/Map;", "getTools", "setTools")
                 }, classVisitor);
     }
 }

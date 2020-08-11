@@ -58,7 +58,7 @@ public class ChunkLoadingExtentVisitor extends BaseFieldAccessorVisitor {
     public ChunkLoadingExtentVisitor(final ClassVisitor classVisitor) {
 
         super(IChunkLoadingExtent.class, new FieldEntry[] {
-                new FieldEntry(Opcodes.ACC_PRIVATE, "enabled", "Z", "isEnabled", "setEnabled")
+                new FinalFieldEntry(Opcodes.ACC_PRIVATE, "enabled", "Z", "isEnabled", "setEnabled")
         }, classVisitor);
     }
 }

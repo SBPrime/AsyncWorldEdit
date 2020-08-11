@@ -47,7 +47,7 @@
  */
 package org.primesoft.asyncworldedit.blockPlacer.entries;
 
-import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.RegenOptions;
 import com.sk89q.worldedit.world.World;
@@ -65,7 +65,7 @@ public class RegenerateEntry extends BlockPlacerEntry {
     private final World m_world;
     private final Region m_region;
     private final IAction m_finalize;
-    private final EditSession m_editSession;
+    private final Extent m_extent;
     private final RegenOptions m_options;
 
     public RegenerateEntry(
@@ -73,12 +73,12 @@ public class RegenerateEntry extends BlockPlacerEntry {
             final World world,
             final Region region,
             final IAction finalizeAction,
-            final EditSession es,
+            final Extent extent,
             final RegenOptions options ) {
         super(jobId, true);
         
         m_region = region;
-        m_editSession = es;
+        m_extent = extent;
         m_world = world;
         m_options = options;
         
@@ -88,7 +88,7 @@ public class RegenerateEntry extends BlockPlacerEntry {
     @Override
     public boolean process(IBlockPlacer bp) {
         try {
-            return m_world.regenerate(m_region, m_editSession, m_options);
+            return m_world.regenerate(m_region, m_extent, m_options);
             
         } catch (Throwable t) {
             ExceptionHelper.printException(t, "Error while regenerating chunk.");

@@ -133,6 +133,35 @@ public class BaseFieldAccessorVisitor extends BaseClassVisitor {
 
     }
 
+    public static class FinalFieldEntry extends FieldEntry {
+        /**
+         * Create new instance of the field entry
+         * @param access The accessor pattern to match
+         * @param name The field name to match
+         * @param descriptor The field descriptor to match
+         * @param getter The getter name in the interface, null if no getter
+         * @param setter The setter name in the interface, null if not setter
+         */
+        public FinalFieldEntry(int access, String name, String descriptor,
+                          String getter, String setter) {
+            this(access, name, descriptor, i -> i, getter, setter);
+        }
+
+        /**
+         * Create new instance of the field entry
+         * @param access The accessor pattern to match
+         * @param name The field name to match
+         * @param descriptor The field descriptor to match
+         * @param getter The getter name in the interface, null if no getter
+         * @param setter The setter name in the interface, null if not setter
+         * @param ac Function to change the accessor
+         */
+        public FinalFieldEntry(int access, String name, String descriptor,
+                          AccessChanger ac, String getter, String setter) {
+            super(access | Opcodes.ACC_FINAL, name, descriptor, i -> ac.process(i) & (~Opcodes.ACC_FINAL), getter, setter);
+        }
+    }
+
     public static class FieldEntry {
         public final int Access;
         public final String Name;

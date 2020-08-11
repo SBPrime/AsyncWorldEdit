@@ -47,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit.world;
 
+import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
@@ -212,7 +213,17 @@ public class CancelableWorld extends AbstractWorldWrapper {
     }
 
     @Override
-    public boolean regenerate(Region region, EditSession editSession, RegenOptions options) {
+    public boolean regenerate(Region region, Extent editSession) {
+        if (m_isCanceled) {
+            throw new IllegalArgumentException(new SessionCanceled());
+        }
+
+        return m_parent.regenerate(region, editSession);
+    }
+
+
+    @Override
+    public boolean regenerate(Region region, Extent editSession, RegenOptions options) {
         if (m_isCanceled) {
             throw new IllegalArgumentException(new SessionCanceled());
         }
