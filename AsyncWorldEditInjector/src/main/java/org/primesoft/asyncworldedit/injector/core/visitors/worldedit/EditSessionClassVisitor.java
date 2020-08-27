@@ -60,7 +60,8 @@ import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
  * @author SBPrime
  */
 public final class EditSessionClassVisitor extends BaseFieldAccessorVisitor {
-    private final static String DESCRIPTOR_CTOR = "(Lcom/sk89q/worldedit/util/eventbus/EventBus;Lcom/sk89q/worldedit/world/World;ILcom/sk89q/worldedit/extent/inventory/BlockBag;Lcom/sk89q/worldedit/event/extent/EditSessionEvent;)V";
+    private final static String DESCRIPTOR_CTOR = "(Lcom/sk89q/worldedit/util/eventbus/EventBus;Lcom/sk89q/worldedit/world/World;ILcom/sk89q/worldedit/extent/inventory/BlockBag;Lcom/sk89q/worldedit/extension/platform/Actor;Z)V";
+
 
     private final SimpleValidator m_vCtor = new SimpleValidator("Constructor not injected");
     

@@ -57,7 +57,7 @@ public class WorldEditVisitor extends BaseFieldAccessorVisitor {
         super(IWorldEdit.class,
                 new FieldEntry[]{
                         new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "blockFactory", "Lcom/sk89q/worldedit/extension/factory/BlockFactory;", i -> i & (~Opcodes.ACC_FINAL), null,  "setBlockFactory"),
-                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "editSessionFactory", "Lcom/sk89q/worldedit/EditSessionFactory;", i -> i & (~Opcodes.ACC_FINAL), null,  "setEditSessionFactory"),
+                        new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL | Opcodes.ACC_DEPRECATED, "editSessionFactory", "Lcom/sk89q/worldedit/EditSessionFactory;", i -> i & (~Opcodes.ACC_FINAL), null,  "setEditSessionFactory"),
                         new FieldEntry(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "sessions", "Lcom/sk89q/worldedit/session/SessionManager;", i -> i & (~Opcodes.ACC_FINAL), null,  "setSessionManager")
                 }, classVisitor);
     }
