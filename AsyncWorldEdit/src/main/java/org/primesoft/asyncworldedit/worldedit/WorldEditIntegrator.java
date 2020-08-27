@@ -122,7 +122,7 @@ public abstract class WorldEditIntegrator implements IWorldeditIntegratorInner {
         IWorldEdit we = (IWorldEdit)(Object)m_worldEdit; // Force caste
 
         we.setBlockFactory(new ExtendedBlockFactory(m_aweCore.getPlatform(), m_worldEdit, m_aweCore.getPlayerManager()));
-        we.setEditSessionFactory(new AsyncEditSessionFactory(m_aweCore, m_worldEdit.getEventBus()));
+        we.setEditSessionFactory(new AsyncEditSessionFactory(m_aweCore));
         we.setSessionManager(new AsyncSessionManager(m_worldEdit, m_aweCore));
     }
     

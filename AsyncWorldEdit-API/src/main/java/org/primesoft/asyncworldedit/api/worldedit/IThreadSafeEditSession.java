@@ -44,6 +44,7 @@ import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.history.change.Change;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
@@ -81,8 +82,6 @@ public interface IThreadSafeEditSession extends IAweEditSession {
     IBlockPlacer getBlockPlacer();
 
     IWorld getCBWorld();
-
-    EditSessionEvent getEditSessionEvent();
 
     EventBus getEventBus();
 

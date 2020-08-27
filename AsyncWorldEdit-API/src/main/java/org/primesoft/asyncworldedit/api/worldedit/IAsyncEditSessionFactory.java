@@ -41,7 +41,6 @@
 package org.primesoft.asyncworldedit.api.worldedit;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.world.World;
@@ -51,17 +50,12 @@ import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
  *
  * @author SBPrime
  */
+@Deprecated
 public interface IAsyncEditSessionFactory {
 
     EditSession getEditSession(World world, int maxBlocks);
 
-    @Deprecated            
-    EditSession getEditSession(World world, int maxBlocks, Player player);
-
     EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag);
-
-    @Deprecated
-    EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, Player player);
 
     EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, IPlayerEntry playerEntry);
     
@@ -71,13 +65,7 @@ public interface IAsyncEditSessionFactory {
 
     IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks);
 
-    @Deprecated
-    IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, Player player);
-
     IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, BlockBag blockBag);
-
-    @Deprecated
-    IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, BlockBag blockBag, Player player);
 
     IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, BlockBag blockBag, IPlayerEntry playerEntry);   
 

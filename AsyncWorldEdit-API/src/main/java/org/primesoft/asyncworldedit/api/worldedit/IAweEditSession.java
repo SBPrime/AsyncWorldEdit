@@ -41,6 +41,7 @@
 package org.primesoft.asyncworldedit.api.worldedit;
 
 import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.history.change.Change;
 
 /**
@@ -56,4 +57,8 @@ public interface IAweEditSession extends IEditSession {
      * @throws com.sk89q.worldedit.WorldEditException
      */
     void doCustomAction(Change change, boolean isDemanding) throws WorldEditException;
+
+    Actor getActor();
+
+    boolean isTracking();
 }

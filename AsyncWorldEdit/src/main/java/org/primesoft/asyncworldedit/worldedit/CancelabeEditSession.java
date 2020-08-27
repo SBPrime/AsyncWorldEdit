@@ -62,7 +62,6 @@ import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.NullExtent;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
-import com.sk89q.worldedit.extent.reorder.MultiStageReorder;
 import com.sk89q.worldedit.extent.world.ChunkLoadingExtent;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.pattern.Pattern;
@@ -98,7 +97,6 @@ import org.primesoft.asyncworldedit.injector.injected.IEditSession;
 import org.primesoft.asyncworldedit.injector.injected.extent.IChangeSetExtent;
 import org.primesoft.asyncworldedit.injector.injected.extent.world.IChunkLoadingExtent;
 import org.primesoft.asyncworldedit.utils.ExtentUtils;
-import org.primesoft.asyncworldedit.utils.Reflection;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
 import org.primesoft.asyncworldedit.worldedit.extent.ExtendedChangeSetExtent;
 import org.primesoft.asyncworldedit.worldedit.extent.SafeDelegateExtent;
@@ -142,14 +140,15 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
                 wrapEventBus(parent.getEventBus()),
                 new CancelableWorld(parent.getWorld(), jobId, parent.getPlayer()),
                 parent.getBlockChangeLimit(), parent.getBlockBag(),
-                parent.getEditSessionEvent());
+                parent.getActor(), parent.isTracking());
     }
 
-    private CancelabeEditSession(IThreadSafeEditSession parent, Mask mask, int jobId,
-            EventBus eventBus, CancelableWorld world, int maxBlocks,
-            @Nullable BlockBag blockBag,
-            EditSessionEvent event) {
-        super(eventBus, world, maxBlocks, blockBag, event);
+    private CancelabeEditSession(
+            IThreadSafeEditSession parent, Mask mask, int jobId,
+            EventBus eventBus, CancelableWorld  world, int maxBlocks,
+            @Nullable BlockBag blockBag, @Nullable Actor actor,
+            boolean tracing) {
+        super(eventBus, world, maxBlocks, blockBag, actor, tracing);
 
         m_jobId = jobId;
         m_parent = parent;

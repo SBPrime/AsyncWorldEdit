@@ -60,6 +60,7 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.NullExtent;
@@ -176,11 +177,6 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     private final EventBus m_eventBus;
 
     /**
-     * The edit session event
-     */
-    private final EditSessionEvent m_editSessionEvent;
-
-    /**
      * The mutex
      */
     private final Object m_mutex = new Object();
@@ -227,11 +223,6 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         return m_eventBus;
     }
 
-    @Override
-    public EditSessionEvent getEditSessionEvent() {
-        return m_editSessionEvent;
-    }
-
     /**
      * Get the root changeset entry
      *
@@ -246,11 +237,12 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
                 || (m_player.getAweMode() && !m_asyncDisabled && !m_asyncForceDisabled);
     }
 
-    public ThreadSafeEditSession(IAsyncWorldEditCore core,
-            IPlayerEntry player, EventBus eventBus, com.sk89q.worldedit.world.World world,
-            int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
+    public ThreadSafeEditSession(IAsyncWorldEditCore core, IPlayerEntry player,
+             EventBus eventBus, com.sk89q.worldedit.world.World world, int maxBlocks,
+             @Nullable BlockBag blockBag, @Nullable Actor actor,
+             boolean tracing) {
 
-        super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, ThreadSafeBlockBag.warap(blockBag), event);
+        super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, ThreadSafeBlockBag.warap(blockBag), actor, tracing);
 
         m_asyncTasks = new HashSet<>();
 
@@ -259,7 +251,6 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
         m_dispatcher = core.getTaskDispatcher();
 
         m_player = player;
-        m_editSessionEvent = event;
         m_eventBus = eventBus;
 
         if (world != null) {

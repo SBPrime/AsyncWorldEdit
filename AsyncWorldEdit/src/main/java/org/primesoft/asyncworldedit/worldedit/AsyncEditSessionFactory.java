@@ -47,19 +47,21 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
-import org.primesoft.asyncworldedit.api.worldedit.IAsyncEditSessionFactory;
+import java.util.Objects;
+
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.EditSessionBuilder;
 import com.sk89q.worldedit.EditSessionFactory;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.event.extent.EditSessionEvent;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
-import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
-import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.IWorldeditIntegrator;
+import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
+import org.primesoft.asyncworldedit.api.worldedit.IAsyncEditSessionBuilder;
+import org.primesoft.asyncworldedit.api.worldedit.IAsyncEditSessionFactory;
 import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 
 /**
@@ -67,16 +69,12 @@ import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
  * @author SBPrime
  */
 public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyncEditSessionFactory {
-
     private final IAsyncWorldEditCore m_aweCore;
-    private final EventBus m_eventBus;
     private final IPlayerManager m_playerManager;
 
     /**
      * Get the player UUID
      *
-     * @param player
-     * @return
      */
     private IPlayerEntry getIPlayerEntry(Actor player) {
         if (player == null) {
@@ -94,134 +92,112 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
         if (weIntegrator == null) {
             return null;
         }
-                        
+
         return weIntegrator.wrapActor(playerEntry);
     }
 
-    public AsyncEditSessionFactory(IAsyncWorldEditCore aweCore, EventBus eventBus) {
+    public AsyncEditSessionFactory(IAsyncWorldEditCore aweCore) {
         m_aweCore = aweCore;
-        m_eventBus = eventBus;
         m_playerManager = aweCore.getPlayerManager();
     }
 
     @Override
-    public EditSession getEditSession(World world, int maxBlocks) {
-        return new AsyncEditSession(m_aweCore, m_playerManager.getUnknownPlayer(),
-                m_eventBus, world, maxBlocks, null,
-                new EditSessionEvent(world, null, maxBlocks, null));
+    public EditSession getEditSession(final World world, final int maxBlocks) {
+        return getEditSession(world, maxBlocks, null, (Actor)null);
     }
 
-    @Override    
-    public EditSession getEditSession(World world, int maxBlocks, Actor actor) {
-        IPlayerEntry entry = getIPlayerEntry(actor);
-        AsyncEditSession result = new AsyncEditSession(m_aweCore, entry,
-                m_eventBus, world, maxBlocks, null,
-                new EditSessionEvent(world, actor, maxBlocks, null));
+    @Override
+    public EditSession getEditSession(final World world, final int maxBlocks, final Actor actor) {
+        return getEditSession(world, maxBlocks, null, actor);
+    }
 
-        m_aweCore.getPlotMeFix().setMask(entry.getUUID());
+    @Override
+    public EditSession getEditSession(final World world, final int maxBlocks, final BlockBag blockBag) {
+        return getEditSession(world, maxBlocks, blockBag, (Actor)null);
+    }
+
+    @Override
+    public EditSession getEditSession(final World world, final int maxBlocks, final BlockBag blockBag, final Actor actor) {
+        return getEditSession(world, maxBlocks, blockBag, actor, getIPlayerEntry(actor));
+    }
+
+    @Override
+    public EditSession getEditSession(final World world, final int maxBlocks, final BlockBag blockBag, final IPlayerEntry playerEntry) {
+        return getEditSession(world, maxBlocks, blockBag, getActor(playerEntry), playerEntry);
+    }
+
+    private EditSession getEditSession(
+            final World world,
+            final int maxBlocks,
+            final BlockBag blockBag,
+            final Actor actor,
+            final IPlayerEntry playerEntry) {
+        return get(false, world, maxBlocks, blockBag, actor, playerEntry);
+    }
+
+    @Override
+    public IThreadSafeEditSession getThreadSafeEditSession(final World world, final int maxBlocks) {
+        return getThreadSafeEditSession(world, maxBlocks, null, (Actor)null);
+    }
+
+    @Override
+    public IThreadSafeEditSession getThreadSafeEditSession(final World world, final int maxBlocks, final Actor actor) {
+        return getThreadSafeEditSession(world, maxBlocks, null, actor);
+    }
+
+    @Override
+    public IThreadSafeEditSession getThreadSafeEditSession(final World world, final int maxBlocks, final BlockBag blockBag) {
+        return getThreadSafeEditSession(world, maxBlocks, blockBag, (Actor)null);
+    }
+
+    @Override
+    public IThreadSafeEditSession getThreadSafeEditSession(final World world, final int maxBlocks, final BlockBag blockBag, final Actor actor) {
+        return getThreadSafeEditSession(world, maxBlocks, blockBag, actor, getIPlayerEntry(actor));
+    }
+
+    @Override
+    public IThreadSafeEditSession getThreadSafeEditSession(final World world, final int maxBlocks, final BlockBag blockBag, final IPlayerEntry playerEntry) {
+        return getThreadSafeEditSession(world, maxBlocks, blockBag, getActor(playerEntry), playerEntry);
+    }
+
+    private IThreadSafeEditSession getThreadSafeEditSession(
+            final World world,
+            final int maxBlocks,
+            final BlockBag blockBag,
+            final Actor actor,
+            final IPlayerEntry playerEntry) {
+
+        return (IThreadSafeEditSession) get(true, world, maxBlocks, blockBag, actor, playerEntry);
+    }
+
+
+    private EditSession get(
+            final boolean threadSafe,
+            final World world,
+            final int maxBlocks,
+            final BlockBag blockBag,
+            final Actor actor,
+            final IPlayerEntry playerEntry) {
+
+        final EditSessionBuilder builder = WorldEdit.getInstance().newEditSessionBuilder();
+        final IAsyncEditSessionBuilder aweBuilder = (IAsyncEditSessionBuilder)(Object)builder;
+
+        builder.world(world)
+                .maxBlocks(maxBlocks)
+                .blockBag(blockBag)
+                .actor(actor)
+                .build();
+        aweBuilder.setPlayerEntry(playerEntry);
+        if (threadSafe) {
+            aweBuilder.theadSafeEditSession();
+        }
+
+        final EditSession result = builder.build();
+
+        if (playerEntry != null && !Objects.equals(playerEntry, m_playerManager.getUnknownPlayer())) {
+            m_aweCore.getPlotMeFix().setMask(playerEntry.getUUID());
+        }
 
         return result;
-    }
-
-    @Override
-    public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag) {
-        return new AsyncEditSession(m_aweCore, m_playerManager.getUnknownPlayer(),
-                m_eventBus, world, maxBlocks, blockBag,
-                new EditSessionEvent(world, null, maxBlocks, null));
-    }
-
-    @Override
-    public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, Actor actor) {
-        IPlayerEntry entry = getIPlayerEntry(actor);
-
-        AsyncEditSession result = new AsyncEditSession(m_aweCore, entry,
-                m_eventBus, world, maxBlocks, blockBag,
-                new EditSessionEvent(world, actor, maxBlocks, null));
-
-        m_aweCore.getPlotMeFix().setMask(entry.getUUID());
-
-        return result;
-    }
-
-    @Override
-    public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, IPlayerEntry playerEntry) {
-        AsyncEditSession result = new AsyncEditSession(m_aweCore, playerEntry,
-                m_eventBus, world, maxBlocks, blockBag,
-                new EditSessionEvent(world, getActor(playerEntry), maxBlocks, null));
-
-        m_aweCore.getPlotMeFix().setMask(playerEntry.getUUID());
-
-        return result;
-    }
-
-    @Override
-    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks) {
-        return new ThreadSafeEditSession(m_aweCore, m_playerManager.getUnknownPlayer(),
-                m_eventBus, world, maxBlocks, null,
-                new EditSessionEvent(world, null, maxBlocks, null));
-    }
-
-    @Override
-    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
-            Actor actor) {
-        IPlayerEntry entry = getIPlayerEntry(actor);
-        ThreadSafeEditSession result = new ThreadSafeEditSession(m_aweCore, entry,
-                m_eventBus, world, maxBlocks, null,
-                new EditSessionEvent(world, actor, maxBlocks, null));
-        m_aweCore.getPlotMeFix().setMask(entry.getUUID());
-
-        return result;
-    }
-
-    @Override
-    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
-            BlockBag blockBag) {
-        return new ThreadSafeEditSession(m_aweCore, m_playerManager.getUnknownPlayer(),
-                m_eventBus, world, maxBlocks, blockBag,
-                new EditSessionEvent(world, null, maxBlocks, null));
-    }
-
-    @Override
-    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
-            BlockBag blockBag, Actor actor) {
-        IPlayerEntry entry = getIPlayerEntry(actor);
-        ThreadSafeEditSession result = new ThreadSafeEditSession(m_aweCore, entry,
-                m_eventBus, world, maxBlocks, blockBag,
-                new EditSessionEvent(world, actor, maxBlocks, null));
-        m_aweCore.getPlotMeFix().setMask(entry.getUUID());
-        
-        return result;
-    }
-
-    @Override
-    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks,
-            BlockBag blockBag, IPlayerEntry playerEntry) {
-        
-        ThreadSafeEditSession result = new ThreadSafeEditSession(m_aweCore, playerEntry,
-                m_eventBus, world, maxBlocks, blockBag,
-                new EditSessionEvent(world, getActor(playerEntry), maxBlocks, null));
-
-        m_aweCore.getPlotMeFix().setMask(playerEntry.getUUID());
-        return result;
-    }
-
-    @Override
-    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, Player player) {
-        return getThreadSafeEditSession(world, maxBlocks, (Actor)player);
-    }
-
-    @Override
-    public IThreadSafeEditSession getThreadSafeEditSession(World world, int maxBlocks, BlockBag blockBag, Player player) {
-        return getThreadSafeEditSession( world, maxBlocks, blockBag, (Actor)player);
-    }
-
-    @Override
-    public EditSession getEditSession(World world, int maxBlocks, Player player) {
-        return getEditSession(world, maxBlocks, (Actor)player);
-    }
-
-    @Override
-    public EditSession getEditSession(World world, int maxBlocks, BlockBag blockBag, Player player) {
-        return getEditSession(world, maxBlocks, blockBag, (Actor)player);
     }
 }

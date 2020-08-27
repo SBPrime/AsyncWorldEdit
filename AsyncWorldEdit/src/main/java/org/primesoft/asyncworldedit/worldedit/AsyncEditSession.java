@@ -47,6 +47,7 @@
  */
 package org.primesoft.asyncworldedit.worldedit;
 
+import com.sk89q.worldedit.extension.platform.Actor;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
@@ -103,11 +104,12 @@ public class AsyncEditSession extends ThreadSafeEditSession {
         return m_wait;
     }
 
-    public AsyncEditSession(IAsyncWorldEditCore aweCore,
-            IPlayerEntry player, EventBus eventBus, com.sk89q.worldedit.world.World world,
-            int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event) {
+    public AsyncEditSession(IAsyncWorldEditCore aweCore, IPlayerEntry player,
+            EventBus eventBus, com.sk89q.worldedit.world.World world, int maxBlocks,
+            @Nullable BlockBag blockBag, @Nullable Actor actor,
+            boolean tracing) {
 
-        super(aweCore, player, eventBus, world, maxBlocks, blockBag, event);
+        super(aweCore, player, eventBus, world, maxBlocks, blockBag, actor, tracing);
 
         m_schedule = aweCore.getPlatform().getScheduler();
 

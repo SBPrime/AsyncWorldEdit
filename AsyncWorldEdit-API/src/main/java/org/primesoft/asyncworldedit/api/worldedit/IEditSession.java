@@ -43,6 +43,7 @@ package org.primesoft.asyncworldedit.api.worldedit;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.EditSession.Stage;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;

@@ -1,19 +1,19 @@
 /*
  * AsyncWorldEdit a performance improvement plugin for Minecraft WorldEdit plugin.
- * Copyright (c) 2014, SBPrime <https://github.com/SBPrime/>
+ * Copyright (c) 2020, SBPrime <https://github.com/SBPrime/>
  * Copyright (c) AsyncWorldEdit contributors
  *
  * All rights reserved.
  *
  * Redistribution in source, use in source and binary forms, with or without
- * modification, are permitted free of charge provided that the following 
+ * modification, are permitted free of charge provided that the following
  * conditions are met:
  *
  * 1.  Redistributions of source code must retain the above copyright notice, this
  *     list of conditions and the following disclaimer.
  * 2.  Redistributions of source code, with or without modification, in any form
  *     other then free of charge is not allowed,
- * 3.  Redistributions of source code, with tools and/or scripts used to build the 
+ * 3.  Redistributions of source code, with tools and/or scripts used to build the
  *     software is not allowed,
  * 4.  Redistributions of source code, with information on how to compile the software
  *     is not allowed,
@@ -45,52 +45,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.sk89q.worldedit;
 
-import com.sk89q.worldedit.extension.platform.Actor;
-import org.primesoft.asyncworldedit.api.worldedit.IAweEditSession;
-import com.sk89q.worldedit.event.extent.EditSessionEvent;
-import com.sk89q.worldedit.extent.inventory.BlockBag;
-import com.sk89q.worldedit.history.change.Change;
-import com.sk89q.worldedit.util.eventbus.EventBus;
-import com.sk89q.worldedit.world.World;
-import javax.annotation.Nullable;
+package org.primesoft.asyncworldedit.api.worldedit;
 
-/**
- * Stub class to allow access to package visible constructor
- *
- * @author SBPrime
- */
-public abstract class AweEditSession extends EditSession implements IAweEditSession {
-    private final Actor m_actor;
-    private final boolean m_isTracking;
+import com.sk89q.worldedit.EditSessionBuilder;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 
-    public AweEditSession(EventBus eventBus, World world, int maxBlocks,
-                          @Nullable BlockBag blockBag, @Nullable Actor actor,
-                          boolean tracing) {
-        super(eventBus, world, maxBlocks, blockBag, actor, tracing);
+public interface IAsyncEditSessionBuilder {
+    EditSessionBuilder theadSafeEditSession();
 
-        m_actor = actor;
-        m_isTracking = tracing;
-    }
-    
-    
-    /**
-     * Perform a custom action
-     * @param change
-     * @param isDemanding
-     * @throws com.sk89q.worldedit.WorldEditException
-     */
-    @Override
-    public abstract void doCustomAction(Change change, boolean isDemanding) throws WorldEditException;
-
-    @Override
-    public Actor getActor() {
-        return m_actor;
-    }
-
-    @Override
-    public boolean isTracking() {
-        return m_isTracking;
-    }
+    EditSessionBuilder setPlayerEntry(IPlayerEntry playerEntry);
 }
