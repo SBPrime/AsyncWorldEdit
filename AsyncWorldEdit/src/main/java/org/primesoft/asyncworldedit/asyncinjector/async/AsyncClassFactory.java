@@ -47,16 +47,22 @@
  */
 package org.primesoft.asyncworldedit.asyncinjector.async;
 
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.command.RegionCommandsRegistration;
 import com.sk89q.worldedit.command.UtilityCommandsRegistration;
+import com.sk89q.worldedit.extension.platform.Actor;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.enginehub.piston.CommandManager;
+import org.primesoft.asyncworldedit.api.IWorldeditIntegrator;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
@@ -71,6 +77,8 @@ import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistra
 import org.primesoft.asyncworldedit.injector.injected.commands.ICommandsRegistrationDelegate;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
 import org.primesoft.asyncworldedit.utils.SessionCanceled;
+import org.primesoft.asyncworldedit.worldedit.AsyncEditSession;
+import org.primesoft.asyncworldedit.worldedit.ThreadSafeEditSession;
 import org.primesoft.asyncworldedit.worldedit.regions.RegionIteratorFactory;
 import org.primesoft.asyncworldedit.worldedit.world.AsyncWorld;
 
@@ -97,7 +105,33 @@ public class AsyncClassFactory extends BaseClassFactory {
     public AsyncClassFactory(IAsyncWorldEditCore aweCore) {
         m_aweCore = aweCore;        
     }
-    
+
+    private IPlayerEntry getIPlayerEntry(
+            final Actor player) {
+
+        final IPlayerManager pm = m_aweCore.getPlayerManager();
+
+        if (player == null) {
+            return pm.getUnknownPlayer();
+        }
+        return pm.getPlayer(player.getUniqueId());
+    }
+
+    private Actor getActor(
+            final IPlayerEntry playerEntry) {
+
+        if (playerEntry == null) {
+            return null;
+        }
+
+        IWorldeditIntegrator weIntegrator = m_aweCore.getWorldEditIntegrator();
+        if (weIntegrator == null) {
+            return null;
+        }
+
+        return weIntegrator.wrapActor(playerEntry);
+    }
+
     private <T> T lazyGet(Supplier<? extends T> suplier, 
             Supplier<T> fieldGet, Consumer<T> fieldSet) {
         if (fieldGet.get() == null) {
@@ -139,7 +173,7 @@ public class AsyncClassFactory extends BaseClassFactory {
 
     @Override
     public IPlayerEntry getPlayer(UUID uniqueId) {
-        IPlayerManager pm = AwePlatform.getInstance().getCore().getPlayerManager();
+        IPlayerManager pm = m_aweCore.getPlayerManager();
         return pm.getPlayer(uniqueId);
     }
 
@@ -167,5 +201,41 @@ public class AsyncClassFactory extends BaseClassFactory {
     @Override
     public Iterator<BlockVector3> getRegionIterator(Region region) {
         return RegionIteratorFactory.getIterator(region);
+    }
+
+
+    @Override
+    public EditSession buildEditSession(
+            final EventBus eventBus,
+            final World world,
+            final int maxBlocks,
+            Actor actor,
+            final BlockBag blockBag,
+            final boolean tracing,
+            final boolean threadSafeOnly,
+            IPlayerEntry playerEntry) {
+
+        boolean traceUnflushed = WorldEdit.getInstance().getConfiguration().traceUnflushedSessions;
+
+        if (actor == null) {
+            actor = getActor(playerEntry);
+        }
+        if (playerEntry == null) {
+            playerEntry = getIPlayerEntry(actor);
+        }
+
+        if (threadSafeOnly) {
+            return new ThreadSafeEditSession(
+                    m_aweCore,
+                    playerEntry, eventBus, world, maxBlocks, blockBag,
+                    actor, tracing,
+                    traceUnflushed);
+        }
+
+        return new AsyncEditSession(
+                m_aweCore,
+                playerEntry, eventBus, world, maxBlocks, blockBag,
+                actor, tracing,
+                traceUnflushed);
     }
 }

@@ -107,9 +107,9 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     public AsyncEditSession(IAsyncWorldEditCore aweCore, IPlayerEntry player,
             EventBus eventBus, com.sk89q.worldedit.world.World world, int maxBlocks,
             @Nullable BlockBag blockBag, @Nullable Actor actor,
-            boolean tracing) {
+            boolean tracing, boolean traceUnflushed) {
 
-        super(aweCore, player, eventBus, world, maxBlocks, blockBag, actor, tracing);
+        super(aweCore, player, eventBus, world, maxBlocks, blockBag, actor, tracing, traceUnflushed);
 
         m_schedule = aweCore.getPlatform().getScheduler();
 

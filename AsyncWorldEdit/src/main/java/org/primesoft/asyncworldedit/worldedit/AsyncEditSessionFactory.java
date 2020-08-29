@@ -72,10 +72,6 @@ public class AsyncEditSessionFactory extends EditSessionFactory implements IAsyn
     private final IAsyncWorldEditCore m_aweCore;
     private final IPlayerManager m_playerManager;
 
-    /**
-     * Get the player UUID
-     *
-     */
     private IPlayerEntry getIPlayerEntry(Actor player) {
         if (player == null) {
             return m_playerManager.getUnknownPlayer();

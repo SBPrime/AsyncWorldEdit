@@ -77,6 +77,7 @@ import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
 import org.primesoft.asyncworldedit.injector.core.visitors.InjectorClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.session.SessionManagerVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.BaseRegionExtentSetter;
+import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.EditSessionBuilderVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.WorldEditVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.AreaPickaxeVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command.tool.FloodFillToolVisitor;
@@ -255,6 +256,7 @@ public class InjectorCore {
             modifyClasses("com.sk89q.worldedit.command.tool.RecursivePickaxe", RecursivePickaxeVisitor::new);
 
             modifyClasses("com.sk89q.worldedit.WorldEdit", WorldEditVisitor::new);
+            modifyClasses("com.sk89q.worldedit.EditSessionBuilder", EditSessionBuilderVisitor::new);
 
             for (String n : new String[]{
                 "com.sk89q.worldedit.function.entity.ExtentEntityCopy",

@@ -93,4 +93,8 @@ public abstract class AweEditSession extends EditSession implements IAweEditSess
     public boolean isTracking() {
         return m_isTracking;
     }
+
+    public final boolean isCommitRequired() {
+        return super.commitRequired();
+    }
 }

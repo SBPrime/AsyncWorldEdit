@@ -52,9 +52,13 @@
 
 package org.primesoft.asyncworldedit.injector.classfactory;
 
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.World;
 import java.util.Iterator;
 import java.util.UUID;
@@ -110,4 +114,6 @@ public interface IClassFactory {
     ICommandsRegistrationDelegate createCommandsRegistrationDelegate(ICommandsRegistration parent);
 
     Iterator<BlockVector3> getRegionIterator(Region region);
+
+    EditSession buildEditSession(EventBus eventBus, World world, int maxBlocks, Actor actor, BlockBag blockBag, boolean tracing, boolean threadSafeOnly, IPlayerEntry playerEntry);
 }

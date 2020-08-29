@@ -51,6 +51,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.security.CodeSource;
+import java.security.SecureClassLoader;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,6 +74,8 @@ final class ClassInjectorBukkit implements IClassInjector {
 
     private final ClassLoader m_classLoaderWe;
     private final ClassLoader m_classLoaderNms;
+    private final CodeSource m_codeSourceWe;
+    private final CodeSource m_codeSourceNms;
     private final Method m_miDefineClass;
     private final Plugin m_worldEdit;
 
@@ -84,6 +88,7 @@ final class ClassInjectorBukkit implements IClassInjector {
         final Class<?> serverCls = server.getClass();
         
         m_classLoaderNms = serverCls.getClassLoader();
+        m_codeSourceNms = serverCls.getProtectionDomain().getCodeSource();
         m_nmsVersion = getNmsVersion(serverCls);
         
         m_worldEdit = server.getPluginManager().getPlugin("WorldEdit");        
@@ -93,10 +98,12 @@ final class ClassInjectorBukkit implements IClassInjector {
             throw new IllegalStateException("Unable to initialize 'ClassInjector'. Matching class loader not found.");
         }
 
-        m_classLoaderWe = worldEditClassLoader;        
+        m_classLoaderWe = worldEditClassLoader;
+        m_codeSourceWe = com.sk89q.worldedit.WorldEditException.class.getProtectionDomain().getCodeSource();
 
         try {
-            m_miDefineClass = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+            m_miDefineClass = SecureClassLoader.class.getDeclaredMethod("defineClass",
+                    String.class, byte[].class, int.class, int.class, CodeSource.class);
             m_miDefineClass.setAccessible(true);
 
             Field fiClasses = ClassLoaderHelper.getPluginClassLoader().getDeclaredField("classes");
@@ -114,11 +121,16 @@ final class ClassInjectorBukkit implements IClassInjector {
         return m.group(2);
     }
 
-    private Class<?> injectClass(ClassLoader cl, 
-            String name, byte[] bin, int off, int len) throws ClassFormatError {
+    private Class<?> injectClass(
+            final ClassLoader cl,
+            final String name,
+            final byte[] bin,
+            final int off,
+            final int len,
+            final CodeSource codeSource) throws ClassFormatError {
         
         try {
-            return (Class<?>) m_miDefineClass.invoke(cl, name, bin, off, len);            
+            return (Class<?>) m_miDefineClass.invoke(cl, name, bin, off, len, codeSource);
         } catch (Exception ex) {
             throw (ClassFormatError) (new ClassFormatError("Unable to inject class.").initCause(ex));
         }
@@ -127,13 +139,13 @@ final class ClassInjectorBukkit implements IClassInjector {
     @Override
     public Class<?> injectNMSClass(String name, byte[] bin, int off, int len) throws ClassFormatError {
         return injectClass(m_classLoaderNms, 
-                name, bin, off, len);
+                name, bin, off, len, m_codeSourceNms);
         
     }
     
     @Override
     public Class<?> injectWorldEditClass(String name, byte[] bin, int off, int len) throws ClassFormatError {
-        final Class<?> result = injectClass(m_classLoaderWe, name, bin, off, len);
+        final Class<?> result = injectClass(m_classLoaderWe, name, bin, off, len, m_codeSourceWe);
         m_classesWe.put(name, result);
         
         return result;

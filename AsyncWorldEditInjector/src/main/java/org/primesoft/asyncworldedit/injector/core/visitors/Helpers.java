@@ -51,11 +51,13 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.collection.BlockMap;
 import com.sk89q.worldedit.util.collection.LocatedBlockList;
+import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.util.formatting.text.TextComponent;
 import com.sk89q.worldedit.world.World;
 import java.util.Iterator;
@@ -63,6 +65,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.enginehub.piston.CommandManager;
+import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.injector.classfactory.IEditSessionJob;
 import org.primesoft.asyncworldedit.injector.classfactory.IJob;
 import org.primesoft.asyncworldedit.injector.core.InjectorCore;
@@ -253,4 +256,17 @@ public final class Helpers {
     public static Iterator<BlockVector3> getRegionIterator(Region region) {
         return InjectorCore.getInstance().getClassFactory().getRegionIterator(region);
     }
+
+    public static EditSession buildEditSession(final EventBus eventBus,
+                                               final World world,
+                                               final int maxBlocks,
+                                               final Actor actor,
+                                               final BlockBag blockBag,
+                                               final boolean tracing,
+                                               final boolean threadSafeOnly,
+                                               final IPlayerEntry playerEntry) {
+        return InjectorCore.getInstance().getClassFactory().buildEditSession(
+            eventBus, world, maxBlocks, actor, blockBag, tracing, threadSafeOnly, playerEntry);
+    }
+
 }

@@ -111,15 +111,19 @@ public class BaseFieldAccessorVisitor extends BaseClassVisitor {
     private void visitGetter(FieldEntry f) {
         MethodVisitor mv = super.visitMethod(Opcodes.ACC_PUBLIC, f.Getter, "()" + f.Descriptor, null, null);
         mv.visitCode();
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitFieldInsn(Opcodes.GETFIELD, m_cls, f.Name, f.Descriptor);
+        emmitGet(mv, f);
         visitReturn(mv, f.Descriptor);
         
         mv.visitMaxs(1, 1);
         mv.visitEnd();
 
-    }   
-    
+    }
+
+    protected void emmitGet(final MethodVisitor mv, final FieldEntry f) {
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, m_cls, f.Name, f.Descriptor);
+    }
+
     private void visitSetter(FieldEntry f) {
         MethodVisitor mv = super.visitMethod(Opcodes.ACC_PUBLIC, f.Setter, "(" + f.Descriptor + ")V", null, null);
         mv.visitCode();

@@ -56,6 +56,7 @@ import javax.annotation.Nullable;
 import com.sk89q.worldedit.AweEditSession;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
@@ -129,6 +130,8 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
      * The dispatcher class
      */
     private final ITaskDispatcher m_dispatcher;
+
+    private final Throwable m_stacktrace;
 
     /**
      * Indicates that the async mode has been disabled (inner state)
@@ -240,9 +243,16 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     public ThreadSafeEditSession(IAsyncWorldEditCore core, IPlayerEntry player,
              EventBus eventBus, com.sk89q.worldedit.world.World world, int maxBlocks,
              @Nullable BlockBag blockBag, @Nullable Actor actor,
-             boolean tracing) {
+             boolean tracing,
+             boolean traceUnflushed) {
 
         super(eventBus, AsyncWorld.wrap(world, player), maxBlocks, ThreadSafeBlockBag.warap(blockBag), actor, tracing);
+
+        if (traceUnflushed) {
+            m_stacktrace = new Throwable("Creation trace.");
+        } else {
+            m_stacktrace = null;
+        }
 
         m_asyncTasks = new HashSet<>();
 
@@ -276,6 +286,17 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
 
         m_jobId = -1;
         m_isInitialized = true;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+        if (m_stacktrace != null && isCommitRequired()) {
+            WorldEdit.logger.warn("####### LEFTOVER BUFFER BLOCKS DETECTED #######");
+            WorldEdit.logger.warn("This means that some code did not flush their EditSession.");
+            WorldEdit.logger.warn("Here is a stacktrace from the creation of this EditSession:", m_stacktrace);
+        }
     }
 
     private void injectExtents(IPlayerEntry playerEntry, IAsyncWorldEditCore core) {
@@ -834,5 +855,5 @@ public class ThreadSafeEditSession extends AweEditSession implements IThreadSafe
     @Override
     public Iterator<Change> doRedo() {
         return getChangeSet().forwardIterator();
-    }        
+    }
 }

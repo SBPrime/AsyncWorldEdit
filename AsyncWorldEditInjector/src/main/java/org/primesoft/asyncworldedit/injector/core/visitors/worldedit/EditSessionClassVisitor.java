@@ -62,8 +62,8 @@ import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 public final class EditSessionClassVisitor extends BaseFieldAccessorVisitor {
     private final static String DESCRIPTOR_CTOR = "(Lcom/sk89q/worldedit/util/eventbus/EventBus;Lcom/sk89q/worldedit/world/World;ILcom/sk89q/worldedit/extent/inventory/BlockBag;Lcom/sk89q/worldedit/extension/platform/Actor;Z)V";
 
-
     private final SimpleValidator m_vCtor = new SimpleValidator("Constructor not injected");
+    private final SimpleValidator m_vCommitRequired = new SimpleValidator("commitRequired()Z method not injected");
     
     public EditSessionClassVisitor(ClassVisitor classVisitor) {
         super(IEditSession.class, new FieldEntry[] {
@@ -82,6 +82,11 @@ public final class EditSessionClassVisitor extends BaseFieldAccessorVisitor {
             return cv.visitMethod(changeVisibility(access, Opcodes.ACC_PROTECTED), 
                     name, descriptor, signature, exceptions);
         }
+        else if ("commitRequired".equals(name) && "()Z".equals(descriptor)) {
+            m_vCommitRequired.set();
+            return super.visitMethod(changeVisibility(access, Opcodes.ACC_PUBLIC),
+                    name, descriptor, signature, exceptions);
+        }
 
         return super.visitMethod(access, name, descriptor, signature, exceptions);
     }
@@ -89,6 +94,7 @@ public final class EditSessionClassVisitor extends BaseFieldAccessorVisitor {
     @Override
     public void validate() throws RuntimeException {
         m_vCtor.validate();
+        m_vCommitRequired.validate();
 
         super.validate();
     }
