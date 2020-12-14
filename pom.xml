@@ -7,7 +7,7 @@
     <artifactId>AsyncWorldEdit_AllInOne</artifactId>
     <version>${global.awe.version}</version>
     <properties>
-        <global.awe.version>3.8.0</global.awe.version>
+        <global.awe.version>3.8.1</global.awe.version>
         <global.awe-api.version>3.8.0</global.awe-api.version>
     </properties>
 

@@ -56,7 +56,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import org.primesoft.asyncworldedit.api.permissions.IPermission;
 import org.primesoft.asyncworldedit.blockPlacer.BlockPlacer;
 import org.primesoft.asyncworldedit.commands.*;
 import org.primesoft.asyncworldedit.configuration.ConfigProvider;
@@ -456,35 +458,53 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
 
         String name = (args != null && args.length > 0) ? args[0] : "";
 
-        if (name.equalsIgnoreCase(Commands.COMMAND_RELOAD)) {
+        if (name.equalsIgnoreCase(Commands.COMMAND_RELOAD) &&
+                isAllowed(player, Stream.of(Permission.RELOAD_CONFIG))) {
             doReloadConfig(player, args != null && args.length > 1 ? args[1] : "");
             return true;
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_HELP)) {
+        }
+
+        if (name.equalsIgnoreCase(Commands.COMMAND_HELP) &&
+                isAllowed(player, Stream.of(Permission.values()))) {
             String arg = args != null && args.length > 1 ? args[1] : null;
             return Help.ShowHelp(player, arg);
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_PURGE)) {
+        }
+        if (name.equalsIgnoreCase(Commands.COMMAND_PURGE) &&
+                isAllowed(player, Stream.of(Permission.PURGE_SELF, Permission.PURGE_OTHER, Permission.PURGE_ALL))) {
             doPurge(player, args);
             return true;
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_JOBS)) {
+        }
+        if (name.equalsIgnoreCase(Commands.COMMAND_JOBS) &&
+                isAllowed(player, Stream.of(Permission.JOBS_SELF, Permission.JOBS_OTHER, Permission.JOBS_ALL))) {
             doJobs(player, args);
             return true;
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_CANCEL)) {
+        }
+        if (name.equalsIgnoreCase(Commands.COMMAND_CANCEL) &&
+                isAllowed(player, Stream.of(Permission.CANCEL_SELF, Permission.CANCEL_OTHER))) {
             doCancel(player, args);
             return true;
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_TOGGLE)) {
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_TOGGLE) &&
+                isAllowed(player, Stream.of(Permission.MODE_CHANGE, Permission.MODE_CHANGE_OTHER))) {
             doToggle(player, args);
             return true;
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_UNDO)) {
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_UNDO) &&
+                isAllowed(player, Stream.of(Permission.UNDO_CHANGE, Permission.UNDO_CHANGE_OTHER))) {
             doToggleUndo(player, args);
             return true;
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_SPEED)) {
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_SPEED) &&
+                isAllowed(player, Stream.of(Permission.SPEED_CHANGE, Permission.SPEED_VIEW, Permission.SPEED_CHANGE_OTHER, Permission.SPEED_VIEW_OTHER))) {
             doSpeed(player, args);
             return true;
-        } else if (name.equalsIgnoreCase(Commands.COMMAND_MESSAGES)) {
+        } else if (name.equalsIgnoreCase(Commands.COMMAND_MESSAGES) &&
+                isAllowed(player, Stream.of(Permission.MESSAGES_CHANGE, Permission.MESSAGES_CHANGE_OTHER, Permission.MESSAGES_CHANGE_OVERRIDE))) {
             doMessages(player, args);
             return true;
         } else if (name.equalsIgnoreCase(Commands.COMMAND_DEBUG) && doDebug(player, args)) {
             return true;
+        }
+
+        if (!isAllowed(player, Stream.of(Permission.values()))) {
+            return false;
         }
 
         return Help.ShowHelp(player, null);
@@ -662,5 +682,12 @@ public abstract class AsyncWorldEditCore implements IAsyncWorldEditCore, IAweOpe
      */
     private boolean doDebug(IPlayerEntry player, String[] args) {
         return DebugCommand.execte(this, player, args);
+    }
+
+    private boolean isAllowed(
+            final IPlayerEntry player,
+            final Stream<IPermission> permissions) {
+
+        return permissions.anyMatch(player::isAllowed);
     }
 }
