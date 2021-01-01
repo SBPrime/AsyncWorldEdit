@@ -49,9 +49,11 @@ package org.primesoft.asyncworldedit.playerManager;
 
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.blockPlacer.IBlockPlacer;
@@ -92,6 +94,8 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
      */
     private final Map<UUID, IPlayerEntry> m_playersUids = new ConcurrentHashMap<>();
 
+    private final Map<IPlayerEntry, WeakReference<IPlayerEntry>> m_playersUidsWeak = new WeakHashMap<>();
+
     public PlayerManager(IAsyncWorldEditCore parent) {
         m_parent = parent;
 
@@ -104,6 +108,10 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
      */
     public void updateGroups() {
         for (IPlayerEntry pe : m_playersUids.values()) {
+            pe.updatePermissionGroup();
+        }
+
+        for (IPlayerEntry pe : m_playersUidsWeak.keySet()) {
             pe.updatePermissionGroup();
         }
     }
@@ -120,8 +128,11 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
                     return entry;
                 }
             }
-            
-            return player;
+
+            synchronized (m_playersUidsWeak) {
+                final IPlayerEntry wpe = m_playersUidsWeak.computeIfAbsent(player, _p -> new WeakReference<>(_p)).get();
+                return wpe == null ? player : wpe;
+            }
         });
 
         if (wrapper != player) {
@@ -133,30 +144,29 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
 
     @Override
     public void removePlayer(UUID uuid) {
-        IPlayerEntry entry = m_playersUids.remove(uuid);
-
-        if (entry != null) {
-            if (entry.getPermissionGroup().getCleanOnLogout()) {
-                m_parent.getBlockPlacer().purge(entry);
-            }
-
-            entry.dispose();
+        final IPlayerEntry entry = m_playersUids.remove(uuid);
+        if (entry == null) {
+            return;
         }
 
-        ConfigUndo undoConfig = ConfigProvider.undo();
-        if (undoConfig != null) {
-            int keepSessionOnLogoutFor = undoConfig.keepSessionOnLogoutFor();
 
-            if (keepSessionOnLogoutFor == 0) {
-                IWorldeditIntegratorInner integrator = m_parent.getWorldEditIntegrator();
-                if (integrator != null) {
-                    integrator.removeSession(entry);
-                }
-            } else if (keepSessionOnLogoutFor > 0) {
-                ICron cron = m_parent.getCron();
-                if (cron!= null) {
-                    cron.scheduleSessionForRemoval(entry, keepSessionOnLogoutFor);
-                }
+        if (entry.getPermissionGroup().getCleanOnLogout()) {
+            m_parent.getBlockPlacer().purge(entry);
+        }
+        entry.dispose();
+
+        final ConfigUndo undoConfig = ConfigProvider.undo();
+        final int keepSessionOnLogoutFor = undoConfig != null ? undoConfig.keepSessionOnLogoutFor() * 60000 : 0;
+
+        if (keepSessionOnLogoutFor == 0) {
+            IWorldeditIntegratorInner integrator = m_parent.getWorldEditIntegrator();
+            if (integrator != null) {
+                integrator.removeSession(entry);
+            }
+        } else if (keepSessionOnLogoutFor > 0) {
+            ICron cron = m_parent.getCron();
+            if (cron!= null) {
+                cron.scheduleSessionForRemoval(entry, keepSessionOnLogoutFor);
             }
         }
     }
@@ -238,7 +248,7 @@ public class PlayerManager implements IPlayerManager, IPlayerStorage {
             return CONSOLE;
         }
 
-        IPlayerEntry result = m_playersUids.get(playerUuid);
+        final IPlayerEntry result = m_playersUids.get(playerUuid);
         if (result != null) {
             return result;
         }

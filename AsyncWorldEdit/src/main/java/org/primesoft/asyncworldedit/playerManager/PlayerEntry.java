@@ -50,6 +50,8 @@ package org.primesoft.asyncworldedit.playerManager;
 import java.util.HashMap;
 import java.util.Map;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
+
+import java.util.Objects;
 import java.util.UUID;
 import static org.primesoft.asyncworldedit.LoggerProvider.sayConsole;
 import org.primesoft.asyncworldedit.api.MessageSystem;
@@ -249,10 +251,7 @@ public abstract class PlayerEntry implements IPlayerEntry {
         }
         final PlayerEntry other = (PlayerEntry) obj;
 
-        if (this.m_uuid != other.m_uuid && (this.m_uuid == null || !this.m_uuid.equals(other.m_uuid))) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.m_uuid, other.m_uuid);
     }
 
     @Override

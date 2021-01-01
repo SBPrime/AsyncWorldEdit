@@ -431,12 +431,12 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
     }
 
     @Override
-    public void undo(EditSession sess) {
-        doUndo(sess);
+    public void undo(EditSession targetSession) {
+        doUndo(targetSession);
     }
 
-    public void doUndo(EditSession sess) {
-        UndoProcessor.processUndo(m_parent, this, sess);
+    public void doUndo(EditSession targetSession) {
+        UndoProcessor.processUndo(m_parent, this, targetSession);
     }
 
     @Override

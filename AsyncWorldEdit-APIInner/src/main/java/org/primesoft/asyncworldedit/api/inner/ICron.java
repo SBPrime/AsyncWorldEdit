@@ -59,7 +59,7 @@ public interface ICron {
      * @param entry
      * @param delayTime 
      */
-    void scheduleSessionForRemoval(IPlayerEntry entry, int delayTime);
-    
-    
+    void scheduleSessionForRemoval(IPlayerEntry entry, long delayTime);
+
+
 }

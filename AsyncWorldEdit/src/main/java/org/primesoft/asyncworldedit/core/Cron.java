@@ -149,7 +149,10 @@ public final class Cron implements ICron {
     }
 
     @Override
-    public void scheduleSessionForRemoval(IPlayerEntry entry, int delayTime) {
+    public void scheduleSessionForRemoval(
+            final IPlayerEntry entry,
+            final long delayTime) {
+
         final long time = System.currentTimeMillis() + delayTime;
 
         m_tasksSessions.compute(entry.getUUID(), (key, current) -> {
