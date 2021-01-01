@@ -57,6 +57,9 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -152,6 +155,8 @@ public class InjectorCore {
      */
     private final Object m_mutex = new Object();
 
+    private List<String> m_log = new LinkedList<>();
+
     /**
      * Log a console message
      *
@@ -163,6 +168,19 @@ public class InjectorCore {
         }
 
         m_platform.log(message);
+    }
+
+    private void logClean() {
+        m_log = Collections.EMPTY_LIST;
+    }
+
+    private void logDump() {
+        m_log.forEach(this::log);
+        logClean();
+    }
+
+    private void logQueue(String msg) {
+        m_log.add(msg);
     }
 
     /**
@@ -283,8 +301,10 @@ public class InjectorCore {
             crateClass(CreatePlayerFactory::new);
             crateClass(CreateActorFactory::new);
 
+            logClean();
             return true;
         } catch (Throwable ex) {
+            logDump();
             log("****************************");
             log("* CLASS INJECTION FAILED!! *");
             log("****************************");
@@ -364,7 +384,7 @@ public class InjectorCore {
     
     private void modifyClasses(String className, Function<ClassWriter, InjectorClassVisitor> classVisitor,
             IGetClassReader getClassReader, IEmit emit) throws IOException {
-        log("Modify class " + className);
+        logQueue("Modify class " + className);
         
         ClassReader classReader = getClassReader.get(className);
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
@@ -381,7 +401,7 @@ public class InjectorCore {
 
     private void modifyClasses(String className, BiFunction<ClassWriter, ICreateClass, InjectorClassVisitor> classVisitor,
             IGetClassReader getClassReader, IEmit emit) throws IOException {
-        log("Modify class " + className);
+        logQueue("Modify class " + className);
                 
         ClassReader classReader = getClassReader.get(className);
         ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
@@ -410,7 +430,7 @@ public class InjectorCore {
     private void crateClass(Function<ICreateClass, BaseClassCreator> factory, IEmit emit) {
         BaseClassCreator bcc = factory.apply((cn, cw) -> createClasses(cn, cw, emit));
         
-        log("Creating class " + bcc.getName());
+        logQueue("Creating class " + bcc.getName());
         bcc.run();
     }
     
