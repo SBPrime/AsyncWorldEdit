@@ -314,10 +314,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 return false;
             }
 
+            logBlock(v, player, oldBlock, newBlock);
             final boolean result = m_parent.setBlock(v, newBlock, sideEffectSet);
-            if (result) {
-                logBlock(v, player, oldBlock, newBlock);
-            }
 
             return result;
         };
@@ -354,10 +352,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 return false;
             }
 
+            logBlock(v, player, oldBlock, newBlock);
             final boolean result = m_parent.setBlock(v, newBlock, notifyAndLight);
-            if (result) {
-                logBlock(v, player, oldBlock, newBlock);
-            }
 
             return result;
         };
@@ -869,10 +865,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 return false;
             }
 
+            logBlock(position, player, oldBlock, newBlock);
             final boolean result = m_parent.setBlock(position, newBlock);
-            if (result) {
-                logBlock(position, player, oldBlock, newBlock);
-            }
 
             return result;
         };
@@ -956,10 +950,8 @@ public class AsyncWorld extends AbstractWorldWrapper {
                 return false;
             }
 
+            logBlock(position, player, oldBlock, newBlock);
             final boolean result = m_parent.notifyAndLightBlock(position, newBlock);
-            if (result) {
-                logBlock(position, player, oldBlock, newBlock);
-            }
 
             return result;
         };
