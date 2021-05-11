@@ -67,7 +67,9 @@ import java.util.function.Function;
  * @author SBPrime
  */
 public abstract class PhysicsWatch implements IPhysicsWatch, IPlatform.PlatformEventListener {
-    private final int TEST_DELTA = 1;
+    private final static int TEST_DELTA = 1;
+
+    private final static long CHUNK_COOLDOWN = 1000;
 
     private final IScheduler m_scheduler;
 
@@ -89,8 +91,6 @@ public abstract class PhysicsWatch implements IPhysicsWatch, IPlatform.PlatformE
     private final Map<String, Map<Integer, Map<Integer, ChunkData>>> m_locked;
 
     private ITask m_cleanupTask;
-
-    private long m_chunkCooldownTime = 1000;
 
     /**
      * Create new instance of the class
@@ -228,7 +228,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch, IPlatform.PlatformE
                         continue;
                     }
 
-                    if (data.refCount <= 0 && (System.currentTimeMillis() - data.zeroTime) >= m_chunkCooldownTime) {
+                    if (data.refCount <= 0 && (System.currentTimeMillis() - data.zeroTime) >= CHUNK_COOLDOWN) {
                         zhash.remove(pz);
                         if (zhash.isEmpty()) {
                             xhash.remove(x);
@@ -286,7 +286,7 @@ public abstract class PhysicsWatch implements IPhysicsWatch, IPlatform.PlatformE
                     for (Map.Entry<Integer, ChunkData> entryZ : zhash.entrySet()) {
                         ChunkData data = entryZ.getValue();
 
-                        if (data.refCount <= 0 && (System.currentTimeMillis() - data.zeroTime) >= m_chunkCooldownTime) {
+                        if (data.refCount <= 0 && (System.currentTimeMillis() - data.zeroTime) >= CHUNK_COOLDOWN) {
                            toRemoveZ.add(entryZ.getKey());
                         }
                     }
