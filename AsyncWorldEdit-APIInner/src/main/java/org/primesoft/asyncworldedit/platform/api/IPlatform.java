@@ -207,7 +207,7 @@ public interface IPlatform {
         void onPlatformEvent(PlatformEvent e);
     }
 
-    enum PlatformEvent {
+    public enum PlatformEvent {
         CONFIGURATION_RELOADED
     }
 }

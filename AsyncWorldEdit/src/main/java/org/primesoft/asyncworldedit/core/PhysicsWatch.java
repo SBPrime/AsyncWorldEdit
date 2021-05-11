@@ -49,8 +49,16 @@ package org.primesoft.asyncworldedit.core;
 
 import com.sk89q.worldedit.math.BlockVector3;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
+import org.primesoft.asyncworldedit.configuration.ConfigPhysicsFreeze;
+import org.primesoft.asyncworldedit.configuration.ConfigProvider;
+import org.primesoft.asyncworldedit.platform.api.IPlatform;
+import org.primesoft.asyncworldedit.platform.api.IScheduler;
+import org.primesoft.asyncworldedit.platform.api.ITask;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -58,15 +66,17 @@ import java.util.function.Function;
  *
  * @author SBPrime
  */
-public abstract class PhysicsWatch implements IPhysicsWatch {
+public abstract class PhysicsWatch implements IPhysicsWatch, IPlatform.PlatformEventListener {
     private final int TEST_DELTA = 1;
+
+    private final IScheduler m_scheduler;
 
     /**
      * Is physics watch enabled
      */
     protected boolean m_isEnabled;
     
-    protected Function<String, Boolean> m_check = i -> true;
+    private Function<String, Boolean> m_check = i -> true;
 
     /**
      * MTA mutex
@@ -76,31 +86,37 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
     /**
      * Locked blocks
      */
-    private final Map<String, Map<Integer, Map<Integer, Integer>>> m_locked;
+    private final Map<String, Map<Integer, Map<Integer, ChunkData>>> m_locked;
+
+    private ITask m_cleanupTask;
+
+    private long m_chunkCooldownTime = 1000;
 
     /**
      * Create new instance of the class
      */
-    protected PhysicsWatch() {
+    protected PhysicsWatch(
+            final IScheduler scheduler) {
+
         m_mutex = new Object();
         m_locked = new HashMap<>();
+        m_scheduler = scheduler;
     }
 
     /**
      * enable the physics freeze
      */
     @Override
-    public void enable() {
-        enable(i -> true);        
-    }
-
-    @Override
-    public void enable(Function<String, Boolean> check) {
+    public synchronized void enable() {
         m_isEnabled = true;
-        m_check = check;
+
+        if (m_cleanupTask != null) {
+            m_cleanupTask.cancel();
+        }
+        m_cleanupTask = m_scheduler.runTaskTimer(this::doCleanup, m_scheduler.tps(), m_scheduler.tps());
+
+        reloadConfig();
     }
-    
-    
 
     /**
      * disable the physics freeze
@@ -110,6 +126,12 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
         m_isEnabled = false;
         synchronized (m_mutex) {
             m_locked.clear();
+        }
+
+        synchronized (this) {
+            if (m_cleanupTask != null) {
+                m_cleanupTask.cancel();
+            }
         }
     }
 
@@ -130,9 +152,9 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
                 return;
             }
 
-            Map<Integer, Map<Integer, Integer>> xhash = m_locked.computeIfAbsent(name, i -> new HashMap<>());
-            Map<Integer, Integer> zhash = xhash.computeIfAbsent(x, i -> new HashMap<>());
-            zhash.compute(z, (_z, value) -> value == null ? 1 : (value + 1));           
+            Map<Integer, Map<Integer, ChunkData>> xhash = m_locked.computeIfAbsent(name, i -> new HashMap<>());
+            Map<Integer, ChunkData> zhash = xhash.computeIfAbsent(x, i -> new HashMap<>());
+            zhash.compute(z, (_z, value) -> (value == null ? new ChunkData() : value).incRefs());
         }
     }
 
@@ -153,22 +175,23 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
                 return;
             }
 
-            final Map<Integer, Map<Integer, Integer>> xhash = m_locked.get(name);
+            final Map<Integer, Map<Integer, ChunkData>> xhash = m_locked.get(name);
             if (xhash == null) {
                 return;
             }
 
-            final Map<Integer, Integer> zhash = xhash.get(x);
+            final Map<Integer, ChunkData> zhash = xhash.get(x);
             if (zhash == null) {
                 return;
             }
             
             zhash.compute(z, (_z, value) -> {
-                if (value == null || value == 1) {
+                if (value == null) {
                     return null;
                 }
-                
-                return value - 1;
+
+                value.decRefs();
+                return value;
             });
 
             if (zhash.isEmpty()) {
@@ -181,27 +204,44 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
     }
     
     /**
-     * Perform test if block event shuld by canceled
+     * Perform test if block event should by canceled
      */
     protected boolean cancelEvent(String name, int x, int y, int z, String material) {
         x = x / 16;
         z = z / 16;
 
         synchronized (m_mutex) {
-            Map<Integer, Map<Integer, Integer>> xhash = m_locked.get(name);
+            Map<Integer, Map<Integer, ChunkData>> xhash = m_locked.get(name);
             if (xhash == null) {
                 return false;
             }
 
             for (int px = x - TEST_DELTA; px <= x + TEST_DELTA; px++) {
-                final Map<Integer, Integer> zhash = xhash.get(px);
+                final Map<Integer, ChunkData> zhash = xhash.get(px);
                 if (zhash == null) {
                     continue;
                 }
 
                 for (int pz = z - TEST_DELTA; pz <= z + TEST_DELTA; pz++) {
-                    if (zhash.containsKey(pz)) {
-                        return m_check.apply(material);
+                    ChunkData data = zhash.get(pz);
+                    if (data == null) {
+                        continue;
+                    }
+
+                    if (data.refCount <= 0 && (System.currentTimeMillis() - data.zeroTime) >= m_chunkCooldownTime) {
+                        zhash.remove(pz);
+                        if (zhash.isEmpty()) {
+                            xhash.remove(x);
+                        }
+                        if (xhash.isEmpty()) {
+                            m_locked.remove(name);
+                        }
+
+                        continue;
+                    }
+
+                    if (m_check.apply(material)) {
+                        return true;
                     }
                 }
             }
@@ -215,4 +255,75 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
      * Register all physics events
      */
     public abstract void registerEvents();
+
+    @Override
+    public void onPlatformEvent(final IPlatform.PlatformEvent e) {
+        if (!IPlatform.PlatformEvent.CONFIGURATION_RELOADED.equals(e)) {
+            return;
+        }
+
+        reloadConfig();
+    }
+
+    protected void reloadConfig() {
+        final ConfigPhysicsFreeze config = ConfigProvider.physicsFreeze();
+
+        m_check = config::shouldFreeze;
+
+    }
+
+    private void doCleanup() {
+        synchronized (m_mutex) {
+            Set<String> toRemoveWorld = new HashSet<>();
+            for (Map.Entry<String, Map<Integer, Map<Integer, ChunkData>>> entryWorld : m_locked.entrySet()) {
+                final Map<Integer, Map<Integer, ChunkData>> xhash = entryWorld.getValue();
+
+                Set<Integer> toRemoveX = new HashSet<>();
+                for (Map.Entry<Integer, Map<Integer, ChunkData>> entryX : xhash.entrySet()) {
+                    final Map<Integer, ChunkData> zhash = entryX.getValue();
+
+                    Set<Integer> toRemoveZ = new HashSet<>();
+                    for (Map.Entry<Integer, ChunkData> entryZ : zhash.entrySet()) {
+                        ChunkData data = entryZ.getValue();
+
+                        if (data.refCount <= 0 && (System.currentTimeMillis() - data.zeroTime) >= m_chunkCooldownTime) {
+                           toRemoveZ.add(entryZ.getKey());
+                        }
+                    }
+
+                    zhash.keySet().removeAll(toRemoveZ);
+                    if (zhash.isEmpty()) {
+                        toRemoveX.add(entryX.getKey());
+                    }
+                }
+
+                xhash.keySet().removeAll(toRemoveX);
+                if (xhash.isEmpty()) {
+                    toRemoveWorld.add(entryWorld.getKey());
+                }
+            }
+            m_locked.keySet().removeAll(toRemoveWorld);
+        }
+    }
+
+    private static class ChunkData {
+        private int refCount;
+
+        private long zeroTime;
+
+        public ChunkData incRefs() {
+            refCount ++;
+            return this;
+        }
+
+        public void decRefs() {
+            if (refCount > 0) {
+                refCount --;
+            }
+
+            if (refCount == 0) {
+                zeroTime = System.currentTimeMillis();
+            }
+        }
+    }
 }

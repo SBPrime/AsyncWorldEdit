@@ -54,7 +54,7 @@ public abstract class BasePlatform implements IPlatform {
             final Function<Supplier<IAsyncWorldEditCore>, ICommandManager> commandManager,
             final IPlayerProvider playerProvider,
             final IScheduler scheduler,
-            final PhysicsWatch physicsWatcher,
+            final Function<IScheduler, PhysicsWatch> physicsWatcher,
             final ChunkWatch chunkWatcher,
             final IMaterialLibrary materialLibrary) {
 
@@ -63,9 +63,10 @@ public abstract class BasePlatform implements IPlatform {
         m_commandManager = commandManager.apply(this::getCore);
         m_playerProvider = playerProvider;
         m_scheduler = scheduler;
-        m_physicsWatcher = physicsWatcher;
         m_chunkWatcher = chunkWatcher;
         m_materialLibrary = materialLibrary;
+
+        m_physicsWatcher = physicsWatcher.apply(scheduler);
     }
 
     @Override

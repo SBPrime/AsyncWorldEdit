@@ -77,6 +77,7 @@ import org.primesoft.asyncworldedit.blockshub.platform.bukkit.BlocksHubV3Factory
 import org.primesoft.asyncworldedit.platform.api.Constants;
 import org.primesoft.asyncworldedit.platform.api.IConfiguration;
 import org.primesoft.asyncworldedit.platform.api.IPlatform;
+import org.primesoft.asyncworldedit.platform.api.IScheduler;
 import org.primesoft.asyncworldedit.platform.base.BasePlatform;
 import org.primesoft.asyncworldedit.platform.bukkit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.strings.MessageProvider;
@@ -104,7 +105,7 @@ public class BukkitPlatform extends BasePlatform implements IPlatform, Listener 
             coreSupplier -> new CommandManager(plugin.getServer(), Constants.PluginName, new CommandConsumer(coreSupplier)),
             new BukkitPlayerProvider(plugin, plugin.getServer()),
             new SchedulerBukkit(plugin),
-            new BykkitPhysicsWatch(plugin),
+            scheduler -> new BukkitPhysicsWatch(plugin, scheduler),
             new BukkitChunkWatcher(plugin),
             new BukkitMaterialLibrary()
         );

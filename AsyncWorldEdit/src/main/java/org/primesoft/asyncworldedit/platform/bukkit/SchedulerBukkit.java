@@ -89,13 +89,18 @@ public class SchedulerBukkit implements IScheduler {
     }
 
     @Override
-    public ITask runTaskTimer(Runnable task, long dellay) {
-        return runTaskTimer(task, dellay, dellay);
+    public ITask runTaskTimer(Runnable task, long delay) {
+        return runTaskTimer(task, delay, delay);
     }
     
     
     @Override
-    public ITask runTaskTimer(Runnable task, long startDellay, long dellay) {
-        return wrapResult(m_scheduler.runTaskTimer(m_plugin, task, startDellay, dellay));
+    public ITask runTaskTimer(Runnable task, long startDelay, long delay) {
+        return wrapResult(m_scheduler.runTaskTimer(m_plugin, task, startDelay, delay));
+    }
+
+    @Override
+    public int tps() {
+        return 20;
     }
 }

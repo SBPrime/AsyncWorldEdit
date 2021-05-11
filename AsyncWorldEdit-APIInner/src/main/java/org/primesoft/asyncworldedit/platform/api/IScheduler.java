@@ -53,10 +53,11 @@ package org.primesoft.asyncworldedit.platform.api;
  * @author SBPrime
  */
 public interface IScheduler {
-    public ITask runTaskTimer(Runnable task, long startDellay, long dellay);
+    ITask runTaskTimer(Runnable task, long startDelay, long delay);
     
-    public ITask runTaskTimer(Runnable task, long dellay);
+    ITask runTaskTimer(Runnable task, long delay);
     
-    public ITask runTaskAsynchronously(Runnable task);
-    
+    ITask runTaskAsynchronously(Runnable task);
+
+    int tps();
 }

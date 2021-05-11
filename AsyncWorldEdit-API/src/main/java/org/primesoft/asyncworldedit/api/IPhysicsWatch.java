@@ -70,14 +70,7 @@ public interface IPhysicsWatch {
     /**
      * Enable the physics watcher
      */
-    @Deprecated
     void enable();
-    
-    /**
-     * Enable the physics watcher
-     * @param check
-     */
-    void enable(Function<String, Boolean> check);
 
     /**
      * Disable the physics watcher

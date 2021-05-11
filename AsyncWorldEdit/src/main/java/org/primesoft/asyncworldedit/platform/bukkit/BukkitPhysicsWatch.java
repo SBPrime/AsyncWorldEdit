@@ -70,15 +70,20 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.plugin.Plugin;
 import org.primesoft.asyncworldedit.api.IPhysicsWatch;
 import org.primesoft.asyncworldedit.core.PhysicsWatch;
+import org.primesoft.asyncworldedit.platform.api.IScheduler;
 
 /**
  *
  * @author prime
  */
-class BykkitPhysicsWatch extends PhysicsWatch implements IPhysicsWatch, Listener {
+class BukkitPhysicsWatch extends PhysicsWatch implements IPhysicsWatch, Listener {
     private final Plugin m_plugin;
 
-    public BykkitPhysicsWatch(Plugin plugin) {
+    public BukkitPhysicsWatch(
+            final Plugin plugin,
+            final IScheduler scheduler) {
+        super(scheduler);
+
         m_plugin = plugin;
     }
 
@@ -159,7 +164,7 @@ class BykkitPhysicsWatch extends PhysicsWatch implements IPhysicsWatch, Listener
     }
     
     /**
-     * Perform test if block event shuld by canceled
+     * Perform test if block event should by canceled
      */
     private void processEvent(Block block, Cancellable event) {
         if (event.isCancelled() || !m_isEnabled) {
