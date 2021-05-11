@@ -73,7 +73,6 @@ public class CommandManager implements ICommandManager {
     private final CommandExecutor m_executor;
 
     
-    
     CommandManager(Server server, String pluginName, CommandExecutor executor) {
         m_pluginName = pluginName;
         m_commandMap = Reflection.get(server, SimpleCommandMap.class, "commandMap", "Unable to get the command map");

@@ -196,4 +196,18 @@ public interface IPlatform {
      * Reload the plugin config
      */
     void reloadConfig();
+
+    /**
+     * Register listener for events
+     */
+    void registerEventListener(PlatformEventListener listener);
+
+    @FunctionalInterface
+    interface PlatformEventListener {
+        void onPlatformEvent(PlatformEvent e);
+    }
+
+    enum PlatformEvent {
+        CONFIGURATION_RELOADED
+    }
 }

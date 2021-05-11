@@ -40,7 +40,7 @@ package org.primesoft.asyncworldedit.api.inner;
  * @author SBPrime
  */
 public interface IBlocksHubBridge extends IBlocksHubIntegration {
-    void addFacroty(IBlocksHubFactory factory);
+    void addFactory(IBlocksHubFactory factory);
 
     void initialize(Object blocksHubPlugin);
 }

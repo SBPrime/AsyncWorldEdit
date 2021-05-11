@@ -79,9 +79,9 @@ public abstract class PhysicsWatch implements IPhysicsWatch {
     private final Map<String, Map<Integer, Map<Integer, Integer>>> m_locked;
 
     /**
-     * Create new instanc of the class
+     * Create new instance of the class
      */
-    public PhysicsWatch() {
+    protected PhysicsWatch() {
         m_mutex = new Object();
         m_locked = new HashMap<>();
     }

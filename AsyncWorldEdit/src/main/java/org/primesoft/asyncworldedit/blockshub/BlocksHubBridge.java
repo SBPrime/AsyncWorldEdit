@@ -124,7 +124,7 @@ public class BlocksHubBridge implements IBlocksHubBridge {
     }
 
     @Override
-    public void addFacroty(IBlocksHubFactory factory) {        
+    public void addFactory(IBlocksHubFactory factory) {
         if (factory == null) {
             return;
         }

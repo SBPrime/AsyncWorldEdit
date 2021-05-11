@@ -47,10 +47,12 @@
  */
 package org.primesoft.asyncworldedit.platform.bukkit;
 
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.function.Supplier;
+
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -67,74 +69,46 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
-import static org.primesoft.asyncworldedit.LoggerProvider.log;
-import org.primesoft.asyncworldedit.api.IPhysicsWatch;
+import org.primesoft.asyncworldedit.api.IWorld;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
-import org.primesoft.asyncworldedit.api.inner.IWorldeditIntegratorInner;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerManager;
-import org.primesoft.asyncworldedit.core.ChunkWatch;
-import org.primesoft.asyncworldedit.core.PhysicsWatch;
+import org.primesoft.asyncworldedit.blockshub.platform.bukkit.BlocksHubV3Factory;
 import org.primesoft.asyncworldedit.platform.api.Constants;
-import org.primesoft.asyncworldedit.platform.api.ICommandManager;
 import org.primesoft.asyncworldedit.platform.api.IConfiguration;
 import org.primesoft.asyncworldedit.platform.api.IPlatform;
-import org.primesoft.asyncworldedit.platform.api.IPlayerProvider;
-import org.primesoft.asyncworldedit.platform.api.IScheduler;
-import org.primesoft.asyncworldedit.api.IWorld;
-import org.primesoft.asyncworldedit.api.inner.IBlocksHubBridge;
-import org.primesoft.asyncworldedit.api.inner.IChunkWatch;
-import org.primesoft.asyncworldedit.api.inner.IClassScanner;
-import org.primesoft.asyncworldedit.api.map.IMapUtils;
-import org.primesoft.asyncworldedit.platform.api.IMaterialLibrary;
-import org.primesoft.asyncworldedit.blockshub.platform.bukkit.BlocksHubV3Factory;
+import org.primesoft.asyncworldedit.platform.base.BasePlatform;
 import org.primesoft.asyncworldedit.platform.bukkit.mcstats.MetricsLite;
 import org.primesoft.asyncworldedit.strings.MessageProvider;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+
+import static org.primesoft.asyncworldedit.LoggerProvider.log;
 
 /**
  *
  * @author SBPrime
  */
-public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
+public class BukkitPlatform extends BasePlatform implements IPlatform, Listener {
 
     private static final String WORLDEDIT_CLASS = "com.sk89q.worldedit.bukkit.WorldEditPlugin";
     private static final String BLOCKSHUB = "BlocksHub";
-
-    private final IMapUtils m_mapUtils;
-
-    private final ICommandManager m_commandManager;
-
-    private final IPlayerProvider m_playerProvider;
-
-    private IAsyncWorldEditCore m_aweCore;
-
-    private final IScheduler m_scheduler;
 
     private final Plugin m_plugin;
 
     private MetricsLite m_metrics;
 
-    private final PhysicsWatch m_physicsWatcher;
-
-    private final ChunkWatch m_chunkWatcher;
-
-    private final IMaterialLibrary m_materialLibrary;
-
-    private IBlocksHubBridge m_blocksHub;
-
-    private final IClassScanner m_classScanner = (new BukkitClassScanner()).initialize();
-
-    private IWorldeditIntegratorInner m_weIntegrator;
-
     public BukkitPlatform(Plugin plugin) {
-        m_mapUtils = new BukkitMapUtils();
-        m_commandManager = new CommandManager(plugin.getServer(), Constants.PluginName, this);
-        m_playerProvider = new BukkitPlayerProvider(plugin, plugin.getServer());
-        m_scheduler = new SchedulerBukkit(plugin);
-        m_physicsWatcher = new BykkitPhysicsWatch(plugin);
-        m_chunkWatcher = new BukkitChunkWatcher(plugin);
-        m_materialLibrary = new BukkitMaterialLibrary();
+        super(
+            new BukkitClassScanner().initialize(),
+            new BukkitMapUtils(),
+            coreSupplier -> new CommandManager(plugin.getServer(), Constants.PluginName, new CommandConsumer(coreSupplier)),
+            new BukkitPlayerProvider(plugin, plugin.getServer()),
+            new SchedulerBukkit(plugin),
+            new BykkitPhysicsWatch(plugin),
+            new BukkitChunkWatcher(plugin),
+            new BukkitMaterialLibrary()
+        );
+
         m_plugin = plugin;
     }
 
@@ -165,7 +139,6 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
     
     /**
      * Gets the server api version
-     * @return 
      */
     @Override
     public String getServerAPILong() {
@@ -174,9 +147,7 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
 
     @Override
     public void initialize(IAsyncWorldEditCore core) {
-        m_aweCore = core;
-        m_blocksHub = core.getBlocksHubBridge();
-        m_blocksHub.addFacroty(new BlocksHubV3Factory());
+        super.initialize(core, BlocksHubV3Factory::new);
     }
     
     @Override
@@ -191,74 +162,36 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
             ExceptionHelper.printException(e, "Error initializing MCStats");
         }
 
-        IPlayerProvider playerProvider = getPlayerProvider();
-
-        playerProvider.registerEvents();
         TileEntityUtils.isTileEntity(Material.AIR);
-
-        m_physicsWatcher.registerEvents();
-        m_chunkWatcher.registerEvents();
 
         PluginManager pm = m_plugin.getServer().getPluginManager();
         pm.registerEvents(this, m_plugin);
         if (pm.isPluginEnabled("WorldEdit")) {
             onPluginEnabled(new PluginEnableEvent(pm.getPlugin("WorldEdit")));
         }
+
+        super.onEnable();
     }
 
     @Override
     public void onDisable() {
-        getChunkWatcher().clear();
+        super.onDisable();
 
-        IWorldeditIntegratorInner weIntegrator = m_weIntegrator;
-        if (weIntegrator != null) {
-            weIntegrator.queueStop();
+        try {
+            m_metrics.disable();
+        } catch (IOException e) {
+            ExceptionHelper.printException(e, "Error disabling MCStats");
         }
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        IAsyncWorldEditCore aweCore = m_aweCore;
-        IPlayerManager pm = aweCore != null ? aweCore.getPlayerManager() : null;
-
-        if (aweCore == null || pm == null) {
-            return false;
-        }
-
-        IPlayerEntry player = null;
-        if (sender instanceof Player) {
-            player = pm.getPlayer(((Player) sender).getUniqueId());
-
-            if (player == null) {
-                pm.getConsolePlayer();
-            }
-        } else {
-            player = pm.getConsolePlayer();
-        }
-
-        return aweCore.onCommand(player, command.getName(), args);
-    }
-
-    @Override
-    public ICommandManager getCommandManager() {
-        return m_commandManager;
-    }
-
-    @Override
-    public IPlayerProvider getPlayerProvider() {
-        return m_playerProvider;
     }
 
     /**
      * Get instance of the world edit plugin
      *
-     * @param plugin
-     * @return
      */
     private WorldEditPlugin getWorldEdit() {
         final Plugin wPlugin = getTypedPlugin("WorldEdit");
 
-        if ((wPlugin == null) || (!(wPlugin instanceof WorldEditPlugin))) {
+        if (!(wPlugin instanceof WorldEditPlugin)) {
             return null;
         }
 
@@ -293,26 +226,6 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
     }
 
     @Override
-    public IScheduler getScheduler() {
-        return m_scheduler;
-    }
-
-    @Override
-    public IPhysicsWatch getPhysicsWatcher() {
-        return m_physicsWatcher;
-    }
-
-    @Override
-    public IChunkWatch getChunkWatcher() {
-        return m_chunkWatcher;
-    }
-
-    @Override
-    public IMapUtils getMapUtils() {
-        return m_mapUtils;
-    }
-
-    @Override
     public IConfiguration getConfig() {
         m_plugin.saveDefaultConfig();
                
@@ -324,16 +237,6 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         configuration.setDefaults(new MemoryConfiguration());
 
         return new BukkitConfiguration(m_plugin, configuration);
-    }
-
-    @Override
-    public IMaterialLibrary getMaterialLibrary() {
-        return m_materialLibrary;
-    }
-
-    @Override
-    public IWorldeditIntegratorInner getWorldEditIntegrator() {
-        return m_weIntegrator;
     }
 
     @EventHandler
@@ -348,10 +251,10 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         }
 
         if (pluginName.equalsIgnoreCase(BLOCKSHUB)) {
-            m_blocksHub.initialize(plugin);
+            initializeBlocksHub(plugin);
         }
     }
-    
+
     /**
      * Initialize the WorldEdit
      */
@@ -361,9 +264,10 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         WorldEditPlugin worldEdit = getWorldEdit();
         if (worldEdit == null) {
             log("World edit not found.");
-            m_weIntegrator = null;
+            initializeWorldEdit(core -> null);
+
         } else {
-            m_weIntegrator = new BukkitWorldeditIntegrator(m_aweCore, worldEdit);
+            initializeWorldEdit(core -> new BukkitWorldeditIntegrator(core, worldEdit));
         }
     }
 
@@ -372,16 +276,9 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
         return new BukkitMessageProvider();
     }
 
-    @Override
-    public IClassScanner getClassScanner() {
-        return m_classScanner;
-    }
-
     /**
      * Get plugin
      *
-     * @param pluginName
-     * @return
      */
     private Plugin getTypedPlugin(String pluginName) {
         if (pluginName == null) {
@@ -401,6 +298,8 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
     @Override
     public void reloadConfig() {
         m_plugin.reloadConfig();
+
+        super.reloadConfig();
     }
 
     private YamlConfiguration loadConfig() {        
@@ -410,12 +309,42 @@ public class BukkitPlatform implements IPlatform, CommandExecutor, Listener {
             File configFile = new File(m_plugin.getDataFolder(), "config.yml");
             config.load(configFile);
             return config;
-        } catch (IOException ex) {
-            ExceptionHelper.printException(ex, "Unable to load configuration,");
-        } catch (InvalidConfigurationException ex) {
+        } catch (IOException | InvalidConfigurationException ex) {
             ExceptionHelper.printException(ex, "Unable to load configuration,");
         }
-        
+
         return null;
+    }
+
+    private static class CommandConsumer implements CommandExecutor {
+        private final Supplier<IAsyncWorldEditCore> getCore;
+
+        private CommandConsumer(final Supplier<IAsyncWorldEditCore> getCore) {
+            this.getCore = getCore;
+        }
+
+        @Override
+        public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+            IAsyncWorldEditCore aweCore = getCore.get();
+            IPlayerManager pm = aweCore != null ? aweCore.getPlayerManager() : null;
+
+            if (aweCore == null || pm == null) {
+                return false;
+            }
+
+            IPlayerEntry player;
+            if (sender instanceof Player) {
+                player = pm.getPlayer(((Player) sender).getUniqueId());
+
+                if (player == null) {
+                    pm.getConsolePlayer();
+                }
+            } else {
+                player = pm.getConsolePlayer();
+            }
+
+            return aweCore.onCommand(player, command.getName(), args);
+        }
+
     }
 }
