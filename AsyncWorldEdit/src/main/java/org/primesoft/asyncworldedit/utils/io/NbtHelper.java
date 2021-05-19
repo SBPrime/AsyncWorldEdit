@@ -58,7 +58,6 @@ import com.sk89q.jnbt.StringTag;
 import com.sk89q.jnbt.Tag;
 import com.sk89q.worldedit.math.Vector3;
 import com.sk89q.worldedit.util.Location;
-import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

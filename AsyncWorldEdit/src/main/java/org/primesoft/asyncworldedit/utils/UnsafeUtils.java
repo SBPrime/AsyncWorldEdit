@@ -54,7 +54,7 @@ import sun.misc.Unsafe;
  * @author SBPrime
  */
 public class UnsafeUtils {
-    protected static final Unsafe s_unsafe = Reflection.get(Unsafe.class, Unsafe.class, "theUnsafe", "Unable to get unsafe");
+    protected static final Unsafe s_unsafe = Reflection.unsafe();
     
     protected static final int SIZE_BYTE = 1;
     protected static final int SIZE_SHORT = 2;

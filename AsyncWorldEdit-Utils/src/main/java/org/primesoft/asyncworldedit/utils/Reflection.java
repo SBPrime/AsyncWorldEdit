@@ -52,9 +52,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Stack;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Optional;
+
+import sun.misc.Unsafe;
 
 /**
  * Reflection GET and SET operations.
@@ -76,6 +78,64 @@ public class Reflection {
 
         modifiersField = mf;
 
+        if (isJava8Plus()) {
+            try {
+                openModuleAccess();
+            } catch (Exception ex) {
+                ExceptionHelper.printException(ex, "Error opening modules.");
+            }
+
+        }
+    }
+
+    public static Unsafe unsafe() {
+        return Reflection.get(Unsafe.class, Unsafe.class, "theUnsafe", "Unable to get unsafe");
+    }
+
+    private static boolean isJava8Plus() {
+        try {
+            return Reflection.class.getClassLoader().loadClass("java.lang.Module") != null;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Based on Lombok:
+     * https://github.com/projectlombok/lombok/commit/9806e5cca4b449159ad0509dafde81951b8a8523
+     */
+    private static void openModuleAccess()
+            throws NoSuchMethodException, NoSuchFieldException,
+                    InvocationTargetException, IllegalAccessException,
+            ClassNotFoundException {
+
+        final Map.Entry<String, String[]>[] modulesToOpen = new Map.Entry[]{
+                new AbstractMap.SimpleEntry("java.base", new String[]{"java.lang", "java.security"})
+        };
+
+        ClassLoader cl = Reflection.class.getClassLoader();
+        Class<?> cModule = cl.loadClass("java.lang.Module");
+        Class<?> cModuleLayer = cl.loadClass("java.lang.ModuleLayer");
+
+        Method mModuleImplAddOpens = cModule.getDeclaredMethod("implAddOpens", String.class, cModule);
+        Method mModuleLayerFindModule = cModuleLayer.getDeclaredMethod("findModule", String.class);
+
+        Object moduleLayer = cModuleLayer.cast(cModuleLayer.getMethod("boot").invoke(null));
+        Object moduleAwe = cModule.cast(Class.class.getDeclaredMethod("getModule").invoke(Reflection.class));
+
+        Unsafe u = unsafe();
+        u.putBooleanVolatile(mModuleImplAddOpens,
+            u.objectFieldOffset(HackyClass.class.getDeclaredField("field1")),
+            true);
+
+        for (Map.Entry<String, String[]> e : modulesToOpen) {
+            Object module = cModule.cast(((Optional<?>)mModuleLayerFindModule.invoke(moduleLayer, e.getKey()))
+                    .orElseThrow(() -> new RuntimeException("Unable to get '" + e.getKey() + "'")));
+
+            for (String pn : e.getValue()) {
+                mModuleImplAddOpens.invoke(module, pn, moduleAwe);
+            }
+        }
     }
 
     public static <T> T create(Class<T> resultClass,
@@ -114,7 +174,7 @@ public class Reflection {
             Method method, String message, Object... args) {
         try {
             boolean accessible = method.isAccessible();
-            
+
             if (!accessible) {
                 method.setAccessible(true);
             }
@@ -327,5 +387,9 @@ public class Reflection {
         }
 
         return null;
+    }
+
+    private static class HackyClass {
+        boolean field1;
     }
 }
