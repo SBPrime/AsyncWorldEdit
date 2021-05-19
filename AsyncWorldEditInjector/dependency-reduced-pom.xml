@@ -85,9 +85,4 @@
       <systemPath>${project.basedir}/../libs/forge/fml-1.7.10-7.10.142.1104-1.7.10-universal.jar</systemPath>
     </dependency>
   </dependencies>
-  <properties>
-    <maven.compiler.target>11</maven.compiler.target>
-    <maven.compiler.source>11</maven.compiler.source>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
 </project>
