@@ -34,10 +34,10 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.15.2-800b93f-e911c70</version>
+            <version>1.16.5-9fb885e-cc21bae</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/spigot/spigot-1.15.2-800b93f-e911c70.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/spigot/spigot-1.16.5-9fb885e-cc21bae.jar</systemPath>
         </dependency>
     </dependencies>
 </project>
