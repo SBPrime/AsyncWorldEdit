@@ -178,10 +178,12 @@ public class BukkitPlatform extends BasePlatform implements IPlatform, Listener 
     public void onDisable() {
         super.onDisable();
 
-        try {
-            m_metrics.disable();
-        } catch (IOException e) {
-            ExceptionHelper.printException(e, "Error disabling MCStats");
+        if (m_metrics != null) {
+            try {
+                m_metrics.disable();
+            } catch (IOException e) {
+                ExceptionHelper.printException(e, "Error disabling MCStats");
+            }
         }
     }
 
