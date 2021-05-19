@@ -87,6 +87,7 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
         }
                 
         try {
+            ClassLoaderHelper.injectFakePlugin(classLoaderPlugin);
             ClassLoaderHelper.addLoader(classLoaderPlugin);
             
             initializeLogger();
@@ -95,10 +96,11 @@ public class AsyncWorldEditBukkit extends AsyncWorldEditMain {
             
             
         } finally {
+            ClassLoaderHelper.cleanPlugin(classLoaderPlugin);
             ClassLoaderHelper.removeLoader(classLoaderPlugin);
         }
     }
-    
+
     private static final String FAWE = "com.boydti.fawe.";
 
     private static final String CLS_CORE = "org.primesoft.asyncworldedit.platform.bukkit.core.BukkitAsyncWorldEditCore";

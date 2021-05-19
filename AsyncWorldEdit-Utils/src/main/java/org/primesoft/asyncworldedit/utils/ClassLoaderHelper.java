@@ -47,9 +47,20 @@
  */
 package org.primesoft.asyncworldedit.utils;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
+
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
+import sun.misc.Unsafe;
 
 /**
  *
@@ -63,10 +74,13 @@ public final class ClassLoaderHelper {
     
     private static final Field s_fieldLoader;
     private static final Field s_fieldLoaders;
+    private static final Field s_fieldPlugin;
 
     static {
         try {
             s_clsPluginClassLoader = ClassLoaderHelper.class.getClassLoader().loadClass(PLUGIN_CLASS_LOADER);
+
+            s_fieldPlugin = s_clsPluginClassLoader.getDeclaredField("plugin");
             s_fieldLoader = s_clsPluginClassLoader.getDeclaredField("loader");
             s_fieldLoader.setAccessible(true);
             
@@ -124,4 +138,65 @@ public final class ClassLoaderHelper {
         getLoaders(getPluginLoader(classLoaderPlugin)).remove(classLoaderPlugin);        
     }
 
+    public static void injectFakePlugin(
+            final ClassLoader classLoaderPlugin) {
+
+        final String className = "org.primesoft.asyncworldedit.utils.FakeJavaPlugin";
+
+        try {
+            final JavaPluginLoader loader = getPluginLoader(classLoaderPlugin);
+            final ClassLoader cl = new URLClassLoader(new URL[0], classLoaderPlugin) {
+                @Override
+                protected Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
+                    if (className.equals(name)) {
+                        byte[] data;
+                        String resourceName = name.replace(".", "/") + ".class";
+                        try (DataInputStream is = new DataInputStream(super.getResourceAsStream(resourceName))) {
+                            data = new byte[is.available()];
+                            is.readFully(data);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Should not happen", e);
+                        }
+
+                        return super.defineClass(name, data, 0, data.length);
+                    }
+
+                    return super.loadClass(name, resolve);
+                }
+
+                @Override
+                protected Class<?> findClass(final String name) throws ClassNotFoundException {
+                    return super.findClass(name);
+                }
+            };
+            final Class<?> clsFakePlugin = cl.loadClass(className);
+            final JavaPlugin fakePlugin = (JavaPlugin) clsFakePlugin.getDeclaredConstructor(JavaPluginLoader.class).newInstance(loader);
+
+            setPlugin(classLoaderPlugin, fakePlugin);
+        }
+        catch (Throwable ex) {
+            ExceptionHelper.printException(ex, "Unable to inject fake plugin.");
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private static void setPlugin(
+            final ClassLoader classLoaderPlugin,
+            final JavaPlugin plugin) {
+
+        if (!s_clsPluginClassLoader.isInstance(classLoaderPlugin)) {
+            throw new IllegalArgumentException("Expected '" + s_clsPluginClassLoader.getName() +
+                    "' got '" + classLoaderPlugin.getClass().getName());
+        }
+
+        final Unsafe unsafe = Reflection.unsafe();
+
+        unsafe.getAndSetObject(classLoaderPlugin,
+                unsafe.objectFieldOffset(s_fieldPlugin), plugin);
+    }
+    public static void cleanPlugin(
+            final ClassLoader classLoaderPlugin) {
+
+        setPlugin(classLoaderPlugin, null);
+    }
 }
