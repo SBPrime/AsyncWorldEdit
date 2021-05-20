@@ -7,8 +7,8 @@
     <artifactId>AsyncWorldEdit_AllInOne</artifactId>
     <version>${global.awe.version}</version>
     <properties>
-        <global.awe.version>3.8.3</global.awe.version>
-        <global.awe-api.version>3.8.3</global.awe-api.version>
+        <global.awe.version>3.8.4</global.awe.version>
+        <global.awe-api.version>3.8.4</global.awe-api.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
