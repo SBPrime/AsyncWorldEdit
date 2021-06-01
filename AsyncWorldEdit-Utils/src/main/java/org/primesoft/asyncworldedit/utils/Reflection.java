@@ -110,7 +110,7 @@ public class Reflection {
             ClassNotFoundException {
 
         final Map.Entry<String, String[]>[] modulesToOpen = new Map.Entry[]{
-                new AbstractMap.SimpleEntry("java.base", new String[]{"java.lang", "java.security"})
+                new AbstractMap.SimpleEntry("java.base", new String[]{"java.lang", "java.security", "java.util"})
         };
 
         ClassLoader cl = Reflection.class.getClassLoader();

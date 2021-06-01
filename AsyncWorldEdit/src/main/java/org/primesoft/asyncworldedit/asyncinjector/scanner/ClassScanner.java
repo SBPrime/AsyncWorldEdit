@@ -76,6 +76,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,6 +94,8 @@ import org.primesoft.asyncworldedit.configuration.ConfigProvider;
 import org.primesoft.asyncworldedit.configuration.DebugLevel;
 import org.primesoft.asyncworldedit.configuration.PermissionGroup;
 import org.primesoft.asyncworldedit.utils.ExceptionHelper;
+import org.primesoft.asyncworldedit.utils.InOutParam;
+import org.primesoft.asyncworldedit.utils.Pair;
 import org.primesoft.asyncworldedit.worldedit.extent.inventory.FixedBlockBagExtent;
 
 /**
@@ -127,7 +130,7 @@ public abstract class ClassScanner implements IClassScanner {
         m_isInitialized = true;
         return this;
     }
-    
+
     /**
      * Scan object (and all fields) for T
      *
@@ -136,18 +139,21 @@ public abstract class ClassScanner implements IClassScanner {
      * @return
      */
     @Override
-    public List<IClassScannerResult> scan(Class<?> types[], Object o) {
+    public List<IClassScannerResult> scan(
+            final Class<?>[] types,
+            final Object o) {
+
         if (!m_isInitialized) {
             throw new IllegalStateException("Class scanner not initialized");
         }
         
-        List<IClassScannerResult> result = new ArrayList<>();
+        final List<IClassScannerResult> result = new ArrayList<>();
         if (o == null) {
             return result;
         }
 
-        Queue<ScannerQueueEntry> toScan = new ArrayDeque<>();
-        HashSet<Object> scanned = new HashSet<>();
+        final Queue<ScannerQueueEntry> toScan = new ArrayDeque<>();
+        final HashSet<Object> scanned = new HashSet<>();
 
         boolean debugOn = ConfigProvider.messages().debugLevel().isAtLeast(DebugLevel.DEBUG);
         toScan.add(new ScannerQueueEntry(o, null, null));
@@ -163,9 +169,10 @@ public abstract class ClassScanner implements IClassScanner {
          * it will by impossible to inject it anyways.
          */
         while (!toScan.isEmpty()) {
-            ScannerQueueEntry entry = toScan.poll();
-            Object cObject = entry.getValue();
-            Class<?> cClass = entry.getValueClass();
+            final ScannerQueueEntry entry = toScan.poll();
+
+            final Object cObject = entry.getValue();
+            final Class<?> cClass = entry.getValueClass();
             if (cObject == null || cClass == null) {
                 continue;
             }
@@ -182,68 +189,13 @@ public abstract class ClassScanner implements IClassScanner {
                     log(String.format("* Skip:\t%1$s", sParent));
                 }
             } else {
-                int added = 0;
                 if (debugOn) {
                     log(String.format("* Scanning:\t%1$s", sParent));
                 }
-                try {
-                    for (ScannerQueueEntry f : unpack(cClass, cObject)) {
-                        Object t = f.getValue();
-                        Class<?> ct = f.getValueClass();
-                        if (t != null && ct != null) {
-                            String classMsg = null;
-                            if (debugOn) {
-                                final Field field = f.getField();
-                                final String sValue = String.format("%1$s:%2$s", Integer.toHexString(f.getValue().hashCode()), f.getValueClass().getName());
-                                final String sField = field != null ? field.getName() : "?";
 
-                                classMsg = String.format("%s = %s", sField, sValue);
-                            }
-
-                            for (Class<?> type : types) {
-                                if (type.isAssignableFrom(ct)) {
-                                    if (debugOn) {
-                                        log(String.format("* F %1$s", classMsg));
-                                    }
-
-                                    result.add(new ClassScannerResult(t, t.getClass(), f.getParent(), f.getField()));
-                                    break;
-                                }
-                            }
-
-                            if (isPrimitive(ct) || 
-                                isBlackList(ct) ||
-                                isStatic(f.getField()) ||
-                                isBlackList(cClass, f.getField()) ||
-                                Objects.equals(t, entry.getParent()))
-                            {
-                                if (debugOn) {
-                                    log(String.format("* - %1$s", classMsg));
-                                }
-                            } else {
-                                toScan.add(f);
-                                added++;
-
-                                if (debugOn) {
-                                    log(String.format("* + %1$s", classMsg));
-                                }
-                            }
-
-                        }
-                    }
-                } catch (Throwable ex) {
-                    log("-----------------------------------------------------------------------");
-                    log("Warning: Class scanner encountered an error while scanning class");
-                    log(String.format("Exception: %1$s, %2$s", ex.getClass().getName(),
-                            ex.getMessage()));
-                    ExceptionHelper.printStack(ex, "");
-                    log(String.format("Class: %1$s", cClass));
-                    log(String.format("Object: %1$s", cObject));
-                    log("Send this message to the author of the plugin!");
-                    log("https://github.com/SBPrime/AsyncWorldEdit/issues");
-                    log("-----------------------------------------------------------------------");
-                }
+                int added = scanProcess(types, result, toScan, debugOn, entry, cObject, cClass);
                 scanned.add(cObject);
+
                 if (debugOn) {
                     log(String.format("* Added:\t%1$s objects.", added));
                 }
@@ -254,6 +206,98 @@ public abstract class ClassScanner implements IClassScanner {
             log("****************************************************************");
         }
         return result;
+    }
+
+    public int scanProcess(
+            final Class<?>[] types,
+            final List<IClassScannerResult> result,
+            final Queue<ScannerQueueEntry> toScan,
+            final boolean debugOn,
+
+            final ScannerQueueEntry entry,
+            final Object curentObject,
+            final Class<?> curentClass) {
+
+        int added = 0;
+
+        final List<Pair<Throwable, String>> errors = new LinkedList<>();
+        final InOutParam<Throwable> generalError = InOutParam.Out();
+
+        try {
+            for (ScannerQueueEntry f : unpack(curentClass, curentObject, errors)) {
+                final Object t = f.getValue();
+                final Class<?> ct = f.getValueClass();
+
+                if (t != null && ct != null) {
+                    final String classMsg = debugOn ? getDebugMessage(f) : null;
+
+                    for (Class<?> type : types) {
+                        if (type.isAssignableFrom(ct)) {
+                            if (classMsg != null) {
+                                log(String.format("* F %1$s", classMsg));
+                            }
+
+                            result.add(new ClassScannerResult(t, t.getClass(), f.getParent(), f.getField()));
+                            break;
+                        }
+                    }
+
+                    if (isPrimitive(ct) ||
+                        isBlackList(ct) ||
+                        isStatic(f.getField()) ||
+                        isBlackList(curentClass, f.getField()) ||
+                        Objects.equals(t, entry.getParent()))
+                    {
+                        if (classMsg != null) {
+                            log(String.format("* - %1$s", classMsg));
+                        }
+                    } else {
+                        toScan.add(f);
+                        added++;
+
+                        if (classMsg != null) {
+                            log(String.format("* + %1$s", classMsg));
+                        }
+                    }
+                }
+            }
+        } catch (Throwable ex) {
+            generalError.setValue(ex);
+        }
+
+        if (generalError.isSet() || !errors.isEmpty()) {
+            log("-----------------------------------------------------------------------");
+            log("Warning: Class scanner encountered an error while scanning class");
+
+            if (generalError.isSet()) {
+                final Throwable ex = generalError.getValue();
+                log(String.format("General exception: %1$s, %2$s", ex.getClass().getName(), ex.getMessage()));
+                ExceptionHelper.printStack(ex, "");
+            }
+            if (!errors.isEmpty()) {
+                log("Errors:");
+                errors.forEach(e -> log(" - " + e.getX2() + ": " +
+                        e.getX1().getClass().getName() + ", " +
+                        e.getX1().getMessage()));
+            }
+            log(String.format("Class: %1$s", curentClass));
+            log(String.format("Object: %1$s", curentObject));
+            log("Send this message to the author of the plugin!");
+            log("https://github.com/SBPrime/AsyncWorldEdit/issues");
+            log("-----------------------------------------------------------------------");
+        }
+
+        return added;
+    }
+
+    public String getDebugMessage(final ScannerQueueEntry f) {
+        String classMsg;
+        final Field field = f.getField();
+        final String sValue = String.format("%1$s:%2$s", Integer.toHexString(f.getValue().hashCode()), f.getValueClass().getName());
+        final String sField = field != null ? field.getName() : "?";
+
+        classMsg = String.format("%s = %s", sField, sValue);
+        return classMsg;
     }
 
     /**
@@ -278,54 +322,87 @@ public abstract class ClassScanner implements IClassScanner {
      * @param o
      * @return
      */
-    private Iterable<ScannerQueueEntry> unpack(Class<?> oClass, Object o) {
-        HashSet<ScannerQueueEntry> result = new HashSet<>();
+    private Iterable<ScannerQueueEntry> unpack(
+            final Class<?> oClass,
+            final Object o,
+            final List<Pair<Throwable, String>> errors) {
+
+        final HashSet<ScannerQueueEntry> result = new HashSet<>();
 
         if (isPrimitive(oClass) || isBlackList(oClass)) {
             return result;
         }
 
-        if (oClass.isArray()) {
-            Class<?> componenClass = oClass;
-            while (componenClass.isArray()) {
-                componenClass = componenClass.getComponentType();
-            }
-            if (!isPrimitive(componenClass) && !isBlackList(componenClass)) {
-                for (Object t : (Object[]) o) {
-                    if (t != null) {
-                        result.add(new ScannerQueueEntry(t, o, null));
-                    }
-                }
-            }
+        unpackArray(oClass, o, result);
+        unpackIterable(oClass, o, result);
+        unpackFields(oClass, o, errors, result);
+
+        return result;
+    }
+
+    private void unpackArray(
+            final Class<?> oClass,
+            final Object o,
+            final HashSet<ScannerQueueEntry> result) {
+
+        if (!oClass.isArray()) {
+            return;
         }
 
-        if (Iterable.class.isAssignableFrom(oClass)) {
-            for (Object t : (Iterable<Object>) o) {
+        Class<?> componenClass = oClass;
+        while (componenClass.isArray()) {
+            componenClass = componenClass.getComponentType();
+        }
+        if (!isPrimitive(componenClass) && !isBlackList(componenClass)) {
+            for (Object t : (Object[]) o) {
                 if (t != null) {
                     result.add(new ScannerQueueEntry(t, o, null));
                 }
             }
         }
+    }
+
+    private void unpackIterable(
+            final Class<?> oClass,
+            final Object o,
+            final HashSet<ScannerQueueEntry> result) {
+
+        if (!Iterable.class.isAssignableFrom(oClass)) {
+            return;
+        }
+
+        for (Object t : (Iterable<Object>) o) {
+            if (t != null) {
+                result.add(new ScannerQueueEntry(t, o, null));
+            }
+        }
+    }
+
+    private void unpackFields(
+            final Class<?> oClass,
+            final Object o,
+            final List<Pair<Throwable, String>> errors,
+            final HashSet<ScannerQueueEntry> result) {
 
         for (Field f : getAllFields(oClass)) {
-            boolean restore = !f.isAccessible();
-            if (restore) {
-                f.setAccessible(true);
-            }
             try {
+                boolean restore = !f.isAccessible();
+                if (restore) {
+                    f.setAccessible(true);
+                }
+
                 Object t = f.get(o);
                 if (t != null) {
                     result.add(new ScannerQueueEntry(t, o, f));
                 }
-            } catch (IllegalArgumentException ex) {
-            } catch (IllegalAccessException ex) {
-            }
 
-            if (restore) {
-                f.setAccessible(false);
+                if (restore) {
+                    f.setAccessible(false);
+                }
+            } catch (Throwable ex) {
+                errors.add(new Pair<>(ex, "Unpack field '" + f.getName() + "'"));
             }
         }
-        return result;
     }
 
     private boolean isBlackList(Class<?> oClass) {
@@ -445,5 +522,5 @@ public abstract class ClassScanner implements IClassScanner {
     @Override
     public void loadConfig() {
         m_configurableFilter.loadConfig();
-    }    
+    }
 }
