@@ -70,4 +70,8 @@ public final class SimpleValidator {
             throw new IllegalStateException(m_message);
         }
     }
+
+    public boolean isValid() {
+        return m_isSet;
+    }
 }

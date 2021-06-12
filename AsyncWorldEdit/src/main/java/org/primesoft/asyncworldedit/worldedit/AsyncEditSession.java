@@ -229,7 +229,7 @@ public class AsyncEditSession extends ThreadSafeEditSession {
     public int makeBiomeShape(final Region region, final Vector3 zero, final Vector3 unit,
             final BiomeType biomeType, final String expressionString,
             final boolean hollow)
-            throws ExpressionException, MaxChangedBlocksException {
+            throws ExpressionException {
         boolean isAsync = checkAsync(WorldeditOperations.makeBiomeShape);
         if (!isAsync) {
             return super.makeBiomeShape(region, zero, unit, biomeType, expressionString, hollow);

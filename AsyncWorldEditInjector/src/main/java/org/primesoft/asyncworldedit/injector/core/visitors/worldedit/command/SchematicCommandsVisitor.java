@@ -49,8 +49,11 @@ package org.primesoft.asyncworldedit.injector.core.visitors.worldedit.command;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
 import org.objectweb.asm.ClassVisitor;
 import org.primesoft.asyncworldedit.injector.core.visitors.ICreateClass;
+import org.primesoft.asyncworldedit.injector.utils.SimpleValidator;
 
 /**
  *
@@ -62,11 +65,23 @@ public class SchematicCommandsVisitor extends BaseCommandsVisitor {
 
     static {
         METHODS = new HashMap<>();
-        METHODS.put("load", new String[]{"(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;)V"});
-        METHODS.put("save", new String[]{"(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;Z)V"});
+        METHODS.put("load", new String[]{
+                "(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;)V",
+                "(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Lcom/sk89q/worldedit/extent/clipboard/io/ClipboardFormat;)V"
+        });
+        METHODS.put("save", new String[]{
+                "(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Ljava/lang/String;Z)V",
+                "(Lcom/sk89q/worldedit/extension/platform/Actor;Lcom/sk89q/worldedit/LocalSession;Ljava/lang/String;Lcom/sk89q/worldedit/extent/clipboard/io/ClipboardFormat;Z)V"
+        });
     }
     
     public SchematicCommandsVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
         super(classVisitor, createClass, METHODS);
+    }
+
+    @Override
+    public void validate() throws RuntimeException {
+        m_methods.values().stream()
+                .allMatch(e -> e.values().stream().filter(Objects::nonNull).noneMatch(i -> !i.isValid()));
     }
 }

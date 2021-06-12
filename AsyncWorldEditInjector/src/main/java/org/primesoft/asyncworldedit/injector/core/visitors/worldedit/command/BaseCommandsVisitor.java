@@ -75,7 +75,7 @@ public abstract class BaseCommandsVisitor extends BaseClassVisitor {
     private String m_descriptorClass;
     private String m_descriptorClassInner;
 
-    private final Map<String, Map<String, SimpleValidator>> m_methods;
+    protected final Map<String, Map<String, SimpleValidator>> m_methods;
 
     private static SimpleValidator buildValidator(String name, String descriptor) {
         return new SimpleValidator("Missing method '" + name + descriptor + "'");

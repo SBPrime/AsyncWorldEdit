@@ -66,6 +66,7 @@ import org.primesoft.asyncworldedit.utils.Reflection;
 public final class TileEntityUtils {
 
     private final static Map<Material, Boolean> m_isTileEntity;
+    public static final String TILE_ENTITY = "net.minecraft.world.level.block.BlockTileEntity";
 
     private TileEntityUtils() {
     }
@@ -89,7 +90,7 @@ public final class TileEntityUtils {
 
         final Map<Material, Boolean> result = new HashMap<>();
         for (Material m : Material.values()) {
-            boolean isTilleEntity = false;            
+            boolean isTilleEntity = false;
             if (m.isBlock() && !m.isLegacy()) {
                 BlockData bd;
                 try {
@@ -102,7 +103,7 @@ public final class TileEntityUtils {
                 Object blockDataState = null;
                 if (bd != null) {
                     if (blockData_getState == null) {
-                        blockData_getState = findMethod(bd.getClass(), "getState");
+                        blockData_getState = findMethod(bd.getClass(), "getState", true);
                     }
                     
                     blockDataState = blockData_getState != null ? Reflection.invoke(bd, Object.class, blockData_getState, "Unable to get block state") : null;
@@ -111,19 +112,23 @@ public final class TileEntityUtils {
                 Object nmsBlock = null;
                 if (blockDataState != null) {
                     if (iBlockData_getBlock == null) {
-                        iBlockData_getBlock = findMethod(blockDataState.getClass(), "getBlock");
+                        iBlockData_getBlock = findMethod(blockDataState.getClass(), "getBlock", true);
                     }
-                    
+
                     nmsBlock = iBlockData_getBlock != null ? Reflection.invoke(blockDataState, Object.class, iBlockData_getBlock, "Unable to get NMS block") : null;
                 }
                 
                 if (nmsBlock != null) {
                     if (block_isTileEntity == null) {
-                        block_isTileEntity = findMethod(nmsBlock.getClass(), "isTileEntity");
+                        block_isTileEntity = findMethod(nmsBlock.getClass(), "isTileEntity", false);
                     }
                     
                     if (block_isTileEntity != null) {
                         isTilleEntity = Reflection.invoke(nmsBlock, Boolean.class, block_isTileEntity, "Unable to check if block is tile entity");
+                    }
+                    else {
+                        isTilleEntity = classExtends(nmsBlock.getClass(), TILE_ENTITY);
+                        LoggerProvider.log("Using class check for '" + m.name() + "'. Result: " + isTilleEntity);
                     }
                 }
             }
@@ -133,8 +138,28 @@ public final class TileEntityUtils {
 
         return Collections.unmodifiableMap(result);
     }
-       
-    private static Method findMethod(Class<?> cls, String name) {
+
+    private static boolean classExtends(
+            Class<?> cls,
+            final String className) {
+
+        while (cls != null && !Object.class.equals(cls)) {
+            if (className.equals(cls.getName())) {
+                return true;
+            }
+
+            cls = cls.getSuperclass();
+        }
+
+        return false;
+    }
+
+    private static Method findMethod(
+            final Class<?> orgCls,
+            final String name,
+            boolean log) {
+
+        Class<?> cls = orgCls;
         Method result = null;
         while (cls != null && !Object.class.equals(cls) && result == null) {
             Optional<Method> method = Stream.of(cls.getMethods())
@@ -149,8 +174,8 @@ public final class TileEntityUtils {
             }
         }
         
-        if (result == null) {
-            LoggerProvider.log("Unable to find '" + name + "' in '" + (cls == null ? "null" : cls.getName()) + "'");
+        if (result == null && log) {
+            LoggerProvider.log("Unable to find '" + name + "' in '" + (orgCls == null ? "null" : orgCls.getName()) + "'");
         }
         return result;
     }
