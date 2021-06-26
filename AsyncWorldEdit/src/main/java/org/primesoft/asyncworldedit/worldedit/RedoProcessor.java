@@ -80,6 +80,7 @@ public class RedoProcessor implements Operation {
         Iterator<Change> changes = parent.doRedo();
         Mask oldMask = targetSession.getMask();
         targetSession.setMask(sender.getMask());
+        targetSession.setReorderMode(sender.getReorderMode());
 
         try {
             Operations.completeBlindly(new RedoProcessor(

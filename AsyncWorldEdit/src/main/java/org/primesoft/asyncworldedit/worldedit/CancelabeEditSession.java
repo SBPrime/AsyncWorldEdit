@@ -564,6 +564,8 @@ public class CancelabeEditSession extends AweEditSession implements ICancelabeEd
 
     private static void copyProperties(final IAweEditSession source, final IAweEditSession target) {
         copyProperties(source.getSurvivalExtent(), target.getSurvivalExtent());
+
+        target.setSideEffectApplier(source.getSideEffectApplier());
     }
 
     private static void copyProperties(final SurvivalModeExtent source, final SurvivalModeExtent target) {

@@ -128,7 +128,6 @@ public final class TileEntityUtils {
                     }
                     else {
                         isTilleEntity = classExtends(nmsBlock.getClass(), TILE_ENTITY);
-                        LoggerProvider.log("Using class check for '" + m.name() + "'. Result: " + isTilleEntity);
                     }
                 }
             }
