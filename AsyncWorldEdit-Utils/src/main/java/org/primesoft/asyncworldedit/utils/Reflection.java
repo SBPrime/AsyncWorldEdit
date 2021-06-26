@@ -56,6 +56,7 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.primesoft.asyncworldedit.LoggerProvider;
 import sun.misc.Unsafe;
 
 /**
@@ -79,6 +80,7 @@ public class Reflection {
         modifiersField = mf;
 
         if (isJava8Plus()) {
+            LoggerProvider.log("Detected Java 8+, trying to open modules for reflection access...");
             try {
                 openModuleAccess();
             } catch (Exception ex) {

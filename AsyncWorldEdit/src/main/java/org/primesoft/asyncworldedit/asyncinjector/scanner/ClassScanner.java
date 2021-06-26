@@ -84,6 +84,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import static org.primesoft.asyncworldedit.LoggerProvider.log;
 import org.primesoft.asyncworldedit.api.classScanner.IClassFilter;
@@ -486,11 +487,27 @@ public abstract class ClassScanner implements IClassScanner {
     private static List<Field> getAllFields(Class<?> oClass) {
         List<Field> result = new ArrayList<>();
 
-        while (oClass != null) {
-            result.addAll(Arrays.asList(oClass.getDeclaredFields()));
+        while (!isBlacklistClass(oClass)) {
+            result.addAll(Stream.of(oClass.getDeclaredFields())
+                    .filter(f -> !Modifier.isStatic(f.getModifiers()))
+                    .collect(Collectors.toSet()));
             oClass = oClass.getSuperclass();
         }
         return result;
+    }
+
+    private static boolean isBlacklistClass(
+            final Class<?> oClass) {
+
+        if (oClass == null) {
+            return true;
+        }
+
+        if (oClass.getName().startsWith("java.util.")) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
