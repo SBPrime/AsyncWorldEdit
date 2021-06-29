@@ -48,6 +48,7 @@
 package org.primesoft.asyncworldedit.worldedit;
 
 import com.sk89q.worldedit.extension.platform.Actor;
+import org.primesoft.asyncworldedit.api.worldedit.IThreadSafeEditSession;
 import org.primesoft.asyncworldedit.configuration.WorldeditOperations;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalSession;
@@ -66,6 +67,7 @@ import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.biome.BiomeType;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import org.primesoft.asyncworldedit.api.inner.IAsyncWorldEditCore;
 import org.primesoft.asyncworldedit.api.playerManager.IPlayerEntry;
@@ -133,13 +135,15 @@ public class AsyncEditSession extends ThreadSafeEditSession {
 
         boolean isAsync = checkAsync(WorldeditOperations.undo);
         Mask mask = getMask();
-        final CancelabeEditSession session = new CancelabeEditSession(this, mask, jobId);
+
+        Consumer<EditSession> process = i -> UndoProcessor.processUndo(this, this, i);
 
         if (!isAsync) {
-            session.undo(sess);
+            process.accept(sess);
             return;
         }
 
+        final CancelabeEditSession session = new CancelabeEditSession((IThreadSafeEditSession) sess, mask, jobId);
         final LocalSession ls = getLocalSession();
         final JobEntry job = new UndoJob(m_player, session, jobId, "undo");
         m_blockPlacer.addJob(m_player, job);
@@ -150,7 +154,8 @@ public class AsyncEditSession extends ThreadSafeEditSession {
             public int task(CancelabeEditSession session)
                     throws MaxChangedBlocksException {
                 m_wait.checkAndWait(null);
-                session.undo(sess);
+
+                process.accept(session);
                 return 0;
             }
         }, ls);

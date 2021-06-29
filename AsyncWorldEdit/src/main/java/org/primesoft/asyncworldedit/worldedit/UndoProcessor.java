@@ -80,7 +80,6 @@ public class UndoProcessor implements Operation {
         Iterator<Change> changes = parent.doUndo();
         Mask oldMask = targetSession.getMask();
         targetSession.setMask(sender.getMask());
-        targetSession.setReorderMode(sender.getReorderMode());
 
         try {
             Operations.completeBlindly(new UndoProcessor(
