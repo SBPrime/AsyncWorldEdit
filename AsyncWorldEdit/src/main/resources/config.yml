@@ -41,7 +41,7 @@ awe:
   physicsFreeze:
     #Disable or enable blocks physics freeze when placing blocks  
     enabled: true
-    #List of block for witch the physics freeze will be disabled
+    #List of blocks for which the physics freeze will be disabled
     blackList:
     - "minecraft:acacia_stairs"
     - "minecraft:andesite_stairs"
