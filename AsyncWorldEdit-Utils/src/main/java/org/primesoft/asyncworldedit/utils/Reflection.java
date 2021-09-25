@@ -126,9 +126,7 @@ public class Reflection {
         Object moduleAwe = cModule.cast(Class.class.getDeclaredMethod("getModule").invoke(Reflection.class));
 
         Unsafe u = unsafe();
-        u.putBooleanVolatile(mModuleImplAddOpens,
-            u.objectFieldOffset(HackyClass.class.getDeclaredField("field1")),
-            true);
+        u.putBooleanVolatile(mModuleImplAddOpens, detectOverrideOffset(u), true);
 
         for (Map.Entry<String, String[]> e : modulesToOpen) {
             Object module = cModule.cast(((Optional<?>)mModuleLayerFindModule.invoke(moduleLayer, e.getKey()))
@@ -138,6 +136,29 @@ public class Reflection {
                 mModuleImplAddOpens.invoke(module, pn, moduleAwe);
             }
         }
+    }
+
+    private static long detectOverrideOffset(final Unsafe u) {
+        final Class<HackyClass> cls = HackyClass.class;
+        for (long i : new long[] { 16, 12}) {
+            try {
+                final Method method = cls.getDeclaredMethods()[0];
+                method.setAccessible(false);
+
+                boolean old = u.getBoolean(method, i);
+                u.putBoolean(method, i, true);
+
+                if (method.isAccessible()) {
+                    return i;
+                }
+                u.putBoolean(method, i, old);
+            }
+            catch (Throwable ex) {
+                // Ignore me
+            }
+        }
+
+        throw new IllegalStateException("Unable to detect 'override' field offset. Your JRE is not supported.");
     }
 
     public static <T> T create(Class<T> resultClass,
@@ -392,6 +413,6 @@ public class Reflection {
     }
 
     private static class HackyClass {
-        boolean field1;
+        private boolean privateMethod() { return false; };
     }
 }
