@@ -291,7 +291,9 @@ public class InjectorCore {
                 "com.sk89q.worldedit.regions.iterator.RegionIterator",
                 "com.sk89q.worldedit.regions.shape.ArbitraryShape",
                 "com.sk89q.worldedit.function.factory.Apply",
-                "com.sk89q.worldedit.function.visitor.RegionVisitor"}) {
+                "com.sk89q.worldedit.function.visitor.RegionVisitor",
+                "com.sk89q.worldedit.function.visitor.FlatRegionVisitor",
+                "com.sk89q.worldedit.function.visitor.LayerVisitor"}) {
                 modifyClasses(n, BaseRegionExtentSetter::new);
             }
 
