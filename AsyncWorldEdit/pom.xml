@@ -176,7 +176,7 @@
             <version>7.3.0</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.3.0-SNAPSHOT-5979.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.2.8-SNAPSHOT-6004.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
