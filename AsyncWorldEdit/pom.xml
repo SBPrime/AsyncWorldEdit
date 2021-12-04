@@ -120,12 +120,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.16.5-9fb885e-cc21bae</version>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.18-R0.1</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/spigot/spigot-1.16.5-9fb885e-cc21bae.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/spigot/spigot-api-1.18-R0.1-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -157,18 +157,6 @@
             <version>${global.awe.version}</version>
             <type>jar</type>
         </dependency>
-        <!--<dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-BlocksHub_v1x</artifactId>
-            <version>[3.5.0, 4.0.0)</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.primesoft.asyncworldedit</groupId>
-            <artifactId>AsyncWorldEdit-BlocksHub_v2x</artifactId>
-            <version>[3.5.0, 4.0.0)</version>
-            <type>jar</type>
-        </dependency>-->
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>
             <artifactId>AsyncWorldEdit-BlocksHub_v3x</artifactId>
@@ -185,21 +173,15 @@
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit</artifactId>
-            <version>7.2.0</version>
+            <version>7.3.0</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.3.0-SNAPSHOT-5790.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.3.0-SNAPSHOT-5979.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.collections</groupId>
-            <artifactId>google-collections</artifactId>
-            <version>1.0</version>
             <type>jar</type>
         </dependency>
         <dependency>

@@ -48,12 +48,11 @@
 package org.primesoft.asyncworldedit.utils;
 
 import com.google.common.base.Objects;
-import com.sk89q.worldedit.extent.Extent;
 import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * The array helper functios
+ * The array helper functions
  *
  * @author SBPrime
  */

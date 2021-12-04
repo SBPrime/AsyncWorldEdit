@@ -64,18 +64,30 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>31.0.1-jre</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.28</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>com.sk89q.worldedit</groupId>
       <artifactId>worldedit</artifactId>
       <version>7.2.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.3.0-SNAPSHOT-5790.jar</systemPath>
+      <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.3.0-SNAPSHOT-5979.jar</systemPath>
     </dependency>
     <dependency>
-      <groupId>org.bukkit</groupId>
-      <artifactId>bukkit</artifactId>
-      <version>1.16.5-9fb885e-cc21bae</version>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
+      <version>1.18-R0.1</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/../libs/spigot/spigot-1.16.5-9fb885e-cc21bae.jar</systemPath>
+      <systemPath>${project.basedir}/../libs/spigot/spigot-api-1.18-R0.1-SNAPSHOT.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>net.minecraftforge</groupId>

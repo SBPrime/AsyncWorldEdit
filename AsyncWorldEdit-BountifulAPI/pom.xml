@@ -70,12 +70,12 @@
             <systemPath>${project.basedir}/../libs/progress/BountifulAPI-1.6.4.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.16.5-9fb885e-cc21bae</version>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.18-R0.1</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/spigot/spigot-1.16.5-9fb885e-cc21bae.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/spigot/spigot-api-1.18-R0.1-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.primesoft.asyncworldedit</groupId>

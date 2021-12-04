@@ -54,7 +54,7 @@
             <version>7.2.0</version>
             <type>jar</type>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.3.0-SNAPSHOT-5790.jar</systemPath>
+            <systemPath>${project.basedir}/../libs/worldedit/worldedit-bukkit-7.3.0-SNAPSHOT-5979.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

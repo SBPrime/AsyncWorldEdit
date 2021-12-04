@@ -181,13 +181,13 @@ public abstract class BaseClassVisitor extends InjectorClassVisitor {
     private final ICreateClass m_createClass;
 
     protected BaseClassVisitor(ClassVisitor classVisitor) {
-        super(Opcodes.ASM6, classVisitor);
+        super(Opcodes.ASM7, classVisitor);
 
         m_createClass = null;
     }
 
     protected BaseClassVisitor(ClassVisitor classVisitor, ICreateClass createClass) {
-        super(Opcodes.ASM6, classVisitor);
+        super(Opcodes.ASM7, classVisitor);
 
         m_createClass = createClass;
     }

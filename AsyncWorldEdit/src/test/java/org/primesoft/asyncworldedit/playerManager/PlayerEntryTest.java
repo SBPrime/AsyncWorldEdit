@@ -70,7 +70,6 @@ public class PlayerEntryTest {
         AwePlatform.getInstance().initialize(core);
         
         Mockito.when(core.getEventBus()).thenReturn(eb);
-        //Mockito.doNothing().when(eb).post(Mockito.anyObject());
     }
     
     @Test
@@ -112,7 +111,7 @@ public class PlayerEntryTest {
         IPermissionGroup pg = Mockito.mock(IPermissionGroup.class);
         Mockito.when(pg.getRendererBlocks()).thenReturn(10);        
         PlayerEntry pe = new TestPlayerEntry(pg);
-        
+
         // When
         pe.setRenderBlocks(100);
         
