@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
@@ -66,7 +67,8 @@ import org.primesoft.asyncworldedit.utils.Reflection;
 public final class TileEntityUtils {
 
     private final static Map<Material, Boolean> m_isTileEntity;
-    public static final String TILE_ENTITY = "net.minecraft.world.level.block.BlockTileEntity";
+    private static final String TILE_ENTITY = "net.minecraft.world.level.block.BlockTileEntity";
+    private static final String BLOCK = "net.minecraft.world.level.block.Block";
 
     private TileEntityUtils() {
     }
@@ -88,22 +90,19 @@ public final class TileEntityUtils {
         Method iBlockData_getBlock = null;
         Method block_isTileEntity = null;
 
-        final Map<Material, Boolean> result = new HashMap<>();
-        for (Material m : Material.values()) {
-            boolean isTilleEntity = false;
-            if (m.isBlock() && !m.isLegacy()) {
-                BlockData bd;
-                try {
-                    bd = m.createBlockData();
-                } catch (Exception ex) {
-                    ExceptionHelper.printException(ex, "Unable to create block data for '" + m + "'.");
-                    bd = null;
-                }
+        boolean getStateLog = true;
+        boolean getBlockLog = true;
 
+        final Map<Material, Boolean> result = new HashMap<>();
+        for (Material material : Material.values()) {
+            boolean isTilleEntity = false;
+            if (material.isBlock() && !material.isLegacy()) {
+                final BlockData bd = getBlockData(material);
                 Object blockDataState = null;
                 if (bd != null) {
                     if (blockData_getState == null) {
-                        blockData_getState = findMethod(bd.getClass(), "getState", true);
+                        blockData_getState = findMethod(bd.getClass(), "getState", getStateLog);
+                        getStateLog = false;
                     }
                     
                     blockDataState = blockData_getState != null ? Reflection.invoke(bd, Object.class, blockData_getState, "Unable to get block state") : null;
@@ -112,7 +111,11 @@ public final class TileEntityUtils {
                 Object nmsBlock = null;
                 if (blockDataState != null) {
                     if (iBlockData_getBlock == null) {
-                        iBlockData_getBlock = findMethod(blockDataState.getClass(), "getBlock", true);
+                        iBlockData_getBlock = findMethod(blockDataState.getClass(),
+                                m -> m.getName().equals("getBlock") || m.getReturnType().getName().equals(BLOCK));
+                        if (iBlockData_getBlock == null) {
+                            LoggerProvider.log("Unable to find getBlock in '" + blockDataState.getClass().getName() + "'");
+                        }
                     }
 
                     nmsBlock = iBlockData_getBlock != null ? Reflection.invoke(blockDataState, Object.class, iBlockData_getBlock, "Unable to get NMS block") : null;
@@ -132,10 +135,21 @@ public final class TileEntityUtils {
                 }
             }
             
-            result.put(m, isTilleEntity);
+            result.put(material, isTilleEntity);
         }
 
         return Collections.unmodifiableMap(result);
+    }
+
+    private static BlockData getBlockData(final Material material) {
+        BlockData bd;
+        try {
+            bd = material.createBlockData();
+        } catch (Exception ex) {
+            ExceptionHelper.printException(ex, "Unable to create block data for '" + material + "'.");
+            bd = null;
+        }
+        return bd;
     }
 
     private static boolean classExtends(
@@ -158,12 +172,25 @@ public final class TileEntityUtils {
             final String name,
             boolean log) {
 
+        Method result = findMethod(orgCls, m -> m.getName().equals(name));
+
+        if (result == null && log) {
+            LoggerProvider.log("Unable to find '" + name + "' in '" + (orgCls == null ? "null" : orgCls.getName()) + "'");
+        }
+
+        return result;
+    }
+
+    private static Method findMethod(
+            final Class<?> orgCls,
+            final Predicate<Method> filter) {
+
         Class<?> cls = orgCls;
         Method result = null;
         while (cls != null && !Object.class.equals(cls) && result == null) {
             Optional<Method> method = Stream.of(cls.getMethods())
-                    .filter(i -> i.getName().equals(name))
                     .filter(i -> i.getParameterCount() == 0)
+                    .filter(filter)
                     .findFirst();
                         
             cls = cls.getSuperclass();
@@ -172,11 +199,7 @@ public final class TileEntityUtils {
                 result = method.get();
             }
         }
-        
-        if (result == null && log) {
-            LoggerProvider.log("Unable to find '" + name + "' in '" + (orgCls == null ? "null" : orgCls.getName()) + "'");
-        }
+
         return result;
     }
-
 }
